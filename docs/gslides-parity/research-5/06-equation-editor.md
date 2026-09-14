@@ -62,7 +62,7 @@ toolbar; rendering; PPTX OMML export)".
 - Repository facts are read at `d5d7f07` with `git show`: `packages/chrome/src/menus/model.ts`,
   `packages/chrome/src/menus/keys.ts`, `packages/chrome/src/menus/__fixtures__/google-shortcuts.json`,
   `packages/chrome/src/dialogs/special-characters-data.ts`, `packages/schema/src/{blocks,text,
-  catalog,actions,export}.ts`, `packages/render/src/blocks/render-block.ts`,
+catalog,actions,export}.ts`, `packages/render/src/blocks/render-block.ts`,
   `packages/render/src/sanitize/html.ts`, `packages/render/src/theme-node.ts`,
   `packages/export/src/pptx/{build,text}.ts`, `packages/export/src/ooxml/*`, `docs/pptx.md`,
   `docs/hosting-chromium.md`, `docs/gslides-parity/SPEC-2.md` (0.10, 0.53, section 12),
@@ -143,14 +143,14 @@ which are the chords Turboslide already binds for the text marks (SPEC-2 section
   (read 2026-09-14). A 2024-08-29 guide names MathType, Better Math Equations and Auto-LaTeX
   Equations; those three listings were not opened.
 
-| Aspect | Google Docs | Google Slides | Turboslide today (`d5d7f07`) |
-| --- | --- | --- | --- |
-| Menu | Insert > Symbols > Equation | none | none (SPEC-2 0.53) |
-| Object model | inline element in a paragraph | none; six math shapes under Insert > Shape > Equation | the six shapes; text marks sup and sub; 130 math characters |
-| Toolbar | New equation and five dropdowns, shown or hidden from View | none | none |
-| Typed input | `\name` and a space; `\` then Shift+6 or Shift+- | none | none |
-| API | `Equation` element with no content fields | none | none |
-| Export | not documented (section 13) | not applicable | not applicable |
+| Aspect       | Google Docs                                                | Google Slides                                         | Turboslide today (`d5d7f07`)                                |
+| ------------ | ---------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------- |
+| Menu         | Insert > Symbols > Equation                                | none                                                  | none (SPEC-2 0.53)                                          |
+| Object model | inline element in a paragraph                              | none; six math shapes under Insert > Shape > Equation | the six shapes; text marks sup and sub; 130 math characters |
+| Toolbar      | New equation and five dropdowns, shown or hidden from View | none                                                  | none                                                        |
+| Typed input  | `\name` and a space; `\` then Shift+6 or Shift+-           | none                                                  | none                                                        |
+| API          | `Equation` element with no content fields                  | none                                                  | none                                                        |
+| Export       | not documented (section 13)                                | not applicable                                        | not applicable                                              |
 
 The round five scope brings Docs' editor to a slide. Because Slides has no equation object, there
 is no Google behaviour to mimic on the canvas side; the object behaviour (place, move, resize,
@@ -175,76 +175,76 @@ the standard form and the source field also accepts the Google name through a ma
 
 ### 4.1 Greek letters (40)
 
-| Command | Inserts | LaTeX in Turboslide |
-| --- | --- | --- |
-| `\alpha` `\beta` `\gamma` `\delta` | α β γ δ | same |
-| `\epsilon` `\varepsilon` | ϵ ε | same |
-| `\zeta` `\eta` `\theta` `\vartheta` | ζ η θ ϑ | same |
-| `\iota` `\kappa` `\lambda` `\mu` `\nu` `\xi` | ι κ λ μ ν ξ | same |
-| `\pi` `\varpi` `\rho` `\varrho` | π ϖ ρ ϱ | same |
-| `\sigma` `\varsigma` `\tau` `\upsilon` | σ ς τ υ | same |
-| `\phi` `\varphi` `\chi` `\psi` `\omega` | ϕ φ χ ψ ω | same |
-| `\Gamma` `\Delta` `\Theta` `\Lambda` `\Xi` `\Pi` | Γ Δ Θ Λ Ξ Π | same |
-| `\Sigma` `\Upsilon` `\Phi` `\Psi` `\Omega` | Σ Υ Φ Ψ Ω | same |
+| Command                                          | Inserts     | LaTeX in Turboslide |
+| ------------------------------------------------ | ----------- | ------------------- |
+| `\alpha` `\beta` `\gamma` `\delta`               | α β γ δ     | same                |
+| `\epsilon` `\varepsilon`                         | ϵ ε         | same                |
+| `\zeta` `\eta` `\theta` `\vartheta`              | ζ η θ ϑ     | same                |
+| `\iota` `\kappa` `\lambda` `\mu` `\nu` `\xi`     | ι κ λ μ ν ξ | same                |
+| `\pi` `\varpi` `\rho` `\varrho`                  | π ϖ ρ ϱ     | same                |
+| `\sigma` `\varsigma` `\tau` `\upsilon`           | σ ς τ υ     | same                |
+| `\phi` `\varphi` `\chi` `\psi` `\omega`          | ϕ φ χ ψ ω   | same                |
+| `\Gamma` `\Delta` `\Theta` `\Lambda` `\Xi` `\Pi` | Γ Δ Θ Λ Ξ Π | same                |
+| `\Sigma` `\Upsilon` `\Phi` `\Psi` `\Omega`       | Σ Υ Φ Ψ Ω   | same                |
 
 ### 4.2 Miscellaneous operations (32)
 
-| Command | Inserts | LaTeX in Turboslide |
-| --- | --- | --- |
-| `\times` `\div` `\cdot` | × ÷ ⋅ | same |
-| `\pm` `\mp` | ± ∓ | same |
-| `\ast` `\star` `\circ` `\bullet` | ∗ ⋆ ∘ ∙ | same |
-| `\oplus` `\ominus` `\oslash` `\otimes` `\odot` | ⊕ ⊖ ⊘ ⊗ ⊙ | same |
-| `\dagger` `\ddagger` | † ‡ | same |
-| `\vee` `\wedge` `\cap` `\cup` | ∨ ∧ ∩ ∪ | same |
-| `\aleph` `\Re` `\Im` | ℵ ℜ ℑ | same |
-| `\top` `\bot` | ⊤ ⊥ | same |
-| `\infty` `\partial` | ∞ ∂ | same |
-| `\forall` `\exists` `\neg` | ∀ ∃ ¬ | same |
-| `\triangle` `\diamond` | △ ⋄ | same |
+| Command                                        | Inserts   | LaTeX in Turboslide |
+| ---------------------------------------------- | --------- | ------------------- |
+| `\times` `\div` `\cdot`                        | × ÷ ⋅     | same                |
+| `\pm` `\mp`                                    | ± ∓       | same                |
+| `\ast` `\star` `\circ` `\bullet`               | ∗ ⋆ ∘ ∙   | same                |
+| `\oplus` `\ominus` `\oslash` `\otimes` `\odot` | ⊕ ⊖ ⊘ ⊗ ⊙ | same                |
+| `\dagger` `\ddagger`                           | † ‡       | same                |
+| `\vee` `\wedge` `\cap` `\cup`                  | ∨ ∧ ∩ ∪   | same                |
+| `\aleph` `\Re` `\Im`                           | ℵ ℜ ℑ     | same                |
+| `\top` `\bot`                                  | ⊤ ⊥       | same                |
+| `\infty` `\partial`                            | ∞ ∂       | same                |
+| `\forall` `\exists` `\neg`                     | ∀ ∃ ¬     | same                |
+| `\triangle` `\diamond`                         | △ ⋄       | same                |
 
 ### 4.3 Relations (21)
 
-| Command | Inserts | LaTeX in Turboslide |
-| --- | --- | --- |
-| `\leq` `\geq` | ≤ ≥ | same |
-| `\prec` `\succ` `\preceq` `\succeq` | ≺ ≻ ⪯ ⪰ | same |
-| `\ll` `\gg` | ≪ ≫ | same |
-| `\equiv` `\sim` `\simeq` `\asymp` `\approx` | ≡ ∼ ≃ ≍ ≈ | same |
-| `\ne` | ≠ | same (`\neq` also accepted) |
-| `\subset` `\supset` `\subseteq` `\supseteq` | ⊂ ⊃ ⊆ ⊇ | same |
-| `\in` `\ni` `\notin` | ∈ ∋ ∉ | same |
+| Command                                     | Inserts   | LaTeX in Turboslide         |
+| ------------------------------------------- | --------- | --------------------------- |
+| `\leq` `\geq`                               | ≤ ≥       | same                        |
+| `\prec` `\succ` `\preceq` `\succeq`         | ≺ ≻ ⪯ ⪰   | same                        |
+| `\ll` `\gg`                                 | ≪ ≫       | same                        |
+| `\equiv` `\sim` `\simeq` `\asymp` `\approx` | ≡ ∼ ≃ ≍ ≈ | same                        |
+| `\ne`                                       | ≠         | same (`\neq` also accepted) |
+| `\subset` `\supset` `\subseteq` `\supseteq` | ⊂ ⊃ ⊆ ⊇   | same                        |
+| `\in` `\ni` `\notin`                        | ∈ ∋ ∉     | same                        |
 
 ### 4.4 Math operations (20)
 
-| Command | Inserts | LaTeX in Turboslide |
-| --- | --- | --- |
-| `\frac` | a fraction with two placeholders | `\frac{}{}` |
-| `\sqrt` | a square root | `\sqrt{}` |
-| `\rootof` | an nth root (alias) | `\sqrt[]{}` |
-| `\superscript` | a base with a superscript (alias) | `{}^{}` |
-| `\subscript` | a base with a subscript (alias) | `{}_{}` |
-| `\subsuperscript` | a base with both (alias) | `{}_{}^{}` |
-| `\overline` | a bar over the argument | `\overline{}` |
-| `\widehat` | a wide hat | `\widehat{}` |
-| `\bigcap` `\bigcup` | big intersection and union with limits | same, `_{}^{}` |
-| `\prod` `\coprod` | product and coproduct with limits | same |
-| `\rbracelr` | round brackets that grow (alias) | `\left(\right)` |
-| `\sbracelr` | square brackets that grow (alias) | `\left[\right]` |
-| `\bracelr` | curly braces that grow (alias) | `\left\{\right\}` |
-| `\abs` | absolute value bars (alias) | `\left\lvert\right\rvert` |
-| `\int` `\oint` | integral and contour integral with limits | same |
-| `\sum` | a sum with limits | same |
-| `\limab` | a limit with a lower argument (alias) | `\lim_{\to}` |
+| Command             | Inserts                                   | LaTeX in Turboslide       |
+| ------------------- | ----------------------------------------- | ------------------------- |
+| `\frac`             | a fraction with two placeholders          | `\frac{}{}`               |
+| `\sqrt`             | a square root                             | `\sqrt{}`                 |
+| `\rootof`           | an nth root (alias)                       | `\sqrt[]{}`               |
+| `\superscript`      | a base with a superscript (alias)         | `{}^{}`                   |
+| `\subscript`        | a base with a subscript (alias)           | `{}_{}`                   |
+| `\subsuperscript`   | a base with both (alias)                  | `{}_{}^{}`                |
+| `\overline`         | a bar over the argument                   | `\overline{}`             |
+| `\widehat`          | a wide hat                                | `\widehat{}`              |
+| `\bigcap` `\bigcup` | big intersection and union with limits    | same, `_{}^{}`            |
+| `\prod` `\coprod`   | product and coproduct with limits         | same                      |
+| `\rbracelr`         | round brackets that grow (alias)          | `\left(\right)`           |
+| `\sbracelr`         | square brackets that grow (alias)         | `\left[\right]`           |
+| `\bracelr`          | curly braces that grow (alias)            | `\left\{\right\}`         |
+| `\abs`              | absolute value bars (alias)               | `\left\lvert\right\rvert` |
+| `\int` `\oint`      | integral and contour integral with limits | same                      |
+| `\sum`              | a sum with limits                         | same                      |
+| `\limab`            | a limit with a lower argument (alias)     | `\lim_{\to}`              |
 
 ### 4.5 Arrows (12)
 
-| Command | Inserts | LaTeX in Turboslide |
-| --- | --- | --- |
-| `\leftarrow` `\rightarrow` `\leftrightarrow` | ← → ↔ | same |
-| `\Leftarrow` `\Rightarrow` `\Leftrightarrow` | ⇐ ⇒ ⇔ | same |
-| `\uparrow` `\downarrow` `\updownarrow` | ↑ ↓ ↕ | same |
-| `\Uparrow` `\Downarrow` `\Updownarrow` | ⇑ ⇓ ⇕ | same |
+| Command                                      | Inserts | LaTeX in Turboslide |
+| -------------------------------------------- | ------- | ------------------- |
+| `\leftarrow` `\rightarrow` `\leftrightarrow` | ← → ↔   | same                |
+| `\Leftarrow` `\Rightarrow` `\Leftrightarrow` | ⇐ ⇒ ⇔   | same                |
+| `\uparrow` `\downarrow` `\updownarrow`       | ↑ ↓ ↕   | same                |
+| `\Uparrow` `\Downarrow` `\Updownarrow`       | ⇑ ⇓ ⇕   | same                |
 
 ### 4.6 Accepted when typed, in no dropdown
 
@@ -353,7 +353,7 @@ article of 2023-03-13), so all three targets draw either HTML plus CSS or MathML
 ### 6.1 KaTeX 0.18.7
 
 - Output: HTML plus CSS by default with MathML alongside "for accessibility" (`output:
-  'htmlAndMathml'`, the default; `html` and `mathml` are the alternatives). Options include
+'htmlAndMathml'`, the default; `html` and `mathml` are the alternatives). Options include
   `displayMode`, `throwOnError` (default true), `errorColor`, `macros`, `strict` (default
   `"warn"`), `trust` (default false, blocks `\includegraphics`, `\href`, `\htmlClass`),
   `maxSize`, `maxExpand` (default 1000), `minRuleThickness`, `fleqn`, `leqno` (katex.org/docs/
@@ -435,18 +435,18 @@ Baseline "Widely available" since January 2023.
 
 ### 6.5 Comparison
 
-| Criterion | KaTeX 0.18.7 | MathJax 4.1.3 | Temml 0.13.5 |
-| --- | --- | --- | --- |
-| Output in the DOM | HTML and CSS, MathML hidden twin | HTML and CSS or SVG | MathML Core |
-| Minified JS | 266 KB | 974 KB (chtml) or 1.76 MB (svg) | 164 KB |
-| CSS | 24 KB | none (inline styles) | 9 KB |
-| Fonts to ship | 20 faces, about 300 KB woff2, must sit beside the CSS | CDN on demand by default; npm packages for Node | 9 KB supplement; one math font of choice (Latin Modern 380 KB) or the OS font |
-| Licence | MIT | Apache 2.0 | MIT |
-| Node rendering without a DOM | yes (`renderToString`) | yes, with its adaptor | yes (`renderToString`) |
-| Same layout in every browser | yes, its own layout | yes | the browser's MathML layout; Chromium in every Turboslide render path |
-| Input to an OMML transform | its MathML twin (accessibility grade) | serialized MathML | the output itself |
-| Screen reader path | the hidden MathML | its speech rule engine (`sre`) | the MathML in the DOM |
-| Coverage | large | largest | between KaTeX and MathJax per its README |
+| Criterion                    | KaTeX 0.18.7                                          | MathJax 4.1.3                                   | Temml 0.13.5                                                                  |
+| ---------------------------- | ----------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------- |
+| Output in the DOM            | HTML and CSS, MathML hidden twin                      | HTML and CSS or SVG                             | MathML Core                                                                   |
+| Minified JS                  | 266 KB                                                | 974 KB (chtml) or 1.76 MB (svg)                 | 164 KB                                                                        |
+| CSS                          | 24 KB                                                 | none (inline styles)                            | 9 KB                                                                          |
+| Fonts to ship                | 20 faces, about 300 KB woff2, must sit beside the CSS | CDN on demand by default; npm packages for Node | 9 KB supplement; one math font of choice (Latin Modern 380 KB) or the OS font |
+| Licence                      | MIT                                                   | Apache 2.0                                      | MIT                                                                           |
+| Node rendering without a DOM | yes (`renderToString`)                                | yes, with its adaptor                           | yes (`renderToString`)                                                        |
+| Same layout in every browser | yes, its own layout                                   | yes                                             | the browser's MathML layout; Chromium in every Turboslide render path         |
+| Input to an OMML transform   | its MathML twin (accessibility grade)                 | serialized MathML                               | the output itself                                                             |
+| Screen reader path           | the hidden MathML                                     | its speech rule engine (`sre`)                  | the MathML in the DOM                                                         |
+| Coverage                     | large                                                 | largest                                         | between KaTeX and MathJax per its README                                      |
 
 ## 7. The document shape
 
@@ -485,7 +485,7 @@ export type EquationBlock = BlockBase & {
 - `display` defaults to `block` because a placed object is display math; `inline` is for a small
   equation set at text size in a row of blocks.
 - The renderer draws `<math>` from `temml.renderToString(tex, { displayMode, annotate: true,
-  throwOnError: false, trust: false, macros: GOOGLE_ALIASES })` inside the block's positioned
+throwOnError: false, trust: false, macros: GOOGLE_ALIASES })` inside the block's positioned
   div, at `font-size: size` px in `color`. A parse error renders Temml's `merror` in the block and
   the validator names it (rule `equation/parse`).
 - The `html` escape block cannot carry MathML: `sanitize/html.ts` lists `math` in

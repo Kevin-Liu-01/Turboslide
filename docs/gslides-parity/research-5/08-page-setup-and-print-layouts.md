@@ -26,163 +26,163 @@ Verdicts: **derive** means the value becomes a function of the deck's page (the 
 
 ### 1.1 Schema
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/schema/src/render.ts:101-102` `SHEET_WIDTH`, `SHEET_HEIGHT` | 1600, 900 | data: become `DEFAULT_PAGE`; `deckPage(deck)` answers the deck's size |
-| `render.ts:105` `CONTENT_BOX` | `[137, 129, 1326, 642]` | derive: `contentBox(page)` is `[137, 129, W - 274, H - 258]` |
-| `render.ts:108` `RAIL_PX` | 56 | stay |
-| `render.ts:111-114` `boxInsideSheet` | against 1600 by 900 | derive: takes the page |
-| `packages/schema/src/canvas.ts:63` `PICTURE_POS` | `0, 0, 1600, 900` | derive |
-| `canvas.ts:226-228, 341, 384` the unplaced stack, the picture placement, the slot boxes | `CONTENT_BOX` | derive |
-| `canvas.ts:633-635` `extent(axis)` for guides | 1600 or 900 | derive |
-| `packages/schema/src/deck.ts:274-279` `GUIDE_MAX`, `deckGuidesSchema` | `{ x: 1600, y: 900 }` | data: the schema bound becomes the cap 6720; `validate` checks guides against the page |
-| `deck.ts:377-378` `PLATE_WIDTHS` | 740, 560, 720 | stay |
-| `packages/schema/src/layouts.ts:254, 656` mark sizes | 132 by 84, 138 by 88 | stay |
-| `layouts.ts:274, 375, 649` plate `maxWidth` | 740, 560, 720 | stay |
-| `layouts.ts:734` `PROBE_DECK` asset size | `[1600, 900]` | stay (an asset's natural size) |
-| `packages/schema/src/diagrams.ts:42-45` the default diagram box | 960 by 540 centred | derive the centre; the size stays and clamps to the content box |
-| `packages/schema/src/freeform.ts:29` `CONTENT_X..H` | from `CONTENT_BOX` | derive |
-| `freeform.ts:165-175` `offSheetKind`, `offSheet` | 1600, 900 | derive |
-| `freeform.ts:232-234` `alignReference` sheet and content | `[0, 0, 1600, 900]`, `CONTENT_BOX` | derive |
-| `freeform.ts:472, 544` `layoutSlotBoxes` | `CONTENT_BOX` | derive |
-| the snap guides of `docs/freeform.md:81` (rails 56 and 1544, content 137 and 1463, centre 800, seams, plate edges 877, 857, 903, rules 56 and 844, middle 450) | absolute | derive from the page and the content box |
-| `packages/schema/src/rules.ts:99, 540`, `position.ts:2, 70`, `catalog.ts:718` rule and help text | "1600 by 900" | stay as text but reworded to "the sheet" and its page |
-| `packages/schema/src/assets.ts:36, 160` material source `size` | literal `[3200, 1800]` | data: widens to any 2x page |
-| `packages/schema/src/blocks/chart.ts:47` `CHART_LEGIBLE_WIDTH_PX` | 960 | stay |
+| Site                                                                                                                                                           | Value                              | Verdict                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| `packages/schema/src/render.ts:101-102` `SHEET_WIDTH`, `SHEET_HEIGHT`                                                                                          | 1600, 900                          | data: become `DEFAULT_PAGE`; `deckPage(deck)` answers the deck's size                  |
+| `render.ts:105` `CONTENT_BOX`                                                                                                                                  | `[137, 129, 1326, 642]`            | derive: `contentBox(page)` is `[137, 129, W - 274, H - 258]`                           |
+| `render.ts:108` `RAIL_PX`                                                                                                                                      | 56                                 | stay                                                                                   |
+| `render.ts:111-114` `boxInsideSheet`                                                                                                                           | against 1600 by 900                | derive: takes the page                                                                 |
+| `packages/schema/src/canvas.ts:63` `PICTURE_POS`                                                                                                               | `0, 0, 1600, 900`                  | derive                                                                                 |
+| `canvas.ts:226-228, 341, 384` the unplaced stack, the picture placement, the slot boxes                                                                        | `CONTENT_BOX`                      | derive                                                                                 |
+| `canvas.ts:633-635` `extent(axis)` for guides                                                                                                                  | 1600 or 900                        | derive                                                                                 |
+| `packages/schema/src/deck.ts:274-279` `GUIDE_MAX`, `deckGuidesSchema`                                                                                          | `{ x: 1600, y: 900 }`              | data: the schema bound becomes the cap 6720; `validate` checks guides against the page |
+| `deck.ts:377-378` `PLATE_WIDTHS`                                                                                                                               | 740, 560, 720                      | stay                                                                                   |
+| `packages/schema/src/layouts.ts:254, 656` mark sizes                                                                                                           | 132 by 84, 138 by 88               | stay                                                                                   |
+| `layouts.ts:274, 375, 649` plate `maxWidth`                                                                                                                    | 740, 560, 720                      | stay                                                                                   |
+| `layouts.ts:734` `PROBE_DECK` asset size                                                                                                                       | `[1600, 900]`                      | stay (an asset's natural size)                                                         |
+| `packages/schema/src/diagrams.ts:42-45` the default diagram box                                                                                                | 960 by 540 centred                 | derive the centre; the size stays and clamps to the content box                        |
+| `packages/schema/src/freeform.ts:29` `CONTENT_X..H`                                                                                                            | from `CONTENT_BOX`                 | derive                                                                                 |
+| `freeform.ts:165-175` `offSheetKind`, `offSheet`                                                                                                               | 1600, 900                          | derive                                                                                 |
+| `freeform.ts:232-234` `alignReference` sheet and content                                                                                                       | `[0, 0, 1600, 900]`, `CONTENT_BOX` | derive                                                                                 |
+| `freeform.ts:472, 544` `layoutSlotBoxes`                                                                                                                       | `CONTENT_BOX`                      | derive                                                                                 |
+| the snap guides of `docs/freeform.md:81` (rails 56 and 1544, content 137 and 1463, centre 800, seams, plate edges 877, 857, 903, rules 56 and 844, middle 450) | absolute                           | derive from the page and the content box                                               |
+| `packages/schema/src/rules.ts:99, 540`, `position.ts:2, 70`, `catalog.ts:718` rule and help text                                                               | "1600 by 900"                      | stay as text but reworded to "the sheet" and its page                                  |
+| `packages/schema/src/assets.ts:36, 160` material source `size`                                                                                                 | literal `[3200, 1800]`             | data: widens to any 2x page                                                            |
+| `packages/schema/src/blocks/chart.ts:47` `CHART_LEGIBLE_WIDTH_PX`                                                                                              | 960                                | stay                                                                                   |
 
 ### 1.2 Theme
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/theme/src/tokens.ts:129` `SHEET` | 1600 by 900 | data: `DEFAULT_PAGE`; `grid(page)` returns the derived values |
-| `tokens.ts:131-135` `RAIL`, `INSET`, `PAD` | 56; 57; 72 by 80 | stay |
-| `tokens.ts:137-138` `CONTENT`, `CONTENT_ORIGIN` | 1326 by 642 at 137, 129 | derive |
-| `tokens.ts:140-143` `CROSS`, `WORDMARK`, `COUNTER` | 11 at 51; left 72 bottom 18; right 72 bottom 22 | stay (edge relative) |
-| `tokens.ts:145-148` `CHIPS` | `66, 858, 40, 30` and `1474, 856, 60, 28` | derive: `66, H - 42` and `W - 126, H - 44` |
-| `tokens.ts:150` `PICTURE_INSET` | -57 | stay |
-| `tokens.ts:153-154` `COLUMN_GAP`, `COLUMNS` | 72; 522.5/731.5, 418/836, 627/627 | gap stays; widths derive through `columnWidths(ratio, gap, contentWidth)` |
-| `tokens.ts:184-212` `LADDER`, `DISPLAY`, `FLOOR` | px sizes | stay |
-| `tokens.ts:231-236` `PLATES` | sides and max widths | stay; the plate boxes `plateClear` reads derive from the content box |
-| `tokens.ts:246-252` `MARK` | viewBox and aspect | stay |
-| `packages/theme/src/gt-ink-paper/sheet.css:54` comment; `:57-115` the frame; `:116-136` counter and wordmark | edge offsets in px | stay |
-| `packages/theme/src/gt-ink-paper/stage.css:38-53` `.sheet` and `.stage` | `width: 1600px; height: 900px` | data: `width: var(--ts-sheet-w, 1600px); height: var(--ts-sheet-h, 900px)`, set by the stage on the root |
-| `stage.css:59-61` `.slide` | `inset: 57px; padding: 72px 80px` | stay |
+| Site                                                                                                         | Value                                           | Verdict                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `packages/theme/src/tokens.ts:129` `SHEET`                                                                   | 1600 by 900                                     | data: `DEFAULT_PAGE`; `grid(page)` returns the derived values                                            |
+| `tokens.ts:131-135` `RAIL`, `INSET`, `PAD`                                                                   | 56; 57; 72 by 80                                | stay                                                                                                     |
+| `tokens.ts:137-138` `CONTENT`, `CONTENT_ORIGIN`                                                              | 1326 by 642 at 137, 129                         | derive                                                                                                   |
+| `tokens.ts:140-143` `CROSS`, `WORDMARK`, `COUNTER`                                                           | 11 at 51; left 72 bottom 18; right 72 bottom 22 | stay (edge relative)                                                                                     |
+| `tokens.ts:145-148` `CHIPS`                                                                                  | `66, 858, 40, 30` and `1474, 856, 60, 28`       | derive: `66, H - 42` and `W - 126, H - 44`                                                               |
+| `tokens.ts:150` `PICTURE_INSET`                                                                              | -57                                             | stay                                                                                                     |
+| `tokens.ts:153-154` `COLUMN_GAP`, `COLUMNS`                                                                  | 72; 522.5/731.5, 418/836, 627/627               | gap stays; widths derive through `columnWidths(ratio, gap, contentWidth)`                                |
+| `tokens.ts:184-212` `LADDER`, `DISPLAY`, `FLOOR`                                                             | px sizes                                        | stay                                                                                                     |
+| `tokens.ts:231-236` `PLATES`                                                                                 | sides and max widths                            | stay; the plate boxes `plateClear` reads derive from the content box                                     |
+| `tokens.ts:246-252` `MARK`                                                                                   | viewBox and aspect                              | stay                                                                                                     |
+| `packages/theme/src/gt-ink-paper/sheet.css:54` comment; `:57-115` the frame; `:116-136` counter and wordmark | edge offsets in px                              | stay                                                                                                     |
+| `packages/theme/src/gt-ink-paper/stage.css:38-53` `.sheet` and `.stage`                                      | `width: 1600px; height: 900px`                  | data: `width: var(--ts-sheet-w, 1600px); height: var(--ts-sheet-h, 900px)`, set by the stage on the root |
+| `stage.css:59-61` `.slide`                                                                                   | `inset: 57px; padding: 72px 80px`               | stay                                                                                                     |
 
 ### 1.3 Render, viewer and present
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/render/src/geometry.ts:8-30` `SHEET`, `CONTENT`, `CHIPS`, `colsWidths` | 1600 by 900 and derived | derive: every export takes the page |
-| `packages/render/src/stage.ts:36-63` `renderStage` | wraps at 1600 by 900 | data: emits `style="--ts-sheet-w:...;--ts-sheet-h:..."` and `data-page` on the root |
-| `packages/render/src/slide.ts:24-32, 233, 322-327` chips and `plateBox` | chips, plate box from `CONTENT` | derive |
-| `packages/render/src/blocks/picture.ts:76` fallback width | 1600 | derive |
-| `packages/render/src/dither-runtime.ts:140` | `[1600, 900]` | derive |
-| `packages/render/src/measure-dom.ts:4, 44` | the stage element | stay (reads the element) |
-| `packages/render/src/print.ts:24` `PRINT_PAGE_PT` | 960 by 540 | derive: `0.6W by 0.6H` |
-| `print.ts:35` `PRINT_SCALE` | 0.8 | stay (96 over 120) |
-| `print.ts:38` `PRINT_PAGE_PX`, `:44-52` `PRINT_CSS`, `:130` the viewport meta | 1600 by 900 | derive per document |
-| `packages/render/src/runtime.ts:120-125` `fit()` | 1600, 900 literals | data: reads the custom properties |
-| `packages/render/src/standalone.ts:172-175` | the runtime script | data: the stage root carries the size |
-| `packages/viewer/src/model.ts:10-11` `SHEET_W`, `SHEET_H` | 1600, 900 | data: `ViewerDeck.page`; the constants remain the default |
-| `packages/viewer/src/Sheet.tsx:62-76` `fitSheetAt` | `w = SHEET_W, h = SHEET_H` defaults | derive: the caller passes the page (the parameters exist) |
-| `packages/viewer/src/rulers-model.ts:8-9, 30-32, 58-72` | 120 px per inch, 1600 by 900, inches | derive the length; add the unit |
-| `packages/viewer/src/Editor.tsx:743, 2443, 2943, 3349, 3379` | covers, insert box, `k = width / 1600`, guide clamp | derive |
-| `packages/viewer/src/Gestures.tsx:204, 1411-1412` | `k` over 1600; insert sizes | derive `k`; sizes stay |
-| `packages/viewer/src/LiveClone.tsx:48`, `LiveClone.css:2-5` | `--k = w / SHEET_W` | derive |
-| `packages/viewer/src/canvas-measure.ts:3, 57, 99` the hidden sheet | 1600 by 900 | derive |
-| `packages/viewer/src/snap.ts:136` | `SHEET.width / 2` | derive |
-| `packages/viewer/src/present/PresenterConsole.css:201` | `aspect-ratio: 16 / 9` | derive: `var(--ts-page-aspect, 16 / 9)` |
-| `apps/studio/src/components/Slideshow.tsx` | no literal; the `Sheet` fit | stay |
-| `packages/viewer/standalone/runtime.ts:282, 386, 396-403` | 1600, 900 literals | data: reads the custom properties once |
-| `packages/viewer/standalone/chrome.ts:81` comment | | stay |
+| Site                                                                             | Value                                               | Verdict                                                                             |
+| -------------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `packages/render/src/geometry.ts:8-30` `SHEET`, `CONTENT`, `CHIPS`, `colsWidths` | 1600 by 900 and derived                             | derive: every export takes the page                                                 |
+| `packages/render/src/stage.ts:36-63` `renderStage`                               | wraps at 1600 by 900                                | data: emits `style="--ts-sheet-w:...;--ts-sheet-h:..."` and `data-page` on the root |
+| `packages/render/src/slide.ts:24-32, 233, 322-327` chips and `plateBox`          | chips, plate box from `CONTENT`                     | derive                                                                              |
+| `packages/render/src/blocks/picture.ts:76` fallback width                        | 1600                                                | derive                                                                              |
+| `packages/render/src/dither-runtime.ts:140`                                      | `[1600, 900]`                                       | derive                                                                              |
+| `packages/render/src/measure-dom.ts:4, 44`                                       | the stage element                                   | stay (reads the element)                                                            |
+| `packages/render/src/print.ts:24` `PRINT_PAGE_PT`                                | 960 by 540                                          | derive: `0.6W by 0.6H`                                                              |
+| `print.ts:35` `PRINT_SCALE`                                                      | 0.8                                                 | stay (96 over 120)                                                                  |
+| `print.ts:38` `PRINT_PAGE_PX`, `:44-52` `PRINT_CSS`, `:130` the viewport meta    | 1600 by 900                                         | derive per document                                                                 |
+| `packages/render/src/runtime.ts:120-125` `fit()`                                 | 1600, 900 literals                                  | data: reads the custom properties                                                   |
+| `packages/render/src/standalone.ts:172-175`                                      | the runtime script                                  | data: the stage root carries the size                                               |
+| `packages/viewer/src/model.ts:10-11` `SHEET_W`, `SHEET_H`                        | 1600, 900                                           | data: `ViewerDeck.page`; the constants remain the default                           |
+| `packages/viewer/src/Sheet.tsx:62-76` `fitSheetAt`                               | `w = SHEET_W, h = SHEET_H` defaults                 | derive: the caller passes the page (the parameters exist)                           |
+| `packages/viewer/src/rulers-model.ts:8-9, 30-32, 58-72`                          | 120 px per inch, 1600 by 900, inches                | derive the length; add the unit                                                     |
+| `packages/viewer/src/Editor.tsx:743, 2443, 2943, 3349, 3379`                     | covers, insert box, `k = width / 1600`, guide clamp | derive                                                                              |
+| `packages/viewer/src/Gestures.tsx:204, 1411-1412`                                | `k` over 1600; insert sizes                         | derive `k`; sizes stay                                                              |
+| `packages/viewer/src/LiveClone.tsx:48`, `LiveClone.css:2-5`                      | `--k = w / SHEET_W`                                 | derive                                                                              |
+| `packages/viewer/src/canvas-measure.ts:3, 57, 99` the hidden sheet               | 1600 by 900                                         | derive                                                                              |
+| `packages/viewer/src/snap.ts:136`                                                | `SHEET.width / 2`                                   | derive                                                                              |
+| `packages/viewer/src/present/PresenterConsole.css:201`                           | `aspect-ratio: 16 / 9`                              | derive: `var(--ts-page-aspect, 16 / 9)`                                             |
+| `apps/studio/src/components/Slideshow.tsx`                                       | no literal; the `Sheet` fit                         | stay                                                                                |
+| `packages/viewer/standalone/runtime.ts:282, 386, 396-403`                        | 1600, 900 literals                                  | data: reads the custom properties once                                              |
+| `packages/viewer/standalone/chrome.ts:81` comment                                |                                                     | stay                                                                                |
 
 ### 1.4 Chrome
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/chrome/src/Rulers.tsx:19, 48, 91-95` | 0 to 13 and 0 to 7, inches | derive the numerals; add the unit |
-| `packages/chrome/src/Rulers.css` | CSS px | stay |
-| `packages/chrome/src/Overlay.tsx:39` the inch readout | inches | derive the unit |
-| `packages/chrome/src/menus/model.ts:556-558` `SHEET_CENTER_X`, `SHEET_CENTER_Y` | 800, 450 | derive |
-| `model.ts:927` `later('file.pageSetup', ...)` | Later | data: Now with `dialog('Page setup')` |
-| `packages/chrome/src/menus/strings.ts:598-611` `GUIDES.inches` | `px / 120` | derive the unit |
-| `packages/chrome/src/inspector/position.tsx:18, 27-28`, `sections.ts:71` doc text | "1600 by 900" | stay, reworded |
-| `packages/chrome/src/inspector/dither.tsx:37, 303, 307` the twin canvases | 1600 by 900 | derive |
-| `packages/chrome/src/editor-shell.ts:1418-1420, 1531-1532`, `palette-data.ts:195, 204` insert sizes and centre | 960 by 540 and kin | sizes stay; centre derives; clamp to the content box |
-| `packages/chrome/src/Sidebar.css:403, 748`, `ThemesPanel.css:43`, `Dialog.css:508`, `AssetPicker.css:106`, `inspector/asset.css:41`, `inspector/dither.css:29`, `pickers/DiagramPicker.css:55`, `apps/studio/src/routes/decks.css:304`, `apps/studio/src/styles.css:337` | `aspect-ratio: 16 / 9` | derive: `var(--ts-page-aspect, 16 / 9)` set on the shell root from the deck |
-| `packages/chrome/src/dialogs/Download.tsx:148` | "One slide per page, 13.333 by 7.5 inches." | derive the sentence |
-| `packages/chrome/src/dialogs/Publish.tsx:21` embed medium | 960 by 540 | width stays; height derives from the aspect |
+| Site                                                                                                                                                                                                                                                                     | Value                                       | Verdict                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
+| `packages/chrome/src/Rulers.tsx:19, 48, 91-95`                                                                                                                                                                                                                           | 0 to 13 and 0 to 7, inches                  | derive the numerals; add the unit                                           |
+| `packages/chrome/src/Rulers.css`                                                                                                                                                                                                                                         | CSS px                                      | stay                                                                        |
+| `packages/chrome/src/Overlay.tsx:39` the inch readout                                                                                                                                                                                                                    | inches                                      | derive the unit                                                             |
+| `packages/chrome/src/menus/model.ts:556-558` `SHEET_CENTER_X`, `SHEET_CENTER_Y`                                                                                                                                                                                          | 800, 450                                    | derive                                                                      |
+| `model.ts:927` `later('file.pageSetup', ...)`                                                                                                                                                                                                                            | Later                                       | data: Now with `dialog('Page setup')`                                       |
+| `packages/chrome/src/menus/strings.ts:598-611` `GUIDES.inches`                                                                                                                                                                                                           | `px / 120`                                  | derive the unit                                                             |
+| `packages/chrome/src/inspector/position.tsx:18, 27-28`, `sections.ts:71` doc text                                                                                                                                                                                        | "1600 by 900"                               | stay, reworded                                                              |
+| `packages/chrome/src/inspector/dither.tsx:37, 303, 307` the twin canvases                                                                                                                                                                                                | 1600 by 900                                 | derive                                                                      |
+| `packages/chrome/src/editor-shell.ts:1418-1420, 1531-1532`, `palette-data.ts:195, 204` insert sizes and centre                                                                                                                                                           | 960 by 540 and kin                          | sizes stay; centre derives; clamp to the content box                        |
+| `packages/chrome/src/Sidebar.css:403, 748`, `ThemesPanel.css:43`, `Dialog.css:508`, `AssetPicker.css:106`, `inspector/asset.css:41`, `inspector/dither.css:29`, `pickers/DiagramPicker.css:55`, `apps/studio/src/routes/decks.css:304`, `apps/studio/src/styles.css:337` | `aspect-ratio: 16 / 9`                      | derive: `var(--ts-page-aspect, 16 / 9)` set on the shell root from the deck |
+| `packages/chrome/src/dialogs/Download.tsx:148`                                                                                                                                                                                                                           | "One slide per page, 13.333 by 7.5 inches." | derive the sentence                                                         |
+| `packages/chrome/src/dialogs/Publish.tsx:21` embed medium                                                                                                                                                                                                                | 960 by 540                                  | width stays; height derives from the aspect                                 |
 
 ### 1.5 Export, verify, headless
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/export/src/units.ts:8, 11, 13` `PAGE_IN`, `PAGE_EMU`, `SHEET_PX` | 13.333333 by 7.5; 12,192,000 by 6,858,000; 1600 by 900 | derive: `pageIn(page)`, `pageEmu(page)` |
-| `units.ts:16-21` `PX_PER_IN`, `PT_PER_PX`, `EMU_PER_PX`, `EMU_PER_IN`, `EMU_PER_PT` | 120; 0.6; 7620; 914,400; 12,700 | stay |
-| `packages/export/src/pptx/masters.ts:14, 25-26` `LAYOUT_NAME`, `defineLayout` | `TS_SHEET_16x9`, 13.333333 by 7.5 | derive: `TS_SHEET_<W>x<H>` |
-| `masters.ts:39-80` the frame lines, crosses, wordmark | from the scene | stay (measured) |
-| `packages/export/src/pptx/images.ts:31-34, 51` `isSheetAspect`, the box fallback | 16/9 within 0.5 percent | derive: `isPageAspect(w, h, page)` |
-| `packages/export/src/pptx/build.ts:139` `COVER_OFFSET_IN` | 360 EMU | stay |
-| `build.ts:142` `DEFAULT_TITLE_BOX` | `[137, 137, 1326, 60]` | derive |
-| `build.ts:175-179` the 2x natural size | 3200 by 1800 | derive |
-| `build.ts:210-211` the hidden title clamp | `PAGE_EMU` | derive |
-| `build.ts:359-362` the cover picture | `PAGE_IN` | derive |
-| `packages/export/src/pptx/text.ts:285, 305, 338` width clamps | `PAGE_IN.width` | derive |
-| `packages/export/src/ooxml/geometry.ts:23-46` `inPage`, `readPageSize` | `PAGE_EMU`, tolerance 7620 | derive |
-| `packages/export/src/check.ts:173, 225` the expected page | 12,192,000 by 6,858,000 | derive from the report's `page` |
-| `packages/export/src/verify/geometry.ts:54, 79` `pageSizeOk` | `PAGE_EMU` | derive |
-| `packages/export/src/verify/fixture.ts:255` `p:sldSz`, `p:notesSz` | page EMU; 6,858,000 by 9,144,000 | `sldSz` derives; `notesSz` stays |
-| `packages/export/src/verify/libreoffice.ts:130-133, 183-194` | 120 dpi, 1600 by 900 | derive the `-scale-to` arguments; the dpi stays |
-| `packages/export/src/verify/report.ts:6, 55, 326-327, 553` | `1600 × scale`, `900 × scale` | derive |
-| `packages/export/src/verify/quicklook.ts:36, 59` | longest side 3200 | derive: `2W` |
-| `packages/export/src/pdf/build.ts:70` `PDF_RASTER` | 3200 by 1800 at 240 dpi, scale 2 | derive the pixels; 240 dpi stays and yields `2W by 2H` on any size |
-| `pdf/build.ts:216` `scale: PRINT_SCALE` | 0.8 | stay |
-| `pdf/build.ts:284, 300` report text; `:466` the reference clip | 960 by 540; 1600 by 900 | derive |
-| `packages/export/src/scene/measure.ts:182-183` | `W = 1600; H = 900` | derive |
-| `packages/export/src/scene/two-tone.ts:4` | 3200 by 1800 or 4800 by 2700 | derive (2x or 3x of the page) |
-| `packages/export/src/calibration/deck.ts:35, 233-234`, `calibration/run.ts:145-146` | 1600 by 900, 3200 by 1800 | stay (the calibration deck is a 16:9 instrument) |
-| `packages/export/src/batch/plan.ts:24-43` `SECONDS_PER_SLIDE` 2.6 | per slide | stay |
-| `packages/headless/src/context.ts:17` `SHEET` viewport | 1600 by 900 | derive |
-| `packages/headless/src/document.ts:3, 41` the viewport meta | `width=1600` | derive |
-| `packages/headless/src/measure.ts:51-55` | `W = 1600; H = 900` | derive |
-| `packages/headless/src/screenshot.ts:38` the fallback box | `[0, 0, 1600, 900]` | derive |
-| `packages/headless/src/sheet.ts:88, 178` the contact sheet | `k = thumb / 1600`, viewport height 900 | derive |
-| `packages/headless/src/pdf.ts:25-26` | the 0.8 argument | stay |
+| Site                                                                                | Value                                                  | Verdict                                                            |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------ |
+| `packages/export/src/units.ts:8, 11, 13` `PAGE_IN`, `PAGE_EMU`, `SHEET_PX`          | 13.333333 by 7.5; 12,192,000 by 6,858,000; 1600 by 900 | derive: `pageIn(page)`, `pageEmu(page)`                            |
+| `units.ts:16-21` `PX_PER_IN`, `PT_PER_PX`, `EMU_PER_PX`, `EMU_PER_IN`, `EMU_PER_PT` | 120; 0.6; 7620; 914,400; 12,700                        | stay                                                               |
+| `packages/export/src/pptx/masters.ts:14, 25-26` `LAYOUT_NAME`, `defineLayout`       | `TS_SHEET_16x9`, 13.333333 by 7.5                      | derive: `TS_SHEET_<W>x<H>`                                         |
+| `masters.ts:39-80` the frame lines, crosses, wordmark                               | from the scene                                         | stay (measured)                                                    |
+| `packages/export/src/pptx/images.ts:31-34, 51` `isSheetAspect`, the box fallback    | 16/9 within 0.5 percent                                | derive: `isPageAspect(w, h, page)`                                 |
+| `packages/export/src/pptx/build.ts:139` `COVER_OFFSET_IN`                           | 360 EMU                                                | stay                                                               |
+| `build.ts:142` `DEFAULT_TITLE_BOX`                                                  | `[137, 137, 1326, 60]`                                 | derive                                                             |
+| `build.ts:175-179` the 2x natural size                                              | 3200 by 1800                                           | derive                                                             |
+| `build.ts:210-211` the hidden title clamp                                           | `PAGE_EMU`                                             | derive                                                             |
+| `build.ts:359-362` the cover picture                                                | `PAGE_IN`                                              | derive                                                             |
+| `packages/export/src/pptx/text.ts:285, 305, 338` width clamps                       | `PAGE_IN.width`                                        | derive                                                             |
+| `packages/export/src/ooxml/geometry.ts:23-46` `inPage`, `readPageSize`              | `PAGE_EMU`, tolerance 7620                             | derive                                                             |
+| `packages/export/src/check.ts:173, 225` the expected page                           | 12,192,000 by 6,858,000                                | derive from the report's `page`                                    |
+| `packages/export/src/verify/geometry.ts:54, 79` `pageSizeOk`                        | `PAGE_EMU`                                             | derive                                                             |
+| `packages/export/src/verify/fixture.ts:255` `p:sldSz`, `p:notesSz`                  | page EMU; 6,858,000 by 9,144,000                       | `sldSz` derives; `notesSz` stays                                   |
+| `packages/export/src/verify/libreoffice.ts:130-133, 183-194`                        | 120 dpi, 1600 by 900                                   | derive the `-scale-to` arguments; the dpi stays                    |
+| `packages/export/src/verify/report.ts:6, 55, 326-327, 553`                          | `1600 × scale`, `900 × scale`                          | derive                                                             |
+| `packages/export/src/verify/quicklook.ts:36, 59`                                    | longest side 3200                                      | derive: `2W`                                                       |
+| `packages/export/src/pdf/build.ts:70` `PDF_RASTER`                                  | 3200 by 1800 at 240 dpi, scale 2                       | derive the pixels; 240 dpi stays and yields `2W by 2H` on any size |
+| `pdf/build.ts:216` `scale: PRINT_SCALE`                                             | 0.8                                                    | stay                                                               |
+| `pdf/build.ts:284, 300` report text; `:466` the reference clip                      | 960 by 540; 1600 by 900                                | derive                                                             |
+| `packages/export/src/scene/measure.ts:182-183`                                      | `W = 1600; H = 900`                                    | derive                                                             |
+| `packages/export/src/scene/two-tone.ts:4`                                           | 3200 by 1800 or 4800 by 2700                           | derive (2x or 3x of the page)                                      |
+| `packages/export/src/calibration/deck.ts:35, 233-234`, `calibration/run.ts:145-146` | 1600 by 900, 3200 by 1800                              | stay (the calibration deck is a 16:9 instrument)                   |
+| `packages/export/src/batch/plan.ts:24-43` `SECONDS_PER_SLIDE` 2.6                   | per slide                                              | stay                                                               |
+| `packages/headless/src/context.ts:17` `SHEET` viewport                              | 1600 by 900                                            | derive                                                             |
+| `packages/headless/src/document.ts:3, 41` the viewport meta                         | `width=1600`                                           | derive                                                             |
+| `packages/headless/src/measure.ts:51-55`                                            | `W = 1600; H = 900`                                    | derive                                                             |
+| `packages/headless/src/screenshot.ts:38` the fallback box                           | `[0, 0, 1600, 900]`                                    | derive                                                             |
+| `packages/headless/src/sheet.ts:88, 178` the contact sheet                          | `k = thumb / 1600`, viewport height 900                | derive                                                             |
+| `packages/headless/src/pdf.ts:25-26`                                                | the 0.8 argument                                       | stay                                                               |
 
 ### 1.6 Effects, materials, the native crate
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `packages/effects/src/pipeline.ts:22-23` `TWO_TONE_SIZE`, `SHEET_SIZE` | 800 by 450; 1600 by 900 | derive: the screen is `page / 2` at cell 2 |
-| `packages/effects/src/metrics.ts:40` `plateClear(bits, plate, cell = 2)` | cell 2 | stay |
-| `packages/effects/src/two-tone.ts:4, 48` | 800 by 450 cells | derive |
-| `packages/materials/src/capture.ts:46-48` `FRAME_SIZE`, `MOUNT_CSS_SIZE` | 3200 by 1800; 1600 by 900 | derive (2x of the page) |
-| `packages/materials/src/mount.ts:18-21` `maxPixelCount` | `3200 × 1800 + 1` | derive |
-| `packages/materials/src/actions.ts:550` comment | | stay, reworded |
-| `crates/turboslide-native/src/lib.rs:223`, `tests/pillow.rs:152-161` | the output asserted at 1600 by 900 | data: the screen size becomes a parameter of the two tone call (how deep the literal sits in the crate is unverified) |
-| `apps/studio/src/workers/dither.worker.ts:29, 76, 91` `SHEET` | 1600 by 900 | derive |
+| Site                                                                     | Value                              | Verdict                                                                                                               |
+| ------------------------------------------------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `packages/effects/src/pipeline.ts:22-23` `TWO_TONE_SIZE`, `SHEET_SIZE`   | 800 by 450; 1600 by 900            | derive: the screen is `page / 2` at cell 2                                                                            |
+| `packages/effects/src/metrics.ts:40` `plateClear(bits, plate, cell = 2)` | cell 2                             | stay                                                                                                                  |
+| `packages/effects/src/two-tone.ts:4, 48`                                 | 800 by 450 cells                   | derive                                                                                                                |
+| `packages/materials/src/capture.ts:46-48` `FRAME_SIZE`, `MOUNT_CSS_SIZE` | 3200 by 1800; 1600 by 900          | derive (2x of the page)                                                                                               |
+| `packages/materials/src/mount.ts:18-21` `maxPixelCount`                  | `3200 × 1800 + 1`                  | derive                                                                                                                |
+| `packages/materials/src/actions.ts:550` comment                          |                                    | stay, reworded                                                                                                        |
+| `crates/turboslide-native/src/lib.rs:223`, `tests/pillow.rs:152-161`     | the output asserted at 1600 by 900 | data: the screen size becomes a parameter of the two tone call (how deep the literal sits in the crate is unverified) |
+| `apps/studio/src/workers/dither.worker.ts:29, 76, 91` `SHEET`            | 1600 by 900                        | derive                                                                                                                |
 
 ### 1.7 Studio, realtime, lint, agents, scripts, tests
 
-| Site | Value | Verdict |
-| --- | --- | --- |
-| `apps/studio/src/server/thumbs.ts:48` `THUMB_WIDTHS`; `:54` `SHEET`; `:168-172` `downsample` | 160, 320, 640; 16:9; aspect kept | widths stay; the aspect derives; `downsample` already keeps the source aspect |
-| `apps/studio/src/server/health.ts:12` `sheet: [1600, 900]` | the default | stay as the default page (report both `defaultPage` and the cap) |
-| `apps/studio/src/routes/print.$deckId.tsx:286-290, 348-355` `--k` from `SHEET_W`; `print.css:3-5, 171, 175, 224-279` `@page 13.333in 7.5in`, `--k` 0.8 and 0.48, the notes geometry | 1600; 13.333 by 7.5 in | derive from the page and the paper (part 4) |
-| `apps/studio/src/routes/edit.$deckId.tsx:2190` the hidden measuring sheet | 1600 by 900 | derive |
-| the per deck card of research-4/02 section 7 and SPEC-4 7 (`/og/deck/:deckId.png`) | the first slide at 1600 by 900 downscaled to 1120 by 630 | derive: contain the first slide in the 1120 by 630 area on the surround colour |
-| `packages/realtime/src/protocol.ts:38-39` `SHEET_WIDTH`, `SHEET_HEIGHT`; `channel.ts:109` | the presence pointer clamp | data: the server clamps to the cap 6720; the client clamps to the page |
-| `packages/lint/src/rendered/rules.ts:77-79, 103` the rails and the overflow proposal | `1600 - RAIL`, `900 - RAIL` | derive |
-| `packages/lint/src/static/asset.ts:74-75` the covering picture check | 1600, 900 | derive |
-| `packages/mcp/src/prompts.ts:21, 154` prompt text | "0..1600 by 0..900" | derive the sentence from the deck's page |
-| `packages/agent/src/generate/grammar.ts:42, 80` the grammar text | `SHEET_WIDTH`, `CONTENT_BOX` | stay as the default page's text with one sentence naming `deck.page` |
-| `apps/cli/src/commands/diff.ts:114, 161` `SHEET_BOX` | `[0, 0, 1600, 900]` | derive |
-| `apps/cli/src/store-actions.ts:2990-2995, 3429` default boxes | centred 960 by 540; the picture at the sheet | derive |
-| `scripts/compare-to-shoot.mjs:44`, `scripts/canvas-fidelity.mjs:46` `SHEET` | 1600 by 900 | derive from the deck read (the GT deck stays 16:9, so the numbers do not change) |
-| `scripts/gslides-parity-audit.mjs:324, 4452, 4689, 5053-5054` `SHEET_EDGE` and the covering checks | 800, 1600, 450, 900 | stay (the audited deck is 16:9); a page setup row is added |
-| `docs/gslides-parity/design-4/perf-budget.mjs` | no sheet literal; budgets per route, filmstrip, idle, twins | stay |
-| `apps/studio/e2e/canvas.spec.ts:177, 625`, `objects.spec.ts:95`, `dither.spec.ts:89-90`, `gslides-actions.spec.ts:345-352, 384-388, 418, 656`, `window-api.spec.ts:204` | sheet coordinates of 16:9 fixtures | stay; a new `page-setup.spec.ts` covers the other sizes |
-| `docs/pptx.md:17-23, 121-150`, `docs/freeform.md:10, 81, 88, 109`, `docs/export-verification.md:19-28, 345` | prose | stay, reworded to name the default and `deck.page` |
+| Site                                                                                                                                                                                | Value                                                       | Verdict                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `apps/studio/src/server/thumbs.ts:48` `THUMB_WIDTHS`; `:54` `SHEET`; `:168-172` `downsample`                                                                                        | 160, 320, 640; 16:9; aspect kept                            | widths stay; the aspect derives; `downsample` already keeps the source aspect    |
+| `apps/studio/src/server/health.ts:12` `sheet: [1600, 900]`                                                                                                                          | the default                                                 | stay as the default page (report both `defaultPage` and the cap)                 |
+| `apps/studio/src/routes/print.$deckId.tsx:286-290, 348-355` `--k` from `SHEET_W`; `print.css:3-5, 171, 175, 224-279` `@page 13.333in 7.5in`, `--k` 0.8 and 0.48, the notes geometry | 1600; 13.333 by 7.5 in                                      | derive from the page and the paper (part 4)                                      |
+| `apps/studio/src/routes/edit.$deckId.tsx:2190` the hidden measuring sheet                                                                                                           | 1600 by 900                                                 | derive                                                                           |
+| the per deck card of research-4/02 section 7 and SPEC-4 7 (`/og/deck/:deckId.png`)                                                                                                  | the first slide at 1600 by 900 downscaled to 1120 by 630    | derive: contain the first slide in the 1120 by 630 area on the surround colour   |
+| `packages/realtime/src/protocol.ts:38-39` `SHEET_WIDTH`, `SHEET_HEIGHT`; `channel.ts:109`                                                                                           | the presence pointer clamp                                  | data: the server clamps to the cap 6720; the client clamps to the page           |
+| `packages/lint/src/rendered/rules.ts:77-79, 103` the rails and the overflow proposal                                                                                                | `1600 - RAIL`, `900 - RAIL`                                 | derive                                                                           |
+| `packages/lint/src/static/asset.ts:74-75` the covering picture check                                                                                                                | 1600, 900                                                   | derive                                                                           |
+| `packages/mcp/src/prompts.ts:21, 154` prompt text                                                                                                                                   | "0..1600 by 0..900"                                         | derive the sentence from the deck's page                                         |
+| `packages/agent/src/generate/grammar.ts:42, 80` the grammar text                                                                                                                    | `SHEET_WIDTH`, `CONTENT_BOX`                                | stay as the default page's text with one sentence naming `deck.page`             |
+| `apps/cli/src/commands/diff.ts:114, 161` `SHEET_BOX`                                                                                                                                | `[0, 0, 1600, 900]`                                         | derive                                                                           |
+| `apps/cli/src/store-actions.ts:2990-2995, 3429` default boxes                                                                                                                       | centred 960 by 540; the picture at the sheet                | derive                                                                           |
+| `scripts/compare-to-shoot.mjs:44`, `scripts/canvas-fidelity.mjs:46` `SHEET`                                                                                                         | 1600 by 900                                                 | derive from the deck read (the GT deck stays 16:9, so the numbers do not change) |
+| `scripts/gslides-parity-audit.mjs:324, 4452, 4689, 5053-5054` `SHEET_EDGE` and the covering checks                                                                                  | 800, 1600, 450, 900                                         | stay (the audited deck is 16:9); a page setup row is added                       |
+| `docs/gslides-parity/design-4/perf-budget.mjs`                                                                                                                                      | no sheet literal; budgets per route, filmstrip, idle, twins | stay                                                                             |
+| `apps/studio/e2e/canvas.spec.ts:177, 625`, `objects.spec.ts:95`, `dither.spec.ts:89-90`, `gslides-actions.spec.ts:345-352, 384-388, 418, 656`, `window-api.spec.ts:204`             | sheet coordinates of 16:9 fixtures                          | stay; a new `page-setup.spec.ts` covers the other sizes                          |
+| `docs/pptx.md:17-23, 121-150`, `docs/freeform.md:10, 81, 88, 109`, `docs/export-verification.md:19-28, 345`                                                                         | prose                                                       | stay, reworded to name the default and `deck.page`                               |
 
 Count: 123 rows over about 110 files (107 distinct file names; geometry.ts, build.ts, measure.ts and runtime.ts each occur in two packages), of which 76 derive, 12 become data and 35 stay.
 
@@ -196,54 +196,54 @@ Because every one of those steps runs on decks that stay at 1600 by 900, they st
 
 ### 2.1 Google Slides
 
-| Behaviour | What the public page says | Source |
-| --- | --- | --- |
-| The dialog | "Click File and then Page setup." A dropdown with "Standard (4:3)", "Widescreen (16:9)", "Widescreen (16:10)" and "Custom"; "Below 'Custom,' enter a size and pick a unit of measurement (inches, centimeters, points, or pixels)." Then "Click OK." | G1 |
-| The confirm label | Google's help says OK; Plus AI says "OK to apply the new size"; other third parties say Apply (report 02 d.1, research/03 row 237) | G1, T1; Apply unverified |
-| The default size | "The default size for a Google Slide is 960 by 540, which is a 16:9 aspect ratio." At 96 pixels per inch this is 10 by 5.625 in, the size PowerPoint lists as its On-screen Show (16:9); the inch reading is an inference | T1; M1 for the inch figure |
-| Scope and objects | The size applies to every slide; "after you change the size and dimensions of your Google Slides, your slide elements may appear differently" (placement of images, text sizing, diagrams, backgrounds). Google's help says nothing about existing objects | T1; the keep coordinates rule is a secondary reading |
-| Measurement units | "Click Tools and then Preferences. Check the box next to Use measurement unit preferences. Select Inches, Centimeters or Pixels." The ruler menu: "Change units" or "Reset to presentation default" | G1 |
-| The API page size | `Presentation.pageSize` is "The size of pages in the presentation", a `Size` of two `Dimension` values with `magnitude` and `unit` (EMU, PT or UNIT_UNSPECIFIED) | G2 |
-| Writable at create time | `presentations.create`: "Creates a blank presentation using the title given in the request. If a presentationId is provided, it is used as the ID of the new presentation. Otherwise, a new ID is generated. Other fields in the request, including any provided content, are ignored." So the page size cannot be set through create | G3 |
-| Writable later | None of the 49 request types of `batchUpdate` names the page size; `updatePageProperties` "Updates the properties of a Page" (background and colour scheme, not dimensions) | G4 |
-| Apps Script | `getPageWidth()` and `getPageHeight()` return "The page width in points" and "The page height in points"; `getNotesPageWidth()` and `getNotesPageHeight()` exist; no setter exists | G5 |
-| PPTX download `p:sldSz` per preset | not stated on any public page read | unverified |
-| Print and PDF | "Print settings and preview" with "Handout" and "Landscape" and "1 slide with notes"; "A PDF file will automatically download" for a presentation; nothing about the page size of that PDF | G6; the page size unverified |
+| Behaviour                          | What the public page says                                                                                                                                                                                                                                                                                                             | Source                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| The dialog                         | "Click File and then Page setup." A dropdown with "Standard (4:3)", "Widescreen (16:9)", "Widescreen (16:10)" and "Custom"; "Below 'Custom,' enter a size and pick a unit of measurement (inches, centimeters, points, or pixels)." Then "Click OK."                                                                                  | G1                                                   |
+| The confirm label                  | Google's help says OK; Plus AI says "OK to apply the new size"; other third parties say Apply (report 02 d.1, research/03 row 237)                                                                                                                                                                                                    | G1, T1; Apply unverified                             |
+| The default size                   | "The default size for a Google Slide is 960 by 540, which is a 16:9 aspect ratio." At 96 pixels per inch this is 10 by 5.625 in, the size PowerPoint lists as its On-screen Show (16:9); the inch reading is an inference                                                                                                             | T1; M1 for the inch figure                           |
+| Scope and objects                  | The size applies to every slide; "after you change the size and dimensions of your Google Slides, your slide elements may appear differently" (placement of images, text sizing, diagrams, backgrounds). Google's help says nothing about existing objects                                                                            | T1; the keep coordinates rule is a secondary reading |
+| Measurement units                  | "Click Tools and then Preferences. Check the box next to Use measurement unit preferences. Select Inches, Centimeters or Pixels." The ruler menu: "Change units" or "Reset to presentation default"                                                                                                                                   | G1                                                   |
+| The API page size                  | `Presentation.pageSize` is "The size of pages in the presentation", a `Size` of two `Dimension` values with `magnitude` and `unit` (EMU, PT or UNIT_UNSPECIFIED)                                                                                                                                                                      | G2                                                   |
+| Writable at create time            | `presentations.create`: "Creates a blank presentation using the title given in the request. If a presentationId is provided, it is used as the ID of the new presentation. Otherwise, a new ID is generated. Other fields in the request, including any provided content, are ignored." So the page size cannot be set through create | G3                                                   |
+| Writable later                     | None of the 49 request types of `batchUpdate` names the page size; `updatePageProperties` "Updates the properties of a Page" (background and colour scheme, not dimensions)                                                                                                                                                           | G4                                                   |
+| Apps Script                        | `getPageWidth()` and `getPageHeight()` return "The page width in points" and "The page height in points"; `getNotesPageWidth()` and `getNotesPageHeight()` exist; no setter exists                                                                                                                                                    | G5                                                   |
+| PPTX download `p:sldSz` per preset | not stated on any public page read                                                                                                                                                                                                                                                                                                    | unverified                                           |
+| Print and PDF                      | "Print settings and preview" with "Handout" and "Landscape" and "1 slide with notes"; "A PDF file will automatically download" for a presentation; nothing about the page size of that PDF                                                                                                                                            | G6; the page size unverified                         |
 
 ### 2.2 PowerPoint and ECMA 376
 
-| Behaviour | What the public page says | Source |
-| --- | --- | --- |
-| Where | "Slide Size" on the Design tab, in the Customize group | M1 |
-| Standard and Widescreen | Standard (4:3) 10 by 7.5 in (25.4 by 19.05 cm); Widescreen (16:9) is listed as 10 by 5.625 in in the summary table and as "Widescreen (13.333 x 7.5)" 13.333 by 7.5 in (33.867 by 19.05 cm) in the custom list; "The 16:9 widescreen setting is the default value for new presentations you create" | M1 |
-| The custom list | Letter Paper 10 by 7.5; Ledger Paper 13.319 by 9.99; A3 14 by 10.5; A4 10.833 by 7.5; B4 (ISO) 11.84 by 8.88; B5 (ISO) 7.84 by 5.88; 35 mm Slides 11.25 by 7.5; Overhead 10 by 7.5; Banner 8 by 1; On-screen Show (16:10) 10 by 6.25; Widescreen 13.333 by 7.5 (all inches) | M1 |
-| Shrinking | "Maximize: increase the size of your slide content when you are scaling to a larger slide size"; "Ensure Fit: decrease the size of your slide content when scaling to a smaller slide size" | M1 |
-| `p:sldSz` | "This element specifies the size of the presentation slide surface. Objects within a presentation slide can be specified outside these extents, but this is the size of background surface that is shown when the slide is presented or printed." Attributes `cx`, `cy` and `type`; the example `<p:sldSz cx="9144000" cy="6858000" type="screen4x3"/>`; content model `CT_SlideSize` | M2 |
-| `ST_SlideSizeType` | screen4x3, letter, A4, 35mm, overhead, banner, custom, ledger, A3, B4ISO, B5ISO, B4JIS, B5JIS, hagakiCard, screen16x9, screen16x10 | M3 |
-| `p:notesSz` | "This element specifies the size of slide surface used for notes slides and handout slides. Objects within a notes slide can be specified outside these extents, but the notes slide has a background surface of the specified size when presented or printed. This element is intended to specify the region to which content is fitted in any special format of printout the application might choose to generate, such as an outline handout." Content model `CT_PositiveSize2D` | M4 |
-| The range of `cx` and `cy` | not on the pages read (recalled as 914,400 to 51,206,400 EMU, 1 to 56 in) | unverified |
-| Print output types | Slides; Single, Two, Three, Four, Six and Nine Slide Handouts; Notes Pages; Outline; Build Slides (`PpPrintOutputType`) | M5 |
-| Handout order | `ppPrintHandoutHorizontalFirst`: "Slides are ordered horizontally, with the first slide in the upper-left corner and the second slide to the right of it"; `ppPrintHandoutVerticalFirst`: "the second slide below it"; both mirror for right to left languages | M6 |
-| Notes page | "'Notes' of a presentation show the slide and the related speaker notes below it"; "The Outline prints only the text in the slides, without images"; the 3 per page handout "consists of three slide thumbnail images on the left side and several printed lines for note-taking to the right of each thumbnail"; a "Print slide numbers on handouts" checkbox | M7 |
-| Header, footer, date, page number | `HeadersFooters` "Contains all the HeaderFooter objects on the specified slide, notes page, handout, or master"; "Each HeaderFooter object represents a header, footer, date and time, or slide number"; "The HeaderFooter object that represents a header is available only for a notes master or handout master" | M8 |
-| Placeholder types of the masters | `hdr`, `ftr`, `dt`, `sldNum`, `sldImg` (Slide Image), `body` among the `ST_PlaceholderType` values | M9 |
+| Behaviour                         | What the public page says                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Source     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Where                             | "Slide Size" on the Design tab, in the Customize group                                                                                                                                                                                                                                                                                                                                                                                                                              | M1         |
+| Standard and Widescreen           | Standard (4:3) 10 by 7.5 in (25.4 by 19.05 cm); Widescreen (16:9) is listed as 10 by 5.625 in in the summary table and as "Widescreen (13.333 x 7.5)" 13.333 by 7.5 in (33.867 by 19.05 cm) in the custom list; "The 16:9 widescreen setting is the default value for new presentations you create"                                                                                                                                                                                 | M1         |
+| The custom list                   | Letter Paper 10 by 7.5; Ledger Paper 13.319 by 9.99; A3 14 by 10.5; A4 10.833 by 7.5; B4 (ISO) 11.84 by 8.88; B5 (ISO) 7.84 by 5.88; 35 mm Slides 11.25 by 7.5; Overhead 10 by 7.5; Banner 8 by 1; On-screen Show (16:10) 10 by 6.25; Widescreen 13.333 by 7.5 (all inches)                                                                                                                                                                                                         | M1         |
+| Shrinking                         | "Maximize: increase the size of your slide content when you are scaling to a larger slide size"; "Ensure Fit: decrease the size of your slide content when scaling to a smaller slide size"                                                                                                                                                                                                                                                                                         | M1         |
+| `p:sldSz`                         | "This element specifies the size of the presentation slide surface. Objects within a presentation slide can be specified outside these extents, but this is the size of background surface that is shown when the slide is presented or printed." Attributes `cx`, `cy` and `type`; the example `<p:sldSz cx="9144000" cy="6858000" type="screen4x3"/>`; content model `CT_SlideSize`                                                                                               | M2         |
+| `ST_SlideSizeType`                | screen4x3, letter, A4, 35mm, overhead, banner, custom, ledger, A3, B4ISO, B5ISO, B4JIS, B5JIS, hagakiCard, screen16x9, screen16x10                                                                                                                                                                                                                                                                                                                                                  | M3         |
+| `p:notesSz`                       | "This element specifies the size of slide surface used for notes slides and handout slides. Objects within a notes slide can be specified outside these extents, but the notes slide has a background surface of the specified size when presented or printed. This element is intended to specify the region to which content is fitted in any special format of printout the application might choose to generate, such as an outline handout." Content model `CT_PositiveSize2D` | M4         |
+| The range of `cx` and `cy`        | not on the pages read (recalled as 914,400 to 51,206,400 EMU, 1 to 56 in)                                                                                                                                                                                                                                                                                                                                                                                                           | unverified |
+| Print output types                | Slides; Single, Two, Three, Four, Six and Nine Slide Handouts; Notes Pages; Outline; Build Slides (`PpPrintOutputType`)                                                                                                                                                                                                                                                                                                                                                             | M5         |
+| Handout order                     | `ppPrintHandoutHorizontalFirst`: "Slides are ordered horizontally, with the first slide in the upper-left corner and the second slide to the right of it"; `ppPrintHandoutVerticalFirst`: "the second slide below it"; both mirror for right to left languages                                                                                                                                                                                                                      | M6         |
+| Notes page                        | "'Notes' of a presentation show the slide and the related speaker notes below it"; "The Outline prints only the text in the slides, without images"; the 3 per page handout "consists of three slide thumbnail images on the left side and several printed lines for note-taking to the right of each thumbnail"; a "Print slide numbers on handouts" checkbox                                                                                                                      | M7         |
+| Header, footer, date, page number | `HeadersFooters` "Contains all the HeaderFooter objects on the specified slide, notes page, handout, or master"; "Each HeaderFooter object represents a header, footer, date and time, or slide number"; "The HeaderFooter object that represents a header is available only for a notes master or handout master"                                                                                                                                                                  | M8         |
+| Placeholder types of the masters  | `hdr`, `ftr`, `dt`, `sldNum`, `sldImg` (Slide Image), `body` among the `ST_PlaceholderType` values                                                                                                                                                                                                                                                                                                                                                                                  | M9         |
 
 ### 2.3 Keynote
 
-| Behaviour | What the public page says | Source |
-| --- | --- | --- |
-| Slide size | "In the Document sidebar, click the pop-up menu below Slide Size and choose a new size." "If you choose Custom Slide Size, enter slide dimensions, then click OK." The preset names and the custom units are not in the article body as fetched | A1; the names Standard (4:3) and Wide (16:9) unverified |
-| Rescaling | nothing in the article | unverified |
-| Print | File > Print; the format choices Slide, Grid (a number of slides per page), Handout (slides per page) and Outline; "Include comments" with the Slide format; "The options vary depending on the format you choose"; the PDF pop-up menu at the bottom of the dialog saves the same layout | A2; the full checkbox list unverified |
+| Behaviour  | What the public page says                                                                                                                                                                                                                                                                 | Source                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Slide size | "In the Document sidebar, click the pop-up menu below Slide Size and choose a new size." "If you choose Custom Slide Size, enter slide dimensions, then click OK." The preset names and the custom units are not in the article body as fetched                                           | A1; the names Standard (4:3) and Wide (16:9) unverified |
+| Rescaling  | nothing in the article                                                                                                                                                                                                                                                                    | unverified                                              |
+| Print      | File > Print; the format choices Slide, Grid (a number of slides per page), Handout (slides per page) and Outline; "Include comments" with the Slide format; "The options vary depending on the format you choose"; the PDF pop-up menu at the bottom of the dialog saves the same layout | A2; the full checkbox list unverified                   |
 
 ### 2.4 ODF, CSS and the Chromium printer
 
-| Behaviour | What the public page says | Source |
-| --- | --- | --- |
-| ODF page model | Part 3 of OpenDocument 1.3 has `<style:page-layout>` at section 16.5, `<style:master-page>` at 16.9 and `<style:page-layout-properties>` at 17.2 (the table of contents was read; the attribute definitions `fo:page-width`, `fo:page-height`, `style:print-orientation` and `style:page-layout-name` are in those sections and were not quoted) | W1; attribute text unverified |
-| CSS `@page size` | "If only one length value is specified, it sets both the width and height of the page box"; two lengths set width then height; `auto` lets the UA match the sheet; keywords A3, A4, A5, B4, B5, JIS-B4, JIS-B5, letter, legal, ledger, with `portrait` and `landscape`; when the page box does not fit the sheet the UA should render at size on a larger sheet, rotate, scale, slice, or clip, in that order | W2 |
-| `page.pdf` | `scale`: "Scales the rendering of the web page. Amount must be between 0.1 and 2", default 1; `preferCSSPageSize`: "Give any CSS @page size declared in the page priority over what is declared in the width or height or format option", default false "which will scale the content to fit the paper size"; `printBackground` default false; `format` default letter; `margin` none by default (Puppeteer's page; Playwright's page did not deliver its option text to the fetcher) | W3; W4 attempted |
-| Turboslide's measurement | a CSS zoom or transform of 0.8 snapped every hairline to whole CSS pixels before scaling (0.27 to 0.63 percent per page); `page.pdf({ scale: 0.8 })` after layout at 1600 px kept them exact (0.000 to 0.017 percent) | R1 `print.ts:27-35` |
+| Behaviour                | What the public page says                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Source                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| ODF page model           | Part 3 of OpenDocument 1.3 has `<style:page-layout>` at section 16.5, `<style:master-page>` at 16.9 and `<style:page-layout-properties>` at 17.2 (the table of contents was read; the attribute definitions `fo:page-width`, `fo:page-height`, `style:print-orientation` and `style:page-layout-name` are in those sections and were not quoted)                                                                                                                                      | W1; attribute text unverified |
+| CSS `@page size`         | "If only one length value is specified, it sets both the width and height of the page box"; two lengths set width then height; `auto` lets the UA match the sheet; keywords A3, A4, A5, B4, B5, JIS-B4, JIS-B5, letter, legal, ledger, with `portrait` and `landscape`; when the page box does not fit the sheet the UA should render at size on a larger sheet, rotate, scale, slice, or clip, in that order                                                                         | W2                            |
+| `page.pdf`               | `scale`: "Scales the rendering of the web page. Amount must be between 0.1 and 2", default 1; `preferCSSPageSize`: "Give any CSS @page size declared in the page priority over what is declared in the width or height or format option", default false "which will scale the content to fit the paper size"; `printBackground` default false; `format` default letter; `margin` none by default (Puppeteer's page; Playwright's page did not deliver its option text to the fetcher) | W3; W4 attempted              |
+| Turboslide's measurement | a CSS zoom or transform of 0.8 snapped every hairline to whole CSS pixels before scaling (0.27 to 0.63 percent per page); `page.pdf({ scale: 0.8 })` after layout at 1600 px kept them exact (0.000 to 0.017 percent)                                                                                                                                                                                                                                                                 | R1 `print.ts:27-35`           |
 
 ## Part 3. The design
 
@@ -259,11 +259,11 @@ Rejected. A per slide size (Google and PowerPoint have one size per file, `p:sld
 
 The three candidate rules and their consequences, all with one sheet pixel at 1/120 in (7,620 EMU, 0.6 pt) because every type size, hairline and export constant of `units.ts:16-21` is written in that unit:
 
-| Rule | Standard (4:3) | Widescreen (16:10) | Consequence |
-| --- | --- | --- | --- |
-| Width fixed at 1600 | 1600 by 1200 px, 13.333 by 10 in, 12,192,000 by 9,144,000 EMU | 1600 by 1000 px, 13.333 by 8.333 in, 12,192,000 by 7,620,000 EMU | No PowerPoint preset matches either; a 10 by 7.5 in import must scale by 4/3 (1 px per 5,715 EMU), which enlarges every point size on the way in and shrinks it on the way out; the content box grows only downward |
+| Rule                              | Standard (4:3)                                                                 | Widescreen (16:10)                                                                                                    | Consequence                                                                                                                                                                                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Width fixed at 1600               | 1600 by 1200 px, 13.333 by 10 in, 12,192,000 by 9,144,000 EMU                  | 1600 by 1000 px, 13.333 by 8.333 in, 12,192,000 by 7,620,000 EMU                                                      | No PowerPoint preset matches either; a 10 by 7.5 in import must scale by 4/3 (1 px per 5,715 EMU), which enlarges every point size on the way in and shrinks it on the way out; the content box grows only downward                                                                                                     |
 | Height fixed at 900 (recommended) | 1200 by 900 px, 10 by 7.5 in, 9,144,000 by 6,858,000 EMU (`screen4x3` exactly) | 1440 by 900 px, 12 by 7.5 in, 10,972,800 by 6,858,000 EMU (a custom size; PowerPoint's 16:10 preset is 10 by 6.25 in) | The 16:9 sheet is unchanged; imports at 1 px per 7,620 EMU are exact and keep every point size; report 04's letterbox sizes (1200 by 900, 1440 by 900) are the same numbers, so `fit` and `match` share one scale; the type ladder and the vertical grid (rules at 56 and 844, content 129 to 771) hold on every preset |
-| PowerPoint's inch presets | 1200 by 900 (as above) | 1200 by 750 px, 10 by 6.25 in, 9,144,000 by 5,715,000 EMU | Every preset is a PowerPoint size, but the 16:10 content box is 926 by 492 px, which the 88 px h1 and the 72 px statement do not fit well; the vertical grid changes per preset |
+| PowerPoint's inch presets         | 1200 by 900 (as above)                                                         | 1200 by 750 px, 10 by 6.25 in, 9,144,000 by 5,715,000 EMU                                                             | Every preset is a PowerPoint size, but the 16:10 content box is 926 by 492 px, which the 88 px h1 and the 72 px statement do not fit well; the vertical grid changes per preset                                                                                                                                         |
 
 Pick the height rule. Custom sizes convert at 120 px per inch (1 cm is 47.244 px, 1 pt is 1.6667 px, 1 pixel is 1 sheet pixel) and round to the whole pixel; the dialog shows the rounded value back in the user's unit. The physical mismatch with Google (Google's 16:9 is 10 by 5.625 in, Turboslide's is 13.333 by 7.5 in) is the same mismatch Turboslide has had since round one and is not widened: Turboslide matches Google's aspects and PowerPoint's inch sizes, which is what the PPTX exports need. Anyone who wants 10 by 6.25 in types it under Custom.
 
@@ -273,23 +273,23 @@ The pixel unit. Google's pixel is 96 per inch (960 by 540 for 10 by 5.625 in, an
 
 What scales, what stays, read from `sheet.css`, `stage.css`, `tokens.ts` and `layouts.ts`:
 
-| Part | Today | Under a variable page |
-| --- | --- | --- |
-| Rails and rules (`sheet.css:71-90`) | `left: 56px`, `right: 56px`, `top: 56px`, `bottom: 56px` | stay: edge relative already |
-| Crosses (`sheet.css:92-114`) | 11 px at 51 px from each corner | stay |
-| Sheet and stage boxes (`stage.css:38-53`) | `1600px` by `900px` literals | `var(--ts-sheet-w, 1600px)` and `var(--ts-sheet-h, 900px)` set on `.ts-sheet` by `renderStage` |
-| Slide box (`stage.css:59-61`) | `inset: 57px; padding: 72px 80px` | stay; the content box follows as `W - 274` by `H - 258` |
-| Content box | 1326 by 642 at 137, 129 | 4:3: 926 by 642; 16:10: 1166 by 642 |
-| Columns (`tokens.ts:153-154`, `geometry.ts:30`) | 5/7 at 522.5 and 731.5, 4/8 at 418 and 836, 1/1 at 627 | derive from `content - gap`: on 4:3 (854 usable) 5/7 is 355.8 and 498.2, 4/8 is 284.7 and 569.3, 1/1 is 427 and 427 |
-| Wordmark and counter (`sheet.css:116-136`) | left 72 bottom 18; right 72 bottom 22 | stay |
-| Chips (`tokens.ts:145-148`) | `66, 858` and `1474, 856` | `66, H - 42` and `W - 126, H - 44` |
-| Plates (`tokens.ts:231-236`, `layouts.ts:274, 375, 649`) | max widths 740, 560, 720 in px | stay; on 4:3 the opener plate at 740 leaves 323 px to the right rail; the plate boxes `plateClear` measures derive from the content box |
-| Marks (`layouts.ts:254, 656`) | 132 by 84, 138 by 88 | stay |
-| Type ladder (`tokens.ts:184`) | px sizes | stay (they are point sizes) |
-| The two tone screen (`pipeline.ts:22`) | 800 by 450 | `W/2 by H/2` at cell 2: 600 by 450 on 4:3 |
-| Material captures (`capture.ts:47`) | 3200 by 1800 | `2W by 2H` |
-| The 21 layouts (`layouts.ts:245-661`) | slots with ratios and gaps; no absolute box except plate `maxWidth` and the marks | flow: nothing to change. The renderer's `slotBoxes` derive from the content box; `layoutSlotBoxes` (`freeform.ts:470`) the same. Only `blank` (freeform) carries absolute `pos` and follows 3d |
-| The measures (`layouts.ts` `measure: 56`, statement `22`) | ch units | stay; a 22ch statement at 72 px is about 870 px and fits the 926 px 4:3 content box; `type/measure` and `sheet/overflow` report what does not |
+| Part                                                      | Today                                                                             | Under a variable page                                                                                                                                                                          |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rails and rules (`sheet.css:71-90`)                       | `left: 56px`, `right: 56px`, `top: 56px`, `bottom: 56px`                          | stay: edge relative already                                                                                                                                                                    |
+| Crosses (`sheet.css:92-114`)                              | 11 px at 51 px from each corner                                                   | stay                                                                                                                                                                                           |
+| Sheet and stage boxes (`stage.css:38-53`)                 | `1600px` by `900px` literals                                                      | `var(--ts-sheet-w, 1600px)` and `var(--ts-sheet-h, 900px)` set on `.ts-sheet` by `renderStage`                                                                                                 |
+| Slide box (`stage.css:59-61`)                             | `inset: 57px; padding: 72px 80px`                                                 | stay; the content box follows as `W - 274` by `H - 258`                                                                                                                                        |
+| Content box                                               | 1326 by 642 at 137, 129                                                           | 4:3: 926 by 642; 16:10: 1166 by 642                                                                                                                                                            |
+| Columns (`tokens.ts:153-154`, `geometry.ts:30`)           | 5/7 at 522.5 and 731.5, 4/8 at 418 and 836, 1/1 at 627                            | derive from `content - gap`: on 4:3 (854 usable) 5/7 is 355.8 and 498.2, 4/8 is 284.7 and 569.3, 1/1 is 427 and 427                                                                            |
+| Wordmark and counter (`sheet.css:116-136`)                | left 72 bottom 18; right 72 bottom 22                                             | stay                                                                                                                                                                                           |
+| Chips (`tokens.ts:145-148`)                               | `66, 858` and `1474, 856`                                                         | `66, H - 42` and `W - 126, H - 44`                                                                                                                                                             |
+| Plates (`tokens.ts:231-236`, `layouts.ts:274, 375, 649`)  | max widths 740, 560, 720 in px                                                    | stay; on 4:3 the opener plate at 740 leaves 323 px to the right rail; the plate boxes `plateClear` measures derive from the content box                                                        |
+| Marks (`layouts.ts:254, 656`)                             | 132 by 84, 138 by 88                                                              | stay                                                                                                                                                                                           |
+| Type ladder (`tokens.ts:184`)                             | px sizes                                                                          | stay (they are point sizes)                                                                                                                                                                    |
+| The two tone screen (`pipeline.ts:22`)                    | 800 by 450                                                                        | `W/2 by H/2` at cell 2: 600 by 450 on 4:3                                                                                                                                                      |
+| Material captures (`capture.ts:47`)                       | 3200 by 1800                                                                      | `2W by 2H`                                                                                                                                                                                     |
+| The 21 layouts (`layouts.ts:245-661`)                     | slots with ratios and gaps; no absolute box except plate `maxWidth` and the marks | flow: nothing to change. The renderer's `slotBoxes` derive from the content box; `layoutSlotBoxes` (`freeform.ts:470`) the same. Only `blank` (freeform) carries absolute `pos` and follows 3d |
+| The measures (`layouts.ts` `measure: 56`, statement `22`) | ch units                                                                          | stay; a 22ch statement at 72 px is about 870 px and fits the 926 px 4:3 content box; `type/measure` and `sheet/overflow` report what does not                                                  |
 
 The second theme of report 03 section 5.2. Its plate "an 800 by 338 plate at (200, 450) is the window of the 8 by 8 grid scaled to 1600 by 900": the construction is fractional, `x = W/8`, `y = H/2`, `w = W/2`, `h = 3H/8`, so the theme stores the fraction and `grid(page)` yields the box (1200 by 900 gives 600 by 338 at 150, 450). Its two rules at 56 px from the left and bottom edges stay edge relative. Its content box is the GT box, so the same derivation applies. Report 03 should record the fraction rather than the pixel box.
 
@@ -309,25 +309,25 @@ Cost. A pure `scaleCanvas(slide, from, to, mode)` in `packages/schema/src/canvas
 
 ### 3e. Every export
 
-| Export | Today | Under a variable page |
-| --- | --- | --- |
-| PPTX page | `defineLayout` at 13.333333 by 7.5 in named `TS_SHEET_16x9`; no `type` attribute written (`verify/fixture.ts:255`) | `pageIn(page)` and `TS_SHEET_<W>x<H>`; `p:sldSz cx="W×7620" cy="H×7620"`, still with no `type` (the attribute is optional; PowerPoint recognises the dialog entry from the numbers, and writing `screen4x3` only for 1200 by 900 buys nothing the numbers do not). `p:notesSz` stays 6,858,000 by 9,144,000 (7.5 by 10 in portrait, the value the fixture writes) |
-| Masters | one paper and one picture master per theme from the scene's measured frame | unchanged: one file has one size; the master geometry is measured, not constant |
-| Perfect raster | 2x sheet shot, 3200 by 1800, budgets as fractions | `2W by 2H`; `PAGE_RASTER_BUDGETS` unchanged (fractions); the per page byte budget scales with area, so a 4:3 page is about 75 percent of a 16:9 page |
-| Cover picture | `w: PAGE_IN.width`, `h: PAGE_IN.height - COVER_OFFSET_IN` | from `pageIn(page)`; the 360 EMU offset stays |
-| `isSheetAspect` | 16/9 within 0.5 percent | `isPageAspect(w, h, page)` with the same tolerance |
-| Editable text clamps | `PAGE_IN.width - pxToIn(x)` | from the page |
-| Geometry read back | `inPage` against `PAGE_EMU`, tolerance 7620 | against the deck's EMU page; `export check` reads the expected page from the report's new `page` field or `--page WxH` |
-| PDF | 960 by 540 pt, `PRINT_SCALE` 0.8, `PDF_RASTER` 3200 by 1800 at 240 dpi | `0.6W by 0.6H` pt; 0.8 unchanged (it is 96/120); 240 dpi yields `2W by 2H` for any size, so `PDF_RASTER` becomes `{ dpi: 240, scale: 2 }` with the pixels derived; the reference clip is the page |
-| JPEG and PNG (`render.slide`) | a 1600 by 900 viewport at 1x or 2x | `headless/context.ts` opens the deck's page |
-| Standalone HTML (`build.run`) | `runtime.ts` fits 1600 by 900 | the stage root carries `--ts-sheet-w` and `--ts-sheet-h`; `fit()` reads them once at boot; the same for `render/runtime.ts` |
-| SVG (report 09) | not built | `viewBox="0 0 W H"`, `width="${0.6W}pt" height="${0.6H}pt"` |
-| ODP (report 09) | not built | `fo:page-width="${W/120}in" fo:page-height="${H/120}in"`, `style:print-orientation` landscape when `W > H` |
-| Text | none | unchanged |
-| The per deck card | first slide at 1600 by 900 to 1120 by 630 | contain the first slide in 1120 by 630 on `--pt-panel-ink`; 4:3 gives 840 by 630 centred |
-| Thumbnails | widths 160, 320, 640; `downsample` keeps the aspect | unchanged code; heights follow; the cache key carries the revision, which `deck.setPageSize` increments |
-| LibreOffice verify | 120 dpi to 1600 by 900 | 120 dpi to `W by H`; the `-scale-to` arguments derive |
-| QuickLook smoke | longest side 3200 | `2W` |
+| Export                        | Today                                                                                                              | Under a variable page                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PPTX page                     | `defineLayout` at 13.333333 by 7.5 in named `TS_SHEET_16x9`; no `type` attribute written (`verify/fixture.ts:255`) | `pageIn(page)` and `TS_SHEET_<W>x<H>`; `p:sldSz cx="W×7620" cy="H×7620"`, still with no `type` (the attribute is optional; PowerPoint recognises the dialog entry from the numbers, and writing `screen4x3` only for 1200 by 900 buys nothing the numbers do not). `p:notesSz` stays 6,858,000 by 9,144,000 (7.5 by 10 in portrait, the value the fixture writes) |
+| Masters                       | one paper and one picture master per theme from the scene's measured frame                                         | unchanged: one file has one size; the master geometry is measured, not constant                                                                                                                                                                                                                                                                                   |
+| Perfect raster                | 2x sheet shot, 3200 by 1800, budgets as fractions                                                                  | `2W by 2H`; `PAGE_RASTER_BUDGETS` unchanged (fractions); the per page byte budget scales with area, so a 4:3 page is about 75 percent of a 16:9 page                                                                                                                                                                                                              |
+| Cover picture                 | `w: PAGE_IN.width`, `h: PAGE_IN.height - COVER_OFFSET_IN`                                                          | from `pageIn(page)`; the 360 EMU offset stays                                                                                                                                                                                                                                                                                                                     |
+| `isSheetAspect`               | 16/9 within 0.5 percent                                                                                            | `isPageAspect(w, h, page)` with the same tolerance                                                                                                                                                                                                                                                                                                                |
+| Editable text clamps          | `PAGE_IN.width - pxToIn(x)`                                                                                        | from the page                                                                                                                                                                                                                                                                                                                                                     |
+| Geometry read back            | `inPage` against `PAGE_EMU`, tolerance 7620                                                                        | against the deck's EMU page; `export check` reads the expected page from the report's new `page` field or `--page WxH`                                                                                                                                                                                                                                            |
+| PDF                           | 960 by 540 pt, `PRINT_SCALE` 0.8, `PDF_RASTER` 3200 by 1800 at 240 dpi                                             | `0.6W by 0.6H` pt; 0.8 unchanged (it is 96/120); 240 dpi yields `2W by 2H` for any size, so `PDF_RASTER` becomes `{ dpi: 240, scale: 2 }` with the pixels derived; the reference clip is the page                                                                                                                                                                 |
+| JPEG and PNG (`render.slide`) | a 1600 by 900 viewport at 1x or 2x                                                                                 | `headless/context.ts` opens the deck's page                                                                                                                                                                                                                                                                                                                       |
+| Standalone HTML (`build.run`) | `runtime.ts` fits 1600 by 900                                                                                      | the stage root carries `--ts-sheet-w` and `--ts-sheet-h`; `fit()` reads them once at boot; the same for `render/runtime.ts`                                                                                                                                                                                                                                       |
+| SVG (report 09)               | not built                                                                                                          | `viewBox="0 0 W H"`, `width="${0.6W}pt" height="${0.6H}pt"`                                                                                                                                                                                                                                                                                                       |
+| ODP (report 09)               | not built                                                                                                          | `fo:page-width="${W/120}in" fo:page-height="${H/120}in"`, `style:print-orientation` landscape when `W > H`                                                                                                                                                                                                                                                        |
+| Text                          | none                                                                                                               | unchanged                                                                                                                                                                                                                                                                                                                                                         |
+| The per deck card             | first slide at 1600 by 900 to 1120 by 630                                                                          | contain the first slide in 1120 by 630 on `--pt-panel-ink`; 4:3 gives 840 by 630 centred                                                                                                                                                                                                                                                                          |
+| Thumbnails                    | widths 160, 320, 640; `downsample` keeps the aspect                                                                | unchanged code; heights follow; the cache key carries the revision, which `deck.setPageSize` increments                                                                                                                                                                                                                                                           |
+| LibreOffice verify            | 120 dpi to 1600 by 900                                                                                             | 120 dpi to `W by H`; the `-scale-to` arguments derive                                                                                                                                                                                                                                                                                                             |
+| QuickLook smoke               | longest side 3200                                                                                                  | `2W`                                                                                                                                                                                                                                                                                                                                                              |
 
 The budgets of SPEC-2 8.1 (`BATCH_BUDGET_S` 240, `SECONDS_PER_SLIDE` 2.6) stay; a smaller page is cheaper, a custom page up to 56 in wide is dearer per slide, so the batch planner reads the page area and scales `SECONDS_PER_SLIDE` by `area / (1600 × 900)` with a floor of 1 and a ceiling of 4 (a 56 by 7.5 in page is 4.2 times the area). The `build --budget 16` MB gate is unchanged.
 
@@ -335,11 +335,11 @@ The budgets of SPEC-2 8.1 (`BATCH_BUDGET_S` 240, `SECONDS_PER_SLIDE` 2.6) stay; 
 
 `rulers-model.ts` takes `page` and `unit: 'in' | 'cm' | 'px'` (report 10 owns the Preferences dialog that stores the unit per browser; this module owns the conversion). Ticks and numerals:
 
-| Unit | Tick | Numeral | 16:9 across, down | 4:3 across, down | 16:10 across, down |
-| --- | --- | --- | --- | --- | --- |
-| Inches (default, Google's) | every 1/8 in (15 px) | every inch | 0 to 13 (14), 0 to 7 (8) | 0 to 10 (11), 0 to 7 (8) | 0 to 12 (13), 0 to 7 (8) |
-| Centimeters | every 0.5 cm (23.6 px) | every cm, odd numerals dropped below stage scale 0.5 | 0 to 33 (34), 0 to 19 (20) | 0 to 25 (26), 0 to 19 (20) | 0 to 30 (31), 0 to 19 (20) |
-| Pixels (sheet) | every 20 px | every 100 px | 0 to 1600 (17), 0 to 900 (10) | 0 to 1200 (13), 0 to 900 (10) | 0 to 1400 (15), 0 to 900 (10) |
+| Unit                       | Tick                   | Numeral                                              | 16:9 across, down             | 4:3 across, down              | 16:10 across, down            |
+| -------------------------- | ---------------------- | ---------------------------------------------------- | ----------------------------- | ----------------------------- | ----------------------------- |
+| Inches (default, Google's) | every 1/8 in (15 px)   | every inch                                           | 0 to 13 (14), 0 to 7 (8)      | 0 to 10 (11), 0 to 7 (8)      | 0 to 12 (13), 0 to 7 (8)      |
+| Centimeters                | every 0.5 cm (23.6 px) | every cm, odd numerals dropped below stage scale 0.5 | 0 to 33 (34), 0 to 19 (20)    | 0 to 25 (26), 0 to 19 (20)    | 0 to 30 (31), 0 to 19 (20)    |
+| Pixels (sheet)             | every 20 px            | every 100 px                                         | 0 to 1600 (17), 0 to 900 (10) | 0 to 1200 (13), 0 to 900 (10) | 0 to 1400 (15), 0 to 900 (10) |
 
 `toInches`, `inchesLabel` and `GUIDES.inches` (`strings.ts:611`) become `toUnit(px, unit)` and `unitLabel(px, unit)` ("6.67 in", "16.93 cm", "800 px"); the Overlay's guide readout, the position inspector's helper text and the snap line labels read the same function. The Google tick pattern for centimeters is unverified; the rows above are Turboslide's choice.
 
@@ -423,51 +423,51 @@ Slide aspect 16:9, sizes rounded to 0.01 pt; `k` is the clone scale `slidePx / 1
 
 Letter portrait (612 by 792; printable 540 by 702 at 36, 36):
 
-| Layout | Grid | Cell | Slide (pt) | Slide (sheet px) | k | Lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| slides | 1 by 1 | 540 by 702 | 540 by 303.75 | 900 by 506.25 | 0.56 | |
-| notes | slide over notes | cap 315.9 | 540 by 303.75 | 900 by 506.25 | 0.56 | notes box 540 by 380.25 at y 357.75, 23 lines |
-| handout-2 | 1 by 2 | 540 by 342 | 540 by 303.75 | 900 by 506.25 | 0.56 | |
-| handout-3 | 1 by 3 | 540 by 222 | 243 by 136.69 | 405 by 227.81 | 0.25 | x 297 to 576, 7 per slide |
-| handout-4 | 2 by 2 | 261 by 342 | 261 by 146.81 | 435 by 244.69 | 0.27 | |
-| handout-6 | 2 by 3 | 261 by 222 | 261 by 146.81 | 435 by 244.69 | 0.27 | |
-| handout-9 | 3 by 3 | 168 by 222 | 168 by 94.5 | 280 by 157.5 | 0.18 | |
+| Layout    | Grid             | Cell       | Slide (pt)    | Slide (sheet px) | k    | Lines                                         |
+| --------- | ---------------- | ---------- | ------------- | ---------------- | ---- | --------------------------------------------- |
+| slides    | 1 by 1           | 540 by 702 | 540 by 303.75 | 900 by 506.25    | 0.56 |                                               |
+| notes     | slide over notes | cap 315.9  | 540 by 303.75 | 900 by 506.25    | 0.56 | notes box 540 by 380.25 at y 357.75, 23 lines |
+| handout-2 | 1 by 2           | 540 by 342 | 540 by 303.75 | 900 by 506.25    | 0.56 |                                               |
+| handout-3 | 1 by 3           | 540 by 222 | 243 by 136.69 | 405 by 227.81    | 0.25 | x 297 to 576, 7 per slide                     |
+| handout-4 | 2 by 2           | 261 by 342 | 261 by 146.81 | 435 by 244.69    | 0.27 |                                               |
+| handout-6 | 2 by 3           | 261 by 222 | 261 by 146.81 | 435 by 244.69    | 0.27 |                                               |
+| handout-9 | 3 by 3           | 168 by 222 | 168 by 94.5   | 280 by 157.5     | 0.18 |                                               |
 
 Letter landscape (792 by 612; printable 720 by 522):
 
-| Layout | Grid | Cell | Slide (pt) | Slide (sheet px) | k | Lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| slides | 1 by 1 | 720 by 522 | 720 by 405 | 1200 by 675 | 0.75 | |
-| notes | slide over notes | cap 234.9 | 417.6 by 234.9 | 696 by 391.5 | 0.44 | notes box 720 by 269.1 at y 288.9, 16 lines |
-| handout-2 | 2 by 1 | 351 by 522 | 351 by 197.44 | 585 by 329.06 | 0.37 | |
-| handout-3 | 1 by 3 | 720 by 162 | 288 by 162 | 480 by 270 | 0.30 | x 342 to 756, 9 per slide |
-| handout-4 | 2 by 2 | 351 by 252 | 351 by 197.44 | 585 by 329.06 | 0.37 | |
-| handout-6 | 3 by 2 | 228 by 252 | 228 by 128.25 | 380 by 213.75 | 0.24 | |
-| handout-9 | 3 by 3 | 228 by 162 | 228 by 128.25 | 380 by 213.75 | 0.24 | |
+| Layout    | Grid             | Cell       | Slide (pt)     | Slide (sheet px) | k    | Lines                                       |
+| --------- | ---------------- | ---------- | -------------- | ---------------- | ---- | ------------------------------------------- |
+| slides    | 1 by 1           | 720 by 522 | 720 by 405     | 1200 by 675      | 0.75 |                                             |
+| notes     | slide over notes | cap 234.9  | 417.6 by 234.9 | 696 by 391.5     | 0.44 | notes box 720 by 269.1 at y 288.9, 16 lines |
+| handout-2 | 2 by 1           | 351 by 522 | 351 by 197.44  | 585 by 329.06    | 0.37 |                                             |
+| handout-3 | 1 by 3           | 720 by 162 | 288 by 162     | 480 by 270       | 0.30 | x 342 to 756, 9 per slide                   |
+| handout-4 | 2 by 2           | 351 by 252 | 351 by 197.44  | 585 by 329.06    | 0.37 |                                             |
+| handout-6 | 3 by 2           | 228 by 252 | 228 by 128.25  | 380 by 213.75    | 0.24 |                                             |
+| handout-9 | 3 by 3           | 228 by 162 | 228 by 128.25  | 380 by 213.75    | 0.24 |                                             |
 
 A4 portrait (595.28 by 841.89; printable 523.28 by 751.89):
 
-| Layout | Grid | Cell | Slide (pt) | Slide (sheet px) | k | Lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| slides | 1 by 1 | 523.28 by 751.89 | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 | |
-| notes | slide over notes | cap 338.35 | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 | notes box 523.28 by 439.54 at y 348.35, 26 lines |
-| handout-2 | 1 by 2 | 523.28 by 366.95 | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 | |
-| handout-3 | 1 by 3 | 523.28 by 238.63 | 235.48 by 132.46 | 392.46 by 220.76 | 0.25 | x 289.48 to 559.28, 7 per slide |
-| handout-4 | 2 by 2 | 252.64 by 366.95 | 252.64 by 142.11 | 421.07 by 236.85 | 0.26 | |
-| handout-6 | 2 by 3 | 252.64 by 238.63 | 252.64 by 142.11 | 421.07 by 236.85 | 0.26 | |
-| handout-9 | 3 by 3 | 162.43 by 238.63 | 162.43 by 91.37 | 270.71 by 152.28 | 0.17 | |
+| Layout    | Grid             | Cell             | Slide (pt)       | Slide (sheet px) | k    | Lines                                            |
+| --------- | ---------------- | ---------------- | ---------------- | ---------------- | ---- | ------------------------------------------------ |
+| slides    | 1 by 1           | 523.28 by 751.89 | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 |                                                  |
+| notes     | slide over notes | cap 338.35       | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 | notes box 523.28 by 439.54 at y 348.35, 26 lines |
+| handout-2 | 1 by 2           | 523.28 by 366.95 | 523.28 by 294.35 | 872.13 by 490.58 | 0.55 |                                                  |
+| handout-3 | 1 by 3           | 523.28 by 238.63 | 235.48 by 132.46 | 392.46 by 220.76 | 0.25 | x 289.48 to 559.28, 7 per slide                  |
+| handout-4 | 2 by 2           | 252.64 by 366.95 | 252.64 by 142.11 | 421.07 by 236.85 | 0.26 |                                                  |
+| handout-6 | 2 by 3           | 252.64 by 238.63 | 252.64 by 142.11 | 421.07 by 236.85 | 0.26 |                                                  |
+| handout-9 | 3 by 3           | 162.43 by 238.63 | 162.43 by 91.37  | 270.71 by 152.28 | 0.17 |                                                  |
 
 A4 landscape (841.89 by 595.28; printable 769.89 by 505.28):
 
-| Layout | Grid | Cell | Slide (pt) | Slide (sheet px) | k | Lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| slides | 1 by 1 | 769.89 by 505.28 | 769.89 by 433.06 | 1283.15 by 721.77 | 0.80 | |
-| notes | slide over notes | cap 227.38 | 404.22 by 227.38 | 673.71 by 378.96 | 0.42 | notes box 769.89 by 259.9 at y 281.38, 15 lines |
-| handout-2 | 2 by 1 | 375.95 by 505.28 | 375.95 by 211.47 | 626.58 by 352.45 | 0.39 | |
-| handout-3 | 1 by 3 | 769.89 by 156.43 | 278.09 by 156.43 | 463.49 by 260.71 | 0.29 | x 332.09 to 805.89, 8 per slide |
-| handout-4 | 2 by 2 | 375.95 by 243.64 | 375.95 by 211.47 | 626.58 by 352.45 | 0.39 | |
-| handout-6 | 3 by 2 | 244.63 by 243.64 | 244.63 by 137.6 | 407.72 by 229.34 | 0.25 | |
-| handout-9 | 3 by 3 | 244.63 by 156.43 | 244.63 by 137.6 | 407.72 by 229.34 | 0.25 | |
+| Layout    | Grid             | Cell             | Slide (pt)       | Slide (sheet px)  | k    | Lines                                           |
+| --------- | ---------------- | ---------------- | ---------------- | ----------------- | ---- | ----------------------------------------------- |
+| slides    | 1 by 1           | 769.89 by 505.28 | 769.89 by 433.06 | 1283.15 by 721.77 | 0.80 |                                                 |
+| notes     | slide over notes | cap 227.38       | 404.22 by 227.38 | 673.71 by 378.96  | 0.42 | notes box 769.89 by 259.9 at y 281.38, 15 lines |
+| handout-2 | 2 by 1           | 375.95 by 505.28 | 375.95 by 211.47 | 626.58 by 352.45  | 0.39 |                                                 |
+| handout-3 | 1 by 3           | 769.89 by 156.43 | 278.09 by 156.43 | 463.49 by 260.71  | 0.29 | x 332.09 to 805.89, 8 per slide                 |
+| handout-4 | 2 by 2           | 375.95 by 243.64 | 375.95 by 211.47 | 626.58 by 352.45  | 0.39 |                                                 |
+| handout-6 | 3 by 2           | 244.63 by 243.64 | 244.63 by 137.6  | 407.72 by 229.34  | 0.25 |                                                 |
+| handout-9 | 3 by 3           | 244.63 by 156.43 | 244.63 by 137.6  | 407.72 by 229.34  | 0.25 |                                                 |
 
 For a 4:3 deck the same cells hold taller slides: on Letter portrait `handout-2` gives 456 by 342 pt (k 0.63 over 1200 px), `handout-3` 243 by 182.25 with 10 lines, `handout-4` and `handout-6` 261 by 195.75 (k 0.36), `handout-9` 168 by 126 (k 0.23), and the notes page slide caps at 421.2 by 315.9 with 22 note lines. The pure function `printLayout({ page, layout, paper, orientation, order })` in `packages/render/src/print-layout.ts` returns the page size, the cells, the slide boxes, the line runs and the footer boxes, and `print.test.ts` pins the tables above.
 

@@ -6,11 +6,11 @@ The three proposals were read in full. Every claim that decides a score was chec
 
 ## Scores
 
-| Proposal | Fidelity | Ease for sales | Architecture fit | Export fidelity | Buildability | Total |
-| --- | --- | --- | --- | --- | --- | --- |
-| Proposal 1, Google faithful | 9 | 6 | 6 | 7 | 5 | 33 |
-| Proposal 2, sales first | 7 | 9 | 7 | 7 | 6 | 36 |
-| Proposal 3, architecture | 7 | 6 | 10 | 9 | 6 | 38 |
+| Proposal                    | Fidelity | Ease for sales | Architecture fit | Export fidelity | Buildability | Total |
+| --------------------------- | -------- | -------------- | ---------------- | --------------- | ------------ | ----- |
+| Proposal 1, Google faithful | 9        | 6              | 6                | 7               | 5            | 33    |
+| Proposal 2, sales first     | 7        | 9              | 7                | 7               | 6            | 36    |
+| Proposal 3, architecture    | 7        | 6              | 10               | 9               | 6            | 38    |
 
 Winner: proposal 3, with the grafts of section 4 and the rejections of section 5.
 

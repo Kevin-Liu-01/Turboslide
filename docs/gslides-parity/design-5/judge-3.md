@@ -6,11 +6,11 @@ Written 2026-09-14 against the three proposals in `docs/gslides-parity/design-5/
 
 Each axis is 1 to 10; the total is the sum.
 
-| Proposal | Fidelity | Ease for sales | Architecture fit | Export fidelity | Buildability | Total |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1, Google faithful | 9 | 7 | 8 | 8 | 6 | 38 |
-| 2, sales first | 8 | 9 | 8 | 8 | 7 | 40 |
-| 3, architecture | 7 | 6 | 10 | 9 | 8 | 40 |
+| Proposal           | Fidelity | Ease for sales | Architecture fit | Export fidelity | Buildability | Total |
+| ------------------ | -------- | -------------- | ---------------- | --------------- | ------------ | ----- |
+| 1, Google faithful | 9        | 7              | 8                | 8               | 6            | 38    |
+| 2, sales first     | 8        | 9              | 8                | 8               | 7            | 40    |
+| 3, architecture    | 7        | 6              | 10               | 9               | 8            | 40    |
 
 Winner: proposal 3, with the grafts of section 5. Proposals 2 and 3 tie on the total; section 4 says how the founder's criteria break the tie.
 

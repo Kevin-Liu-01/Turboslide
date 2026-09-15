@@ -1,0 +1,30 @@
+ok   the draft has an untitled id: untitled-20260915-vxc7
+ok   a draft is not connected before its first write
+ok   the double click opened and kept the inline session: contenteditable=true
+ok   edit 1 saved: revision 1
+ok   the first write moved the address to /edit/<id>: /edit/untitled-20260915-vxc7
+ok   the room attached after the first write: {"seq":0,"revision":1,"pending":0,"retained":0,"tier":"memory","transport":"poll","connected":false}
+ok   edit 2 saved: revision 2
+ok   edit 3 saved: revision 3
+ok   edit 4 saved: revision 4
+ok   edit 5 saved: revision 5
+ok   edit 6 saved: revision 6
+ok   six edits landed: revision 12
+ok   12 sequential edits were each acknowledged at exactly the next revision (hotfix 2): revision 12, serverRevision 12, sync {"seq":12,"pending":0}
+ok   no stale message in the state, the snackbar or a toast across the edits (hotfix 2): none
+ok   no 404 on the draft thumbnail route: 0 seen
+ok   Duplicate slide after the save landed at the next revision: revision 13
+ok   the slide switch on the saved /new page kept the editor, the client id and the one stream (hotfix 2): clientId same, streams 1 -> 1, /edit/untitled-20260915-vxc7#s/title
+ok   the reload opened the deck at the revision the tab had: 13 -> 13
+ok   after the reload the tab draws nobody else: zero chips, marks, outlines, carets, pointers (hotfix 2): others none, dom {"chips":0,"count":"0","marks":0,"outlines":0,"carets":0,"pointers":0,"flags":0}
+ok   the roster lists no row that is not this tab, and at most the self row (hotfix 2, cause B): {"total":1,"self":1}
+ok   the edit after the reload was acknowledged at the next revision (hotfix 2): 13 -> 14, rejects 0
+ok   with a second tab open, neither tab lists itself as a collaborator (hotfix 2, cause B): first tab others 0 (), second tab others 2 (7a0e3dbe,db0e7fac), chips 0, first self db0e7fac, second self 014fdb38, tier blob
+note the per instance roster on the blob tier makes the cross tab count depend on the instance (BLOB_TIER_NOTICE): first tab others 0 (), second tab others 2 (7a0e3dbe,db0e7fac), chips 0, first self db0e7fac, second self 014fdb38, tier blob
+ok   the first tab forgets the second tab once it closed (hotfix 2): others 0, chips 0, tier blob
+ok   the first write after opening the deck saved and was not lost (finding 33): opened at 14, now 15, rejects 0
+ok   the immediate keystroke reached the document: Q4 review b c d e f g h i j k l r Z
+ok   File > Move to trash moved the deck and returned to /decks: /decks
+ok   Delete forever removed the deck from the trash: untitled-20260915-vxc7
+
+new-write-probe: all steps ok against https://turboslide.vercel.app

@@ -1,0 +1,91 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-15T06:16:50.760Z",
+  "home": {
+    "1440-light": {
+      "fold": "docs/gslides-parity/verification-4/production-home-1440-light-fold.jpg",
+      "full": "docs/gslides-parity/verification-4/production-home-1440-light.jpg",
+      "status": 200,
+      "cache": "HIT",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 921600,
+        "start": 156,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "https://turboslide.vercel.app/brand/hero-light.png"
+      },
+      "ink": "#070707",
+      "title": "Turboslide",
+      "theme": "light",
+      "h1": "Turboslide",
+      "main": "ts-product"
+    },
+    "1440-dark": {
+      "fold": "docs/gslides-parity/verification-4/production-home-1440-dark-fold.jpg",
+      "full": "docs/gslides-parity/verification-4/production-home-1440-dark.jpg",
+      "status": 200,
+      "cache": "HIT",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 921600,
+        "start": 176,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "https://turboslide.vercel.app/brand/hero-dark.png"
+      },
+      "ink": "#f2f2f0",
+      "title": "Turboslide",
+      "theme": "dark",
+      "h1": "Turboslide",
+      "main": "ts-product"
+    },
+    "390-light": {
+      "fold": "docs/gslides-parity/verification-4/production-home-390-light-fold.jpg",
+      "full": "docs/gslides-parity/verification-4/production-home-390-light.jpg",
+      "status": 200,
+      "cache": "HIT",
+      "overflowX": 0,
+      "scrollHeight": 19857,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 202800,
+        "start": 168,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "https://turboslide.vercel.app/brand/hero-light.png"
+      },
+      "ink": "#070707",
+      "title": "Turboslide",
+      "theme": "light",
+      "h1": "Turboslide",
+      "main": "ts-product"
+    },
+    "390-dark": {
+      "fold": "docs/gslides-parity/verification-4/production-home-390-dark-fold.jpg",
+      "full": "docs/gslides-parity/verification-4/production-home-390-dark.jpg",
+      "status": 200,
+      "cache": "HIT",
+      "overflowX": 0,
+      "scrollHeight": 19857,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 202800,
+        "start": 180,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "https://turboslide.vercel.app/brand/hero-dark.png"
+      },
+      "ink": "#f2f2f0",
+      "title": "Turboslide",
+      "theme": "dark",
+      "h1": "Turboslide",
+      "main": "ts-product"
+    }
+  },
+  "finishedAt": "2026-09-15T06:17:03.254Z"
+}

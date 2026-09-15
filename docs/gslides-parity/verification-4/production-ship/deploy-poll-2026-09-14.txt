@@ -1,0 +1,45 @@
+2026-09-15T06:04:53Z +0s newest https://turboslide-jfh7h0y4u-kl01s-projects.vercel.app ; production entry assets/index-CDkNPPA9.js
+2026-09-15T06:05:14Z +21s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CDkNPPA9.js
+2026-09-15T06:05:34Z +42s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CDkNPPA9.js
+2026-09-15T06:05:55Z +62s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CDkNPPA9.js
+2026-09-15T06:06:16Z +83s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:06:37Z +104s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:06:58Z +125s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:07:19Z +146s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:07:39Z +167s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:08:00Z +187s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:08:21Z +208s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:08:42Z +229s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:09:02Z +250s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:09:23Z +270s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:09:44Z +291s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:10:04Z +312s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:10:25Z +332s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:10:46Z +353s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:11:06Z +374s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:11:27Z +394s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:11:48Z +415s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:12:08Z +436s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:12:29Z +456s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:12:50Z +477s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:13:10Z +498s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:13:31Z +518s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:13:52Z +539s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+2026-09-15T06:14:13Z +560s newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; production entry assets/index-CQkTTK17.js
+TIMEOUT after 560s: newest https://turboslide-42f8yn887-kl01s-projects.vercel.app ; entry assets/index-CQkTTK17.js
+
+--- confirmation at 2026-09-15T06:15:13Z ---
+id		dpl_9qwLq7hWVbdg99uo34NAzrZ9naVg
+name	turboslide
+status	● Ready
+created	Mon Sep 14 2026 23:04:56 GMT-0700 (Pacific Daylight Time) [10m ago]
+Aliases
+╶ https://turboslide.vercel.app
+  10m     kl01s-projects/turboslide     https://turboslide-42f8yn887-kl01s-projects.vercel.app     ● Ready     Production      1m           kevin-liu-01     
+  3h      kl01s-projects/turboslide     https://turboslide-jfh7h0y4u-kl01s-projects.vercel.app     ● Ready     Production      1m           kevin-liu-01     
+age: 538
+etag: "24fdde8669c13250d84753cd3cfd98f5"
+x-vercel-cache: HIT
+x-vercel-id: sfo1::s6zj2-1789452914797-823a86c1e980
+production /home entry: assets/index-CQkTTK17.js; local build: index-CsG3g2yv.js
+index-CQkTTK17.js

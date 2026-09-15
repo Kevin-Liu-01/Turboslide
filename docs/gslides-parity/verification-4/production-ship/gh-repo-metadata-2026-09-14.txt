@@ -1,0 +1,16 @@
+gh repo view Kevin-Liu-01/Turboslide before the ship step's edit, 2026-09-15T06:17:03Z
+description: Agent native slides editor with Google Slides' structure and behaviours, a canvas where everything moves, shader materials and dithers, and pixel identical PPTX export.
+homepage: https://studio-delta-six-40.vercel.app
+topics: agent-native, canvas-editor, cli, design-system, dithering, export, google-slides, mcp, mcp-server, powerpoint, pptx, presentation-editor, presentations, react, shaders, slides, tanstack-start, typescript, vercel, vite
+
+--- the edit, 2026-09-15T06:21:21Z (ruling 2: the description and the topics; add new ones, remove none; the homepage and the social preview stay Kevin's) ---
+gh repo edit Kevin-Liu-01/Turboslide --description "Turboslide: an agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export"
+description: set
+gh repo edit Kevin-Liu-01/Turboslide --add-topic agents,bayer-dither,paper-shaders,rust
+HTTP 422: Validation Failed (https://api.github.com/repos/Kevin-Liu-01/Turboslide/topics)
+A repository cannot have more than 20 topics.
+
+--- after the edit ---
+description: Turboslide: an agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export
+homepage: https://studio-delta-six-40.vercel.app
+topics: agent-native, canvas-editor, cli, design-system, dithering, export, google-slides, mcp, mcp-server, powerpoint, pptx, presentation-editor, presentations, react, shaders, slides, tanstack-start, typescript, vercel, vite

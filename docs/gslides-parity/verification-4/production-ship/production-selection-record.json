@@ -1,0 +1,55 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deck": "ship4-selection-mu2ab01v",
+  "when": "2026-09-15T06:22:02.122Z",
+  "shots": {
+    "blank-dark": {
+      "file": "docs/gslides-parity/verification-4/production-ship/production-selection-shape-dark-slide.png",
+      "ring": "rgb(61, 134, 240)",
+      "ringBox": [
+        679,
+        352,
+        338,
+        212
+      ],
+      "chipBackground": "rgb(61, 134, 240)",
+      "chipColor": "rgb(7, 7, 7)",
+      "handleBorder": "rgb(255, 255, 255)",
+      "handleBackground": "rgba(0, 0, 0, 0)",
+      "select": "#3d86f0",
+      "theme": "dark",
+      "slideBackground": "rgba(0, 0, 0, 0)"
+    },
+    "photo-dark": {
+      "file": "docs/gslides-parity/verification-4/production-ship/production-selection-shape-dark-photo.png",
+      "ring": "rgb(61, 134, 240)",
+      "ringBox": [
+        919,
+        507,
+        296,
+        169
+      ],
+      "chipBackground": "rgb(61, 134, 240)",
+      "chipColor": "rgb(7, 7, 7)",
+      "handleBorder": "rgb(255, 255, 255)",
+      "handleBackground": "rgba(0, 0, 0, 0)",
+      "select": "#3d86f0",
+      "theme": "dark",
+      "slideBackground": "rgba(0, 0, 0, 0)"
+    }
+  },
+  "cleanup": {
+    "trash": {
+      "revision": 3,
+      "trashedAt": "2026-09-15T06:22:30.826Z"
+    },
+    "remove": {
+      "ok": true,
+      "answer": {
+        "id": "ship4-selection-mu2ab01v",
+        "removed": true
+      }
+    },
+    "deckProbe": 404
+  }
+}

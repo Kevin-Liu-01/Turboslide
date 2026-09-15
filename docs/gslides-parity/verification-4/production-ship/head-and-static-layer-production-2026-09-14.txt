@@ -1,0 +1,38 @@
+head and static layer on https://turboslide.vercel.app at 2026-09-15T06:15:19.468Z
+/favicon.ico: 200 image/vnd.microsoft.icon 15086 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/icon.svg: 200 image/svg+xml 957 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/apple-touch-icon.png: 200 image/png 753 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/manifest.webmanifest: 200 application/manifest+json; charset=utf-8 971 B; cache-control public, max-age=86400; x-vercel-cache HIT; age 0
+/og/turboslide.png: 200 image/png 29818 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/brand/hero-dark.png: 200 image/png 13679 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/brand/hero-light.png: 200 image/png 13689 B; cache-control public, max-age=86400, stale-while-revalidate=604800; x-vercel-cache HIT; age 0
+/home: 200 text/html; charset=utf-8 94348 B; cache-control public, max-age=0, must-revalidate; x-vercel-cache HIT; age 543
+/openapi.json: 200 application/json; charset=utf-8 2072829 B; cache-control public, max-age=300; x-vercel-cache MISS; age 0
+/llms.txt: 200 text/plain; charset=utf-8 6417 B; cache-control public, max-age=300; x-vercel-cache MISS; age 0
+/: 307 location /new x-robots-tag noindex
+/home head tags:
+  <title>Turboslide</title>
+  <meta name="apple-mobile-web-app-title" content="Turboslide" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="theme-color" content="#070707" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:site_name" content="Turboslide" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:type" content="website" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:locale" content="en_US" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:image" content="https://turboslide.vercel.app/og/turboslide.png" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:image:type" content="image/png" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:image:width" content="1200" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:image:height" content="630" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:image:alt" content="The Turboslide mark and name on a plate cut from a two tone dithered liquid metal frame" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="twitter:card" content="summary_large_image" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="twitter:title" content="Turboslide" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="twitter:description" content="An agent native slides editor with Google Slides&#x27; behaviours, a canvas on every slide and a pixel identical PowerPoint export." nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="twitter:image" content="https://turboslide.vercel.app/og/turboslide.png" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="twitter:image:alt" content="The Turboslide mark and name on a plate cut from a two tone dithered liquid metal frame" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta name="description" content="An agent native slides editor with Google Slides&#x27; behaviours, a canvas on every slide and a pixel identical PowerPoint export." nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:title" content="Turboslide" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:description" content="An agent native slides editor with Google Slides&#x27; behaviours, a canvas on every slide and a pixel identical PowerPoint export." nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <meta property="og:url" content="https://turboslide.vercel.app/home" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <link rel="icon" href="/favicon.ico" sizes="32x32" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+  <link rel="manifest" href="/manifest.webmanifest" nonce="Y8rkfHAvnqW/9ohqXBOzDA=="/>
+/home entry chunk: assets/index-CQkTTK17.js; main root main.ts-product present; speculationrules present; document 94348 characters

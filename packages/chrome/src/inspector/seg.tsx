@@ -1,7 +1,7 @@
 import { Seg } from '../Seg';
 import type { SegOption } from '../Seg';
 import type { ControlProps } from './props';
-import { HIDDEN_NATIVE_CLASS, optionValue } from './props';
+import { HIDDEN_NATIVE_CLASS, optionLabel, optionValue } from './props';
 
 import './seg.css';
 
@@ -19,9 +19,9 @@ export function SegControl({ spec, onChange, disabled }: ControlProps) {
   const current = spec.value === undefined ? '' : String(spec.value);
   const segOptions: readonly SegOption<string>[] = options.map((option) => ({
     value: String(option),
-    label: String(option),
-    title: `${spec.inspector.label} ${String(option)}`,
-    doc: spec.inspector.help ?? `Sets ${spec.inspector.label} to ${String(option)}.`,
+    label: optionLabel(option),
+    title: `${spec.inspector.label} ${optionLabel(option)}`,
+    doc: spec.inspector.help ?? `Sets ${spec.inspector.label} to ${optionLabel(option)}.`,
   }));
   const pick = (raw: string) => {
     if (disabled) return;
@@ -40,7 +40,7 @@ export function SegControl({ spec, onChange, disabled }: ControlProps) {
         {spec.optional ? <option value="">none</option> : null}
         {options.map((option) => (
           <option key={String(option)} value={String(option)}>
-            {String(option)}
+            {optionLabel(option)}
           </option>
         ))}
       </select>

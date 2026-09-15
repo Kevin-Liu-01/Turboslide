@@ -1,0 +1,16 @@
+<title>Turboslide</title>
+<meta name="theme-color" content="#070707"/>
+<meta property="og:image" content="https://turboslide.vercel.app/og/turboslide.png"/>
+<link rel="icon" href="/favicon.ico" sizes="32x32"/>
+<link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<main class="ts-product"
+<script type="speculationrules"
+HTTP/2 200  cache-control: public, max-age=86400 x-vercel-cache: HIT  <- /manifest.webmanifest
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 x-vercel-cache: HIT  <- /icon.svg
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 x-vercel-cache: HIT  <- /favicon.ico
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 x-vercel-cache: HIT  <- /og/turboslide.png
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 x-vercel-cache: HIT  <- /brand/hero-dark.png
+HTTP/2 200  cache-control: public, max-age=0, must-revalidate x-vercel-cache: HIT  <- /home
+HTTP/2 307 
+location: /new

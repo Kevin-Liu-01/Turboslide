@@ -207,6 +207,77 @@ test("the server's HTML carries the skeleton and the robots meta, and the editor
   await expect(page.locator('[data-skeleton="editor"]')).toHaveCount(0);
 });
 
+test('a banner stands in the status row and covers neither the toolbar, nor the sheet, nor a bottom bar control (VERIFICATION-4 finding 4)', async ({
+  page,
+}) => {
+  /* the three banners share `.ts-banner` (editor/EditorRoot.tsx; routes/edit.$deckId.css): the
+     trashed banner is the one a file store shows on demand, so the deck goes to the trash through
+     the action surface and comes back at the end whatever the assertions found */
+  const state = async (action: 'deck.trash' | 'deck.restore') => {
+    const head = await page.request.post(`/api/actions/deck.info?deck=${DECK}`, { data: {} });
+    expect(head.ok(), `deck.info ${head.status()}`).toBeTruthy();
+    const { revision } = (await head.json()) as { revision: number };
+    const moved = await page.request.post(`/api/actions/${action}?deck=${DECK}`, {
+      data: { id: DECK, baseRevision: revision },
+    });
+    expect(moved.ok(), `${action} ${moved.status()}`).toBeTruthy();
+  };
+  await state('deck.trash');
+  try {
+    await page.goto(`/edit/${DECK}?author=agent:e2e-editor`);
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
+    const banner = page.locator('.ts-banner[data-state="trashed"]');
+    await expect(banner).toBeVisible();
+    const facts = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const el = document.querySelector(selector);
+        if (!el) throw new Error(`no ${selector}`);
+        return el.getBoundingClientRect();
+      };
+      const banner = rect('.ts-banner');
+      const apart = (r: DOMRect) =>
+        banner.right <= r.left ||
+        banner.left >= r.right ||
+        banner.bottom <= r.top ||
+        banner.top >= r.bottom;
+      /* the centre of a bottom bar control answers to the control itself, not to the banner (the
+         menu bar's View items share the control ids, so the bar's own buttons are named) */
+      const hits = (selector: string) => {
+        const el = document.querySelector(selector);
+        if (!el) throw new Error(`no ${selector}`);
+        const r = el.getBoundingClientRect();
+        const target = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return target !== null && el.contains(target);
+      };
+      const bar = rect('.ts-bottombar');
+      return {
+        bannerTop: banner.top,
+        bannerBottom: banner.bottom,
+        barTop: bar.top,
+        viewportHeight: window.innerHeight,
+        offToolbar: apart(rect('.ts-toolbar')),
+        offSheet: apart(rect('.pt-sheet-stage')),
+        gridView: hits('.ts-bottombar [data-control="view.gridView"]'),
+        filmstripView: hits('.ts-bottombar [data-control="view.filmstripView"]'),
+        panelToggle: hits('.ts-bottombar [data-control="panel.toggle"]'),
+      };
+    });
+    console.log(`banner: ${JSON.stringify(facts)}`);
+    expect(facts.offToolbar).toBe(true);
+    expect(facts.offSheet).toBe(true);
+    /* in the status row: its bottom is the viewport's, its top the bar's rule (one line of text) */
+    expect(Math.abs(facts.bannerBottom - facts.viewportHeight)).toBeLessThanOrEqual(1);
+    expect(Math.abs(facts.bannerTop - facts.barTop)).toBeLessThanOrEqual(1);
+    expect(facts.gridView).toBe(true);
+    expect(facts.filmstripView).toBe(true);
+    expect(facts.panelToggle).toBe(true);
+    /* the banner's control keeps its tooltip (AGENTS.md) */
+    await expect(banner.locator('[data-control="deck.restore"]')).toHaveAttribute('data-tip', /.+/);
+  } finally {
+    await state('deck.restore');
+  }
+});
+
 test('the key column edge and the column seam write snapped values', async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);

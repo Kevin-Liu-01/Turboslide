@@ -1,0 +1,108 @@
+The ship step's check chain (node scripts/check.mjs in segments; docs/gslides-parity/verification-4/check-ship/run-check-chain.sh), 2026-09-14 23:00 PDT
+
+driver: start 2026-09-15T04:32:10Z load 12.94 13.59 12.59
+driver: segment 1 from 1 exit 1 2026-09-15T04:32:15Z load 13.51 13.70 12.63
+driver: segment 2 from 4 exit 1 2026-09-15T04:34:07Z load 22.04 17.92 14.49
+driver: segment 3 from 6 exit 1 2026-09-15T04:42:00Z load 29.96 26.60 19.83
+driver: vite preview started on 4344 (pid ) 2026-09-15T04:42:00Z
+driver: segment 4 from 20 exit 1 2026-09-15T05:00:57Z load 11.62 11.23 13.53
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:00:57Z
+driver: segment 5 from 21 exit 1 2026-09-15T05:22:43Z load 9.83 10.55 10.62
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:22:43Z
+driver: segment 6 from 22 exit 1 2026-09-15T05:26:52Z load 11.81 10.80 10.67
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:26:52Z
+driver: segment 7 from 26 exit 1 2026-09-15T05:39:53Z load 20.55 13.10 11.01
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:39:53Z
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:39:54Z
+driver: segment 8 from 27 exit 1 2026-09-15T05:49:35Z load 7.42 9.23 10.16
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:49:35Z
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:49:35Z
+driver: segment 9 from 28 exit 1 2026-09-15T05:53:48Z load 5.75 7.15 9.00
+driver: vite preview started on 4344 (pid ) 2026-09-15T05:53:48Z
+driver: done 2026-09-15T05:53:48Z
+
+check  1/31: ok in 0.7 s  [check-full]
+check  2/31: ok in 1.6 s  [check-full]
+check  3/31: FAIL exit 1 after 2.9 s  [check-full]
+check  4/31: ok in 0.8 s  [check-from-4]
+check  5/31: FAIL exit 1 after 110.7 s  [check-from-4]
+check  6/31: ok in 8.1 s  [check-from-6]
+check  7/31: ok in 1.4 s  [check-from-6]
+check  8/31: ok in 0.0 s  [check-from-6]
+check  9/31: ok in 1.3 s  [check-from-6]
+check 10/31: ok in 21.9 s  [check-from-6]
+check 11/31: ok in 0.0 s  [check-from-6]
+check 12/31: ok in 64.0 s  [check-from-6]
+check 13/31: ok in 6.3 s  [check-from-6]
+check 14/31: ok in 0.1 s  [check-from-6]
+check 15/31: ok in 13.5 s  [check-from-6]
+check 16/31: ok in 4.7 s  [check-from-6]
+check 17/31: ok in 30.4 s  [check-from-6]
+check 18/31: ok in 192.8 s  [check-from-6]
+check 19/31: FAIL exit 1 after 107.0 s  [check-from-6]
+check 20/31: FAIL exit 1 after 1109.5 s  [check-from-20]
+check 21/31: FAIL exit 1 after 1285.0 s  [check-from-21]
+check 22/31: ok in 58.6 s  [check-from-22]
+check 23/31: ok in 68.2 s  [check-from-22]
+check 24/31: ok in 113.2 s  [check-from-22]
+check 25/31: FAIL exit 1 after 8.7 s  [check-from-22]
+check 26/31: FAIL exit 1 after 766.9 s  [check-from-26]
+check 27/31: FAIL exit 1 after 579.6 s  [check-from-27]
+check 28/31: ok in 0.6 s  [check-from-28]
+check 29/31: ok in 5.8 s  [check-from-28]
+check 30/31: ok in 11.0 s  [check-from-28]
+check 31/31: FAIL exit 1 after 221.2 s  [check-from-28]
+
+Why each failing step failed:
+--- step 3 (check-full.log): check  3/31: FAIL exit 1 after 2.9 s
+generate:contracts: 14 files current
+diff --git a/docs/grammar.md b/docs/grammar.md
+diff --git a/packages/agent/generated/mcp-tools.json b/packages/agent/generated/mcp-tools.json
+diff --git a/packages/agent/generated/openapi.json b/packages/agent/generated/openapi.json
+diff --git a/skills/turboslide-create/references/grammar.md b/skills/turboslide-create/references/grammar.md
+--- step 20 (check-from-20.log): check 20/31: FAIL exit 1 after 1109.5 s
+audit: 2979 pass, 5 fail, 385 skipped in 1108 s; report docs/gslides-parity/verification-3/parity-audit.json
+--- step 21 (check-from-21.log): check 21/31: FAIL exit 1 after 1285.0 s
+  1) apps/studio/e2e/canvas.spec.ts:323:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind 
+  2) apps/studio/e2e/charts.spec.ts:204:1 › the data grid edits a value and adds a series, Chart type to Pie keeps the first series, the legend moves, the TXT export lists the data 
+  3) apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor 
+  4) apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu 
+  5) apps/studio/e2e/objects.spec.ts:159:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide 
+  6) apps/studio/e2e/tables.spec.ts:191:1 › a cell range, Merge cells and Unmerge cells ────────────
+  7) apps/studio/e2e/text-styles.spec.ts:203:1 › Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s level; Tab at the start of an item raises it to 9 at most 
+  7 failed
+  6 did not run
+  58 passed (21.4m)
+--- step 25 (check-from-22.log): check 25/31: FAIL exit 1 after 8.7 s
+check 22/31: pnpm exec turboslide export decks/fixture/gslides --mode native --out .turboslide/gs-native && pnpm exec turboslide export check .turboslide/gs-native && pnpm exec turboslide export decks/fixture/gslides --mode flatten --out .turboslide/gs-flatten && pnpm exec turboslide export check .turboslide/gs-flatten && node -e "const fs=require('fs'); const dir='.turboslide/gs-flatten'; const reports=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')); if(reports.length===0) process.exit(1); for (const f of reports) { const r=JSON.parse(fs.readFileSync(dir+'/'+f)); const perfect = r.perfect ?? (r.themes ?? r.reports ?? []).every(t=>t.perfect); if(perfect!==true){ console.error(f+': flatten report is not perfect'); process.exit(1) } }"
+check 25/31: docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker . && docker run --rm -v "$PWD/.turboslide/container:/work" turboslide-render-worker turboslide export decks/fixture/gslides --mode native --verify --out /work/gs-native
+            https://docs.docker.com/go/buildx/
+--- step 26 (check-from-26.log): check 26/31: FAIL exit 1 after 766.9 s
+  1) apps/studio/e2e/comments.spec.ts:87:1 › a comment with a mention reaches the other browser within 2 s: the marker, the filmstrip chip, the inbox plate and For you; reply, resolve, delete with Undo, the orphan and its revival 
+  2) apps/studio/e2e/presence.spec.ts:158:1 › a second person appears as a chip without moving the row; the roster lists them with Go to slide; a selection draws the outline and the flag; the words typed arrive (4.10) 
+  3) apps/studio/e2e/realtime.spec.ts:188:1 › two contexts open one deck as two labels and see each other in the roster 
+  4) apps/studio/e2e/security.spec.ts:177:1 › the eight html payloads are inert in the editor, the viewer and the print document 
+  5) apps/studio/e2e/share.spec.ts:320:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim 
+  6) apps/studio/e2e/versions-by-author.spec.ts:96:1 › two labels editing two slides make one window with two marks; Show changes hatches with the author chip and underlines the run; Only named; Make a copy at a version; the delete rows are disabled with the clause 
+  6 failed
+  18 did not run
+  25 passed (12.8m)
+--- step 27 (check-from-27.log): check 27/31: FAIL exit 1 after 579.6 s
+check 27/31: node scripts/layout-shift-audit.mjs --base http://localhost:4344 --out docs/gslides-parity/verification-3/layout-shift.json
+layout shift audit: 109 cells against http://localhost:4344
+66 failure(s), 7 skipped state(s); /Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-3/layout-shift.json
+--- step 31 (check-from-28.log): check 31/31: FAIL exit 1 after 221.2 s
+perf-budget: wrote /Users/kevinliu/repos/Turboslide/.turboslide/perf-budget.json
+perf-budget: 128 of 151 budgets met on http://localhost:4321 (local)
+--- step 5 (check-from-4.log): check  5/31: FAIL exit 1 after 110.7 s
+     × converts one slide of every kind at the recorded pos, six ids on one browser page 5015ms
+     × block set /pos on a grammar slide converts and moves in one revision 4543ms
+     × the dispatcher has deck.set and slide.import and the tool list names every parity tool 5851ms
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > converts one slide of every kind at the recorded pos, six ids on one browser page
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > block set /pos on a grammar slide converts and moves in one revision
+ FAIL  |@turboslide/cli| src/commands/mcp.test.ts > turboslide mcp serves the parity actions over the deck folder > the dispatcher has deck.set and slide.import and the tool list names every parity tool
+ Test Files  2 failed | 281 passed (283)
+      Tests  3 failed | 3005 passed | 2 skipped (3010)
+--- step 19 (check-from-6.log): check 19/31: FAIL exit 1 after 107.0 s
+[warn] scripts/probes/editor-walk-probe.mjs
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.

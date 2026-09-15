@@ -171,8 +171,8 @@ function buildViewerDeck(
         if (!options.includeSkipped) continue;
       }
       n += 1;
-      // the document carries the first slide's HTML alone when asked; the rest streams behind it
-      // (SPEC-4 3.11), and the request for the rest leaves the first slide out
+      // the document carries the first slide's HTML alone when asked; the viewer fetches the rest
+      // after it mounts (SPEC-4 3.11), and the request for the rest leaves the first slide out
       const wanted =
         options.slides === 'first'
           ? out.length === 0
@@ -844,11 +844,13 @@ export const getDeck = createServerFn({ method: 'GET' })
   });
 
 /**
- * The HTML of every slide but the first (gslides-parity SPEC-4 3.11): the viewer routes ask for
- * it as a deferred promise the router streams behind the document, so /deck and /embed carry one
- * slide's markup and the sidebar's clones and the grid fill in when this answers. The same
- * authorize and the same shape as `getDeck`, so a reader gets the slides the payload would have
- * carried and nothing more; null for the caller who gets null there.
+ * The HTML of every slide but the first (gslides-parity SPEC-4 3.11): the viewer asks for it once
+ * it has mounted, through this GET the CDN keeps under the revision's URL, so /deck and /embed
+ * carry one slide's markup and the sidebar's clones and the grid fill in when this answers (the
+ * round four fixer moved the call out of the loader, where the router had streamed the answer
+ * inside the document; VERIFICATION-4 finding 6). The same authorize and the same shape as
+ * `getDeck`, so a reader gets the slides the payload would have carried and nothing more; null
+ * for the caller who gets null there.
  */
 export const getDeckSlides = createServerFn({ method: 'GET' })
   .validator(deckInputValidator)

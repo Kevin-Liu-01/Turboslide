@@ -1,0 +1,28 @@
+mark-20px-1x-light.png (20, 20) colours 2 ['#070707', '#ffffff']
+mark-20px-1x-dark.png (20, 20) colours 2 ['#070707', '#f2f2f0']
+mark-20px-2x-light.png (40, 40) colours 2 ['#070707', '#ffffff']
+mark-20px-2x-dark.png (40, 40) colours 2 ['#070707', '#f2f2f0']
+mark-24px-1x-light.png (24, 24) colours 2 ['#070707', '#ffffff']
+mark-24px-1x-dark.png (24, 24) colours 2 ['#070707', '#f2f2f0']
+mark-24px-2x-light.png (48, 48) colours 2 ['#070707', '#ffffff']
+mark-24px-2x-dark.png (48, 48) colours 2 ['#070707', '#f2f2f0']
+readme-lockup-github-light.png (1280, 840) corners ['#ffffff', '#ffffff', '#ffffff', '#ffffff'] expected ground #ffffff top colours [(592640, '#ffffff'), (450414, '#070707'), (28525, '#f2f2f0')]
+readme-lockup-github-dark.png (1280, 840) corners ['#0d1117', '#0d1117', '#0d1117', '#0d1117'] expected ground #0d1117 top colours [(592640, '#0d1117'), (450414, '#ffffff'), (28525, '#070707')]
+1x chrome light: strip #dee1e6 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 32423
+2x chrome light: strip #dee1e6 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 132256
+1x chrome dark: strip #202124 present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 32420
+2x chrome dark: strip #202124 present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 132305
+1x firefox light: strip #f0f0f4 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 32433
+2x firefox light: strip #f0f0f4 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 132377
+1x firefox dark: strip #1c1b22 present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 32426
+2x firefox dark: strip #1c1b22 present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 132407
+1x safari light: strip #e6e6e6 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 32382
+2x safari light: strip #e6e6e6 present tile colours ['#070707', '#656565', '#ffffff'] strip pixels 132271
+1x safari dark: strip #2d2d2d present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 32453
+2x safari dark: strip #2d2d2d present tile colours ['#070707', '#656565', '#ffffff', '#888887', '#f2f2f0'] strip pixels 132277
+frame #656565 on chrome light #dee1e6: 4.45:1; plate #ffffff on it: 1.31:1; svg dark frame #888887 on it: 2.71:1
+frame #656565 on chrome dark #202124: 2.76:1; plate #ffffff on it: 16.10:1; svg dark frame #888887 on it: 4.54:1
+frame #656565 on firefox light #f0f0f4: 5.13:1; plate #ffffff on it: 1.14:1; svg dark frame #888887 on it: 3.12:1
+frame #656565 on firefox dark #1c1b22: 2.93:1; plate #ffffff on it: 17.08:1; svg dark frame #888887 on it: 4.81:1
+frame #656565 on safari light #e6e6e6: 4.67:1; plate #ffffff on it: 1.25:1; svg dark frame #888887 on it: 2.84:1
+frame #656565 on safari dark #2d2d2d: 2.36:1; plate #ffffff on it: 13.77:1; svg dark frame #888887 on it: 3.88:1

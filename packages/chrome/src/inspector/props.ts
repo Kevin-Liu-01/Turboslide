@@ -27,6 +27,20 @@ export type ControlProps = {
 /** The class every visually hidden native mirror of a composite control carries (Seg, icon). */
 export const HIDDEN_NATIVE_CLASS = 'ts-native-mirror';
 
+/**
+ * The word a person reads for an option value (SPEC 12, the default view words): the values are
+ * the schema's tags and stay the control's values, and one of them, the `freeform` layout tag, is
+ * an engineering word the chrome never shows (menus/strings.ts FORBIDDEN_DEFAULT_VIEW_WORDS), so
+ * the option reads "Blank", the layout's name everywhere else in the chrome (the Layout grid, the
+ * layout catalog's `blank`). Every other value reads as written.
+ */
+const OPTION_WORDS: Readonly<Record<string, string>> = { freeform: 'Blank' };
+
+export function optionLabel(option: string | number): string {
+  const raw = String(option);
+  return OPTION_WORDS[raw] ?? raw;
+}
+
 /** `22` from `'22'` when the options are numbers, else the string itself. */
 export function optionValue(
   raw: string,

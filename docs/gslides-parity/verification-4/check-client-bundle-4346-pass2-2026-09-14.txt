@@ -1,0 +1,9 @@
+check-client-bundle: marker in client files: 0 of 95 text files
+check-client-bundle: marker in server files under apps/studio/dist/server: 1 of 155 text files
+check-client-bundle: marker in server files under apps/studio/.output/server: 1 of 539 text files
+check-client-bundle: node builtins (node:fs, node:path, node:zlib, node:child_process) in client scripts: 0 of 71 files
+check-client-bundle: largest client chunk under apps/studio/.output/public: assets/index-iYzVmBVs.js 577949 B (ceiling 600000, reported: no vendor chunk in the output, the vendor group of SPEC-4 3.12 has not landed); next assets/Slideshow-BOIJDoBv.js 458821, assets/Frame-D4VmvOcF.js 455333, assets/editor-DTcM-CDO.js 389932
+check-client-bundle: /decks preloads 9 chunk(s), 729747 B on disk (ceiling 600000)
+check-client-bundle: /deck/gt-brand preloads 6 chunk(s), 590657 B on disk (ceiling 1000000)
+check-client-bundle: /edit/gt-brand preloads 5 chunk(s), 971935 B on disk (ceiling 2000000)
+check-client-bundle: FAIL /decks preloads 729747 B of chunks, over the 600000 B ceiling (SPEC-4 3.12, 4.1)

@@ -1,0 +1,221 @@
+{
+  "base": "http://localhost:4346",
+  "startedAt": "2026-09-15T02:59:38.370Z",
+  "selection": {
+    "dark-photo-light": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/selection-dark-photo-light.png",
+      "clip": {
+        "x": 248,
+        "y": 104,
+        "width": 1192,
+        "height": 707
+      },
+      "ring": "rgb(26, 115, 232)",
+      "ringBox": [398.90625, 481.65625, 485.03125, 107.59375],
+      "chipBackground": "rgb(26, 115, 232)",
+      "chipColor": "rgb(255, 255, 255)",
+      "handleBorder": null,
+      "handleBackground": null,
+      "select": "#1a73e8",
+      "guide": "#d6336c"
+    },
+    "white-light": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/selection-white-light.png",
+      "clip": {
+        "x": 248,
+        "y": 104,
+        "width": 1192,
+        "height": 707
+      },
+      "ring": "rgb(26, 115, 232)",
+      "ringBox": [503.359375, 430.34375, 689.265625, 53.796875],
+      "chipBackground": "rgb(26, 115, 232)",
+      "chipColor": "rgb(255, 255, 255)",
+      "handleBorder": null,
+      "handleBackground": null,
+      "select": "#1a73e8",
+      "guide": "#d6336c"
+    },
+    "dark-photo-dark": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/selection-dark-photo-dark.png",
+      "clip": {
+        "x": 248,
+        "y": 104,
+        "width": 1192,
+        "height": 707
+      },
+      "ring": "rgb(61, 134, 240)",
+      "ringBox": [398.90625, 481.65625, 485.03125, 107.59375],
+      "chipBackground": "rgb(61, 134, 240)",
+      "chipColor": "rgb(7, 7, 7)",
+      "handleBorder": null,
+      "handleBackground": null,
+      "select": "#3d86f0",
+      "guide": "#f0397a"
+    },
+    "white-dark": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/selection-white-dark.png",
+      "clip": {
+        "x": 248,
+        "y": 104,
+        "width": 1192,
+        "height": 707
+      },
+      "ring": "rgb(61, 134, 240)",
+      "ringBox": [503.359375, 430.34375, 689.265625, 53.796875],
+      "chipBackground": "rgb(61, 134, 240)",
+      "chipColor": "rgb(7, 7, 7)",
+      "handleBorder": null,
+      "handleBackground": null,
+      "select": "#3d86f0",
+      "guide": "#f0397a"
+    }
+  },
+  "skeleton": {
+    "light": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/skeleton-curtain-edit-light.png",
+      "skeleton": "editor",
+      "curtain": [256, 157, 1184, 666],
+      "host": [256, 112, 1184, 756],
+      "curtainImage": "url(\"http://localhost:4346/brand/figure-light.png\")",
+      "titleRow": true,
+      "themeColor": "#ffffff"
+    },
+    "dark": {
+      "file": "docs/gslides-parity/verification-4/shots-pass2/skeleton-curtain-edit-dark.png",
+      "skeleton": "editor",
+      "curtain": [256, 157, 1184, 666],
+      "host": [256, 112, 1184, 756],
+      "curtainImage": "url(\"http://localhost:4346/brand/figure-dark.png\")",
+      "titleRow": true,
+      "themeColor": "#070707"
+    }
+  },
+  "filmstrip": {
+    "file": "docs/gslides-parity/verification-4/shots-pass2/filmstrip-typed-heading-held-network.png",
+    "heldRequests": 1,
+    "t0": 1434.800000011921,
+    "cloneAt": 1717.7000000476837,
+    "pendingAt": 1717.7000000476837,
+    "revisionAt": null,
+    "requests": 0,
+    "cardHasText": true,
+    "cardCapture": "never",
+    "cardThumbKind": "clone",
+    "pending": 1,
+    "revision": 25,
+    "serverRevision": 25,
+    "cloneAfterTypingMs": 0
+  },
+  "home": {
+    "1440-light": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-1440-light-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-1440-light-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 921600,
+        "start": 356,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-light.png"
+      },
+      "ink": "#070707",
+      "title": "Turboslide",
+      "theme": "light",
+      "h1": "Turboslide"
+    },
+    "1440-dark": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-1440-dark-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-1440-dark-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 921600,
+        "start": 200,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-dark.png"
+      },
+      "ink": "#f2f2f0",
+      "title": "Turboslide",
+      "theme": "dark",
+      "h1": "Turboslide"
+    },
+    "1280-light": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-1280-light-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-1280-light-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 819200,
+        "start": 108,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-light.png"
+      },
+      "ink": "#070707",
+      "title": "Turboslide",
+      "theme": "light",
+      "h1": "Turboslide"
+    },
+    "1280-dark": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-1280-dark-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-1280-dark-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 11059,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 819200,
+        "start": 104,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-dark.png"
+      },
+      "ink": "#f2f2f0",
+      "title": "Turboslide",
+      "theme": "dark",
+      "h1": "Turboslide"
+    },
+    "390-light": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-390-light-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-390-light-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 19857,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 202800,
+        "start": 208,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-light.png"
+      },
+      "ink": "#070707",
+      "title": "Turboslide",
+      "theme": "light",
+      "h1": "Turboslide"
+    },
+    "390-dark": {
+      "fold": "docs/gslides-parity/verification-4/shots-pass2/home-390-dark-fold.png",
+      "full": "docs/gslides-parity/verification-4/shots-pass2/home-390-dark-full.jpg",
+      "overflowX": 0,
+      "scrollHeight": 19857,
+      "images": 16,
+      "broken": 0,
+      "lcp": {
+        "size": 202800,
+        "start": 184,
+        "el": "DIV.ts-product-hero-twin",
+        "url": "http://localhost:4346/brand/hero-dark.png"
+      },
+      "ink": "#f2f2f0",
+      "title": "Turboslide",
+      "theme": "dark",
+      "h1": "Turboslide"
+    }
+  },
+  "finishedAt": "2026-09-15T03:00:14.567Z"
+}

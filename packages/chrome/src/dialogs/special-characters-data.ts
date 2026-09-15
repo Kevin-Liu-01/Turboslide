@@ -95,7 +95,7 @@ export const SPECIAL_CHARACTERS: ReadonlyArray<SpecialCharacter> = [
     ['⟹', 'Long rightwards double arrow'],
     ['⟺', 'Long left right double arrow'],
     ['➔', 'Heavy wide headed rightwards arrow'],
-    ['➜', 'Heavy round tipped rightwards arrow'],
+    ['➜', 'Heavy blunt tipped rightwards arrow'],
     ['➝', 'Triangle headed rightwards arrow'],
     ['➞', 'Heavy triangle headed rightwards arrow'],
     ['➡', 'Black rightwards arrow'],

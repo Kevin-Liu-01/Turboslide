@@ -24646,9 +24646,9 @@
                 ]
               },
               "measure": {
-                "title": "Measure (ch)",
+                "title": "Line length (ch)",
                 "x-inspector": {
-                  "label": "Measure (ch)",
+                  "label": "Line length (ch)",
                   "control": "number",
                   "snap": [
                     32,

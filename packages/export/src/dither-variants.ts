@@ -11,8 +11,9 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, join } from 'node:path';
 
 import { renderVariant } from '@turboslide/effects/io';
-import { ditherKey12, ditheredPictures, variantRecordOf } from '@turboslide/render/dither-key';
-import type { DitheredPicture } from '@turboslide/render/dither-key';
+import { ditherKey12, variantRecordOf } from '@turboslide/render/dither-key';
+import { ditheredPictures } from '@turboslide/render/dither-walk';
+import type { DitheredPicture } from '@turboslide/render/dither-walk';
 import type { Asset } from '@turboslide/schema/assets';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
 import type { DeckDocument } from '@turboslide/schema/deck';

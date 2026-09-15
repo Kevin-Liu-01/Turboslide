@@ -25,7 +25,8 @@ import {
 } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
-import type { DeckPayload, DeckSlidesPayload } from '../server/decks';
+import { getDeckSlides } from '../server/decks';
+import type { DeckPayload, DeckSlidesPayload, GetDeckInput } from '../server/decks';
 import { renderSlideImages } from '../server/render';
 import { Slideshow } from './Slideshow';
 import type { SlideshowState } from './Slideshow';
@@ -40,15 +41,18 @@ import { useStudioSession } from './useStudioSession';
  * protocol and the #NN hash contract are preserved; the studio writes
  * #s/<slideId> as the stable form).
  *
- * The deferred slides (gslides-parity SPEC-4 3.11): the document carries the first slide's HTML
- * and `rest` is the other slides' HTML on its way from the router's stream; the viewer merges it
- * into the deck when it lands, so the sidebar's clones and the grid fill in a moment after first
- * paint. Until then those items render with an empty `html`, which the clones draw as the plate.
+ * The deferred slides (gslides-parity SPEC-4 3.11; VERIFICATION-4 finding 6): the document
+ * carries the first slide's HTML and `rest` is the request for the other slides' HTML, which the
+ * viewer sends to `getDeckSlides` once it has mounted (a GET the CDN keeps under the revision's
+ * URL) and merges into the deck when it answers, so the sidebar's clones and the grid fill in a
+ * moment after first paint. Until then those items render with an empty `html`, which the clones
+ * draw as the plate. The first build streamed the answer inside the document instead
+ * (routes/deck.$deckId.tsx says what that cost).
  */
 export type DeckViewerProps = {
   payload: DeckPayload;
-  /** the other slides' HTML, streamed behind the document (SPEC-4 3.11); absent for a whole payload */
-  rest?: Promise<DeckSlidesPayload | null>;
+  /** the request for the other slides' HTML (SPEC-4 3.11); absent or null for a whole payload */
+  rest?: GetDeckInput | null;
   /** ?mode= from the route, ahead of the saved mode */
   mode?: ShellMode;
   /** ?theme= from the route: applied once on mount, ahead of the stored theme */
@@ -116,6 +120,26 @@ export function mergeDeferredSlides(
   };
 }
 
+/* the last request for the other slides and its answer (SPEC-4 3.11): the effect below runs
+   twice on one mount in development (React's double invocation of effects) and again on a
+   remount, and every run of it must cost one request at most, so the promise is kept by its
+   request key and reused; one entry, because a page shows one deck at a time and a later deck
+   or revision replaces it */
+let lastSlides: { key: string; promise: Promise<DeckSlidesPayload | null> } | null = null;
+
+/** The other slides' HTML for a request, fetched once per page for that request. */
+function fetchDeckSlides(rest: GetDeckInput): Promise<DeckSlidesPayload | null> {
+  const key = JSON.stringify(rest);
+  if (lastSlides === null || lastSlides.key !== key) {
+    const promise = getDeckSlides({ data: rest });
+    lastSlides = { key, promise };
+    promise.catch(() => {
+      if (lastSlides?.promise === promise) lastSlides = null;
+    });
+  }
+  return lastSlides.promise;
+}
+
 export function DeckViewer({
   payload,
   rest,
@@ -126,12 +150,13 @@ export function DeckViewer({
   onModeChange,
 }: DeckViewerProps) {
   const { sprite } = payload;
-  /* the streamed slides once they land (SPEC-4 3.11); the server and the first client render agree on none */
+  /* the other slides once they arrive (SPEC-4 3.11); the server and the first client render agree
+     on none, and the request leaves after the mount so the document is the shell and one slide */
   const [deferred, setDeferred] = useState<Record<string, string> | null>(null);
   useEffect(() => {
-    if (rest === undefined || payload.partial !== true) return;
+    if (rest === undefined || rest === null || payload.partial !== true) return;
     let alive = true;
-    rest
+    fetchDeckSlides(rest)
       .then((answer) => {
         if (alive && answer !== null && answer.revision === payload.deck.revision)
           setDeferred(answer.html);

@@ -1,0 +1,56 @@
+brand-manifest.json: generator scripts/build-brand.ts entries 31
+apps/studio/public/apple-touch-icon.png: 753 B kind built bytes match sha match 180x180 mode RGBA colours 2 opaque True
+apps/studio/public/brand/figure-dark.png: 13873 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/figure-light.png: 13892 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/hero-dark.png: 13679 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/hero-light.png: 13689 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/notfound-dark.png: 13866 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/notfound-light.png: 13862 B kind captured bytes match sha match 1600x900 mode P colours 2
+apps/studio/public/brand/og-screen-dark.png: 1885 B kind captured bytes match sha match 1200x630 mode P colours 2
+apps/studio/public/brand/og-screen-light.png: 1887 B kind captured bytes match sha match 1200x630 mode P colours 2
+apps/studio/public/favicon.ico: 15086 B kind built bytes match sha match ico entries [(16, 16), (32, 32), (48, 48)] [16px: 3 colours ['#070707', '#656565', '#ffffff']] [32px: 3 colours ['#070707', '#656565', '#ffffff']] [48px: 3 colours ['#070707', '#656565', '#ffffff']]
+apps/studio/public/icon.svg: 957 B kind built bytes match sha match crispEdges True prefers-color-scheme True
+apps/studio/public/icons/icon-192.png: 257 B kind built bytes match sha match 192x192 mode P colours 2
+apps/studio/public/icons/icon-512.png: 460 B kind built bytes match sha match 512x512 mode P colours 2
+apps/studio/public/icons/icon-dark-192.png: 257 B kind built bytes match sha match 192x192 mode P colours 2
+apps/studio/public/icons/icon-dark-512.png: 460 B kind built bytes match sha match 512x512 mode P colours 2
+apps/studio/public/icons/icon-mask-192.png: 292 B kind built bytes match sha match 192x192 mode P colours 2
+apps/studio/public/icons/icon-mask-512.png: 422 B kind built bytes match sha match 512x512 mode P colours 2
+apps/studio/public/icons/icon-mono-512.png: 3083 B kind built bytes match sha match 512x512 mode RGBA colours 2 alpha levels 2
+apps/studio/public/manifest.webmanifest: 971 B kind built bytes match sha match
+apps/studio/public/og/turboslide.png: 29818 B kind rendered bytes match sha match 1200x630 mode RGB colours 480
+apps/studio/public/robots.txt: 99 B kind built bytes match sha match
+packages/theme/brand/facts.json: 37322 B kind facts bytes match sha match
+packages/theme/brand/hero.recipe.json: 10180 B kind captured bytes match sha match
+packages/theme/brand/icon-tile.svg: 957 B kind built bytes match sha match crispEdges True prefers-color-scheme True
+packages/theme/brand/lockup-stacked.svg: 10463 B kind built bytes match sha match crispEdges True prefers-color-scheme False
+packages/theme/brand/mark-geometry.json: 2422 B kind built bytes match sha match
+packages/theme/brand/mark-small.svg: 553 B kind built bytes match sha match crispEdges True prefers-color-scheme False
+packages/theme/brand/mark.svg: 38576 B kind built bytes match sha match crispEdges True prefers-color-scheme False
+packages/theme/brand/og-template.html: 8348 B kind built bytes match sha match
+packages/theme/brand/wordmark-outlines.svg: 5474 B kind outlined bytes match sha match crispEdges True prefers-color-scheme False
+packages/theme/brand/wordmark.svg: 887 B kind built bytes match sha match crispEdges True prefers-color-scheme False
+
+manifest.webmanifest: name 'Turboslide' short_name 'Turboslide' start_url /home display standalone theme_color #070707 background_color #070707 icons 5
+  icon /icons/icon-192.png 192x192 image/png purpose None
+  !! not exactly one purpose
+  icon /icons/icon-512.png 512x512 image/png purpose None
+  !! not exactly one purpose
+  icon /icons/icon-mask-192.png 192x192 image/png purpose 'maskable'
+  icon /icons/icon-mask-512.png 512x512 image/png purpose 'maskable'
+  icon /icons/icon-mono-512.png 512x512 image/png purpose 'monochrome'
+card (1200, 630) 29818 B under 1 MB True is 1200x630 True mode RGB colours 480
+card top colours (count, hex): [(581892, '#070707'), (163203, '#f2f2f0'), (1848, '#b9bcc3'), (490, '#7d7d7c'), (381, '#424241'), (321, '#b7b7b6'), (190, '#080808'), (152, '#58595d')]
+apps/studio/public/brand/hero-dark.png (1600, 900) 13679 B palette ['#070707', '#f2f2f0'] ink fraction 0.69545
+apps/studio/public/brand/hero-light.png (1600, 900) 13689 B palette ['#070707', '#ffffff'] ink fraction 0.30455
+  hero: ink fractions sum 1.00000
+apps/studio/public/brand/figure-dark.png (1600, 900) 13873 B palette ['#070707', '#f2f2f0'] ink fraction 0.70336
+apps/studio/public/brand/figure-light.png (1600, 900) 13892 B palette ['#070707', '#ffffff'] ink fraction 0.29664
+  figure: ink fractions sum 1.00000
+apps/studio/public/brand/notfound-dark.png (1600, 900) 13866 B palette ['#070707', '#f2f2f0'] ink fraction 0.69021
+apps/studio/public/brand/notfound-light.png (1600, 900) 13862 B palette ['#070707', '#ffffff'] ink fraction 0.30979
+  notfound: ink fractions sum 1.00000
+apps/studio/public/brand/og-screen-dark.png (1200, 630) 1885 B palette ['#070707', '#f2f2f0'] ink fraction 0.75542
+apps/studio/public/brand/og-screen-light.png (1200, 630) 1887 B palette ['#070707', '#ffffff'] ink fraction 0.24458
+  og-screen: ink fractions sum 1.00000
+PROBLEMS

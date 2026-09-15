@@ -1,0 +1,26 @@
+== /home head ==
+<title>Turboslide</title>
+<meta name="theme-color" content="#070707" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<meta property="og:image" content="https://turboslide.vercel.app/og/turboslide.png" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<meta name="twitter:card" content="summary_large_image" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<meta name="description" content="An agent native slides editor with Google Slides&#x27; behaviours, a canvas on every slide and a pixel identical PowerPoint export." nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<meta property="og:url" content="https://turboslide.vercel.app/home" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<link rel="icon" href="/favicon.ico" sizes="32x32" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<link rel="icon" href="/icon.svg" type="image/svg+xml" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<link rel="manifest" href="/manifest.webmanifest" nonce="mUIIstww/3/ghiqq91/E9Q=="/>
+<main class="ts-product"
+<script type="speculationrules"
+== static layer (second request) ==
+HTTP/2 200  cache-control: public, max-age=86400 content-type: application/manifest+json; charset=utf-8 x-robots-tag: noindex x-vercel-cache: HIT  <- /manifest.webmanifest
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 content-type: image/svg+xml x-robots-tag: noindex x-vercel-cache: HIT  <- /icon.svg
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 content-type: image/vnd.microsoft.icon x-robots-tag: noindex x-vercel-cache: HIT  <- /favicon.ico
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 content-type: image/png x-robots-tag: noindex x-vercel-cache: HIT  <- /apple-touch-icon.png
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 content-type: image/png x-robots-tag: noindex x-vercel-cache: HIT  <- /og/turboslide.png
+HTTP/2 200  cache-control: public, max-age=86400, stale-while-revalidate=604800 content-type: image/png x-robots-tag: noindex x-vercel-cache: HIT  <- /brand/hero-dark.png
+HTTP/2 200  cache-control: public, max-age=0, must-revalidate content-type: text/html; charset=utf-8 x-robots-tag: noindex x-vercel-cache: HIT  <- /home
+HTTP/2 404  cache-control: public, max-age=3600 content-type: text/plain;charset=UTF-8 x-robots-tag: noindex x-vercel-cache: MISS  <- /decks/gt-brand/assets/opener-prototemplate.png
+== / redirect ==
+HTTP/2 307 
+location: /new
+x-robots-tag: noindex

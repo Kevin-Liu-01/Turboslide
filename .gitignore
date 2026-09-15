@@ -35,3 +35,6 @@ crates/*/target
 # repository; a private deck repository removes the one line. The pattern is one level deep, so
 # the fixture threads under decks/fixture/gslides/comments/ stay tracked (MILESTONES-3 B1).
 decks/*/comments/
+
+# Python bytecode the fonts script leaves beside itself (round four ship step, VERIFICATION-4 finding 20)
+__pycache__/

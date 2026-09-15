@@ -1,0 +1,3 @@
+banner {"box":[295.0625,868,849.875,32],"text":"Edits are kept on this server instance only and do not persist until a Blob store is connected; connect one to the Verce","zIndex":"19","under":[["footer[bottombar].ts-bottombar","div.pt-viewer","html."],["footer[bottombar].ts-bottombar","div.pt-viewer","html."],["footer[bottombar].ts-bottombar","div.pt-viewer","html."]]}
+controls under the banner ["bottombar(850x32)"]
+item found false

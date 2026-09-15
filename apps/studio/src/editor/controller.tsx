@@ -385,6 +385,8 @@ function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
 
 /** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
 const EXTERNAL_BANNER_MS = 8000;
+/** How long a write's answer waits for the acknowledgement that moves the revision above its base (the ops POST's latency: about 100 ms on the memory tier, up to a second on blob). */
+const ACK_WAIT_MS = 5000;
 
 export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
 
@@ -1585,7 +1587,8 @@ export function createEditorController(init: {
       }
       if (item.entryId !== null) clockOf.set(item.entryId, applied.at);
       setDocument(applied.document, changedBy(item.mutations));
-      void applied.settled.then((outcome) => {
+      const base = latest().serverRevision;
+      void applied.settled.then(async (outcome) => {
         if ('rejected' in outcome) {
           item.reject(
             new ConflictError(
@@ -1597,12 +1600,32 @@ export function createEditorController(init: {
           return;
         }
         item.resolve({
-          revision: latest().serverRevision,
+          revision: await acknowledgedAbove(base),
           entry: recordOf(item.mutations, applied.inverse, outcome.seq),
           seq: outcome.seq,
         });
       });
     }
+  };
+
+  /**
+   * The revision an admitted write's answer carries (SPEC-3 3.10: the answer is the base of the
+   * next write). The room client settles an op when its own entry arrives, and on the memory
+   * tier the stream delivers that entry before the ops POST answers, which is what moves the
+   * acknowledged revision (`serverRevision` through `onStatus`), so an answer read at the settle
+   * carried the revision before its own write and the next write based on it was refused as
+   * stale (VERIFICATION-4 finding 1, the three step 21 rows; the round four fixer round). The
+   * answer waits for the acknowledgement above the base the write was made on, capped: a write
+   * the room admitted moved the document past its base, so the floor after the cap is the base
+   * plus one.
+   */
+  const acknowledgedAbove = async (base: number): Promise<number> => {
+    const until = Date.now() + ACK_WAIT_MS;
+    while (latest().serverRevision <= base) {
+      if (Date.now() > until) return Math.max(latest().serverRevision, base + 1);
+      await sleep(20);
+    }
+    return latest().serverRevision;
   };
 
   const rejectDraftQueue = (error: Error): void => {
@@ -1713,6 +1736,7 @@ export function createEditorController(init: {
       return draftCommit(mutations, label, kind);
     }
     wroteInSession = true;
+    const base = latest().serverRevision;
     let applied;
     try {
       applied = room.apply(mutations, label);
@@ -1756,7 +1780,7 @@ export function createEditorController(init: {
     }
     setDocument(applied.document, changedBy(mutations));
     stopFollowing();
-    return applied.settled.then((outcome) => {
+    return applied.settled.then(async (outcome) => {
       if ('rejected' in outcome) {
         throw new ConflictError(
           outcome.rejected.message ?? `The change was not accepted (${outcome.rejected.reason})`,
@@ -1767,7 +1791,7 @@ export function createEditorController(init: {
         );
       }
       return {
-        revision: latest().serverRevision,
+        revision: await acknowledgedAbove(base),
         entry: recordOf(mutations, applied.inverse, outcome.seq),
         seq: outcome.seq,
       };

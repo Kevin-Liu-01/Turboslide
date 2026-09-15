@@ -30,14 +30,9 @@ import {
 import { ditherAsset, twoToneAssets } from '@turboslide/headless/capture/twins';
 import type { DitherReport } from '@turboslide/headless/capture/twins';
 import type { LaunchOptions } from '@turboslide/headless/launch';
-import {
-  boxOfDithered,
-  ditherKey12,
-  ditheredPictures,
-  plateBoxOf,
-  variantRecordOf,
-} from '@turboslide/render/dither-key';
-import type { DitheredPicture } from '@turboslide/render/dither-key';
+import { ditherKey12, variantRecordOf } from '@turboslide/render/dither-key';
+import { boxOfDithered, ditheredPictures, plateBoxOf } from '@turboslide/render/dither-walk';
+import type { DitheredPicture } from '@turboslide/render/dither-walk';
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset, AssetTreatment, AssetVariant } from '@turboslide/schema/assets';
 import { hasContinuousSource } from '@turboslide/schema/assets';

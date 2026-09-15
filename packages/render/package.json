@@ -20,6 +20,7 @@
     "./theme-node": "./src/theme-node.ts",
     "./collab": "./src/collab.ts",
     "./dither-key": "./src/dither-key.ts",
+    "./dither-walk": "./src/dither-walk.ts",
     "./dither-runtime": "./src/dither-runtime.ts",
     "./sanitize/html": "./src/sanitize/html.ts",
     "./sanitize/css": "./src/sanitize/css.ts",

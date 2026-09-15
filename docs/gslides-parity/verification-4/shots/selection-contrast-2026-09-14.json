@@ -1,0 +1,58 @@
+{
+  "dark-photo-light": {
+    "ring": "#1a73e8",
+    "ringPixelsInShot": 1744,
+    "samples": 306,
+    "contrastMin": 1.0,
+    "contrastMedian": 4.51,
+    "contrastMax": 4.51,
+    "darkestNeighbour": "#1a73e8",
+    "lightestNeighbour": "#ffffff",
+    "under3to1": 9,
+    "chipBackground": "rgb(26, 115, 232)",
+    "chipColor": "rgb(255, 255, 255)",
+    "select": "#1a73e8"
+  },
+  "white-light": {
+    "ring": "#1a73e8",
+    "ringPixelsInShot": 2035,
+    "samples": 382,
+    "contrastMin": 1.0,
+    "contrastMedian": 4.51,
+    "contrastMax": 4.51,
+    "darkestNeighbour": "#1a73e8",
+    "lightestNeighbour": "#ffffff",
+    "under3to1": 10,
+    "chipBackground": "rgb(26, 115, 232)",
+    "chipColor": "rgb(255, 255, 255)",
+    "select": "#1a73e8"
+  },
+  "dark-photo-dark": {
+    "ring": "#3d86f0",
+    "ringPixelsInShot": 1744,
+    "samples": 306,
+    "contrastMin": 1.0,
+    "contrastMedian": 5.63,
+    "contrastMax": 5.63,
+    "darkestNeighbour": "#070707",
+    "lightestNeighbour": "#3d86f0",
+    "under3to1": 9,
+    "chipBackground": "rgb(61, 134, 240)",
+    "chipColor": "rgb(7, 7, 7)",
+    "select": "#3d86f0"
+  },
+  "white-dark": {
+    "ring": "#3d86f0",
+    "ringPixelsInShot": 2035,
+    "samples": 382,
+    "contrastMin": 1.0,
+    "contrastMedian": 5.63,
+    "contrastMax": 5.63,
+    "darkestNeighbour": "#070707",
+    "lightestNeighbour": "#3d86f0",
+    "under3to1": 10,
+    "chipBackground": "rgb(61, 134, 240)",
+    "chipColor": "rgb(7, 7, 7)",
+    "select": "#3d86f0"
+  }
+}

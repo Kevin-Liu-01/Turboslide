@@ -15,8 +15,8 @@ import { HomeHero } from '../components/home/HomeHero';
 import { HomeNav } from '../components/home/HomeNav';
 import { HomePipeline } from '../components/home/HomePipeline';
 import { HomeSpeed } from '../components/home/HomeSpeed';
-import { HOME_META } from '../components/home/copy';
 import { HOME_FACTS } from '../components/home/facts';
+import { HOME_META } from '../components/home/home-meta';
 import { useMountEffect } from '../components/useMountEffect';
 
 import './home.css';

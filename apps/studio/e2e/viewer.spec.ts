@@ -173,11 +173,54 @@ test('the embed posts gt-deck-slide on navigation and applies gt-theme', async (
 test('the document carries the first slide alone and the deferred slides arrive; the twins are not fetched again on a second visit (SPEC-4 3.11, 4.5)', async ({
   page,
 }) => {
-  /* the server's HTML: one rendered slide section, the other slides' markup streamed behind it
-     as the loader's deferred promise (routes/deck.$deckId.tsx loadDeckView) */
+  /* the server's HTML: one rendered slide section and no other slide's markup, plain or encoded
+     in a stream script (the first build streamed the other slides inside the document as the
+     loader's deferred promise, which made the document 481 KB; VERIFICATION-4 finding 6). The
+     second slide's id is read from the sidebar rows the document carries. */
   const html = await (await page.request.get(DECK)).text();
   expect((html.match(/<section class="slide/g) ?? []).length).toBe(1);
-  /* on the page the deferred slides have arrived: a later slide's sheet renders its markup */
+  const rowIds = [...html.matchAll(/class="pt-orow[^"]*"[^>]*data-id="([^"]+)"/g)].map((m) => m[1]);
+  console.log(`viewer document: ${html.length} bytes, ${rowIds.length} sidebar rows`);
+  const second = rowIds[1];
+  if (second !== undefined) {
+    expect(html).not.toContain(`data-slide="${second}"`);
+    expect(html).not.toContain(`data-slide=\\"${second}\\"`);
+  }
+  /* on the page the other slides arrive through one getDeckSlides request the viewer sends after
+     it mounts (components/DeckViewer.tsx), and a later slide's sheet renders its markup. The
+     server function's id in the URL is opaque (a base64 descriptor on the dev server, a hash in
+     the build), so the answer is recognised by its shape in the router's serializer form: an
+     object whose keys are `revision` and `html`, the html object keyed by slide id. */
+  const slideAnswers: { status: number; cache: string | undefined; slides: number }[] = [];
+  const slidesIn = (node: unknown): number | null => {
+    if (node === null || typeof node !== 'object') return null;
+    const record = node as { p?: { k?: unknown; v?: unknown[] } };
+    const keys = record.p?.k;
+    if (Array.isArray(keys) && keys[0] === 'revision' && keys[1] === 'html') {
+      const html = record.p?.v?.[1] as { p?: { k?: unknown } } | undefined;
+      return Array.isArray(html?.p?.k) ? html.p.k.length : 0;
+    }
+    for (const child of record.p?.v ?? []) {
+      const found = slidesIn(child);
+      if (found !== null) return found;
+    }
+    return null;
+  };
+  page.on('response', (response) => {
+    if (!response.url().includes('/_serverFn/')) return;
+    void response
+      .json()
+      .then((body: unknown) => {
+        const slides = slidesIn(body);
+        if (slides !== null)
+          slideAnswers.push({
+            status: response.status(),
+            cache: response.headers()['cache-control'],
+            slides,
+          });
+      })
+      .catch(() => undefined);
+  });
   const total = await openDeck(page);
   const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   const target = Math.min(total, 3);
@@ -194,6 +237,15 @@ test('the document carries the first slide alone and the deferred slides arrive;
   await expect(sheet).toBeVisible({ timeout: 15_000 });
   const laterHtml = await sheet.evaluate((el) => el.innerHTML.length);
   expect(laterHtml).toBeGreaterThan(100);
+  if (total > 1) {
+    /* one request, whatever the mount count (the viewer keeps the promise by its request key),
+       answering every slide but the first; the cache header's value depends on how this reader
+       reached the deck (server/decks.ts setDeckCacheHeader), so it is printed and not asserted */
+    await expect.poll(() => slideAnswers.length).toBe(1);
+    expect(slideAnswers[0]?.status).toBe(200);
+    expect(slideAnswers[0]?.slides).toBe(total - 1);
+    console.log(`getDeckSlides: cache-control ${slideAnswers[0]?.cache ?? '(none)'}`);
+  }
   /* the twins on a second visit in the same context (SPEC-4 4.5): the deck's assets come from the
      browser's cache, none with bytes on the wire */
   await page.goto(DECK);

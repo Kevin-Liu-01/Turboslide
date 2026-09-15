@@ -390,8 +390,9 @@ test('an idle editor holds one stream and polls its session at the long poll cad
   expect(streams.length).toBeGreaterThanOrEqual(1);
   expect(streamsInWindow).toBeLessThanOrEqual(1);
   /* the idle ceiling of SPEC-4 4.4: four server function responses per minute. The session poll
-     survives round three (0.37); held for its 20 s on the instance that owns the session and
-     paused 2 s after an empty answer, it costs three a minute, never the storm R04 7.3 measured */
+     survives round three (0.37); held for its 25 s on the instance that owns the session and
+     paused 6 s after an empty answer (useStudioSession.ts, the round four fixer round), it costs
+     at most two a minute in any 60 s alignment, never the storm R04 7.3 measured */
   expect(fnInWindow.length).toBeLessThanOrEqual(4);
   const gaps = fnInWindow.slice(1).map((row, i) => row.at - (fnInWindow[i]?.at ?? row.at));
   for (const gap of gaps) expect(gap).toBeGreaterThan(1_500);

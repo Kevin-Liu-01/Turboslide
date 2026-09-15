@@ -18,16 +18,16 @@ Notes on the gestures: the toolbar's New slide button opens the "New slide with 
 
 Run 3 attempt 1 (deck `untitled-20260914-otxp`, ten bursts typed from 1264 ms to 4121 ms, 170 ms pauses). The request pairs, times from the run's start:
 
-| Time     | Request                                                 | Answer                                                                                       |
-| -------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| 1264     | burst 1 "Q4 review", `writeDeck` baseRevision 0         | 2607: ok, revision 1; the room attaches, stream opened at 2609, `hello` seq 1 revision 1 at 3055 |
-| 1682     | burst 2, `writeDeck` baseRevision 1 (queued on the draft chain) | 3364: ok, revision 2                                                                  |
-| 3060     | ops POST base.seq 1, opId `…:1` (a burst typed after the attach) | 3725: ok, revision 3, entry seq 3                                                   |
-| 1957     | burst 3, `writeDeck` baseRevision 2 (queued)            | 3800: ok false, **"baseRevision 2 is stale; the document is at revision 3"**                 |
-| 2230     | burst 4, `writeDeck` baseRevision 3 (queued)            | 4374: ok, revision 4                                                                         |
-| 3729     | ops POST base.seq 1, opIds `…:2`, `…:3`                 | 4968: **409 resync, "The deck moved to revision 4; reload and rebase"**, head 4              |
-| 4970     | `readEditorDeck` (the client's resync reload)           | the document at revision 4                                                                   |
-| 5219     | ops POST base.seq 1, opIds `…:1`, `…:2`, `…:3` (`…:1` re-sent although admitted at seq 3) | 6231: ok, revision 5, three entries all at seq 5           |
+| Time | Request                                                                                   | Answer                                                                                           |
+| ---- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 1264 | burst 1 "Q4 review", `writeDeck` baseRevision 0                                           | 2607: ok, revision 1; the room attaches, stream opened at 2609, `hello` seq 1 revision 1 at 3055 |
+| 1682 | burst 2, `writeDeck` baseRevision 1 (queued on the draft chain)                           | 3364: ok, revision 2                                                                             |
+| 3060 | ops POST base.seq 1, opId `…:1` (a burst typed after the attach)                          | 3725: ok, revision 3, entry seq 3                                                                |
+| 1957 | burst 3, `writeDeck` baseRevision 2 (queued)                                              | 3800: ok false, **"baseRevision 2 is stale; the document is at revision 3"**                     |
+| 2230 | burst 4, `writeDeck` baseRevision 3 (queued)                                              | 4374: ok, revision 4                                                                             |
+| 3729 | ops POST base.seq 1, opIds `…:2`, `…:3`                                                   | 4968: **409 resync, "The deck moved to revision 4; reload and rebase"**, head 4                  |
+| 4970 | `readEditorDeck` (the client's resync reload)                                             | the document at revision 4                                                                       |
+| 5219 | ops POST base.seq 1, opIds `…:1`, `…:2`, `…:3` (`…:1` re-sent although admitted at seq 3) | 6231: ok, revision 5, three entries all at seq 5                                                 |
 
 The snackbar showed "baseRevision 2 is stale; the document is at revision 3" at 3819 ms and "baseRevision 1 is stale; the document is at revision 3" from 4129 ms to 9317 ms (the second text has no matching server answer; it is the client's own base check, section 1.4 cause A5). The tab's sampler from 3819 ms on: `revision` 3 to 5, `sync.seq` 1, `sync.pending` 3, and it never changed until the run stopped sampling at 35 s. The local title read "Q4 review one two three four five six"; after a reload the store's title read the same: the bursts " seven", " eight" and " nine" were lost. The stream received no `op` or `checkpoint` frame between the `hello` at 3055 ms and 6324 ms, when the store echo delivered seq 3, 4 and 5 at once.
 
@@ -229,12 +229,32 @@ function parseAnswer(text) {
 }
 
 function summarizeAnswer(json) {
-  if (json === null || typeof json !== 'object') return { raw: json === null ? null : String(json).slice(0, 120) };
+  if (json === null || typeof json !== 'object')
+    return { raw: json === null ? null : String(json).slice(0, 120) };
   const out = {};
-  for (const key of ['ok', 'revision', 'seq', 'head', 'code', 'error', 'message', 'currentRevision', 'created', 'left', 'dropped', 'hueSlot', 'role']) {
+  for (const key of [
+    'ok',
+    'revision',
+    'seq',
+    'head',
+    'code',
+    'error',
+    'message',
+    'currentRevision',
+    'created',
+    'left',
+    'dropped',
+    'hueSlot',
+    'role',
+  ]) {
     if (key in json) out[key] = json[key];
   }
-  if (Array.isArray(json.entries)) out.entries = json.entries.map((e) => ({ seq: e.seq, opId: e.opId, ops: (e.mutations || []).map((m) => m.op) }));
+  if (Array.isArray(json.entries))
+    out.entries = json.entries.map((e) => ({
+      seq: e.seq,
+      opId: e.opId,
+      ops: (e.mutations || []).map((m) => m.op),
+    }));
   if (Array.isArray(json.rejected)) out.rejected = json.rejected;
   if (json.entry && typeof json.entry === 'object') out.entryRevision = json.entry.revision;
   if (json.document && json.document.deck) out.documentRevision = json.document.deck.revision;
@@ -257,13 +277,23 @@ function instrument(page, name, context) {
     trace.console.push({ t: t(), page: name, type: msg.type(), text: text.slice(0, 400) });
   });
   page.on('pageerror', (error) => {
-    trace.console.push({ t: t(), page: name, type: 'pageerror', text: String(error).slice(0, 400) });
+    trace.console.push({
+      t: t(),
+      page: name,
+      type: 'pageerror',
+      text: String(error).slice(0, 400),
+    });
   });
   page.on('request', (request) => {
     const url = request.url();
     if (!url.startsWith(BASE)) return;
     const path = url.slice(BASE.length);
-    if (!/\/api\/decks\/|_serverFn|_server|\/api\/actions|\/api\/render|\/api\/decks\.|\/edit\/|\/new/.test(path)) return;
+    if (
+      !/\/api\/decks\/|_serverFn|_server|\/api\/actions|\/api\/render|\/api\/decks\.|\/edit\/|\/new/.test(
+        path,
+      )
+    )
+      return;
     if (request.method() === 'GET' && !/\/stream|\/api\/render/.test(path)) {
       if (!/_serverFn|_server/.test(path)) return;
     }
@@ -302,7 +332,8 @@ function instrument(page, name, context) {
       trace.responses.push(row);
       return;
     }
-    const interesting = /\/api\/decks\/|_serverFn|_server|\/api\/actions/.test(path) && request.method() === 'POST';
+    const interesting =
+      /\/api\/decks\/|_serverFn|_server|\/api\/actions/.test(path) && request.method() === 'POST';
     const rendered = /\/api\/render/.test(path);
     if (!interesting && !rendered && setCookie === undefined) return;
     if (interesting) {
@@ -328,7 +359,12 @@ const state = (page) =>
   page.evaluate(() => {
     const s = window.turboslide.studio.describe().state;
     const roster = Array.isArray(s.roster)
-      ? s.roster.map((r) => ({ clientId: r.clientId, label: r.label, principalId: r.principalId, slideId: r.slideId }))
+      ? s.roster.map((r) => ({
+          clientId: r.clientId,
+          label: r.label,
+          principalId: r.principalId,
+          slideId: r.slideId,
+        }))
       : undefined;
     return {
       keys: Object.keys(s),
@@ -337,7 +373,9 @@ const state = (page) =>
       pending: s.pending,
       sync: s.sync,
       roster,
-      rejects: Array.isArray(s.rejects) ? s.rejects.map((r) => ({ opId: r.opId, reason: r.reason, message: r.message })) : s.rejects,
+      rejects: Array.isArray(s.rejects)
+        ? s.rejects.map((r) => ({ opId: r.opId, reason: r.reason, message: r.message }))
+        : s.rejects,
       error: s.error,
       external: s.external,
       documentRevision: s.document && s.document.deck ? s.document.deck.revision : undefined,
@@ -365,7 +403,9 @@ const dom = (page) =>
       flags: q('.ts-flag'),
       presenceCount: presence ? presence.getAttribute('data-count') : null,
       chips: q('[data-control^="presence.chip."]'),
-      chipClients: [...document.querySelectorAll('[data-control^="presence.chip."]')].map((el) => el.getAttribute('data-client')),
+      chipClients: [...document.querySelectorAll('[data-control^="presence.chip."]')].map((el) =>
+        el.getAttribute('data-client'),
+      ),
       cardMarks: marks,
       rosterRows: q('.ts-roster-row'),
       status: status ? status.textContent : null,
@@ -425,7 +465,8 @@ const settled = async (page, timeout = 30_000) => {
   }
 };
 
-const headingRun = (page) => page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]').first();
+const headingRun = (page) =>
+  page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]').first();
 
 /** One click on the placeholder, the report's gesture; a double click if one did not open the session. */
 async function openHeading(page) {
@@ -454,14 +495,18 @@ async function drag(page, locator, dx, dy) {
   await page.mouse.move(x, y);
   await page.mouse.down();
   const steps = 10;
-  for (let i = 1; i <= steps; i += 1) await page.mouse.move(x + (dx * i) / steps, y + (dy * i) / steps);
+  for (let i = 1; i <= steps; i += 1)
+    await page.mouse.move(x + (dx * i) / steps, y + (dy * i) / steps);
   await page.mouse.up();
 }
 
 async function closeNamePrompt(page) {
   const prompt = page.locator('[data-control="dialog.namePrompt"]');
   if (await prompt.isVisible().catch(() => false)) {
-    await page.locator('[data-control="dialog.namePrompt.close"]').click().catch(() => undefined);
+    await page
+      .locator('[data-control="dialog.namePrompt.close"]')
+      .click()
+      .catch(() => undefined);
   }
 }
 
@@ -518,7 +563,10 @@ try {
   await A.locator('[data-control="toolbar.newSlide.split"]').click();
   await sleep(gap());
   let s5 = await sample(A, 'after edit 5 (new slide)');
-  step('edit 5 new slide', `active ${s5?.state.activeSlide}, revision ${s5?.state.revision}, pending ${s5?.state.sync?.pending}`);
+  step(
+    'edit 5 new slide',
+    `active ${s5?.state.activeSlide}, revision ${s5?.state.revision}, pending ${s5?.state.sync?.pending}`,
+  );
   const slide2 = s5?.state.activeSlide;
 
   // 4. edits 6 to 8: typing on the new slide
@@ -536,14 +584,21 @@ try {
 
   // 5. edit 9: a drag of the heading block on slide 2
   mark(A, 'edit 9 start');
-  const before9 = slide2 ? await invoke(A, 'slide.get', { slideId: slide2 }).catch(() => null) : null;
+  const before9 = slide2
+    ? await invoke(A, 'slide.get', { slideId: slide2 }).catch(() => null)
+    : null;
   await headingRun(A).click();
   await sleep(150);
   await drag(A, headingRun(A), 60, 30);
   await sleep(gap());
-  const after9 = slide2 ? await invoke(A, 'slide.get', { slideId: slide2 }).catch(() => null) : null;
+  const after9 = slide2
+    ? await invoke(A, 'slide.get', { slideId: slide2 }).catch(() => null)
+    : null;
   const s9 = await sample(A, 'after edit 9 (drag)');
-  step('edit 9 drag', `revision ${s9?.state.revision}, pending ${s9?.state.sync?.pending}, slide before/after ${JSON.stringify(before9?.slide?.heading ?? null).slice(0, 40)} -> ${JSON.stringify(after9?.slide?.heading ?? null).slice(0, 40)}`);
+  step(
+    'edit 9 drag',
+    `revision ${s9?.state.revision}, pending ${s9?.state.sync?.pending}, slide before/after ${JSON.stringify(before9?.slide?.heading ?? null).slice(0, 40)} -> ${JSON.stringify(after9?.slide?.heading ?? null).slice(0, 40)}`,
+  );
 
   // 6. edit 10: a text style change (Bold from the toolbar) on the selected block
   mark(A, 'edit 10 start');
@@ -576,9 +631,20 @@ try {
   const settledA = await settled(A, 45_000);
   await sample(A, 'settled after twelve edits');
   await shot(A, '01-after-twelve-edits');
-  step('settled', `revision ${settledA.revision}, serverRevision ${settledA.serverRevision}, pending ${settledA.sync?.pending}, retained ${settledA.sync?.retained}, seq ${settledA.sync?.seq}, rejects ${settledA.rejects?.length}, error ${JSON.stringify(settledA.error)}`);
-  const titleNow = await invoke(A, 'slide.get', { slideId: 'title' }).then((g) => g.slide.heading, () => null);
-  const slide2Now = slide2 ? await invoke(A, 'slide.get', { slideId: slide2 }).then((g) => g.slide.heading, () => null) : null;
+  step(
+    'settled',
+    `revision ${settledA.revision}, serverRevision ${settledA.serverRevision}, pending ${settledA.sync?.pending}, retained ${settledA.sync?.retained}, seq ${settledA.sync?.seq}, rejects ${settledA.rejects?.length}, error ${JSON.stringify(settledA.error)}`,
+  );
+  const titleNow = await invoke(A, 'slide.get', { slideId: 'title' }).then(
+    (g) => g.slide.heading,
+    () => null,
+  );
+  const slide2Now = slide2
+    ? await invoke(A, 'slide.get', { slideId: slide2 }).then(
+        (g) => g.slide.heading,
+        () => null,
+      )
+    : null;
   step('document text', `title=${JSON.stringify(titleNow)} slide2=${JSON.stringify(slide2Now)}`);
   const presenceA1 = await invoke(A, 'presence.list').catch((e) => ({ error: String(e) }));
   step('presence.list (one tab)', JSON.stringify(presenceA1).slice(0, 400));
@@ -593,7 +659,10 @@ try {
   await editorReady(A);
   stopSampler = startSampler(A, 500);
   const afterReload = await sample(A, 'after reload boot');
-  step('after reload', `revision ${afterReload?.state.revision}, serverRevision ${afterReload?.state.serverRevision}, documentRevision ${afterReload?.state.documentRevision}, seq ${afterReload?.state.sync?.seq}, status "${afterReload?.dom.status}"`);
+  step(
+    'after reload',
+    `revision ${afterReload?.state.revision}, serverRevision ${afterReload?.state.serverRevision}, documentRevision ${afterReload?.state.documentRevision}, seq ${afterReload?.state.sync?.seq}, status "${afterReload?.dom.status}"`,
+  );
   await sleep(1500);
   await sample(A, 'after reload +1.5 s');
   const opened4 = await openHeading(A);
@@ -605,15 +674,24 @@ try {
   const settledR = await settled(A, 45_000);
   await sample(A, 'settled after reload edit');
   await shot(A, '02-after-reload-edit');
-  step('edit after reload', `gesture ${opened4.gesture}; revision ${settledR.revision}, pending ${settledR.sync?.pending}, rejects ${JSON.stringify(settledR.rejects)}, error ${JSON.stringify(settledR.error)}`);
-  const titleAfter = await invoke(A, 'slide.get', { slideId: 'title' }).then((g) => g.slide.heading, () => null);
+  step(
+    'edit after reload',
+    `gesture ${opened4.gesture}; revision ${settledR.revision}, pending ${settledR.sync?.pending}, rejects ${JSON.stringify(settledR.rejects)}, error ${JSON.stringify(settledR.error)}`,
+  );
+  const titleAfter = await invoke(A, 'slide.get', { slideId: 'title' }).then(
+    (g) => g.slide.heading,
+    () => null,
+  );
   step('title after reload edit', JSON.stringify(titleAfter));
   const presenceA2 = await invoke(A, 'presence.list').catch((e) => ({ error: String(e) }));
   step('presence.list (one tab, after reload)', JSON.stringify(presenceA2).slice(0, 400));
 
   // 10. the second tab: a second context that shares the first context's cookies
   const storage = await contextA.storageState();
-  contextB = await browser.newContext({ viewport: { width: 1440, height: 900 }, storageState: storage });
+  contextB = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    storageState: storage,
+  });
   await contextB.addInitScript(SSE_WRAPPER);
   const B = await contextB.newPage();
   instrument(B, 'B', contextB);
@@ -624,8 +702,14 @@ try {
   const sB = await sample(B, 'two tabs: B');
   const presenceA3 = await invoke(A, 'presence.list').catch((e) => ({ error: String(e) }));
   const presenceB1 = await invoke(B, 'presence.list').catch((e) => ({ error: String(e) }));
-  step('two tabs A', `revision ${sA?.state.revision}, roster ${JSON.stringify(sA?.state.roster)}, dom ${JSON.stringify({ outline: sA?.dom.remoteOutline, caret: sA?.dom.remoteCaret, chips: sA?.dom.chips, count: sA?.dom.presenceCount, marks: sA?.dom.cardMarks })}`);
-  step('two tabs B', `revision ${sB?.state.revision}, roster ${JSON.stringify(sB?.state.roster)}, dom ${JSON.stringify({ outline: sB?.dom.remoteOutline, caret: sB?.dom.remoteCaret, chips: sB?.dom.chips, count: sB?.dom.presenceCount, marks: sB?.dom.cardMarks })}`);
+  step(
+    'two tabs A',
+    `revision ${sA?.state.revision}, roster ${JSON.stringify(sA?.state.roster)}, dom ${JSON.stringify({ outline: sA?.dom.remoteOutline, caret: sA?.dom.remoteCaret, chips: sA?.dom.chips, count: sA?.dom.presenceCount, marks: sA?.dom.cardMarks })}`,
+  );
+  step(
+    'two tabs B',
+    `revision ${sB?.state.revision}, roster ${JSON.stringify(sB?.state.roster)}, dom ${JSON.stringify({ outline: sB?.dom.remoteOutline, caret: sB?.dom.remoteCaret, chips: sB?.dom.chips, count: sB?.dom.presenceCount, marks: sB?.dom.cardMarks })}`,
+  );
   step('presence.list A', JSON.stringify(presenceA3).slice(0, 500));
   step('presence.list B', JSON.stringify(presenceB1).slice(0, 500));
   await shot(A, '03-two-tabs-A');
@@ -640,14 +724,43 @@ try {
   await sleep(2500);
   const sA2 = await sample(A, 'after B typed: A');
   const sB2 = await sample(B, 'after B typed: B');
-  step('B typed', `gesture ${openedB.gesture}; B revision ${settledB.revision}, pending ${settledB.sync?.pending}, rejects ${JSON.stringify(settledB.rejects)}; A revision ${sA2?.state.revision}, A title now ${JSON.stringify(await invoke(A, 'slide.get', { slideId: 'title' }).then((g) => g.slide.heading, () => null))}`);
-  step('A dom after B typed', JSON.stringify({ outline: sA2?.dom.remoteOutline, caret: sA2?.dom.remoteCaret, chips: sA2?.dom.chips, count: sA2?.dom.presenceCount, marks: sA2?.dom.cardMarks }));
-  step('B dom after B typed', JSON.stringify({ outline: sB2?.dom.remoteOutline, caret: sB2?.dom.remoteCaret, chips: sB2?.dom.chips, count: sB2?.dom.presenceCount, marks: sB2?.dom.cardMarks }));
+  step(
+    'B typed',
+    `gesture ${openedB.gesture}; B revision ${settledB.revision}, pending ${settledB.sync?.pending}, rejects ${JSON.stringify(settledB.rejects)}; A revision ${sA2?.state.revision}, A title now ${JSON.stringify(
+      await invoke(A, 'slide.get', { slideId: 'title' }).then(
+        (g) => g.slide.heading,
+        () => null,
+      ),
+    )}`,
+  );
+  step(
+    'A dom after B typed',
+    JSON.stringify({
+      outline: sA2?.dom.remoteOutline,
+      caret: sA2?.dom.remoteCaret,
+      chips: sA2?.dom.chips,
+      count: sA2?.dom.presenceCount,
+      marks: sA2?.dom.cardMarks,
+    }),
+  );
+  step(
+    'B dom after B typed',
+    JSON.stringify({
+      outline: sB2?.dom.remoteOutline,
+      caret: sB2?.dom.remoteCaret,
+      chips: sB2?.dom.chips,
+      count: sB2?.dom.presenceCount,
+      marks: sB2?.dom.cardMarks,
+    }),
+  );
   trace.sse['B'] = await sseLog(B);
   await B.close();
   await sleep(3000);
   const sA3 = await sample(A, 'after B closed: A');
-  step('A after B closed', `roster ${JSON.stringify(sA3?.state.roster)}, dom ${JSON.stringify({ outline: sA3?.dom.remoteOutline, caret: sA3?.dom.remoteCaret, chips: sA3?.dom.chips, count: sA3?.dom.presenceCount })}`);
+  step(
+    'A after B closed',
+    `roster ${JSON.stringify(sA3?.state.roster)}, dom ${JSON.stringify({ outline: sA3?.dom.remoteOutline, caret: sA3?.dom.remoteCaret, chips: sA3?.dom.chips, count: sA3?.dom.presenceCount })}`,
+  );
 
   // 11. optional: the stream's lifetime end and the reconnect (240 to 290 s on the server)
   if (LONG) {
@@ -661,7 +774,10 @@ try {
         opens = now.opens;
         await sleep(4000);
         const sR = await sample(A, `after reconnect ${opens}`);
-        step(`stream reconnected (${opens})`, `roster ${JSON.stringify(sR?.state.roster)}, sync ${JSON.stringify(sR?.state.sync)}, dom ${JSON.stringify({ outline: sR?.dom.remoteOutline, caret: sR?.dom.remoteCaret, chips: sR?.dom.chips, count: sR?.dom.presenceCount })}`);
+        step(
+          `stream reconnected (${opens})`,
+          `roster ${JSON.stringify(sR?.state.roster)}, sync ${JSON.stringify(sR?.state.sync)}, dom ${JSON.stringify({ outline: sR?.dom.remoteOutline, caret: sR?.dom.remoteCaret, chips: sR?.dom.chips, count: sR?.dom.presenceCount })}`,
+        );
         await shot(A, `04-after-reconnect-${opens}`);
         // type once after the reconnect
         const openedR = await openHeading(A);
@@ -670,7 +786,15 @@ try {
         await sleep(600);
         await A.keyboard.press('Escape');
         const sR2 = await settled(A, 45_000);
-        step('edit after reconnect', `gesture ${openedR.gesture}; revision ${sR2.revision}, pending ${sR2.sync?.pending}, rejects ${JSON.stringify(sR2.rejects)}, title ${JSON.stringify(await invoke(A, 'slide.get', { slideId: 'title' }).then((g) => g.slide.heading, () => null))}`);
+        step(
+          'edit after reconnect',
+          `gesture ${openedR.gesture}; revision ${sR2.revision}, pending ${sR2.sync?.pending}, rejects ${JSON.stringify(sR2.rejects)}, title ${JSON.stringify(
+            await invoke(A, 'slide.get', { slideId: 'title' }).then(
+              (g) => g.slide.heading,
+              () => null,
+            ),
+          )}`,
+        );
         break;
       }
     }
@@ -705,9 +829,15 @@ try {
         await editorReady(A);
         const info = await invoke(A, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch((e) => step('deck.trash failed', String(e)));
+          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch((e) =>
+            step('deck.trash failed', String(e)),
+          );
           const again = await invoke(A, 'deck.info').catch(() => null);
-          await invoke(A, 'deck.remove', { id: deckId, confirm: true, baseRevision: again?.revision ?? info.revision }).then(
+          await invoke(A, 'deck.remove', {
+            id: deckId,
+            confirm: true,
+            baseRevision: again?.revision ?? info.revision,
+          }).then(
             () => {
               step('cleanup', `deck.remove removed ${deckId}`);
               deckId = '';
@@ -716,7 +846,10 @@ try {
           );
         }
       } catch (error2) {
-        step('cleanup via actions failed', error2 instanceof Error ? error2.message : String(error2));
+        step(
+          'cleanup via actions failed',
+          error2 instanceof Error ? error2.message : String(error2),
+        );
       }
     }
   }
@@ -724,7 +857,9 @@ try {
   trace.endedAt = new Date().toISOString();
   writeFileSync(join(OUT, 'trace.json'), JSON.stringify(trace, null, 2));
   await browser.close();
-  console.log(`\ntrace written to ${join(OUT, 'trace.json')}; deck left behind: ${deckId || 'none'}`);
+  console.log(
+    `\ntrace written to ${join(OUT, 'trace.json')}; deck left behind: ${deckId || 'none'}`,
+  );
 }
 ```
 
@@ -787,15 +922,15 @@ The probe, `scripts/probes/new-write-probe.mjs`, gained: twelve sequential edits
 
 All from `/Users/kevinliu/repos/Turboslide` (or the package folder named) with Node 24.13.0, `node_modules/.bin/<tool>`, no `pnpm` command, no git write command, no Docker. The verifier's dev server on 4346 and its `.turboslide/e2e.lock` (taken 15:34 PDT) ran beside this work the whole time.
 
-| Command                                                                                                                                                                                                                                                                                                                                   | Result                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `node_modules/.bin/tsc -b` (twice: after the source changes, after the Prettier pass)                                                                                                                                                                                                                                                     | exit 0 both times, 12.6 s the first                                                                                                                                                                                                                                                                                                                                          |
-| `cd packages/realtime && ../../node_modules/.bin/vitest run` (eleven runs while the machine carried the verifier's browser work)                                                                                                                                                                                                          | 10 files, 84 tests (80 before, the 4 of section 2.3 new); 84 passed in ten runs; one run had one failure in the new A3 case, whose assertion read the position after the re-sent POST had already been answered; the case now holds the flush behind the transport's `hold` until it has read the position, and passed ten of ten runs after that                             |
-| `cd apps/studio && ../../node_modules/.bin/vitest run`                                                                                                                                                                                                                                                                                    | 35 files, 234 tests passed (the three new files: `client-ids.test.ts` 5, `retire-clients.test.ts` 2, `-hash-guard.test.ts` 3; `client-binding.test.ts` still green)                                                                                                                                                                                                         |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts`                                                                                                                                                                                                                                 | 8 passed (no chrome string changed)                                                                                                                                                                                                                                                                                                                                          |
-| `node_modules/.bin/prettier --check <the 13 changed files>`, then `--write` on the six it flagged (`controller.tsx`, `client-ids.ts`, `-hash-guard.ts`, `-hash-guard.test.ts`, `retire-clients.test.ts`, `new-write-probe.mjs`)                                                                                                             | clean; the diff of `controller.tsx` after the pass shows only lines this fix wrote                                                                                                                                                                                                                                                                                           |
-| `node scripts/lint-packages.mjs --changed`, then per file `node_modules/.bin/eslint <file>` against `git show main:<file>` through `--stdin`                                                                                                                                                                                              | every finding `--changed` lists sits on a line from `43707c3` (`git blame`); per file the counts are equal to `main`'s (`room-client.ts` 4 and 4, `controller.tsx` 5 and 5, `EditorRoot.tsx` 3 and 3, `room.ts` 2 and 2, `new.tsx`, the stream route and the client test 0 and 0) and the five new files have 0; the package counts above the baseline are the tree's on `main` |
-| `cd apps/studio && TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> TURBOSLIDE_LOCAL_OPEN=1 node_modules/.bin/vite dev --port 4347 --strictPort` (the first start without the two secrets answered 500 on every route: the tmp store has no state folder for a session secret) | up in 2 s; `/home` and `/new` 200; stopped at the end of the round                                                                                                                                                                                                                                                                                                           |
+| Command                                                                                                                                                                                                                                                                                                                                          | Result                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node_modules/.bin/tsc -b` (twice: after the source changes, after the Prettier pass)                                                                                                                                                                                                                                                            | exit 0 both times, 12.6 s the first                                                                                                                                                                                                                                                                                                                                             |
+| `cd packages/realtime && ../../node_modules/.bin/vitest run` (eleven runs while the machine carried the verifier's browser work)                                                                                                                                                                                                                 | 10 files, 84 tests (80 before, the 4 of section 2.3 new); 84 passed in ten runs; one run had one failure in the new A3 case, whose assertion read the position after the re-sent POST had already been answered; the case now holds the flush behind the transport's `hold` until it has read the position, and passed ten of ten runs after that                               |
+| `cd apps/studio && ../../node_modules/.bin/vitest run`                                                                                                                                                                                                                                                                                           | 35 files, 234 tests passed (the three new files: `client-ids.test.ts` 5, `retire-clients.test.ts` 2, `-hash-guard.test.ts` 3; `client-binding.test.ts` still green)                                                                                                                                                                                                             |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts`                                                                                                                                                                                                                                        | 8 passed (no chrome string changed)                                                                                                                                                                                                                                                                                                                                             |
+| `node_modules/.bin/prettier --check <the 13 changed files>`, then `--write` on the six it flagged (`controller.tsx`, `client-ids.ts`, `-hash-guard.ts`, `-hash-guard.test.ts`, `retire-clients.test.ts`, `new-write-probe.mjs`)                                                                                                                  | clean; the diff of `controller.tsx` after the pass shows only lines this fix wrote                                                                                                                                                                                                                                                                                              |
+| `node scripts/lint-packages.mjs --changed`, then per file `node_modules/.bin/eslint <file>` against `git show main:<file>` through `--stdin`                                                                                                                                                                                                     | every finding `--changed` lists sits on a line from `43707c3` (`git blame`); per file the counts are equal to `main`'s (`room-client.ts` 4 and 4, `controller.tsx` 5 and 5, `EditorRoot.tsx` 3 and 3, `room.ts` 2 and 2, `new.tsx`, the stream route and the client test 0 and 0) and the five new files have 0; the package counts above the baseline are the tree's on `main` |
+| `cd apps/studio && TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> TURBOSLIDE_LOCAL_OPEN=1 node_modules/.bin/vite dev --port 4347 --strictPort` (the first start without the two secrets answered 500 on every route: the tmp store has no state folder for a session secret) | up in 2 s; `/home` and `/new` 200; stopped at the end of the round                                                                                                                                                                                                                                                                                                              |
 
 ### 2.5 The probe against the fixer's dev server
 
@@ -824,14 +959,14 @@ By the ship step, 2026-09-14, 16:10 to 17:10 PDT, on the shared checkout over `m
 
 All from the repository root (or the package folder named), Node 24.13.0.
 
-| Command                                                                   | Result                                                                                                                        |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `node_modules/.bin/tsc -b` (and `--force`)                               | exit 0 both; the full `--force` build is clean                                                                               |
-| `cd packages/realtime && ../../node_modules/.bin/vitest run`             | 10 files, 84 tests passed                                                                                                    |
-| `cd apps/studio && ../../node_modules/.bin/vitest run`                   | 35 files, 234 to 236 tests passed (the count varies with the route fixtures; the three new files green)                     |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts` | 8 passed                                                                                    |
-| `node scripts/check.mjs --only 4,5,6`                                    | 4 (`tsc -b`) ok, 5 (`pnpm test`) ok, 6 (`pnpm build` + client bundle + greps) ok. Step 5 failed once on `packages/materials/src/capture.test.ts` (a headless browser `afterAll` hook timed out at 10 s under the machine's load, unrelated to the hotfix); it passed on the rerun and in the full `--only 5,6` chain |
-| `cd packages/agent && node src/generate/main.ts --check`                 | every committed contract is current; no generated file changed, so none join the commit                                     |
+| Command                                                                                                   | Result                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node_modules/.bin/tsc -b` (and `--force`)                                                                | exit 0 both; the full `--force` build is clean                                                                                                                                                                                                                                                                       |
+| `cd packages/realtime && ../../node_modules/.bin/vitest run`                                              | 10 files, 84 tests passed                                                                                                                                                                                                                                                                                            |
+| `cd apps/studio && ../../node_modules/.bin/vitest run`                                                    | 35 files, 234 to 236 tests passed (the count varies with the route fixtures; the three new files green)                                                                                                                                                                                                              |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts` | 8 passed                                                                                                                                                                                                                                                                                                             |
+| `node scripts/check.mjs --only 4,5,6`                                                                     | 4 (`tsc -b`) ok, 5 (`pnpm test`) ok, 6 (`pnpm build` + client bundle + greps) ok. Step 5 failed once on `packages/materials/src/capture.test.ts` (a headless browser `afterAll` hook timed out at 10 s under the machine's load, unrelated to the hotfix); it passed on the rerun and in the full `--only 5,6` chain |
+| `cd packages/agent && node src/generate/main.ts --check`                                                  | every committed contract is current; no generated file changed, so none join the commit                                                                                                                                                                                                                              |
 
 ### 3.2 The preview deployment and the smoke
 

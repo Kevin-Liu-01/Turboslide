@@ -46,9 +46,10 @@ import type { HomeFacts } from './facts';
 // verifier's JSON under docs/gslides-parity/verification-4/ when it is present.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..', '..', '..');
-const BASELINE_JSON = join(
+/** The verifier's production run after the round four ship (VERIFICATION-4 section 5), the source of the measured numbers since the fixer round. */
+const PRODUCTION_JSON = join(
   ROOT,
-  'docs/gslides-parity/verification-4/perf-budget-baseline-2026-09-14.json',
+  'docs/gslides-parity/verification-4/perf-budget-production-2026-09-14.json',
 );
 
 /** Distinct primes above 99,999, so every formatted probe carries a thousands separator and no two collide. */
@@ -341,56 +342,69 @@ describe('the numbers and their source lines (SPEC-4 0.20)', () => {
       const row = SPEED.rows.find((r) => r.id === id);
       expect(row?.source, id).toMatch(/\d{4}-\d{2}-\d{2}/);
     }
-    expect(SPEED.closing.source).toMatch(/verification-4\/BASELINE\.md.*2026-09-14/);
+    expect(SPEED.closing.source).toMatch(
+      /verification-4\/perf-budget-production-2026-09-14\.json, 2026-09-14/,
+    );
   });
 
   it('writes the Rust row and the preload row in the tense of the ship tree (PP section 4)', () => {
     expect(SPEED.rows.find((r) => r.id === 'rust')?.body).toContain(
       'The hosted studio runs the TypeScript stages today.',
     );
+    /* the title row's mark is a same document link since round four (SPEC-4 0.16, 0.39): the
+       sentence is in the present tense and never says the move is a document load */
     expect(SPEED.rows.find((r) => r.id === 'preload')?.body).toContain(
-      'still a document load today',
+      'keeps the page and its code',
     );
+    expect(SPEED.rows.find((r) => r.id === 'preload')?.body).not.toContain('document load');
     expect(SPEED.closing.text).toContain('one instance renders one slide at a time');
   });
 
-  it("uses the verifier's day 0 numbers, not R04's alone", () => {
+  it("uses the verifier's post round production numbers, not the day 0 baseline or R04's", () => {
     expect(MEASURED.preload.text).toContain(String(MEASURED.preload.decksToEditGtBrandMs));
-    expect(MEASURED.preload.text).toContain(String(MEASURED.preload.decksToEditOneSlideMs));
-    expect(MEASURED.preload.text).not.toContain('858');
-    expect(MEASURED.preload.text).not.toContain('399');
+    expect(MEASURED.preload.text).toContain(String(MEASURED.preload.editToDecksMs));
+    for (const stale of ['858', '399', '598', '544', '723'])
+      expect(MEASURED.preload.text).not.toContain(stale);
+    expect(SPEED.closing.text).not.toContain('823');
+    expect(SPEED.closing.text).not.toContain('4.3 s');
   });
 
-  const hasBaseline = existsSync(BASELINE_JSON);
+  const hasProduction = existsSync(PRODUCTION_JSON);
 
-  it.skipIf(!hasBaseline)("matches the verifier's baseline JSON where it holds the number", () => {
-    const json = JSON.parse(readFileSync(BASELINE_JSON, 'utf8')) as {
-      routes: {
-        route: string;
-        kind?: string;
-        ttfb?: number;
-        ready?: number;
-        samples?: { ttfb: number }[];
-      }[];
-      transitions: { name: string; ms: number }[];
-    };
-    const decksToEdit = json.transitions.find((t) => t.name === 'decks->edit');
-    expect(Math.round(decksToEdit?.ms ?? 0)).toBe(MEASURED.preload.decksToEditGtBrandMs);
-    const newCold = json.routes.find((r) => r.route === '/new' && r.kind === 'cold');
-    expect(Math.round(newCold?.ready ?? 0)).toBe(MEASURED.closing.newReadyColdMs);
-    const decksCold = json.routes.find((r) => r.route === '/decks' && r.kind === 'cold');
-    for (const sample of decksCold?.samples ?? []) {
-      const s = sample.ttfb / 1000;
-      const fast =
-        s >= MEASURED.closing.decksTtfbFastS[0] && s <= MEASURED.closing.decksTtfbFastS[1] + 0.4;
-      const slow =
-        s >= MEASURED.closing.decksTtfbSlowS[0] && s <= MEASURED.closing.decksTtfbSlowS[1] + 0.2;
-      expect(
-        fast || slow,
-        `a /decks cold sample of ${sample.ttfb} ms sits in one of the two modes`,
-      ).toBe(true);
-    }
-  });
+  it.skipIf(!hasProduction)(
+    "matches the verifier's production JSON where it holds the number",
+    () => {
+      const json = JSON.parse(readFileSync(PRODUCTION_JSON, 'utf8')) as {
+        routes: {
+          route: string;
+          kind?: string;
+          ttfb?: number;
+          ready?: number;
+          jsDecoded?: number;
+          samples?: { ttfb: number }[];
+        }[];
+        transitions: { name: string; ms: number }[];
+        twins: { total: number; refetched: number };
+      };
+      const decksToEdit = json.transitions.find((t) => t.name === 'decks->edit');
+      expect(Math.round(decksToEdit?.ms ?? 0)).toBe(MEASURED.preload.decksToEditGtBrandMs);
+      const editToDecks = json.transitions.find((t) => t.name === 'edit->decks');
+      expect(Math.round(editToDecks?.ms ?? 0)).toBe(MEASURED.preload.editToDecksMs);
+      expect([json.twins.refetched, json.twins.total]).toEqual([
+        ...MEASURED.immutable.twinsRefetched,
+      ]);
+      const cold = (route: string) =>
+        json.routes.find((r) => r.route === route && r.kind === 'cold');
+      expect(Math.round(cold('/new')?.ready ?? 0)).toBe(MEASURED.closing.newReadyColdMs);
+      expect(Math.round(cold('/deck/gt-brand')?.ready ?? 0)).toBe(MEASURED.closing.deckReadyColdMs);
+      expect(Math.round(cold('/decks')?.ttfb ?? 0)).toBe(MEASURED.closing.decksTtfbColdMs);
+      const worst = Math.max(...(cold('/decks')?.samples ?? []).map((s) => s.ttfb));
+      expect(Math.round(worst)).toBe(MEASURED.closing.decksTtfbWorstMs);
+      const decoded = json.routes.map((r) => r.jsDecoded ?? 0).filter((n) => n > 0);
+      expect(Math.round(Math.min(...decoded) / 1024)).toBe(MEASURED.closing.jsDecodedKb[0]);
+      expect(Math.round(Math.max(...decoded) / 1024)).toBe(MEASURED.closing.jsDecodedKb[1]);
+    },
+  );
 });
 
 describe('the shape of the page', () => {

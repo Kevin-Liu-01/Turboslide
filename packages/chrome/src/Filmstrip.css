@@ -9,7 +9,14 @@
    labels, the drop line in ink between cards, a refused drop shaking for 200ms. Line law (SPEC
    2.2): the aside owns its right edge; a frame draws its one --pt-edge line; the current ring is
    ink as a state (the same pair every current frame in the shell uses). Colors are tokens only;
-   motion is the fast duration and the shake, both off under reduced motion. ---- */
+   motion is the fast duration and the shake, both off under reduced motion. The cards carry no
+   `content-visibility: auto` since the round four fixer round (gslides-parity SPEC-4 0.41,
+   VERIFICATION-4 finding 5): with the clones windowed by the observer the off screen cards hold
+   an 8 node plate and nothing is left to skip, while a skipped card's cached layout result kept
+   every clone unmounted under it alive (2,500 detached nodes after three passes, held by
+   `blink::LayoutBlockFlow` in the heap snapshot) and unlocking a card on the way back laid the
+   clone out inside the scroll frame (steady p95 33 to 60 ms against 10 without the rule, measured
+   2026-09-14 on the dev server). ---- */
 .ts-filmstrip .ts-film {
   flex: 1 1 auto;
   min-height: 0;
@@ -27,8 +34,6 @@
   column-gap: 0;
   align-items: start;
   cursor: pointer;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 118px;
 }
 
 .ts-card:focus-visible {

@@ -23,7 +23,10 @@
    of its own: Chromium insets a sticky box's constraint rectangle by its
    scroll container's padding. Colors are tokens only, radius 0, no shadow;
    motion is color over the fast duration plus the chevron's turn, off under
-   reduced motion. Rows skip painting off screen (content-visibility). */
+   reduced motion. Outline rows skip painting off screen (content-visibility); the thumbnail
+   density rows do not, because their clones mount and unmount with the shared window
+   (gslides-parity SPEC-4 0.41) and a skipped row's cached layout result kept every clone
+   unmounted under it alive (the round four fixer round; Filmstrip.css says the same). */
 
 .pt-sb {
   grid-column: 1;
@@ -414,7 +417,8 @@ a.pt-sb-mark:focus-visible {
   align-items: center;
   height: auto;
   padding: 6px 10px 8px 12px;
-  contain-intrinsic-size: auto 152px;
+  content-visibility: visible;
+  contain-intrinsic-size: none;
 }
 
 .pt-tree.is-shots .pt-orow .pt-orow-n {

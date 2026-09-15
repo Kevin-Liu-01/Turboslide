@@ -2,13 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import type { Version } from '@turboslide/schema/mutations';
 
-import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog } from './write';
+import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog, withTrashStamp } from './write';
 import type { EditorDeck } from './write';
 
 // The editor payload's version log (gslides-parity SPEC-4 0.34; PP 3.5 item 3): the loader
 // carries the newest EDITOR_VERSIONS_KEPT records without their mutations, and the trim runs
 // after the role shaping so a role without `history` keeps its empty log. Pure functions over
-// hand built records; no store, no server function.
+// hand built records; no store, no server function. `withTrashStamp` (the round four fixer) is
+// the store's manifest stamp applied over the room's live document.
 
 function version(n: number, mutationCount = 1): Version {
   return {
@@ -93,5 +94,28 @@ describe('shapeByRole then trimVersionLog', () => {
     const shaped = shapeByRole(payload, ['read']);
     expect(shaped.versions).toEqual([]);
     expect(trimVersionLog(shaped.versions)).toEqual([]);
+  });
+
+  describe('withTrashStamp', () => {
+    const live = payload.document;
+
+    it('applies the store manifest stamp a room opened before the trash does not carry', () => {
+      const stamped = withTrashStamp(live, '2026-09-14T01:00:00.000Z');
+      expect(stamped.deck.trashedAt).toBe('2026-09-14T01:00:00.000Z');
+      /* the rest of the document is the room's: the same slides object, the same revision */
+      expect(stamped.slides).toBe(live.slides);
+      expect(stamped.deck.revision).toBe(live.deck.revision);
+      expect(live.deck.trashedAt).toBeUndefined();
+    });
+
+    it('removes a stamp the store has cleared, and returns the same document when they agree', () => {
+      const trashed = { ...live, deck: { ...live.deck, trashedAt: '2026-09-14T01:00:00.000Z' } };
+      const restored = withTrashStamp(trashed, undefined);
+      expect('trashedAt' in restored.deck).toBe(false);
+      expect(withTrashStamp(live, undefined)).toBe(live);
+      expect(withTrashStamp(trashed, '2026-09-14T01:00:00.000Z')).toBe(trashed);
+      /* an empty string is no stamp (schema/deck isTrashed) */
+      expect(withTrashStamp(live, '')).toBe(live);
+    });
   });
 });

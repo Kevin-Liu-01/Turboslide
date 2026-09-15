@@ -1,0 +1,45 @@
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+skip  template copy: pass --template-copy (the row writes one deck and removes it)
+path                                       status  ms     result  detail
+/                                          307     282    pass    location /new; x-robots-tag noindex
+/new                                       200     2986   pass    72141 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     1278   pass    179392 chars; 0 notes key(s)
+/edit/gt-brand                             200     1046   pass    294357 chars; 3/3 shell marks
+/decks                                     200     363    pass    19 card(s)
+/decks/trash                               200     416    pass    35273 chars
+/print/gt-brand                            200     276    pass    85 page(s)
+/present/gt-brand                          200     449    pass    293151 chars
+/home                                      200     365    pass    94348 chars; 3/3 marks; no noindex meta; x-robots-tag noindex (the platform stamps it on every preview answer; reported)
+/decks/gt-brand/assets/cover-fumadocs.png  200     459    pass    image/png 335538 B
+/api/agent                                 401     219    pass    bearer rule
+headers /edit/gt-brand                     200     480    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                     200     421    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                    200     333    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                      200     252    pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                 415     138    pass    415
+unsigned thumbnail                         302     193    pass    shadow: the stored object (https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.)
+csp report endpoint                        204     107    pass    204
+cdn /favicon.ico                           200     30     pass    image/vnd.microsoft.icon 15086 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /icon.svg                              200     33     pass    image/svg+xml 957 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /apple-touch-icon.png                  200     30     pass    image/png 753 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /manifest.webmanifest                  200     55     pass    application/manifest+json; charset=utf-8 971 B; first 200 MISS, second 200 HIT; public, max-age=86400
+cdn /icons/icon-512.png                    200     38     pass    image/png 460 B; first 200 MISS, second 200 HIT; public, max-age=604800, stale-while-revalidate=2592000
+cdn /og/turboslide.png                     200     83     pass    image/png 29818 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-dark.png                   200     61     pass    image/png 13679 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-light.png                  200     26     pass    image/png 13689 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-dark.png                 200     32     pass    image/png 13873 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-light.png                200     34     pass    image/png 13892 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-dark.png               200     38     pass    image/png 13866 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-light.png              200     100    pass    image/png 13862 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-dark.png              200     38     pass    image/png 1885 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-light.png             200     33     pass    image/png 1887 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /home                                  200     112    pass    text/html; charset=utf-8 94348 B; first 200 HIT, second 200 HIT; public, max-age=0, must-revalidate
+thumbnail without r                        302     351    pass    302 -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/deck; public; MISS; set-cookie present (the CDN does not cache it); stamp 277d772f; source blob; fresh 1
+thumbnail with r twice                     302     211    pass    first 302 MISS blob; second 302 MISS blob -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.thumbs/2; public, max-age=31536000, immutable
+effects backend                            200     154    pass    typescript; glibc 2.34; node v24.19.0 linux (the TypeScript or wasm stages: the Linux addon is not committed, SPEC-4 0.38)
+deck.info snapshots                        200     310    pass    1 snapshot(s), revision 32
+37/37 passed against https://turboslide-5h207n1fg-kl01s-projects.vercel.app/

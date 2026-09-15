@@ -1,0 +1,4 @@
+untitled-20260915-ofpb deck.info 200 {"revision":2,"title":"Perf budget heading"}
+untitled-20260915-ofpb deck.trash 200 {"revision":2,"trashedAt":"2026-09-15T03:38:06.453Z"}
+untitled-20260915-ofpb deck.remove 200 {"id":"untitled-20260915-ofpb","removed":true}
+untitled-20260915-ofpb /deck probe 404

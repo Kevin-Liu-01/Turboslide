@@ -1,0 +1,86 @@
+{
+  "mark-20px-1x-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-20px-1x-light.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 20,
+      "height": 20
+    }
+  },
+  "mark-20px-1x-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-20px-1x-dark.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 20,
+      "height": 20
+    }
+  },
+  "mark-24px-1x-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-24px-1x-light.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 24,
+      "height": 24
+    }
+  },
+  "mark-24px-1x-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-24px-1x-dark.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 24,
+      "height": 24
+    }
+  },
+  "mark-20px-2x-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-20px-2x-light.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 20,
+      "height": 20
+    }
+  },
+  "mark-20px-2x-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-20px-2x-dark.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 20,
+      "height": 20
+    }
+  },
+  "mark-24px-2x-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-24px-2x-light.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 24,
+      "height": 24
+    }
+  },
+  "mark-24px-2x-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/mark-24px-2x-dark.png",
+    "box": {
+      "x": 8,
+      "y": 8,
+      "width": 24,
+      "height": 24
+    }
+  },
+  "readme-lockup-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/readme-lockup-github-light.png",
+    "currentSrc": "docs/readme/brand/lockup-stacked-dark.png",
+    "natural": [0, 0],
+    "rendered": [640, 36]
+  },
+  "readme-lockup-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/readme-lockup-github-dark.png",
+    "currentSrc": "docs/readme/brand/lockup-stacked-light.png",
+    "natural": [0, 0],
+    "rendered": [640, 36]
+  }
+}

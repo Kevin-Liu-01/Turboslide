@@ -14,13 +14,8 @@ import { SEMANTIC_PALETTE, isColorToken } from '@turboslide/schema/color';
 import type { Color } from '@turboslide/schema/color';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { canvasObjects } from '@turboslide/schema/deck';
-import {
-  ditherKey12,
-  ditheredPictures,
-  readDither,
-  resolveDither,
-  variantFor,
-} from '@turboslide/render/dither-key';
+import { ditherKey12, readDither, resolveDither, variantFor } from '@turboslide/render/dither-key';
+import { ditheredPictures } from '@turboslide/render/dither-walk';
 import { boundingBox } from '@turboslide/schema/freeform';
 import type { NumberPreset } from '@turboslide/schema/text';
 import { NUMBER_PRESETS, NUMBER_PRESET_FORMS, presetSlot } from '@turboslide/schema/text';

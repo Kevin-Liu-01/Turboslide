@@ -3,7 +3,7 @@
 //
 //   node scripts/gslides-parity-audit.mjs [--base <origin>] [--out <json>] [--report]
 //                                         [--read-only-deck gt-brand] [--quick] [--keep-deck]
-//                                         [--skip-tooltip-audit]
+//                                         [--skip-tooltip-audit] [--trace <zip>]
 //
 // Opens the studio in Chrome for Testing (packages/headless launch, playwright-core) at 1440 by
 // 900, imports the menu model from packages/chrome/src/menus/model.ts and drives every row of it:
@@ -120,6 +120,8 @@ const REPORT_ONLY = flag('report');
 const QUICK = flag('quick');
 const KEEP_DECK = flag('keep-deck');
 const SKIP_TOOLTIP_AUDIT = flag('skip-tooltip-audit');
+/** a Playwright trace of the main context (actions with their logs and screenshots, no DOM snapshots), written as a zip at the end; the verifier's pass 2 of round four uses it to name what moved under an "element is not stable" click (VERIFICATION-4 finding 3) */
+const TRACE = value('trace');
 const READ_ONLY_DECK = value('read-only-deck') ?? 'gt-brand';
 /** an existing deck to audit in place of a fresh draft (debugging; it is not trashed unless --trash) */
 const USE_DECK = value('deck');
@@ -694,6 +696,20 @@ const WORDS_EXCLUDE = [
   '[data-control^="home.open."]',
   '[data-control^="home.title."]',
   '.ts-hm-card',
+  /* the deck's own words on the editor (round four fixer round, VERIFICATION-4 finding 10): a
+     filmstrip card's tooltip is the slide's title (Filmstrip.tsx FilmCard, `name: item.title`) and
+     the Last edit clock's tooltip names the newest record's author by the principal's own name
+     (TitleRow.tsx lastEditWords), so a deck titled "The agent API" or edited by "agent:int2-walk"
+     is the deck's text, not the chrome's; the chrome's own Last edit words are the menu model's
+     and the default view words test covers them */
+  '[data-control^="filmstrip.slide."]',
+  '[data-control="deck.lastEdit.slot"]',
+  /* the avatar builder's "Glyph" tab is SPEC-3's own label (0.22, 7.6): the one place the round
+     two engineering word is a label, exempted by name in the chrome's default view words test
+     (menus/strings.ts ACCOUNT.avatar.tabs) and recorded for Kevin in round three; the tab button
+     carries the label and its tooltip (Dialog.tsx DialogTabs), so the one control is excluded
+     (round four verification, pass 2: the node-server run read it where the dev server run had not) */
+  '[data-control="dialog.avatarBuilder.tab.glyph"]',
   '[class^="go"]',
   '.tsqd-parent-container',
   '[data-tsd-source]',
@@ -1249,8 +1265,21 @@ async function observeDialog(page, item, title) {
         .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
         .map((el) => el.getAttribute('data-control') ?? el.tagName),
   );
-  /* SPEC-2 section 10: the words of the dialog while it is open */
-  await checkDefaultWords(page, `dialog ${found.control ?? found.title}`);
+  /* SPEC-2 section 10: the words of the dialog while it is open; SPEC 12 exempts Extensions > Agent
+     access and Tools > Advanced by name (menus/strings.ts FORBIDDEN_DEFAULT_VIEW_WORDS), and the
+     tooltip plate of an exempt dialog's controls renders outside the dialog's element, so the
+     exempt dialogs are skipped here rather than excluded by selector (round four fixer round,
+     VERIFICATION-4 finding 10) */
+  const exemptDialog =
+    found.control === 'dialog.agentAccess' ||
+    item.id === 'extensions.agentAccess' ||
+    item.id.startsWith('tools.advanced');
+  if (exemptDialog)
+    pass('defaultViewWords', {
+      where: `dialog ${found.control ?? found.title}`,
+      evidence: 'SPEC 12 exempts this dialog by name; its words are not checked',
+    });
+  else await checkDefaultWords(page, `dialog ${found.control ?? found.title}`);
   await page.keyboard.press('Escape');
   const gone = await waitFor(async () => (await dialogs(page)).length === 0);
   const focusAfter = await page.evaluate(
@@ -5747,6 +5776,12 @@ await context
   .grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE })
   .catch(() => null);
 const page = await context.newPage();
+if (TRACE)
+  await context.tracing.start({
+    screenshots: true,
+    snapshots: false,
+    title: 'gslides-parity-audit',
+  });
 const pageErrors = [];
 page.on('pageerror', (error) => pageErrors.push(String(error.message ?? error).slice(0, 300)));
 let scratchDeck = null;
@@ -6234,6 +6269,10 @@ try {
     }
   }
 } finally {
+  if (TRACE)
+    await context.tracing
+      .stop({ path: isAbsolute(TRACE) ? TRACE : join(ROOT, TRACE) })
+      .catch(() => null);
   await launched.close().catch(() => null);
 }
 

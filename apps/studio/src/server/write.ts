@@ -169,6 +169,28 @@ export function trimVersionLog(versions: ReadonlyArray<Version>): Version[] {
 }
 
 /**
+ * The room's live document with the store's trash stamp (gslides-parity SPEC 6.4, 7.5): Move to
+ * trash and Restore write `trashedAt` on the manifest at the store level without moving the
+ * revision (`@turboslide/store/templates` trashDeck, restoreDeck), so a room that was open before
+ * the write keeps serving a document without the stamp and the editor it fed never showed the
+ * trashed banner on a warm instance (the round four fixer, found by editor.spec.ts's banner
+ * row). The loader reads the store beside the room, so the manifest's stamp is applied here: set
+ * when the store has one, removed when the store has none, the same object when they agree. Pure.
+ */
+export function withTrashStamp(
+  document: DeckDocument,
+  trashedAt: string | undefined,
+): DeckDocument {
+  const stamped = typeof trashedAt === 'string' && trashedAt !== '' ? trashedAt : undefined;
+  if (document.deck.trashedAt === stamped) return document;
+  if (stamped === undefined) {
+    const { trashedAt: _cleared, ...deck } = document.deck;
+    return { ...document, deck };
+  }
+  return { ...document, deck: { ...document.deck, trashedAt: stamped } };
+}
+
+/**
  * The payload shaped by role (SPEC-3 6.3): notes leave below editor, skipped slides leave below
  * commenter, the version log leaves without `history`. Pure, so the loader and the tests share it.
  */
@@ -256,7 +278,8 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     const selection = room.realtimeSelection();
     const result: EditorDeck = {
       deckId: data.deckId,
-      document: live.document,
+      // the room's document carries the store's trash stamp (withTrashStamp says why)
+      document: withTrashStamp(live.document, read.document.deck.trashedAt),
       issues: read.issues,
       ok: read.ok,
       sprite: readSprite(),

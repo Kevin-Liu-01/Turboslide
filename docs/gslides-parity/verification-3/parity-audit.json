@@ -1,14 +1,14 @@
 {
   "base": "http://localhost:4321",
-  "at": "2026-09-14T19:37:58.916Z",
-  "commit": "1d2a132",
-  "seconds": 1245,
-  "scratchDeck": "untitled-20260914-sa75",
+  "at": "2026-09-15T05:00:51.936Z",
+  "commit": "04d95c2",
+  "seconds": 1108,
+  "scratchDeck": "untitled-20260915-2lq5",
   "namePromptAnswered": 1,
   "summary": {
-    "pass": 2980,
+    "pass": 2979,
     "fail": 5,
-    "skip": 384
+    "skip": 385
   },
   "perSection": {
     "firstOpen": {
@@ -82,9 +82,9 @@
       "skip": 3
     },
     "effects:textBlock2": {
-      "pass": 18,
+      "pass": 17,
       "fail": 1,
-      "skip": 0
+      "skip": 1
     },
     "pickers:objects": {
       "pass": 10,
@@ -1536,7 +1536,7 @@
     {
       "section": "firstOpen",
       "id": "the first write creates the deck and moves the address",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75; save words \"All changes saved\"; title \"Audit scratch\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5; save words \"All changes saved\"; title \"Audit scratch\"",
       "pass": true
     },
     {
@@ -5126,7 +5126,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-sa75",
+      "where": "/edit/untitled-20260915-2lq5",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -5220,7 +5220,7 @@
       "menu": "title",
       "effect": "route",
       "label": "Turboslide home",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75 -> http://localhost:4321/decks",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5 -> http://localhost:4321/decks",
       "pass": true
     },
     {
@@ -5310,7 +5310,7 @@
       "menu": "title",
       "effect": "client",
       "label": "Presenter view",
-      "evidence": "second window http://localhost:4321/present/untitled-20260914-sa75; this window presenting",
+      "evidence": "second window http://localhost:4321/present/untitled-20260915-2lq5; this window presenting",
       "pass": true
     },
     {
@@ -5523,7 +5523,7 @@
       "menu": "file",
       "effect": "client",
       "label": "Copy link",
-      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260914-sa75\" wanted \"http://localhost:4321/deck/untitled-20260914-sa75\"; snackbar \"Link copied\"",
+      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260915-2lq5\" wanted \"http://localhost:4321/deck/untitled-20260915-2lq5\"; snackbar \"Link copied\"",
       "pass": true
     },
     {
@@ -5562,7 +5562,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Plain Text (.txt)",
-      "evidence": "download untitled-20260914-sa75.txt",
+      "evidence": "download untitled-20260915-2lq5.txt",
       "pass": true
     },
     {
@@ -5571,7 +5571,7 @@
       "menu": "file",
       "effect": "action",
       "label": "JPEG image (.jpg, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260915-2lq5&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5580,7 +5580,7 @@
       "menu": "file",
       "effect": "action",
       "label": "PNG image (.png, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260915-2lq5&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5598,7 +5598,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Turboslide bundle (.zip)",
-      "evidence": "download untitled-20260914-sa75-r3.zip",
+      "evidence": "download untitled-20260915-2lq5-r3.zip",
       "pass": true
     },
     {
@@ -5664,7 +5664,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print settings and preview",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5#s/title -> http://localhost:4321/print/untitled-20260915-2lq5",
       "pass": true
     },
     {
@@ -5673,7 +5673,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5#s/title -> http://localhost:4321/print/untitled-20260915-2lq5",
       "pass": true
     },
     {
@@ -7347,7 +7347,7 @@
       "menu": "tools",
       "effect": "action",
       "label": "Render this slide",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=1&revision=19",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260915-2lq5&theme=light&scale=1&revision=19",
       "pass": true
     },
     {
@@ -7398,7 +7398,7 @@
     {
       "section": "defaultViewWords",
       "where": "dialog dialog.agentAccess",
-      "evidence": "0 text nodes, 0 tooltips, none of 36 words",
+      "evidence": "SPEC 12 exempts this dialog by name; its words are not checked",
       "pass": true
     },
     {
@@ -7869,7 +7869,7 @@
       "id": "file.print",
       "key": "Cmd+P",
       "chord": "Cmd+P",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5#s/title -> http://localhost:4321/print/untitled-20260915-2lq5",
       "pass": true
     },
     {
@@ -12155,11 +12155,8 @@
     {
       "section": "effects:textBlock2",
       "id": "format.text.italic",
-      "menu": "format",
-      "effect": "action",
-      "label": "Italic",
-      "evidence": "revision 103 -> 104; text \"[The audit paragraph carries a sentence for the marks]{i}\" carries {i}: true",
-      "pass": true
+      "evidence": "could not select the text",
+      "pass": null
     },
     {
       "section": "effects:textBlock2",
@@ -12167,7 +12164,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Underline",
-      "evidence": "revision 105 -> 106; text \"[The audit paragraph carries a sentence for the marks]{u}\" carries {u}: true",
+      "evidence": "revision 103 -> 104; text \"[The audit paragraph carries a sentence for the marks]{u}\" carries {u}: true",
       "pass": true
     },
     {
@@ -12176,7 +12173,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Strikethrough",
-      "evidence": "revision 107 -> 108; text \"[The audit paragraph carries a sentence for the marks]{s}\" carries {s}: true",
+      "evidence": "revision 105 -> 106; text \"[The audit paragraph carries a sentence for the marks]{s}\" carries {s}: true",
       "pass": true
     },
     {
@@ -12185,7 +12182,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Superscript",
-      "evidence": "revision 109 -> 110; text \"[The audit paragraph carries a sentence for the marks]{sup}\" carries {sup}: true",
+      "evidence": "revision 107 -> 108; text \"[The audit paragraph carries a sentence for the marks]{sup}\" carries {sup}: true",
       "pass": true
     },
     {
@@ -12194,7 +12191,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Subscript",
-      "evidence": "revision 111 -> 112; text \"[The audit paragraph carries a sentence for the marks]{sub}\" carries {sub}: true",
+      "evidence": "revision 109 -> 110; text \"[The audit paragraph carries a sentence for the marks]{sub}\" carries {sub}: true",
       "pass": true
     },
     {
@@ -12203,7 +12200,7 @@
       "menu": "format",
       "effect": "action",
       "label": "lowercase",
-      "evidence": "revision 113 -> 114; lower: \"The audit paragraph carries a sentence f\" -> \"the audit paragraph carries a sentence f\"",
+      "evidence": "revision 111 -> 112; lower: \"The audit paragraph carries a sentence f\" -> \"the audit paragraph carries a sentence f\"",
       "pass": true
     },
     {
@@ -12212,7 +12209,7 @@
       "menu": "format",
       "effect": "action",
       "label": "UPPERCASE",
-      "evidence": "revision 115 -> 116; upper: \"The audit paragraph carries a sentence f\" -> \"THE AUDIT PARAGRAPH CARRIES A SENTENCE F\"",
+      "evidence": "revision 113 -> 114; upper: \"The audit paragraph carries a sentence f\" -> \"THE AUDIT PARAGRAPH CARRIES A SENTENCE F\"",
       "pass": true
     },
     {
@@ -12221,7 +12218,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Title Case",
-      "evidence": "revision 117 -> 118; title: \"The audit paragraph carries a sentence f\" -> \"The Audit Paragraph Carries A Sentence F\"",
+      "evidence": "revision 115 -> 116; title: \"The audit paragraph carries a sentence f\" -> \"The Audit Paragraph Carries A Sentence F\"",
       "pass": true
     },
     {
@@ -12230,7 +12227,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Justified",
-      "evidence": "revision 119 -> 120; align start -> justify",
+      "evidence": "revision 117 -> 118; align start -> justify",
       "pass": true
     },
     {
@@ -12239,7 +12236,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Increase indent",
-      "evidence": "revision 121 -> 122; indent 0 -> 64",
+      "evidence": "revision 119 -> 120; indent 0 -> 64",
       "pass": true
     },
     {
@@ -12248,7 +12245,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Decrease indent",
-      "evidence": "revision 124 -> 125; indent 64 -> 0",
+      "evidence": "revision 122 -> 123; indent 64 -> 0",
       "pass": true
     },
     {
@@ -12257,7 +12254,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Add space before paragraph",
-      "evidence": "revision 127 -> 128; spaceBefore 0 -> 8",
+      "evidence": "revision 125 -> 126; spaceBefore 0 -> 8",
       "pass": true
     },
     {
@@ -12266,7 +12263,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Add space after paragraph",
-      "evidence": "revision 129 -> 130; spaceAfter 0 -> 8",
+      "evidence": "revision 127 -> 128; spaceAfter 0 -> 8",
       "pass": true
     },
     {
@@ -12299,62 +12296,62 @@
     {
       "section": "pickers:objects",
       "id": "format.bulletsNumbering.bulleted.pick",
-      "evidence": "picked disc-circle-square; revision 131 -> 132; block now plain marker bullet preset disc-circle-square",
+      "evidence": "picked disc-circle-square; revision 129 -> 130; block now plain marker bullet preset disc-circle-square",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "format.bulletsNumbering.numbered.pick",
-      "evidence": "picked digit-alpha-roman; revision 133 -> 134; block now plain marker number preset digit-alpha-roman",
+      "evidence": "picked digit-alpha-roman; revision 131 -> 132; block now plain marker number preset digit-alpha-roman",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.italic",
       "key": "Cmd+I",
-      "evidence": "revision 135 -> 136; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{i}the marks\"",
+      "evidence": "revision 133 -> 134; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{i}the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.underline",
       "key": "Cmd+U",
-      "evidence": "revision 137 -> 138; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{u}the marks\"",
+      "evidence": "revision 135 -> 136; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{u}the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.strikethrough",
       "key": "Cmd+Shift+X",
-      "evidence": "revision 139 -> 140; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{s}the marks\"",
+      "evidence": "revision 137 -> 138; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{s}the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.superscript",
       "key": "Cmd+.",
-      "evidence": "revision 141 -> 142; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{sup}the marks\"",
+      "evidence": "revision 139 -> 140; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{sup}the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.subscript",
       "key": "Cmd+,",
-      "evidence": "revision 143 -> 144; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{sub}the marks\"",
+      "evidence": "revision 141 -> 142; paragraph block p1 text \"The audit paragraph carries a sentence [for ]{sub}the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.justify",
       "key": "Cmd+Shift+J",
-      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260914-sa75",
+      "evidence": "revision 143 -> 144; align justify; page still at /edit/untitled-20260915-2lq5",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.indentMore",
       "key": "Cmd+]",
-      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260914-sa75",
+      "evidence": "revision 145 -> 146; indent 64; page still at /edit/untitled-20260915-2lq5",
       "pass": true
     },
     {
@@ -12366,8 +12363,8 @@
     {
       "section": "formatOptions:objects",
       "id": "sections.text",
-      "shown": ["size", "position", "layout", "textFitting", "text", "altText"],
-      "evidence": "sections size, position, layout, textFitting, text, altText; controls without a tooltip: block.p1.role, block.p1.tone, block.p1.typography.align, block.p1.typography.columns",
+      "shown": ["size", "position", "layout", "textFitting", "text", "altText", "block"],
+      "evidence": "sections size, position, layout, textFitting, text, altText, block; controls without a tooltip: block.p1.role, block.p1.tone, block.p1.typography.align, block.p1.typography.columns",
       "pass": true
     },
     {
@@ -16043,7 +16040,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate clockwise 90°",
-      "evidence": "revision 149 -> 150; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
+      "evidence": "revision 147 -> 148; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16052,7 +16049,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate counter-clockwise 90°",
-      "evidence": "revision 151 -> 152; rotate 0 -> 270 (wanted 270); the slide converted to the canvas in the same write",
+      "evidence": "revision 149 -> 150; rotate 0 -> 270 (wanted 270); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16061,7 +16058,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip horizontally",
-      "evidence": "revision 153 -> 154; flip none -> h; the slide converted to the canvas in the same write",
+      "evidence": "revision 151 -> 152; flip none -> h; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16070,7 +16067,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip vertically",
-      "evidence": "revision 155 -> 156; flip none -> v; the slide converted to the canvas in the same write",
+      "evidence": "revision 153 -> 154; flip none -> v; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16079,7 +16076,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Horizontally",
-      "evidence": "revision 157 -> 158; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 155 -> 156; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16088,7 +16085,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Vertically",
-      "evidence": "revision 159 -> 160; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 157 -> 158; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16097,7 +16094,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Left",
-      "evidence": "revision 161 -> 162; left of one object to the slide: 0 (wanted 0); pos {\"x\":0,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 159 -> 160; left of one object to the slide: 0 (wanted 0); pos {\"x\":0,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16106,7 +16103,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Center",
-      "evidence": "revision 163 -> 164; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 161 -> 162; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16115,7 +16112,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Right",
-      "evidence": "revision 165 -> 166; right of one object to the slide: 1600 (wanted 1600); pos {\"x\":764,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 163 -> 164; right of one object to the slide: 1600 (wanted 1600); pos {\"x\":764,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16124,7 +16121,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Top",
-      "evidence": "revision 167 -> 168; top of one object to the slide: 0 (wanted 0); pos {\"x\":137,\"y\":0,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 165 -> 166; top of one object to the slide: 0 (wanted 0); pos {\"x\":137,\"y\":0,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16133,7 +16130,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Middle",
-      "evidence": "revision 169 -> 170; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 167 -> 168; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16142,7 +16139,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bottom",
-      "evidence": "revision 171 -> 172; bottom of one object to the slide: 900 (wanted 900); pos {\"x\":137,\"y\":780,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 169 -> 170; bottom of one object to the slide: 900 (wanted 900); pos {\"x\":137,\"y\":780,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -16151,7 +16148,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bring to front",
-      "evidence": "revision 173 -> 174",
+      "evidence": "revision 171 -> 172",
       "pass": true
     },
     {
@@ -16160,7 +16157,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bring forward",
-      "evidence": "revision 175 -> 176",
+      "evidence": "revision 173 -> 174",
       "pass": true
     },
     {
@@ -16169,7 +16166,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Send backward",
-      "evidence": "revision 177 -> 178",
+      "evidence": "revision 175 -> 176",
       "pass": true
     },
     {
@@ -16178,7 +16175,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Send to back",
-      "evidence": "revision 179 -> 180",
+      "evidence": "revision 177 -> 178",
       "pass": true
     },
     {
@@ -16187,7 +16184,7 @@
       "menu": "format",
       "effect": "client",
       "label": "Border color",
-      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderColor.ink; revision 181 -> 182; stroke now \"ink\"",
+      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderColor.ink; revision 179 -> 180; stroke now \"ink\"",
       "pass": true
     },
     {
@@ -16196,7 +16193,7 @@
       "menu": "format",
       "effect": "client",
       "label": "Border weight",
-      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderWeight.2; revision 183 -> 184; strokeWidth now 2",
+      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderWeight.2; revision 181 -> 182; strokeWidth now 2",
       "pass": true
     },
     {
@@ -16205,7 +16202,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Dot",
-      "evidence": "revision 185 -> 186; dash solid -> dot (wanted dot)",
+      "evidence": "revision 183 -> 184; dash solid -> dot (wanted dot)",
       "pass": true
     },
     {
@@ -16214,7 +16211,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Long dash",
-      "evidence": "revision 187 -> 188; dash solid -> longDash (wanted longDash)",
+      "evidence": "revision 185 -> 186; dash solid -> longDash (wanted longDash)",
       "pass": true
     },
     {
@@ -16223,7 +16220,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Italic",
-      "evidence": "revision 189 -> 190; text \"[Shape text]{i}\" carries {i}: true",
+      "evidence": "revision 187 -> 188; text \"[Shape text]{i}\" carries {i}: true",
       "pass": true
     },
     {
@@ -16240,35 +16237,35 @@
       "id": "format.changeShape",
       "menu": "context",
       "label": "Change shape",
-      "evidence": "picked hexagon; revision 191 -> 192; shape rectangle -> hexagon",
+      "evidence": "picked hexagon; revision 189 -> 190; shape rectangle -> hexagon",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.rotate.right15",
       "key": "Option+Right",
-      "evidence": "revision 193 -> 194; rotate 0 -> 15; the slide converted in the same write",
+      "evidence": "revision 191 -> 192; rotate 0 -> 15; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.rotate.left1",
       "key": "Option+Shift+Left",
-      "evidence": "revision 195 -> 196; rotate 0 -> 359; the slide converted in the same write",
+      "evidence": "revision 193 -> 194; rotate 0 -> 359; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.right1",
       "key": "Right",
-      "evidence": "revision 197 -> 198; x 137 -> 138; the slide converted in the same write",
+      "evidence": "revision 195 -> 196; x 137 -> 138; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.down10",
       "key": "Shift+Down",
-      "evidence": "revision 199 -> 200; y 853.125 -> 863.125; the slide converted in the same write",
+      "evidence": "revision 197 -> 198; y 853.125 -> 863.125; the slide converted in the same write",
       "pass": true
     },
     {
@@ -16282,7 +16279,7 @@
       "section": "shortcuts:objects",
       "id": "key.duplicate",
       "key": "Cmd+D",
-      "evidence": "revision 203 -> 204; objects 7 -> 8; copy audit-shape-2 at {\"x\":153,\"y\":869.125,\"w\":836,\"h\":120,\"z\":7}",
+      "evidence": "revision 201 -> 202; objects 7 -> 8; copy audit-shape-2 at {\"x\":153,\"y\":869.125,\"w\":836,\"h\":120,\"z\":7}",
       "pass": true
     },
     {
@@ -16303,21 +16300,21 @@
       "section": "shortcuts:objects",
       "id": "key.group",
       "key": "Cmd+Option+G",
-      "evidence": "chip \"2 objects\"; revision 205 -> 206; group group with 2 members; chip now \"Group\"",
+      "evidence": "chip \"2 objects\"; revision 203 -> 204; group group with 2 members; chip now \"Group\"",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.ungroup",
       "key": "Cmd+Option+Shift+G",
-      "evidence": "revision 206 -> 207; 0 members left in group",
+      "evidence": "revision 204 -> 205; 0 members left in group",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.delete",
       "key": "Delete",
-      "evidence": "chip \"Shape\"; revision 209 -> 210; objects 7 -> 6; snackbar \"Shape deletedUndo\"",
+      "evidence": "chip \"Shape\"; revision 207 -> 208; objects 7 -> 6; snackbar \"Shape deletedUndo\"",
       "pass": true
     },
     {
@@ -16393,7 +16390,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Circle",
-      "evidence": "revision 211 -> 212; lineStart none -> fillCircle (wanted fillCircle)",
+      "evidence": "revision 209 -> 210; lineStart none -> fillCircle (wanted fillCircle)",
       "pass": true
     },
     {
@@ -16402,7 +16399,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Arrow",
-      "evidence": "revision 213 -> 214; lineEnd none -> fillArrow (wanted fillArrow)",
+      "evidence": "revision 211 -> 212; lineEnd none -> fillArrow (wanted fillArrow)",
       "pass": true
     },
     {
@@ -16411,7 +16408,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Open diamond",
-      "evidence": "revision 215 -> 216; lineEnd none -> openDiamond (wanted openDiamond)",
+      "evidence": "revision 213 -> 214; lineEnd none -> openDiamond (wanted openDiamond)",
       "pass": true
     },
     {
@@ -16420,7 +16417,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Dash",
-      "evidence": "revision 217 -> 218; dash solid -> dash (wanted dash)",
+      "evidence": "revision 215 -> 216; dash solid -> dash (wanted dash)",
       "pass": true
     },
     {
@@ -16429,7 +16426,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate clockwise 90°",
-      "evidence": "revision 219 -> 220; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
+      "evidence": "revision 217 -> 218; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20088,20 +20085,20 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip horizontally",
-      "evidence": "revision 221 -> 222; flip none -> h; the slide converted to the canvas in the same write",
+      "evidence": "revision 219 -> 220; flip none -> h; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "format.image.maskImage.pick",
-      "evidence": "picked ellipse; revision 223 -> 224; mask none -> ellipse",
+      "evidence": "picked ellipse; revision 221 -> 222; mask none -> ellipse",
       "pass": true
     },
     {
       "section": "effects:image",
       "id": "format.image.resetImage",
       "menu": "format",
-      "evidence": "revision 226 -> 227; mask ellipse -> none",
+      "evidence": "revision 224 -> 225; mask ellipse -> none",
       "pass": true
     },
     {
@@ -20302,7 +20299,7 @@
       "id": "format.chartType",
       "menu": "context",
       "label": "Chart type",
-      "evidence": "revision 230 -> 231; kind bar -> pie",
+      "evidence": "revision 228 -> 229; kind bar -> pie",
       "pass": true
     },
     {
@@ -23880,7 +23877,7 @@
       "section": "effects:objects",
       "id": "arrange.group",
       "menu": "arrange",
-      "evidence": "revision 233 -> 234; group group with 2 members",
+      "evidence": "revision 231 -> 232; group group with 2 members",
       "pass": true
     },
     {
@@ -23998,14 +23995,14 @@
       "section": "effects:objects",
       "id": "arrange.ungroup",
       "menu": "arrange",
-      "evidence": "revision 234 -> 235; 0 members left",
+      "evidence": "revision 232 -> 233; 0 members left",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "arrange.regroup",
       "menu": "arrange",
-      "evidence": "revision 235 -> 236; group group",
+      "evidence": "revision 233 -> 234; group group",
       "pass": true
     },
     {
@@ -24119,37 +24116,37 @@
     {
       "section": "pickers:objects",
       "id": "insert.table.pick",
-      "evidence": "picked 4x3; revision 244 -> 245; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
+      "evidence": "picked 4x3; revision 242 -> 243; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.shapes.pick",
-      "evidence": "picked hexagon; revision 246 -> 247; objects 7 -> 8; hexagon at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked hexagon; revision 244 -> 245; objects 7 -> 8; hexagon at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.arrows.pick",
-      "evidence": "picked rightArrow; revision 248 -> 249; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked rightArrow; revision 246 -> 247; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.callouts.pick",
-      "evidence": "picked wedgeRectCallout; revision 250 -> 251; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked wedgeRectCallout; revision 248 -> 249; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.equation.pick",
-      "evidence": "picked mathPlus; revision 252 -> 253; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked mathPlus; revision 250 -> 251; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.specialCharacters.pick",
-      "evidence": "picked dialog.specialCharacters.pick.8592; revision 254 -> 255; objects 7 -> 8; the dialog stays open",
+      "evidence": "picked dialog.specialCharacters.pick.8592; revision 252 -> 253; objects 7 -> 8; the dialog stays open",
       "pass": true
     },
     {
@@ -24161,21 +24158,21 @@
     {
       "section": "pickers:objects",
       "id": "insert.diagram.insert",
-      "evidence": "revision 256 -> 257; objects 7 -> 18; groups process",
+      "evidence": "revision 254 -> 255; objects 7 -> 18; groups process",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.color",
       "menu": "slide",
-      "evidence": "picked dialog.background.color.ink; Done clicked; revision 258 -> 259; background {\"color\":\"ink\"}",
+      "evidence": "picked dialog.background.color.ink; Done clicked; revision 256 -> 257; background {\"color\":\"ink\"}",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.choose",
       "menu": "slide",
-      "evidence": "chose dialog.background.choose.opener-brand; revision 260 -> 261; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
+      "evidence": "chose dialog.background.choose.opener-brand; revision 258 -> 259; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
       "pass": true
     },
     {
@@ -24207,7 +24204,7 @@
     {
       "section": "dither:scratch",
       "id": "dialog.background.upload",
-      "evidence": "the covering picture picture (asset ref-rosetta) landed in 837 ms; revision 262 -> 263",
+      "evidence": "the covering picture picture (asset ref-rosetta) landed in 358 ms; revision 260 -> 261",
       "pass": true
     },
     {
@@ -24250,7 +24247,7 @@
     {
       "section": "roles:scratch",
       "id": "owner.record",
-      "evidence": "record revision 0, owner anon_93fc90f…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260914-sa75\",\"revision\":0,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
+      "evidence": "record revision 0, owner anon_c27193f…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260915-2lq5\",\"revision\":0,\"owner\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
       "pass": true
     },
     {
@@ -24262,13 +24259,13 @@
     {
       "section": "roles:scratch",
       "id": "viewer.landing",
-      "evidence": "the viewer link landed on /deck/untitled-20260914-sa75; address carries a token: false",
+      "evidence": "the viewer link landed on /deck/untitled-20260915-2lq5; address carries a token: false",
       "pass": true
     },
     {
       "section": "roles:scratch",
       "id": "viewer.mode",
-      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260914-sa75\",\"revision\":1,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_g-z7iU8nUHEQ-yKo\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T19:35:48.309Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
+      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260915-2lq5\",\"revision\":1,\"owner\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_wL3zDFqz_C0VkZOp\",\"role\":\"viewer\",\"createdAt\":\"2026-09-15T04:59:59.821Z\",\"createdBy\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
       "pass": true
     },
     {
@@ -27738,7 +27735,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-sa75 as a viewer",
+      "where": "/edit/untitled-20260915-2lq5 as a viewer",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -27751,7 +27748,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.landing",
-      "evidence": "the commenter link landed on /edit/untitled-20260914-sa75",
+      "evidence": "the commenter link landed on /edit/untitled-20260915-2lq5",
       "pass": true
     },
     {
@@ -27763,7 +27760,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.role",
-      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260914-sa75\",\"revision\":2,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_g-z7iU8nUHEQ-yKo\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T19:35:48.309Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_V7dRDmALu85Og6XW\",\"role\":\"commenter\",\"createdAt\":\"2026-09-14T19:36:01.642Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
+      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260915-2lq5\",\"revision\":2,\"owner\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_wL3zDFqz_C0VkZOp\",\"role\":\"viewer\",\"createdAt\":\"2026-09-15T04:59:59.821Z\",\"createdBy\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_-vpR8tyBbfAnEZlx\",\"role\":\"commenter\",\"createdAt\":\"2026-09-15T05:00:06.021Z\",\"createdBy\":\"anon_c27193f5-3478-466f-bdd5-19a743cd6158\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
       "pass": true
     },
     {
@@ -31209,7 +31206,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-sa75 as a commenter",
+      "where": "/edit/untitled-20260915-2lq5 as a commenter",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -31225,13 +31222,13 @@
       "menu": "title",
       "effect": "action",
       "label": "Forget this browser",
-      "evidence": "own chip \"Agent (you)\" -> \"Carbon 340 (you)\"; the page's principal agent:localhost -> anon_d190ad7e-56f7-4210-af08-810a8228e093; confirm dialog \"Forget this browser\" confirmed",
+      "evidence": "own chip \"Agent (you)\" -> \"Resin 423 (you)\"; the page's principal agent:localhost -> anon_9bfdc367-c29a-400f-8d2a-03ff7fa5b21f; confirm dialog \"Forget this browser\" confirmed",
       "pass": true
     },
     {
       "section": "tooltipAudit",
       "id": "tooltip-audit",
-      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260914-sa75\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
+      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260915-2lq5\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
       "pass": true
     },
     {
@@ -31240,7 +31237,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Move to trash",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75 -> /decks \"\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260915-2lq5 -> /decks \"\"",
       "pass": true
     },
     {
@@ -31248,7 +31245,7 @@
       "id": "trash.delete",
       "menu": "home",
       "label": "Delete forever",
-      "evidence": "the card of untitled-20260914-sa75 left the trash",
+      "evidence": "the card of untitled-20260915-2lq5 left the trash",
       "pass": true
     },
     {

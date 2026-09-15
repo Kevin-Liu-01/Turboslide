@@ -1,0 +1,32 @@
+{
+  "readme-lockup-light": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/readme-lockup-github-light.png",
+    "ground": "#ffffff",
+    "currentSrc": "docs/readme/brand/lockup-stacked-dark.png",
+    "natural": [832, 580],
+    "rendered": [416, 290]
+  },
+  "readme-lockup-dark": {
+    "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/readme-lockup-github-dark.png",
+    "ground": "#0d1117",
+    "currentSrc": "docs/readme/brand/lockup-stacked-light.png",
+    "natural": [832, 580],
+    "rendered": [416, 290]
+  },
+  "tab-strips-1x": [
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-chrome-light-1x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-chrome-dark-1x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-firefox-light-1x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-firefox-dark-1x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-safari-light-1x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-safari-dark-1x.png"
+  ],
+  "tab-strips-2x": [
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-chrome-light-2x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-chrome-dark-2x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-firefox-light-2x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-firefox-dark-2x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-safari-light-2x.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-4/brand/pass2/tab-strip-safari-dark-2x.png"
+  ]
+}

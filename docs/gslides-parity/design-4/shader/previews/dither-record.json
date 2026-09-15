@@ -22,19 +22,12 @@
       "ms": 94,
       "litFraction": 0.1762,
       "plateClear": {
-        "plate": [
-          137,
-          500,
-          740,
-          271
-        ],
+        "plate": [137, 500, 740, 271],
         "nearestLitPx": 0,
         "litUnder": 9846,
         "litInBand": 2446
       },
-      "warnings": [
-        "9846 lit cell(s) under the plate (picture/plate-clear)"
-      ],
+      "warnings": ["9846 lit cell(s) under the plate (picture/plate-clear)"],
       "bytes": {
         "dark": 11896,
         "light": 11913

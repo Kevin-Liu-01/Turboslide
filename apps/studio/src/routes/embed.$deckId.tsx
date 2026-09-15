@@ -16,7 +16,8 @@ import { publishedPlayerGate } from '../server/published';
 // published embed (gslides-parity SPEC-3 6.4): the token reaches `getDeck`, the answer carries
 // noindex, and a revoked token is the 410 page (server/published.ts; hotfix B request R1). The
 // loader is the deck route's (gslides-parity SPEC-4 3.11): the first slide's HTML in the
-// document, the rest streamed behind it, the reads keyed by the revision for the CDN. A missing
+// document, the rest fetched by the viewer after it mounts, the reads keyed by the revision for
+// the CDN (deck.$deckId.tsx says why the rest no longer streams inside the document). A missing
 // or restricted deck falls to the root's Not found page: the You need access form belongs to a
 // top level document, not to a frame another page embeds.
 export const Route = createFileRoute('/embed/$deckId')({

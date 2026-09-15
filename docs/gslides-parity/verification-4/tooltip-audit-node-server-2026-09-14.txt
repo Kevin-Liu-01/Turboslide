@@ -1,0 +1,5 @@
+tooltip-audit: http://localhost:4346/new: 0 interactive elements without a tooltip, 0 with a native title only
+tooltip-audit: http://localhost:4346/edit/gt-brand?edit=1: 0 interactive elements without a tooltip, 0 with a native title only
+tooltip-audit: http://localhost:4346/decks: 0 interactive elements without a tooltip, 0 with a native title only
+tooltip-audit: http://localhost:4346/home: 0 interactive elements without a tooltip, 0 with a native title only
+tooltip-audit: 0 missing, 0 title only (strict: counted as missing), 0 pages not walked

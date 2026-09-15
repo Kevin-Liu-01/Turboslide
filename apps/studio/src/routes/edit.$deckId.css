@@ -91,25 +91,51 @@
   margin-top: 16px;
 }
 
-/* the hosting and external revision banners sit at the right end of the title row's height
-   under the bar, over the stage's right column, never over the toolbar's left group (the
-   Layout button; verification-4/BASELINE.md finding 7: centred under the bar the hosting banner
-   covered toolbar.layout on the tmp tier and the perf check's click timed out) */
+/* the hosting, trashed and external revision banners stand in the status row (the shell's bottom
+   bar, --pt-status-h, BottomBar.css): centred at the bottom of the viewport, the row's height,
+   in the empty middle between the bar's view toggle at the left (66 px) and its panel chevron at
+   the right (36 px), so the banner covers no control, no toolbar button and no slide content.
+   The two earlier places were measured and left: centred under the bar it covered toolbar.layout
+   on the tmp tier and the perf check's click timed out (verification-4/BASELINE.md finding 7);
+   at the right end under the toolbar it covered the sheet's top right and intercepted the parity
+   audit's clicks on slide content there (VERIFICATION-4 finding 4). The 80 px margin on each
+   side keeps it off both groups at every width the shell supports; the hosting sentence (137
+   characters) is one line at 960 px, and a message that wraps grows upward from the row. The top
+   edge shares the bar's own rule when the banner is one row tall. The width is the content's up
+   to the cap (a fixed box placed by left: 50% would otherwise shrink to the half viewport it has
+   on its right and wrap the sentence at 720 px on a 1440 px screen). */
 .ts-banner {
   position: fixed;
-  right: 16px;
-  top: calc(var(--pt-bar-h) + var(--pt-menu-h) + var(--pt-tool-h) + 12px);
-  max-width: min(560px, calc(100vw - var(--pt-sb-w) - 48px));
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  min-height: var(--pt-status-h);
+  max-width: min(960px, calc(100vw - 160px));
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 8px 6px 14px;
+  padding: 0 8px 0 14px;
   background: var(--pt-paper);
   color: var(--pt-ink);
   border: 1px solid var(--pt-hair);
+  border-bottom: 0;
   z-index: 19;
   font: 12.5px/1.4 var(--pt-text);
   white-space: normal;
+}
+
+/* the banner's text buttons (Restore, Reload) take the bottom bar's 28 px, so a banner with a
+   button is the row's 32 px and not the 33 the 32 px text button plus the rule would make */
+.ts-banner .pt-ib {
+  height: 28px;
+}
+
+/* the hosting notice carries no control, so it takes no pointer event at all: whatever stands
+   under it (the notes pane's edge when the sentence wraps at a narrow width) stays clickable */
+.ts-banner[data-state='hosting'] {
+  pointer-events: none;
 }
 
 @media (max-width: 900px) {

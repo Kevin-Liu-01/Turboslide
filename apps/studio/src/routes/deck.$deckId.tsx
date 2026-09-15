@@ -5,8 +5,8 @@ import type { ShellMode } from '@turboslide/chrome/shell-data';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
-import { deckRevision, getDeck, getDeckSlides } from '../server/decks';
-import type { DeckPayload, DeckSlidesPayload } from '../server/decks';
+import { deckRevision, getDeck } from '../server/decks';
+import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
 import { AccessPage } from './-access-page';
 
@@ -23,26 +23,37 @@ import { AccessPage } from './-access-page';
 // (server/published.ts; hotfix B request R1).
 //
 // Round four (gslides-parity SPEC-4 3.11; PP 6, 5 "The Blob read path"): the document carries the
-// first slide's HTML and the other slides stream behind it. The loader reads the revision first
-// (`deckRevision`), asks `getDeck` for the payload with the first slide's markup alone
-// (`slides: 'first'`) and returns `getDeckSlides` unawaited as `rest`, which the router streams
-// after the shell and DeckViewer merges when it lands, so the sidebar's clones and the grid fill
-// in a moment after first paint while the document is one slide long (85 slides were 381 KB of
-// HTML and 6,470 nodes to hydrate). Both reads are GET server functions whose URL names the deck,
-// the theme and the revision, so a client's request is a CDN key: the answer carries
-// `public, s-maxage=60, stale-while-revalidate=3600` when the reader reached the deck as anyone
-// would and the shape is the public one (server/decks.ts setDeckCacheHeader), else
-// `private, no-store`. The revision is learned inside the loader rather than through
-// `loaderDeps`, which the router derives from the search alone. `notFoundComponent` is the You
-// need access page (VERIFICATION-3 finding 53; ruling 3): `getDeck` answers null for a missing
-// and a restricted deck alike and the server's status is 404.
+// first slide's HTML alone. The loader reads the revision first (`deckRevision`), asks `getDeck`
+// for the payload with the first slide's markup (`slides: 'first'`) and returns the request for
+// the other slides as `rest`, the input DeckViewer hands to `getDeckSlides` once it has mounted,
+// so the sidebar's clones and the grid fill in a moment after first paint while the document is
+// one slide long (85 slides were 381 KB of HTML and 6,470 nodes to hydrate). Both reads are GET
+// server functions whose URL names the deck, the theme and the revision, so a client's request is
+// a CDN key: the answer carries `public, s-maxage=60, stale-while-revalidate=3600` when the
+// reader reached the deck as anyone would and the shape is the public one (server/decks.ts
+// setDeckCacheHeader), else `private, no-store`. The revision is learned inside the loader
+// rather than through `loaderDeps`, which the router derives from the search alone.
+// `notFoundComponent` is the You need access page (VERIFICATION-3 finding 53; ruling 3):
+// `getDeck` answers null for a missing and a restricted deck alike and the server's status is 404.
+//
+// The round four fixer (VERIFICATION-4 finding 6): the first build returned `getDeckSlides`
+// unawaited and the router streamed the answer behind the shell as one document, which made
+// /deck/gt-brand 481 KB (275 KB of encoded slide markup after the shell) and slower than the
+// whole deck on both deployments (production LCP 808 ms against 400 at day 0, ready 1,067 against
+// 560), because the browser waits for the document's end before `load` and the CDN cannot keep a
+// streamed document. The request now travels as data and the viewer fetches it after hydration
+// through the cacheable GET, so the document is the shell and one slide, and the CDN serves the
+// other slides from its cache for a minute (stale for an hour) under the revision's URL.
 export type DeckSearch = { mode?: ShellMode; theme?: Theme; present?: 1; p?: string };
 
-/** What the two viewer routes' loaders return: the document's payload and the streamed rest. */
+/** What the two viewer routes' loaders return: the document's payload and the request for the rest. */
 export type DeckLoaderData = {
   payload: DeckPayload;
-  /** the other slides' HTML, on its way; null for a caller `getDeckSlides` refuses */
-  rest: Promise<DeckSlidesPayload | null>;
+  /**
+   * the input DeckViewer hands to `getDeckSlides` after it mounts, for the other slides' HTML;
+   * null when the payload carries every slide
+   */
+  rest: GetDeckInput | null;
 };
 
 /** The published token's grammar, the one `getDeck` validates (`publishToken`). */
@@ -86,8 +97,9 @@ export function isNoLongerPublished(error: unknown): boolean {
 }
 
 /**
- * The loader of /deck and /embed (SPEC-4 3.11): the revision, the first slide's payload, the
- * rest deferred. Shared by the two routes so they read the store the same way.
+ * The loader of /deck and /embed (SPEC-4 3.11): the revision, the first slide's payload, and the
+ * request for the rest, which the viewer sends after it mounts (the module comment). Shared by
+ * the two routes so they read the store the same way.
  */
 export async function loadDeckView(
   deckId: string,
@@ -95,20 +107,17 @@ export async function loadDeckView(
 ): Promise<DeckLoaderData> {
   const head = await deckRevision({ data: { deckId } });
   if (!head) throw notFound();
-  const input = {
+  const input: GetDeckInput = {
     deckId,
-    theme: deps.theme,
+    ...(deps.theme === undefined ? {} : { theme: deps.theme }),
     revision: head.revision,
     ...(deps.p === undefined ? {} : { publishToken: deps.p }),
   };
   const payload = await getDeck({ data: { ...input, slides: 'first' } });
   if (!payload) throw notFound();
-  // not awaited: the router streams the other slides behind the document (SPEC-4 3.11)
-  const rest =
-    payload.partial === true
-      ? getDeckSlides({ data: input })
-      : Promise.resolve<DeckSlidesPayload | null>(null);
-  return { payload, rest };
+  // the other slides are not read here: the viewer asks `getDeckSlides` for them once it has
+  // mounted, through the CDN cacheable GET (VERIFICATION-4 finding 6)
+  return { payload, rest: payload.partial === true ? input : null };
 }
 
 export const Route = createFileRoute('/deck/$deckId')({

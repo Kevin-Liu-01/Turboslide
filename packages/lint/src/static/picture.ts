@@ -11,8 +11,8 @@
 // record. Without a variant the plate rule reports at severity 1 that nothing is measured yet;
 // the blank rule stays quiet, because there is no file to judge.
 import { PLATE_BOXES } from '@turboslide/effects/metrics';
-import { ditheredPictures } from '@turboslide/render/dither-key';
-import type { DitheredPicture } from '@turboslide/render/dither-key';
+import { ditheredPictures } from '@turboslide/render/dither-walk';
+import type { DitheredPicture } from '@turboslide/render/dither-walk';
 import type { Asset, Finding, Slide } from '../contracts.ts';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '../contracts.ts';
 import type { LintContext } from '../context.ts';

@@ -1,6 +1,6 @@
 import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
-import { optionValue } from './props';
+import { optionLabel, optionValue } from './props';
 
 import './select.css';
 
@@ -31,10 +31,10 @@ export function SelectControl({ spec, onChange, disabled }: ControlProps) {
       })}
     >
       {spec.optional || current === '' ? <option value="">none</option> : null}
-      {!known && current !== '' ? <option value={current}>{current}</option> : null}
+      {!known && current !== '' ? <option value={current}>{optionLabel(current)}</option> : null}
       {options.map((option) => (
         <option key={String(option)} value={String(option)}>
-          {String(option)}
+          {optionLabel(option)}
         </option>
       ))}
     </select>

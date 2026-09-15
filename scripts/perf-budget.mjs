@@ -36,9 +36,16 @@
 //     (`serverRevision >= revision && pending === 0`) is still recorded as `checkpointAt` and
 //     stays the "saved" stamp of the `deployment` profile, where the blob channel's checkpoint is
 //     the durable write. Decided by the integrator with B4's report (b4.md section 1.7).
-//   - Twins: a 304 revalidation (transferSize about 300 bytes of headers, decodedBodySize 0) is
-//     not a re-fetch; the row counts entries whose transferSize and decodedBodySize are both
-//     above zero and reports the revalidations beside them.
+//   - Twins: a 304 revalidation (transferSize about 300 bytes of headers, no body) is not a
+//     re-fetch; the row counts entries that carried a body over the wire and reports the
+//     revalidations beside them. Fixer round of round four (VERIFICATION-4 finding 13): Chrome
+//     reports a 304's encodedBodySize and decodedBodySize as the cached body's sizes, not zero, so
+//     the earlier rule ("transferSize and decodedBodySize both above zero") counted every
+//     revalidation as a download (18 of 36 on the preview); an entry is a re-fetch when its
+//     transferSize reaches its encodedBodySize (the body rode on the wire) or, when the browser
+//     reports no encoded size, when transferSize exceeds REVALIDATION_MAX_BYTES; encodedBodySize
+//     is recorded per entry. The second visit goes through about:blank first: a navigation to the
+//     document's own URL is a reload in Chromium, and the row measures a second visit.
 //
 //   node scripts/perf-budget.mjs --base http://localhost:4321 --profile local --write
 //   node scripts/perf-budget.mjs --base https://<preview>.vercel.app --profile deployment
@@ -63,7 +70,10 @@
 // request from Playwright's request timing; FCP and LCP are the paint and LCP entries; "ready" is
 // the first moment the route's landmark holds, stamped in the page by a MutationObserver plus a 4 ms
 // poll; a transition is pointerdown to the landmark in page for a same-document navigation and wall
-// clock for a document navigation; filmstrip frames are requestAnimationFrame timestamps while the
+// clock for a document navigation (`home->new`: the pointer rests on the link for HOME_HOVER_MS
+// first, so the page's Speculation Rules prerender of /new (SPEC-4 0.42, moderate eagerness, 200 ms
+// of hover) has started; the row reads the new document's `activationStart` and says whether the
+// navigation activated a prerendered document or loaded a plain one); filmstrip frames are requestAnimationFrame timestamps while the
 // wheel fires 18 times at 80 ms gaps over .ts-film; idle calls are /_serverFn/ responses and
 // stream connections (/api/decks/<id>/stream, SPEC-4 4.4) per minute on an open editor; twins are
 // the deck's asset pictures re-fetched on a second visit of /deck; image bytes are the Resource
@@ -74,6 +84,11 @@
 // keyup, local commit, the current card's clone carrying the text, the saved revision) are taken
 // in the page at 4 ms.
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+
+/** A 304 carries headers alone; a transferSize under this with no body size reported is a revalidation. */
+const REVALIDATION_MAX_BYTES = 2_000;
+/** The rest on the New presentation link before the click: past the 200 ms the moderate eagerness rule needs, the time a person reads a button. */
+const HOME_HOVER_MS = 1_000;
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -978,10 +993,23 @@ async function transitions() {
     await sleep(500);
     const toNew = page.locator('a[href="/new"]').first();
     if ((await toNew.count()) > 0) {
+      // the rules of SPEC-4 0.42 prerender /new once the pointer has rested on the link for 200 ms
+      // (moderate eagerness); the row rests for HOME_HOVER_MS, clicks, and reads whether the new
+      // document was the prerendered one (activationStart above 0 on its navigation entry)
       await toNew.hover();
-      await sleep(150);
+      await sleep(HOME_HOVER_MS);
       const t = await clickToRoute(page, toNew, '/new');
-      record('home->new', t.ms, t.how);
+      const activation = await page
+        .evaluate(() => {
+          const [nav] = performance.getEntriesByType('navigation');
+          return nav && 'activationStart' in nav ? nav.activationStart : null;
+        })
+        .catch(() => null);
+      const prerendered = typeof activation === 'number' && activation > 0;
+      const how = t.how.startsWith('wall')
+        ? `${t.how}, ${prerendered ? 'prerender activated' : 'no prerender activation'}`
+        : t.how;
+      record('home->new', t.ms, how, { activationStart: activation, hoverMs: HOME_HOVER_MS });
     }
   } else {
     console.log('info transitions  /home is absent: the home->new transition is skipped');
@@ -1169,6 +1197,8 @@ async function twins() {
   const page = await context.newPage();
   const route = `/deck/${args.deck}`;
   for (const visit of [1, 2]) {
+    /* a navigation to the document's own URL is a reload in Chromium; the second visit leaves first */
+    if (visit === 2) await page.goto('about:blank');
     await page.goto(`${args.base}${route}`, { waitUntil: 'commit' });
     await waitLandmark(page, route);
     await sleep(2500);
@@ -1180,14 +1210,21 @@ async function twins() {
           .filter((r) => r.name.includes(`/decks/${deck}/assets/`))
           .map((r) => ({
             name: r.name.split('/').pop(),
+            initiator: r.initiatorType,
             transfer: r.transferSize,
+            encoded: r.encodedBodySize,
             decoded: r.decodedBodySize,
           })),
       args.deck,
     );
-    // a body came over the wire; a 304 (headers alone, decoded 0) is a revalidation, reported
-    const refetched = list.filter((r) => r.transfer > 0 && r.decoded > 0);
-    const revalidated = list.filter((r) => r.transfer > 0 && r.decoded === 0);
+    // a body came over the wire when the bytes transferred reach the encoded body (Chrome reports
+    // a 304's body sizes as the cached body's, so the decoded size alone says nothing); a 304 is a
+    // revalidation, reported; transferSize 0 is the cache
+    const overWire = (r) =>
+      r.transfer > 0 &&
+      (r.encoded > 0 ? r.transfer >= r.encoded : r.transfer > REVALIDATION_MAX_BYTES);
+    const refetched = list.filter((r) => overWire(r));
+    const revalidated = list.filter((r) => r.transfer > 0 && !overWire(r));
     results.twins = {
       total: list.length,
       refetched: refetched.length,

@@ -155,7 +155,10 @@ const round2 = (v) => (typeof v === 'number' ? Math.round(v * 100) / 100 : v);
 /** True while a `playwright test` runner is alive on this machine (the runs the lock serializes). */
 function playwrightTestRunning() {
   try {
-    const out = execSync("ps -axo command | grep -E 'playwright(/cli\\.js)? test|@playwright/test/cli' | grep -v grep", { encoding: 'utf8' });
+    const out = execSync(
+      "ps -axo command | grep -E 'playwright(/cli\\.js)? test|@playwright/test/cli' | grep -v grep",
+      { encoding: 'utf8' },
+    );
     return out.trim().length > 0;
   } catch {
     return false;
@@ -230,7 +233,12 @@ page.on('response', async (response) => {
   try {
     const text = await response.text();
     if (/is stale|resync|changed in the Blob store/.test(text))
-      staleAnswers.push({ t: t(), path: url.slice(BASE.length, BASE.length + 80), status: response.status(), text: text.slice(0, 200) });
+      staleAnswers.push({
+        t: t(),
+        path: url.slice(BASE.length, BASE.length + 80),
+        status: response.status(),
+        text: text.slice(0, 200),
+      });
   } catch {
     // body already consumed
   }
@@ -257,7 +265,8 @@ const st = () =>
 const invoke = (action, input) =>
   page.evaluate(([a, i]) => window.turboslide.studio.invoke(a, i), [action, input]);
 /** The read only actions take no baseRevision (their input objects are strict). */
-const READ_ONLY = /^(view\.|slide\.list$|slide\.get$|deck\.info$|material\.list$|lint\.run$|sync\.status$|presence\.list$)/;
+const READ_ONLY =
+  /^(view\.|slide\.list$|slide\.get$|deck\.info$|material\.list$|lint\.run$|sync\.status$|presence\.list$)/;
 async function act(action, input) {
   if (READ_ONLY.test(action)) return invoke(action, input);
   /* a scripted write waits for the last one to land on the server: on this production build a
@@ -330,7 +339,14 @@ async function waitCaughtUp(timeout = 10_000) {
   } catch {
     const s = await page.evaluate(() => {
       const s = window.turboslide?.studio?.describe().state ?? {};
-      return { revision: s.revision, doc: s.document && s.document.deck ? s.document.deck.revision : null, pending: s.pending, sync: s.sync ? { pending: s.sync.pending, seq: s.sync.seq, revision: s.sync.revision } : null };
+      return {
+        revision: s.revision,
+        doc: s.document && s.document.deck ? s.document.deck.revision : null,
+        pending: s.pending,
+        sync: s.sync
+          ? { pending: s.sync.pending, seq: s.sync.seq, revision: s.sync.revision }
+          : null,
+      };
     });
     return { ok: false, ms: Date.now() - t1, state: s };
   }
@@ -393,7 +409,11 @@ const snapshot = (id, members = []) =>
         body?.querySelector(`.free[data-free="${id}"]`) ??
         body?.querySelector(`[data-block="${id}"]`) ??
         null;
-      const out = { t: Date.now(), k: r2(k), stage: [sr.left, sr.top, sr.width, sr.height].map(r2) };
+      const out = {
+        t: Date.now(),
+        k: r2(k),
+        stage: [sr.left, sr.top, sr.width, sr.height].map(r2),
+      };
       out.rect = wrap ? toSheet(wrap.getBoundingClientRect()) : null;
       out.isWrapper = wrap ? wrap.classList.contains('free') : false;
       out.inline = wrap
@@ -407,7 +427,10 @@ const snapshot = (id, members = []) =>
         : null;
       const inner = wrap ? wrap.firstElementChild : null;
       if (inner) {
-        const c = { tag: inner.tagName.toLowerCase(), rect: toSheet(inner.getBoundingClientRect()) };
+        const c = {
+          tag: inner.tagName.toLowerCase(),
+          rect: toSheet(inner.getBoundingClientRect()),
+        };
         c.cls = typeof inner.className === 'string' ? inner.className : inner.getAttribute('class');
         c.fontSize = getComputedStyle(inner).fontSize;
         if (inner instanceof SVGElement) {
@@ -427,7 +450,10 @@ const snapshot = (id, members = []) =>
         }
         const svg = wrap.querySelector('svg');
         if (svg && !(inner instanceof SVGElement)) {
-          c.svg = { rect: toSheet(svg.getBoundingClientRect()), viewBox: svg.getAttribute('viewBox') };
+          c.svg = {
+            rect: toSheet(svg.getBoundingClientRect()),
+            viewBox: svg.getAttribute('viewBox'),
+          };
         }
         const img = wrap.querySelector('img');
         if (img)
@@ -437,13 +463,20 @@ const snapshot = (id, members = []) =>
             fit: getComputedStyle(img).objectFit,
           };
         const canvas = wrap.querySelector('canvas');
-        if (canvas) c.canvas = { rect: toSheet(canvas.getBoundingClientRect()), size: [canvas.width, canvas.height] };
+        if (canvas)
+          c.canvas = {
+            rect: toSheet(canvas.getBoundingClientRect()),
+            size: [canvas.width, canvas.height],
+          };
         const live = wrap.querySelector('.ts-material-live');
         if (live) c.live = toSheet(live.getBoundingClientRect());
-        const textEl =
-          inner.matches('p, h1, h2, h3, .big, .box, .shape-block, .credit')
-            ? inner.matches('.box') ? inner.querySelector('.box-text') ?? inner : inner.matches('.shape-block') ? inner.querySelector('.shape-text') : inner
-            : wrap.querySelector('p, h1, h2, .box-text, .shape-text');
+        const textEl = inner.matches('p, h1, h2, h3, .big, .box, .shape-block, .credit')
+          ? inner.matches('.box')
+            ? (inner.querySelector('.box-text') ?? inner)
+            : inner.matches('.shape-block')
+              ? inner.querySelector('.shape-text')
+              : inner
+          : wrap.querySelector('p, h1, h2, .box-text, .shape-text');
         if (textEl) {
           const range = document.createRange();
           range.selectNodeContents(textEl);
@@ -458,8 +491,10 @@ const snapshot = (id, members = []) =>
               ? toSheet({
                   left: Math.min(...rects.map((r) => r.left)),
                   top: Math.min(...rects.map((r) => r.top)),
-                  width: Math.max(...rects.map((r) => r.right)) - Math.min(...rects.map((r) => r.left)),
-                  height: Math.max(...rects.map((r) => r.bottom)) - Math.min(...rects.map((r) => r.top)),
+                  width:
+                    Math.max(...rects.map((r) => r.right)) - Math.min(...rects.map((r) => r.left)),
+                  height:
+                    Math.max(...rects.map((r) => r.bottom)) - Math.min(...rects.map((r) => r.top)),
                 })
               : null,
           };
@@ -501,18 +536,27 @@ const snapshot = (id, members = []) =>
         y: val('[data-control="formatOptions.position.y"]'),
       };
       out.readout = document.querySelector('.ts-readout')?.textContent ?? null;
-      out.editing = document.querySelector('.ts-stagewrap.ts-editor')?.hasAttribute('data-editing') ?? false;
-      out.formatControls = [...document.querySelectorAll('[data-control^="formatOptions."]')].map((e) => e.getAttribute('data-control')).slice(0, 40);
+      out.editing =
+        document.querySelector('.ts-stagewrap.ts-editor')?.hasAttribute('data-editing') ?? false;
+      out.formatControls = [...document.querySelectorAll('[data-control^="formatOptions."]')]
+        .map((e) => e.getAttribute('data-control'))
+        .slice(0, 40);
       const panel = document.querySelector('[data-control="panel.formatOptions"]');
       out.panel = panel
         ? {
-            controls: [...panel.querySelectorAll('[data-control]')].map((e) => e.getAttribute('data-control')).slice(0, 40),
+            controls: [...panel.querySelectorAll('[data-control]')]
+              .map((e) => e.getAttribute('data-control'))
+              .slice(0, 40),
             text: (panel.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 240),
-            inputs: [...panel.querySelectorAll('input')].map((e) => ({ label: e.getAttribute('aria-label'), value: e.value })).slice(0, 12),
+            inputs: [...panel.querySelectorAll('input')]
+              .map((e) => ({ label: e.getAttribute('aria-label'), value: e.value }))
+              .slice(0, 12),
           }
         : null;
       out.guides = document.querySelectorAll('.ts-guide').length;
-      const ring = document.querySelector('.ts-overlay .ts-turn .ts-select, .ts-overlay .ts-select.is-selected');
+      const ring = document.querySelector(
+        '.ts-overlay .ts-turn .ts-select, .ts-overlay .ts-select.is-selected',
+      );
       out.ring = ring ? toSheet(ring.getBoundingClientRect()) : null;
       const state = window.turboslide.studio.describe().state;
       out.blockId = state.blockId;
@@ -576,24 +620,28 @@ async function select(id, opts = {}) {
           { x: pos.x + pos.w / 2, y: pos.y + pos.h / 2 },
         ];
     for (const pt of points) {
-    await page.keyboard.press('Escape');
-    await sleep(120);
-    if (await clickSelect(id, pt)) {
-      /* a click inside a text run places the caret (SPEC 10.2); Escape steps back to the block,
+      await page.keyboard.press('Escape');
+      await sleep(120);
+      if (await clickSelect(id, pt)) {
+        /* a click inside a text run places the caret (SPEC 10.2); Escape steps back to the block,
          whose handles the overlay draws only outside the caret state */
-      const editing = await page.evaluate(() => document.querySelector('.ts-stagewrap.ts-editor')?.hasAttribute('data-editing') ?? false);
-      if (editing) {
-        await page.keyboard.press('Escape');
-        await sleep(150);
-        const still = await st();
-        if (still.blockId === id) return 'click+escape';
-        if (await clickSelect(id, pt)) {
+        const editing = await page.evaluate(
+          () =>
+            document.querySelector('.ts-stagewrap.ts-editor')?.hasAttribute('data-editing') ??
+            false,
+        );
+        if (editing) {
           await page.keyboard.press('Escape');
           await sleep(150);
-          if ((await st()).blockId === id) return 'click+escape';
-        }
-      } else return 'click';
-    }
+          const still = await st();
+          if (still.blockId === id) return 'click+escape';
+          if (await clickSelect(id, pt)) {
+            await page.keyboard.press('Escape');
+            await sleep(150);
+            if ((await st()).blockId === id) return 'click+escape';
+          }
+        } else return 'click';
+      }
     }
   }
   await page.keyboard.press('Escape');
@@ -627,7 +675,10 @@ function rotatedCorner(pos, dir) {
   const a = ((pos.rotate ?? 0) % 360) * deg;
   const dx = lx - cx;
   const dy = ly - cy;
-  return { x: cx + dx * Math.cos(a) - dy * Math.sin(a), y: cy + dx * Math.sin(a) + dy * Math.cos(a) };
+  return {
+    x: cx + dx * Math.cos(a) - dy * Math.sin(a),
+    y: cy + dx * Math.sin(a) + dy * Math.cos(a),
+  };
 }
 function handlePoint(pos, dir) {
   return rotatedCorner(pos, dir);
@@ -684,7 +735,8 @@ async function shot(name) {
 async function undoOnce() {
   const s0 = await st();
   const button = control('toolbar.undo');
-  if ((await button.count()) > 0 && (await button.isEnabled().catch(() => false))) await button.click();
+  if ((await button.count()) > 0 && (await button.isEnabled().catch(() => false)))
+    await button.click();
   else await page.keyboard.press('Meta+z');
   const ok = await waitRev(s0.revision, 6000);
   await sleep(250);
@@ -705,19 +757,26 @@ async function dragHandle(spec) {
     const geomBox = unionBefore ?? pos0;
     const point = handlePoint(geomBox, dir);
     await setZoom(zoom, point);
-    const picked = await select(anchor, { box: pos0, ...(spec.selectPoint ? { point: spec.selectPoint } : {}) });
+    const picked = await select(anchor, {
+      box: pos0,
+      ...(spec.selectPoint ? { point: spec.selectPoint } : {}),
+    });
     row.selectedBy = picked;
     if (picked === 'failed') {
       row.error = 'could not select';
       return row;
     }
-    const handle = page.locator(`.ts-overlay [data-control="handle.${anchor}.resize.${dir}"]`).first();
+    const handle = page
+      .locator(`.ts-overlay [data-control="handle.${anchor}.resize.${dir}"]`)
+      .first();
     try {
       await handle.waitFor({ timeout: 4000 });
     } catch {
       row.error = `no handle handle.${anchor}.resize.${dir}`;
       row.handlesPresent = await page.evaluate(() =>
-        [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((e) => e.getAttribute('data-control')),
+        [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((e) =>
+          e.getAttribute('data-control'),
+        ),
       );
       return row;
     }
@@ -755,7 +814,12 @@ async function dragHandle(spec) {
         const el = document.elementFromPoint(x, y);
         if (!el) return null;
         const control = el.closest('[data-control]')?.getAttribute('data-control') ?? null;
-        return { tag: el.tagName.toLowerCase(), cls: String(el.className).slice(0, 60), control, side: el.getAttribute('data-side') };
+        return {
+          tag: el.tagName.toLowerCase(),
+          cls: String(el.className).slice(0, 60),
+          control,
+          side: el.getAttribute('data-side'),
+        };
       },
       [cx, cy],
     );
@@ -807,11 +871,19 @@ async function dragHandle(spec) {
           pending: s.pending,
           serverRevision: s.serverRevision,
           revision: s.revision,
-          sync: s.sync ? { seq: s.sync.seq, pending: s.sync.pending, revision: s.sync.revision, status: s.sync.status } : null,
+          sync: s.sync
+            ? {
+                seq: s.sync.seq,
+                pending: s.sync.pending,
+                revision: s.sync.revision,
+                status: s.sync.status,
+              }
+            : null,
           committed: typeof s.revision === 'number' && s.revision > r,
         };
       }, s0.revision);
-      if (probe.snackbar && !notices.some((n) => n.snackbar === probe.snackbar)) notices.push({ at: Date.now() - (deadline - (convertPath ? 15_000 : 8000)), ...probe });
+      if (probe.snackbar && !notices.some((n) => n.snackbar === probe.snackbar))
+        notices.push({ at: Date.now() - (deadline - (convertPath ? 15_000 : 8000)), ...probe });
       if (probe.committed) {
         committed = true;
         row.notice = probe;
@@ -825,7 +897,21 @@ async function dragHandle(spec) {
       row.notice = await page.evaluate(() => {
         const bar = document.querySelector('[data-control="snackbar"]');
         const s = window.turboslide?.studio?.describe().state ?? {};
-        return { snackbar: bar ? (bar.textContent ?? '').trim().slice(0, 200) : null, error: s.error ?? null, pending: s.pending, serverRevision: s.serverRevision, revision: s.revision, sync: s.sync ? { seq: s.sync.seq, pending: s.sync.pending, revision: s.sync.revision, status: s.sync.status } : null };
+        return {
+          snackbar: bar ? (bar.textContent ?? '').trim().slice(0, 200) : null,
+          error: s.error ?? null,
+          pending: s.pending,
+          serverRevision: s.serverRevision,
+          revision: s.revision,
+          sync: s.sync
+            ? {
+                seq: s.sync.seq,
+                pending: s.sync.pending,
+                revision: s.sync.revision,
+                status: s.sync.status,
+              }
+            : null,
+        };
       });
     }
     await sleep(300);
@@ -860,22 +946,55 @@ async function dragHandle(spec) {
     row.jumpAtUp = boxDiff(preview.rect, after.rect);
     row.rectDelta = boxDiff(before.rect, after.rect);
     row.posDelta = row.posAfter
-      ? { x: round2(row.posAfter.x - pos0.x), y: round2(row.posAfter.y - pos0.y), w: round2(row.posAfter.w - pos0.w), h: round2(row.posAfter.h - pos0.h) }
+      ? {
+          x: round2(row.posAfter.x - pos0.x),
+          y: round2(row.posAfter.y - pos0.y),
+          w: round2(row.posAfter.w - pos0.w),
+          h: round2(row.posAfter.h - pos0.h),
+        }
       : null;
     if (before.content && after.content) {
       row.contentDelta = {
         rect: boxDiff(before.content.rect, after.content.rect),
         fontSize: [before.content.fontSize, after.content.fontSize],
-        text: before.content.text && after.content.text
-          ? { lines: [before.content.text.lines, after.content.text.lines], fontSize: [before.content.text.fontSize, after.content.text.fontSize], ink: [before.content.text.inkRect, after.content.text.inkRect] }
-          : null,
-        img: before.content.img && after.content.img ? boxDiff(before.content.img.rect, after.content.img.rect) : null,
-        svg: before.content.svg && after.content.svg ? { rect: boxDiff(before.content.svg.rect, after.content.svg.rect), viewBox: [before.content.svg.viewBox, after.content.svg.viewBox] } : null,
+        text:
+          before.content.text && after.content.text
+            ? {
+                lines: [before.content.text.lines, after.content.text.lines],
+                fontSize: [before.content.text.fontSize, after.content.text.fontSize],
+                ink: [before.content.text.inkRect, after.content.text.inkRect],
+              }
+            : null,
+        img:
+          before.content.img && after.content.img
+            ? boxDiff(before.content.img.rect, after.content.img.rect)
+            : null,
+        svg:
+          before.content.svg && after.content.svg
+            ? {
+                rect: boxDiff(before.content.svg.rect, after.content.svg.rect),
+                viewBox: [before.content.svg.viewBox, after.content.svg.viewBox],
+              }
+            : null,
         viewBox: [before.content.viewBox, after.content.viewBox],
         bbox: [before.content.bbox, after.content.bbox],
-        table: before.content.table && after.content.table ? { rows: [before.content.table.rows, after.content.table.rows], font: [before.content.table.fontSize, after.content.table.fontSize], rect: boxDiff(before.content.table.rect, after.content.table.rect), cols: [before.content.table.cols, after.content.table.cols] } : null,
-        live: before.content.live && after.content.live ? boxDiff(before.content.live, after.content.live) : null,
-        canvas: before.content.canvas && after.content.canvas ? boxDiff(before.content.canvas.rect, after.content.canvas.rect) : null,
+        table:
+          before.content.table && after.content.table
+            ? {
+                rows: [before.content.table.rows, after.content.table.rows],
+                font: [before.content.table.fontSize, after.content.table.fontSize],
+                rect: boxDiff(before.content.table.rect, after.content.table.rect),
+                cols: [before.content.table.cols, after.content.table.cols],
+              }
+            : null,
+        live:
+          before.content.live && after.content.live
+            ? boxDiff(before.content.live, after.content.live)
+            : null,
+        canvas:
+          before.content.canvas && after.content.canvas
+            ? boxDiff(before.content.canvas.rect, after.content.canvas.rect)
+            : null,
       };
     }
     row.thumbMatch = after.thumb?.[0] ? boxDiff(after.rect, after.thumb[0]) : null;
@@ -910,8 +1029,16 @@ async function renderCompare(kind, id, slideId, deckId, box) {
     const stageShot = await page.screenshot({
       clip: { x: g.left, y: g.top, width: g.width, height: g.height },
     });
-    const editor = await sharp(stageShot).resize(1600, 900, { fit: 'fill' }).ensureAlpha().raw().toBuffer();
-    const editorPaper = [editor[(4 * 1600 + 4) * 4], editor[(4 * 1600 + 4) * 4 + 1], editor[(4 * 1600 + 4) * 4 + 2]];
+    const editor = await sharp(stageShot)
+      .resize(1600, 900, { fit: 'fill' })
+      .ensureAlpha()
+      .raw()
+      .toBuffer();
+    const editorPaper = [
+      editor[(4 * 1600 + 4) * 4],
+      editor[(4 * 1600 + 4) * 4 + 1],
+      editor[(4 * 1600 + 4) * 4 + 2],
+    ];
     const theme = editorPaper[0] < 128 ? 'dark' : 'light';
     out.theme = theme;
     const headers = TOKEN ? { authorization: `Bearer ${TOKEN}` } : {};
@@ -931,24 +1058,46 @@ async function renderCompare(kind, id, slideId, deckId, box) {
     writeFileSync(join(OUT, `render-${kind}.png`), png);
     const meta = await sharp(png).metadata();
     out.renderSize = [meta.width, meta.height];
-    const render = await sharp(png).resize(1600, 900, { fit: 'fill' }).ensureAlpha().raw().toBuffer();
+    const render = await sharp(png)
+      .resize(1600, 900, { fit: 'fill' })
+      .ensureAlpha()
+      .raw()
+      .toBuffer();
     const diff = Buffer.alloc(1600 * 900 * 4);
     const mismatched = pixelmatch(editor, render, diff, 1600, 900, { threshold: 0.1 });
     out.mismatch = round2(mismatched / (1600 * 900));
-    await sharp(diff, { raw: { width: 1600, height: 900, channels: 4 } }).png().toFile(join(OUT, `diff-${kind}.png`));
-    await sharp(stageShot).resize(1600, 900, { fit: 'fill' }).png().toFile(join(OUT, `editor-${kind}.png`));
+    await sharp(diff, { raw: { width: 1600, height: 900, channels: 4 } })
+      .png()
+      .toFile(join(OUT, `diff-${kind}.png`));
+    await sharp(stageShot)
+      .resize(1600, 900, { fit: 'fill' })
+      .png()
+      .toFile(join(OUT, `editor-${kind}.png`));
     /* the object's ink box in both images: pixels that differ from the paper sampled at (4, 4) */
     const inkBox = (buf) => {
-      const paper = [buf[(4 * 1600 + 4) * 4], buf[(4 * 1600 + 4) * 4 + 1], buf[(4 * 1600 + 4) * 4 + 2]];
+      const paper = [
+        buf[(4 * 1600 + 4) * 4],
+        buf[(4 * 1600 + 4) * 4 + 1],
+        buf[(4 * 1600 + 4) * 4 + 2],
+      ];
       const x0 = Math.max(0, Math.floor(box.x - 30));
       const y0 = Math.max(0, Math.floor(box.y - 30));
       const x1 = Math.min(1599, Math.ceil(box.x + box.w + 30));
       const y1 = Math.min(899, Math.ceil(box.y + box.h + 30));
-      let minX = Infinity, minY = Infinity, maxX = -1, maxY = -1, count = 0;
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -1,
+        maxY = -1,
+        count = 0;
       for (let y = y0; y <= y1; y += 1)
         for (let x = x0; x <= x1; x += 1) {
           const i = (y * 1600 + x) * 4;
-          if (Math.abs(buf[i] - paper[0]) + Math.abs(buf[i + 1] - paper[1]) + Math.abs(buf[i + 2] - paper[2]) > 60) {
+          if (
+            Math.abs(buf[i] - paper[0]) +
+              Math.abs(buf[i + 1] - paper[1]) +
+              Math.abs(buf[i + 2] - paper[2]) >
+            60
+          ) {
             count += 1;
             if (x < minX) minX = x;
             if (y < minY) minY = y;
@@ -956,7 +1105,9 @@ async function renderCompare(kind, id, slideId, deckId, box) {
             if (y > maxY) maxY = y;
           }
         }
-      return count > 0 ? { box: [minX, minY, maxX - minX + 1, maxY - minY + 1], pixels: count, paper } : { box: null, pixels: 0, paper };
+      return count > 0
+        ? { box: [minX, minY, maxX - minX + 1, maxY - minY + 1], pixels: count, paper }
+        : { box: null, pixels: 0, paper };
     };
     out.editorInk = inkBox(editor);
     out.renderInk = inkBox(render);
@@ -1023,10 +1174,14 @@ async function boot() {
       .catch(() => say('the first write did not report a revision within 60 s'));
     await settle(60_000);
     const saved = await st();
-    say(`saved ${saved.deckId ?? deckId} r${saved.revision} (server r${saved.serverRevision}) at ${page.url().slice(BASE.length)}`);
+    say(
+      `saved ${saved.deckId ?? deckId} r${saved.revision} (server r${saved.serverRevision}) at ${page.url().slice(BASE.length)}`,
+    );
   }
   say(`open /edit/${deckId}`);
-  await page.goto(`${BASE}/edit/${encodeURIComponent(deckId)}?edit=1`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${BASE}/edit/${encodeURIComponent(deckId)}?edit=1`, {
+    waitUntil: 'domcontentloaded',
+  });
   await waitStudio();
   await settle(20_000);
   await sleep(800);
@@ -1035,7 +1190,9 @@ async function boot() {
   /* the anonymous identity's name prompt ("How should others see you?") sits over the sheet's corner */
   const prompt = page.locator('text=How should others see you?').first();
   if (await prompt.isVisible().catch(() => false)) {
-    const close = prompt.locator('xpath=ancestor::*[self::div or self::section or self::form][1]//button').last();
+    const close = prompt
+      .locator('xpath=ancestor::*[self::div or self::section or self::form][1]//button')
+      .last();
     await close.click({ timeout: 2000 }).catch(() => page.keyboard.press('Escape'));
     await sleep(300);
     report.namePromptDismissed = !(await prompt.isVisible().catch(() => false));
@@ -1058,12 +1215,14 @@ async function boot() {
     report.formatOptionsOpen = false;
     report.formatOptionsError = String(error).slice(0, 160);
   }
-  say(`format options open: ${report.formatOptionsOpen}, size field present: ${report.formatOptionsSizeField}`);
+  say(
+    `format options open: ${report.formatOptionsOpen}, size field present: ${report.formatOptionsSizeField}`,
+  );
 }
 
 async function ensureSlide(id, layout) {
   const list = await invoke('slide.list', {});
-  const ids = (Array.isArray(list) ? list : list.slides ?? []).map((s) => s.id ?? s.slideId ?? s);
+  const ids = (Array.isArray(list) ? list : (list.slides ?? [])).map((s) => s.id ?? s.slideId ?? s);
   if (!ids.includes(id)) {
     const s = await st();
     await act('slide.new', { layout, after: ids[ids.length - 1], id });
@@ -1080,7 +1239,12 @@ async function ensureSlide(id, layout) {
   }
 }
 
-const freshIds = async () => new Set(Object.values((await source()).slots ?? {}).flat().map((b) => b.id));
+const freshIds = async () =>
+  new Set(
+    Object.values((await source()).slots ?? {})
+      .flat()
+      .map((b) => b.id),
+  );
 async function freshBlock(before, type) {
   const after = Object.values((await source()).slots ?? {}).flat();
   return after.find((b) => b.type === type && !before.has(b.id)) ?? null;
@@ -1100,10 +1264,15 @@ async function menuPick(ids) {
   await sleep(250);
   for (let i = 0; i < ids.length; i += 1) {
     const item = control(`menu.${ids[i]}`);
-    const shown = await item.waitFor({ state: 'visible', timeout: 2500 }).then(() => true).catch(() => false);
+    const shown = await item
+      .waitFor({ state: 'visible', timeout: 2500 })
+      .then(() => true)
+      .catch(() => false);
     if (!shown) {
       const listed = await page.evaluate(() =>
-        [...document.querySelectorAll('[data-control^="menu."]')].map((e) => e.getAttribute('data-control')).slice(0, 80),
+        [...document.querySelectorAll('[data-control^="menu."]')]
+          .map((e) => e.getAttribute('data-control'))
+          .slice(0, 80),
       );
       say(`  menu row menu.${ids[i]} missing; rows: ${listed.join(' ')}`);
       await page.keyboard.press('Escape');
@@ -1175,7 +1344,12 @@ async function place(id, box) {
   if (!pos) return;
   const slide = await source();
   const s = await st();
-  await act('block.set', { slideId: slide.id, blockId: id, path: '/pos', value: { ...pos, ...box } });
+  await act('block.set', {
+    slideId: slide.id,
+    blockId: id,
+    path: '/pos',
+    value: { ...pos, ...box },
+  });
   await waitRev(s.revision, 15_000);
   await sleep(200);
 }
@@ -1197,7 +1371,16 @@ async function pngDataUrl() {
   })
     .composite([
       {
-        input: await sharp({ create: { width: 48, height: 32, channels: 4, background: { r: 240, g: 160, b: 32, alpha: 1 } } }).png().toBuffer(),
+        input: await sharp({
+          create: {
+            width: 48,
+            height: 32,
+            channels: 4,
+            background: { r: 240, g: 160, b: 32, alpha: 1 },
+          },
+        })
+          .png()
+          .toBuffer(),
         left: 24,
         top: 16,
       },
@@ -1234,18 +1417,38 @@ async function makeObjects() {
     let id = await insertViaTool(['insert.textBox'], 'text', cellPoint());
     if (!id) {
       made = 'block.insert (the menu path failed)';
-      id = await insertViaAction({ id: 'text-menu', type: 'text', text: 'Text.' }, { x: 0, y: 0, w: 260, h: 140 });
+      id = await insertViaAction(
+        { id: 'text-menu', type: 'text', text: 'Text.' },
+        { x: 0, y: 0, w: 260, h: 140 },
+      );
     }
     await setField(id, '/text', LONG_TEXT);
     await add('text', id, made, { w: 260, h: 140 });
   }
   if (want('text-grow')) {
-    const id = await insertViaAction({ id: 'text-grow', type: 'text', text: LONG_TEXT, autofit: 'grow' }, { x: 0, y: 0, w: 260, h: 140 });
-    await add('text-grow', id, 'block.insert (autofit grow, as the text tool writes)', { w: 260, h: 140 }, { full: true });
+    const id = await insertViaAction(
+      { id: 'text-grow', type: 'text', text: LONG_TEXT, autofit: 'grow' },
+      { x: 0, y: 0, w: 260, h: 140 },
+    );
+    await add(
+      'text-grow',
+      id,
+      'block.insert (autofit grow, as the text tool writes)',
+      { w: 260, h: 140 },
+      { full: true },
+    );
   }
   if (want('text-shrink')) {
-    const id = await insertViaAction({ id: 'text-shrink', type: 'text', text: LONG_TEXT, autofit: 'shrink' }, { x: 0, y: 0, w: 260, h: 140 });
-    await add('text-shrink', id, 'block.insert (autofit shrink, as a converted placeholder carries)', { w: 260, h: 140 });
+    const id = await insertViaAction(
+      { id: 'text-shrink', type: 'text', text: LONG_TEXT, autofit: 'shrink' },
+      { x: 0, y: 0, w: 260, h: 140 },
+    );
+    await add(
+      'text-shrink',
+      id,
+      'block.insert (autofit shrink, as a converted placeholder carries)',
+      { w: 260, h: 140 },
+    );
   }
   for (const [kind, row, shape] of [
     ['rectangle', 'rectangle', 'rectangle'],
@@ -1254,29 +1457,54 @@ async function makeObjects() {
   ]) {
     if (!want(kind)) continue;
     let made = `menubar Insert > Shape > Shapes > ${row}, one click on the sheet`;
-    let id = await insertViaTool(['insert.shape', 'insert.shape.shapes', `insert.shape.shapes.${row}`], 'shape', cellPoint());
+    let id = await insertViaTool(
+      ['insert.shape', 'insert.shape.shapes', `insert.shape.shapes.${row}`],
+      'shape',
+      cellPoint(),
+    );
     if (!id) {
       made = 'block.insert (the menu path failed)';
-      id = await insertViaAction({ id: `${kind}-shape`, type: 'shape', shape, stroke: 'hair' }, { x: 0, y: 0, w: 240, h: 150 });
+      id = await insertViaAction(
+        { id: `${kind}-shape`, type: 'shape', shape, stroke: 'hair' },
+        { x: 0, y: 0, w: 240, h: 150 },
+      );
     }
     if (kind === 'rectangle') await setField(id, '/fill', 'plate');
     await add(kind, id, made, { w: 240, h: 150 }, { full: kind === 'rectangle' });
   }
   if (want('triangle')) {
-    const id = await insertViaAction({ id: 'triangle', type: 'shape', shape: 'triangle', stroke: 'hair', fill: 'plate' }, { x: 0, y: 0, w: 240, h: 150 });
-    await add('triangle', id, 'block.insert (preset triangle; the menu lists the presets as a glyph grid)', { w: 240, h: 150 });
+    const id = await insertViaAction(
+      { id: 'triangle', type: 'shape', shape: 'triangle', stroke: 'hair', fill: 'plate' },
+      { x: 0, y: 0, w: 240, h: 150 },
+    );
+    await add(
+      'triangle',
+      id,
+      'block.insert (preset triangle; the menu lists the presets as a glyph grid)',
+      { w: 240, h: 150 },
+    );
   }
   if (want('arrow')) {
     let made = 'menubar Insert > Shape > Arrows > Arrow, one click on the sheet';
-    let id = await insertViaTool(['insert.shape', 'insert.shape.arrows', 'insert.shape.arrows.arrow'], 'shape', cellPoint());
+    let id = await insertViaTool(
+      ['insert.shape', 'insert.shape.arrows', 'insert.shape.arrows.arrow'],
+      'shape',
+      cellPoint(),
+    );
     if (!id) {
       made = 'block.insert (preset rightArrow; the menu path failed)';
-      id = await insertViaAction({ id: 'arrow-shape', type: 'shape', shape: 'rightArrow', stroke: 'hair', fill: 'plate' }, { x: 0, y: 0, w: 240, h: 150 });
+      id = await insertViaAction(
+        { id: 'arrow-shape', type: 'shape', shape: 'rightArrow', stroke: 'hair', fill: 'plate' },
+        { x: 0, y: 0, w: 240, h: 150 },
+      );
     }
     await add('arrow', id, made, { w: 240, h: 150 });
   }
   if (want('star')) {
-    const id = await insertViaAction({ id: 'star', type: 'shape', shape: 'star5', stroke: 'hair', fill: 'plate' }, { x: 0, y: 0, w: 240, h: 150 });
+    const id = await insertViaAction(
+      { id: 'star', type: 'shape', shape: 'star5', stroke: 'hair', fill: 'plate' },
+      { x: 0, y: 0, w: 240, h: 150 },
+    );
     await add('star', id, 'block.insert (preset star5)', { w: 240, h: 150 });
   }
   if (want('rule')) {
@@ -1284,7 +1512,10 @@ async function makeObjects() {
     let id = await insertViaMenuRow(['insert.line', 'insert.line.rule'], 'rule');
     if (!id) {
       made = 'block.insert (the menu path failed)';
-      id = await insertViaAction({ id: 'rule-a', type: 'rule', orientation: 'horizontal' }, { x: 0, y: 0, w: 240, h: 8 });
+      id = await insertViaAction(
+        { id: 'rule-a', type: 'rule', orientation: 'horizontal' },
+        { x: 0, y: 0, w: 240, h: 8 },
+      );
     }
     await add('rule', id, made, { w: 240, h: 8 });
   }
@@ -1293,36 +1524,77 @@ async function makeObjects() {
     let id = await insertViaMenuRow(['insert.line', 'insert.line.line'], 'shape');
     if (!id) {
       made = 'block.insert (line kind; the menu path failed)';
-      id = await insertViaAction({ id: 'line', type: 'shape', shape: 'line', orientation: 'diagonal-down' }, { x: 0, y: 0, w: 240, h: 120 });
+      id = await insertViaAction(
+        { id: 'line', type: 'shape', shape: 'line', orientation: 'diagonal-down' },
+        { x: 0, y: 0, w: 240, h: 120 },
+      );
     }
     await add('line', id, made, { w: 240, h: 120 }, { line: true });
   }
   if (want('icon')) {
-    const id = await insertViaAction({ id: 'icon-a', type: 'icon', name: 'check-circle', size: 24 }, { x: 0, y: 0, w: 96, h: 96 });
-    await add('icon', id, 'block.insert (the Icon primitive of the toolbar Insert menu, absent on this build)', { w: 96, h: 96 }, { full: true });
+    const id = await insertViaAction(
+      { id: 'icon-a', type: 'icon', name: 'check-circle', size: 24 },
+      { x: 0, y: 0, w: 96, h: 96 },
+    );
+    await add(
+      'icon',
+      id,
+      'block.insert (the Icon primitive of the toolbar Insert menu, absent on this build)',
+      { w: 96, h: 96 },
+      { full: true },
+    );
   }
   if (want('box')) {
-    const id = await insertViaAction({ id: 'box-a', type: 'box', stroke: 'hair', padding: 16, text: LONG_TEXT }, { x: 0, y: 0, w: 260, h: 150 });
+    const id = await insertViaAction(
+      { id: 'box-a', type: 'box', stroke: 'hair', padding: 16, text: LONG_TEXT },
+      { x: 0, y: 0, w: 260, h: 150 },
+    );
     await add('box', id, 'block.insert (the Box primitive)', { w: 260, h: 150 });
   }
   if (want('picture')) {
     const s = await st();
-    const asset = await act('asset.add', { id: 'probe-picture', file: await pngDataUrl(), role: 'capture', alt: 'A blue plate with an amber centre' });
+    const asset = await act('asset.add', {
+      id: 'probe-picture',
+      file: await pngDataUrl(),
+      role: 'capture',
+      alt: 'A blue plate with an amber centre',
+    });
     say(`asset.add ${JSON.stringify(asset).slice(0, 120)}`);
     await waitRev(s.revision, 20_000);
-    await page.waitForFunction(() => {
-      try {
-        return Boolean(JSON.parse(window.turboslide.studio.readSource()));
-      } catch {
-        return false;
-      }
-    }, null, { timeout: 5000 }).catch(() => {});
-    const id = await insertViaAction({ id: 'picture-a', type: 'picture', asset: 'probe-picture' }, { x: 0, y: 0, w: 240, h: 160 });
-    await add('picture', id, 'asset.add (a 96 by 64 PNG data URL) + block.insert picture', { w: 240, h: 160 }, { full: true });
+    await page
+      .waitForFunction(
+        () => {
+          try {
+            return Boolean(JSON.parse(window.turboslide.studio.readSource()));
+          } catch {
+            return false;
+          }
+        },
+        null,
+        { timeout: 5000 },
+      )
+      .catch(() => {});
+    const id = await insertViaAction(
+      { id: 'picture-a', type: 'picture', asset: 'probe-picture' },
+      { x: 0, y: 0, w: 240, h: 160 },
+    );
+    await add(
+      'picture',
+      id,
+      'asset.add (a 96 by 64 PNG data URL) + block.insert picture',
+      { w: 240, h: 160 },
+      { full: true },
+    );
   }
   if (want('group')) {
-    const a = await insertViaAction({ id: 'g-rect', type: 'shape', shape: 'rectangle', stroke: 'hair', fill: 'plate' }, { x: 0, y: 0, w: 120, h: 140 });
-    const b = await insertViaAction({ id: 'g-text', type: 'text', text: 'Grouped text keeps its size.', autofit: 'grow' }, { x: 0, y: 0, w: 130, h: 140 });
+    const a = await insertViaAction(
+      { id: 'g-rect', type: 'shape', shape: 'rectangle', stroke: 'hair', fill: 'plate' },
+      { x: 0, y: 0, w: 120, h: 140 },
+    );
+    const b = await insertViaAction(
+      { id: 'g-text', type: 'text', text: 'Grouped text keeps its size.', autofit: 'grow' },
+      { x: 0, y: 0, w: 130, h: 140 },
+    );
     const c = cell(i);
     i += 1;
     await place(a, { x: c.x, y: c.y, w: 120, h: 140 });
@@ -1331,7 +1603,14 @@ async function makeObjects() {
     const s = await st();
     await act('block.group', { slideId: slide.id, blockIds: [a, b] });
     await waitRev(s.revision, 15_000);
-    objects.push({ kind: 'group', id: a, slide: 'canvas-a', made: 'two objects grouped with block.group', members: [a, b], full: true });
+    objects.push({
+      kind: 'group',
+      id: a,
+      slide: 'canvas-a',
+      made: 'two objects grouped with block.group',
+      members: [a, b],
+      full: true,
+    });
     say(`object group = ${a}+${b}`);
   }
 
@@ -1362,14 +1641,29 @@ async function makeObjects() {
         },
         { x: 0, y: 0, w: 640, h: 300 },
       );
-      await addB('table', id, 'block.insert (the menu grid is a hover plate)', { w: 640, h: 300 }, { full: true });
+      await addB(
+        'table',
+        id,
+        'block.insert (the menu grid is a hover plate)',
+        { w: 640, h: 300 },
+        { full: true },
+      );
     }
     if (want('chart')) {
       let made = 'menubar Insert > Chart > Column';
       let id = await insertViaMenuRow(['insert.chart', 'insert.chart.column'], 'chart');
       if (!id) {
         made = 'block.insert (the menu path failed)';
-        id = await insertViaAction({ id: 'chart-a', type: 'chart', kind: 'column', series: [{ name: 'A', values: [3, 5, 2, 6] }], categories: ['Q1', 'Q2', 'Q3', 'Q4'] }, { x: 0, y: 0, w: 640, h: 340 });
+        id = await insertViaAction(
+          {
+            id: 'chart-a',
+            type: 'chart',
+            kind: 'column',
+            series: [{ name: 'A', values: [3, 5, 2, 6] }],
+            categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+          },
+          { x: 0, y: 0, w: 640, h: 340 },
+        );
       }
       await addB('chart', id, made, { w: 640, h: 340 });
     }
@@ -1383,20 +1677,44 @@ async function makeObjects() {
           data: {
             w: 627,
             h: 300,
-            lines: [{ x1: 20, y1: 150, x2: 600, y2: 150, stroke: 'ink' }, { x1: 313, y1: 20, x2: 313, y2: 280, stroke: 'mid' }],
-            rects: [{ x: 60, y: 60, w: 160, h: 90, fill: 'plate', stroke: 'ink' }, { x: 400, y: 160, w: 160, h: 90, fill: 'paper', stroke: 'ink' }],
+            lines: [
+              { x1: 20, y1: 150, x2: 600, y2: 150, stroke: 'ink' },
+              { x1: 313, y1: 20, x2: 313, y2: 280, stroke: 'mid' },
+            ],
+            rects: [
+              { x: 60, y: 60, w: 160, h: 90, fill: 'plate', stroke: 'ink' },
+              { x: 400, y: 160, w: 160, h: 90, fill: 'paper', stroke: 'ink' },
+            ],
             markers: [{ x: 313, y: 150 }],
-            texts: [{ x: 140, y: 40, text: 'Input' }, { x: 480, y: 270, text: 'Output' }],
+            texts: [
+              { x: 140, y: 40, text: 'Input' },
+              { x: 480, y: 270, text: 'Output' },
+            ],
             icons: [],
             marks: [],
           },
         },
         { x: 0, y: 0, w: 640, h: 300 },
       );
-      await addB('dia', id, 'block.insert (a declared diagram with lines, rects, a marker and two labels)', { w: 640, h: 300 });
+      await addB(
+        'dia',
+        id,
+        'block.insert (a declared diagram with lines, rects, a marker and two labels)',
+        { w: 640, h: 300 },
+      );
     }
     if (want('material')) {
-      const id = await insertViaAction({ id: 'material-a', type: 'material', materialId: 'paper:gem-smoke', preset: 'brand-blue', anchor: 5500, alt: 'The gem smoke material in the brand blue' }, { x: 0, y: 0, w: 640, h: 340 });
+      const id = await insertViaAction(
+        {
+          id: 'material-a',
+          type: 'material',
+          materialId: 'paper:gem-smoke',
+          preset: 'brand-blue',
+          anchor: 5500,
+          alt: 'The gem smoke material in the brand blue',
+        },
+        { x: 0, y: 0, w: 640, h: 340 },
+      );
       await addB('material', id, 'block.insert (the Material primitive)', { w: 640, h: 340 });
     }
   }
@@ -1404,7 +1722,9 @@ async function makeObjects() {
   // Slide C: an opener template slide: the plate, the photograph and the plate's heading
   if (want('plate') || want('opener-picture') || want('template-big')) {
     const list = await invoke('slide.list', {});
-    const ids = (Array.isArray(list) ? list : list.slides ?? []).map((s) => s.id ?? s.slideId ?? s);
+    const ids = (Array.isArray(list) ? list : (list.slides ?? [])).map(
+      (s) => s.id ?? s.slideId ?? s,
+    );
     if (!ids.includes('opener-1')) {
       const s = await st();
       try {
@@ -1417,15 +1737,46 @@ async function makeObjects() {
     await gotoSlide('opener-1').catch(() => {});
     const slide = await source();
     if (slide.id === 'opener-1') {
-      const big = slide.plate?.blocks?.find((b) => b.type === 'heading') ?? slide.slots?.main?.find((b) => b.type === 'heading');
+      const big =
+        slide.plate?.blocks?.find((b) => b.type === 'heading') ??
+        slide.slots?.main?.find((b) => b.type === 'heading');
       if (big) {
         const s = await st();
-        await act('block.set', { slideId: 'opener-1', blockId: big.id, path: '/text', value: 'Section title that runs long enough to wrap' });
+        await act('block.set', {
+          slideId: 'opener-1',
+          blockId: big.id,
+          path: '/text',
+          value: 'Section title that runs long enough to wrap',
+        });
         await waitRev(s.revision, 15_000);
       }
-      if (want('plate')) objects.push({ kind: 'plate', id: 'plate', slide: 'opener-1', made: 'the opener template plate (a virtual object until the first drag converts the slide)', convertPath: true, selectPoint: 'plate' });
-      if (want('opener-picture')) objects.push({ kind: 'opener-picture', id: 'picture', slide: 'opener-1', made: 'the opener photograph covering the sheet', convertPath: true, selectPoint: 'picture', skipRotate: true });
-      if (want('template-big') && big) objects.push({ kind: 'template-big', id: big.id, slide: 'opener-1', made: 'the opener plate heading (autofit shrink after the conversion)', convertPath: true });
+      if (want('plate'))
+        objects.push({
+          kind: 'plate',
+          id: 'plate',
+          slide: 'opener-1',
+          made: 'the opener template plate (a virtual object until the first drag converts the slide)',
+          convertPath: true,
+          selectPoint: 'plate',
+        });
+      if (want('opener-picture'))
+        objects.push({
+          kind: 'opener-picture',
+          id: 'picture',
+          slide: 'opener-1',
+          made: 'the opener photograph covering the sheet',
+          convertPath: true,
+          selectPoint: 'picture',
+          skipRotate: true,
+        });
+      if (want('template-big') && big)
+        objects.push({
+          kind: 'template-big',
+          id: big.id,
+          slide: 'opener-1',
+          made: 'the opener plate heading (autofit shrink after the conversion)',
+          convertPath: true,
+        });
     }
   }
   // Slide D: the deck's title slide heading (a title kind)
@@ -1435,10 +1786,26 @@ async function makeObjects() {
     if (slide.kind === 'title' || slide.template === 'title') {
       if (slide.kind === 'title') {
         const s = await st();
-        await act('slide.update', { slideId: 'title', mutations: [{ op: 'slide.set', slideId: 'title', path: '/heading', value: 'Quarterly review of the resize handles' }] }).catch(() => {});
+        await act('slide.update', {
+          slideId: 'title',
+          mutations: [
+            {
+              op: 'slide.set',
+              slideId: 'title',
+              path: '/heading',
+              value: 'Quarterly review of the resize handles',
+            },
+          ],
+        }).catch(() => {});
         await waitRev(s.revision, 15_000).catch(() => {});
       }
-      objects.push({ kind: 'title-heading', id: 'heading', slide: 'title', made: 'the title slide heading (a slide field drawn as an object; the first drag converts the kind)', convertPath: true });
+      objects.push({
+        kind: 'title-heading',
+        id: 'heading',
+        slide: 'title',
+        made: 'the title slide heading (a slide field drawn as an object; the first drag converts the kind)',
+        convertPath: true,
+      });
     }
   }
 }
@@ -1456,11 +1823,17 @@ async function pointerSelectSpec(object) {
       const sr = stage.getBoundingClientRect();
       const k = sr.width / 1600;
       const r = plate.getBoundingClientRect();
-      return { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k };
+      return {
+        x: (r.left - sr.left) / k,
+        y: (r.top - sr.top) / k,
+        w: r.width / k,
+        h: r.height / k,
+      };
     }, STAGE);
     return box ? { box, point: { x: box.x + 10, y: box.y + 8 } } : {};
   }
-  if (object.selectPoint === 'picture') return { box: { x: 0, y: 0, w: 1600, h: 900 }, point: { x: 1500, y: 60 } };
+  if (object.selectPoint === 'picture')
+    return { box: { x: 0, y: 0, w: 1600, h: 900 }, point: { x: 1500, y: 60 } };
   return {};
 }
 
@@ -1473,7 +1846,12 @@ async function measuredBox(id) {
       const sr = stage.getBoundingClientRect();
       const k = sr.width / 1600;
       const r = el.getBoundingClientRect();
-      return { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k };
+      return {
+        x: (r.left - sr.left) / k,
+        y: (r.top - sr.top) / k,
+        w: r.width / k,
+        h: r.height / k,
+      };
     },
     [STAGE, id],
   );
@@ -1488,10 +1866,17 @@ async function runObject(object) {
   const union = members.length
     ? async () => {
         const slide = await source();
-        const ps = members.map((m) => slide.slots.main.find((b) => b.id === m)?.pos).filter(Boolean);
+        const ps = members
+          .map((m) => slide.slots.main.find((b) => b.id === m)?.pos)
+          .filter(Boolean);
         const x = Math.min(...ps.map((p) => p.x));
         const y = Math.min(...ps.map((p) => p.y));
-        return { x, y, w: Math.max(...ps.map((p) => p.x + p.w)) - x, h: Math.max(...ps.map((p) => p.y + p.h)) - y };
+        return {
+          x,
+          y,
+          w: Math.max(...ps.map((p) => p.x + p.w)) - x,
+          h: Math.max(...ps.map((p) => p.y + p.h)) - y,
+        };
       }
     : null;
   await setZoom('fit');
@@ -1503,13 +1888,16 @@ async function runObject(object) {
   const plan = [];
   for (const zoom of zooms) for (const mod of MODS) plan.push({ zoom, mod, handles: HANDLES });
   if (REDUCED && !object.full) {
-    for (const zoom of ZOOMS.filter((z) => z !== 1)) plan.push({ zoom, mod: 'plain', handles: ['se', 'nw'] });
+    for (const zoom of ZOOMS.filter((z) => z !== 1))
+      plan.push({ zoom, mod: 'plain', handles: ['se', 'nw'] });
   }
   if (object.line) {
     /* a line has two end handles and no resize squares: record what the overlay offers */
     await select(object.id, { box: fallback });
     entry.lineHandles = await page.evaluate(() =>
-      [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((e) => e.getAttribute('data-control')),
+      [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((e) =>
+        e.getAttribute('data-control'),
+      ),
     );
     say(`line handles: ${entry.lineHandles.join(' ')}`);
     /* drag the end handle by a known delta and compare the end against the pointer */
@@ -1530,7 +1918,8 @@ async function runObject(object) {
       const dy = 24;
       await page.mouse.move(cx, cy);
       await page.mouse.down();
-      for (let i = 1; i <= 8; i += 1) await page.mouse.move(cx + (dx * g.k * i) / 8, cy + (dy * g.k * i) / 8);
+      for (let i = 1; i <= 8; i += 1)
+        await page.mouse.move(cx + (dx * g.k * i) / 8, cy + (dy * g.k * i) / 8);
       await sleep(150);
       const preview = await snapshot(object.id);
       await page.mouse.up();
@@ -1558,14 +1947,22 @@ async function runObject(object) {
         committed,
         pointer: { x: round2(pointer.x), y: round2(pointer.y) },
         lineEnd: endSheet ? { x: round2(endSheet.x), y: round2(endSheet.y) } : null,
-        gap: endSheet ? { x: round2(endSheet.x - pointer.x), y: round2(endSheet.y - pointer.y) } : null,
+        gap: endSheet
+          ? { x: round2(endSheet.x - pointer.x), y: round2(endSheet.y - pointer.y) }
+          : null,
         jumpAtUp: boxDiff(preview.rect, after.rect),
       });
       entry.drags += 1;
       flush();
     }
     const undoOk = await undoOnce();
-    report.undo.push({ kind: object.kind, zoom: 2, mod: 'plain', ok: undoOk, note: 'line end drag' });
+    report.undo.push({
+      kind: object.kind,
+      zoom: 2,
+      mod: 'plain',
+      ok: undoOk,
+      note: 'line end drag',
+    });
     return entry;
   }
 
@@ -1602,7 +1999,9 @@ async function runObject(object) {
           if (box) {
             const cmp = await renderCompare(object.kind, object.id, object.slide, deckId, box);
             report.renders.push(cmp);
-            say(`  render: status ${cmp.renderStatus} mismatch ${cmp.mismatch} region ${cmp.regionMismatch} editorInk ${JSON.stringify(cmp.editorInk?.box)} renderInk ${JSON.stringify(cmp.renderInk?.box)} ${cmp.error ?? ''}`);
+            say(
+              `  render: status ${cmp.renderStatus} mismatch ${cmp.mismatch} region ${cmp.regionMismatch} editorInk ${JSON.stringify(cmp.editorInk?.box)} renderInk ${JSON.stringify(cmp.renderInk?.box)} ${cmp.error ?? ''}`,
+            );
             await gotoSlide(object.slide);
           }
         }
@@ -1613,9 +2012,27 @@ async function runObject(object) {
     if (last && last.posAfter) {
       const undoOk = await undoOnce();
       const posNow = await posOf(object.id);
-      const restored = posNow && last.posBefore && ['x', 'y', 'w', 'h'].every((key) => Math.abs((posNow[key] ?? 0) - (last.posBefore[key] ?? 0)) <= 0.51);
-      report.undo.push({ kind: object.kind, zoom: step.zoom, mod: step.mod, dir: last.dir, ok: undoOk, restored, before: last.posBefore, afterUndo: posNow, afterDrag: last.posAfter, blockAfterUndo: await blockOf(object.id) });
-      say(`  undo after ${last.dir}: write ${undoOk}, box restored ${restored} (${JSON.stringify(posNow)})`);
+      const restored =
+        posNow &&
+        last.posBefore &&
+        ['x', 'y', 'w', 'h'].every(
+          (key) => Math.abs((posNow[key] ?? 0) - (last.posBefore[key] ?? 0)) <= 0.51,
+        );
+      report.undo.push({
+        kind: object.kind,
+        zoom: step.zoom,
+        mod: step.mod,
+        dir: last.dir,
+        ok: undoOk,
+        restored,
+        before: last.posBefore,
+        afterUndo: posNow,
+        afterDrag: last.posAfter,
+        blockAfterUndo: await blockOf(object.id),
+      });
+      say(
+        `  undo after ${last.dir}: write ${undoOk}, box restored ${restored} (${JSON.stringify(posNow)})`,
+      );
     }
     await settle(8000);
   }
@@ -1624,24 +2041,45 @@ async function runObject(object) {
     const slide = await source();
     const s = await st();
     try {
-      await act('block.rotate', { slideId: slide.id, blockIds: members.length ? members : [object.id], to: 30 });
+      await act('block.rotate', {
+        slideId: slide.id,
+        blockIds: members.length ? members : [object.id],
+        to: 30,
+      });
       await waitRev(s.revision, 15_000);
       await sleep(300);
       for (const dir of HANDLES) {
-        const row = await dragHandle({ kind: object.kind, id: object.id, anchor: object.id, dir, zoom: 1, mod: 'plain', rotated: 30, members, union, fallbackBox: fallback });
+        const row = await dragHandle({
+          kind: object.kind,
+          id: object.id,
+          anchor: object.id,
+          dir,
+          zoom: 1,
+          mod: 'plain',
+          rotated: 30,
+          members,
+          union,
+          fallbackBox: fallback,
+        });
         rows.push(row);
         entry.drags += 1;
         if (row.error) {
           entry.errors += 1;
           say(`  rotated ${dir}: ERROR ${row.error}`);
         } else {
-          say(`  rotated ${dir}: pos ${JSON.stringify(row.posBefore)} -> ${JSON.stringify(row.posAfter)} corner ${JSON.stringify(row.corner)} pointer ${JSON.stringify(row.pointer)} gap ${JSON.stringify(row.gap)} jumpUp ${JSON.stringify(row.jumpAtUp)}`);
+          say(
+            `  rotated ${dir}: pos ${JSON.stringify(row.posBefore)} -> ${JSON.stringify(row.posAfter)} corner ${JSON.stringify(row.corner)} pointer ${JSON.stringify(row.pointer)} gap ${JSON.stringify(row.gap)} jumpUp ${JSON.stringify(row.jumpAtUp)}`,
+          );
         }
         flush();
       }
       entry.shots.rotated = await shot(`${object.kind}-rotated`);
       const s2 = await st();
-      await act('block.rotate', { slideId: slide.id, blockIds: members.length ? members : [object.id], to: 0 }).catch(() => {});
+      await act('block.rotate', {
+        slideId: slide.id,
+        blockIds: members.length ? members : [object.id],
+        to: 0,
+      }).catch(() => {});
       await waitRev(s2.revision, 15_000);
     } catch (error) {
       say(`  rotate failed: ${String(error).slice(0, 200)}`);
@@ -1678,15 +2116,33 @@ async function apiAction(name, id, body) {
 async function cleanup(id) {
   const steps = [];
   const info = await apiAction('deck.info', id, {});
-  steps.push({ step: 'deck.info', status: info.status, revision: info.json?.revision, trashedAt: info.json?.trashedAt ?? null });
+  steps.push({
+    step: 'deck.info',
+    status: info.status,
+    revision: info.json?.revision,
+    trashedAt: info.json?.trashedAt ?? null,
+  });
   if (info.status === 200) {
     if (!info.json?.trashedAt) {
       const trash = await apiAction('deck.trash', id, { id, baseRevision: info.json.revision });
-      steps.push({ step: 'deck.trash', status: trash.status, revision: trash.json?.revision, text: trash.status === 200 ? undefined : trash.text });
+      steps.push({
+        step: 'deck.trash',
+        status: trash.status,
+        revision: trash.json?.revision,
+        text: trash.status === 200 ? undefined : trash.text,
+      });
     }
     const again = await apiAction('deck.info', id, {});
-    const remove = await apiAction('deck.remove', id, { id, confirm: true, baseRevision: again.json?.revision ?? info.json.revision });
-    steps.push({ step: 'deck.remove', status: remove.status, text: remove.status === 200 ? JSON.stringify(remove.json).slice(0, 120) : remove.text });
+    const remove = await apiAction('deck.remove', id, {
+      id,
+      confirm: true,
+      baseRevision: again.json?.revision ?? info.json.revision,
+    });
+    steps.push({
+      step: 'deck.remove',
+      status: remove.status,
+      text: remove.status === 200 ? JSON.stringify(remove.json).slice(0, 120) : remove.text,
+    });
   }
   const probe = await fetch(`${BASE}/edit/${encodeURIComponent(id)}`, { redirect: 'manual' });
   steps.push({ step: '/edit probe', status: probe.status });
@@ -1703,8 +2159,17 @@ try {
   flush();
   for (const object of objects) {
     const entry = await runObject(object);
-    report.objects = report.objects.map((o) => (o.id === object.id && o.kind === object.kind ? { ...o, ...entry } : o));
-    writeFileSync(join(OUT, 'report.json'), JSON.stringify({ ...report, deckId, pageErrors, consoleErrors: consoleErrors.slice(0, 200), staleAnswers }, null, 1));
+    report.objects = report.objects.map((o) =>
+      o.id === object.id && o.kind === object.kind ? { ...o, ...entry } : o,
+    );
+    writeFileSync(
+      join(OUT, 'report.json'),
+      JSON.stringify(
+        { ...report, deckId, pageErrors, consoleErrors: consoleErrors.slice(0, 200), staleAnswers },
+        null,
+        1,
+      ),
+    );
     flush();
   }
 } catch (error) {
@@ -1782,20 +2247,20 @@ Unit tests, in the owning package, each failing on the source of `0830115`.
 
 All from `/Users/kevinliu/repos/Turboslide` (or the package folder named) with Node 24.13.0 and `node_modules/.bin/<tool>`; no `pnpm` command, no git write command, no Docker. Other rounds' work ran on the checkout throughout (hotfix 2's ship step held `.turboslide/e2e.lock` for its production probe twice while this round waited).
 
-| Command | Result |
-| --- | --- |
-| `node_modules/.bin/tsc -b` (after every source change; six runs) | exit 0 each time once the tree settled (one `TS6133` for the `hasDir` helper `snapResize` no longer needed, removed; two strictness errors in new tests, fixed) |
-| `cd packages/schema && ../../node_modules/.bin/vitest run` | 24 files, 501 tests passed (the ten `resizeBox` cases new) |
-| `cd packages/viewer && ../../node_modules/.bin/vitest run` | 28 files, 249 tests passed (four gesture cases and the three measurer cases new; `snap-freeform.test.ts` unchanged and green) |
-| `cd packages/render && ../../node_modules/.bin/vitest run` | 14 files, 337 tests passed after the one snapshot update (`vitest run src/__tests__/canvas.test.ts -u`; two snapshot lines, the icon's inline size) |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run` | 54 files, 496 tests passed |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts` | 8 passed |
-| `node apps/cli/bin/turboslide.mjs render all --theme light,dark --scale 1 --out <scratch>/render --json` | exit 0, 170 records, no page errors |
-| `node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render <scratch>/render --shoot /Users/kevinliu/repos/Prototemplate/deck --max-mismatch 0.005 --report <scratch>/compare-report.json` | exit 0: 170 pairs, 170 compared, 0 over budget; worst non-escape 0.408 percent, mean 0.016 percent |
-| `node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005 --out <scratch>/canvas-fidelity --report <scratch>/canvas-fidelity.json` | exit 0: 171 slides converted, 342 pairs compared, 0 over budget; worst 0.262 percent (gt-brand/directions dark), mean 0.004 percent, 109.1 s |
-| `node_modules/.bin/prettier --check <every changed file>` | clean after `--write` on the files the tests and the spec were appended to; `git diff` shows only the appended hunks and the import lines |
-| `cd apps/studio && TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> TURBOSLIDE_LOCAL_OPEN=1 TURBOSLIDE_AUTH_RATE_LIMIT=off ../../node_modules/.bin/vite dev --port 4348 --strictPort` | up in 2 s; `/home` and `/edit/gt-brand` 200; stopped at the end of the round |
-| `mkdir .turboslide/e2e.lock && PLAYWRIGHT_BASE_URL=http://localhost:4348 node_modules/.bin/playwright test apps/studio/e2e/resize.spec.ts; rmdir .turboslide/e2e.lock` | every one of the eight tests green, across three consecutive runs of the final spec on the memory tier: `resize-run3.log` the setup and the 50 and 100 percent tests (five tests, 6.2 m, 24 drags per zoom plus the group's 8), `resize-run4.log` the two 200 percent tests (2.8 m) after the zoom centre moved to the dragged handle, `resize-run5.log` the rotated test (1.1 m) after its no jump check took the rotated box's bounds. Two attempts at one uninterrupted run of all eight (`resize-final.log`, `resize-final2.log`) passed the setup and the first drags and were cut by a page reload the dev server made when another round wrote to the shared checkout (`dev-4348.log`: `page reload src/routeTree.gen.ts` at 18:05:11, `page reload packages/native/wasm/turboslide_native_bg.wasm` at 18:07:13), so the execution context was destroyed mid drag. The third attempt (`resize-final3.log`) ran uninterrupted, passed the setup and the 50 and 100 percent tests (five tests) and failed the 200 percent test on the text box's south east handle: the box sat at sheet x 1000, so at 200 percent the scroller could not bring that handle under the stage centre and it landed under the open Format options panel (`elementFromPoint` answered the panel); the spec now places the picture at x 460 and the text box at x 800, in the sheet's left two thirds. The fourth attempt (`resize-final4.log`) ran uninterrupted and passed seven of the eight (the setup, the three zooms of the objects, the three zooms of the group, 7.4 m) and failed the rotated test's first selection: eight drags net to about zero but not exactly and the undo takes one back, so after three zoom rounds the rectangle had drifted onto the picture, which took the click at its centre (`handle.rs-rect.move` never appeared); the spec now puts every object back at its starting box at the start of each test. The fifth attempt (`resize-final5.log`, 18:24 to 18:34) ran uninterrupted with the final spec and passed all eight tests in 9.1 m: the setup, the three zooms of the objects (24 drags each, every press on its handle, every box the model's, every readout the box, no jump at the release, the text at 22 px with `autofit: 'none'`, the Format options fields reading the box, one undo per object), the three zooms of the group, and the rotated rectangle with Shift and Alt |
+| Command                                                                                                                                                                                                                                                 | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node_modules/.bin/tsc -b` (after every source change; six runs)                                                                                                                                                                                        | exit 0 each time once the tree settled (one `TS6133` for the `hasDir` helper `snapResize` no longer needed, removed; two strictness errors in new tests, fixed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `cd packages/schema && ../../node_modules/.bin/vitest run`                                                                                                                                                                                              | 24 files, 501 tests passed (the ten `resizeBox` cases new)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cd packages/viewer && ../../node_modules/.bin/vitest run`                                                                                                                                                                                              | 28 files, 249 tests passed (four gesture cases and the three measurer cases new; `snap-freeform.test.ts` unchanged and green)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `cd packages/render && ../../node_modules/.bin/vitest run`                                                                                                                                                                                              | 14 files, 337 tests passed after the one snapshot update (`vitest run src/__tests__/canvas.test.ts -u`; two snapshot lines, the icon's inline size)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run`                                                                                                                                                                                              | 54 files, 496 tests passed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts`                                                                                                                                               | 8 passed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `node apps/cli/bin/turboslide.mjs render all --theme light,dark --scale 1 --out <scratch>/render --json`                                                                                                                                                | exit 0, 170 records, no page errors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render <scratch>/render --shoot /Users/kevinliu/repos/Prototemplate/deck --max-mismatch 0.005 --report <scratch>/compare-report.json`                                                        | exit 0: 170 pairs, 170 compared, 0 over budget; worst non-escape 0.408 percent, mean 0.016 percent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005 --out <scratch>/canvas-fidelity --report <scratch>/canvas-fidelity.json`                                      | exit 0: 171 slides converted, 342 pairs compared, 0 over budget; worst 0.262 percent (gt-brand/directions dark), mean 0.004 percent, 109.1 s                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `node_modules/.bin/prettier --check <every changed file>`                                                                                                                                                                                               | clean after `--write` on the files the tests and the spec were appended to; `git diff` shows only the appended hunks and the import lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `cd apps/studio && TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> TURBOSLIDE_LOCAL_OPEN=1 TURBOSLIDE_AUTH_RATE_LIMIT=off ../../node_modules/.bin/vite dev --port 4348 --strictPort` | up in 2 s; `/home` and `/edit/gt-brand` 200; stopped at the end of the round                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `mkdir .turboslide/e2e.lock && PLAYWRIGHT_BASE_URL=http://localhost:4348 node_modules/.bin/playwright test apps/studio/e2e/resize.spec.ts; rmdir .turboslide/e2e.lock`                                                                                  | every one of the eight tests green, across three consecutive runs of the final spec on the memory tier: `resize-run3.log` the setup and the 50 and 100 percent tests (five tests, 6.2 m, 24 drags per zoom plus the group's 8), `resize-run4.log` the two 200 percent tests (2.8 m) after the zoom centre moved to the dragged handle, `resize-run5.log` the rotated test (1.1 m) after its no jump check took the rotated box's bounds. Two attempts at one uninterrupted run of all eight (`resize-final.log`, `resize-final2.log`) passed the setup and the first drags and were cut by a page reload the dev server made when another round wrote to the shared checkout (`dev-4348.log`: `page reload src/routeTree.gen.ts` at 18:05:11, `page reload packages/native/wasm/turboslide_native_bg.wasm` at 18:07:13), so the execution context was destroyed mid drag. The third attempt (`resize-final3.log`) ran uninterrupted, passed the setup and the 50 and 100 percent tests (five tests) and failed the 200 percent test on the text box's south east handle: the box sat at sheet x 1000, so at 200 percent the scroller could not bring that handle under the stage centre and it landed under the open Format options panel (`elementFromPoint` answered the panel); the spec now places the picture at x 460 and the text box at x 800, in the sheet's left two thirds. The fourth attempt (`resize-final4.log`) ran uninterrupted and passed seven of the eight (the setup, the three zooms of the objects, the three zooms of the group, 7.4 m) and failed the rotated test's first selection: eight drags net to about zero but not exactly and the undo takes one back, so after three zoom rounds the rectangle had drifted onto the picture, which took the click at its centre (`handle.rs-rect.move` never appeared); the spec now puts every object back at its starting box at the start of each test. The fifth attempt (`resize-final5.log`, 18:24 to 18:34) ran uninterrupted with the final spec and passed all eight tests in 9.1 m: the setup, the three zooms of the objects (24 drags each, every press on its handle, every box the model's, every readout the box, no jump at the release, the text at 22 px with `autofit: 'none'`, the Format options fields reading the box, one undo per object), the three zooms of the group, and the rotated rectangle with Shift and Alt |
 
 The diagnostic runs on the way (`resize-run1.log` to `resize-diag6.log`, `resize-geom.log`, `resize-panel.log`): the first run refused every mutating window call for want of `baseRevision` (the spec's `act` helper now passes the tab's revision); the second hung on a `textContent()` wait for a readout that was not there, because the first press had started a move (the R7 finding above); the rectangle-only subsets then pinned the chip under the nw handle and the 6 px measured offset, and passed all eight handles once the measurer read against the body; the panel probe showed the Format options fields present with an object selected; the first full run passed the setup and the 50 and 100 percent tests and failed the 200 percent test on the picture's west handle, which the zoom centred on the object's centre had left under the filmstrip (`elementFromPoint` answered a thumbnail), so the spec now centres the zoom on the dragged handle's own sheet point.
 
@@ -1820,19 +2285,19 @@ By the ship step, 2026-09-14, 18:35 PDT onwards, on the shared checkout over `ma
 
 ### 3.1 The gates, re-run
 
-| Command | Result |
-| --- | --- |
-| `node_modules/.bin/tsc -b` | exit 0 (three runs: at the start, after the `snap.ts` comment below, after the spec change of 3.3) |
-| `cd packages/schema && ../../node_modules/.bin/vitest run` | 24 files, 501 tests; the full run under load 46 timed out one property test (`apply-layout.test.ts`, then `comments.test.ts` on the second run, each "Test timed out in 5000ms"); the two files alone: 21 passed in 4.1 s |
-| `cd packages/viewer && ../../node_modules/.bin/vitest run` | 28 files, 249 tests passed |
-| `cd packages/render && ../../node_modules/.bin/vitest run` | 14 files, 337 tests passed |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run` | 54 files, 496 tests; two timed out under load (`editor-shell-render.test.tsx`, `format-options-round-two.test.tsx`, 5000 ms); the two files alone: 24 passed |
-| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts` | 8 passed |
-| `cd packages/agent && node src/generate/main.ts --check` | every committed contract is current. The working tree's `packages/agent/generated/*.json` diff ("Measure (ch)" to "Line length (ch)") belongs to another round's `packages/schema/src/blocks.ts` change and is not this hotfix's; no generated file joins the commit |
-| `node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005` | exit 0: 171 slides converted, 342 pairs compared, 0 over budget; worst 0.262 percent (gt-brand/directions dark), mean 0.004 percent, 311 s under load |
-| `node scripts/check.mjs --only 4,5,6`, first run | step 4 ok in 0.7 s; step 5 (`pnpm test`) failed 26 tests in 10 files, every one "Test timed out in 5000ms" under load 46 to 70 (the CLI's browser tests, the MCP tool list, the agent contracts test, the schema property test), 2982 passed; step 6 did not run. Re-run recorded in 3.4 |
-| `node_modules/.bin/eslint <the hotfix's source and spec files>` | 22 findings, every one on a line outside the hotfix's hunks (pre-existing at HEAD: `no-unnecessary-type-assertion`, `no-unnecessary-condition`, `import/no-duplicates`, `no-shadow`, `no-fallthrough`); 0 in the two new files |
-| `node_modules/.bin/prettier --check` on `snap.ts` and `resize.spec.ts` after the two edits below | clean |
+| Command                                                                                                                                    | Result                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node_modules/.bin/tsc -b`                                                                                                                 | exit 0 (three runs: at the start, after the `snap.ts` comment below, after the spec change of 3.3)                                                                                                                                                                                       |
+| `cd packages/schema && ../../node_modules/.bin/vitest run`                                                                                 | 24 files, 501 tests; the full run under load 46 timed out one property test (`apply-layout.test.ts`, then `comments.test.ts` on the second run, each "Test timed out in 5000ms"); the two files alone: 21 passed in 4.1 s                                                                |
+| `cd packages/viewer && ../../node_modules/.bin/vitest run`                                                                                 | 28 files, 249 tests passed                                                                                                                                                                                                                                                               |
+| `cd packages/render && ../../node_modules/.bin/vitest run`                                                                                 | 14 files, 337 tests passed                                                                                                                                                                                                                                                               |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run`                                                                                 | 54 files, 496 tests; two timed out under load (`editor-shell-render.test.tsx`, `format-options-round-two.test.tsx`, 5000 ms); the two files alone: 24 passed                                                                                                                             |
+| `cd packages/chrome && ../../node_modules/.bin/vitest run src/menus/__tests__/default-view-words.test.ts`                                  | 8 passed                                                                                                                                                                                                                                                                                 |
+| `cd packages/agent && node src/generate/main.ts --check`                                                                                   | every committed contract is current. The working tree's `packages/agent/generated/*.json` diff ("Measure (ch)" to "Line length (ch)") belongs to another round's `packages/schema/src/blocks.ts` change and is not this hotfix's; no generated file joins the commit                     |
+| `node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005` | exit 0: 171 slides converted, 342 pairs compared, 0 over budget; worst 0.262 percent (gt-brand/directions dark), mean 0.004 percent, 311 s under load                                                                                                                                    |
+| `node scripts/check.mjs --only 4,5,6`, first run                                                                                           | step 4 ok in 0.7 s; step 5 (`pnpm test`) failed 26 tests in 10 files, every one "Test timed out in 5000ms" under load 46 to 70 (the CLI's browser tests, the MCP tool list, the agent contracts test, the schema property test), 2982 passed; step 6 did not run. Re-run recorded in 3.4 |
+| `node_modules/.bin/eslint <the hotfix's source and spec files>`                                                                            | 22 findings, every one on a line outside the hotfix's hunks (pre-existing at HEAD: `no-unnecessary-type-assertion`, `no-unnecessary-condition`, `import/no-duplicates`, `no-shadow`, `no-fallthrough`); 0 in the two new files                                                           |
+| `node_modules/.bin/prettier --check` on `snap.ts` and `resize.spec.ts` after the two edits below                                           | clean                                                                                                                                                                                                                                                                                    |
 
 One edit to the fixer's files before the preview: `packages/viewer/src/snap.ts` had lost the one line docblock of `resizeCursor` in the rewrite of `snapResize`; the line is back, so the diff holds only the model's wiring.
 
@@ -1882,11 +2347,11 @@ The push of `6679c54` started deployment `dpl_F68Eh7ETHKstZTL1USjfBvxuVeBk` (`tu
 
 The screenshot script then ran in the same lock (its third run, 20:15, scratch deck `hotfix3-shots-mu23mh2g`, deleted the same way). The files under `docs/gslides-parity/build-4/hotfix-3/`: `canvas-before.png` (the three objects at their starting boxes), `shape-during-drag.png`, `shape-after-release.png`, `picture-during-drag.png`, `picture-after-release.png`, `text-during-drag.png`, `text-after-release.png` (each pair: the pointer still down after the last move with the live box and the size readout, then the committed box with the object selected), and `production.json` with the rows below. Every box is in sheet pixels; the south east handle was dragged by 35 percent of the box with Cmd held.
 
-| Object | Press landed on | Before | Delta | Readout under the pointer | Drawn box under the pointer | Committed box | Content box after | Autofit |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rectangle (`shape`) | `handle.hs-rect.resize.se` | 120, 120, 240 × 150 | +84, +53 | 324 × 203 | 120, 120, 324 × 203 | 120, 120, 324 × 203 | the shape's svg 120, 120, 324 × 203 | none |
-| Picture (`gh-gt`) | `handle.hs-picture.resize.se` | 460, 120, 240 × 160 | +84, +56 | 324 × 216 | 460, 120, 324 × 216 | 460, 120, 324 × 216 (the 3:2 ratio kept from the corner) | the picture frame 460, 120, 324 × 216 | none |
-| Text box (grow) | `handle.hs-text.resize.se` | 800, 120, 260 × 140 | +91, +49 | 351 × 189 | 800, 120, 351 × 189 | 800, 120, 351 × 189 | the paragraph 800, 120, 351 × 165 (reflowed in the new width, the font unchanged) | `grow` to `none` |
+| Object              | Press landed on               | Before              | Delta    | Readout under the pointer | Drawn box under the pointer | Committed box                                            | Content box after                                                                 | Autofit          |
+| ------------------- | ----------------------------- | ------------------- | -------- | ------------------------- | --------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------- |
+| Rectangle (`shape`) | `handle.hs-rect.resize.se`    | 120, 120, 240 × 150 | +84, +53 | 324 × 203                 | 120, 120, 324 × 203         | 120, 120, 324 × 203                                      | the shape's svg 120, 120, 324 × 203                                               | none             |
+| Picture (`gh-gt`)   | `handle.hs-picture.resize.se` | 460, 120, 240 × 160 | +84, +56 | 324 × 216                 | 460, 120, 324 × 216         | 460, 120, 324 × 216 (the 3:2 ratio kept from the corner) | the picture frame 460, 120, 324 × 216                                             | none             |
+| Text box (grow)     | `handle.hs-text.resize.se`    | 800, 120, 260 × 140 | +91, +49 | 351 × 189                 | 800, 120, 351 × 189         | 800, 120, 351 × 189                                      | the paragraph 800, 120, 351 × 165 (reflowed in the new width, the font unchanged) | `grow` to `none` |
 
 In every row the drawn box under the pointer, the readout and the committed box agree, and the content took the box. On this build the picture's row waited on nothing: the screenshot script's settle is the spec's.
 

@@ -2,12 +2,7 @@
   "date": "2026-09-13",
   "recipe": {
     "material": "paper:mesh-gradient",
-    "colors": [
-      "#070707",
-      "#070707",
-      "#8a8f98",
-      "#f2f2f0"
-    ],
+    "colors": ["#070707", "#070707", "#8a8f98", "#f2f2f0"],
     "distortion": 0.6,
     "swirl": 0.15,
     "frame": 6800,
@@ -37,16 +32,9 @@
   "screenMs": 179.6,
   "metrics": {
     "litFraction": 0.1648,
-    "warnings": [
-      "8855 lit cell(s) under the plate (picture/plate-clear)"
-    ],
+    "warnings": ["8855 lit cell(s) under the plate (picture/plate-clear)"],
     "plateClear": {
-      "plate": [
-        96,
-        96,
-        760,
-        300
-      ],
+      "plate": [96, 96, 760, 300],
       "nearestLitPx": 0,
       "litUnder": 8855,
       "litInBand": 1990

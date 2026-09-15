@@ -2,6 +2,7 @@ import { SITE } from '@turboslide/theme/brand/site';
 
 import type { HomeFacts } from './facts';
 import { FACTS_PATH, formatCount, formatPercent } from './facts';
+import { HOME_META } from './home-meta';
 
 /**
  * Every string of the /home page (gslides-parity SPEC-4 2.2, 0.20 to 0.26; R05 section 6
@@ -15,8 +16,9 @@ import { FACTS_PATH, formatCount, formatPercent } from './facts';
  * function of `HomeFacts` (0.25: a literal count is a defect), and every number on the page has
  * a source line beside it (0.20): the file or the report and the date of the measurement.
  * "Today", "after" and "never" (PP section 4) are the tenses: the speed rows are written for the
- * tree the page ships from, so the Rust row ends with the TypeScript sentence and the preload row
- * says that leaving the editor is still a document load.
+ * tree the page ships from, so the Rust row ends with the TypeScript sentence; the preload row and
+ * the closing sentence carry the verifier's post round production numbers of 2026-09-14
+ * (VERIFICATION-4 section 5, the round four fixer round), which replaced the day 0 baseline per 0.26.
  */
 export type Text = string | ((facts: HomeFacts) => string);
 
@@ -95,11 +97,8 @@ export const DEFAULT_VIEW_EXEMPT: ReadonlyArray<string> = [
 // ---------------------------------------------------------------------------------------------
 // The head (2.1, 2.6)
 
-export const HOME_META = {
-  title: 'Turboslide',
-  description: SITE.description,
-  path: '/home',
-} as const;
+/* the head's strings live in home-meta.ts so the route's `head()` does not pull this module into the entry chunk */
+export { HOME_META } from './home-meta';
 
 // ---------------------------------------------------------------------------------------------
 // The navigation (2.2 item 1, 0.23)
@@ -493,26 +492,29 @@ export const MEASURED = {
     source: 'apps/studio/vite.deploy.config.ts; docs/hosting.md section 6',
   },
   preload: {
-    /** verification-4/perf-budget-baseline-2026-09-14.json `decks->edit` 598; BASELINE.md 3.1 harness 544 */
-    decksToEditOneSlideMs: 544,
-    decksToEditGtBrandMs: 598,
-    text: '544 ms from the click to a ready editor for a one slide presentation and 598 ms for the 85 slide GT deck, warm, on production',
+    /** verification-4/perf-budget-production-2026-09-14.json `decks->edit` 167.5 in page, `edit->decks` 15.8 in page (medians of three, warm) */
+    decksToEditGtBrandMs: 168,
+    editToDecksMs: 16,
+    text: '168 ms from the click on a card to a ready editor for the 85 slide GT deck and 16 ms from the title row mark back to the list, warm, on production',
     source:
-      'apps/studio/src/router.tsx; docs/gslides-parity/verification-4/BASELINE.md section 3.1, 2026-09-14',
+      'apps/studio/src/router.tsx; docs/gslides-parity/VERIFICATION-4.md section 5.2, 2026-09-14',
   },
   immutable: {
-    text: '16 of 16 thumbnails on the list answered from the CDN cache; a picture the browser holds is revalidated in one 300 byte answer',
+    /** verification-4/perf-budget-production-2026-09-14.json `twins` 0 of 16 re-fetched, `cdn` HIT on 7 of 7 paths */
+    twinsRefetched: [0, 16] as const,
+    text: "0 of 16 pictures of the GT deck fetched again on a second visit within the hour; the icon set, the card and /home answered from the CDN's cache on their second request",
     source:
-      'packages/store/src/snapshots.ts; apps/studio/src/server/thumbs.ts; docs/gslides-parity/verification-4/BASELINE.md sections 2.2 and 3.6, 2026-09-14',
+      'packages/store/src/snapshots.ts; apps/studio/src/server/thumbs.ts; docs/gslides-parity/VERIFICATION-4.md sections 5.1 and 5.2, 2026-09-14',
   },
   closing: {
-    /** verification-4/BASELINE.md finding 1 and section 2.1 and 3.2 */
-    decksTtfbFastS: [0.29, 0.45] as const,
-    decksTtfbSlowS: [4.7, 7.1] as const,
-    firstThumbnailS: 4.3,
-    laterThumbnailS: 0.13,
-    newReadyColdMs: 823,
-    source: 'docs/gslides-parity/verification-4/BASELINE.md sections 2.1, 3.2 and 6, 2026-09-14',
+    /** verification-4/perf-budget-production-2026-09-14.json: /decks cold first byte 409 at the median with 3,782 in the worst of three samples; /deck/gt-brand cold ready 1,067; /new cold ready 570; js decoded 968,671 to 2,257,712 bytes per route */
+    decksTtfbColdMs: 409,
+    decksTtfbWorstMs: 3782,
+    deckReadyColdMs: 1067,
+    newReadyColdMs: 570,
+    jsDecodedKb: [946, 2205] as const,
+    source:
+      'docs/gslides-parity/VERIFICATION-4.md section 5; docs/gslides-parity/verification-4/perf-budget-production-2026-09-14.json, 2026-09-14',
   },
 } as const;
 
@@ -566,20 +568,20 @@ export const SPEED = {
     {
       id: 'preload',
       title: 'Routes load before the click',
-      body: "The router preloads a route's code and data as soon as the pointer reaches its link, so a presentation opened from the list is loading before the click lands. Leaving the editor for the list is still a document load today.",
+      body: "The router preloads a route's code and data as soon as the pointer reaches its link, so a presentation opened from the list is loading before the click lands. The title row's mark is a link of the same document, so leaving the editor for the list keeps the page and its code.",
       figure: MEASURED.preload.text,
       source: MEASURED.preload.source,
     },
     {
       id: 'immutable',
       title: 'Immutable documents and caches',
-      body: "Every committed write stores the whole document under the hash of its bytes, so a reader proves it has the current document from one header. Thumbnails named by their version are cached for a year, and the GT deck's pictures are static files on the CDN that answer before the function runs.",
+      body: "Every committed write stores the whole document under the hash of its bytes, so a reader proves it has the current document from one header. Thumbnails named by their version are cached for a year, and the GT deck's pictures are static files that the CDN keeps for a day and the browser for an hour, so a second visit fetches none of them.",
       figure: MEASURED.immutable.text,
       source: MEASURED.immutable.source,
     },
   ] as ReadonlyArray<SpeedRow>,
   closing: {
-    text: `What is still slow is measured too: the list at /decks answers its first byte in ${MEASURED.closing.decksTtfbFastS[0]} to ${MEASURED.closing.decksTtfbFastS[1]} s in one mode and ${MEASURED.closing.decksTtfbSlowS[0]} to ${MEASURED.closing.decksTtfbSlowS[1]} s in the other; the first thumbnail of a new presentation arrives ${MEASURED.closing.firstThumbnailS} s after the save and the later ones in ${MEASURED.closing.laterThumbnailS} s; the editor is ready ${(MEASURED.closing.newReadyColdMs / 1000).toFixed(2)} s after a cold load of /new; and one instance renders one slide at a time. Those are the numbers the current work is measured against.`,
+    text: `What is still slow is measured too: the list at /decks answers its first byte in ${MEASURED.closing.decksTtfbColdMs} ms at the median of a cold visit and in ${(MEASURED.closing.decksTtfbWorstMs / 1000).toFixed(1)} s in its worst sample; the viewer of the 85 slide GT deck is ready ${(MEASURED.closing.deckReadyColdMs / 1000).toFixed(2)} s after a cold load; the editor is ready ${(MEASURED.closing.newReadyColdMs / 1000).toFixed(2)} s after a cold load of /new; every route loads ${MEASURED.closing.jsDecodedKb[0]} to ${formatCount(MEASURED.closing.jsDecodedKb[1])} KB of JavaScript; and one instance renders one slide at a time. Those are the numbers the current work is measured against.`,
     source: MEASURED.closing.source,
   },
 } as const;

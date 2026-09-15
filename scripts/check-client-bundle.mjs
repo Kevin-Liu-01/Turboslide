@@ -33,7 +33,10 @@
 //      the output is byte identical with and without them), from the environment config or the
 //      top level (build-4/integrator.md section 17). Until a `vendor-*.js` chunk is in the client
 //      output the ceiling is reported with that reason and the entry chunk's attribution, never
-//      failed; the per route preload ceilings below are asserted regardless.
+//      failed; the per route preload ceilings below are asserted regardless. The fixer round cut
+//      the entry from 914,233 to 577,949 bytes without the vendor group, by taking the schema
+//      package and zod out of the root graph (render/dither-walk.ts) and the page copy out of
+//      routes/home.tsx's head (components/home/home-meta.ts); build-4/integrator.md section 22.
 //
 // The default server output is <dist>/server. A Nitro deploy build (apps/studio/.output/server)
 // is checked too when it exists, or pass it with --server. Source maps are skipped: a client map

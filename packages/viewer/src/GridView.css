@@ -46,9 +46,13 @@
 
 /* a frame item: the number column, then the frame and its title. The 3px
    pad (and the matching negative margin) keeps the active frame's offset
-   outline inside the box that content-visibility paints. A 300px column
-   holds a 272px frame at 16:9 plus its title: the size a frame off screen
-   reserves before it is first drawn (directive 7.5). */
+   outline inside the tile's box. A 300px column holds a 272px frame at 16:9
+   plus its title. The tiles carry no `content-visibility: auto` since the
+   round four fixer round: the clones are windowed by the observer
+   (gslides-parity SPEC-4 0.41; useNearWindow in GridView.tsx), so an off
+   screen tile holds its frame and number alone, and a skipped tile's cached
+   layout result kept the clone unmounted under it alive (Filmstrip.css
+   records the measurement). */
 .pt-thumb {
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr);
@@ -57,8 +61,6 @@
   padding: 3px 3px 3px 0;
   margin: -3px -3px -3px 0;
   cursor: pointer;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 180px;
 }
 
 .pt-thumb:focus-visible {
@@ -144,11 +146,6 @@
 /* the tile width is the page's setting: 200, 300 or 400 px (GRID_TILE_SIZES) */
 .pt-grid.is-edit .pt-thumbs {
   grid-template-columns: repeat(auto-fill, minmax(var(--pt-grid-tile, 300px), 1fr));
-}
-
-/* a card of the filmstrip: number and frame, no title (SPEC 4.1: Google shows none) */
-.pt-grid.is-edit .pt-thumb {
-  contain-intrinsic-size: auto calc(var(--pt-grid-tile, 300px) * 9 / 16 + 6px);
 }
 
 /* the selected cards ring in ink; the current card is one of them */

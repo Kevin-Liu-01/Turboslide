@@ -989,7 +989,8 @@ export const paragraphBlockSchema = z.strictObject({
     group: 'Block',
   }),
   measure: annotate(z.number().positive().optional(), {
-    label: 'Measure (ch)',
+    /* "Line length", never the typographer's "measure": a default view word (chrome strings.ts) */
+    label: 'Line length (ch)',
     control: 'number',
     snap: [32, 56],
     group: 'Layout',

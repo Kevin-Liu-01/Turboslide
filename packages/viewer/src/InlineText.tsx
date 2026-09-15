@@ -237,6 +237,22 @@ export function textFromNode(node: RunNode, options: { multiline?: boolean } = {
     .join(BREAK);
 }
 
+/**
+ * The rewrite rule of a burst boundary (SPEC-2 0.54): the text the editable is rewritten from, or
+ * null when it is left alone. `raw` is what the DOM serializes to (`serializeRuns(runsFromNode)`,
+ * the paragraphs joined by `\n` on a multiline pointer); the rewrite happens only when that string
+ * is not the canonical string of the runs it holds (an escape the browser split, a run the merge
+ * would join), and the canonical string keeps the white space at the ends of every paragraph. The
+ * trimmed form belongs to the write alone (textFromNode): comparing the DOM with it made every
+ * trailing space a difference, so the space a person types before the next word was rewritten
+ * away 100 ms after the keystroke, whenever the pause between two words was longer than the
+ * burst (build-4/hotfix-4.md cause W3, Kevin's "pressing space isn't working").
+ */
+export function burstRewrite(raw: Markup): Markup | null {
+  const canonical = canonicalText(raw);
+  return canonical === raw ? null : canonical;
+}
+
 /** The slide field a title or statement pseudo block renders (slide.ts: heading, lead, big). */
 function slideTextPath(slide: Slide, blockId: string): string {
   if (slide.kind === 'title') return blockId === 'lead' ? '/lead' : '/heading';
@@ -1111,7 +1127,10 @@ export function InlineText({
           .map((runs) => serializeRuns(runs))
           .join(BREAK)
       : serializeRuns(runsFromNode(element));
-    if (raw !== text && text !== '' && document.activeElement === element) rewriteEditable(text);
+    /* the rewrite keeps the white space at the ends (burstRewrite): the write below trims it */
+    const rewrite = burstRewrite(raw);
+    if (rewrite !== null && text !== '' && document.activeElement === element)
+      rewriteEditable(rewrite);
     if (text === lastBurst.current) return;
     lastBurst.current = text;
     callbacks.current.onBurst?.(text);
@@ -1340,9 +1359,12 @@ export function InlineText({
       } else if (meta && !e.altKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         e.stopPropagation();
+        // finish ends the session (its own re-render); the undo runs on the next task so its
+        // document change is a re-render of its own and is not batched away with the session end
+        // (build-4/hotfix-4.md cause W10: the undo changed the document but the run stayed stale)
         finish(e.shiftKey ? 'redo' : 'undo');
-        if (e.shiftKey) callbacks.current.onRedo?.();
-        else callbacks.current.onUndo?.();
+        const step = e.shiftKey ? callbacks.current.onRedo : callbacks.current.onUndo;
+        window.setTimeout(() => step?.(), 0);
       } else if (meta && !e.altKey && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         e.stopPropagation();

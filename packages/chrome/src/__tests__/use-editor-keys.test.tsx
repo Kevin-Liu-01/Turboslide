@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_MENU_CONTEXT } from '../menus/model';
 import type { MenuContext, MenuItem } from '../menus/model';
-import { isIndentChord, useEditorKeys } from '../useEditorKeys';
+import { CARET_KEYS, isCaretKeyInCanvasText, isIndentChord, useEditorKeys } from '../useEditorKeys';
 import type { EditorKeyHandlers } from '../useEditorKeys';
 
 // Cmd+] and Cmd+[ (gslides-parity SPEC-2 0.55, section 9): Chrome's Forward and Back on macOS. The
@@ -35,6 +35,13 @@ function Host({ context, handlers }: { context: MenuContext; handlers: EditorKey
       <aside className="ts-panel">
         <input data-testid="field" aria-label="Width" />
       </aside>
+      <div className="ts-stagewrap ts-sheet ts-editor ts-stage">
+        <p data-block="p">
+          <span data-testid="run" data-run="p/text" contentEditable suppressContentEditableWarning>
+            Text
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
@@ -155,5 +162,94 @@ describe('useEditorKeys and the indent chords', () => {
     fireEvent.keyDown(document.body, { key: 'b', metaKey: true });
     expect(runItem).toHaveBeenCalledTimes(1);
     expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('format.text.bold');
+  });
+});
+
+// The caret keys inside the canvas run (build-4/hotfix-4.md, key ownership): Home, End, PageUp,
+// PageDown and the arrows with every modifier belong to the caret while the InlineText session
+// is open. Cmd Up and Cmd Down are also Move slide up and down and Bring forward and Send
+// backward in the key table; from the run they must move the caret to the text's ends, never run
+// a row or prevent the browser's default. jsdom leaves isContentEditable undefined, so the test
+// derives it from the attribute the way a browser does.
+describe('the caret keys inside the canvas run', () => {
+  const MODIFIERS: ReadonlyArray<Partial<KeyboardEventInit>> = [
+    {},
+    { shiftKey: true },
+    { metaKey: true },
+    { metaKey: true, shiftKey: true },
+    { altKey: true },
+    { altKey: true, shiftKey: true },
+  ];
+  let shimmed = false;
+  const shim = () => {
+    if (shimmed) return;
+    shimmed = true;
+    Object.defineProperty(HTMLElement.prototype, 'isContentEditable', {
+      configurable: true,
+      get(this: HTMLElement) {
+        const own = this.getAttribute('contenteditable');
+        if (own === 'true' || own === '') return true;
+        if (own === 'false') return false;
+        return this.parentElement?.isContentEditable ?? false;
+      },
+    });
+  };
+
+  it('names the caret keys and reads the run through the target', () => {
+    shim();
+    expect([...CARET_KEYS].sort()).toEqual(
+      [
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'End',
+        'Home',
+        'PageDown',
+        'PageUp',
+      ].sort(),
+    );
+    const view = render(<Host context={withText} handlers={handlers()} />);
+    const run = view.getByTestId('run');
+    const field = view.getByTestId('field');
+    expect(isCaretKeyInCanvasText({ key: 'Home', target: run })).toBe(true);
+    expect(isCaretKeyInCanvasText({ key: 'ArrowUp', target: run })).toBe(true);
+    expect(isCaretKeyInCanvasText({ key: 'b', target: run })).toBe(false);
+    expect(isCaretKeyInCanvasText({ key: 'Home', target: field })).toBe(false);
+    expect(isCaretKeyInCanvasText({ key: 'Home', target: document.body })).toBe(false);
+  });
+
+  it('runs nothing and prevents nothing for every caret key with every modifier from the run, and still matches the chord from the body', () => {
+    shim();
+    const runItem = vi.fn();
+    const runBinding = vi.fn(() => false);
+    const h = { ...handlers(runItem), runBinding };
+    const view = render(<Host context={withText} handlers={h} />);
+    const run = view.getByTestId('run');
+    run.focus();
+    for (const key of CARET_KEYS) {
+      for (const mods of MODIFIERS) {
+        const event = new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+          ...mods,
+        });
+        run.dispatchEvent(event);
+        expect(event.defaultPrevented, `${JSON.stringify(mods)} ${key}`).toBe(false);
+      }
+    }
+    expect(runItem).not.toHaveBeenCalled();
+    expect(runBinding).not.toHaveBeenCalled();
+    /* the same chord from the body reaches the key table: Cmd Up is Move slide up or Bring forward,
+       and the table either runs the row or swallows the chord of a disabled row */
+    const outside = new KeyboardEvent('keydown', {
+      key: 'ArrowUp',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    document.body.dispatchEvent(outside);
+    expect(runItem.mock.calls.length > 0 || outside.defaultPrevented).toBe(true);
   });
 });

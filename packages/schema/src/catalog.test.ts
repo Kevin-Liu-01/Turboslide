@@ -10,6 +10,7 @@ import {
   blockAssetRefs,
   blockTextPaths,
   expandPaths,
+  isMultilineType,
 } from './catalog.ts';
 import { SLIDE_KINDS, slideSchema } from './deck.ts';
 import { CONTENT_RULE, THE_PRODUCTION_SITE } from './fixtures.ts';
@@ -73,6 +74,19 @@ describe('the block catalog', () => {
     const json = JSON.stringify(z.toJSONSchema(slideSchema, { target: 'draft-2020-12' }));
     expect(json).toContain('$ref');
     expect(json).toContain('"composite"');
+  });
+
+  it('isMultilineType judges a pointer by its block type, for the title and statement pseudo blocks (hotfix-4 W4)', () => {
+    // a title's lead is a paragraph, whose /text takes paragraph breaks: Enter in the subtitle
+    // placeholder makes a line rather than ending the session
+    expect(isMultilineType('paragraph', '/text')).toBe(true);
+    expect(isMultilineType('box', '/text')).toBe(true);
+    // a title's heading and a statement's big are headings, single line: Enter ends the session
+    expect(isMultilineType('heading', '/text')).toBe(false);
+    // an unknown type or a pointer the type does not take is not multiline
+    expect(isMultilineType('mark', '/text')).toBe(false);
+    expect(isMultilineType('paragraph', '/notes')).toBe(false);
+    expect(isMultilineType('not-a-type', '/text')).toBe(false);
   });
 });
 

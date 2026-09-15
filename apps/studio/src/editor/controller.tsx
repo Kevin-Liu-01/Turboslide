@@ -3,6 +3,8 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { createEditHistory } from '@turboslide/agent/window/history';
 import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history';
+import { resyncBroughtUnseen } from './resync-history';
+import { typingKeyOf } from './typing-key';
 import { windowActionIds } from '@turboslide/agent/window/registry';
 import {
   blockAdjust,
@@ -377,11 +379,6 @@ class StaleBaseError extends ConflictError {
 }
 
 /** The Text a typing burst names, for the 400 ms undo grouping (SPEC 7.2.15). */
-function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
-  const first = mutations[0];
-  if (mutations.length !== 1 || first === undefined || first.op !== 'text.splice') return null;
-  return `${first.slideId}/${first.blockId}${first.path}`;
-}
 
 /** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
 const EXTERNAL_BANNER_MS = 8000;
@@ -1470,14 +1467,22 @@ export function createEditorController(init: {
       onResync: async (revision) => {
         const payload = await readEditorDeck({ deckId });
         if (payload === null) return null;
-        history.clear();
-        clockOf.clear();
+        const fresh = payload.document.deck.revision;
+        // a reload that lands at or below the revision this tab acknowledged brought nothing the
+        // tab has not applied (its own write, refused one revision low by another instance's
+        // mirror, is re-sent after it): the history and its clocks stay and no banner names the
+        // tab's own write as external. One that lands above it brought entries the tab never
+        // applied, past which no history entry can be transformed (build-4/hotfix-4.md 3.7)
+        if (resyncBroughtUnseen(fresh, latest().serverRevision)) {
+          history.clear();
+          clockOf.clear();
+          showExternal({ revision: fresh });
+        }
         publish({
           versions: payload.versions,
           leases: payload.leases,
-          serverRevision: payload.document.deck.revision,
+          serverRevision: fresh,
         });
-        showExternal({ revision: payload.document.deck.revision });
         void revision;
         return payload.document;
       },

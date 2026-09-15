@@ -208,13 +208,23 @@ export const BLOCK_CSS = `
 .ts-sheet .free[data-group="plate"] > p { max-width: 56ch; color: var(--ink); }
 .ts-sheet .free > .credit { font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
 .ts-sheet .free > .big.title { font-size: 44px; line-height: 1.08; }
-.ts-sheet .free > svg[data-type="mark"] { display: block; fill: currentColor; }
 /* the objects whose content scales with the box under a resize handle (hotfix-3 causes R4, R5;
    SPEC-5-amendments A4): an icon object's glyph fills its box (renderIcon writes no size for a
    positioned icon), a diagram object fills its box in both axes (renderDia adds
    preserveAspectRatio none for a positioned dia), a table object's rows share the box's height
    (the flex rows of the classic form grow from their content height, the auto tracks of the grid
-   form stretch); at the box the conversion measured nothing changes, so the fidelity gate holds */
+   form stretch); at the box the conversion measured nothing changes, so the fidelity gate holds.
+   hotfix-4 causes W2 and W8 add the mark object (renderMark writes no size for a positioned mark
+   and the class mark-block; the symbol keeps its ratio inside the box) and the panel object: the
+   panel fills its box and the two marks of its term form take half and the whole of the content
+   height (16 and 32 at the measured box) with their width from the symbol's ratio (panel.ts
+   MARK_VIEW_BOX). The mark rule keys on the class, never on data-type: a surface rendered without
+   block attributes (the deck build, the present surface, a flatten sheet) writes no data-type, and
+   an unsized svg no rule reaches draws at 300 by 150 (hotfix-4 section 3) */
+.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: 100%; height: 100%; }
+.ts-sheet .free > .panel, .ts-sheet .free > .link > .panel { box-sizing: border-box; height: 100%; }
+.ts-sheet .free > .panel.term > svg.mark-s, .ts-sheet .free > .link > .panel.term > svg.mark-s { height: 50%; width: auto; }
+.ts-sheet .free > .panel.term > svg.mark-l, .ts-sheet .free > .link > .panel.term > svg.mark-l { height: 100%; width: auto; }
 .ts-sheet .free > svg.icon-block, .ts-sheet .free > .link > svg.icon-block { width: 100%; height: 100%; }
 .ts-sheet .free > svg.dia, .ts-sheet .free > .link > svg.dia { width: 100%; height: 100%; }
 .ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; }

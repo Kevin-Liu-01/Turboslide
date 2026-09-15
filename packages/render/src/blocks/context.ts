@@ -153,16 +153,31 @@ export function iconSvg(
   return `<svg class="${cls}" aria-hidden="true"${dataAttrs(raster(ctx, blockId, 'icon', true))}><use href="#i-${escapeAttr(icon.name)}"/></svg>`;
 }
 
-/** The standalone GT mark at a pixel size (s02:4, s15:4, s85:18). */
+/**
+ * The standalone GT mark at a pixel size (s02:4, s15:4, s85:18). With `sized` false the svg
+ * writes no size of its own and carries the class `mark-block`: a mark object of the canvas (a
+ * block with `pos`) fills its box through block-css.ts, so a resize handle scales the glyph with
+ * the box (build-4/hotfix-4.md cause W2, the rule of hotfix-3 causes R4 and R5 for the icon and
+ * the diagram). The class, not `data-type`, keys the rule: a surface rendered without block
+ * attributes (the deck build, the present surface the PDF gate shoots, a flatten sheet) writes no
+ * `data-type`, and an unsized svg no rule reaches draws at the browser's 300 by 150 default
+ * (hotfix-4 section 3, the ship step).
+ */
 export function markSvg(
   ctx: BlockContext,
   blockId: BlockId,
   w: number,
   h: number,
   attributes: Record<string, string> = {},
+  sized = true,
 ): string {
-  let out = `<svg width="${w}" height="${h}" fill="currentColor"`;
-  for (const [name, value] of Object.entries(attributes)) out += ` ${name}="${escapeAttr(value)}"`;
+  let out = sized
+    ? `<svg width="${w}" height="${h}" fill="currentColor"`
+    : '<svg fill="currentColor"';
+  const extra = sized
+    ? attributes
+    : { ...attributes, class: classes(attributes['class'], 'mark-block') ?? 'mark-block' };
+  for (const [name, value] of Object.entries(extra)) out += ` ${name}="${escapeAttr(value)}"`;
   if (!('aria-label' in attributes)) out += ' aria-hidden="true"';
   out += dataAttrs(raster(ctx, blockId, 'mark', true));
   return `${out}><use href="#gt-mark"/></svg>`;

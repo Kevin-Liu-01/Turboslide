@@ -39,7 +39,7 @@ import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import type { GuidesInput } from '@turboslide/schema/canvas';
 import { GUIDE_CENTRE } from '@turboslide/schema/canvas';
-import { isMultilinePath } from '@turboslide/schema/catalog';
+import { isMultilinePath, isMultilineType } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
 import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
 import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
@@ -145,6 +145,8 @@ import type {
   MeasuredBoxes,
   Point,
 } from './Gestures';
+import { GESTURE_IDLE, gestureLife } from './gesture-life';
+import type { GestureEnd, GestureLife, GestureLifeEvent, GestureReadout } from './gesture-life';
 import type { Guide } from './Guides';
 import {
   InlineText,
@@ -837,9 +839,7 @@ export function Editor({
   const [crop, setCrop] = useState<CropState | null>(null);
   /* a member selected alone inside its group after a double click (SPEC-2 6.1 row 14) */
   const [groupEntered, setGroupEntered] = useState<string | null>(null);
-  const [readout, setReadout] = useState<
-    { kind: 'angle'; value: number } | { kind: 'size'; w: number; h: number } | null
-  >(null);
+  const [readout, setReadout] = useState<GestureReadout>(null);
   const [space, setSpace] = useState(false);
   const [draggingGuide, setDraggingGuide] = useState<DraggingGuide | null>(null);
   const [pointer, setPointer] = useState<Point | null>(null);
@@ -912,6 +912,14 @@ export function Editor({
   /* the points a Curve or Polyline tool placed so far */
   const drawPointsRef = useRef<Point[]>([]);
   const readoutTimer = useRef(0);
+  /* the life of the pointer gesture that is down (gesture-life.ts, hotfix-4 cause W1): the size
+     and angle readouts of a drag are read from it, so an end event of any kind clears them */
+  const life = useRef<GestureLife>(GESTURE_IDLE);
+  const stepLife = (event: GestureLifeEvent) => {
+    life.current = gestureLife(life.current, event);
+    if (event.type !== 'move') window.clearTimeout(readoutTimer.current);
+    setReadout(life.current.readout);
+  };
   /* the markup shown while a run is edited: frozen at the session's start so a burst's re-render
      never replaces the editable element under the caret */
   const frozenHtml = useRef<string | null>(null);
@@ -964,6 +972,8 @@ export function Editor({
     }
     if (jsonEqual(next, selectionRef.current)) return;
     selectionRef.current = next;
+    /* a new selection inherits nothing of a past gesture (its readout, hotfix-4 cause W1) */
+    if (gesture.current === null) stepLife({ type: 'select' });
     setInnerSelection(next);
     onSelectionRef.current?.(next);
   };
@@ -1396,7 +1406,13 @@ export function Editor({
     const slideNow = slideRef.current;
     if (!slideNow) return;
     const block = blockById(slideNow, run.blockId);
-    const multiline = block !== undefined && isMultilinePath(block, `/${run.pointer}`);
+    /* a title or statement slide's text run is a slide field, not a block (blockById finds none);
+       its type comes from blockTypeOf, and a title's lead is a paragraph, whose /text is
+       multiline, so Enter in the subtitle placeholder breaks the line (hotfix-4 cause W4) */
+    const multiline =
+      block !== undefined
+        ? isMultilinePath(block, `/${run.pointer}`)
+        : isMultilineType(blockTypeOf(slideNow, run.blockId) ?? '', `/${run.pointer}`);
     committedText.current = readRunText(slideNow, run.blockId, run.pointer) ?? '';
     frozenHtml.current = htmlRef.current;
     setEditing({ ...run, caret, multiline, ...(options.link ? { link: true } : {}) });
@@ -1741,12 +1757,17 @@ export function Editor({
     return out;
   };
 
-  /** The mutations a gesture stands for at a point, and what the overlay shows meanwhile. */
+  /**
+   * The mutations a gesture stands for at a point, and what the overlay would show meanwhile: a
+   * pure function of the gesture and the point. The pointer move shows the readout it returns
+   * through the gesture's life; the release computes its mutations with the same function and
+   * shows nothing (hotfix-4 cause W1: the release used to set the readout it had just cleared).
+   */
   const gestureAt = (
     g: ActiveGesture,
     now: Point,
     mods: GestureMods,
-  ): { mutations: Mutation[]; guides: Guide[]; sites: Point[] } => {
+  ): { mutations: Mutation[]; guides: Guide[]; sites: Point[]; readout: GestureReadout } => {
     const kind = g.handle.kind;
     if (
       kind === 'free-move' ||
@@ -1755,25 +1776,29 @@ export function Editor({
       kind === 'line-end'
     ) {
       const result = freeGesture(g.handle, g.ctx, g.start, now, mods);
-      if (result?.angle !== undefined) setReadout({ kind: 'angle', value: result.angle });
-      else if (result?.size !== undefined)
-        setReadout({ kind: 'size', w: result.size.w, h: result.size.h });
+      const readout: GestureReadout =
+        result?.angle !== undefined
+          ? { kind: 'angle', value: result.angle }
+          : result?.size !== undefined
+            ? { kind: 'size', w: result.size.w, h: result.size.h }
+            : null;
       let mutations = result?.mutations ?? [];
       if (g.duplicate && kind === 'free-move') mutations = duplicateMutations(g, mutations);
-      return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [] };
+      return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [], readout };
     }
     const mutation = gestureMutation(g.handle, g.ctx, g.start, now);
-    return { mutations: mutation === null ? [] : [mutation], guides: [], sites: [] };
+    return { mutations: mutation === null ? [] : [mutation], guides: [], sites: [], readout: null };
   };
 
-  const endGestureState = () => {
+  /** The end of the gesture that is down, by whatever event ended it: every live state clears. */
+  const endGestureState = (end: GestureEnd) => {
     gesture.current = null;
     setActiveHandle(null);
     setDrop(null);
     setDropSlot(null);
     setGuides([]);
     setSites([]);
-    setReadout(null);
+    stepLife({ type: end });
   };
 
   const modsOf = (ev: {
@@ -1797,7 +1822,7 @@ export function Editor({
     handle: Handle,
     clientX: number,
     clientY: number,
-    options: { duplicate?: boolean } = {},
+    options: { duplicate?: boolean; target?: EventTarget | null } = {},
   ) => {
     const slideNow = slideRef.current;
     const rect = stageRect();
@@ -1837,6 +1862,7 @@ export function Editor({
       const selected = selectedIds(selectionRef.current, extraRef.current);
       if (!selected.includes(handle.blockId)) selectObjects([handle.blockId]);
     }
+    stepLife({ type: 'down' });
     if (handle.kind === 'block-move' && handle.blockId !== undefined) {
       const first = blockMoveFor(slideNow, handle.blockId, start, ctx.boxes);
       setDrop(first.indicator);
@@ -1868,21 +1894,36 @@ export function Editor({
         setDrop(at.indicator);
         setDropSlot(at.slotBox);
       }
-      const { mutations, guides: nextGuides, sites: nextSites } = gestureAt(g, now, mods);
+      const {
+        mutations,
+        guides: nextGuides,
+        sites: nextSites,
+        readout: nextReadout,
+      } = gestureAt(g, now, mods);
+      stepLife({ type: 'move', readout: nextReadout });
       setGuides(nextGuides);
       setSites(nextSites);
       if (jsonEqual(mutations, g.last)) return;
       g.last = mutations;
       preview(mutations);
     };
-    const up = (ev: PointerEvent) => {
+    /* the end of the gesture by any of its events (gesture-life.ts GESTURE_END_EVENTS): the
+       release commits, everything else cancels; every listener leaves with the gesture */
+    const pressed = options.target instanceof Element ? options.target : null;
+    const detach = () => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', cancel);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('keydown', onEscape, true);
+      pressed?.removeEventListener('lostpointercapture', onLostCapture);
+    };
+    const up = (ev: PointerEvent) => {
+      detach();
       const g = gesture.current;
       const r = stageRect();
       const mods = g ? { ...g.mods, ...modsOf(ev) } : modsOf(ev);
-      endGestureState();
+      endGestureState('pointerup');
       if (!g || !r) {
         setDraft(null);
         return;
@@ -1922,16 +1963,29 @@ export function Editor({
         await finishCanvasGesture(exact, mutations);
       })();
     };
-    const cancel = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      endGestureState();
+    const cancelBy = (end: GestureEnd) => {
+      detach();
+      if (gesture.current === null) return;
+      endGestureState(end);
       setDraft(null);
+    };
+    const cancel = () => cancelBy('pointercancel');
+    const onLostCapture = () => cancelBy('lostpointercapture');
+    /* the window losing focus mid drag (Cmd Tab, a system dialog): no release will come */
+    const onBlur = () => cancelBy('blur');
+    /* Escape cancels the drag and the object returns to its committed box */
+    const onEscape = (ev: KeyboardEvent) => {
+      if (ev.key !== 'Escape' || gesture.current === null) return;
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      cancelBy('escape');
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', cancel);
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('keydown', onEscape, true);
+    pressed?.addEventListener('lostpointercapture', onLostCapture);
   };
 
   /** The commit of a gesture: the conversion first, the writes, the connectors that follow and the autofit (SPEC-2 1.6). */
@@ -3117,6 +3171,9 @@ export function Editor({
       }
       switch (action.type) {
         case 'escape':
+          /* Escape during a drag cancels the drag (beginGesture's own listener, registered after
+             this one) and leaves the selection as it is */
+          if (gesture.current !== null) return;
           if (paintRef.current) {
             setPaint(null);
             stop();
@@ -3331,6 +3388,7 @@ export function Editor({
     }
     beginGesture(handle, e.clientX, e.clientY, {
       duplicate: e.altKey && handle.kind === 'free-move',
+      target: e.target,
     });
   };
 

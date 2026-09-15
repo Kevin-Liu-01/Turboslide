@@ -7,7 +7,7 @@ import { measureStyle } from './blocks/text-blocks.ts';
 import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
 import { colorCss } from '@turboslide/schema/color';
-import { renderTextOrPrompt } from './blocks/prompt.ts';
+import { renderMultiline, renderTextOrPrompt } from './blocks/prompt.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { AssetTwins } from '@turboslide/schema/assets';
 import type { Block, BlockOf } from '@turboslide/schema/blocks';
@@ -261,7 +261,9 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'lead', 'data-type': 'paragraph', 'data-run': 'lead/text' }
             : {}),
         },
-        renderTextOrPrompt(slide.lead, ctx, undefined, '/lead'),
+        /* the lead takes paragraph breaks (hotfix-4 cause W4): renderMultiline writes one .para
+           span per paragraph, and a one paragraph lead renders byte for byte as renderText did */
+        renderMultiline(slide.lead, ctx, undefined, '/lead'),
       );
       html = el(
         'section',

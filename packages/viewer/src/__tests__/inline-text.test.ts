@@ -8,6 +8,7 @@ import { canonicalText, mergeRuns, parseText, serializeRuns } from '@turboslide/
 
 import {
   absorbedText,
+  burstRewrite,
   listAppendMutation,
   noteAbsorbed,
   runKey,
@@ -138,6 +139,42 @@ describe('runsFromNode', () => {
     const empty = el('H1', [el('SPAN', [text('Click to add title')], { 'data-prompt': '' })]);
     expect(textFromNode(empty)).toBe('');
     expect(runsFromNode(empty)).toEqual([]);
+  });
+});
+
+// The rewrite rule of a burst boundary (SPEC-2 0.54; build-4/hotfix-4.md cause W3): the editable
+// is rewritten only when what the DOM serializes to is not the canonical string of its own runs,
+// and the white space at the ends of a paragraph is never a reason. Kevin's "pressing space
+// isn't working": the burst compared the DOM with the trimmed write form, so the space typed
+// before the next word was rewritten away 100 ms after the keystroke.
+describe('burstRewrite', () => {
+  it('leaves a trailing space alone: the no-break space Chromium writes for it reads back as a space and is not a rewrite', () => {
+    const typed = el('H1', [text('Quarterly review: Q3, ')]);
+    const raw = serializeRuns(runsFromNode(typed));
+    expect(raw).toBe('Quarterly review: Q3, ');
+    expect(burstRewrite(raw)).toBeNull();
+    /* the write trims it, as before */
+    expect(textFromNode(typed)).toBe('Quarterly review: Q3,');
+  });
+
+  it('leaves the white space at either end of any paragraph alone', () => {
+    expect(burstRewrite('x ')).toBeNull();
+    expect(burstRewrite(' x')).toBeNull();
+    expect(burstRewrite('Body copy, ')).toBeNull();
+    expect(burstRewrite('one \ntwo\n three ')).toBeNull();
+    expect(burstRewrite('*bold* ')).toBeNull();
+    expect(burstRewrite('')).toBeNull();
+  });
+
+  it('rewrites only a string that is not its own canonical form, from the canonical form with its ends kept', () => {
+    /* two adjacent bold runs are one in the canonical form; the trailing space stays */
+    expect(canonicalText('*a**b* ')).toBe('*ab* ');
+    expect(burstRewrite('*a**b* ')).toBe('*ab* ');
+    /* what the DOM serializes to is canonical already */
+    const dom = el('P', [text('one '), el('B', [text('two')]), text(' ')]);
+    const raw = serializeRuns(runsFromNode(dom));
+    expect(raw).toBe('one *two* ');
+    expect(burstRewrite(raw)).toBeNull();
   });
 });
 

@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { BLOCK_CSS } from '../block-css.ts';
+import { MARK_VIEW_BOX } from '../blocks/panel.ts';
 import { renderBlock } from '../blocks/render-block.ts';
 import type { BlockContext } from '../blocks/context.ts';
 import type { Block } from '@turboslide/schema/blocks';
@@ -225,6 +226,73 @@ describe('objects of the canvas scale their content with the box', () => {
     expect(object).toContain('class="ic icon-block"');
     expect(BLOCK_CSS).toContain(
       '.ts-sheet .free > svg.icon-block, .ts-sheet .free > .link > svg.icon-block { width: 100%; height: 100%; }',
+    );
+  });
+
+  it('a mark object writes no size of its own and fills its box; a flow mark keeps its pixel size (hotfix-4 W2)', () => {
+    const flow = renderBlock({ id: 'mk', type: 'mark', w: 160, h: 100 }, context('light'));
+    expect(flow).toContain('<svg width="160" height="100" fill="currentColor"');
+    const object = renderBlock(
+      { id: 'mk', type: 'mark', w: 160, h: 100, pos: { ...pos, w: 320, h: 200 } },
+      { ...context('light'), slotWidth: 320, slotHeight: 200 },
+    );
+    expect(object).toContain('<svg fill="currentColor"');
+    expect(object).not.toMatch(/<svg[^>]* width="/);
+    expect(object).not.toMatch(/<svg[^>]* height="/);
+    expect(object).toContain('class="mark-block"');
+    expect(object).toContain('data-type="mark"');
+    expect(object).toContain('<use href="#gt-mark"/>');
+    expect(flow).not.toContain('mark-block');
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: 100%; height: 100%; }',
+    );
+    expect(BLOCK_CSS).not.toContain('svg[data-type="mark"]');
+  });
+
+  it('a mark object rendered without block attributes still carries the class its box rule keys on (hotfix-4 section 3)', () => {
+    // the deck build, the present surface the PDF gate shoots and a flatten sheet render with
+    // blockAttrs off: no data-type is written, so a rule on data-type would reach nothing and the
+    // unsized svg would draw at the browser's 300 by 150 default (the PDF gate read canvas-title
+    // at 1.05 percent over its reference)
+    const object = renderBlock(
+      { id: 'mk', type: 'mark', w: 160, h: 100, pos: { ...pos, w: 320, h: 200 } },
+      { ...context('light', false), slotWidth: 320, slotHeight: 200 },
+    );
+    expect(object).not.toContain('data-type');
+    expect(object).not.toMatch(/<svg[^>]* width="/);
+    expect(object).toContain('class="mark-block"');
+    expect(object).toContain('<use href="#gt-mark"/>');
+  });
+
+  it('a panel object fills its box and its term marks are sized by the box; a flow panel keeps 25 by 16 and 50 by 32 (hotfix-4 W8)', () => {
+    const term = {
+      id: 'pn',
+      type: 'panel' as const,
+      code: 'npx gt translate',
+      term: true,
+      marks: true as const,
+    };
+    const flow = renderBlock(term, context('light'));
+    expect(flow).toContain('<svg width="25" height="16" aria-hidden="true"');
+    expect(flow).toContain('<svg width="50" height="32" aria-hidden="true"');
+    expect(flow).not.toContain('viewBox');
+    const object = renderBlock(
+      { ...term, pos: { ...pos, w: 600, h: 60 } },
+      { ...context('light'), slotWidth: 600, slotHeight: 60 },
+    );
+    expect(object).toContain(`<svg class="mark-s" viewBox="${MARK_VIEW_BOX}" aria-hidden="true"`);
+    expect(object).toContain(`<svg class="mark-l" viewBox="${MARK_VIEW_BOX}" aria-hidden="true"`);
+    expect(object).not.toContain('width="25"');
+    expect(object).not.toContain('width="50"');
+    expect(object).toContain('class="panel term"');
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .panel, .ts-sheet .free > .link > .panel { box-sizing: border-box; height: 100%; }',
+    );
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .panel.term > svg.mark-s, .ts-sheet .free > .link > .panel.term > svg.mark-s { height: 50%; width: auto; }',
+    );
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .panel.term > svg.mark-l, .ts-sheet .free > .link > .panel.term > svg.mark-l { height: 100%; width: auto; }',
     );
   });
 

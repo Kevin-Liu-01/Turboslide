@@ -2101,8 +2101,23 @@ function LayoutPlate({
       if (root.current?.contains(event.target) || request.anchor.contains(event.target)) return;
       onClose();
     };
+    /* Escape closes the plate whatever holds the focus: opened by a click on the toolbar button
+       the focus stays on that button, outside the plate, so the plate's own onKeyDown never sees
+       Escape (build-4/hotfix-4.md cause W5). A document capture listener answers it, and the
+       plate's onKeyDown still serves a keyboard user whose focus is inside it. */
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
+      request.returnFocusTo?.focus();
+    };
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey, true);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey, true);
+    };
   }, [request, onClose]);
 
   return (

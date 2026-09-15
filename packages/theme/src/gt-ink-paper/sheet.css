@@ -225,9 +225,14 @@
   place-items: center;
   text-align: center;
 }
+/* the column spans the content box (right: 0): its text blocks take the slot's width the way a
+   placeholder frame does, so the heading the canvas conversion measures is the column's width and
+   a longer title typed into it wraps at the words (build-4/hotfix-4.md cause W9); a left aligned
+   text draws the same at either width */
 .ts-sheet .left-mid {
   position: absolute;
   left: 0;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
 }

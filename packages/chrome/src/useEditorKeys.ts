@@ -104,6 +104,28 @@ const RUN_OWNED: ReadonlySet<string> = new Set([
   'insert.link',
 ]);
 
+/**
+ * The caret keys: inside the canvas run they move the caret with every modifier (Cmd Up and Down
+ * to the text's start and end on a Mac, Shift to extend, Option by word) and never run a chord
+ * (Move slide up, Bring forward, the filmstrip's Home and End) (build-4/hotfix-4.md, key
+ * ownership). The stage's own key table yields the same way (viewer keys.ts editorKeyAction).
+ */
+export const CARET_KEYS: ReadonlySet<string> = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
+/** True when a key pressed inside the canvas run is the caret's, whatever the modifiers. */
+export function isCaretKeyInCanvasText(event: Pick<KeyboardEvent, 'key' | 'target'>): boolean {
+  return CARET_KEYS.has(event.key) && isCanvasText(event.target);
+}
+
 /** Cmd+] or Cmd+[ on a Mac, Ctrl+] or Ctrl+[ elsewhere, with no other modifier (SPEC-2 0.55). */
 export function isIndentChord(
   event: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'altKey' | 'shiftKey'>,
@@ -138,6 +160,10 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
       const inField = isChromeField(event.target);
       const inCanvasText = isCanvasText(event.target);
       const modifier = event.metaKey || event.ctrlKey || event.altKey;
+
+      /* the caret keys inside the canvas run are the caret's with every modifier: Cmd Up would
+         otherwise run Move slide up or Bring forward and the caret would not move */
+      if (isCaretKeyInCanvasText(event)) return;
 
       /* Esc: menus and dialogs close themselves; the shell's ladder runs when nothing of theirs is open */
       if (event.key === 'Escape') {

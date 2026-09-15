@@ -288,6 +288,28 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
     );
   });
 
+  it('accepts a paragraph break in a title slide lead but not in its heading (hotfix-4 W4)', () => {
+    const lead = validateSlide({
+      schemaVersion: 1,
+      id: 'title',
+      kind: 'title',
+      mark: { w: 160, h: 100 },
+      heading: 'General Translation',
+      lead: 'One line.\nTwo lines.',
+    });
+    expect(lead.ok).toBe(true);
+    const heading = validateSlide({
+      schemaVersion: 1,
+      id: 'title',
+      kind: 'title',
+      mark: { w: 160, h: 100 },
+      heading: 'Two\nlines',
+      lead: 'A subtitle.',
+    });
+    expect(heading.ok).toBe(false);
+    expect(heading.issues.some((issue) => issue.pointer === '/heading')).toBe(true);
+  });
+
   it('accepts an empty picture reference on a figure and skips its reference check', () => {
     const slide = clone(THE_PRODUCTION_SITE);
     if (slide.kind !== 'content') throw new Error('fixture');

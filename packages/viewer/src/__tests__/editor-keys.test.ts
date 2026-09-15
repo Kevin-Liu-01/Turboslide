@@ -104,6 +104,40 @@ describe('editorKeyAction', () => {
     expect(editorKeyAction({ key: 'd', metaKey: true }, { ...selected, editing: true })).toBeNull();
   });
 
+  it('leaves the caret keys to the text while a run is being edited: Home, End, PageUp, PageDown and the arrows with every modifier (hotfix-4 key ownership)', () => {
+    const caretKeys = [
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+    ];
+    const mods = [
+      {},
+      { shiftKey: true },
+      { metaKey: true },
+      { metaKey: true, shiftKey: true },
+      { altKey: true },
+      { altKey: true, shiftKey: true },
+    ];
+    for (const key of caretKeys) {
+      for (const mod of mods) {
+        expect(editorKeyAction({ key, ...mod }, { ...selected, editing: true })).toBeNull();
+        expect(editorKeyAction({ key, ...mod }, { ...free, editing: true })).toBeNull();
+      }
+    }
+    /* the same arrows nudge and rotate once the session is over */
+    expect(editorKeyAction({ key: 'ArrowRight' }, selected)).toEqual({
+      type: 'nudge',
+      dx: NUDGE_PX,
+      dy: 0,
+    });
+    expect(editorKeyAction({ key: 'ArrowRight', altKey: true }, selected)?.type).toBe('rotate');
+  });
+
   it('Esc leaves the mode, Enter edits, Delete and Backspace remove, with a block selected only', () => {
     expect(editorKeyAction({ key: 'Escape' }, selected)).toEqual({ type: 'escape' });
     expect(editorKeyAction({ key: 'Enter' }, selected)).toEqual({ type: 'enter' });

@@ -24,13 +24,17 @@ export function renderDither(block: BlockOf<'dither'>, ctx: BlockContext): strin
   )}></canvas>`;
 }
 
-/** `mark`: the standalone GT mark at a pixel size (s02:4, s15:4). */
+/**
+ * `mark`: the standalone GT mark at a pixel size (s02:4, s15:4). A mark object of the canvas (a
+ * block with `pos`) writes no size of its own: the glyph fills its box through block-css.ts, so a
+ * resize handle scales it with the box (build-4/hotfix-4.md cause W2).
+ */
 export function renderMark(block: BlockOf<'mark'>, ctx: BlockContext): string {
   const attributes = rootAttrs(block, ctx, {});
   const extra: Record<string, string> = {};
   for (const [name, value] of Object.entries(attributes))
     if (value !== undefined) extra[name] = value;
-  return markSvg(ctx, block.id, block.w, block.h, extra);
+  return markSvg(ctx, block.id, block.w, block.h, extra, block.pos === undefined);
 }
 
 /**

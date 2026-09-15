@@ -16,7 +16,7 @@ import { slugSchema } from './ids.ts';
 import type { Position } from './position.ts';
 import { positionObjectSchema } from './position.ts';
 import type { Text } from './text.ts';
-import { plainText, textSchema } from './text.ts';
+import { multilineTextSchema, plainText, textSchema } from './text.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -498,7 +498,10 @@ export const titleSlideSchema = z.strictObject({
   kind: z.literal('title'),
   mark: markSizeSchema,
   heading: annotate(textSchema, { label: 'Heading', control: 'text', group: 'Text' }),
-  lead: annotate(textSchema, { label: 'Lead', control: 'textarea', group: 'Text' }),
+  /* the subtitle placeholder takes paragraph breaks like Google's, so Enter in it makes a line
+     rather than ending the session (build-4/hotfix-4.md cause W4); a one line lead is one
+     paragraph, so every existing deck validates and renders byte for byte */
+  lead: annotate(multilineTextSchema, { label: 'Lead', control: 'textarea', group: 'Text' }),
 }) satisfies z.ZodType<TitleSlide>;
 
 export const statementSlideSchema = z.strictObject({

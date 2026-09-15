@@ -764,6 +764,20 @@ export function isMultilinePath(block: Block, pointer: string): boolean {
   return blockMultilinePaths(block).includes(pointer);
 }
 
+/**
+ * True when a block type's pointer takes paragraph breaks, judged from the type alone (no block
+ * value). The title and statement slides render their text as pseudo blocks (`heading`, `lead`,
+ * `big`; render/slide.ts) that are slide fields rather than blocks, so the editor resolves their
+ * type through `blockTypeOf` and asks this; a title's lead is a `paragraph`, whose `/text` is
+ * multiline, so Enter in the subtitle placeholder makes a line break rather than ending the
+ * session (build-4/hotfix-4.md cause W4). Only templates without a wildcard can be judged by type;
+ * the pseudo blocks' pointers are all plain `/text`.
+ */
+export function isMultilineType(type: string, pointer: string): boolean {
+  const entry = (CATALOG as Record<string, { multilineTextPaths?: ReadonlyArray<string> }>)[type];
+  return entry?.multilineTextPaths?.includes(pointer) ?? false;
+}
+
 /** Every asset reference inside a block: pointer and the referenced id. */
 export function blockAssetRefs(block: Block): { path: string; assetId: string }[] {
   return CATALOG[block.type].assetPaths.flatMap((template) =>

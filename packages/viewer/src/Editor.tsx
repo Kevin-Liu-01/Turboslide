@@ -1058,7 +1058,11 @@ export function Editor({
         () => undefined,
         (error: unknown) => onErrorRef.current?.(error),
       )
-      .finally(() => setDraft(null));
+      .finally(() => {
+        /* the answer of an earlier write, arriving during the next drag, leaves that drag's
+           preview alone (the same rule as the document effect below) */
+        if (gesture.current === null) setDraft(null);
+      });
   };
 
   /** A named action with the current revision; the promise is the server's confirmation. */
@@ -1337,9 +1341,14 @@ export function Editor({
     if (mutation) commit([mutation]);
   };
 
-  /* a new document ends any preview: the write landed, or the world moved on */
+  /* a new document ends any preview: the write landed, or the world moved on. Not while a
+     gesture is down: on the blob tier the checkpoint frame of the previous drag's write can reach
+     the tab seconds later, in the middle of the next drag, and clearing the preview then snaps
+     the object back to the document's box under the pointer until the next move redraws it
+     (build-4/hotfix-3.md 3.5, seen on production); the next move recomputes the preview over the
+     new document through docRef, and the release commits over it */
   useEffect(() => {
-    setDraft(null);
+    if (gesture.current === null) setDraft(null);
   }, [doc]);
 
   /* Alt held: the diagram handles take the pointer (SPEC 6.4 Alt-drag); Space held: the stage

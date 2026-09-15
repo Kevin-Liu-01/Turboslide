@@ -281,9 +281,28 @@ async function dragHandle(
           .catch(() => null)
       : null;
   const stage = await stageBox(page);
-  const wrapper = await page
-    .locator(`.ts-stagewrap.ts-editor .pt-slide .free[data-free="${id}"]`)
-    .boundingBox();
+  /* the wrapper's box once the draft of the last move is drawn: the sheet re-renders the slide
+     for a draft while the overlay's readout updates first, and under load the sheet's frame can
+     come later than a fixed pause (a production run read the previous box 60 ms after the last
+     move while the readout already named the new size); two equal reads 40 ms apart, within
+     1.5 s, is the drawn box */
+  const wrapperLocator = page.locator(`.ts-stagewrap.ts-editor .pt-slide .free[data-free="${id}"]`);
+  let wrapper = await wrapperLocator.boundingBox();
+  const settleStart = Date.now();
+  while (Date.now() - settleStart < 1500) {
+    await page.waitForTimeout(40);
+    const again = await wrapperLocator.boundingBox();
+    if (
+      wrapper &&
+      again &&
+      Math.abs(again.x - wrapper.x) < 0.5 &&
+      Math.abs(again.y - wrapper.y) < 0.5 &&
+      Math.abs(again.width - wrapper.width) < 0.5 &&
+      Math.abs(again.height - wrapper.height) < 0.5
+    )
+      break;
+    wrapper = again;
+  }
   if (!wrapper) throw new Error(`no ${id} wrapper while the drag is down`);
   const preview = {
     x: (wrapper.x - stage.x) / k,

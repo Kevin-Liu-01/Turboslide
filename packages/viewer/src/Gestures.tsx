@@ -12,6 +12,7 @@
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Block, BlockType, ShapeBlock, ShapeKind } from '@turboslide/schema/blocks';
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
+import { resizeKindOf, rotateVector } from '@turboslide/schema/canvas';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable } from '@turboslide/schema/blocks/table';
@@ -46,7 +47,7 @@ import {
   posFor,
   scaleGroupMutations,
 } from './Freeform';
-import { rotateMutations, rotationFromDrag, unrotateDelta } from './rotate';
+import { rotateMutations, rotationFromDrag } from './rotate';
 import type { Selection } from './Selection';
 import { blockById, selectedBlockId } from './Selection';
 import {
@@ -1092,27 +1093,38 @@ export function freeGesture(
     return { mutations, guides: snapped.guides };
   }
   if (handle.kind === 'free-resize' && handle.dir !== undefined) {
+    /* the one resize model (schema/canvas.ts resizeBox through snapResize): the opposite edge
+       or corner held on the sheet, Shift or a locked kind keeping the ratio, Alt about the
+       centre, a rotated object's handles along its own axes (SPEC-5-amendments A4) */
     if (ids.length > 1) {
       const rows = placedOf(slide, ids, boxes);
       const union = unionBox(rows.map((row) => row.pos));
-      const snapped = snapResize(union, handle.dir, dx, dy, lines, { aspect: mods.shift, grid });
-      const to = mods.alt === true ? aboutCentre(union, snapped.box) : snapped.box;
+      const snapped = snapResize(union, handle.dir, dx, dy, lines, {
+        aspect: mods.shift,
+        alt: mods.alt === true,
+        grid,
+        kind: 'group',
+      });
+      const to = snapped.box;
       const mutations = scaleGroupMutations(slide, ids, boxes, to);
       if (mutations.length === 0) return null;
       return { mutations, guides: snapped.guides, size: { w: to[2], h: to[3] } };
     }
     const angle = normalizeRotation(anchor.rotate ?? 0);
-    if (angle !== 0) ({ dx, dy } = unrotateDelta(dx, dy, angle));
-    const snapped = snapResize(posBox(anchor), handle.dir, dx, dy, angle === 0 ? lines : [], {
+    const snapped = snapResize(posBox(anchor), handle.dir, dx, dy, lines, {
       aspect: mods.shift,
-      grid: angle === 0 ? grid : false,
+      alt: mods.alt === true,
+      grid,
+      rotation: angle,
+      ...(resizeKindOf(blockById(slide, blockId)) !== undefined
+        ? { kind: resizeKindOf(blockById(slide, blockId)) }
+        : {}),
     });
-    const box = mods.alt === true ? aboutCentre(posBox(anchor), snapped.box) : snapped.box;
-    const [x, y, w, h] = box;
+    const [x, y, w, h] = snapped.box;
     if (x === anchor.x && y === anchor.y && w === anchor.w && h === anchor.h) return null;
     return {
       mutations: [posMutation(slide, blockId, { ...anchor, x, y, w, h })],
-      guides: angle === 0 ? snapped.guides : [],
+      guides: snapped.guides,
       size: { w, h },
     };
   }
@@ -1144,15 +1156,6 @@ export function freeGesture(
     return { mutations: result.mutations, guides: [], sites: result.sites };
   }
   return null;
-}
-
-/** A resized box mirrored about the original centre (Option: the opposite edges move too). */
-function aboutCentre(from: Box, to: Box): Box {
-  const cx = from[0] + from[2] / 2;
-  const cy = from[1] + from[3] / 2;
-  const w = Math.max(1, from[2] + 2 * (to[2] - from[2]));
-  const h = Math.max(1, from[3] + 2 * (to[3] - from[3]));
-  return [Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)];
 }
 
 /** Shift constrains a line's end to 45 degree steps (SPEC-2 6.2). */
@@ -1259,12 +1262,21 @@ export function nudgeMutation(
       return posMutation(slide, blockId, { ...pos, x: pos.x + dx, y: pos.y + dy });
     }
     case 'free-resize': {
-      // the handle's edge moves by one pixel per step: Right and Up grow, Left and Down shrink
+      // the handle's edge moves by one pixel per step along the object's own axis: Right and Up
+      // grow, Left and Down shrink; the same model as the drag (schema/canvas.ts resizeBox)
       const pos = posFor(slide, blockId, boxes);
       if (!pos || handle.dir === undefined) return null;
-      const dx = axis === 'x' ? delta : 0;
-      const dy = axis === 'y' ? -delta : 0;
-      const grown = snapResize(posBox(pos), handle.dir, dx, dy, [], { grid: false });
+      const kind = resizeKindOf(block);
+      const angle = normalizeRotation(pos.rotate ?? 0);
+      /* the step is one pixel of the object's own width or height: it is turned into sheet
+         space here and back into the object's axes by the model, so a turned object grows by
+         the whole step */
+      const step = rotateVector(axis === 'x' ? delta : 0, axis === 'y' ? -delta : 0, angle);
+      const grown = snapResize(posBox(pos), handle.dir, step.dx, step.dy, [], {
+        grid: false,
+        rotation: angle,
+        ...(kind !== undefined ? { kind } : {}),
+      });
       const [x, y, w, h] = grown.box;
       if (x === pos.x && y === pos.y && w === pos.w && h === pos.h) return null;
       return posMutation(slide, blockId, { ...pos, x, y, w, h });

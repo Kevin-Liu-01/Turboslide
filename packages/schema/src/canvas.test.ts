@@ -18,14 +18,20 @@ import {
   CONVERSION_IDS,
   PICTURE_POS,
   PLATE_PADDING,
+  RESIZE_HANDLES,
+  RESIZE_MIN_SIZE,
   applyGuides,
   canvasUnmoved,
   fromCanvas,
+  locksAspect,
   minLineBox,
   normalizeGuideList,
+  resizeBox,
+  resizeKindOf,
+  rotatedBoxCorners,
   toCanvas,
 } from './canvas.ts';
-import type { CanvasBoxes } from './canvas.ts';
+import type { CanvasBoxes, ResizeBox, ResizeHandle } from './canvas.ts';
 import type { ContentSlide, Slide } from './deck.ts';
 import { LAYOUT_IDS, isCanvasSlide } from './deck.ts';
 import {
@@ -494,5 +500,246 @@ describe('deck.guides arithmetic', () => {
     expect(applyGuides({ x: [800], y: [] }, { clear: true })).toBeUndefined();
     expect(applyGuides({ x: [800], y: [] }, { remove: [{ axis: 'x', at: 800 }] })).toBeUndefined();
     expect(normalizeGuideList([900.4, 3, 3, -2], 'y')).toEqual([0, 3, 900]);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The resize model (SPEC-5-amendments A4; build-4/hotfix-3.md section 2)
+
+describe('resizeBox', () => {
+  const box: ResizeBox = { x: 100, y: 100, w: 200, h: 100 };
+  const corners = (b: ResizeBox, rotation = 0) => rotatedBoxCorners(b, rotation);
+  const close = (a: { x: number; y: number }, b: { x: number; y: number }, tolerance = 1 / 32) => {
+    expect(Math.abs(a.x - b.x)).toBeLessThanOrEqual(tolerance);
+    expect(Math.abs(a.y - b.y)).toBeLessThanOrEqual(tolerance);
+  };
+  /** The index of the corner a handle drags (top left first, clockwise) and of the one it anchors. */
+  const CORNER: Record<string, [number, number]> = {
+    nw: [0, 2],
+    ne: [1, 3],
+    se: [2, 0],
+    sw: [3, 1],
+  };
+
+  it('moves the dragged edge or corner by the delta and holds the opposite one, on every handle', () => {
+    const delta = { dx: 20, dy: 10 };
+    const expected: Record<ResizeHandle, ResizeBox> = {
+      nw: { x: 120, y: 110, w: 180, h: 90 },
+      n: { x: 100, y: 110, w: 200, h: 90 },
+      ne: { x: 100, y: 110, w: 220, h: 90 },
+      e: { x: 100, y: 100, w: 220, h: 100 },
+      se: { x: 100, y: 100, w: 220, h: 110 },
+      s: { x: 100, y: 100, w: 200, h: 110 },
+      sw: { x: 120, y: 100, w: 180, h: 110 },
+      w: { x: 120, y: 100, w: 180, h: 100 },
+    };
+    for (const handle of RESIZE_HANDLES) {
+      expect(resizeBox(handle, delta, {}, 0, 'shape', box), handle).toEqual(expected[handle]);
+    }
+  });
+
+  it('never drops a side under the minimum and keeps the anchored edge while it clamps', () => {
+    expect(resizeBox('w', { dx: 500, dy: 0 }, {}, 0, 'shape', box)).toEqual({
+      x: 300 - RESIZE_MIN_SIZE,
+      y: 100,
+      w: RESIZE_MIN_SIZE,
+      h: 100,
+    });
+    expect(resizeBox('n', { dx: 0, dy: 500 }, {}, 0, 'shape', box)).toEqual({
+      x: 100,
+      y: 200 - RESIZE_MIN_SIZE,
+      w: 200,
+      h: RESIZE_MIN_SIZE,
+    });
+    expect(resizeBox('se', { dx: -500, dy: -500 }, {}, 0, 'shape', box, { min: 4 })).toEqual({
+      x: 100,
+      y: 100,
+      w: 4,
+      h: 4,
+    });
+  });
+
+  it('keeps the aspect ratio under Shift from the dominant delta of a corner and from an edge’s own side', () => {
+    expect(resizeBox('se', { dx: 100, dy: 0 }, { shift: true }, 0, 'shape', box)).toEqual({
+      x: 100,
+      y: 100,
+      w: 300,
+      h: 150,
+    });
+    expect(resizeBox('nw', { dx: 0, dy: -50 }, { shift: true }, 0, 'shape', box)).toEqual({
+      x: 0,
+      y: 50,
+      w: 300,
+      h: 150,
+    });
+    /* an n handle leads on y; dx is ignored and the width follows from the left edge */
+    expect(resizeBox('n', { dx: -50, dy: 0 }, { shift: true }, 0, 'shape', box)).toEqual(box);
+    expect(resizeBox('n', { dx: 0, dy: -50 }, { shift: true }, 0, 'shape', box)).toEqual({
+      x: 100,
+      y: 50,
+      w: 300,
+      h: 150,
+    });
+    expect(resizeBox('e', { dx: 100, dy: 0 }, { shift: true }, 0, 'shape', box)).toEqual({
+      x: 100,
+      y: 100,
+      w: 300,
+      h: 150,
+    });
+    /* the inspector's lock is the same rule */
+    expect(resizeBox('se', { dx: 480, dy: 0 }, { lock: true }, 0, undefined, box)).toEqual({
+      x: 100,
+      y: 100,
+      w: 680,
+      h: 340,
+    });
+  });
+
+  it('locks the aspect from a corner alone for a picture, an icon, a material, a mark and a plate', () => {
+    for (const kind of ['picture', 'icon', 'material', 'mark', 'plate'] as const) {
+      expect(locksAspect(kind), kind).toBe(true);
+      expect(resizeBox('se', { dx: 100, dy: 0 }, {}, 0, kind, box), kind).toEqual({
+        x: 100,
+        y: 100,
+        w: 300,
+        h: 150,
+      });
+      /* a side handle of a locked kind changes one dimension, as Google’s does for an image */
+      expect(resizeBox('e', { dx: 100, dy: 0 }, {}, 0, kind, box), kind).toEqual({
+        x: 100,
+        y: 100,
+        w: 300,
+        h: 100,
+      });
+    }
+    for (const kind of ['shape', 'text', 'table', 'chart', 'dia', 'box', 'group'] as const) {
+      expect(locksAspect(kind), kind).toBe(false);
+      expect(resizeBox('se', { dx: 100, dy: 0 }, {}, 0, kind, box), kind).toEqual({
+        x: 100,
+        y: 100,
+        w: 300,
+        h: 100,
+      });
+    }
+    expect(
+      resizeKindOf({ type: 'box', pos: { x: 0, y: 0, w: 1, h: 1, group: CANVAS_GROUP } }),
+    ).toBe('plate');
+    expect(resizeKindOf({ type: 'box', pos: { x: 0, y: 0, w: 1, h: 1 } })).toBe('box');
+    expect(resizeKindOf({ type: 'picture' })).toBe('picture');
+    expect(resizeKindOf(undefined)).toBeUndefined();
+  });
+
+  it('resizes about the centre under Alt on every handle, with Shift keeping the ratio too', () => {
+    const centre = { x: 200, y: 150 };
+    for (const handle of RESIZE_HANDLES) {
+      const out = resizeBox(handle, { dx: 20, dy: 10 }, { alt: true }, 0, 'shape', box);
+      close({ x: out.x + out.w / 2, y: out.y + out.h / 2 }, centre);
+      const grewX = handle.includes('e') ? 40 : handle.includes('w') ? -40 : 0;
+      const grewY = handle.includes('s') ? 20 : handle.includes('n') ? -20 : 0;
+      expect(out.w, handle).toBe(200 + grewX);
+      expect(out.h, handle).toBe(100 + grewY);
+    }
+    expect(resizeBox('se', { dx: 50, dy: 0 }, { alt: true, shift: true }, 0, 'shape', box)).toEqual(
+      {
+        x: 50,
+        y: 75,
+        w: 300,
+        h: 150,
+      },
+    );
+  });
+
+  it('keeps the anchored corner on the sheet and lands the dragged corner under the pointer on a rotated object', () => {
+    for (const rotation of [30, 90, 135, 300]) {
+      for (const handle of ['nw', 'ne', 'se', 'sw'] as const) {
+        const delta = { dx: 40, dy: -24 };
+        const before = corners(box, rotation);
+        const out = resizeBox(handle, delta, {}, rotation, 'shape', box);
+        const after = corners(out, rotation);
+        const [dragged, anchored] = CORNER[handle]!;
+        close(after[anchored]!, before[anchored]!, 0.75);
+        close(
+          after[dragged]!,
+          { x: before[dragged]!.x + delta.dx, y: before[dragged]!.y + delta.dy },
+          0.75,
+        );
+        /* the size follows the delta turned into the object’s axes */
+        expect(Number.isInteger(out.w) && Number.isInteger(out.h), `${rotation} ${handle}`).toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  it('keeps the opposite edge of a rotated object on the sheet when a side handle moves', () => {
+    const rotation = 30;
+    const before = corners(box, rotation);
+    const out = resizeBox('n', { dx: 0, dy: -20 }, {}, rotation, 'chart', box);
+    const after = corners(out, rotation);
+    /* the bottom edge (corners 2 and 3) stays; the top edge moved along the object’s own y axis */
+    close(after[2]!, before[2]!, 0.75);
+    close(after[3]!, before[3]!, 0.75);
+    const rad = (rotation * Math.PI) / 180;
+    const along = -20 * Math.cos(rad);
+    expect(out.h).toBe(Math.round(100 - along));
+    expect(out.w).toBe(200);
+    const east = resizeBox('e', { dx: 30, dy: 0 }, {}, rotation, 'chart', box);
+    const eastCorners = corners(east, rotation);
+    close(eastCorners[0]!, before[0]!, 0.75);
+    close(eastCorners[3]!, before[3]!, 0.75);
+    expect(east.w).toBe(Math.round(200 + 30 * Math.cos(rad)));
+  });
+
+  it('keeps the centre of a rotated object under Alt and its ratio under Shift', () => {
+    const out = resizeBox('se', { dx: 40, dy: 0 }, { alt: true }, 45, 'shape', box);
+    close({ x: out.x + out.w / 2, y: out.y + out.h / 2 }, { x: 200, y: 150 });
+    const locked = resizeBox('se', { dx: 40, dy: 0 }, { shift: true }, 60, 'shape', box);
+    /* the ratio holds to the pixel the sides are rounded to */
+    expect(Math.abs(locked.w / 2 - locked.h)).toBeLessThanOrEqual(0.5);
+    const before = corners(box, 60);
+    const after = corners(locked, 60);
+    close(after[0]!, before[0]!, 0.75);
+  });
+
+  it('runs the moving edges through the caller’s snap and clamps after it; a rotated object is never snapped', () => {
+    const snapX = (edge: number) => Math.round(edge / 8) * 8;
+    expect(resizeBox('e', { dx: 13, dy: 0 }, {}, 0, 'shape', box, { snap: { x: snapX } })).toEqual({
+      x: 100,
+      y: 100,
+      w: 212,
+      h: 100,
+    });
+    expect(
+      resizeBox('w', { dx: 190, dy: 0 }, {}, 0, 'shape', box, { snap: { x: () => 299 } }),
+    ).toEqual({ x: 300 - RESIZE_MIN_SIZE, y: 100, w: RESIZE_MIN_SIZE, h: 100 });
+    /* a corner dragged along one axis leaves the other axis alone, so no phantom snap */
+    let calls = 0;
+    const out = resizeBox('se', { dx: 13, dy: 0 }, {}, 0, 'shape', box, {
+      snap: {
+        x: snapX,
+        y: (edge) => {
+          calls += 1;
+          return edge - 5;
+        },
+      },
+    });
+    expect(out).toEqual({ x: 100, y: 100, w: 212, h: 100 });
+    expect(calls).toBe(0);
+    const rotated = resizeBox('e', { dx: 13, dy: 0 }, {}, 30, 'shape', box, {
+      snap: { x: () => 5000 },
+    });
+    expect(rotated.w).toBe(Math.round(200 + 13 * Math.cos(Math.PI / 6)));
+  });
+
+  it('gives whole pixels unrotated and 1/64 px steps rotated, and the same box whatever the zoom divided the delta by', () => {
+    const plain = resizeBox('se', { dx: 12.6, dy: 7.2 }, {}, 0, 'text', box);
+    expect(plain).toEqual({ x: 100, y: 100, w: 213, h: 107 });
+    const turned = resizeBox('se', { dx: 12.6, dy: 7.2 }, {}, 30, 'text', box);
+    expect(Number.isInteger(turned.x * 64) && Number.isInteger(turned.y * 64)).toBe(true);
+    /* the caller divides the client delta by the sheet scale once: 25 px at zoom 0.25 and 400 px
+       at zoom 4 are the same 100 sheet px, so the model sees one number */
+    expect(resizeBox('e', { dx: 25 / 0.25, dy: 0 }, {}, 0, 'text', box)).toEqual(
+      resizeBox('e', { dx: 400 / 4, dy: 0 }, {}, 0, 'text', box),
+    );
   });
 });

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { fromCanvas } from '@turboslide/schema/canvas';
+import { fromCanvas, rotatedBoxCorners } from '@turboslide/schema/canvas';
 import type { Mutation } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -26,6 +26,7 @@ import {
   freeGesture,
   handlesFor,
   lineEndMutations,
+  nudgeMutation,
   siteUnder,
 } from '../Gestures';
 import type { Handle, MeasuredBoxes } from '../Gestures';
@@ -472,5 +473,165 @@ describe('the snap lines of the canvas (SPEC-2 6.1 rows 7, 31)', () => {
     expect(boxSnapLines([200, 200, 300, 100]).map((l) => l.at)).toEqual([
       200, 350, 500, 200, 250, 300,
     ]);
+  });
+});
+
+// The resize handles over the one model (SPEC-5-amendments A4; build-4/hotfix-3.md section 2):
+// the gesture and the keyboard nudge land what schema/canvas.ts resizeBox says, so a rotated
+// object keeps its anchored corner on the sheet, Alt keeps the centre, an icon's corner keeps its
+// ratio without Shift, and the size readout is the box written.
+describe('the resize handles share the schema model (SPEC-5-amendments A4)', () => {
+  const rectPos: Position = { x: 100, y: 100, w: 200, h: 100, z: 0, rotate: 30 };
+  const iconPos: Position = { x: 500, y: 100, w: 96, h: 96, z: 1 };
+  const textPos: Position = { x: 700, y: 100, w: 260, h: 140, z: 2 };
+  const canvas: ContentSlide = {
+    schemaVersion: 1,
+    id: 'cv',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        { id: 'rect', type: 'shape', shape: 'rectangle', stroke: 'hair', pos: rectPos },
+        { id: 'icon', type: 'icon', name: 'bolt', pos: iconPos },
+        { id: 'text', type: 'text', text: 'Some text.', autofit: 'grow', pos: textPos },
+      ] as Block[],
+    },
+  };
+  const boxes: MeasuredBoxes = {
+    blocks: {
+      rect: [rectPos.x, rectPos.y, rectPos.w, rectPos.h],
+      icon: [iconPos.x, iconPos.y, iconPos.w, iconPos.h],
+      text: [textPos.x, textPos.y, textPos.w, textPos.h],
+    },
+    slots: {},
+    runs: {},
+    parts: {},
+  };
+  const ctx = (ids: string[]) => ({
+    slide: canvas as Slide,
+    boxes,
+    free: { ids, lines: [], grid: false },
+  });
+  const posOfMutation = (m: Mutation | undefined): Position => {
+    if (m?.op !== 'block.set') throw new Error('expected a block.set');
+    return m.value as Position;
+  };
+  const near = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+    expect(Math.abs(a.x - b.x)).toBeLessThanOrEqual(0.75);
+    expect(Math.abs(a.y - b.y)).toBeLessThanOrEqual(0.75);
+  };
+
+  it('keeps a rotated object’s anchored corner on the sheet and lands the dragged corner under the pointer', () => {
+    const list = handlesFor(canvas, boxes, { kind: 'block', blockId: 'rect' });
+    const se = handle('free-resize', list, 'se');
+    const start = { x: 300, y: 200 };
+    const drag = freeGesture(se, ctx(['rect']), start, { x: start.x + 40, y: start.y - 24 });
+    const pos = posOfMutation(drag?.mutations[0]);
+    const before = rotatedBoxCorners(rectPos, 30);
+    const after = rotatedBoxCorners(pos, 30);
+    near(after[0]!, before[0]!);
+    near(after[2]!, { x: before[2]!.x + 40, y: before[2]!.y - 24 });
+    expect(pos.rotate).toBe(30);
+    expect(drag?.guides).toEqual([]);
+    expect(drag?.size).toEqual({ w: pos.w, h: pos.h });
+    /* a side handle: the opposite edge stays put and the size follows the delta along the axis */
+    const n = handle('free-resize', list, 'n');
+    const lifted = posOfMutation(
+      freeGesture(n, ctx(['rect']), { x: 200, y: 100 }, { x: 200, y: 80 })?.mutations[0],
+    );
+    const lifts = rotatedBoxCorners(lifted, 30);
+    near(lifts[2]!, before[2]!);
+    near(lifts[3]!, before[3]!);
+    expect(lifted.w).toBe(200);
+    expect(lifted.h).toBe(Math.round(100 + 20 * Math.cos(Math.PI / 6)));
+  });
+
+  it('resizes about the centre under Alt and keeps an icon’s ratio from a corner without Shift', () => {
+    const list = handlesFor(canvas, boxes, { kind: 'block', blockId: 'rect' });
+    const e = handle('free-resize', list, 'e');
+    const alt = posOfMutation(
+      freeGesture(
+        e,
+        ctx(['rect']),
+        { x: 300, y: 150 },
+        { x: 340, y: 150 },
+        { shift: false, alt: true },
+      )?.mutations[0],
+    );
+    expect({ x: alt.x + alt.w / 2, y: alt.y + alt.h / 2 }).toEqual({ x: 200, y: 150 });
+    expect(alt.h).toBe(100);
+    const icons = handlesFor(canvas, boxes, { kind: 'block', blockId: 'icon' });
+    const se = handle('free-resize', icons, 'se');
+    const grown = posOfMutation(
+      freeGesture(se, ctx(['icon']), { x: 596, y: 196 }, { x: 644, y: 196 })?.mutations[0],
+    );
+    expect(grown).toEqual({ ...iconPos, w: 144, h: 144 });
+    /* the side handle of a locked kind changes one dimension */
+    const east = posOfMutation(
+      freeGesture(
+        handle('free-resize', icons, 'e'),
+        ctx(['icon']),
+        { x: 596, y: 148 },
+        { x: 644, y: 148 },
+      )?.mutations[0],
+    );
+    expect(east).toEqual({ ...iconPos, w: 144 });
+    /* Shift keeps a text box’s ratio, which resizes freely otherwise */
+    const texts = handlesFor(canvas, boxes, { kind: 'block', blockId: 'text' });
+    const corner = handle('free-resize', texts, 'se');
+    const free = posOfMutation(
+      freeGesture(corner, ctx(['text']), { x: 960, y: 240 }, { x: 1090, y: 240 })?.mutations[0],
+    );
+    expect(free).toEqual({ ...textPos, w: 390 });
+    const held = posOfMutation(
+      freeGesture(corner, ctx(['text']), { x: 960, y: 240 }, { x: 1090, y: 240 }, { shift: true })
+        ?.mutations[0],
+    );
+    expect(held).toEqual({ ...textPos, w: 390, h: 210 });
+  });
+
+  it('nudges a rotated object’s handle along its own axis with the opposite edge held', () => {
+    const list = handlesFor(canvas, boxes, { kind: 'block', blockId: 'rect' });
+    const e = handle('free-resize', list, 'e');
+    const pos = posOfMutation(nudgeMutation(e, ctx(['rect']), 10, 'x') ?? undefined);
+    expect(pos.w).toBe(210);
+    expect(pos.h).toBe(100);
+    const before = rotatedBoxCorners(rectPos, 30);
+    const after = rotatedBoxCorners(pos, 30);
+    near(after[0]!, before[0]!);
+    near(after[3]!, before[3]!);
+  });
+
+  it('scales a multi selection about the union’s centre under Alt', () => {
+    const list = handlesFor(
+      canvas,
+      boxes,
+      { kind: 'block', blockId: 'icon' },
+      { ids: ['icon', 'text'] },
+    );
+    const e = handle('free-resize', list, 'e');
+    const drag = freeGesture(
+      e,
+      ctx(['icon', 'text']),
+      { x: 960, y: 170 },
+      { x: 1060, y: 170 },
+      {
+        shift: false,
+        alt: true,
+      },
+    );
+    expect(drag?.size).toEqual({ w: 660, h: 140 });
+    const written = Object.fromEntries(
+      (drag?.mutations ?? []).map((m) => [
+        m.op === 'block.set' ? m.blockId : '',
+        m.op === 'block.set' ? m.value : null,
+      ]),
+    ) as Record<string, Position>;
+    /* the union 500..960 by 100..240 grows 100 each way about its centre at 730, 170 */
+    const iconOut = written['icon'];
+    const textOut = written['text'];
+    if (iconOut === undefined || textOut === undefined) throw new Error('both members write');
+    expect(iconOut.x).toBeCloseTo(400, 0);
+    expect(textOut.x + textOut.w).toBeCloseTo(1060, 0);
   });
 });

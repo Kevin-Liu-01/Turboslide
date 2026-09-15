@@ -209,6 +209,17 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .credit { font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
 .ts-sheet .free > .big.title { font-size: 44px; line-height: 1.08; }
 .ts-sheet .free > svg[data-type="mark"] { display: block; fill: currentColor; }
+/* the objects whose content scales with the box under a resize handle (hotfix-3 causes R4, R5;
+   SPEC-5-amendments A4): an icon object's glyph fills its box (renderIcon writes no size for a
+   positioned icon), a diagram object fills its box in both axes (renderDia adds
+   preserveAspectRatio none for a positioned dia), a table object's rows share the box's height
+   (the flex rows of the classic form grow from their content height, the auto tracks of the grid
+   form stretch); at the box the conversion measured nothing changes, so the fidelity gate holds */
+.ts-sheet .free > svg.icon-block, .ts-sheet .free > .link > svg.icon-block { width: 100%; height: 100%; }
+.ts-sheet .free > svg.dia, .ts-sheet .free > .link > svg.dia { width: 100%; height: 100%; }
+.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; }
+.ts-sheet .free > .table > .tr, .ts-sheet .free > .link > .table > .tr { flex: 1 1 auto; }
+.ts-sheet .free > .table.grid, .ts-sheet .free > .link > .table.grid { align-content: stretch; }
 /* the slide background colour layer (2.6.1): under .in at the sheet box */
 .ts-sheet .slide-bg { position: absolute; inset: -57px; pointer-events: none; }
 /* a positioned text box with an alignment or a padding fills its box (2.2.18, 2.2.19) */

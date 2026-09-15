@@ -31,6 +31,13 @@
   animation: none;
 }
 
+/* nor the sheet's own slide change cut (Sheet.css pt-slide-up and pt-slide-down on the body): the
+   body would travel 6 px under the overlay's ring and handles for the length of the cut, and a
+   box measured on its first frame sat 6 px low (build-4/hotfix-3.md cause R7) */
+.ts-editor .pt-sheet-stage[data-dir] .ts-stage > .pt-slide {
+  animation: none;
+}
+
 .ts-overlay {
   position: absolute;
   z-index: 3;

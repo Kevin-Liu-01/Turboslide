@@ -6,6 +6,8 @@
 // @turboslide/theme, never from a second copy here. Pure functions; the gesture engine and the
 // keyboard nudges call them, and snap.test.ts pins them.
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
+import { resizeBox } from '@turboslide/schema/canvas';
+import type { ResizeKind } from '@turboslide/schema/canvas';
 import type { ColsRatio, PlateSide } from '@turboslide/schema/deck';
 import {
   FREEFORM_GRID,
@@ -443,15 +445,16 @@ export function snapMove(
   return { box: snapped, guides };
 }
 
-function hasDir(dir: ResizeDir, edge: 'n' | 's' | 'e' | 'w'): boolean {
-  return dir.includes(edge);
-}
-
 /**
- * A box resized from one of eight handles by (dx, dy): only the moving edges snap, the opposite
- * edges hold, no side drops under `min`. With `aspect` (Shift) the corner handles keep the box's
- * ratio from the dominant delta and an edge handle scales the other side from its own; the
- * dependent side skips the line snap so the ratio holds exactly.
+ * A box resized from one of eight handles by (dx, dy) in sheet pixels: the schema's one resize
+ * model (`resizeBox` of @turboslide/schema/canvas, SPEC-5-amendments A4) with this module's line
+ * and grid snap on the moving edges of an unrotated object. Only the moving edges snap, the
+ * opposite edges hold, no side drops under `min`. With `aspect` (Shift) the corner handles keep
+ * the box's ratio from the dominant delta and an edge handle scales the other side from its own;
+ * `kind` locks a picture's, an icon's, a material's, a mark's or a plate's corners without Shift;
+ * `alt` resizes about the centre; a `rotation` turns the delta into the object's axes and keeps
+ * the anchored edge on the sheet, and such an object is never snapped (its edges are not sheet
+ * lines). The dependent side of the aspect rule skips the line snap so the ratio holds exactly.
  */
 export function snapResize(
   box: readonly [number, number, number, number],
@@ -459,82 +462,36 @@ export function snapResize(
   dx: number,
   dy: number,
   lines: SnapLine[],
-  options: { aspect?: boolean; min?: number; grid?: boolean } = {},
+  options: {
+    aspect?: boolean;
+    min?: number;
+    grid?: boolean;
+    alt?: boolean;
+    rotation?: number;
+    kind?: ResizeKind;
+  } = {},
 ): SnapResult {
-  const min = options.min ?? FREE_MIN_SIZE;
   const grid = options.grid ?? true;
-  const aspect = options.aspect ?? false;
   const [x, y, w, h] = box;
-  let left = x;
-  let right = x + w;
-  let top = y;
-  let bottom = y + h;
-  /* an edge snaps only when the pointer moved along its axis: a corner dragged sideways keeps
-     its top and bottom where they are instead of taking a nearby line (a phantom resize) */
-  const movesX = (hasDir(dir, 'e') || hasDir(dir, 'w')) && dx !== 0;
-  const movesY = (hasDir(dir, 'n') || hasDir(dir, 's')) && dy !== 0;
-  if (hasDir(dir, 'w')) left += dx;
-  if (hasDir(dir, 'e')) right += dx;
-  if (hasDir(dir, 'n')) top += dy;
-  if (hasDir(dir, 's')) bottom += dy;
   const guides: SnapLine[] = [];
-  const ratio = h > 0 ? w / h : 1;
-  /* which axis leads under an aspect lock: the larger relative change on a corner, the moving
-     axis on an edge */
-  const leadX = !aspect
-    ? movesX
-    : movesX && movesY
-      ? Math.abs(dx) / Math.max(1, w) >= Math.abs(dy) / Math.max(1, h)
-      : movesX || ((hasDir(dir, 'e') || hasDir(dir, 'w')) && !movesY);
-  const leadY = !aspect ? movesY : !leadX;
-  if (leadX) {
-    if (hasDir(dir, 'w')) {
-      const s = snapAxis([left], lines, 'x', grid);
-      left += s.delta;
-      if (s.line) guides.push(s.line);
-    } else if (hasDir(dir, 'e')) {
-      const s = snapAxis([right], lines, 'x', grid);
-      right += s.delta;
-      if (s.line) guides.push(s.line);
-    }
-    if (right - left < min) {
-      if (hasDir(dir, 'w')) left = right - min;
-      else right = left + min;
-    }
-  }
-  if (leadY) {
-    if (hasDir(dir, 'n')) {
-      const s = snapAxis([top], lines, 'y', grid);
-      top += s.delta;
-      if (s.line) guides.push(s.line);
-    } else if (hasDir(dir, 's')) {
-      const s = snapAxis([bottom], lines, 'y', grid);
-      bottom += s.delta;
-      if (s.line) guides.push(s.line);
-    }
-    if (bottom - top < min) {
-      if (hasDir(dir, 'n')) top = bottom - min;
-      else bottom = top + min;
-    }
-  }
-  if (aspect) {
-    if (leadX) {
-      const nextH = Math.max(min, (right - left) / ratio);
-      // an edge handle grows from the top; a corner grows away from its anchored side
-      if (hasDir(dir, 'n')) top = bottom - nextH;
-      else bottom = top + nextH;
-    } else {
-      const nextW = Math.max(min, (bottom - top) * ratio);
-      if (hasDir(dir, 'w')) left = right - nextW;
-      else right = left + nextW;
-    }
-  }
-  const snapped: [number, number, number, number] = [
-    Math.round(left),
-    Math.round(top),
-    Math.max(min, Math.round(right - left)),
-    Math.max(min, Math.round(bottom - top)),
-  ];
+  const snapEdge = (axis: SnapAxis) => (edge: number) => {
+    const s = snapAxis([edge], lines, axis, grid);
+    if (s.line) guides.push(s.line);
+    return edge + s.delta;
+  };
+  const out = resizeBox(
+    dir,
+    { dx, dy },
+    { shift: options.aspect === true, alt: options.alt === true },
+    options.rotation ?? 0,
+    options.kind,
+    { x, y, w, h },
+    {
+      ...(options.min !== undefined ? { min: options.min } : { min: FREE_MIN_SIZE }),
+      snap: { x: snapEdge('x'), y: snapEdge('y') },
+    },
+  );
+  const snapped: [number, number, number, number] = [out.x, out.y, out.w, out.h];
   return { box: snapped, guides: guides.map((line) => guideFor(line, snapped)) };
 }
 

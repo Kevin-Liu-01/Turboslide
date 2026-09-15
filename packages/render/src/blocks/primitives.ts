@@ -596,14 +596,16 @@ export function renderTextBlock(block: BlockOf<'text'>, ctx: BlockContext): stri
 
 /**
  * `icon`: one sprite glyph on its own, the way a list icon is written (DECK-GRAMMAR.md:40), at a
- * stated size in a palette color; a raster on export like every icon (SPEC 8.6).
+ * stated size in a palette color; a raster on export like every icon (SPEC 8.6). An icon object
+ * of the canvas (a block with `pos`) writes no size of its own: the glyph fills its box through
+ * block-css.ts, so a resize handle scales it with the box (hotfix-3 cause R4).
  */
 export function renderIcon(block: BlockOf<'icon'>, ctx: BlockContext): string {
   const size = block.size ?? 24;
   const attributes = rootAttrs(block, ctx, {
     className: 'ic icon-block',
     style: style(
-      `width:${size}px;height:${size}px`,
+      block.pos === undefined && `width:${size}px;height:${size}px`,
       colorDeclaration('color', block.color),
       dropShadowDeclaration(block.shadow),
     ),

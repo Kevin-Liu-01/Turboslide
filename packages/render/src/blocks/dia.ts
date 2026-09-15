@@ -121,6 +121,11 @@ export function renderDia(block: BlockOf<'dia'>, ctx: BlockContext): string {
     if (!/\saria-label=|\saria-hidden=/.test(inner)) {
       inner += block.alt ? ` aria-label="${escapeAttr(block.alt)}"` : ' aria-hidden="true"';
     }
+    // a diagram object of the canvas fills its box in both axes, so a resize handle scales the
+    // drawing with the box (hotfix-3 cause R5); block-css.ts gives the svg the box's size
+    if (block.pos !== undefined && !/\spreserveAspectRatio=/.test(inner)) {
+      inner += ' preserveAspectRatio="none"';
+    }
     const classMatch = /\sclass="([^"]*)"/.exec(inner);
     const rawClasses = classMatch ? (classMatch[1] ?? '').split(/\s+/).filter(Boolean) : [];
     const merged = [...new Set(['dia', ...rawClasses, ...(attributes.class ?? '').split(' ')])]
@@ -150,6 +155,7 @@ export function renderDia(block: BlockOf<'dia'>, ctx: BlockContext): string {
   }
   out += dataAttrs(rasterAttrs);
   out += ` viewBox="0 0 ${px(width)} ${px(data.h)}"`;
+  if (block.pos !== undefined) out += ' preserveAspectRatio="none"';
   out += block.alt ? ` aria-label="${escapeAttr(block.alt)}"` : ' aria-hidden="true"';
   return `${out}>${diagramBody(data, ctx.blockAttrs)}</svg>`;
 }

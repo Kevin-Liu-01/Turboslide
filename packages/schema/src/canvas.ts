@@ -28,6 +28,7 @@
 // actions call these and nothing else converts.
 import type {
   Block,
+  BlockType,
   BoxBlock,
   HeadingBlock,
   MarkBlock,
@@ -680,3 +681,228 @@ export const GUIDE_CENTRE: Readonly<Record<GuideAxis, number>> = {
   x: SHEET_WIDTH / 2,
   y: SHEET_HEIGHT / 2,
 };
+
+// ---------------------------------------------------------------------------------------------
+// The resize model (gslides-parity SPEC-5-amendments A4; build-4/hotfix-3.md section 2)
+
+/** The eight resize handles, compass named, in the order the overlay draws them. */
+export type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
+export const RESIZE_HANDLES: readonly ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+
+export type ResizeModifiers = {
+  /** Shift: a corner keeps the aspect ratio, an edge scales the other side from its own */
+  shift?: boolean;
+  /** Alt (Option on a Mac): the box resizes about its centre */
+  alt?: boolean;
+  /** the inspector's Lock aspect ratio toggle; the same rule as Shift */
+  lock?: boolean;
+};
+
+/**
+ * The kind of the object a handle resizes, for the aspect rule: a block type, `plate` for the
+ * box block of a converted picture kind (its group tag is CANVAS_GROUP), `group` for the union of
+ * a multi selection.
+ */
+export type ResizeKind = BlockType | 'plate' | 'group';
+
+/**
+ * The kinds whose corner handles keep the aspect ratio without Shift, as Google's do for an image
+ * (R04 B7): the picture, the icon, the material, the mark and the plate. A shape, a text box, a
+ * table, a chart, a diagram, a line and a group resize freely; Shift or the inspector's lock
+ * keeps their ratio.
+ */
+export const ASPECT_LOCKED_KINDS: ReadonlySet<ResizeKind> = new Set<ResizeKind>([
+  'picture',
+  'icon',
+  'material',
+  'mark',
+  'plate',
+]);
+
+export function locksAspect(kind: ResizeKind | undefined): boolean {
+  return kind !== undefined && ASPECT_LOCKED_KINDS.has(kind);
+}
+
+/** The resize kind of a block: `plate` for the plate box of a converted picture kind, else its type. */
+export function resizeKindOf(
+  block: Pick<Block, 'type' | 'pos'> | undefined,
+): ResizeKind | undefined {
+  if (block === undefined) return undefined;
+  if (block.type === 'box' && block.pos?.group === CANVAS_GROUP) return 'plate';
+  return block.type;
+}
+
+/**
+ * The snap of an unrotated object's moving edges: each function takes the sheet coordinate of
+ * the edge that moves (the x of a left or right edge, the y of a top or bottom edge) and returns
+ * the coordinate it lands on. The caller records the guide lines it drew; a rotated object gets
+ * no snap because its edges are not sheet lines.
+ */
+export type ResizeSnap = {
+  x?: (edge: number) => number;
+  y?: (edge: number) => number;
+};
+
+export type ResizeOptions = {
+  /** the smallest width and height, RESIZE_MIN_SIZE unless set */
+  min?: number;
+  snap?: ResizeSnap;
+};
+
+/** The smallest side a handle drag leaves, in sheet pixels (the viewer's FREE_MIN_SIZE). */
+export const RESIZE_MIN_SIZE = 16;
+
+export type ResizeBox = { x: number; y: number; w: number; h: number };
+
+/** A vector turned by `degrees` clockwise (the CSS rotate direction on a sheet whose y grows down). */
+export function rotateVector(dx: number, dy: number, degrees: number): { dx: number; dy: number } {
+  const angle = normalizeRotation(degrees);
+  if (angle === 0) return { dx, dy };
+  const rad = (angle * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  return { dx: dx * cos - dy * sin, dy: dx * sin + dy * cos };
+}
+
+/** A value at the canvas precision, 1/64 px (the measurer's LayoutUnit), so a rotated result carries no float noise. */
+function round64(value: number): number {
+  return Math.round(value * 64) / 64;
+}
+
+/**
+ * One resize of a box by one of its eight handles (SPEC-2 6.1 row 9; SPEC-5-amendments A4): the
+ * pure function the gesture, the inspector and the keyboard nudge share, so every surface lands
+ * the same `pos`.
+ *
+ * `delta` is the pointer's travel in sheet pixels (the client delta divided by the sheet scale
+ * once, so the zoom does not matter); for a rotated object it is turned back into the object's
+ * own axes, so the handle moves along the rotated edge. The dragged edge or corner moves by the
+ * delta and the opposite edge or corner stays where it is on the sheet: for a rotated object the
+ * anchored point is kept in sheet space and `x, y` are rebuilt from it and the new size, because
+ * the renderer rotates the box about its own centre and a plain change of `w` or `h` would move
+ * that centre and drag the anchored edge with it (hotfix-3 cause R3). Alt resizes about the
+ * centre instead: both opposite edges move. A corner keeps the aspect ratio for the kinds of
+ * ASPECT_LOCKED_KINDS, and every handle does under Shift or the inspector's lock; the axis with the larger
+ * relative change leads and the other follows; an edge handle under the aspect rule scales the
+ * other side from its own, growing from the left or the top. Neither side drops under `min`.
+ * The unrotated case snaps its moving edges through `snap` (the caller's lines and grid) and
+ * lands on whole pixels; a rotated result is rounded to 1/64 px.
+ */
+export function resizeBox(
+  handle: ResizeHandle,
+  delta: { dx: number; dy: number },
+  modifiers: ResizeModifiers,
+  rotation: number,
+  kind: ResizeKind | undefined,
+  box: ResizeBox,
+  options: ResizeOptions = {},
+): ResizeBox {
+  const min = options.min ?? RESIZE_MIN_SIZE;
+  const angle = normalizeRotation(rotation);
+  const { dx, dy } = angle === 0 ? delta : rotateVector(delta.dx, delta.dy, -angle);
+  const hasW = handle.includes('w');
+  const hasE = handle.includes('e');
+  const hasN = handle.includes('n');
+  const hasS = handle.includes('s');
+  const { x, y, w, h } = box;
+  /* the edges in the object's own frame, as the coordinates of the unrotated box */
+  let left = x;
+  let right = x + w;
+  let top = y;
+  let bottom = y + h;
+  /* an edge snaps only when the pointer moved along its axis: a corner dragged sideways keeps
+     its top and bottom where they are instead of taking a nearby line (a phantom resize) */
+  const movesX = (hasE || hasW) && dx !== 0;
+  const movesY = (hasN || hasS) && dy !== 0;
+  if (hasW) left += dx;
+  if (hasE) right += dx;
+  if (hasN) top += dy;
+  if (hasS) bottom += dy;
+  /* the kinds that lock keep their ratio from a corner alone; a side handle of a picture changes
+     one dimension, as Google's does; Shift and the inspector's lock rule every handle */
+  const corner = (hasE || hasW) && (hasN || hasS);
+  const aspect =
+    modifiers.shift === true || modifiers.lock === true || (corner && locksAspect(kind));
+  const ratio = h > 0 ? w / h : 1;
+  /* which axis leads under the aspect rule: the larger relative change on a corner, the moving
+     axis on an edge */
+  const leadX = !aspect
+    ? movesX
+    : movesX && movesY
+      ? Math.abs(dx) / Math.max(1, w) >= Math.abs(dy) / Math.max(1, h)
+      : movesX || ((hasE || hasW) && !movesY);
+  const leadY = !aspect ? movesY : !leadX;
+  const snap = angle === 0 ? options.snap : undefined;
+  if (leadX) {
+    if (snap?.x !== undefined) {
+      if (hasW) left = snap.x(left);
+      else if (hasE) right = snap.x(right);
+    }
+    if (right - left < min) {
+      if (hasW) left = right - min;
+      else right = left + min;
+    }
+  }
+  if (leadY) {
+    if (snap?.y !== undefined) {
+      if (hasN) top = snap.y(top);
+      else if (hasS) bottom = snap.y(bottom);
+    }
+    if (bottom - top < min) {
+      if (hasN) top = bottom - min;
+      else bottom = top + min;
+    }
+  }
+  if (aspect) {
+    if (leadX) {
+      const nextH = Math.max(min, (right - left) / ratio);
+      if (hasN) top = bottom - nextH;
+      else bottom = top + nextH;
+    } else {
+      const nextW = Math.max(min, (bottom - top) * ratio);
+      if (hasW) left = right - nextW;
+      else right = left + nextW;
+    }
+  }
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  if (modifiers.alt === true) {
+    /* about the centre: the opposite edges mirror the moved ones and the centre stays */
+    const w2 = Math.max(min, Math.round(w + 2 * (right - left - w)));
+    const h2 = Math.max(min, Math.round(h + 2 * (bottom - top - h)));
+    return { x: round64(cx - w2 / 2), y: round64(cy - h2 / 2), w: w2, h: h2 };
+  }
+  const w2 = Math.max(min, Math.round(right - left));
+  const h2 = Math.max(min, Math.round(bottom - top));
+  /* the anchored point in the object's frame, relative to the centre: the edge opposite the one
+     that moves, and the left or top edge of an axis no handle moves (the side the aspect rule
+     grows away from); the same point in the new box gives the new centre */
+  const ax = hasW ? w / 2 : -w / 2;
+  const ay = hasN ? h / 2 : -h / 2;
+  const ax2 = hasW ? w2 / 2 : -w2 / 2;
+  const ay2 = hasN ? h2 / 2 : -h2 / 2;
+  const before = rotateVector(ax, ay, angle);
+  const after = rotateVector(ax2, ay2, angle);
+  const cx2 = cx + before.dx - after.dx;
+  const cy2 = cy + before.dy - after.dy;
+  return { x: round64(cx2 - w2 / 2), y: round64(cy2 - h2 / 2), w: w2, h: h2 };
+}
+
+/**
+ * The four corners of a box rotated about its centre in sheet pixels, top left first and
+ * clockwise: what a test or a probe reads to check that a handle's opposite corner stayed put.
+ */
+export function rotatedBoxCorners(box: ResizeBox, rotation: number): { x: number; y: number }[] {
+  const cx = box.x + box.w / 2;
+  const cy = box.y + box.h / 2;
+  return [
+    [-box.w / 2, -box.h / 2],
+    [box.w / 2, -box.h / 2],
+    [box.w / 2, box.h / 2],
+    [-box.w / 2, box.h / 2],
+  ].map(([lx, ly]) => {
+    const turned = rotateVector(lx ?? 0, ly ?? 0, rotation);
+    return { x: cx + turned.dx, y: cy + turned.dy };
+  });
+}

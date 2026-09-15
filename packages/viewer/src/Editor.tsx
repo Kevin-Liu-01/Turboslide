@@ -1133,12 +1133,18 @@ export function Editor({
    * it is rendered into the hidden sheet and measured; a `grow` block whose text needs more than
    * its box takes the text height as `pos.h`, a `shrink` block steps its size down the ladder by
    * one, the same one step `block.autofit --apply` writes. Only the blocks the mutations touched.
+   *
+   * A `grow` block whose box the write resized keeps the box the user set and turns its autofit
+   * off (`autofit: 'none'`, Google's "Do not autofit" after a handle drag on a "Resize shape to
+   * fit text" box), so the committed box is the previewed box and the height handles can shorten
+   * it (hotfix-3 cause R2); a move leaves the fit alone.
    */
   const withAutofit = async (
     slideNow: Slide,
     mutations: Mutation[],
     touched: ReadonlyArray<string>,
   ): Promise<Mutation[]> => {
+    const before = docRef.current.slides[slideNow.id];
     const after = (() => {
       try {
         return applyMutations(docRef.current, mutations).document.slides[slideNow.id];
@@ -1147,14 +1153,40 @@ export function Editor({
       }
     })();
     if (!after) return mutations;
-    const fitted = freeformBlocks(after).filter(
+    const wasPos = new Map(
+      (before ? freeformBlocks(before) : []).map((block) => [block.id, block.pos] as const),
+    );
+    const resized = (block: Block): boolean => {
+      const was = wasPos.get(block.id);
+      return (
+        block.pos !== undefined &&
+        was !== undefined &&
+        (was.w !== block.pos.w || was.h !== block.pos.h)
+      );
+    };
+    const candidates = freeformBlocks(after).filter(
       (block) =>
         touched.includes(block.id) &&
         block.pos !== undefined &&
         'autofit' in block &&
         (block.autofit === 'grow' || block.autofit === 'shrink'),
     );
-    if (fitted.length === 0) return mutations;
+    const out = [...mutations];
+    const fitted: Block[] = [];
+    for (const block of candidates) {
+      if ('autofit' in block && block.autofit === 'grow' && resized(block)) {
+        out.push({
+          op: 'block.set',
+          slideId: after.id,
+          blockId: block.id,
+          path: '/autofit',
+          value: 'none',
+        });
+        continue;
+      }
+      fitted.push(block);
+    }
+    if (fitted.length === 0) return out;
     let measured: FitMeasure;
     try {
       const withSlide: DeckDocument = {
@@ -1165,9 +1197,8 @@ export function Editor({
         assetBase: assetBaseRef.current,
       });
     } catch {
-      return mutations;
+      return out;
     }
-    const out = [...mutations];
     for (const block of fitted) {
       const fit = measured[block.id];
       const pos = block.pos;

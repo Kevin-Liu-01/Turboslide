@@ -2,6 +2,7 @@
 // per block type in both themes).
 import { describe, expect, it } from 'vitest';
 
+import { BLOCK_CSS } from '../block-css.ts';
 import { renderBlock } from '../blocks/render-block.ts';
 import type { BlockContext } from '../blocks/context.ts';
 import type { Block } from '@turboslide/schema/blocks';
@@ -200,5 +201,101 @@ describe('block catalog', () => {
     renderBlock(catalog.find((block) => block.id === 'list') as Block, ctx);
     expect(ctx.rasters.map((r) => r.kind)).toEqual(['icon', 'icon']);
     expect(ctx.rasters[0]?.selector).toBe('[data-slide="catalog"] [data-rid="list:1"]');
+  });
+});
+
+// The objects whose content scales with the box (build-4/hotfix-3.md causes R4 and R5;
+// SPEC-5-amendments A4): a positioned icon or diagram fills its .free wrapper, a flow one keeps
+// its own size, and block-css.ts carries the rules the wrapper's box reaches them through.
+describe('objects of the canvas scale their content with the box', () => {
+  const pos = { x: 100, y: 100, w: 96, h: 96, z: 1 };
+
+  it('an icon object writes no size of its own and fills its box; a flow icon keeps its stated size', () => {
+    const flow = renderBlock({ id: 'ico', type: 'icon', name: 'bolt', size: 48 }, context('light'));
+    expect(flow).toContain('style="width:48px;height:48px"');
+    const object = renderBlock(
+      { id: 'ico', type: 'icon', name: 'bolt', size: 48, pos },
+      {
+        ...context('light'),
+        slotWidth: 96,
+        slotHeight: 96,
+      },
+    );
+    expect(object).not.toContain('width:48px');
+    expect(object).toContain('class="ic icon-block"');
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > svg.icon-block, .ts-sheet .free > .link > svg.icon-block { width: 100%; height: 100%; }',
+    );
+  });
+
+  it('a diagram object fills its box in both axes; a flow diagram and a raw svg with its own rule are left alone', () => {
+    const data = {
+      w: 300,
+      h: 200,
+      rects: [{ x: 0, y: 0, w: 100, h: 50, fill: 'plate' as const }],
+      lines: [],
+      markers: [],
+      icons: [],
+      marks: [],
+      texts: [],
+    };
+    const fit = { viewBox: [0, 0, 300, 200] as [number, number, number, number] };
+    const alt = 'A diagram';
+    const flow = renderBlock({ id: 'd', type: 'dia', fit, alt, data }, context('light'));
+    expect(flow).toContain('viewBox="0 0 300 200"');
+    expect(flow).not.toContain('preserveAspectRatio');
+    const object = renderBlock(
+      { id: 'd', type: 'dia', fit, alt, data, pos: { ...pos, w: 600, h: 200 } },
+      { ...context('light'), slotWidth: 600, slotHeight: 200 },
+    );
+    expect(object).toContain('viewBox="0 0 300 200"');
+    expect(object).toContain('preserveAspectRatio="none"');
+    /* fit slot keeps its declared width rule: the coordinate space is the box's width */
+    const slot = renderBlock(
+      { id: 'd', type: 'dia', alt, data, fit: 'slot', pos: { ...pos, w: 600, h: 200 } },
+      { ...context('light'), slotWidth: 600, slotHeight: 200 },
+    );
+    expect(slot).toContain('viewBox="0 0 600 200"');
+    expect(slot).toContain('preserveAspectRatio="none"');
+    const raw = renderBlock(
+      {
+        id: 'r',
+        type: 'dia',
+        fit,
+        alt,
+        svg: '<svg viewBox="0 0 300 200"><rect width="10" height="10"/></svg>',
+        pos,
+      },
+      { ...context('light'), slotWidth: 96, slotHeight: 96 },
+    );
+    expect(raw).toContain('preserveAspectRatio="none"');
+    const own = renderBlock(
+      {
+        id: 'r',
+        type: 'dia',
+        fit,
+        alt,
+        svg: '<svg viewBox="0 0 300 200" preserveAspectRatio="xMinYMin meet"><rect width="10" height="10"/></svg>',
+        pos,
+      },
+      { ...context('light'), slotWidth: 96, slotHeight: 96 },
+    );
+    expect(own).toContain('preserveAspectRatio="xMinYMin meet"');
+    expect(own).not.toContain('preserveAspectRatio="none"');
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > svg.dia, .ts-sheet .free > .link > svg.dia { width: 100%; height: 100%; }',
+    );
+  });
+
+  it('a table object takes the box height and its rows share it', () => {
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; }',
+    );
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .table > .tr, .ts-sheet .free > .link > .table > .tr { flex: 1 1 auto; }',
+    );
+    expect(BLOCK_CSS).toContain(
+      '.ts-sheet .free > .table.grid, .ts-sheet .free > .link > .table.grid { align-content: stretch; }',
+    );
   });
 });

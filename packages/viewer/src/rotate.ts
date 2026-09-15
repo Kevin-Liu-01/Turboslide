@@ -4,6 +4,7 @@
 // writes of a rotation or a flip over the schema's arithmetic (rotatePositions, flipPositions), so
 // the handle, Option+Left and Right, Arrange > Rotate and the CLI's block.rotate land the same
 // numbers. Pure over sheet pixels; rotate.test.ts pins it.
+import { rotateVector } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
 import { flipPositions, rotatePositions } from '@turboslide/schema/freeform';
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -177,10 +178,7 @@ export function objectTransform(pos: Position): string | undefined {
  * "the eight resize handles resize along the rotated axes").
  */
 export function unrotateDelta(dx: number, dy: number, degrees: number): { dx: number; dy: number } {
-  const angle = normalizeRotation(degrees);
-  if (angle === 0) return { dx, dy };
-  const rad = (-angle * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  return { dx: dx * cos - dy * sin, dy: dx * sin + dy * cos };
+  /* the schema's rotation arithmetic (canvas.ts rotateVector), so the resize model and this
+     helper turn a vector the same way */
+  return rotateVector(dx, dy, -normalizeRotation(degrees));
 }

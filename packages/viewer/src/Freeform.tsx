@@ -273,9 +273,15 @@ function roundBox(box: Box): Box {
 export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
   const stage = body.parentElement;
   if (!stage) return null;
-  const rect = stage.getBoundingClientRect();
-  const k = rect.width / SHEET.width;
+  const k = stage.getBoundingClientRect().width / SHEET.width;
   if (!(k > 0)) return null;
+  /* the origin is the body's own box, not the stage's: the sheet's slide change animates the body
+     from translateY(6px) (Sheet.css pt-slide-up) and the layout effect measures on its first
+     frame, so a box read against the stage sat 6 px low until the next edit, the ring and the chip
+     with it while the handles stood at pos, and a press on the nw handle hit the chip and moved
+     the object (build-4/hotfix-3.md cause R7); the body's translate moves every child with it, so
+     a box against the body is the layout position at any frame */
+  const rect = body.getBoundingClientRect();
   const toBox = (el: Element): Box => {
     const r = el.getBoundingClientRect();
     return roundBox([(r.left - rect.left) / k, (r.top - rect.top) / k, r.width / k, r.height / k]);

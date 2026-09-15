@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import type { Block } from '@turboslide/schema/blocks';
+import { locksAspect, resizeBox, resizeKindOf } from '@turboslide/schema/canvas';
 import type { Mutation } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
 import { unionBox } from '@turboslide/schema/freeform';
@@ -83,9 +84,13 @@ export function scaleMembers(
 }
 
 export function SizeRotationSection({ blocks, measured, group, write }: GeometrySectionProps) {
-  const [lock, setLock] = useState(false);
+  /* the lock starts on for the kinds whose corners keep their ratio on the canvas (a picture,
+     an icon, a material, a mark, a plate; schema/canvas.ts ASPECT_LOCKED_KINDS) and off for the
+     rest, as Google's Format options do for an image; the toggle overrides it */
+  const [lockChoice, setLockChoice] = useState<boolean | null>(null);
   const words = FORMAT.size;
   const one = blocks.length === 1 ? blocks[0] : undefined;
+  const lock = lockChoice ?? (one !== undefined && locksAspect(resizeKindOf(one)));
   const box = one !== undefined ? boxOf(one, measured) : unionOf(blocks, measured);
   const ids = blocks.map((block) => block.id);
   const rotate = one?.pos?.rotate ?? 0;
@@ -96,11 +101,18 @@ export function SizeRotationSection({ blocks, measured, group, write }: Geometry
   const setSize = (key: 'w' | 'h', value: number) => {
     if (box === undefined) return;
     const size = Math.max(1, Math.round(value));
-    const next = { w: box.w, h: box.h, [key]: size } as { w: number; h: number };
-    if (lock && box.w > 0 && box.h > 0) {
-      if (key === 'w') next.h = Math.max(1, Math.round((size * box.h) / box.w));
-      else next.w = Math.max(1, Math.round((size * box.w) / box.h));
-    }
+    /* the one resize model (schema/canvas.ts resizeBox, SPEC-5-amendments A4) from the south
+       east handle with the top left held: the field writes the number typed, the lock scales
+       the other side; the rotation is left at zero so X and Y keep the box the fields show */
+    const next = resizeBox(
+      'se',
+      { dx: key === 'w' ? size - box.w : 0, dy: key === 'h' ? size - box.h : 0 },
+      { lock },
+      0,
+      undefined,
+      { x: box.x, y: box.y, w: box.w, h: box.h },
+      { min: 1 },
+    );
     if (one !== undefined) {
       const pos: Position = { ...(one.pos ?? {}), x: box.x, y: box.y, w: next.w, h: next.h };
       write.report(
@@ -201,7 +213,7 @@ export function SizeRotationSection({ blocks, measured, group, write }: Geometry
             },
           ]}
           pressed={lock ? 'lock' : undefined}
-          onToggle={() => setLock((on) => !on)}
+          onToggle={() => setLockChoice(!lock)}
           control="formatOptions.size.lock"
           mode="multi"
           disabled={disabled}

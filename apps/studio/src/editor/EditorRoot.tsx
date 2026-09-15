@@ -122,6 +122,7 @@ import type {
   Selection,
 } from './controller';
 import type { EditSearch } from '../routes/-edit-search';
+import { partitionRoster } from './client-ids';
 import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-bridge';
 
 /* the route's own CSS travels with the editor since round four day 2 (the banners, the owner
@@ -601,7 +602,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const deckId = snap.deckId;
   const assetBase = ASSET_BASE(deckId);
   const slide = snap.document.slides[snap.activeSlide];
-  const revision = deck.revision;
+  /* the revision every chrome write bases on: the one the controller reports and checks against
+     (`reportedRevision`, SPEC-3 3.10), never the document's alone. On the blob tier an ops POST
+     answer moves the confirmed revision at once while the document's moves with the checkpoint
+     frame from the stream's instance, seconds later; a write based on the document's in that
+     window was refused as stale by the tab itself (hotfix 2 cause A5). */
+  const revision = Math.max(deck.revision, snap.serverRevision);
   const selection =
     snap.selection && snap.selection.slideId === snap.activeSlide ? snap.selection : null;
 
@@ -643,7 +649,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     setChosenMode(mode);
     if (search.edit === 0) onSearch({ edit: undefined });
   };
-  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6) */
+  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6), and the presence leave on
+     the way out (hotfix 2 cause B1): a reload or a navigation fires `pagehide` and nothing else
+     that the room client sees, so the controller stops there and the room client posts the leave
+     with keepalive; a page the browser restores from its cache afterwards reloads, since its
+     stream and its client id are gone */
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       const current = controller.getSnapshot();
@@ -652,8 +662,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         event.returnValue = REFUSALS.leaveAnyway;
       }
     };
+    const onPageHide = () => controller.stop();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) window.location.reload();
+    };
     window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
+    };
   }, [controller]);
   /* the tab's presence (SPEC-3 3.8): the slide, the selection and the caret, coalesced by the room client */
   useEffect(() => {
@@ -684,11 +704,15 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     () => snap.roster.map((entry) => participantOf(entry, now)),
     [snap.roster],
   );
+  /* this tab is every id it was issued (hotfix 2 cause B3), so a roster row of its earlier id after
+     a reload or a remount is never a chip, a mark, an outline, a caret or a roster row */
+  const { self: ownRow, others: otherRows } = useMemo(
+    () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
+    [rosterRows, snap.ownClientIds, ownClientId],
+  );
   const presence: EditorPresence = {
-    ...(rosterRows.find((row) => row.clientId === ownClientId) !== undefined
-      ? { self: rosterRows.find((row) => row.clientId === ownClientId) }
-      : {}),
-    others: rosterRows.filter((row) => row.clientId !== ownClientId),
+    ...(ownRow !== null ? { self: ownRow } : {}),
+    others: otherRows,
     cap: 20,
     /* View > Live pointers > Show collaborator pointers (SPEC-3 4.6): the controller's setting */
     pointersVisible: snap.pointersVisible,
@@ -1398,7 +1422,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                 controller
                   .invoke('slide.update', {
                     slideId: slide.id,
-                    baseRevision: current.document.deck.revision,
+                    baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
                     mutations: [
                       {
                         op: 'slide.set',
@@ -1682,11 +1706,12 @@ function EditorStage({
       let after = target.after;
       for (const id of ids) {
         try {
+          const current = controller.getSnapshot();
           await controller.invoke('slide.move', {
             slideId: id,
             sectionId: target.sectionId,
             ...(after === undefined ? {} : { after }),
-            baseRevision: controller.getSnapshot().document.deck.revision,
+            baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
           });
         } catch (error) {
           controller.say(errorMessage(error));
@@ -1730,10 +1755,11 @@ function EditorStage({
             ? { guides: snap.document.deck.guides }
             : {})}
           onGuides={(input) => {
+            const current = controller.getSnapshot();
             void controller
               .invoke('deck.guides', {
                 ...input,
-                baseRevision: controller.getSnapshot().document.deck.revision,
+                baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
               })
               .catch((error: unknown) => controller.say(errorMessage(error)));
           }}
@@ -2056,12 +2082,15 @@ function RejectCard({
 /**
  * The store's notice (the hosting round, docs/hosting.md): a hosted studio without a Blob store
  * keeps edits on one server instance, so the editor says so for as long as the page is open. The
- * external revision banner takes the same slot while it is up.
+ * external revision banner takes the same slot while it is up. The slot is the status row's
+ * empty middle (edit.$deckId.css `.ts-banner`; VERIFICATION-4 finding 4): the banner stands
+ * over no toolbar button and no slide content, so a click on the sheet's top right reaches the
+ * block there on the tmp tier as it does on the others.
  */
 function HostingBanner({ notice, store }: { notice: string; store: string }) {
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="hosting" data-store={store}>
-      <span>{`${notice}. Connect a Blob store to the Vercel project to keep them.`}</span>
+      <span>{`${notice}; connect one to the Vercel project to keep them.`}</span>
     </div>
   );
 }

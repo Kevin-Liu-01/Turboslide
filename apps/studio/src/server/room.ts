@@ -1415,6 +1415,38 @@ export async function clientBoundTo(
   return true;
 }
 
+/** At most this many earlier ids a stream open may retire (hotfix 2 cause B1). */
+export const RETIRE_MAX = 8;
+
+/**
+ * Removes the roster rows of the client ids a tab held before this page (hotfix 2, build-4/
+ * hotfix-2.md causes B1 and B2): a reload posts no leave, and on the blob tier the roster is per
+ * instance, so the reloaded tab's `hello` listed its own earlier id as a collaborator. The ids
+ * come from the stream open's `retire` query (comma separated); an id is retired only when its
+ * MAC names this deck and this identity (`clientIdMatches`), so a tab retires its own principal's
+ * ids alone and never a stranger's. Answers the ids it retired.
+ */
+export async function retireClients(
+  room: Room,
+  raw: string | null,
+  identity: RequestIdentity,
+  exceptClientId?: string,
+): Promise<string[]> {
+  if (raw === null || raw === '') return [];
+  const seen = new Set<string>();
+  const retired: string[] = [];
+  for (const candidate of raw.split(',')) {
+    const clientId = candidate.trim();
+    if (clientId === '' || clientId === exceptClientId || seen.has(clientId)) continue;
+    seen.add(clientId);
+    if (seen.size > RETIRE_MAX) break;
+    if (!clientIdMatches(room.deckId, clientId, identity.identity)) continue;
+    await room.channel.presence.leave(room.deckId, clientId).catch(() => undefined);
+    retired.push(clientId);
+  }
+  return retired;
+}
+
 export async function bindClient(room: Room, identity: RequestIdentity): Promise<string> {
   const clientId = mintClientId(room.deckId, identity.identity);
   await room.channel.presence.bind(room.deckId, clientId, identity.identity, CLIENT_BINDING_TTL_MS);

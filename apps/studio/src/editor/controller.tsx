@@ -212,6 +212,7 @@ import {
   writeDeck,
 } from '../server/write';
 import type { EditorDeck, EditorIdentity } from '../server/write';
+import { partitionRoster, readClientIds, rememberClientId } from './client-ids';
 
 /**
  * The editor, /edit/:deckId with ssr: false (SPEC 3.4, 6; MILESTONES M3). The chrome's
@@ -308,8 +309,14 @@ function sseTransport(deckId: string): RoomTransport {
     'resync',
   ];
   return {
-    open({ since, onEvent, onError }) {
-      const source = new EventSource(`${base}/stream?since=${since}`);
+    open({ since, retire, onEvent, onError }) {
+      // the tab's earlier ids ride every open (a reconnect too), so the instance the stream lands
+      // on drops their roster rows before hello (hotfix 2 cause B1)
+      const retiring =
+        retire === undefined || retire.length === 0
+          ? ''
+          : `&retire=${retire.map((id) => encodeURIComponent(id)).join(',')}`;
+      const source = new EventSource(`${base}/stream?since=${since}${retiring}`);
       for (const type of EVENTS) {
         source.addEventListener(type, (raw) => {
           const event = roomEventOf({ data: (raw as MessageEvent<string>).data });
@@ -352,6 +359,21 @@ function sseTransport(deckId: string): RoomTransport {
 /** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
 function pendingStoreFor(): PendingStore {
   return typeof indexedDB === 'undefined' ? memoryPendingStore() : indexedDbPendingStore();
+}
+
+/**
+ * A write whose `baseRevision` is not the revision the tab reports (SPEC-3 3.10; `checkBase`).
+ * A ConflictError to the agent surface, which reads the revision and retries itself; a class of
+ * its own so the chrome's dispatch can tell it from a conflict the room returned and rebase the
+ * gesture once (hotfix 2 cause A5, `invokeRebasing`).
+ */
+class StaleBaseError extends ConflictError {
+  constructor(baseRevision: number, current: number, document: DeckDocument) {
+    super(`baseRevision ${baseRevision} is stale; the document is at revision ${current}`, {
+      currentRevision: current,
+      current: document,
+    });
+  }
 }
 
 /** The Text a typing burst names, for the 400 ms undo grouping (SPEC 7.2.15). */
@@ -593,6 +615,12 @@ export type EditorSnapshot = {
   sync: SyncStatus | null;
   /** the room's roster as the stream told it */
   roster: readonly RosterEntry[];
+  /**
+   * Every client id this tab was issued on this deck, the current one last (hotfix 2 cause B3;
+   * editor/client-ids.ts): a roster row with any of them is this tab, never a collaborator. A
+   * reload or a remount gives the tab a new id while the earlier one may still stand in a roster.
+   */
+  ownClientIds: readonly string[];
   /** the collaborator this tab follows (SPEC-3 4.4) */
   following: string | null;
   /** the operations the room returned with their content */
@@ -877,6 +905,14 @@ export function createEditorController(init: {
   let versionsTimer: ReturnType<typeof setTimeout> | undefined;
   const identity = init.payload.identity;
   const pendingStore = pendingStoreFor();
+  /* the tab's memory of its client ids (hotfix 2 cause B1): sessionStorage is per tab and survives a reload */
+  const idStorage = (): Storage | null => {
+    try {
+      return typeof sessionStorage === 'undefined' ? null : sessionStorage;
+    } catch {
+      return null;
+    }
+  };
 
   const initialOrder = slideOrder(init.payload.document);
   let snapshot: EditorSnapshot = {
@@ -888,6 +924,7 @@ export function createEditorController(init: {
     pending: 0,
     sync: null,
     roster: [],
+    ownClientIds: readClientIds(idStorage(), deckId),
     following: null,
     rejects: [],
     persisted: null,
@@ -1129,7 +1166,12 @@ export function createEditorController(init: {
    * holds them.
    */
   const announceRemoteText = (entry: Entry): void => {
-    if (room === null || entry.clientId === room.clientId() || entry.mutations === undefined)
+    if (
+      room === null ||
+      entry.clientId === room.clientId() ||
+      latest().ownClientIds.includes(entry.clientId) ||
+      entry.mutations === undefined
+    )
       return;
     const document = room.document();
     const seen = new Set<string>();
@@ -1309,6 +1351,8 @@ export function createEditorController(init: {
       document,
       seq,
       tier,
+      // the tab's earlier ids leave the roster before hello lists it (hotfix 2 cause B1)
+      retire: latest().ownClientIds,
       pendingStore,
       onChange: ({ document: next, changed, reason }) => {
         if (reason === 'local') return;
@@ -1355,7 +1399,12 @@ export function createEditorController(init: {
             if (event.entries.some((entry) => entry.kind === 'comment')) scheduleCommentsRefresh();
             return;
           case 'hello':
-            publish({ roster: event.clients, error: null });
+            publish({
+              roster: event.clients,
+              // this tab's ids, the new one last, remembered across a reload (hotfix 2 cause B3)
+              ownClientIds: rememberClientId(idStorage(), deckId, event.clientId),
+              error: null,
+            });
             if (event.role === 'viewer' && event.editing >= 100) say(REFUSALS.tooManyEditors);
             return;
           case 'presence': {
@@ -1471,9 +1520,102 @@ export function createEditorController(init: {
   });
 
   /**
+   * A write made while the draft's first write is in flight (hotfix 2 cause A1). Before the fix
+   * every such burst was a strict `writeDeck` of its own on the draft chain, and on the blob tier
+   * those interleaved with the room's ops POSTs once the room attached, so a chain write met a
+   * store one revision ahead ("baseRevision N is stale; the document is at revision M") and the
+   * room's POST met the chain's revision (409 resync). Now exactly one strict write creates the
+   * deck; the bursts typed during its flight are applied locally at once (the reducer, no revision
+   * bump) and replayed through the room in order when it attaches, so every write after the
+   * first is one op of the room, the way every write of a stored deck is.
+   */
+  type DraftQueued = {
+    mutations: Mutation[];
+    label: string;
+    kind: 'edit' | 'undo' | 'redo';
+    /** the history entry the write made, for the room clock an undo transforms from */
+    entryId: number | null;
+    resolve: (committed: Committed) => void;
+    reject: (error: Error) => void;
+  };
+  let draftInFlight = false;
+  const draftQueue: DraftQueued[] = [];
+
+  const draftEnqueue = (
+    mutations: Mutation[],
+    label: string,
+    kind: 'edit' | 'undo' | 'redo',
+  ): Promise<Committed> => {
+    let result: ReturnType<typeof applyMutations>;
+    try {
+      result = applyMutations(snapshot.document, mutations);
+    } catch (error) {
+      publish({ error: errorMessage(error) });
+      return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
+    }
+    let entryId: number | null = null;
+    if (kind === 'edit') {
+      const entry = history.push({ mutations, inverse: result.inverse, label });
+      revisionOf.set(entry.id, latest().serverRevision);
+      entryId = entry.id;
+    }
+    setDocument(result.document, changedBy(mutations));
+    publish({ pending: snapshot.pending + 1 });
+    return new Promise<Committed>((resolve, reject) => {
+      draftQueue.push({ mutations, label, kind, entryId, resolve, reject });
+    });
+  };
+
+  /** The queued writes go through the room in order; the local document holds them already. */
+  const replayDraftQueue = (): void => {
+    const queued = draftQueue.splice(0);
+    for (const item of queued) {
+      const client = room;
+      if (client === null) {
+        item.reject(new TypeError('The room did not attach after the first write'));
+        continue;
+      }
+      let applied: ReturnType<RoomClient['apply']>;
+      try {
+        applied = client.apply(item.mutations, item.label);
+      } catch (error) {
+        publish({ error: errorMessage(error) });
+        item.reject(error instanceof Error ? error : new TypeError(String(error)));
+        continue;
+      }
+      if (item.entryId !== null) clockOf.set(item.entryId, applied.at);
+      setDocument(applied.document, changedBy(item.mutations));
+      void applied.settled.then((outcome) => {
+        if ('rejected' in outcome) {
+          item.reject(
+            new ConflictError(
+              outcome.rejected.message ??
+                `The change was not accepted (${outcome.rejected.reason})`,
+              { currentRevision: latest().serverRevision, current: latest().document },
+            ),
+          );
+          return;
+        }
+        item.resolve({
+          revision: latest().serverRevision,
+          entry: recordOf(item.mutations, applied.inverse, outcome.seq),
+          seq: outcome.seq,
+        });
+      });
+    }
+  };
+
+  const rejectDraftQueue = (error: Error): void => {
+    const queued = draftQueue.splice(0);
+    for (const item of queued) item.reject(error);
+    if (queued.length > 0) publish({ pending: Math.max(0, latest().pending - queued.length) });
+  };
+
+  /**
    * The draft's first write (SPEC 6.1): the deck does not exist until it lands, so the write goes
    * through the strict server function, which creates the deck and admits the write through the
-   * room; the room client starts on the answer.
+   * room; the room client starts on the answer, and the writes queued during the flight follow
+   * through it (`replayDraftQueue`).
    */
   const draftCommit = (
     mutations: Mutation[],
@@ -1500,16 +1642,30 @@ export function createEditorController(init: {
     }
     setDocument(result.document, changedBy(mutations));
     publish({ pending: snapshot.pending + 1 });
+    draftInFlight = true;
     const run = draftChain.then(async () => {
-      const answer = await writeDeck({ deckId, write, returnDocument: true });
+      let answer: Awaited<ReturnType<typeof writeDeck>>;
+      try {
+        answer = await writeDeck({ deckId, write, returnDocument: true });
+      } catch (error) {
+        draftInFlight = false;
+        const failure = error instanceof Error ? error : new TypeError(String(error));
+        publish({ pending: Math.max(0, latest().pending - 1), error: failure.message });
+        rejectDraftQueue(failure);
+        throw failure;
+      }
       if (!answer.ok) {
+        draftInFlight = false;
         publish({ pending: Math.max(0, latest().pending - 1), error: answer.message });
-        if (answer.code === 'conflict')
-          throw new ConflictError(answer.message, {
-            currentRevision: answer.currentRevision,
-            current: answer.current,
-          });
-        throw new TypeError(answer.message);
+        const failure =
+          answer.code === 'conflict'
+            ? new ConflictError(answer.message, {
+                currentRevision: answer.currentRevision,
+                current: answer.current,
+              })
+            : new TypeError(answer.message);
+        rejectDraftQueue(failure);
+        throw failure;
       }
       publish({
         pending: Math.max(0, latest().pending - 1),
@@ -1518,6 +1674,8 @@ export function createEditorController(init: {
       });
       warmHomeCard();
       if (room === null && answer.document !== undefined) {
+        // the server's document is the room's base; the writes queued during the flight are
+        // folded back on top of it through the room in the same tick, so nothing is drawn twice
         setDocument(answer.document, 'all');
         attachRoom(
           answer.document,
@@ -1525,6 +1683,8 @@ export function createEditorController(init: {
           init.payload.room?.tier ?? 'memory',
         );
       }
+      draftInFlight = false;
+      replayDraftQueue();
       refreshVersionsSoon();
       return {
         revision: answer.revision,
@@ -1547,7 +1707,11 @@ export function createEditorController(init: {
     label: string,
     kind: 'edit' | 'undo' | 'redo',
   ): Promise<Committed> => {
-    if (room === null) return draftCommit(mutations, label, kind);
+    if (room === null) {
+      // a burst typed while the first write is in flight waits for the room (hotfix 2 cause A1)
+      if (draftInFlight) return draftEnqueue(mutations, label, kind);
+      return draftCommit(mutations, label, kind);
+    }
     wroteInSession = true;
     let applied;
     try {
@@ -1637,11 +1801,7 @@ export function createEditorController(init: {
     lastTyping = null;
     const inverse = stepMutations(entry, entry.inverse);
     if (inverse.length === 0) {
-      say(
-        REFUSALS.alreadyChanged(
-          latest().roster.find((row) => row.clientId !== room?.clientId())?.label ?? 'someone',
-        ),
-      );
+      say(REFUSALS.alreadyChanged(participants().others[0]?.label ?? 'someone'));
       return;
     }
     try {
@@ -1819,10 +1979,7 @@ export function createEditorController(init: {
   const checkBase = (baseRevision: number): void => {
     const current = reportedRevision();
     if (baseRevision !== current) {
-      throw new ConflictError(
-        `baseRevision ${baseRevision} is stale; the document is at revision ${current}`,
-        { currentRevision: current, current: snapshot.document },
-      );
+      throw new StaleBaseError(baseRevision, current, snapshot.document);
     }
   };
   const requireSlide = (slideId: string): Slide => {
@@ -2355,12 +2512,9 @@ export function createEditorController(init: {
    */
   const participants = (): { self: PresenceParticipant | null; others: PresenceParticipant[] } => {
     const now = new Date().toISOString();
-    const own = room?.clientId() ?? null;
     const rows = latest().roster.map((entry) => participantOf(entry, now));
-    return {
-      self: rows.find((row) => row.clientId === own) ?? null,
-      others: rows.filter((row) => row.clientId !== own),
-    };
+    // every id this tab held is this tab (hotfix 2 cause B3), not only the current one
+    return partitionRoster(rows, new Set(latest().ownClientIds), room?.clientId() ?? null);
   };
   const participantOut = (row: PresenceParticipant) => ({
     clientId: row.clientId,
@@ -2762,6 +2916,31 @@ export function createEditorController(init: {
     dispatcher.dispatch(action, input ?? {}, context);
 
   /**
+   * The chrome's own dispatch (EditorRoot's shellDispatch, the sidebar, the notes pane, the
+   * guides): a write `checkBase` refused because the revision moved between the render that read
+   * it and the gesture (a POST answer or a checkpoint frame in between) is retried once on the
+   * revision the refusal named instead of dropping the gesture (hotfix 2 cause A5). Nothing was
+   * committed by the refused attempt, since every handler checks the base before it commits. The
+   * window API's owners call `invoke` directly and keep the strict contract of SPEC-3 3.10.
+   */
+  const invokeRebasing = async (action: string, input?: unknown): Promise<unknown> => {
+    try {
+      return await invoke(action, input);
+    } catch (error) {
+      const carriesBase =
+        typeof input === 'object' &&
+        input !== null &&
+        typeof (input as { baseRevision?: unknown }).baseRevision === 'number';
+      if (!(error instanceof StaleBaseError) || !carriesBase) throw error;
+      const rebased = {
+        ...(input as Record<string, unknown>),
+        baseRevision: error.currentRevision,
+      };
+      return invoke(action, rebased);
+    }
+  };
+
+  /**
    * describe().state for both owners (SPEC-3 3.10): the document's facts and the room's. The
    * access record and the caller's standing come from the snapshot, which every `access` event
    * of the stream refreshes, so a share write based on `state.access.revision` never meets a
@@ -3019,7 +3198,7 @@ export function createEditorController(init: {
     readSource,
     validateSource,
     applySource,
-    invoke,
+    invoke: invokeRebasing,
     editorAdapter,
     viewerAdapter,
     clearError() {

@@ -12,6 +12,7 @@ import { DECK_CREATED_EVENT, readDraftDeck } from '../server/write';
 import type { DeckCreatedDetail } from '../server/write';
 import { validateEditSearch } from './-edit-search';
 import type { EditSearch } from './-edit-search';
+import { installHashGuard } from './-hash-guard';
 
 /**
  * The fresh presentation, /new (gslides-parity SPEC 6.1; MILESTONES B5 item 1): the editor on a
@@ -35,6 +36,14 @@ import type { EditSearch } from './-edit-search';
  * restores the empty heading. The router's own location stays /new for this page's life, which
  * is why a view toggle after the save updates the search on this route and pins the address again
  * rather than navigating to the edit route (a remount would lose the history the same way).
+ *
+ * Hotfix 2 (gslides-parity build-4/hotfix-2.md cause A4): the viewer shell writes the slide hash
+ * on every move through `window.history.replaceState` (viewer/hash.ts), the router's wrapper,
+ * with the pinned /edit/<id> pathname, which made the router match the edit route and mount a
+ * second editor beside the first (a second room client and client id; the first one's last
+ * flush dropped). From the first save until unmount `installHashGuard` (./-hash-guard.ts) stands
+ * in for the wrapper: a call on the pinned path becomes the same move on /new for the router and
+ * the native pin of the address afterwards.
  *
  * Round four (gslides-parity SPEC-4 0.34, 0.42; PP 3.5, 6): `ssr: 'data-only'` runs the loader
  * on the server, so the draft rides the document as dehydrated loader data and the server
@@ -105,6 +114,7 @@ function NewPage() {
   const [savedId, setSavedId] = useState<string | null>(null);
 
   useMountEffect(() => {
+    let removeGuard: (() => void) | null = null;
     const onCreated = (event: Event) => {
       const detail = (event as CustomEvent<DeckCreatedDetail>).detail;
       if (detail.deckId !== payload.deckId) return;
@@ -112,9 +122,18 @@ function NewPage() {
       // the same document, saved: the address follows without a reload (SPEC 6.1) and without a
       // route change, so the editor and its undo history stay (SPEC-2 8.6)
       pinAddress(detail.deckId);
+      // the shell's hash writes on the pinned path must not reach the router as a route change
+      // (hotfix 2 cause A4); the instance's own property is the router's wrapper at this point
+      removeGuard ??= installHashGuard(window.history, detail.deckId, {
+        wrapper: window.history.replaceState,
+        native: History.prototype.replaceState,
+      });
     };
     window.addEventListener(DECK_CREATED_EVENT, onCreated);
-    return () => window.removeEventListener(DECK_CREATED_EVENT, onCreated);
+    return () => {
+      window.removeEventListener(DECK_CREATED_EVENT, onCreated);
+      removeGuard?.();
+    };
   });
 
   const onSearch = (patch: Partial<EditSearch>) => {

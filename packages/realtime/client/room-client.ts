@@ -56,6 +56,13 @@ export type StreamHandle = { close: () => void };
 
 export type OpenOptions = {
   since: number;
+  /**
+   * The client ids this tab held before (an earlier page of the same tab, hotfix 2 cause B1):
+   * the stream route removes their roster rows before it writes `hello`, so a reload never
+   * lists the tab's own earlier id as a collaborator. Sent on every open, so a reconnect that
+   * lands on another instance retires them there too.
+   */
+  retire?: readonly string[];
   onEvent: (event: RoomEvent) => void;
   /** the connection dropped; the transport reconnects on its own and sends a new hello */
   onError: (error: unknown) => void;
@@ -139,6 +146,8 @@ export type RoomClientOptions = {
   document: DeckDocument;
   seq: number;
   tier?: RealtimeTier;
+  /** the client ids this tab held before this page (hotfix 2 cause B1); sent as `retire` on every open */
+  retire?: readonly string[];
   pendingStore?: PendingStore;
   now?: () => number;
   /** the schema's transform unless a test injects one */
@@ -299,7 +308,15 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let pending: PendingOp[] = [];
   let retained: RetainedOp[] = [];
   const recent: Entry[] = [];
-  const incoming = new Map<number, Entry>();
+  /**
+   * The entries buffered ahead of the position, by seq. A list per seq, because the blob tier
+   * commits one ops POST as one revision and gives every entry of the batch that revision as its
+   * seq (blob.ts `append`; hotfix 2 cause A2), so two entries at one seq are siblings, not
+   * duplicates.
+   */
+  const incoming = new Map<number, Entry[]>();
+  /** the op ids applied at the current position, so a duplicate delivery of a sibling is dropped */
+  const appliedAtSeq = new Set<string>();
   let clientId: string | null = null;
   const myClientIds = new Set<string>();
   let counter = 0;
@@ -431,7 +448,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
 
   /** One admitted entry in stream order. */
   const applyEntry = (entry: Entry): void => {
+    if (entry.seq !== seq) appliedAtSeq.clear();
     seq = entry.seq;
+    appliedAtSeq.add(entry.opId);
     remember(entry);
     const mine = myClientIds.has(entry.clientId);
     if (entry.kind === 'comment') {
@@ -520,22 +539,36 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (pending.some((op) => !op.inflight)) scheduleFlush('now');
   };
 
-  /** Drains the contiguous entries buffered by seq. */
+  /** Drains the contiguous entries buffered by seq, every sibling of a seq in arrival order. */
   const drain = (): void => {
     for (;;) {
       const next = incoming.get(seq + 1);
       if (next === undefined) break;
       incoming.delete(seq + 1);
-      applyEntry(next);
+      for (const entry of next) applyEntry(entry);
     }
-    // anything at or below the seq is a duplicate
+    // anything below the seq is a duplicate
     for (const key of [...incoming.keys()]) if (key <= seq) incoming.delete(key);
     noteCaughtUp();
   };
 
+  /**
+   * One entry off the wire (the stream or an ops POST answer). Below the position it is a
+   * duplicate. At the position it is a sibling of a batch the blob tier committed as one
+   * revision (hotfix 2 cause A2) and is applied unless its op id was applied already; a store
+   * echo (`clientId: 'store'`, the record's folded mutations) at the position repeats what the
+   * batch's entries already carried and is dropped. Above the position it is buffered by seq.
+   */
   const take = (entry: Entry): void => {
-    if (entry.seq <= seq) return;
-    incoming.set(entry.seq, entry);
+    if (entry.seq < seq) return;
+    if (entry.seq === seq) {
+      if (entry.clientId === 'store' || appliedAtSeq.has(entry.opId)) return;
+      applyEntry(entry);
+      return;
+    }
+    const siblings = incoming.get(entry.seq);
+    if (siblings === undefined) incoming.set(entry.seq, [entry]);
+    else if (!siblings.some((row) => row.opId === entry.opId)) siblings.push(entry);
     drain();
   };
 
@@ -550,9 +583,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const fresh = await options.onResync(at);
     if (fresh === null || stopped) return;
     server = fresh;
-    revision = fresh.deck.revision;
-    seq = Math.max(seq, helloSeq);
-    // the reload brought the document to the head, so the pending ops (re-folded on it) may flush
+    revision = Math.max(revision, fresh.deck.revision);
+    // the reload brought the document to the head. On the blob tier the seq of an entry is the
+    // revision its record made (blob.ts), so the fresh document's revision is the stream
+    // position; a position left at the last hello buffered every later entry for good and the
+    // document stopped moving while the revision climbed (hotfix 2 cause A3, "revision 2 vs 12").
+    seq = Math.max(seq, helloSeq, tier === 'blob' ? fresh.deck.revision : 0);
+    appliedAtSeq.clear();
+    // the pending ops (re-folded on the fresh document) may flush
     caughtUp = true;
     incoming.clear();
     retained = [];
@@ -585,6 +623,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         if (event.seq < seq) {
           // the stream was reset behind this client; reload at the server's revision
           seq = event.seq;
+          appliedAtSeq.clear();
           void resync(event.revision);
         }
         // ops sent on a connection that died are re-sent under the new client id once the
@@ -608,7 +647,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         if (event.external === true) {
           void resync(event.revision);
         } else {
-          setRevision(event.revision, new Date(now()).toISOString());
+          // never backwards: on the blob tier the ops POST answer names the revision first and
+          // the stream's instance delivers the checkpoint frames of earlier revisions after it,
+          // so a late frame must not pull the reported revision behind the server's (hotfix 2)
+          setRevision(Math.max(revision, event.revision), new Date(now()).toISOString());
           emitChange(local, [], 'checkpoint');
         }
         options.onEvent?.(event);
@@ -867,6 +909,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (stream !== null || stopped) return;
       stream = transport.open({
         since: seq,
+        ...(options.retire === undefined || options.retire.length === 0
+          ? {}
+          : { retire: options.retire }),
         onEvent,
         onError: () => {
           connected = false;
@@ -881,15 +926,19 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (flushTimer !== undefined) timers.clearTimeout(flushTimer);
       if (presenceTimer !== undefined) timers.clearTimeout(presenceTimer);
       if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);
-      if (posting !== null) await posting.catch(() => undefined);
-      if (clientId !== null && connected) {
-        await transport
-          .postPresence({ clientId, clock: presenceClock + 1, ...presence }, { leave: true })
-          .catch(() => undefined);
-      }
+      // the leave goes first (a `pagehide` gives it no time to wait on a POST in flight; the
+      // browser transport sends it with keepalive), then the POST in flight is awaited
+      const leaving =
+        clientId !== null && connected
+          ? transport
+              .postPresence({ clientId, clock: presenceClock + 1, ...presence }, { leave: true })
+              .catch(() => undefined)
+          : Promise.resolve();
       stream?.close();
       stream = null;
       connected = false;
+      if (posting !== null) await posting.catch(() => undefined);
+      await leaving;
       persist();
     },
     apply(mutations, label, flush) {

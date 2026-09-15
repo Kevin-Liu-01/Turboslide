@@ -15,6 +15,7 @@ import {
   overEditingCeiling,
   replayFor,
   requestIdentity,
+  retireClients,
   roomFor,
   rosterEntryForReader,
   streamAddress,
@@ -26,7 +27,8 @@ import {
  * GET /api/decks/:id/stream (gslides-parity SPEC-3 3.3; MILESTONES-3 B2 day 3): the room's
  * Server-Sent Events. `authorize(read)` at open and every 60 s, the stream counters of report 10
  * F24 (per identity, per address, per instance), a server issued `clientId` bound to the session
- * (F26), `hello` with the roster filtered by role (4.8) and the editing count (0.9), the replay
+ * (F26), the tab's earlier ids of `?retire=` removed from this instance's roster (hotfix 2 cause
+ * B1), `hello` with the roster filtered by role (4.8) and the editing count (0.9), the replay
  * since `Last-Event-ID` or `?since=` (or `resync` past 2,000 entries, F25), then every event the
  * reader may see, a heartbeat comment every 15 s, and a close at a random point between 240 and
  * 290 s with a `retry` between 1 and 4 s so tabs never reconnect together. On the catch all
@@ -98,6 +100,9 @@ async function serve(request: Request, deckId: string): Promise<Response> {
           // closed by the reader already
         }
       };
+      // the tab's earlier ids leave this instance's roster before hello lists it (hotfix 2, B1):
+      // a reload posts no leave and the blob tier's roster is per instance
+      await retireClients(room, url.searchParams.get('retire'), identity, clientId);
       const roster = await room.channel.presence.roster(deckId);
       const live = await room.live();
       const hello: RoomEvent = {

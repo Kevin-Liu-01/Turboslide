@@ -15,13 +15,14 @@ import { validateDocument } from '@turboslide/schema/validate';
 import type { Entry, RoomEvent } from '../src/channel.ts';
 import { memoryChannel } from '../src/memory.ts';
 import { until } from '../src/channel-contract.ts';
-import type { OpsPost } from '../src/protocol.ts';
+import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import { fakeRoomServer, reconnectingTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
 import { memoryPendingStore } from './pending-store.ts';
 import { createRoomClient } from './room-client.ts';
 import type {
   DocumentChange,
+  OpenOptions,
   RoomClientOptions,
   RoomTransport,
   SyncStatus,
@@ -457,5 +458,315 @@ describe('createRoomClient', () => {
       mutations: [splice(1, 0, 'k')],
     });
     await room.stop();
+  });
+
+  // ------------------------------------------------------------------------------------------
+  // Hotfix 2 (build-4/hotfix-2.md, causes A2, A3 and the late checkpoint): the blob tier commits
+  // one ops POST as one revision and answers every entry of the batch at that revision as its
+  // seq; the client must settle each of them, take a remote batch whole, keep its position at the
+  // fresh document's revision after a resync, and never report a revision behind the server's.
+
+  /** A blob tier transport: one POST is one revision, every entry of it at that seq. */
+  function blobTransport(options: {
+    author: FakeIdentity['author'];
+    head: number;
+    /** answers the first POST with a 409 resync naming this head, then admits */
+    resyncOnceTo?: number;
+  }): RoomTransport & {
+    fire: (event: RoomEvent) => void;
+    posts: OpsPost[];
+    opens: OpenOptions[];
+    leaves: PresencePost[];
+    /** holds every POST until released */
+    hold: (on: boolean) => void;
+  } {
+    const posts: OpsPost[] = [];
+    const opens: OpenOptions[] = [];
+    const leaves: PresencePost[] = [];
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    let head = options.head;
+    let refused = false;
+    let held: (() => void) | null = null;
+    let holding = false;
+    return {
+      fire(event) {
+        onEvent?.(event);
+      },
+      posts,
+      opens,
+      leaves,
+      hold(on) {
+        holding = on;
+        if (!on && held !== null) {
+          held();
+          held = null;
+        }
+      },
+      open(o) {
+        opens.push(o);
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        if (holding) await new Promise<void>((resolve) => (held = resolve));
+        if (options.resyncOnceTo !== undefined && !refused) {
+          refused = true;
+          head = options.resyncOnceTo;
+          return {
+            ok: false,
+            status: 409,
+            code: 'resync',
+            message: `The deck moved to revision ${head}; reload and rebase`,
+            head,
+          };
+        }
+        head += 1;
+        const entries: Entry[] = body.entries.map((entry) => ({
+          seq: head,
+          rev: head - 1,
+          kind: 'edit',
+          author: options.author,
+          clientId: body.clientId,
+          opId: entry.opId,
+          mutations: (entry as { mutations?: Mutation[] }).mutations ?? [],
+          at: new Date().toISOString(),
+        }));
+        return { ok: true, entries, rejected: [], head, revision: head };
+      },
+      async postPresence(body, presenceOptions) {
+        if (presenceOptions?.leave === true) leaves.push(body);
+      },
+    };
+  }
+
+  const hello = (clientId: string, seq: number, revision: number): RoomEvent => ({
+    type: 'hello',
+    seq,
+    revision,
+    clientId,
+    role: 'editor',
+    clients: [],
+    editing: 1,
+    tier: 'blob',
+  });
+
+  it('settles every entry of a batch the blob tier answered at one seq, drops the store echo and takes a remote batch whole (hotfix 2, A2)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = blobTransport({ author: kevin.author, head: base });
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+    });
+    room.start();
+    transport.fire(hello(CLIENT_A, base, base));
+    const before = textOf(room.document());
+    // three bursts inside one flush window: one POST with three entries
+    const a = room.apply([splice(0, 0, 'a')], 'type');
+    const b = room.apply([splice(1, 0, 'b')], 'type');
+    const c = room.apply([splice(2, 0, 'c')], 'type');
+    await room.flush();
+    expect(transport.posts).toHaveLength(1);
+    expect(transport.posts[0]!.entries).toHaveLength(3);
+    const outcomes = await Promise.all([a.settled, b.settled, c.settled]);
+    for (const outcome of outcomes) expect(outcome).toEqual({ seq: base + 1 });
+    // every op settled: nothing pending, the position and the revision are the answer's
+    expect(room.status()).toMatchObject({
+      pending: 0,
+      retained: 3,
+      seq: base + 1,
+      revision: base + 1,
+    });
+    expect(textOf(room.document())).toBe(`abc${before}`);
+    // the store echo of the record (the same revision, the folded mutations) repeats nothing
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: base + 1,
+        rev: base,
+        kind: 'edit',
+        author: kevin.author,
+        clientId: 'store',
+        opId: 'store:1',
+        mutations: [splice(0, 0, 'abc')],
+        at: new Date().toISOString(),
+      },
+    });
+    transport.fire({
+      type: 'checkpoint',
+      revision: base + 1,
+      fromSeq: base + 1,
+      toSeq: base + 1,
+      author: kevin.author,
+      note: '',
+    });
+    expect(textOf(room.document())).toBe(`abc${before}`);
+    expect(room.status()).toMatchObject({ retained: 0, seq: base + 1, revision: base + 1 });
+    expect(room.document().deck.revision).toBe(base + 1);
+    // another client's batch: two entries at one seq, both applied
+    for (const [i, insert] of ['X', 'Y'].entries()) {
+      transport.fire({
+        type: 'op',
+        entry: {
+          seq: base + 2,
+          rev: base + 1,
+          kind: 'edit',
+          author: maya.author,
+          clientId: CLIENT_B,
+          opId: `${CLIENT_B}:${i + 1}`,
+          mutations: [splice(i, 0, insert)],
+          at: new Date().toISOString(),
+        },
+      });
+    }
+    expect(textOf(room.document())).toBe(`XYabc${before}`);
+    expect(room.status().seq).toBe(base + 2);
+    // a second delivery of a sibling is a duplicate
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: base + 2,
+        rev: base + 1,
+        kind: 'edit',
+        author: maya.author,
+        clientId: CLIENT_B,
+        opId: `${CLIENT_B}:2`,
+        mutations: [splice(1, 0, 'Y')],
+        at: new Date().toISOString(),
+      },
+    });
+    expect(textOf(room.document())).toBe(`XYabc${before}`);
+    await room.stop();
+  });
+
+  it('moves the position to the fresh document’s revision after a resync on the blob tier, so later entries drain and the pending op is re-sent on the new base (hotfix 2, A3)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const moved = base + 3;
+    const transport = blobTransport({ author: kevin.author, head: base, resyncOnceTo: moved });
+    const fresh: DeckDocument = {
+      deck: { ...document.deck, revision: moved },
+      slides: document.slides,
+    };
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      onResync: async () => {
+        // the flush the resync schedules is held, so the position is read before its answer
+        transport.hold(true);
+        return fresh;
+      },
+    });
+    room.start();
+    transport.fire(hello(CLIENT_A, base, base));
+    const applied = room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await until(() => changes.some((change) => change.reason === 'resync'), 3000);
+    // the position is the fresh document's revision, not the last hello's
+    expect(room.status().seq).toBe(moved);
+    expect(room.status().revision).toBe(moved);
+    expect(room.status().pending).toBe(1);
+    // the pending op flushes again on the new base and settles at the next revision
+    await until(() => transport.posts.length === 2, 3000);
+    expect(transport.posts[1]!.base.seq).toBe(moved);
+    transport.hold(false);
+    expect((await applied.settled) as { seq: number }).toEqual({ seq: moved + 1 });
+    expect(room.status().pending).toBe(0);
+    // an entry at the next position is not buffered: it applies at once
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: moved + 2,
+        rev: moved + 1,
+        kind: 'edit',
+        author: maya.author,
+        clientId: CLIENT_B,
+        opId: `${CLIENT_B}:1`,
+        mutations: [splice(0, 0, 'Z')],
+        at: new Date().toISOString(),
+      },
+    });
+    expect(room.status().seq).toBe(moved + 2);
+    expect(textOf(room.document()).startsWith('Zk')).toBe(true);
+    await room.stop();
+  });
+
+  it('never reports a revision behind the server’s when a checkpoint frame of an earlier revision arrives late (hotfix 2)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = blobTransport({ author: kevin.author, head: base });
+    const revisions: number[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: () => undefined,
+      onStatus: (status) => revisions.push(status.revision),
+    });
+    room.start();
+    transport.fire(hello(CLIENT_A, base, base));
+    const first = room.apply([splice(0, 0, 'a')], 'type', 'now');
+    await first.settled;
+    const second = room.apply([splice(1, 0, 'b')], 'type', 'now');
+    await second.settled;
+    expect(room.status().revision).toBe(base + 2);
+    // the stream's instance delivers the first commit's checkpoint after the second answer
+    transport.fire({
+      type: 'checkpoint',
+      revision: base + 1,
+      fromSeq: base + 1,
+      toSeq: base + 1,
+      author: kevin.author,
+      note: '',
+    });
+    expect(room.status().revision).toBe(base + 2);
+    expect(room.document().deck.revision).toBe(base + 2);
+    expect(revisions.every((revision, i) => i === 0 || revision >= revisions[i - 1]!)).toBe(true);
+    await room.stop();
+  });
+
+  it('sends the tab’s earlier client ids as retire on every open and posts the leave before waiting on a POST in flight (hotfix 2, B1)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = blobTransport({ author: kevin.author, head: base });
+    const earlier = ['c'.repeat(32), 'd'.repeat(32)];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      retire: earlier,
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    expect(transport.opens).toHaveLength(1);
+    expect(transport.opens[0]!.retire).toEqual(earlier);
+    transport.fire(hello(CLIENT_A, base, base));
+    transport.hold(true);
+    room.apply([splice(0, 0, 'a')], 'type', 'now');
+    await until(() => transport.posts.length === 1, 1000);
+    const stopping = room.stop();
+    // the leave is on the wire while the POST is still held
+    await until(() => transport.leaves.length === 1, 1000);
+    expect(transport.leaves[0]!.clientId).toBe(CLIENT_A);
+    transport.hold(false);
+    await stopping;
   });
 });

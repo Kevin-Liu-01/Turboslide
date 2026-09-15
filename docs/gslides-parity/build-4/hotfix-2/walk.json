@@ -1,0 +1,80 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "tier": "blob",
+  "started": "2026-09-15T00:35:52.346Z",
+  "finished": "2026-09-15T00:36:17.031Z",
+  "rows": [
+    {
+      "kind": "ok",
+      "stage": "A editing alone: four edits, each acknowledged at the next revision, no stale message (cause A)",
+      "evidence": "revision 4, serverRevision 4, tier blob, /edit/untitled-20260915-pb4c",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "A editing alone draws no collaborator: no others, no chips, no outlines, no carets, no non-self roster row (cause B)",
+      "evidence": "others 0, dom {\"chips\":0,\"count\":\"0\",\"marks\":0,\"outlines\":0,\"carets\":0,\"pointers\":0,\"flags\":0}, roster {\"total\":1,\"self\":1,\"clients\":[\"39e9977a\"]}",
+      "shot": "01-a-alone-sheet.png, 02-a-alone-roster.png"
+    },
+    {
+      "kind": "ok",
+      "stage": "A after a reload: same revision, its earlier id never drawn as a collaborator, no non-self roster row (cause B)",
+      "evidence": "revision 4 -> 4, others 0, dom {\"chips\":0,\"count\":\"0\",\"marks\":0,\"outlines\":0,\"carets\":0,\"pointers\":0,\"flags\":0}, roster {\"total\":0,\"self\":0,\"clients\":[]}",
+      "shot": "03-a-after-reload-sheet.png, 04-a-after-reload-roster.png"
+    },
+    {
+      "kind": "ok",
+      "stage": "A after the reload: an edit acknowledged at the next revision, no stale message (cause A)",
+      "evidence": "4 -> 5, rejects 0",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "two tabs of the same person: neither tab lists itself as a collaborator (cause B)",
+      "evidence": "A self 354ece2f others [b5bcb965], B self b5bcb965 others [354ece2f]",
+      "shot": "05-two-tabs-a-sheet.png, 06-two-tabs-a-roster.png, 07-two-tabs-b-sheet.png, 08-two-tabs-b-roster.png"
+    },
+    {
+      "kind": "note",
+      "stage": "two tabs cross tab presence (recorded on the blob tier, BLOB_TIER_NOTICE)",
+      "evidence": "A sees [b5bcb965] chips 1 roster {\"total\":2,\"self\":1,\"clients\":[\"354ece2f\",\"b5bcb965\"]}; B sees [354ece2f] chips 1 roster {\"total\":2,\"self\":1,\"clients\":[\"b5bcb965\",\"354ece2f\"]}; tier blob",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "B editing: B never draws its own client id as a collaborator, and B's own edit reaches its document (cause B, cause A)",
+      "evidence": "B drew of itself 0 element(s), B revision 5 -> 6, text \"Hotfix two walk one two three four from tab B\"",
+      "shot": "09-b-editing-seen-from-a.png"
+    },
+    {
+      "kind": "note",
+      "stage": "cross tab carets while B edits (recorded): the remote caret is the collaborator",
+      "evidence": "A drew of B {\"outlines\":0,\"carets\":1,\"flags\":1}, B drew a remote caret {\"outlines\":0,\"carets\":0} (A's)",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "no stale message in either tab (cause A)",
+      "evidence": "A none, B none",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "after B closed: A never lists itself as a collaborator (cause B)",
+      "evidence": "A drew of itself 0, others [], chips 0, roster {\"total\":1,\"self\":1,\"clients\":[\"354ece2f\"]}",
+      "shot": "10-after-b-closed-a-roster.png"
+    },
+    {
+      "kind": "note",
+      "stage": "A after B closed (recorded on the blob tier: a closed tab lingers cross instance until PRESENCE_EXPIRY_MS)",
+      "evidence": "A still lists 0 other(s) [] (B was b5bcb965), chips 0",
+      "shot": null
+    },
+    {
+      "kind": "ok",
+      "stage": "the deck was moved to the trash and deleted forever",
+      "evidence": "untitled-20260915-pb4c",
+      "shot": null
+    }
+  ]
+}

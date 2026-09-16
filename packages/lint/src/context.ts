@@ -34,6 +34,32 @@ export type LintOptions = {
   rules?: readonly RuleId[];
   /** Restrict to these slides. */
   slideIds?: readonly SlideId[];
+  /**
+   * The spelling engine (gslides-parity SPEC-5 7.2; b5.md request 11): `text/spelling` reports
+   * nothing without it, so a run in the editor page never pays for a dictionary. The checker's
+   * shape is `SpellingLintChecker` of `static/spelling.ts`; typed structurally here so this
+   * module stays the leaf it is.
+   */
+  spelling?: {
+    check: (request: {
+      document: DeckDocument;
+      language: string;
+      notes?: boolean;
+      ignore?: ReadonlyArray<string>;
+    }) => Promise<{
+      dictionary: string | null;
+      misspellings: {
+        slideId: string;
+        blockId?: string;
+        path: string;
+        range: [number, number];
+        word: string;
+        suggestions: string[];
+      }[];
+    }>;
+  };
+  /** the caller's personal dictionary, never reported */
+  personalDictionary?: ReadonlyArray<string>;
 };
 
 /** SPEC 5.1: the proper-noun list and the product tokens of copy.ts, with the names the deck uses. */

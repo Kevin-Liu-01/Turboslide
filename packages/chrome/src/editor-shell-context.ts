@@ -38,6 +38,11 @@ export type DialogRequest = {
   target?: PictureTarget;
   /** the role the Request access dialog asks for (the View only button asks for editor) */
   role?: 'viewer' | 'commenter' | 'editor';
+  /* round five (gslides-parity SPEC-5 7.7, 7.1): the version record Delete this and older
+     versions was opened on, the Preferences tab, and the Find and replace query the tool finder hands over */
+  upTo?: number;
+  tab?: 'general' | 'substitutions';
+  query?: string;
 };
 
 /** The comment card the overlay draws (SPEC-3 5.3): an existing thread, or a new comment at an anchor. */

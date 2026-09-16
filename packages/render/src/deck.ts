@@ -9,6 +9,7 @@ import type { RenderOptions, RenderedSlide } from './slide.ts';
 import { counterText, renderStage } from './stage.ts';
 import type { SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
+import { deckPage } from '@turboslide/schema/render';
 import { deckCounter } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
 
@@ -130,6 +131,7 @@ export function renderDeck(deck: Deck, slides: Slide[], options: RenderDeckOptio
     sprite: bundle.sprite,
     present: present !== false,
     stageId: 'stage',
+    page: deckPage(deck),
   });
   const head =
     `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +

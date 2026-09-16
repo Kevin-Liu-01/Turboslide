@@ -18,6 +18,7 @@ import { launchBrowser } from '@turboslide/headless/launch';
 import { renderSlideRecord } from '@turboslide/headless/record';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder } from '@turboslide/schema/deck';
+import { deckPage, pageBox } from '@turboslide/schema/render';
 import type { Mutation } from '@turboslide/schema/mutations';
 
 import { flagBoolean, flagList, flagString } from '../args.ts';
@@ -111,7 +112,10 @@ export function cropBox(
   return { left, top, width, height };
 }
 
-const SHEET_BOX: [number, number, number, number] = [0, 0, 1600, 900];
+/** The whole page as a crop box: the deck's page (gslides-parity SPEC-5 6.1), 1600 by 900 for a deck without one. */
+function sheetBox(document: DeckDocument): [number, number, number, number] {
+  return pageBox(deckPage(document.deck));
+}
 
 type Side = 'before' | 'after';
 
@@ -156,9 +160,10 @@ async function writeCrop(
   image: string,
   box: [number, number, number, number],
   out: string,
+  fallback: [number, number, number, number],
 ): Promise<void> {
   const meta = await sharp(image).metadata();
-  const size: [number, number] = [meta.width ?? 1600, meta.height ?? 900];
+  const size: [number, number] = [meta.width ?? fallback[2], meta.height ?? fallback[3]];
   await sharp(image).extract(cropBox(box, size)).toFile(out);
 }
 
@@ -209,10 +214,10 @@ export async function renderCrops(
           const recordB = b.get(target.slideId);
           const box =
             target.blockId === undefined
-              ? SHEET_BOX
+              ? sheetBox(after)
               : (recordB?.blocks[target.blockId]?.box ??
                 recordA?.blocks[target.blockId]?.box ??
-                SHEET_BOX);
+                sheetBox(after));
           const stem = `${target.slideId}${target.blockId !== undefined ? `-${target.blockId}` : ''}-${theme}`;
           const crop: Crop = {
             slideId: target.slideId,
@@ -227,6 +232,7 @@ export async function renderCrops(
               join(outDir, 'before', `${target.slideId}-${theme}.png`),
               box,
               crop.before,
+              sheetBox(before),
             );
           }
           if (recordB !== undefined) {
@@ -235,6 +241,7 @@ export async function renderCrops(
               join(outDir, 'after', `${target.slideId}-${theme}.png`),
               box,
               crop.after,
+              sheetBox(after),
             );
           }
           crops.push(crop);

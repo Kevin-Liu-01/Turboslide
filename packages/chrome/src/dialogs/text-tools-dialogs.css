@@ -1,0 +1,416 @@
+/* The text tools' dialogs and panels (gslides-parity SPEC-5 7, 10; B5): Preferences, Personal
+   dictionary, Edit guides, Indentation options, List options, Delete versions; the Spell check
+   card, the Chat panel and the Dictionary panel. Colours are the --pt- tokens of tokens.css alone;
+   every rule is 1 px in one of the line law's roles; nothing animates. The Substitutions table is a
+   grid with a 1 px --pt-hair-soft ground so no two cells draw one seam. */
+
+.ts-tt-section {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.ts-tt-section + .ts-tt-section {
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-tt-heading {
+  font: 500 12.5px/1.3 var(--pt-text);
+  color: var(--pt-titanium);
+  letter-spacing: 0.01em;
+  margin: 2px 0;
+}
+
+.ts-tt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.ts-tt-row > label,
+.ts-tt-label {
+  font: 13px/1.4 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-tt-grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ts-tt-field {
+  width: 96px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-tt-field:focus-visible {
+  outline: 2px solid var(--pt-select, var(--pt-ink));
+  outline-offset: 1px;
+}
+
+.ts-tt-field.is-wide {
+  width: 100%;
+}
+
+.ts-tt-suffix {
+  font: 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+  min-width: 18px;
+}
+
+.ts-tt-table {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 72px;
+  gap: 1px;
+  background: var(--pt-hair-soft);
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.ts-tt-table > * {
+  background: var(--pt-paper);
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 8px;
+  font: 13px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-tt-table .ts-tt-head {
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-tt-table input[type='text'] {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
+.ts-tt-table input[type='text']:focus-visible {
+  outline: 2px solid var(--pt-select, var(--pt-ink));
+  outline-offset: -2px;
+}
+
+.ts-tt-remove,
+.ts-tt-small {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-tt-remove:hover,
+.ts-tt-small:hover {
+  background: var(--pt-plate);
+}
+
+.ts-tt-list {
+  display: grid;
+  gap: 1px;
+  background: var(--pt-hair-soft);
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-tt-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--pt-paper);
+  min-height: 30px;
+  padding: 0 8px;
+  font: 13px/1.3 var(--pt-text);
+}
+
+.ts-tt-empty {
+  font: 13px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+  margin: 4px 0;
+}
+
+.ts-tt-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.ts-tt-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--pt-hair);
+  background: var(--swatch, var(--pt-titanium));
+  cursor: pointer;
+  padding: 0;
+}
+
+.ts-tt-swatch.is-on {
+  outline: 2px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-tt-note {
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+  margin: 2px 0 0;
+}
+
+.ts-tt-error {
+  font: 12.5px/1.4 var(--pt-text);
+  color: var(--pt-signal, var(--pt-ink));
+  margin: 4px 0 0;
+}
+
+/* the spell check card (SPEC-5 7.2): 320 px at the top right of the canvas */
+.ts-spell-card {
+  width: 320px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.ts-spell-word {
+  font: 500 15px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+  word-break: break-word;
+}
+
+.ts-spell-context {
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+}
+
+.ts-spell-suggestions {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-hair-soft);
+  overflow: hidden;
+}
+
+.ts-spell-suggestions > li > button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.ts-spell-suggestions > li > button[aria-pressed='true'] {
+  background: var(--pt-plate);
+}
+
+.ts-spell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ts-spell-split {
+  display: inline-flex;
+}
+
+.ts-spell-split > button + button {
+  border-left: 0;
+  padding: 0 6px;
+}
+
+/* the chat panel (SPEC-5 10) */
+.ts-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.ts-chat-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 8px 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ts-chat-message {
+  display: grid;
+  gap: 2px;
+}
+
+.ts-chat-meta {
+  font: 12px/1.3 var(--pt-text);
+  color: var(--pt-titanium);
+  display: flex;
+  gap: 6px;
+}
+
+.ts-chat-text {
+  font: 13px/1.45 var(--pt-text);
+  color: var(--pt-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ts-chat-composer {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-chat-composer textarea {
+  flex: 1 1 auto;
+  min-height: 32px;
+  max-height: 96px;
+  resize: none;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+  padding: 6px 8px;
+}
+
+/* the dictionary panel (SPEC-5 7.4) */
+.ts-dict-entry {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-dict-pos {
+  font: 500 12.5px/1.3 var(--pt-text);
+  color: var(--pt-titanium);
+}
+
+.ts-dict-defs {
+  margin: 0;
+  padding-left: 20px;
+  font: 13px/1.45 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-dict-attribution {
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+  padding-top: 8px;
+}
+
+/* the dictation box (SPEC-5 7.3): 200 by 128 over the notes pane's left edge */
+.ts-dictate {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 200px;
+  min-height: 128px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  border-radius: 6px;
+  z-index: 3;
+}
+
+.ts-dictate-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--pt-ink);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 11px/1 var(--pt-text);
+  cursor: pointer;
+  justify-self: center;
+}
+
+.ts-dictate-button[aria-pressed='true'] {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  outline: 3px solid var(--pt-signal, var(--pt-ink));
+  outline-offset: 2px;
+}
+
+.ts-dictate-interim {
+  font: 12.5px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+  min-height: 1.4em;
+}
+
+/* the verbalize live region (SPEC-5 7.5): present at zero size so turning it on moves nothing */
+.ts-verbalize {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* the drawing box of the special characters dialog (SPEC-5 0.41) */
+.ts-draw-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ts-draw-canvas {
+  width: 160px;
+  height: 160px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.ts-draw-guesses {
+  display: grid;
+  gap: 4px;
+}
+
+/* the engine's misspelling marks (SPEC-5 7.2): the Custom Highlight, else the decorator span */
+::highlight(ts-misspelling) {
+  text-decoration: underline wavy var(--pt-signal, currentColor);
+  text-decoration-skip-ink: none;
+}
+
+.ts-misspelling {
+  text-decoration: underline wavy var(--pt-signal, currentColor);
+  text-decoration-skip-ink: none;
+}

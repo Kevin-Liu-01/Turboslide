@@ -1,0 +1,87 @@
+/* The two media dialogs (gslides-parity SPEC-5 3.2; B2): the drop zone of the Upload tabs, the
+   disabled Search YouTube tab and the By URL preview. Lines follow the dialog card's hairline
+   (--pt-edge); the drop zone is a dashed hairline that fills to ink when a file is over it. */
+.ts-media-drop {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 28px 16px;
+  border: 1px dashed var(--pt-edge);
+  color: var(--pt-ink);
+  text-align: center;
+}
+.ts-media-drop.is-over {
+  border-style: solid;
+  border-color: var(--pt-ink);
+}
+.ts-media-drop.has-file .ts-media-drop-words {
+  font-weight: 500;
+}
+.ts-media-drop-words {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ts-media-drop-button {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  cursor: pointer;
+}
+.ts-media-drop-button:hover:not(:disabled) {
+  border-color: var(--pt-ink);
+}
+.ts-media-drop-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ts-media-search.is-disabled input {
+  opacity: 0.6;
+}
+.ts-media-preview img {
+  max-height: 220px;
+  object-fit: contain;
+}
+
+/* Insert > Image > Camera (gslides-parity SPEC-5 3.7): the preview box keeps the sheet's aspect */
+.ts-media-camera {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--ts-plate, #111);
+  border: 1px solid var(--ts-hair, #ddd);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.ts-media-camera-video,
+.ts-media-camera-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ts-media-camera-video[hidden] {
+  display: none;
+}
+/* Presentation display options (SPEC-5 3.7): one row per screen */
+.ts-media-screens {
+  display: grid;
+  gap: 12px;
+}
+.ts-media-screen {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid var(--ts-hair, #ddd);
+}
+.ts-media-screen-label {
+  font-weight: 500;
+}

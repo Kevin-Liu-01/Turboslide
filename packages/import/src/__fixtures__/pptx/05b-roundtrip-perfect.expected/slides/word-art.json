@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "word-art",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Word art",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:word-art#h/text"
+        }
+      },
+      {
+        "id": "art",
+        "type": "text",
+        "text": "Outlined at 88",
+        "pos": {
+          "x": 137,
+          "y": 312.88,
+          "w": 1326,
+          "h": 240,
+          "z": 2
+        },
+        "typography": {
+          "size": 88,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:word-art#art/text"
+        }
+      }
+    ]
+  },
+  "title": "Word art",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide14.xml",
+    "pptxSlideId": 269
+  }
+}

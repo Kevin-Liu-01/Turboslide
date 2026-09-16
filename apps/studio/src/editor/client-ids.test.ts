@@ -6,6 +6,10 @@ import { describe, expect, it } from 'vitest';
 import {
   CLIENT_IDS_KEPT,
   clientIdsKey,
+  heldClientId,
+  idsToRetire,
+  opCounterFor,
+  opCounterKey,
   partitionRoster,
   readClientIds,
   rememberClientId,
@@ -72,7 +76,11 @@ describe('partitionRoster', () => {
   ];
 
   it('puts the current id in self and every id this tab held out of others', () => {
-    const { self, others } = partitionRoster(rows, new Set([id(1), id(2)]), id(2));
+    const { self, others } = partitionRoster(
+      rows.map((row) => ({ ...row, principalId: `anon_${row.clientId}` })),
+      new Set([id(1), id(2)]),
+      id(2),
+    );
     expect(self?.label).toBe('this page');
     expect(others.map((row) => row.label)).toEqual([
       'another tab of the same person',
@@ -86,13 +94,66 @@ describe('partitionRoster', () => {
     expect(others.map((row) => row.clientId)).toEqual([id(2), id(3), id(4)]);
   });
 
-  it('lists a second tab of the same person as one other participant', () => {
-    const { others } = partitionRoster(
-      rows.filter((row) => row.principalId === 'anon_me'),
-      new Set([id(1), id(2)]),
-      id(2),
-    );
-    expect(others).toHaveLength(1);
-    expect(others[0]?.clientId).toBe(id(3));
+  it('reads the person from the self row when the caller knows no principal, so a second tab of the same person is nobody (A3 item 5)', () => {
+    const { self, others } = partitionRoster(rows, new Set([id(1), id(2)]), id(2));
+    expect(self?.clientId).toBe(id(2));
+    expect(others.map((row) => row.label)).toEqual(['someone else']);
+    // no current id and no principal: the client id rule alone, as before round five
+    const { others: unknown } = partitionRoster(rows, new Set([id(1)]), null);
+    expect(unknown.map((row) => row.clientId)).toEqual([id(2), id(3), id(4)]);
+  });
+
+  it('keeps every row of the tab’s own principal out of others once the principal is known (A3 item 5)', () => {
+    const { self, others } = partitionRoster(rows, new Set([id(2)]), id(2), 'anon_me');
+    expect(self?.label).toBe('this page');
+    expect(others.map((row) => row.label)).toEqual(['someone else']);
+    // the current row stays self even though it is the own principal's
+    const alone = partitionRoster(rows.slice(0, 3), new Set([id(2)]), id(2), 'anon_me');
+    expect(alone.self?.clientId).toBe(id(2));
+    expect(alone.others).toEqual([]);
+  });
+});
+
+describe('one client id per tab (A3 item 5)', () => {
+  it('holds the id the stream issued last and retires every other id it held', () => {
+    const store = storage();
+    expect(heldClientId(store, 'gt-brand')).toBeNull();
+    expect(idsToRetire(store, 'gt-brand', null)).toEqual([]);
+    rememberClientId(store, 'gt-brand', id(1));
+    expect(heldClientId(store, 'gt-brand')).toBe(id(1));
+    // the server kept the id: nothing to retire
+    expect(idsToRetire(store, 'gt-brand', id(1))).toEqual([]);
+    // the server issued a fresh id: the earlier one rides as retire on the next open
+    rememberClientId(store, 'gt-brand', id(2));
+    expect(heldClientId(store, 'gt-brand')).toBe(id(2));
+    expect(idsToRetire(store, 'gt-brand', id(2))).toEqual([id(1)]);
+    expect(heldClientId(null, 'gt-brand')).toBeNull();
+  });
+
+  it('keeps the op counter across a reload so a kept id never repeats a counter', () => {
+    const store = storage();
+    const first = opCounterFor(store, 'gt-brand');
+    expect(first.next()).toBe(1);
+    expect(first.next()).toBe(2);
+    expect(store.map.get(opCounterKey('gt-brand'))).toBe('2');
+    // the reloaded page continues where the earlier one stopped
+    const second = opCounterFor(store, 'gt-brand');
+    expect(second.next()).toBe(3);
+    // per deck, and from zero without storage or with a malformed value
+    expect(opCounterFor(store, 'other').next()).toBe(1);
+    expect(opCounterFor(null, 'gt-brand').next()).toBe(1);
+    store.map.set(opCounterKey('gt-brand'), 'nine');
+    expect(opCounterFor(store, 'gt-brand').next()).toBe(1);
+    const throwing: IdStorage = {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {
+        throw new Error('blocked');
+      },
+    };
+    const counter = opCounterFor(throwing, 'gt-brand');
+    expect(counter.next()).toBe(1);
+    expect(counter.next()).toBe(2);
   });
 });

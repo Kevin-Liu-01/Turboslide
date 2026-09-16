@@ -1,0 +1,128 @@
+/* The template gallery, /decks/templates (gslides-parity SPEC-5 0.23, 4.3; B3): three headings in
+   Google's order, a grid of cards with a live cover, the name and the use cases; the page shares
+   the home page's app bar and strip rules (decks.css). Lines follow the chrome line law. */
+.ts-gallery {
+  padding: 24px 0 48px;
+}
+
+.ts-gallery-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 8px;
+}
+
+.ts-gallery-head h1 {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-gallery-lead {
+  margin: 0 0 16px;
+  font: 13.5px/1.5 var(--pt-text);
+  color: var(--pt-ink-2);
+  max-width: 64ch;
+}
+
+.ts-gallery-group {
+  padding: 16px 0 8px;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-gallery-group h2 {
+  margin: 0 0 12px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--pt-ink);
+}
+
+.ts-gallery-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-gallery-card {
+  appearance: none;
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  text-align: left;
+  font: 13px var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-gallery-card:disabled {
+  cursor: default;
+  color: var(--pt-ink-2);
+}
+
+.ts-gallery-cover {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-gallery-card:hover .ts-gallery-cover,
+.ts-gallery-card:focus-visible .ts-gallery-cover {
+  border-color: var(--pt-ink);
+}
+
+.ts-gallery-card:focus-visible {
+  outline: none;
+}
+
+.ts-gallery-plate {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font: 500 14px/1.3 var(--pt-display);
+  color: var(--pt-ink);
+}
+
+.ts-gallery-name {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.ts-gallery-meta {
+  font-size: 12px;
+  color: var(--pt-ink-2);
+}
+
+/* the home strip's cover cards (the same live cover at the strip's 160 by 120 plate) */
+.ts-template-cover {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+}
+
+.ts-template-cover > * {
+  position: absolute;
+  inset: 0;
+}

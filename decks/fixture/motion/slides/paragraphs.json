@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "paragraphs",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "By paragraph"
+      },
+      {
+        "id": "para",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "The first paragraph fades in on the first click.\nThe second paragraph fades in on the second click.\nThe third paragraph fades in on the third click, and the list appears after it."
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Item one appears after the third paragraph"
+          },
+          {
+            "text": "Item two follows it"
+          },
+          {
+            "text": "Item three follows it"
+          },
+          {
+            "text": "Item four ends the chain; the fourth click hides the list"
+          }
+        ]
+      }
+    ]
+  },
+  "template": "cols",
+  "animations": [
+    {
+      "id": "a0",
+      "blockId": "h",
+      "effect": "flyIn",
+      "trigger": "withPrevious",
+      "durationMs": 600,
+      "direction": "top"
+    },
+    {
+      "id": "a1",
+      "blockId": "para",
+      "effect": "fadeIn",
+      "trigger": "click",
+      "durationMs": 500,
+      "byParagraph": true
+    },
+    {
+      "id": "a2",
+      "blockId": "list",
+      "effect": "appear",
+      "trigger": "afterPrevious",
+      "durationMs": 500,
+      "byParagraph": true
+    },
+    {
+      "id": "a3",
+      "blockId": "list",
+      "effect": "disappear",
+      "trigger": "click",
+      "durationMs": 500
+    }
+  ]
+}

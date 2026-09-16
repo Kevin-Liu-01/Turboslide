@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "roundtrip-perfect",
+  "title": "Export fixture (light)",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Export fixture (light)",
+      "slideIds": [
+        "title",
+        "breaks",
+        "table",
+        "numbered",
+        "links",
+        "prompt",
+        "styles",
+        "canvas-title",
+        "canvas-opener",
+        "rotated",
+        "grouped",
+        "shapes",
+        "lines",
+        "word-art",
+        "shadow",
+        "background-color",
+        "background-picture",
+        "background-dither",
+        "picture-dither-strength",
+        "image-tools",
+        "table-merge",
+        "chart-bar",
+        "chart-line",
+        "chart-pie",
+        "diagram",
+        "bullets",
+        "spacing",
+        "autofit"
+      ]
+    }
+  ],
+  "assets": {},
+  "revision": 0,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

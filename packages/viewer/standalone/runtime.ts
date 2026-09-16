@@ -22,6 +22,11 @@
   The runtime injects the chrome when the document has no #viewer, so a build that passes only the
   runtime still gets the whole viewer.
 
+  Round five (gslides-parity SPEC-5 2.3, the amendment to SPEC 5.3's frozen port): show(n) asks
+  window.__tsMotion.go(from, to) first when a motion script is present; a true answer means the
+  move was a step of the current slide and the runtime does nothing else. That call is the one
+  change to the frozen runtime.
+
   Behavior kept from tail.html: the sidebar of live clones, the grid, the
   lazily built book with its IntersectionObserver at -42%, the fit math, the
   dual-key theme (gt-theme then gt-deck-theme, default dark, never
@@ -64,6 +69,10 @@
   if (!sheet.id) sheet.id = 'sheet';
   const stage =
     $('stage') ?? sheet.querySelector<HTMLElement>('.ts-stage, .stage') ?? need('stage');
+  /* the deck's page from the stage root's custom properties (gslides-parity SPEC-5 6.1), read once at boot; 1600 by 900 when the root carries none */
+  const sheetRoot = sheet.closest<HTMLElement>('.ts-sheet') ?? sheet;
+  const pageW = parseFloat(sheetRoot.style.getPropertyValue('--ts-sheet-w')) || 1600;
+  const pageH = parseFloat(sheetRoot.style.getPropertyValue('--ts-sheet-h')) || 900;
   const grid = need('grid');
   const book = need('book');
   const bookIn = need('book-in');
@@ -279,7 +288,7 @@
       const f = t.querySelector<HTMLElement>('.thumb-frame');
       const w = f ? f.clientWidth : 0;
       const mini = f ? f.querySelector<HTMLElement>('.mini') : null;
-      if (w && mini) mini.style.setProperty('--k', String((w - 2) / 1600));
+      if (w && mini) mini.style.setProperty('--k', String((w - 2) / pageW));
     });
   }
   function go(k: number): void {
@@ -383,24 +392,26 @@
   }
   function scaleBook(): void {
     const f = bookIn.querySelector<HTMLElement>('.page-frame');
-    if (f && f.clientWidth) bookIn.style.setProperty('--k', String((f.clientWidth - 2) / 1600));
+    if (f && f.clientWidth) bookIn.style.setProperty('--k', String((f.clientWidth - 2) / pageW));
   }
 
-  /* the sheet: the 1600 x 900 stage scaled to the space left over (SPEC 5.5) */
+  /* the sheet: the deck's page (the stage root's --ts-sheet-w and --ts-sheet-h, read once at
+     boot; 1600 by 900 when the root carries none, gslides-parity SPEC-5 6.1) scaled to the space
+     left over (SPEC 5.5) */
   function fit(): void {
     const presenting = viewer.classList.contains('is-present');
     const pad2 = presenting ? 0 : narrow() ? 12 : 28;
     const side = panel && panelOn() && !narrow() ? panel.offsetWidth : 0;
     const aw = wrap.clientWidth - side;
     const ah = wrap.clientHeight;
-    const s = Math.max(0.05, Math.min((aw - pad2 * 2) / 1600, (ah - pad2 * 2) / 900));
-    const W = Math.round(1600 * s);
-    const H = Math.round(900 * s);
+    const s = Math.max(0.05, Math.min((aw - pad2 * 2) / pageW, (ah - pad2 * 2) / pageH));
+    const W = Math.round(pageW * s);
+    const H = Math.round(pageH * s);
     sheet.style.width = `${W}px`;
     sheet.style.height = `${H}px`;
     sheet.style.left = `${Math.round((aw - W) / 2) - 1}px`;
     sheet.style.top = `${Math.round((ah - H) / 2) - 1}px`;
-    stage.style.transform = `scale(${W / 1600})`;
+    stage.style.transform = `scale(${W / pageW})`;
   }
   function applyTheme(): void {
     const dark = isDark();
@@ -437,6 +448,13 @@
   function show(n: number, opts?: { hash?: boolean; scroll?: boolean }): void {
     const o = opts || {};
     const k = Math.max(0, Math.min(slides.length - 1, n));
+    /* the one round five hook (gslides-parity SPEC-5 2.3): a deck with motion carries the standalone
+       motion script, which answers true when the move of one was a step of the current slide and
+       plays it; the slide then stays. A still deck has no script and every move is a slide. */
+    const motion = (
+      window as unknown as { __tsMotion?: { go?: (from: number, to: number) => boolean } }
+    ).__tsMotion;
+    if (motion && motion.go && k !== i && motion.go(i, k)) return;
     slides.forEach((s, j) => s.classList.toggle('is-on', j === k));
     thumbs.forEach((t, j) => t.classList.toggle('is-active', j === k));
     pages.forEach((p, j) => p.classList.toggle('is-active', j === k));

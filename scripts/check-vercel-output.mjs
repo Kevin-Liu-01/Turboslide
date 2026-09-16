@@ -69,8 +69,10 @@ const STATIC_FILES = [
 const STATIC_FOLDERS = ['brand', 'home'];
 /** SPEC-4 0.43: /home is prerendered; the start plugin writes either shape. */
 const PRERENDERED = [{ route: '/home', files: ['home/index.html', 'home.html'] }];
-/** Vercel's per function size cap (docs/hosting.md section 6); the 200 MB gate waits for round five (SPEC-4 0.35). */
+/** Vercel's per function size cap (docs/hosting.md section 6). */
 const FUNCTION_CAP_BYTES = 250 * 1024 * 1024;
+/** The gate of gslides-parity SPEC-5 16.7 (SPEC-4 0.35, 7): a function directory over 200 MB fails the check (the integrator, round five merge 2). */
+const FUNCTION_GATE_BYTES = 200 * 1024 * 1024;
 
 function parseArgs(argv) {
   const out = { dir: 'apps/studio/.vercel/output', report: false, json: null };
@@ -257,7 +259,7 @@ if (existsSync(staticDir)) {
   row('static', 'static/ total', true, `${mb(size.bytes)} in ${size.files} file(s)`, false);
 }
 
-// SPEC-4 0.35, 0.45: each function directory's size against the cap (reported; the cap itself fails a deploy)
+// SPEC-4 0.35, 0.45 and gslides-parity SPEC-5 16.7: each function directory's size against the 200 MB gate (the 250 MB cap itself fails a deploy)
 const functions = functionDirs(join(OUT, 'functions'));
 row('functions', 'function directories', functions.length > 0, `${functions.length} found`);
 const sizes = [];
@@ -267,8 +269,50 @@ for (const dir of functions) {
   row(
     'functions',
     relative(join(OUT, 'functions'), dir),
-    size.bytes < FUNCTION_CAP_BYTES,
-    `${mb(size.bytes)} in ${size.files} file(s), cap ${mb(FUNCTION_CAP_BYTES)}`,
+    size.bytes < FUNCTION_GATE_BYTES,
+    `${mb(size.bytes)} in ${size.files} file(s), gate ${mb(FUNCTION_GATE_BYTES)}, cap ${mb(FUNCTION_CAP_BYTES)}`,
+  );
+}
+
+// gslides-parity SPEC-5 8.1 and VERIFICATION-5 finding 2 (the round five fix round): the runtime
+// files of the `packages` server asset group must reach the function. The equation fonts are the
+// ones the merge 2 preview lacked (every hosted export and fresh thumbnail answered ENOENT on
+// Temml.woff2), so each of the runtime files below is looked for in every function directory,
+// either as a file of that name (Nitro's raw asset chunks keep the name) or as its asset key
+// inside a bundled chunk (Nitro's inlined server assets carry the key beside the bytes).
+const PACKAGE_RUNTIME_FILES = [
+  'render/assets/Temml.woff2',
+  'render/assets/latinmodern-math.woff2',
+  'theme/assets/sprite.svg',
+  'fonts/assets/InterVariable.woff2',
+  'export/src/calibration/calibration.json',
+];
+function walkFiles(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walkFiles(path, out);
+    else if (entry.isFile()) out.push(path);
+  }
+  return out;
+}
+for (const dir of functions) {
+  const files = walkFiles(dir);
+  const names = new Set(files.map((file) => file.split('/').pop()));
+  let texts = null;
+  const missing = PACKAGE_RUNTIME_FILES.filter((key) => {
+    if (names.has(key.split('/').pop())) return false;
+    texts ??= files
+      .filter((file) => /\.(?:m?js|cjs|json)$/.test(file))
+      .map((file) => readFileSync(file, 'utf8'));
+    return !texts.some((text) => text.includes(key));
+  });
+  row(
+    'functions',
+    `${relative(join(OUT, 'functions'), dir)} carries the packages runtime files`,
+    missing.length === 0,
+    missing.length === 0
+      ? `${PACKAGE_RUNTIME_FILES.length} of ${PACKAGE_RUNTIME_FILES.length} present (render/assets/*, the sprite, Inter, calibration.json)`
+      : `missing ${missing.join(', ')} (vite.deploy.config.ts PACKAGES_PATTERN)`,
   );
 }
 

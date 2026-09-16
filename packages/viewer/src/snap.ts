@@ -11,13 +11,21 @@ import type { ResizeKind } from '@turboslide/schema/canvas';
 import type { ColsRatio, PlateSide } from '@turboslide/schema/deck';
 import {
   FREEFORM_GRID,
-  GUIDES,
+  guidesFor,
   SNAP_DISTANCE,
   snapToGrid as schemaSnapToGrid,
 } from '@turboslide/schema/freeform';
 import { PLATE_WIDTHS } from '@turboslide/schema/deck';
 import { jsonEqual } from '@turboslide/schema/pointer';
-import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET, columnWidths } from '@turboslide/theme/tokens';
+import {
+  COLUMN_GAP,
+  CONTENT,
+  CONTENT_ORIGIN,
+  SHEET,
+  columnWidths,
+  grid,
+} from '@turboslide/theme/tokens';
+import type { PageSize } from '@turboslide/theme/tokens';
 
 export type RowsKey = (typeof ROWS_KEY_SNAP)[number];
 export type PlateWidth = (typeof PLATE_WIDTHS)[number];
@@ -133,9 +141,13 @@ export const PLATE_SIDES_BY_KIND: Readonly<
 };
 
 /** The plate side for a pointer at sheet x: the left half keeps the left side, the right half the right. */
-export function plateSideFor(kind: 'opener' | 'mood' | 'closing', x: number): PlateSide {
+export function plateSideFor(
+  kind: 'opener' | 'mood' | 'closing',
+  x: number,
+  page: PageSize = SHEET,
+): PlateSide {
   const [left, right] = PLATE_SIDES_BY_KIND[kind];
-  return x >= SHEET.width / 2 ? right : left;
+  return x >= page.width / 2 ? right : left;
 }
 
 /**
@@ -214,11 +226,12 @@ function kindOfGuide(name: string): SnapKind {
  * sheet; the content box's edges and centers, the column seams of the three named ratios (both
  * sides of the gap) and the plate edges span the content box.
  */
-export function sheetSnapLines(): SnapLine[] {
+export function sheetSnapLines(page: PageSize = SHEET): SnapLine[] {
   const [cx, cy] = CONTENT_ORIGIN;
-  const [cw, ch] = CONTENT;
+  const [cw, ch] = grid(page).content;
+  const guides = guidesFor(page);
   const lines: SnapLine[] = [];
-  for (const guide of GUIDES.x) {
+  for (const guide of guides.x) {
     const kind = kindOfGuide(guide.name);
     const full = kind === 'rail';
     lines.push({
@@ -226,10 +239,10 @@ export function sheetSnapLines(): SnapLine[] {
       at: guide.at,
       kind,
       from: full ? 0 : cy,
-      to: full ? SHEET.height : cy + ch,
+      to: full ? page.height : cy + ch,
     });
   }
-  for (const guide of GUIDES.y) {
+  for (const guide of guides.y) {
     const kind = kindOfGuide(guide.name);
     const full = kind === 'rail';
     lines.push({
@@ -237,15 +250,15 @@ export function sheetSnapLines(): SnapLine[] {
       at: guide.at,
       kind,
       from: full ? 0 : cx,
-      to: full ? SHEET.width : cx + cw,
+      to: full ? page.width : cx + cw,
     });
   }
   return lines;
 }
 
-/** The sheet's own edges and centre (SPEC-2 6.1 row 7: "the sheet's edges and centre"). */
-export function sheetEdgeLines(): SnapLine[] {
-  const { width, height } = SHEET;
+/** The page's own edges and centre (SPEC-2 6.1 row 7: "the sheet's edges and centre"). */
+export function sheetEdgeLines(page: PageSize = SHEET): SnapLine[] {
+  const { width, height } = page;
   return [
     { axis: 'x', at: 0, kind: 'sheet', from: 0, to: height },
     { axis: 'x', at: width / 2, kind: 'sheet', from: 0, to: height },
@@ -259,6 +272,7 @@ export function sheetEdgeLines(): SnapLine[] {
 /** The deck's guides as snap lines spanning the sheet (SPEC-2 2.10, 6.1 row 31). */
 export function deckGuideLines(
   guides: { x: ReadonlyArray<number>; y: ReadonlyArray<number> } | undefined,
+  page: PageSize = SHEET,
 ): SnapLine[] {
   if (!guides) return [];
   return [
@@ -267,9 +281,9 @@ export function deckGuideLines(
       at,
       kind: 'guide',
       from: 0,
-      to: SHEET.height,
+      to: page.height,
     })),
-    ...guides.y.map((at): SnapLine => ({ axis: 'y', at, kind: 'guide', from: 0, to: SHEET.width })),
+    ...guides.y.map((at): SnapLine => ({ axis: 'y', at, kind: 'guide', from: 0, to: page.width })),
   ];
 }
 

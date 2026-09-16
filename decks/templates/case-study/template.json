@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "case-study",
+  "name": "Case study",
+  "description": "Eight slides on one customer: who they are, the problem, what was done, three results, a quote and what comes next.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 8
+    }
+  ],
+  "archetypes": [],
+  "category": "work",
+  "useCases": [
+    "sales pitches",
+    "marketing plans"
+  ],
+  "cover": "title",
+  "slideCount": 8
+}

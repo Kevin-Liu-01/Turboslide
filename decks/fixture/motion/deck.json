@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "motion",
+  "title": "Motion fixture",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "motion",
+      "name": "Motion",
+      "slideIds": [
+        "t-none",
+        "t-dissolve",
+        "t-fade",
+        "t-slide-right",
+        "t-slide-left",
+        "t-flip",
+        "t-cube",
+        "t-gallery",
+        "effects",
+        "paragraphs",
+        "media"
+      ]
+    }
+  ],
+  "assets": {},
+  "media": {
+    "bars-1s": {
+      "id": "bars-1s",
+      "kind": "video",
+      "role": "media",
+      "file": "assets/bars-1s.e5f1f192.webm",
+      "mime": "video/webm",
+      "bytes": 1856,
+      "sha256": "e5f1f192c901bcccb6511df55a120730e25f6fa0eabb8aefbceb7293fefe3dd1",
+      "durationMs": 1000,
+      "size": [
+        320,
+        180
+      ],
+      "codecs": [
+        "V_VP9"
+      ],
+      "title": "Colour bars",
+      "source": {
+        "kind": "file"
+      }
+    },
+    "tone-1s": {
+      "id": "tone-1s",
+      "kind": "audio",
+      "role": "media",
+      "file": "assets/tone-1s.c087187e.wav",
+      "mime": "audio/wav",
+      "bytes": 88278,
+      "sha256": "c087187ef80798631ceac4eee8d43c8d4d441451576abdf45a8d7b7bd2269129",
+      "durationMs": 1000,
+      "codecs": [
+        "pcm_s16le"
+      ],
+      "title": "Tone",
+      "source": {
+        "kind": "file"
+      }
+    }
+  },
+  "defaults": {
+    "appearance": "light",
+    "counter": "on"
+  },
+  "revision": 1,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

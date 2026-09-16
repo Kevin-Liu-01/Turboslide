@@ -134,6 +134,33 @@ html:has(.ts-home-page) {
   background: var(--pt-paper);
 }
 
+/* the Starred view toggle beside the search (gslides-parity SPEC-5 7.7): a pill in the search row;
+   pressed, it takes the ink and the star fills */
+.ts-appbar-starred {
+  margin-left: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-plate);
+  color: var(--pt-ink-2);
+  flex: none;
+}
+
+.ts-appbar-starred svg {
+  position: static;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+.ts-appbar-starred[aria-pressed='true'] {
+  border-color: var(--pt-ink);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
 /* ---- Start a new presentation ---- */
 .ts-strip {
   padding: 24px 0;
@@ -246,6 +273,16 @@ html:has(.ts-home-page) {
   font-size: 13.5px;
 }
 
+/* the strip's template glyph: the slide count or the theme's two letters on the plate (B3) */
+.ts-template-glyph {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--pt-ink);
+}
+
 /* ---- Recent presentations ---- */
 .ts-recent {
   padding: 24px 0 0;
@@ -331,7 +368,7 @@ html:has(.ts-home-page) {
 .ts-hm-card-thumb {
   position: relative;
   display: block;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   overflow: hidden;
   border-bottom: 1px solid var(--pt-hair-soft);
   background: var(--pt-plate);

@@ -7,6 +7,7 @@
 // picture rules (plate clearance, blank twins, mood placement) are static/picture.ts.
 import type { Asset, Finding, Mutation, Slide } from '../contracts.ts';
 import { isShareAlike } from '../contracts.ts';
+import { coversPage, deckPage } from '@turboslide/schema/render';
 import type { LintContext } from '../context.ts';
 import { plainText } from '../text.ts';
 import { pictureAsset } from './picture.ts';
@@ -67,12 +68,7 @@ export function checkAssets(ctx: LintContext): Finding[] {
       if (block.type === 'picture') {
         const asset = ctx.asset(block.asset);
         if (block.asset !== '' && !usedBy.has(block.asset)) usedBy.set(block.asset, slide.id);
-        const covers =
-          block.pos !== undefined &&
-          block.pos.x <= 0 &&
-          block.pos.y <= 0 &&
-          block.pos.x + block.pos.w >= 1600 &&
-          block.pos.y + block.pos.h >= 900;
+        const covers = block.pos !== undefined && coversPage(block.pos, deckPage(ctx.deck));
         const framed = block.frame !== undefined;
         if (asset && 'neutral' in asset.twins && !framed && !covers) {
           out.push(

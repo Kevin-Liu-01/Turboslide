@@ -86,8 +86,22 @@ export type HostedDecks = {
   ensureAssets: (deckId: string) => Promise<void>;
   /** the local file of an asset twin, confined to the deck's assets folder; null when absent */
   assetFile: (deckId: string, relative: string) => Promise<string | null>;
-  /** a URL the twin is served from when it is not on this instance; null when there is none */
-  assetUrl: (deckId: string, relative: string) => Promise<string | null>;
+  /**
+   * a URL the twin is served from when it is not on this instance; null when there is none. With
+   * the deck's `assetKey` (gslides-parity SPEC-5 0.19) the blob backend answers a media file under
+   * `d/<deckId>/<assetKey>/` before the plain prefix; the file and tmp backends ignore the key.
+   */
+  assetUrl: (deckId: string, relative: string, assetKey?: string) => Promise<string | null>;
+  /**
+   * Moves a restricted deck's keyed media files from one key to the next (SPEC-5 0.19: a
+   * collaborator removed or a link revoked rotates the key); the blob backend alone holds keyed
+   * files, so the others answer no moves.
+   */
+  rotateAssetKey?: (deckId: string, from: string, to: string) => Promise<{ moved: string[] }>;
+  /** rebuilds the deck index from every manifest (SPEC-5 11; `admin.migrateStorage --reindex`); the blob backend alone keeps one */
+  reindex?: () => Promise<{ decks: number }>;
+  /** writes the index rows held by the coalescing timer now (tests and the migration step) */
+  flushIndex?: () => Promise<void>;
   facts: () => HostingFacts;
 };
 
@@ -110,6 +124,8 @@ export type HostedOptions = {
   fetchAsset?: (deckId: string, relative: string) => Promise<Uint8Array | null>;
   /** the clock, for tests */
   now?: () => string;
+  /** past this many decks the blob list reads `decks/index.json` (SPEC-5 11); `INDEX_READ_THRESHOLD` (50) unless a test lowers it */
+  indexReadThreshold?: number;
   log?: (line: string) => void;
 };
 

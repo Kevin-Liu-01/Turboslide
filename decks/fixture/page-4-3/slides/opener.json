@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "opener",
+  "kind": "opener",
+  "sectionId": "canvas",
+  "picture": {
+    "asset": "fixture-photo",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-left",
+    "maxWidth": 740,
+    "blocks": [
+      {
+        "id": "big",
+        "type": "heading",
+        "level": "big",
+        "text": "A picture kind on 4:3"
+      },
+      {
+        "id": "p",
+        "type": "paragraph",
+        "text": "The photograph covers the page and the plate keeps its 740 px width in the content box.",
+        "measure": 56,
+        "marginTop": 14
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Fixture geometry, drawn in one bit"
+      }
+    ]
+  },
+  "template": "opener"
+}

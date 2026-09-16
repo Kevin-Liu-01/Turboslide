@@ -69,8 +69,10 @@ import {
   DEFAULT_MENU_CONTEXT,
   DIVIDER,
   GS2_ACTION_IDS,
+  GS5_PLANNED_EFFECTS,
   MENUS,
   TITLE_ROW_ITEMS,
+  visibleMenus,
   TOOLBAR_HEAD,
   TOOLBAR_TAIL_DEFAULT,
   allItems,
@@ -84,12 +86,31 @@ import {
   walkItems,
 } from '../packages/chrome/src/menus/model.ts';
 import {
+  GS5_KEY_ROWS,
+  OMITTED_SHORTCUTS,
   ariaKeyShortcuts,
   buildKeyTable,
   chordsOf,
   shortcutLabel,
 } from '../packages/chrome/src/menus/keys.ts';
 import { HIDE_MENUS_CONTROL, tailFor } from '../packages/chrome/src/menus/toolbar-tails.ts';
+/* round five (gslides-parity SPEC-5 16.1; the verifier's rows of 2026-09-15): the tables the
+   behaviour rows are read against */
+import { OFFERED_LANGUAGES } from '../packages/chrome/src/text-tools.ts';
+import {
+  ANIMATION_CHOICES_IN_ORDER,
+  MOTION_LABELS,
+  TRANSITION_KINDS,
+  animationLabel,
+} from '../packages/schema/src/motion.ts';
+import {
+  EQUATION_GROUP_LABELS,
+  EQUATION_SYMBOL_GROUPS,
+} from '../packages/schema/src/blocks/equation.ts';
+import {
+  BUILDING_BLOCK_CATEGORIES,
+  TEMPLATE_CATEGORIES,
+} from '../packages/schema/src/building-blocks.ts';
 import {
   ACCOUNT,
   DIALOGS,
@@ -350,6 +371,11 @@ function index(items, parent, menu) {
 }
 index(TITLE_ROW_ITEMS, null, 'title');
 for (const menu of MENUS) index(menu.items, null, menu.id);
+
+/* The menus the bar draws in the default context (gslides-parity SPEC-5 7.5): `MENUS` holds the
+   Accessibility menu, which draws under screen reader support alone, so the bar walks and the first
+   open row read this list (the integrator, round five merge 2; the smallest edit in the verifier's file) */
+const BAR_MENUS = visibleMenus(DEFAULT_MENU_CONTEXT);
 
 /** the container ids above an item, top down */
 function ancestors(id) {
@@ -947,7 +973,7 @@ async function walkMenus(page, ctx, tag) {
       await walkList(menuId, item.items, level + 1);
     }
   };
-  for (const menu of MENUS) {
+  for (const menu of BAR_MENUS) {
     await openBarMenu(page, menu.id);
     await walkList(menu.id, menu.items, 0);
     await closeMenus(page);
@@ -2953,7 +2979,7 @@ async function checkShortcuts(page, context, ctx, deckId, tag) {
   const section = `shortcuts:${tag}`;
   const table = buildKeyTable();
   /* the ten menu access keys */
-  for (const menu of MENUS) {
+  for (const menu of BAR_MENUS) {
     await closeOverlays(page);
     await blurAll(page);
     const chord = chordsOf(menu.key.mac)[0];
@@ -5320,7 +5346,7 @@ async function walkRoleMenus(page, ctx, tag) {
   );
   for (const menu of MENUS) {
     const shown = barMenus.includes(menu.id);
-    const expected = isPresent(menu, ctx);
+    const expected = visibleMenus(ctx, [menu]).length === 1;
     (shown === expected ? pass : fail)(section, {
       id: `menubar.${menu.id}`,
       menu: menu.id,
@@ -5339,7 +5365,8 @@ async function walkRoleMenus(page, ctx, tag) {
     const menu = MENU_OF.get(item.id);
     const menuDef = MENUS.find((m) => m.id === menu);
     const parentIds = ancestors(item.id);
-    const menuShown = menu === 'title' || (menuDef !== undefined && isPresent(menuDef, ctx));
+    const menuShown =
+      menu === 'title' || (menuDef !== undefined && visibleMenus(ctx, [menuDef]).length === 1);
     const expected =
       menuShown &&
       isPresent(item, ctx) &&
@@ -5763,6 +5790,793 @@ async function forgetOnCollaborator(tag) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// round five (gslides-parity SPEC-5 16.1; the verifier's rows, 2026-09-15): the flipped rows of
+// 14.1 with their effects, the behaviour rows of the new panels and dialogs, the Later count, the
+// Omit reasons, the eleven shortcut rows that left OMITTED_SHORTCUTS and the unverified labels.
+// Every row names the lane that owns the surface (GS5_PLANNED_EFFECTS) so a miss lands with its
+// owner in VERIFICATION-5.md. A surface the audit cannot reach is a skip with the reason, never a
+// pass.
+
+const R5 = 'roundFive';
+const laneOf = (id) => GS5_PLANNED_EFFECTS[id]?.lane ?? 'integrator';
+const r5 = (ok, id, evidence, extra = {}) =>
+  (ok === null ? skip : ok ? pass : fail)(R5, { id, evidence, owner: laneOf(id), ...extra });
+
+/** The open panel's title, or null. */
+const openPanelTitle = (page) =>
+  page.evaluate(
+    () =>
+      document.querySelector('.ts-rpanel [data-panel-title]')?.getAttribute('data-panel-title') ??
+      null,
+  );
+/** Closes whatever panel is open (the close control, else Esc). */
+async function closePanel(page) {
+  const close = await page.$('.ts-rpanel [data-control$=".close"]');
+  if (close) await close.click().catch(() => null);
+  else await page.keyboard.press('Escape');
+  await page.waitForTimeout(120);
+}
+/** Opens a menu row and reads the panel it opened; leaves the panel open. */
+async function openPanelThrough(page, id, title) {
+  await closeOverlays(page).catch(() => null);
+  await activate(page, id).catch(() => null);
+  const found = await waitFor(() => page.$(`.ts-rpanel [data-panel-title="${title}"]`));
+  return found !== null;
+}
+/** Every data-control id under a root, in document order. */
+const controlsUnder = (page, root) =>
+  page.$$eval(`${root} [data-control]`, (els) => els.map((el) => el.getAttribute('data-control')));
+/** The visible texts of the dialog's tabs (Dialog.tsx DialogTabs: role="tab"). */
+const dialogTabs = (page) =>
+  page.$$eval('[role="dialog"] [role="tab"]', (els) =>
+    els.map((el) => ({
+      label: el.textContent.trim(),
+      selected: el.getAttribute('aria-selected') === 'true',
+      disabled: el.getAttribute('aria-disabled') === 'true' || el.disabled === true,
+      control: el.getAttribute('data-control'),
+    })),
+  );
+async function closeDialogs(page) {
+  for (let i = 0; i < 4; i += 1) {
+    if ((await page.$$('[role="dialog"]')).length === 0) break;
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(120);
+  }
+}
+
+async function checkRoundFive(page, context, states, deckId, tag) {
+  log('audit: round five rows (SPEC-5 16.1)');
+  /* 1. the flipped rows of 14.1: each planned row is `now` (or a live toolbar control) */
+  for (const [id, planned] of Object.entries(GS5_PLANNED_EFFECTS)) {
+    if (id.startsWith('toolbar.')) {
+      const control = [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT, ...tailFor('text')].find(
+        (c) => c.control === id,
+      );
+      const enabledNever = control?.enabled === 'never';
+      r5(
+        control !== undefined && control.status !== 'omit' && !enabledNever,
+        `flip ${id}`,
+        control
+          ? `toolbar control ${id}: status ${control.status ?? 'now'}, enabled ${JSON.stringify(control.enabled ?? 'always')} (${planned.lane})`
+          : `no toolbar control ${id} in the model (${planned.lane})`,
+        { lane: planned.lane },
+      );
+      continue;
+    }
+    const item = findItem(id);
+    const ok = item !== undefined && item.status === 'now';
+    r5(
+      ok,
+      `flip ${id}`,
+      item
+        ? `${item.status}${item.status === 'later' ? `: "${item.stubReason}"` : ''}; effect ${JSON.stringify(item.effect ?? planned.effect)} (${planned.lane})`
+        : `no row ${id} in the model (${planned.lane})`,
+      { lane: planned.lane },
+    );
+  }
+  /* 2. the Later count at 2 leaves (14.2) and every Omit row with a reason */
+  const laterLeaves = allItems().filter((i) => i.status === 'later' && !Array.isArray(i.items));
+  r5(
+    laterLeaves.length === 2,
+    'later count (14.2)',
+    `${laterLeaves.length} Later leaf row(s): ${laterLeaves.map((i) => i.id).join(', ')} (SPEC-5 14.2 reads 2)`,
+    { lane: 'B4' },
+  );
+  const omitted = allItems().filter((i) => i.status === 'omit');
+  const noReason = omitted.filter((i) => !i.omitReason || i.omitReason.trim() === '');
+  r5(
+    noReason.length === 0,
+    'omit rows carry a reason',
+    `${omitted.length} Omit row(s), ${noReason.length} without a reason${noReason.length ? `: ${noReason.map((i) => i.id).join(', ')}` : ''}`,
+  );
+  /* 3. the labels the research marks unverified: listed, never failing (16.1, 16.9) */
+  const unverified = allItems().filter((i) => i.unverified === true);
+  pass(R5, {
+    id: 'unverified labels',
+    evidence: `${unverified.length} row(s) carry unverified: true: ${unverified.map((i) => `${i.id} "${i.label}"`).join('; ')}`,
+  });
+  /* 4. the eleven shortcut rows that left OMITTED_SHORTCUTS */
+  const googleRows = GS5_KEY_ROWS.filter((row) => row.google !== undefined);
+  const stillOmitted = OMITTED_SHORTCUTS.filter((o) =>
+    googleRows.some((row) => row.google === o.id || row.google === o.google),
+  );
+  const unbound = googleRows.filter((row) => {
+    const item = findItem(row.id);
+    return item !== undefined && item.key === undefined && !row.id.startsWith('key.');
+  });
+  r5(
+    stillOmitted.length === 0 && unbound.length === 0,
+    'the Google shortcut rows of round five left OMITTED_SHORTCUTS',
+    `${googleRows.length} planned Google row(s) (${googleRows.map((r) => r.google).join(', ')}); OMITTED_SHORTCUTS holds ${OMITTED_SHORTCUTS.length} row(s), ${stillOmitted.length} of them planned this round (${stillOmitted.map((o) => o.id ?? o.google ?? o.label).join(', ') || 'none'}); menu rows without a key: ${unbound.map((r) => r.id).join(', ') || 'none'}`,
+  );
+
+  /* the browser rows need the editor on the scratch deck */
+  await resetEditor(page, deckId).catch(() => null);
+
+  /* 5. the Motion panel: six entry points, the transition kinds and animation labels in Google's
+     order, Apply to all slides writing every slide */
+  const motionEntries = [];
+  for (const id of ['slide.transition', 'view.motion']) {
+    const opened = await openPanelThrough(page, id, 'Motion');
+    motionEntries.push([id, opened]);
+    await closePanel(page);
+  }
+  {
+    const btn = await page.$('[data-control="toolbar.transition"]');
+    let opened = false;
+    if (btn) {
+      await btn.click().catch(() => null);
+      opened = (await waitFor(() => page.$('.ts-rpanel [data-panel-title="Motion"]'))) !== null;
+      await closePanel(page);
+    }
+    motionEntries.push(['toolbar.transition', btn ? opened : null]);
+  }
+  {
+    const chord = findItem('slide.transition')?.key;
+    let opened = null;
+    if (chord) {
+      await closeOverlays(page).catch(() => null);
+      await blurAll(page).catch(() => null);
+      await page.keyboard.press(playwrightChord(String(chord.mac ?? chord).split(/\s+or\s+/)[0]));
+      opened = (await waitFor(() => page.$('.ts-rpanel [data-panel-title="Motion"]'))) !== null;
+      await closePanel(page);
+    }
+    motionEntries.push([`chord ${JSON.stringify(chord?.mac ?? chord ?? null)}`, opened]);
+  }
+  motionEntries.push([
+    'insert.animation',
+    findItem('insert.animation')?.status === 'now' ? true : false,
+  ]);
+  motionEntries.push(['block.animate', findItem('block.animate')?.status === 'now' ? true : false]);
+  r5(
+    motionEntries.every(([, ok]) => ok === true),
+    'motion panel: the six entry points',
+    motionEntries
+      .map(([id, ok]) => `${id} ${ok === null ? 'not driven' : ok ? 'ok' : 'FAIL'}`)
+      .join('; '),
+    { lane: 'B1' },
+  );
+  if (await openPanelThrough(page, 'slide.transition', 'Motion')) {
+    const kinds = await page
+      .$$eval('[data-control="motion.transition.kind"] option', (els) =>
+        els.map((el) => el.textContent.trim()),
+      )
+      .catch(() => []);
+    const wantKinds = TRANSITION_KINDS.map((k) => MOTION_LABELS.transitions[k]);
+    r5(
+      JSON.stringify(kinds) === JSON.stringify(wantKinds),
+      "motion panel: the eight transition kinds in Google's order",
+      `select lists ${JSON.stringify(kinds)}; wanted ${JSON.stringify(wantKinds)}`,
+      { lane: 'B1' },
+    );
+    const controls = await controlsUnder(page, '.ts-rpanel [data-panel-title="Motion"]');
+    const wantControls = [
+      'motion.play',
+      'motion.transition',
+      'motion.transition.kind',
+      'motion.transition.applyAll',
+      'motion.animations',
+      'motion.list',
+      'motion.add',
+    ];
+    const missing = wantControls.filter((c) => !controls.includes(c));
+    r5(
+      missing.length === 0,
+      'motion panel: the controls',
+      `${controls.length} control(s): ${controls.join(', ')}${missing.length ? `; missing ${missing.join(', ')}` : ''}`,
+      { lane: 'B1' },
+    );
+    /* Apply to all slides: Fade on this slide, then every slide carries it */
+    const rev0 = await revisionOf(page);
+    await page.selectOption('[data-control="motion.transition.kind"]', 'fade').catch(() => null);
+    await waitRevision(page, rev0, 8000).catch(() => null);
+    const rev1 = await revisionOf(page);
+    await page.click('[data-control="motion.transition.applyAll"]').catch(() => null);
+    await waitRevision(page, rev1, 8000).catch(() => null);
+    await settled(page).catch(() => null);
+    const list = await invoke(page, 'slide.list').catch(() => []);
+    const kindsPer = [];
+    for (const row of Array.isArray(list) ? list : []) {
+      const got = await invoke(page, 'slide.get', { slideId: row.id }).catch(() => null);
+      kindsPer.push([row.id, got?.slide?.transition?.kind ?? null]);
+    }
+    r5(
+      kindsPer.length > 1 && kindsPer.every(([, k]) => k === 'fade'),
+      'motion panel: Apply to all slides writes every slide',
+      `revision ${rev0} -> ${await revisionOf(page)}; ${kindsPer.map(([id, k]) => `${id}:${k}`).join(', ')}`,
+      { lane: 'B1' },
+    );
+    /* an animation on the text block: the fifteen labels in Google's order, By paragraph */
+    let labels = [];
+    let rowControls = [];
+    if (states?.textCtx) {
+      await invoke(page, 'view.goto', { slideId: states.textCtx.slideId }).catch(() => null);
+      await selectBlockByClick(page, states.textCtx.blockId, { text: true }).catch(() => null);
+      const rev2 = await revisionOf(page);
+      await page.click('[data-control="motion.add"]').catch(() => null);
+      await waitRevision(page, rev2, 8000).catch(() => null);
+      const rowSel =
+        '[data-control="motion.list"] [data-control^="motion.row."][data-control$=".effect"]';
+      await page.waitForSelector(rowSel, { timeout: 5000 }).catch(() => null);
+      labels = await page
+        .$$eval(`${rowSel} option`, (els) => els.map((el) => el.textContent.trim()))
+        .catch(() => []);
+      rowControls = await controlsUnder(page, '[data-control="motion.list"]');
+    }
+    const wantLabels = ANIMATION_CHOICES_IN_ORDER.map(animationLabel);
+    r5(
+      states?.textCtx ? JSON.stringify(labels) === JSON.stringify(wantLabels) : null,
+      "motion panel: the fifteen animation labels in Google's order",
+      states?.textCtx
+        ? `the row's select lists ${JSON.stringify(labels)}; wanted ${JSON.stringify(wantLabels)}`
+        : 'no text block state to add an animation to',
+      { lane: 'B1' },
+    );
+    const perRow = ['.effect', '.trigger', '.byParagraph', '.remove', '.toggle', '.handle'];
+    const present = perRow.filter((s) => rowControls.some((c) => c.endsWith(s)));
+    r5(
+      states?.textCtx ? present.length >= 4 : null,
+      'motion panel: the row controls (effect, trigger, By paragraph, remove)',
+      `${rowControls.length} control(s) in the list: ${rowControls.slice(0, 12).join(', ')}`,
+      { lane: 'B1' },
+    );
+    await closePanel(page);
+  } else
+    r5(false, 'motion panel: opens', 'Slide > Transition opened no Motion panel', { lane: 'B1' });
+  await resetEditor(page, deckId).catch(() => null);
+
+  /* 6. Insert > Audio's two tabs, Insert > Video's three tabs with the search tab disabled */
+  for (const [id, want, title] of [
+    ['insert.audio', 2, 'Insert audio'],
+    ['insert.video', 3, 'Insert video'],
+  ]) {
+    await closeOverlays(page).catch(() => null);
+    await activate(page, id).catch(() => null);
+    const open = await waitFor(
+      async () => (await dialogs(page)).find((d) => d.title.startsWith(title)) ?? null,
+    );
+    const tabs = open ? await dialogTabs(page) : [];
+    let searchDisabled = null;
+    if (open && id === 'insert.video') {
+      const search = tabs.find((t) => /youtube|search/i.test(t.label));
+      if (search?.control) await page.click(`[data-control="${search.control}"]`).catch(() => null);
+      searchDisabled = await page
+        .evaluate(() => {
+          const box = document.querySelector('[data-control="dialog.insertVideo.search"]');
+          const clause = document.querySelector(
+            '[data-control="dialog.insertVideo.search.clause"]',
+          );
+          return box
+            ? {
+                disabled: box.classList.contains('is-disabled'),
+                clause: clause?.textContent?.trim() ?? '',
+              }
+            : null;
+        })
+        .catch(() => null);
+    }
+    r5(
+      open !== null &&
+        tabs.length === want &&
+        (id !== 'insert.video' ||
+          (searchDisabled?.disabled === true && searchDisabled.clause !== '')),
+      `${id}: the dialog's tabs`,
+      open
+        ? `dialog "${open.title}"; tabs ${JSON.stringify(tabs.map((t) => t.label))}${searchDisabled ? `; search tab ${searchDisabled.disabled ? 'disabled' : 'ENABLED'} with clause "${searchDisabled.clause}"` : ''}`
+        : `no "${title}" dialog opened`,
+      { lane: 'B2' },
+    );
+    await closeDialogs(page);
+  }
+
+  /* 7. the Templates and Building blocks panes with their categories */
+  for (const [id, title, want] of [
+    ['insert.templates', 'Templates', TEMPLATE_CATEGORIES.length],
+    ['insert.buildingBlocks', 'Building blocks', BUILDING_BLOCK_CATEGORIES.length],
+  ]) {
+    const opened = await openPanelThrough(page, id, title);
+    const heads = opened
+      ? await page
+          .$$eval(`.ts-rpanel [data-panel-title="${title}"] h3`, (els) =>
+            els.map((el) => el.textContent.trim()),
+          )
+          .catch(() => [])
+      : [];
+    r5(
+      opened && heads.length === want,
+      `${id}: the pane's categories`,
+      opened
+        ? `${heads.length} heading(s): ${heads.join(', ')} (wanted ${want})`
+        : `no "${title}" panel`,
+      { lane: 'B3' },
+    );
+    await closePanel(page);
+  }
+
+  /* 8. the gallery page's three headings */
+  {
+    await page.goto(`${BASE}/decks/templates`, { waitUntil: 'domcontentloaded' });
+    const gallery = await page
+      .waitForSelector('#ts-gallery-heading', { timeout: 30_000 })
+      .then(() => true)
+      .catch(() => false);
+    const heads = gallery
+      ? await page.$$eval('main h2', (els) => els.map((el) => el.textContent.trim()))
+      : [];
+    r5(
+      gallery && ['Personal', 'Work', 'Education'].every((h) => heads.includes(h)),
+      'gallery page: Personal, Work and Education',
+      `/decks/templates ${gallery ? '200 with the gallery heading' : 'without the gallery heading'}; h2 ${JSON.stringify(heads)}`,
+      { lane: 'B3' },
+    );
+    await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
+    await ready(page);
+  }
+
+  /* 9. Import slides: the steps with the checkbox unchecked; the Upload tabs accept .pptx */
+  for (const [id, title, control] of [
+    ['file.importSlides', 'Import slides', 'dialog.importSlides'],
+    ['file.open', 'Open', 'dialog.open'],
+  ]) {
+    await closeOverlays(page).catch(() => null);
+    await activate(page, id).catch(() => null);
+    const open = await waitFor(
+      async () => (await dialogs(page)).find((d) => d.title.startsWith(title)) ?? null,
+    );
+    const facts = open
+      ? await page.evaluate((c) => {
+          const dlg = document.querySelector('[role="dialog"]');
+          const inputs = [...(dlg?.querySelectorAll('input[type="file"]') ?? [])].map((el) =>
+            el.getAttribute('accept'),
+          );
+          const keep = dlg?.querySelector(`[data-control="${c}.keepTheme"]`);
+          return {
+            accepts: inputs,
+            keepTheme: keep ? keep.checked : null,
+            text: dlg?.textContent?.slice(0, 600) ?? '',
+          };
+        }, control)
+      : null;
+    const acceptsPptx = facts?.accepts.some((a) => (a ?? '').includes('.pptx')) ?? false;
+    const refusalGone = !/PowerPoint files? (are|is) not|cannot be opened|not accepted/i.test(
+      facts?.text ?? '',
+    );
+    r5(
+      open !== null &&
+        acceptsPptx &&
+        refusalGone &&
+        (id !== 'file.importSlides' || facts.keepTheme === false),
+      `${id}: the Upload tab accepts .pptx${id === 'file.importSlides' ? ' and Keep original theme is unchecked' : ' and the refusal sentence is gone'}`,
+      open
+        ? `dialog "${open.title}"; accept ${JSON.stringify(facts.accepts)}; keepTheme ${facts.keepTheme}`
+        : `no "${title}" dialog`,
+      { lane: 'B3' },
+    );
+    await closeDialogs(page);
+  }
+
+  /* 10. Page setup, the print dropdown, the ODP and SVG rows (B4) */
+  {
+    const item = findItem('file.pageSetup');
+    if (item?.status === 'now') {
+      await activate(page, 'file.pageSetup').catch(() => null);
+      const open = await waitFor(
+        async () => (await dialogs(page)).find((d) => d.title.startsWith('Page setup')) ?? null,
+      );
+      const labels = open
+        ? await page.$$eval('[role="dialog"] label, [role="dialog"] [role="radio"]', (els) =>
+            els.map((el) => el.textContent.trim()).filter(Boolean),
+          )
+        : [];
+      r5(
+        open !== null,
+        'file.pageSetup: the dialog and its labels',
+        `labels ${JSON.stringify(labels)}`,
+        { lane: 'B4' },
+      );
+      await closeDialogs(page);
+    } else
+      r5(
+        false,
+        'file.pageSetup: the dialog and its four labels',
+        `the row is ${item?.status ?? 'absent'}: "${item?.stubReason ?? ''}"`,
+        { lane: 'B4' },
+      );
+    for (const id of ['file.download.odp', 'file.download.svg']) {
+      const row = findItem(id);
+      r5(
+        row?.status === 'now',
+        `${id}: the row is Now`,
+        `${row?.status ?? 'absent'}${row?.stubReason ? `: "${row.stubReason}"` : ''}`,
+        { lane: 'B4' },
+      );
+    }
+    await page.goto(`${BASE}/print/${deckId}`, { waitUntil: 'domcontentloaded' });
+    const options = await page
+      .waitForSelector('[data-control="print.layout"]', { timeout: 30_000 })
+      .then(() =>
+        page.$$eval('[data-control="print.layout"] option', (els) =>
+          els.map((el) => ({ label: el.textContent.trim(), disabled: el.disabled })),
+        ),
+      )
+      .catch(() => []);
+    const disabled = options.filter((o) => o.disabled);
+    r5(
+      options.length === 7 && disabled.length === 0,
+      'print dropdown: seven rows enabled',
+      `${options.length} option(s), ${disabled.length} disabled: ${options.map((o) => `${o.label}${o.disabled ? ' (disabled)' : ''}`).join(', ')}`,
+      { lane: 'B4' },
+    );
+    await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
+    await ready(page);
+  }
+
+  /* 11. Preferences: the two tabs and the Substitutions table */
+  {
+    await closeOverlays(page).catch(() => null);
+    await activate(page, 'tools.preferences').catch(() => null);
+    const open = await waitFor(
+      async () => (await dialogs(page)).find((d) => d.title.startsWith('Preferences')) ?? null,
+    );
+    const tabs = open ? await dialogTabs(page) : [];
+    let table = false;
+    const sub = tabs.find((t) => /substitution/i.test(t.label));
+    if (sub?.control) {
+      await page.click(`[data-control="${sub.control}"]`).catch(() => null);
+      table =
+        (await page
+          .waitForSelector('[data-control="dialog.preferences.substitutions.table"]', {
+            timeout: 4000,
+          })
+          .catch(() => null)) !== null;
+    }
+    r5(
+      open !== null && tabs.length === 2 && table,
+      'tools.preferences: two tabs and the Substitutions table',
+      open
+        ? `tabs ${JSON.stringify(tabs.map((t) => t.label))}; table ${table ? 'drawn' : 'absent'}`
+        : 'no Preferences dialog',
+      { lane: 'B5' },
+    );
+    await closeDialogs(page);
+  }
+
+  /* 12. File > Language's submenu */
+  {
+    let rows = [];
+    try {
+      await openPath(page, 'file.language');
+      rows = await page.$$eval('[data-menu-item^="file.language."]', (els) =>
+        els.map((el) => ({
+          id: el.getAttribute('data-menu-item'),
+          checked: el.getAttribute('aria-checked'),
+        })),
+      );
+    } catch (error) {
+      rows = [];
+    }
+    await closeMenus(page).catch(() => null);
+    r5(
+      rows.length === OFFERED_LANGUAGES.length &&
+        rows.filter((r) => r.checked === 'true').length === 1,
+      'file.language: the submenu of offered tags with one checked',
+      `${rows.length} row(s) (offered ${OFFERED_LANGUAGES.length}): ${rows.map((r) => `${r.id.split('.').pop()}${r.checked === 'true' ? '*' : ''}`).join(', ')}`,
+      { lane: 'B5' },
+    );
+  }
+
+  /* 13. the spell check card's four buttons (a misspelling planted on the heading) */
+  {
+    const st = await state(page);
+    const before = (await invoke(page, 'slide.get', { slideId: st.slideId }).catch(() => null))
+      ?.slide?.heading;
+    await invoke(page, 'slide.update', {
+      slideId: st.slideId,
+      baseRevision: st.revision,
+      mutations: [
+        {
+          op: 'slide.set',
+          slideId: st.slideId,
+          path: '/heading',
+          value: 'Audit scratch wiht a mispeling',
+        },
+      ],
+    }).catch(() => null);
+    await settled(page).catch(() => null);
+    const opened = await openPanelThrough(page, 'tools.spelling.spellCheck', 'Spell check');
+    const card = opened
+      ? await waitFor(
+          () =>
+            page.$(
+              '[data-control="panel.spellCheck.change"], [data-control="panel.spellCheck.none"], [data-control="panel.spellCheck.noDictionary"]',
+            ),
+          { timeout: 20_000 },
+        )
+      : null;
+    const controls = opened
+      ? await controlsUnder(page, '.ts-rpanel [data-panel-title="Spell check"]')
+      : [];
+    const four = [
+      'panel.spellCheck.change',
+      'panel.spellCheck.changeAll',
+      'panel.spellCheck.ignore',
+      'panel.spellCheck.ignoreAll',
+    ];
+    const have = four.filter((c) => controls.includes(c));
+    r5(
+      opened && have.length === 4,
+      'tools.spelling.spellCheck: the card with Change, Change all, Ignore, Ignore all',
+      opened
+        ? `${controls.length} control(s): ${controls.join(', ')}${card ? '' : '; no card within 20 s'}`
+        : 'no Spell check panel',
+      { lane: 'B5' },
+    );
+    await closePanel(page);
+    if (before !== undefined) {
+      const st2 = await state(page);
+      await invoke(page, 'slide.update', {
+        slideId: st2.slideId,
+        baseRevision: st2.revision,
+        mutations: [{ op: 'slide.set', slideId: st2.slideId, path: '/heading', value: before }],
+      }).catch(() => null);
+    }
+  }
+
+  /* 14. the Dictionary panel */
+  {
+    const opened = await openPanelThrough(page, 'tools.dictionary', 'Dictionary');
+    const controls = opened
+      ? await controlsUnder(page, '.ts-rpanel [data-panel-title="Dictionary"]')
+      : [];
+    r5(
+      opened &&
+        controls.some(
+          (c) =>
+            c === 'panel.dictionary.search' ||
+            c === 'panel.dictionary.word' ||
+            c === 'panel.dictionary.linkOnly',
+        ),
+      'tools.dictionary: the panel or the link',
+      opened ? `${controls.length} control(s): ${controls.join(', ')}` : 'no Dictionary panel',
+      { lane: 'B5' },
+    );
+    await closePanel(page);
+  }
+
+  /* 15. the Accessibility menu drawn under the toggle with its rows */
+  {
+    const menuBefore = (await page.$('[data-control="menubar.accessibility"]')) !== null;
+    await activate(page, 'tools.accessibilitySettings.screenReader').catch(() => null);
+    await closeMenus(page).catch(() => null);
+    const menuAfter =
+      (await waitFor(() => page.$('[data-control="menubar.accessibility"]'), { timeout: 5000 })) !==
+      null;
+    let rows = [];
+    if (menuAfter) {
+      await openBarMenu(page, 'accessibility').catch(() => null);
+      rows = await page.$$eval('[role="menu"] [data-menu-item^="accessibility."]', (els) =>
+        els.map((el) => el.getAttribute('data-menu-item')),
+      );
+      await closeMenus(page).catch(() => null);
+      await activate(page, 'tools.accessibilitySettings.screenReader').catch(() => null);
+      await closeMenus(page).catch(() => null);
+    }
+    const menuRestored = (await page.$('[data-control="menubar.accessibility"]')) === null;
+    r5(
+      !menuBefore && menuAfter && rows.length >= 4 && menuRestored,
+      'the Accessibility menu under Screen reader support',
+      `menu before ${menuBefore}, after the toggle ${menuAfter}, rows ${JSON.stringify(rows)}, gone after the second toggle ${menuRestored}`,
+      { lane: 'B5' },
+    );
+  }
+
+  /* 16. Insert > Equation with its chord and toolbar toggle and the six dropdowns */
+  {
+    const st = await state(page);
+    const objectsBefore = await objectsOf(page, st.slideId).catch(() => []);
+    await closeOverlays(page).catch(() => null);
+    await activate(page, 'insert.equation').catch(() => null);
+    await waitRevision(page, st.revision, 10_000).catch(() => null);
+    await settled(page).catch(() => null);
+    const objectsAfter = await objectsOf(page, st.slideId).catch(() => []);
+    const equations = objectsAfter.filter((o) => o.type === 'equation');
+    const toolbar = await waitFor(() => page.$('[data-control="equationToolbar"]'), {
+      timeout: 8000,
+    });
+    const groups = toolbar
+      ? await page.$$eval('[data-control="equationToolbar"] button .pt-lb', (els) =>
+          els.map((el) => el.textContent.trim()),
+        )
+      : [];
+    const wantGroups = EQUATION_SYMBOL_GROUPS.map((g) => EQUATION_GROUP_LABELS[g]);
+    r5(
+      equations.length >= 1 && toolbar !== null && wantGroups.every((g) => groups.includes(g)),
+      'insert.equation: the block, the toolbar and its six dropdowns',
+      `objects ${objectsBefore.length} -> ${objectsAfter.length} (${equations.length} equation); toolbar ${toolbar ? 'drawn' : 'absent'}; dropdowns ${JSON.stringify(groups)}`,
+      { lane: 'B6' },
+    );
+    const chord = findItem('insert.equation')?.key;
+    let chordOk = null;
+    if (chord) {
+      await blurAll(page).catch(() => null);
+      await page.keyboard.press('Escape');
+      const rev = await revisionOf(page);
+      await page.keyboard.press(playwrightChord(String(chord.mac ?? chord).split(/\s+or\s+/)[0]));
+      await waitRevision(page, rev, 8000).catch(() => null);
+      const after = await objectsOf(page, st.slideId).catch(() => []);
+      chordOk = after.filter((o) => o.type === 'equation').length > equations.length;
+    }
+    r5(
+      chordOk,
+      'insert.equation: the chord inserts a second equation',
+      `chord ${JSON.stringify(chord?.mac ?? chord ?? null)}: ${chordOk === null ? 'no chord on the row' : chordOk ? 'a second block landed' : 'no block landed'}`,
+      { lane: 'B6' },
+    );
+    const toggle = findItem('view.equationToolbar');
+    let toggled = null;
+    if (toggle?.status === 'now') {
+      await activate(page, 'view.equationToolbar').catch(() => null);
+      await page.waitForTimeout(300);
+      const hidden = (await page.$('[data-control="equationToolbar"]')) === null;
+      await activate(page, 'view.equationToolbar').catch(() => null);
+      await page.waitForTimeout(300);
+      const back = (await page.$('[data-control="equationToolbar"]')) !== null;
+      toggled = hidden && back;
+    }
+    r5(
+      toggled,
+      'view.equationToolbar: the toggle hides and shows the toolbar',
+      `row ${toggle?.status ?? 'absent'}; ${toggled === null ? 'not driven' : toggled ? 'hidden then shown' : 'did not toggle'}`,
+      { lane: 'B6' },
+    );
+    await resetEditor(page, deckId).catch(() => null);
+  }
+
+  /* 17. Edit theme's mode, toolbar controls and layout context rows */
+  {
+    await closeOverlays(page).catch(() => null);
+    await activate(page, 'slide.editTheme').catch(() => null);
+    const root = await waitFor(() => page.$('[data-control="themeMode"]'), { timeout: 10_000 });
+    const mode = await page.evaluate(
+      () => document.querySelector('[data-editor-mode]')?.getAttribute('data-editor-mode') ?? null,
+    );
+    const controls = root ? await controlsUnder(page, '[data-control="themeMode"]') : [];
+    const toolbarControls = root
+      ? await controlsUnder(page, '[data-control="themeMode.toolbar"]')
+      : [];
+    const wantToolbar = [
+      'themeMode.colors.menu',
+      'themeMode.fonts.menu',
+      'themeMode.placeholder.menu',
+    ];
+    const layoutRows = controls.filter((c) => c.startsWith('themeMode.layout.'));
+    let contextRows = [];
+    const tile = await page.$(
+      '[data-control^="themeMode.layout."]:not([data-control^="themeMode.layout.menu"]):not([data-control="themeMode.layout.new"])',
+    );
+    if (tile) {
+      await tile.click({ button: 'right' }).catch(() => null);
+      contextRows = await page
+        .$$eval('[data-control^="themeMode.layout.menu."]', (els) =>
+          els.map((el) => el.getAttribute('data-control')),
+        )
+        .catch(() => []);
+      await page.keyboard.press('Escape');
+    }
+    const exit = await page.$('[data-control="themeMode.exit"]');
+    if (exit) await exit.click().catch(() => null);
+    else await page.keyboard.press('Escape');
+    const left = await waitFor(
+      async () => ((await page.$('[data-control="themeMode"]')) === null ? true : null),
+      { timeout: 8000 },
+    );
+    r5(
+      root !== null &&
+        mode === 'theme' &&
+        wantToolbar.every((c) => toolbarControls.includes(c)) &&
+        layoutRows.length > 0 &&
+        left === true,
+      'slide.editTheme: the mode, the toolbar controls and the layout rows',
+      `data-editor-mode ${mode}; toolbar ${JSON.stringify(toolbarControls)}; ${layoutRows.length} layout control(s); context rows ${JSON.stringify(contextRows)}; exit ${left === true ? 'left the mode' : 'did not leave'}`,
+      { lane: 'B6' },
+    );
+    await resetEditor(page, deckId).catch(() => null);
+  }
+
+  /* 18. the Themes panel's three groups and Import theme */
+  {
+    const opened = await openPanelThrough(page, 'slide.changeTheme', 'Themes');
+    const heads = opened
+      ? await page.$$eval('.ts-rpanel [data-panel-title="Themes"] .ts-themes-head', (els) =>
+          els.map((el) => el.textContent.trim()),
+        )
+      : [];
+    const importBtn = opened ? (await page.$('[data-control="themes.import"]')) !== null : false;
+    r5(
+      opened && heads.length === 3 && importBtn,
+      'slide.changeTheme: three groups and Import theme',
+      opened
+        ? `groups ${JSON.stringify(heads)}; Import theme ${importBtn ? 'drawn' : 'absent'}`
+        : 'no Themes panel',
+      { lane: 'B6' },
+    );
+    await closePanel(page);
+  }
+
+  /* 19. Join chat's panel and its first line */
+  {
+    const opened = await openPanelThrough(page, 'title.presence.joinChat', 'Chat');
+    const first = opened
+      ? await page.evaluate(
+          () =>
+            document.querySelector('[data-control="panel.chat.notSaved"]')?.textContent?.trim() ??
+            null,
+        )
+      : null;
+    r5(
+      opened && typeof first === 'string' && first.length > 0,
+      'title.presence.joinChat: the panel and its first line',
+      opened ? `first line "${first}"` : 'no Chat panel',
+      { lane: 'B5' },
+    );
+    await closePanel(page);
+  }
+
+  /* 20. the Font dropdown lists the catalog (A5) */
+  if (states?.textCtx) {
+    await invoke(page, 'view.goto', { slideId: states.textCtx.slideId }).catch(() => null);
+    await selectBlockByClick(page, states.textCtx.blockId, { text: true }).catch(() => null);
+    const font = await waitFor(() => page.$('[data-control="toolbar.font"]'), { timeout: 5000 });
+    let rows = 0;
+    let catalog = 0;
+    if (font) {
+      await font.click().catch(() => null);
+      await page
+        .waitForSelector('[data-control="toolbar.font.list"]', { timeout: 5000 })
+        .catch(() => null);
+      rows = await page
+        .$$eval('[data-control^="toolbar.font.pick."]', (els) => els.length)
+        .catch(() => 0);
+      const listed = await invoke(page, 'font.list').catch(() => null);
+      catalog = Array.isArray(listed)
+        ? listed.length
+        : Array.isArray(listed?.fonts)
+          ? listed.fonts.length
+          : 0;
+      await page.keyboard.press('Escape');
+    }
+    r5(
+      font !== null && rows > 0 && rows === catalog,
+      'toolbar.font: the dropdown lists the catalog',
+      `control ${font ? 'drawn' : 'absent'}; ${rows} row(s) in the plate against ${catalog} in font.list`,
+      { lane: 'B7' },
+    );
+  } else
+    r5(null, 'toolbar.font: the dropdown lists the catalog', 'no text block state', { lane: 'B7' });
+  await resetEditor(page, deckId).catch(() => null);
+}
+
+// ---------------------------------------------------------------------------------------------
 // Main
 
 const startedAt = Date.now();
@@ -5840,7 +6654,7 @@ try {
       ['no snackbar', first.snackbar === ''],
       [
         'the ten menus in order',
-        JSON.stringify(first.menus) === JSON.stringify(MENUS.map((m) => m.label)),
+        JSON.stringify(first.menus) === JSON.stringify(BAR_MENUS.map((m) => m.label)),
       ],
       [
         'the bottom bar: filmstrip, grid, the panel chevron',
@@ -6164,6 +6978,19 @@ try {
         }
         await resetEditor(page, scratchDeck).catch(() => null);
       }
+    }
+    /* round five (SPEC-5 16.1): the flipped rows, the new panels and dialogs, the counts */
+    if (phase('roundFive')) {
+      await resetEditor(page, scratchDeck).catch(() => null);
+      try {
+        await checkRoundFive(page, context, states, scratchDeck, 'scratch');
+      } catch (error) {
+        fail('infrastructure', {
+          id: 'roundFive',
+          evidence: `the round five rows threw: ${String(error?.stack ?? error).slice(0, 600)}`,
+        });
+      }
+      await resetEditor(page, scratchDeck).catch(() => null);
     }
   }
 

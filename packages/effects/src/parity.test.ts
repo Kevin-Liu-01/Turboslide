@@ -28,10 +28,13 @@ import { loadNativeAddon, loadWasmNode } from '@turboslide/native/node';
 import pixelmatch from 'pixelmatch';
 import { afterAll, describe, expect, test } from 'vitest';
 
+import { resolveDither } from '@turboslide/schema/blocks/dither';
+
 import { backendFromNative, typescriptBackend } from './backend.ts';
 import type { EffectsBackend } from './backend.ts';
 import { bitsFromGray, cellAgreement } from './diff.ts';
-import type { BitImage, Box, RgbaImage } from './image.ts';
+import { levelsOf, planeAlpha, positiveOf, thresholdAt } from './dither.ts';
+import type { BitImage, Box, GrayImage, RgbaImage } from './image.ts';
 import { cropRgba, invertBits } from './image.ts';
 import { decodeImage } from './io.ts';
 import { PLATE_BOXES, twoToneMetrics } from './metrics.ts';
@@ -520,6 +523,128 @@ describe.skipIf(!hasNative)('diffs', () => {
       }
       if (name === 'identical') expect(want.dssim).toBe(0);
       if (name === 'twin vs inverse twin') expect(want.dssim).toBeGreaterThan(0.5);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The block level dither patterns in the crate (gslides-parity SPEC-4 7, SPEC-5 11; MILESTONES-5
+// B6 day 7): the ordered thresholds, the levels under every pattern (the two error diffusions
+// included) at two, three and four levels over the Pillow fixture's gray and a synthetic ramp,
+// and the plane alpha, each backend against the TypeScript stages at agreement 1.0.
+
+describe.skipIf(!hasNative)('the block level dither patterns', () => {
+  const patterns = [
+    'bayer8',
+    'bayer4',
+    'blue64',
+    'random',
+    'floyd-steinberg',
+    'atkinson',
+    'halftone-dot',
+    'halftone-line',
+  ] as const;
+  const angles = [45, 0, 15, 90, 137.5];
+  const seeds = [0, 7, 123456789];
+
+  test('ordered thresholds agree cell for cell at every angle and seed', () => {
+    for (const backend of nativeBackends) {
+      const native = backend.kind === 'native' ? addon : wasm;
+      if (!native) continue;
+      for (const pattern of patterns) {
+        for (const angle of angles) {
+          for (const seed of seeds) {
+            const width = 70;
+            const height = 41;
+            const expected = new Uint8Array(width * height);
+            for (let y = 0; y < height; y += 1)
+              for (let x = 0; x < width; x += 1)
+                expected[y * width + x] = thresholdAt(pattern, x, y, seed, angle);
+            const got = native.ditherThresholds(pattern, width, height, seed, angle);
+            const disagreements = countDiff(expected, got);
+            report.rows.push({
+              check: 'dither thresholds',
+              backend: backend.kind,
+              pattern,
+              angle,
+              seed,
+              cells: width * height,
+              disagreements,
+            });
+            expect(disagreements, `${backend.kind} ${pattern} angle ${angle} seed ${seed}`).toBe(0);
+          }
+        }
+      }
+    }
+  });
+
+  test('levels agree under every pattern at two, three and four levels on the fixture gray and a ramp', async () => {
+    const pillowSrc = await decodeImage(join(FIXTURES, 'pillow', 'src.png'));
+    const gray = toGray(pillowSrc, 'gray');
+    const ramp: GrayImage = { width: 96, height: 40, data: new Uint8Array(96 * 40) };
+    for (let y = 0; y < ramp.height; y += 1)
+      for (let x = 0; x < ramp.width; x += 1)
+        ramp.data[y * ramp.width + x] = Math.round(
+          ((x + y) / (ramp.width + ramp.height - 2)) * 255,
+        );
+    for (const backend of nativeBackends) {
+      const native = backend.kind === 'native' ? addon : wasm;
+      if (!native) continue;
+      for (const pattern of patterns) {
+        for (const levels of [2, 3, 4]) {
+          for (const tone of [gray, ramp]) {
+            const resolved = { ...resolveDither({ pattern }), pattern, angle: 45 };
+            const expected = levelsOf(tone, resolved, levels);
+            const got = native.ditherLevels(
+              tone.data,
+              tone.width,
+              tone.height,
+              pattern,
+              levels,
+              0,
+              45,
+            );
+            const disagreements = countDiff(expected, got);
+            report.rows.push({
+              check: 'dither levels',
+              backend: backend.kind,
+              pattern,
+              levels,
+              size: `${tone.width}x${tone.height}`,
+              cells: tone.width * tone.height,
+              disagreements,
+              agreement: 1 - disagreements / (tone.width * tone.height),
+            });
+            expect(
+              disagreements,
+              `${backend.kind} ${pattern} levels ${levels} ${tone.width}x${tone.height}`,
+            ).toBe(0);
+          }
+          // the positive at two levels is positiveOf
+          if (levels === 2) {
+            const positive = positiveOf(gray, {
+              ...resolveDither({ pattern }),
+              pattern,
+              angle: 45,
+            });
+            const got = native.ditherLevels(gray.data, gray.width, gray.height, pattern, 2, 0, 45);
+            expect(countDiff(positive.bits, got), `${backend.kind} ${pattern} positive`).toBe(0);
+          }
+        }
+      }
+    }
+  });
+
+  test('the plane alpha agrees over the strength range', () => {
+    for (const backend of nativeBackends) {
+      const native = backend.kind === 'native' ? addon : wasm;
+      if (!native) continue;
+      for (let i = 0; i <= 200; i += 1) {
+        const strength = i / 100 - 0.5;
+        expect(native.planeAlpha(strength), `${backend.kind} strength ${strength}`).toBe(
+          planeAlpha(strength),
+        );
+      }
     }
   });
 });

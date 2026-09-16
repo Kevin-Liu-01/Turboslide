@@ -30,8 +30,10 @@ import { basename, join, resolve } from 'node:path';
 
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
+import type { TemplateCategory, TemplateIndexEntry } from '@turboslide/schema/building-blocks';
+import { TEMPLATE_CATEGORIES, templateIndexEntrySchema } from '@turboslide/schema/building-blocks';
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { isTrashed, slideOrder } from '@turboslide/schema/deck';
+import { THEMES, isTrashed, slideOrder } from '@turboslide/schema/deck';
 import { SLUG_PATTERN, slugify } from '@turboslide/schema/ids';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
 
@@ -58,14 +60,29 @@ export type TemplateArchetype = {
   source?: string;
 };
 
-/** decks/templates/<id>/template.json. */
+/** The index of the templates, `decks/templates/templates.json` (gslides-parity SPEC-5 4.1). */
+export const TEMPLATE_INDEX_FILE = 'templates.json';
+
+/**
+ * decks/templates/<id>/template.json. Round five (gslides-parity SPEC-5 4.1) widens the id from
+ * the two built ins to any template folder and adds, all optional, the gallery's category, Google's
+ * use case words, the cover slide and the slide count the index carries.
+ */
 export type TemplateRecord = {
   schemaVersion: 1;
-  /** the template id, the directory name and the deck.create `from` value */
-  id: DeckTemplateId;
+  /** the template id, the directory name and the deck.create `from` value (any slug; `DECK_TEMPLATES` are the two built ins) */
+  id: string;
   name: string;
   description: string;
   theme: string;
+  /** the gallery heading the card sits under (SPEC-5 0.23); a template without one is not listed on the gallery page */
+  category?: TemplateCategory;
+  /** Google's use case words (R02 b.1), shown in the Templates pane */
+  useCases?: string[];
+  /** the slide the card renders; the first slide when absent */
+  cover?: string;
+  /** the slide count the index carries; computed from the manifest when absent */
+  slideCount?: number;
   /** the manifest file, relative to the template directory */
   deck: string;
   /** the slides folder, relative to the template directory */
@@ -80,7 +97,8 @@ export type Template = { record: TemplateRecord; dir: string };
 
 export type CreateDeckInput = {
   name: string;
-  from: DeckTemplateId;
+  /** a built in id or any id of the template index (SPEC-5 4.6) */
+  from: DeckTemplateId | string;
   /** the deck id; the slug of the name when absent */
   id?: string;
 };
@@ -88,7 +106,7 @@ export type CreateDeckInput = {
 export type CreateDeckResult = {
   deckId: string;
   title: string;
-  from: DeckTemplateId;
+  from: DeckTemplateId | string;
   revision: number;
   dir: string;
   counts: { slides: number; sections: number; assets: number };
@@ -103,7 +121,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isTemplateId(value: unknown): value is DeckTemplateId {
+/** True for a built in template id (`gt-brand`, `blank`). */
+export function isBuiltInTemplateId(value: unknown): value is DeckTemplateId {
   return typeof value === 'string' && (DECK_TEMPLATES as ReadonlyArray<string>).includes(value);
 }
 
@@ -111,8 +130,10 @@ function isTemplateId(value: unknown): value is DeckTemplateId {
 export function parseTemplateRecord(raw: unknown, file: string): TemplateRecord {
   if (!isRecord(raw)) throw new TypeError(`${file} must hold one JSON object`);
   if (raw.schemaVersion !== 1) throw new TypeError(`${file}: schemaVersion must be 1`);
-  if (!isTemplateId(raw.id))
-    throw new TypeError(`${file}: id must be one of ${DECK_TEMPLATES.join(', ')}`);
+  if (typeof raw.id !== 'string' || !SLUG_PATTERN.test(raw.id) || raw.id === TEMPLATES_DIR)
+    throw new TypeError(
+      `${file}: id must be a slug (lower case letters and digits joined by hyphens), the template folder's name`,
+    );
   for (const key of ['name', 'description', 'theme', 'deck', 'slides', 'assets'] as const) {
     if (typeof raw[key] !== 'string' || raw[key] === '')
       throw new TypeError(`${file}: ${key} must be a non-empty string`);
@@ -146,7 +167,7 @@ export function parseTemplateRecord(raw: unknown, file: string): TemplateRecord 
     if (typeof entry.source === 'string') archetype.source = entry.source;
     return archetype;
   });
-  return {
+  const record: TemplateRecord = {
     schemaVersion: 1,
     id: raw.id,
     name: raw.name as string,
@@ -158,6 +179,34 @@ export function parseTemplateRecord(raw: unknown, file: string): TemplateRecord 
     sections,
     archetypes,
   };
+  if (raw.category !== undefined) {
+    if (
+      typeof raw.category !== 'string' ||
+      !(TEMPLATE_CATEGORIES as ReadonlyArray<string>).includes(raw.category)
+    )
+      throw new TypeError(`${file}: category must be one of ${TEMPLATE_CATEGORIES.join(', ')}`);
+    record.category = raw.category as TemplateCategory;
+  }
+  if (raw.useCases !== undefined) {
+    if (!Array.isArray(raw.useCases) || !raw.useCases.every((entry) => typeof entry === 'string'))
+      throw new TypeError(`${file}: useCases must be a list of strings`);
+    record.useCases = raw.useCases as string[];
+  }
+  if (raw.cover !== undefined) {
+    if (typeof raw.cover !== 'string' || raw.cover === '')
+      throw new TypeError(`${file}: cover must be a slide id`);
+    record.cover = raw.cover;
+  }
+  if (raw.slideCount !== undefined) {
+    if (
+      typeof raw.slideCount !== 'number' ||
+      !Number.isInteger(raw.slideCount) ||
+      raw.slideCount < 0
+    )
+      throw new TypeError(`${file}: slideCount must be a whole number`);
+    record.slideCount = raw.slideCount;
+  }
+  return record;
 }
 
 /** The templates folder: decks/templates. */
@@ -180,6 +229,131 @@ export function listTemplates(decksDir: string): Template[] {
     .filter((entry) => entry.isDirectory() && existsSync(join(root, entry.name, 'template.json')))
     .map((entry) => readTemplate(join(root, entry.name)))
     .sort((a, b) => a.record.id.localeCompare(b.record.id));
+}
+
+/** The slide count of a template from its manifest's sections. */
+export function templateSlideCount(template: Template): number {
+  const manifestPath = join(template.dir, template.record.deck);
+  if (!existsSync(manifestPath))
+    return template.record.sections.reduce((sum, section) => sum + section.slides, 0);
+  const manifest = parseJson(readFileSync(manifestPath, 'utf8'), manifestPath);
+  if (!isRecord(manifest) || !Array.isArray(manifest.sections)) return 0;
+  return manifest.sections.reduce(
+    (sum: number, section: unknown) =>
+      sum + (isRecord(section) && Array.isArray(section.slideIds) ? section.slideIds.length : 0),
+    0,
+  );
+}
+
+/** The first slide id of a template's manifest, the cover when the record names none. */
+export function templateCover(template: Template): string | undefined {
+  if (template.record.cover !== undefined) return template.record.cover;
+  const manifestPath = join(template.dir, template.record.deck);
+  if (!existsSync(manifestPath)) return undefined;
+  const manifest = parseJson(readFileSync(manifestPath, 'utf8'), manifestPath);
+  if (!isRecord(manifest) || !Array.isArray(manifest.sections)) return undefined;
+  for (const section of manifest.sections) {
+    if (
+      isRecord(section) &&
+      Array.isArray(section.slideIds) &&
+      typeof section.slideIds[0] === 'string'
+    )
+      return section.slideIds[0];
+  }
+  return undefined;
+}
+
+/** A template's row of the index (SPEC-5 4.1): the id, the name, the category, the cover, the use cases, the slide count and the theme. */
+export function templateIndexEntry(template: Template): TemplateIndexEntry {
+  const { record } = template;
+  const theme = (THEMES as ReadonlyArray<string>).includes(record.theme)
+    ? (record.theme as (typeof THEMES)[number])
+    : 'gt-ink-paper';
+  const cover = templateCover(template);
+  const entry: TemplateIndexEntry = {
+    id: record.id,
+    name: record.name,
+    // the GT deck sits under Personal as General presentation and Blank is first (SPEC-5 0.23)
+    category: record.category ?? 'personal',
+    slides: record.slideCount ?? templateSlideCount(template),
+    theme,
+  };
+  if (record.description !== '')
+    entry.description =
+      record.description.length > 400
+        ? `${record.description.slice(0, 397)}...`
+        : record.description;
+  if (cover !== undefined) entry.cover = cover;
+  if (record.useCases !== undefined && record.useCases.length > 0)
+    entry.useCases = record.useCases.slice(0, 8);
+  return templateIndexEntrySchema.parse(entry);
+}
+
+/** The order of the index: Blank, Blank (Plate), General presentation (the GT deck), then Sales pitch, then the rest by name (SPEC-5 4.3). */
+export const TEMPLATE_INDEX_ORDER: ReadonlyArray<string> = [
+  'blank',
+  'blank-plate',
+  'gt-brand',
+  'sales-pitch',
+];
+
+export function compareIndexEntries(a: TemplateIndexEntry, b: TemplateIndexEntry): number {
+  const ia = TEMPLATE_INDEX_ORDER.indexOf(a.id);
+  const ib = TEMPLATE_INDEX_ORDER.indexOf(b.id);
+  if (ia !== -1 || ib !== -1)
+    return (
+      (ia === -1 ? TEMPLATE_INDEX_ORDER.length : ia) -
+      (ib === -1 ? TEMPLATE_INDEX_ORDER.length : ib)
+    );
+  return a.name.localeCompare(b.name);
+}
+
+/** The index built from the folders (what the seed writes and `template.list` answers without a file). */
+export function buildTemplateIndex(decksDir: string): TemplateIndexEntry[] {
+  return listTemplates(decksDir).map(templateIndexEntry).sort(compareIndexEntries);
+}
+
+/** Writes `decks/templates/templates.json` from the folders; answers the rows written. */
+export function writeTemplateIndex(decksDir: string): TemplateIndexEntry[] {
+  const rows = buildTemplateIndex(decksDir);
+  const root = templatesDir(decksDir);
+  mkdirSync(root, { recursive: true });
+  writeFileSync(join(root, TEMPLATE_INDEX_FILE), canonicalJson(rows));
+  return rows;
+}
+
+/**
+ * The template index: `templates.json` when it exists and parses, else the folders. The two built
+ * ins are always rows, so a decks folder without templates still answers `gt-brand` and `blank`.
+ */
+export function readTemplateIndex(decksDir: string): TemplateIndexEntry[] {
+  const file = join(templatesDir(decksDir), TEMPLATE_INDEX_FILE);
+  if (existsSync(file)) {
+    const raw = parseJson(readFileSync(file, 'utf8'), file);
+    if (Array.isArray(raw)) {
+      const rows = raw.map((row, index) => {
+        const parsed = templateIndexEntrySchema.safeParse(row);
+        if (!parsed.success)
+          throw new TypeError(`${file}: row ${index} does not hold a template index entry`);
+        return parsed.data;
+      });
+      return rows.sort(compareIndexEntries);
+    }
+  }
+  return buildTemplateIndex(decksDir);
+}
+
+/** The ids `deck.create --from` accepts: the index's ids with the two built ins. */
+export function templateIds(decksDir: string): string[] {
+  const ids = new Set<string>(DECK_TEMPLATES);
+  for (const row of readTemplateIndex(decksDir)) ids.add(row.id);
+  return [...ids];
+}
+
+/** True when `from` names a built in or a template folder under decks/templates. */
+export function isKnownTemplateId(decksDir: string, from: string): boolean {
+  if (isBuiltInTemplateId(from)) return true;
+  return SLUG_PATTERN.test(from) && existsSync(join(templatesDir(decksDir), from, 'template.json'));
 }
 
 /** The deck id a name gives: its slug, or a TypeError when nothing slug-like survives. */
@@ -254,6 +428,8 @@ export function createDeck(
   if (existsSync(dir)) throw new TypeError(`decks/${deckId} exists already; pick another name`);
   const now = (options.now ?? (() => new Date().toISOString()))();
 
+  if (!SLUG_PATTERN.test(input.from) || input.from === TEMPLATES_DIR)
+    throw new TypeError(`"${input.from}" is not a template id (a slug)`);
   const templateDir = join(templatesDir(decksDir), input.from);
   if (input.from === 'blank' && !existsSync(join(templateDir, 'template.json'))) {
     // a decks folder without the blank template: one title slide, no starter pictures
@@ -262,6 +438,10 @@ export function createDeck(
     for (const slide of slides) writeSlide(dir, slide);
     writeManifest(dir, deck);
   } else {
+    if (!existsSync(join(templateDir, 'template.json')))
+      throw new RangeError(
+        `No template "${input.from}" under decks/templates; the index lists ${templateIds(decksDir).join(', ')}`,
+      );
     const template = readTemplate(templateDir);
     const { record } = template;
     const manifestPath = join(template.dir, record.deck);

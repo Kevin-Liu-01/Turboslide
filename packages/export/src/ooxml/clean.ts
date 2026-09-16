@@ -37,18 +37,40 @@ export function stripRepairRisks(xml: string): RepairStrip {
   return { xml: stripEmptyExtLst(stripKern(xml)), kern, extLst, custGeom };
 }
 
-export type ContentTypesClean = { removedOverrides: string[]; fixedTypes: string[] };
+export type ContentTypesClean = {
+  removedOverrides: string[];
+  fixedTypes: string[];
+  /** the `Default` entries added for media extensions the package holds (gslides-parity SPEC-5 3.6) */
+  addedDefaults: string[];
+};
 
 /**
- * `[Content_Types].xml`: drops overrides whose part is missing and corrects `image/jpg` to
- * `image/jpeg` (the registered type; PowerPoint writes `image/jpeg` for `.jpg` too).
+ * The content type per media extension (gslides-parity SPEC-5 0.20, 3.6; R05 7.1): `mp4` and
+ * `m4v` as pptxgenjs writes them, and the four the post process adds when the package holds one;
+ * `audio/mp3`, the non standard type pptxgenjs writes for an mp3, is corrected to `audio/mpeg`.
+ */
+export const MEDIA_CONTENT_TYPES: Readonly<Record<string, string>> = {
+  mp4: 'video/mp4',
+  m4v: 'video/mp4',
+  webm: 'video/webm',
+  mp3: 'audio/mpeg',
+  m4a: 'audio/mp4',
+  wav: 'audio/wav',
+};
+
+/**
+ * `[Content_Types].xml`: drops overrides whose part is missing, corrects `image/jpg` to
+ * `image/jpeg` (the registered type; PowerPoint writes `image/jpeg` for `.jpg` too) and
+ * `audio/mp3` to `audio/mpeg`, and adds a `Default` for every media extension a part under
+ * `ppt/media/` carries and the file does not declare (gslides-parity SPEC-5 3.6).
  */
 export async function cleanContentTypes(zip: Package): Promise<ContentTypesClean> {
   const path = '[Content_Types].xml';
-  if (!hasPart(zip, path)) return { removedOverrides: [], fixedTypes: [] };
+  if (!hasPart(zip, path)) return { removedOverrides: [], fixedTypes: [], addedDefaults: [] };
   let xml = await readPart(zip, path);
   const removedOverrides: string[] = [];
   const fixedTypes: string[] = [];
+  const addedDefaults: string[] = [];
   xml = xml.replace(/\s*<Override PartName="([^"]+)" ContentType="[^"]+"\s*\/>/g, (match, name) => {
     const part = String(name).replace(/^\//, '');
     if (hasPart(zip, part)) return match;
@@ -59,8 +81,28 @@ export async function cleanContentTypes(zip: Package): Promise<ContentTypesClean
     xml = xml.replace(/ContentType="image\/jpg"/g, 'ContentType="image/jpeg"');
     fixedTypes.push('image/jpg');
   }
+  if (/ContentType="audio\/mp3"/.test(xml)) {
+    xml = xml.replace(/ContentType="audio\/mp3"/g, 'ContentType="audio/mpeg"');
+    fixedTypes.push('audio/mp3');
+  }
+  const declared = new Set(
+    [...xml.matchAll(/<Default Extension="([^"]+)"/g)].map((match) =>
+      (match[1] as string).toLowerCase(),
+    ),
+  );
+  const present = new Set<string>();
+  for (const part of listParts(zip)) {
+    const match = /^ppt\/media\/[^/]+\.([a-z0-9]+)$/i.exec(part);
+    if (match !== null) present.add((match[1] as string).toLowerCase());
+  }
+  for (const ext of [...present].sort()) {
+    const type = MEDIA_CONTENT_TYPES[ext];
+    if (type === undefined || declared.has(ext)) continue;
+    xml = xml.replace(/<\/Types>/, `<Default Extension="${ext}" ContentType="${type}"/></Types>`);
+    addedDefaults.push(ext);
+  }
   writePart(zip, path, xml);
-  return { removedOverrides, fixedTypes };
+  return { removedOverrides, fixedTypes, addedDefaults };
 }
 
 function escapeXml(value: string): string {

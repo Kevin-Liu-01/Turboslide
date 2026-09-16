@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-edge",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Objects near the right rail",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 700,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "box",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "text": "At the content edge",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 763,
+          "y": 260,
+          "w": 300,
+          "h": 160,
+          "z": 1
+        }
+      },
+      {
+        "id": "rail",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "plate",
+        "stroke": "ink",
+        "pos": {
+          "x": 984,
+          "y": 480,
+          "w": 160,
+          "h": 160,
+          "z": 2
+        }
+      },
+      {
+        "id": "text",
+        "type": "text",
+        "text": "A text box in the left half of the 1200 px page.",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 480,
+          "h": 120,
+          "z": 3
+        }
+      }
+    ]
+  }
+}

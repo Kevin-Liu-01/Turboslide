@@ -10,6 +10,7 @@
 import { RENDERED_LIMITS } from '@turboslide/schema/rules';
 
 import type { Finding, RenderRecord, Slide } from '../contracts.ts';
+import { DEFAULT_PAGE, deckPage } from '@turboslide/schema/render';
 import type { LintContext } from '../context.ts';
 import type { RenderedInputs } from './bitmap.ts';
 import { loadRecordBitmap } from './bitmap.ts';
@@ -66,7 +67,10 @@ function renderDirOf(options: object): string | undefined {
 }
 
 /** Distance from a box to the four rails and rules; 0 when the box crosses one. */
-function railDistance(box: [number, number, number, number]): { line: string; distance: number } {
+function railDistance(
+  box: [number, number, number, number],
+  page: { width: number; height: number } = DEFAULT_PAGE,
+): { line: string; distance: number } {
   const [x, y, w, h] = box;
   const right = x + w;
   const bottom = y + h;
@@ -74,9 +78,9 @@ function railDistance(box: [number, number, number, number]): { line: string; di
     lo > line ? lo - line : hi < line ? line - hi : 0;
   const candidates = [
     { line: 'left rail', distance: gap(RAIL, x, right) },
-    { line: 'right rail', distance: gap(1600 - RAIL, x, right) },
+    { line: 'right rail', distance: gap(page.width - RAIL, x, right) },
     { line: 'top rule', distance: gap(RAIL, y, bottom) },
-    { line: 'bottom rule', distance: gap(900 - RAIL, y, bottom) },
+    { line: 'bottom rule', distance: gap(page.height - RAIL, y, bottom) },
   ];
   return candidates.reduce((best, c) => (c.distance < best.distance ? c : best));
 }
@@ -91,6 +95,7 @@ export function lintRecord(
   const refs = indexBlocks(ctx, slide);
   const paths = new Map([...refs].map(([id, ref]) => [id, ref.path]));
   const theme = record.theme;
+  const page = deckPage(ctx.deck);
 
   for (const entry of record.overflow) {
     out.push(
@@ -100,7 +105,7 @@ export function lintRecord(
         theme,
         text: entry.selector,
         box: entry.box,
-        proposal: `${entry.selector} leaves the 1600 by 900 sheet at ${entry.box[0]},${entry.box[1]} ${entry.box[2]}x${entry.box[3]}; shorten the copy or tighten the layout (DECK-GRAMMAR.md:15).`,
+        proposal: `${entry.selector} leaves the ${page.width} by ${page.height} sheet at ${entry.box[0]},${entry.box[1]} ${entry.box[2]}x${entry.box[3]}; shorten the copy or tighten the layout (DECK-GRAMMAR.md:15).`,
       }),
     );
   }
@@ -193,7 +198,7 @@ export function lintRecord(
       );
     }
     if (TEXT_TYPES.has(block.type)) {
-      const near = railDistance(block.box);
+      const near = railDistance(block.box, page);
       const crosses = block.box[0] < RAIL && block.box[0] + block.box[2] > RAIL;
       if (
         near.distance < RAIL_TOUCH_PX &&

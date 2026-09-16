@@ -12,11 +12,21 @@ import type { Deck, DeckDocument, DeckGuides, Slide } from '@turboslide/schema/d
 import { deckAppearance, sectionOfSlide, slideBlocks, slideOrder } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type { BlockId } from '@turboslide/schema/ids';
+import { guideCentre } from '@turboslide/schema/canvas';
 import type { LayoutId } from '@turboslide/schema/layouts';
+import type { Preferences } from '@turboslide/schema/preferences';
+import type { ThemeId } from '@turboslide/schema/deck';
 import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
 import type { Lease, Mutation, Version } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import type { Page } from '@turboslide/schema/render';
+import {
+  DEFAULT_PAGE,
+  SHEET_HEIGHT,
+  SHEET_WIDTH,
+  coversPage,
+  deckPage,
+} from '@turboslide/schema/render';
 import { isLineKind } from '@turboslide/schema/shapes';
 import {
   BULLET_PRESETS,
@@ -694,8 +704,8 @@ export type EditorShellInput = {
   listDecks?: () => Promise<ReadonlyArray<DeckHeadRow>>;
   /** another deck's slides, for Import slides step 2 */
   readDeck?: (deckId: string) => Promise<SourceDeckSlides>;
-  /** the Upload tab of Open and Import slides: a Turboslide bundle (.zip) */
-  uploadBundle?: (file: File) => Promise<{ id: string }>;
+  /** the Upload tab of Open and Import slides: a Turboslide bundle (.zip), or a `.pptx` through the reader with its report (SPEC-5 5.2) */
+  uploadBundle?: (file: File) => Promise<{ id: string; report?: unknown }>;
   /** Insert > Image > Upload from computer and Replace image: the OS file picker then asset.add */
   uploadPicture?: (target: PictureTarget) => void;
   /** the origin the share links carry; window.location.origin when absent */
@@ -764,6 +774,27 @@ export type EditorShellInput = {
   identities?: Readonly<Record<string, IdentityView>>;
   /** `version.diff` for Show changes (5.7): the route runs it; the shell dispatches the action when absent */
   diffVersions?: (from: number, to: number) => Promise<VersionDiffView>;
+  /* round five (gslides-parity SPEC-5 7.1, 7.3, 8.2, 9.2, 10; merge 2), every field optional */
+  /** the caller's preferences record (B5): the shell reads the browser mirror when absent */
+  preferences?: Preferences;
+  /** the deck's language tag; `document.deck.language` else `en-US` */
+  language?: string;
+  /** the room's chat when the route wires it (SPEC-5 10): the capability to send and the head count */
+  chat?: { canSend: boolean; participants: number };
+  /** true when the studio proxies definitions (`TURBOSLIDE_DICTIONARY` not `link`); the panel links out otherwise */
+  dictionaryPanel?: boolean;
+  /** the browser offers the Window Management API; the two second screen rows are disabled without it (3.7) */
+  screens?: boolean;
+  /** the editor's own mode (9.2): `theme` while Edit theme is open */
+  editorMode?: 'edit' | 'theme';
+  /** Slide > Edit theme and View > Theme builder: the route enters the mode (9.2) */
+  onThemeMode?: () => void;
+  /** Tools > Dictate speaker notes: the route opens the box over the notes pane (7.3) */
+  onDictate?: () => void;
+  /** the theme records another theme id renders under, for the Themes panel's other group (9.3) */
+  renderThemed?: (slide: Slide, appearance: 'light' | 'dark', theme: ThemeId) => string;
+  /** the deck's own spelling walk in the page (7.2); the window transport's `spelling.check` when absent */
+  spellingCheck?: (input: Record<string, unknown>) => Promise<unknown>;
 };
 
 /** `version.diff`'s answer as the Show changes overlay reads it (SPEC-3 0.44, 5.7). */
@@ -822,6 +853,14 @@ export const PANEL_IDS = [
   'inbox',
   'activity',
   'editHtml',
+  /* round five (gslides-parity SPEC-5 14.1; merge 2): the Motion panel (B1), the Templates and
+     Building blocks panes (B3), the Spell check card, the Dictionary and the Chat panels (B5) */
+  'motion',
+  'templates',
+  'buildingBlocks',
+  'spellCheck',
+  'dictionary',
+  'chat',
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
@@ -851,6 +890,19 @@ export function panelIdOfTitle(title: string): PanelId | null {
       return 'activity';
     case 'Edit HTML':
       return 'editHtml';
+    /* round five (SPEC-5 14.1) */
+    case 'Motion':
+      return 'motion';
+    case 'Templates':
+      return 'templates';
+    case 'Building blocks':
+      return 'buildingBlocks';
+    case 'Spell check':
+      return 'spellCheck';
+    case 'Dictionary':
+      return 'dictionary';
+    case 'Chat':
+      return 'chat';
     default:
       return null;
   }
@@ -893,6 +945,24 @@ export const DIALOG_IDS = [
   'requestAccess',
   /* Forget this browser asks first (7.4, ACCOUNT.forgetConfirm); the route's `account.forget` runs on Forget */
   'forgetBrowser',
+  /* round five (gslides-parity SPEC-5 14.1; merge 2): B2's two Insert dialogs, Camera and
+     Presentation display options; B3's Import theme and Import report; B5's Preferences, Personal
+     dictionary, Edit guides, Indentation options, Restart numbering, Edit prefix and suffix and
+     Delete versions. Page setup (B4) and More fonts (B7, opened by the Font picker itself) have no
+     id here. */
+  'insertAudio',
+  'insertVideo',
+  'camera',
+  'displayOptions',
+  'importTheme',
+  'importReport',
+  'preferences',
+  'personalDictionary',
+  'editGuides',
+  'indentationOptions',
+  'restartNumbering',
+  'prefixSuffix',
+  'deleteVersions',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
 
@@ -951,6 +1021,33 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'forgetBrowser';
     case 'Request access':
       return 'requestAccess';
+    /* round five (SPEC-5 14.1) */
+    case 'Insert audio':
+      return 'insertAudio';
+    case 'Insert video':
+      return 'insertVideo';
+    case 'Camera':
+      return 'camera';
+    case 'Presentation display options':
+      return 'displayOptions';
+    case 'Import theme':
+      return 'importTheme';
+    case 'Import report':
+      return 'importReport';
+    case 'Preferences':
+      return 'preferences';
+    case 'Personal dictionary':
+      return 'personalDictionary';
+    case 'Edit guides':
+      return 'editGuides';
+    case 'Indentation options':
+      return 'indentationOptions';
+    case 'Restart numbering':
+      return 'restartNumbering';
+    case 'Edit prefix and suffix':
+      return 'prefixSuffix';
+    case 'Delete versions':
+      return 'deleteVersions';
     default:
       return null;
   }
@@ -1120,13 +1217,16 @@ export function textAt(block: Block, path: string): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-/** True when a picture object covers the sheet at the bottom of the stack (SPEC-2 0.100). */
-export function coversSheetOf(slide: Slide | undefined, block: Block | undefined): boolean {
+/** True when a picture object covers the page at the bottom of the stack (SPEC-2 0.100); the GT sheet when no page is given. */
+export function coversSheetOf(
+  slide: Slide | undefined,
+  block: Block | undefined,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): boolean {
   if (block?.type !== 'picture' || slide === undefined) return false;
   const pos = block.pos;
   if (pos === undefined) return slide.kind !== 'content';
-  const covers =
-    pos.x <= 0 && pos.y <= 0 && pos.x + pos.w >= SHEET_WIDTH && pos.y + pos.h >= SHEET_HEIGHT;
+  const covers = coversPage(pos, page);
   const zs = slideBlocks(slide)
     .map(({ block: each }) => each.pos?.z ?? 0)
     .filter((z) => Number.isFinite(z));
@@ -1166,6 +1266,9 @@ export function buildMenuContext(
     | 'account'
     | 'access'
     | 'inbox'
+    | 'screens'
+    | 'editorMode'
+    | 'language'
   > & { regroup?: boolean },
   settings: ShellSettings,
   platform: MenuContext['platform'],
@@ -1232,7 +1335,8 @@ export function buildMenuContext(
       input.selection?.positioned ?? (block?.pos !== undefined || (blocks > 0 && !freeform)),
     ...(group === undefined ? {} : { group }),
     ...(input.regroup === undefined ? {} : { regroup: input.regroup }),
-    coversSheet: input.selection?.coversSheet ?? coversSheetOf(slide, block),
+    coversSheet:
+      input.selection?.coversSheet ?? coversSheetOf(slide, block, deckPage(input.document.deck)),
     ...(input.selection?.cells === undefined ? {} : { cells: input.selection.cells }),
     ...(block?.type === 'table' &&
     input.selection?.cell !== undefined &&
@@ -1275,7 +1379,15 @@ export function buildMenuContext(
     history: { undo: input.history?.canUndo ?? false, redo: input.history?.canRedo ?? false },
     sections: input.document.deck.sections.length,
     guides: (guides?.x.length ?? 0) + (guides?.y.length ?? 0),
-    settings: { ...DEFAULT_MENU_CONTEXT.settings, ...settings },
+    /* round five (SPEC-5 7.1): the language radios check the deck's tag */
+    settings: {
+      ...DEFAULT_MENU_CONTEXT.settings,
+      ...settings,
+      language: input.language ?? input.document.deck.language ?? 'en-US',
+    },
+    /* round five (SPEC-5 3.7, 9.2): the second screen rows and the placeholder rows */
+    ...(input.screens === undefined ? {} : { screens: input.screens }),
+    ...(input.editorMode === undefined ? {} : { editorMode: input.editorMode }),
     /* round three (SPEC-3 13.4): absent fields read as today's open deck */
     ...(input.role === undefined ? {} : { role: input.role }),
     ...(input.capabilities === undefined ? {} : { capabilities: input.capabilities }),
@@ -1524,12 +1636,15 @@ export function pictureTargetOf(
  * not rounded to the 8 px grid: Snap to > Grid is off by default (6.1 row 31) and the fixture's
  * `chart-bar` sits at 320, 180, the centre of a 960 by 540 chart (VERIFICATION-2 finding 26).
  */
-export function centredPosition(size: readonly [number, number]): Position {
+export function centredPosition(
+  size: readonly [number, number],
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): Position {
   const [w, h] = size;
-  return { x: Math.round((SHEET_WIDTH - w) / 2), y: Math.round((SHEET_HEIGHT - h) / 2), w, h };
+  return { x: Math.round((page.width - w) / 2), y: Math.round((page.height - h) / 2), w, h };
 }
 
-/** The position of the picture object Change background inserts: the whole sheet at the bottom (2.6.4). */
+/** The position of the picture object Change background inserts on the default page: the whole sheet at the bottom (2.6.4). */
 export const BACKGROUND_PICTURE_POS: Position = {
   x: 0,
   y: 0,
@@ -1537,6 +1652,13 @@ export const BACKGROUND_PICTURE_POS: Position = {
   h: SHEET_HEIGHT,
   z: 0,
 };
+
+/** The position of the background picture on a page: the whole page at the bottom of the stack (gslides-parity SPEC-5 6.1). */
+export function backgroundPicturePos(
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): Position {
+  return { x: 0, y: 0, w: page.width, h: page.height, z: 0 };
+}
 
 /** The default box of a block type placed from a menu, in sheet px (palette-data.ts DEFAULT_SIZE). */
 export const INSERT_SIZES: Readonly<Record<string, [number, number]>> = {
@@ -2609,7 +2731,17 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     /* View > Guides (SPEC-2 0.77, 6.1 row 30): the row carries add or clear; Delete guide takes
        the guide under the pointer */
     case 'view.guides.addVertical':
-    case 'view.guides.addHorizontal':
+    case 'view.guides.addHorizontal': {
+      /* the row's value is the default sheet's centre; the deck's page decides (gslides-parity
+         SPEC-5 6.1; b4.md R1) */
+      const centre = guideCentre(deckPage(facts.document.deck));
+      const axis = item.id === 'view.guides.addVertical' ? 'x' : 'y';
+      return {
+        action: 'deck.guides',
+        input: { add: [{ axis, at: axis === 'x' ? centre.x : centre.y }], ...rev },
+        label: item.label,
+      };
+    }
     case 'view.guides.clear':
       return {
         action: 'deck.guides',

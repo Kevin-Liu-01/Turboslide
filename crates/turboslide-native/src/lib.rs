@@ -18,6 +18,7 @@
 
 pub mod bayer;
 pub mod diff;
+pub mod dither;
 pub mod dssim;
 pub mod filters;
 pub mod image;

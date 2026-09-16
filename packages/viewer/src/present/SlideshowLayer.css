@@ -32,3 +32,28 @@
   pointer-events: none;
   will-change: transform;
 }
+
+/* the pen's canvas (SPEC-5 0.15): over the whole window, above the sheet and under the toolbar;
+   it takes the pointer only while the pen is on */
+.ts-present-pen {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  pointer-events: none;
+}
+
+.ts-present-pen.is-active {
+  pointer-events: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* the show's live region: read by a screen reader, drawn nowhere (SPEC-5 15) */
+.ts-present-announce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

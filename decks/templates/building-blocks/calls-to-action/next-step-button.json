@@ -1,0 +1,45 @@
+{
+  "id": "calls-to-action/next-step-button",
+  "category": "calls-to-action",
+  "label": "Next step",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 40,
+        "w": 1326,
+        "h": 100,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "Start the pilot this month"
+    },
+    {
+      "id": "button",
+      "pos": {
+        "x": 0,
+        "y": 170,
+        "w": 360,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "box",
+      "fill": "ink",
+      "radius": 8,
+      "padding": 20,
+      "text": "Book the kickoff",
+      "typography": {
+        "size": 22,
+        "align": "center"
+      },
+      "color": "paper",
+      "valign": "middle"
+    }
+  ],
+  "box": [
+    1326,
+    242
+  ]
+}

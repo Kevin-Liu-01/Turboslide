@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "id": "numbered",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "rule-0",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 731.5,
+        "pos": {
+          "x": 731.5,
+          "y": 362.11,
+          "w": 731.5,
+          "h": 1,
+          "z": 1
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:numbered#rule/0"
+        }
+      },
+      {
+        "id": "rule-1",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 731.5,
+        "pos": {
+          "x": 731.5,
+          "y": 420.7,
+          "w": 731.5,
+          "h": 1,
+          "z": 2,
+          "group": "list-item-0"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:numbered#rule/1@list/item/0",
+          "pptxGroupPath": "list/item/0"
+        }
+      },
+      {
+        "id": "list-items-0-num",
+        "type": "text",
+        "text": "1",
+        "pos": {
+          "x": 731.5,
+          "y": 370.91,
+          "w": 36,
+          "h": 33.6,
+          "z": 3,
+          "group": "list-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/0/num@list/item/0",
+          "pptxGroupPath": "list/item/0"
+        }
+      },
+      {
+        "id": "list-items-0-text",
+        "type": "text",
+        "text": "Connect the repository",
+        "pos": {
+          "x": 767.5,
+          "y": 370.91,
+          "w": 695.5,
+          "h": 33.6,
+          "z": 4,
+          "group": "list-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/0/text@list/item/0",
+          "pptxGroupPath": "list/item/0"
+        }
+      },
+      {
+        "id": "rule-2",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 731.5,
+        "pos": {
+          "x": 731.5,
+          "y": 479.3,
+          "w": 731.5,
+          "h": 1,
+          "z": 5,
+          "group": "list-item-1"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:numbered#rule/2@list/item/1",
+          "pptxGroupPath": "list/item/1"
+        }
+      },
+      {
+        "id": "list-items-1-num",
+        "type": "text",
+        "text": "2",
+        "pos": {
+          "x": 731.5,
+          "y": 429.5,
+          "w": 36,
+          "h": 33.6,
+          "z": 6,
+          "group": "list-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/1/num@list/item/1",
+          "pptxGroupPath": "list/item/1"
+        }
+      },
+      {
+        "id": "list-items-1-text",
+        "type": "text",
+        "text": "Pick the locales",
+        "pos": {
+          "x": 767.5,
+          "y": 429.5,
+          "w": 695.5,
+          "h": 33.6,
+          "z": 7,
+          "group": "list-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/1/text@list/item/1",
+          "pptxGroupPath": "list/item/1"
+        }
+      },
+      {
+        "id": "rule-3",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 731.5,
+        "pos": {
+          "x": 731.5,
+          "y": 537.89,
+          "w": 731.5,
+          "h": 1,
+          "z": 8,
+          "group": "list-item-2"
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:numbered#rule/3@list/item/2",
+          "pptxGroupPath": "list/item/2"
+        }
+      },
+      {
+        "id": "list-items-2-num",
+        "type": "text",
+        "text": "3",
+        "pos": {
+          "x": 731.5,
+          "y": 488.1,
+          "w": 36,
+          "h": 33.6,
+          "z": 9,
+          "group": "list-item-2"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/2/num@list/item/2",
+          "pptxGroupPath": "list/item/2"
+        }
+      },
+      {
+        "id": "list-items-2-text",
+        "type": "text",
+        "text": "Ship the first release",
+        "pos": {
+          "x": 767.5,
+          "y": 488.1,
+          "w": 695.5,
+          "h": 33.6,
+          "z": 10,
+          "group": "list-item-2"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#list/items/2/text@list/item/2",
+          "pptxGroupPath": "list/item/2"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Rollout steps",
+        "pos": {
+          "x": 137,
+          "y": 373.1,
+          "w": 522.5,
+          "h": 48.4,
+          "z": 11
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#h/text"
+        }
+      },
+      {
+        "id": "p1",
+        "type": "text",
+        "text": "A numbered list with a tabular numeral in the key position.",
+        "pos": {
+          "x": 137,
+          "y": 456.19,
+          "w": 522.5,
+          "h": 66,
+          "z": 12
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:numbered#p1/text"
+        }
+      }
+    ]
+  },
+  "title": "Rollout steps",
+  "ext": {
+    "pptxPart": "ppt/slides/slide4.xml",
+    "pptxSlideId": 259
+  }
+}

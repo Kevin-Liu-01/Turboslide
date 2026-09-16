@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "themes",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Themes",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What the book keeps returning to.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Home",
+            "value": "Where the narrator belongs changes by the last chapter."
+          },
+          {
+            "key": "Trust",
+            "value": "Every promise in the book is tested once."
+          },
+          {
+            "key": "Time",
+            "value": "The story runs over one summer and thirty years."
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Themes"
+}

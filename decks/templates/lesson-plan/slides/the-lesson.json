@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "the-lesson",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The lesson",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Water leaves the surface as vapour when the sun warms it.\nThe vapour rises and cools.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "The cooled vapour gathers into droplets and clouds.\nThe droplets fall as rain or snow and the cycle starts again.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "The lesson"
+}

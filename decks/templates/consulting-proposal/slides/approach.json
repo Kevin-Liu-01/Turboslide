@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "id": "approach",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "title": "Approach",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Approach",
+        "pos": {
+          "x": 137,
+          "y": 92,
+          "w": 1000,
+          "h": 72,
+          "z": 1
+        }
+      },
+      {
+        "id": "step-1",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 137,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 0,
+          "group": "process"
+        }
+      },
+      {
+        "id": "label-1",
+        "type": "text",
+        "text": "Step 1",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 1,
+          "group": "process"
+        }
+      },
+      {
+        "id": "link-1",
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "orientation": "horizontal",
+        "connect": {
+          "start": {
+            "block": "step-1",
+            "site": 3
+          },
+          "end": {
+            "block": "step-2",
+            "site": 1
+          }
+        },
+        "pos": {
+          "x": 408.8,
+          "y": 426,
+          "w": 79.6,
+          "h": 8,
+          "z": 2,
+          "group": "process"
+        }
+      },
+      {
+        "id": "step-2",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 488.4,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 3,
+          "group": "process"
+        }
+      },
+      {
+        "id": "label-2",
+        "type": "text",
+        "text": "Step 2",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 488.4,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 4,
+          "group": "process"
+        }
+      },
+      {
+        "id": "link-2",
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "orientation": "horizontal",
+        "connect": {
+          "start": {
+            "block": "step-2",
+            "site": 3
+          },
+          "end": {
+            "block": "step-3",
+            "site": 1
+          }
+        },
+        "pos": {
+          "x": 760.2,
+          "y": 426,
+          "w": 79.6,
+          "h": 8,
+          "z": 5,
+          "group": "process"
+        }
+      },
+      {
+        "id": "step-3",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 839.8,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 6,
+          "group": "process"
+        }
+      },
+      {
+        "id": "label-3",
+        "type": "text",
+        "text": "Step 3",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 839.8,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 7,
+          "group": "process"
+        }
+      },
+      {
+        "id": "link-3",
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "orientation": "horizontal",
+        "connect": {
+          "start": {
+            "block": "step-3",
+            "site": 3
+          },
+          "end": {
+            "block": "step-4",
+            "site": 1
+          }
+        },
+        "pos": {
+          "x": 1111.6,
+          "y": 426,
+          "w": 79.6,
+          "h": 8,
+          "z": 8,
+          "group": "process"
+        }
+      },
+      {
+        "id": "step-4",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 1191.2,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 9,
+          "group": "process"
+        }
+      },
+      {
+        "id": "label-4",
+        "type": "text",
+        "text": "Step 4",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 1191.2,
+          "y": 350,
+          "w": 271.8,
+          "h": 160,
+          "z": 10,
+          "group": "process"
+        }
+      }
+    ]
+  }
+}

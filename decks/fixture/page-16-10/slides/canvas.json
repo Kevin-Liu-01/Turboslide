@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A canvas slide on 16:10",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 800,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "box",
+        "type": "shape",
+        "shape": "roundRect",
+        "fill": "plate",
+        "stroke": "ink",
+        "text": "Centred on the 1440 px page",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 480,
+          "y": 330,
+          "w": 480,
+          "h": 240,
+          "z": 1
+        }
+      }
+    ]
+  }
+}

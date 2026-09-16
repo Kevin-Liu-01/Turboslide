@@ -7,17 +7,20 @@ import { authorLabel } from '@turboslide/store/store';
 
 import { flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
+import { runDeckAction } from '../dispatch.ts';
 import { UsageError } from '../exit.ts';
 import { versionDiff, versionList, versionRestore, versionSave } from '../store-actions.ts';
 import { baseRevision, openStore, runAction, storeDeps, writeContext } from '../write.ts';
 
-const USAGE = `usage: turboslide version <save|list|restore> ...
+const USAGE = `usage: turboslide version <save|list|restore|diff|delete> ...
   version save -m <note>            a named version at the current revision (also --message, --note)
   version list [--named]            the log: every write and every save, oldest first
   version restore <n>               restore version n as a write (--base-revision, --author, --json)
   version diff [<from> [<to>]] [--staged]
                                     the mutations between two revisions grouped by touched block and author, the data
-                                    behind Show changes (version.diff)`;
+                                    behind Show changes (version.diff)
+  version delete --up-to <n> --confirm | version delete --all --confirm
+                                    delete the records up to n (the named ones stay), or every record (version.delete)`;
 
 export function formatVersion(version: Version): string {
   const what =
@@ -39,6 +42,8 @@ export async function version(ctx: CommandContext): Promise<number> {
       return restore(inner);
     case 'diff':
       return diff(inner);
+    case 'delete':
+      return deleteVersions(inner);
     default:
       throw new UsageError(`unknown subcommand "version ${sub ?? ''}"\n${USAGE}`);
   }
@@ -113,5 +118,27 @@ async function diff(ctx: CommandContext): Promise<number> {
       `  ${authorLabel(group.author)}: ${group.blocks.map((block) => `${block.slideId}${block.blockId !== undefined ? `#${block.blockId}` : ''} (${block.ops.join(', ')})`).join('; ')}`,
     );
   }
+  return 0;
+}
+
+/**
+ * `version delete --up-to <n> --confirm | --all --confirm` (gslides-parity SPEC-5 7.7; b5.md
+ * request 9): the shared `version.delete` handler; refused without --confirm.
+ */
+async function deleteVersions(ctx: CommandContext): Promise<number> {
+  if (!flagBoolean(ctx.args, 'confirm'))
+    throw new UsageError(`version delete wants --confirm\n${USAGE}`);
+  const all = flagBoolean(ctx.args, 'all');
+  const upToFlag = flagString(ctx.args, 'up-to');
+  const upTo = upToFlag === undefined ? NaN : Number(upToFlag);
+  if (!all && (!Number.isInteger(upTo) || upTo < 1))
+    throw new UsageError(`version delete wants --up-to <n> or --all\n${USAGE}`);
+  const result = await runDeckAction<{ deleted: number }>(
+    ctx,
+    'version.delete',
+    all ? { all: true, confirm: true } : { upTo, confirm: true },
+  );
+  ctx.out.result(result);
+  ctx.out.human(`deleted ${result.deleted} version record(s)`);
   return 0;
 }

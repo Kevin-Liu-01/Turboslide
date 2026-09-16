@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "id": "lines-and-connectors",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "left-box",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 119.25,
+          "y": 179.25,
+          "w": 241.5,
+          "h": 181.5,
+          "z": 1
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "Left box"
+        }
+      },
+      {
+        "id": "right-box",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 839.25,
+          "y": 479.25,
+          "w": 241.5,
+          "h": 181.5,
+          "z": 2
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "Right box"
+        }
+      },
+      {
+        "id": "straight-arrow",
+        "type": "shape",
+        "shape": "arrow",
+        "pos": {
+          "x": 120,
+          "y": 480,
+          "w": 480,
+          "h": 1,
+          "z": 3
+        },
+        "orientation": "horizontal",
+        "stroke": "ink",
+        "width": 3,
+        "lineStart": "fillCircle",
+        "lineEnd": "fillArrow",
+        "ext": {
+          "pptxName": "Straight arrow"
+        }
+      },
+      {
+        "id": "elbow",
+        "type": "shape",
+        "shape": "elbow",
+        "pos": {
+          "x": 360,
+          "y": 270,
+          "w": 480,
+          "h": 300,
+          "z": 4
+        },
+        "stroke": "blue",
+        "width": 2,
+        "dash": "dash",
+        "lineEnd": "stealth",
+        "connect": {
+          "start": {
+            "block": "left-box",
+            "site": 3
+          },
+          "end": {
+            "block": "right-box",
+            "site": 1
+          }
+        },
+        "ext": {
+          "pptxName": "Elbow"
+        }
+      },
+      {
+        "id": "curved",
+        "type": "shape",
+        "shape": "curved",
+        "pos": {
+          "x": 240,
+          "y": 360,
+          "w": 720,
+          "h": 120,
+          "z": 5
+        },
+        "stroke": "green",
+        "width": 1.5,
+        "connect": {
+          "start": {
+            "block": "left-box",
+            "site": 2
+          },
+          "end": {
+            "block": "right-box",
+            "site": 0
+          }
+        },
+        "ext": {
+          "pptxName": "Curved"
+        }
+      },
+      {
+        "id": "hair-rule",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 360,
+        "pos": {
+          "x": 1200,
+          "y": 180,
+          "w": 360,
+          "h": 1,
+          "z": 6
+        },
+        "color": "ink",
+        "ext": {
+          "pptxName": "Hair rule"
+        }
+      },
+      {
+        "id": "vertical-line",
+        "type": "shape",
+        "shape": "line",
+        "pos": {
+          "x": 1200,
+          "y": 300,
+          "w": 1,
+          "h": 420,
+          "z": 7
+        },
+        "orientation": "vertical",
+        "stroke": "ink-2",
+        "width": 4,
+        "ext": {
+          "pptxName": "Vertical line"
+        }
+      },
+      {
+        "id": "polyline",
+        "type": "shape",
+        "shape": "polyline",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.7244
+          ],
+          [
+            0.957,
+            0.8419
+          ],
+          [
+            0.8256,
+            0.9664
+          ],
+          [
+            0.641,
+            1
+          ],
+          [
+            0.4551,
+            0.9399
+          ],
+          [
+            0.2877,
+            0.8136
+          ],
+          [
+            0.1451,
+            0.6239
+          ],
+          [
+            0.0413,
+            0.3578
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "pos": {
+          "x": 1259.25,
+          "y": 299.25,
+          "w": 241.5,
+          "h": 332.8,
+          "z": 8
+        },
+        "closed": true,
+        "fill": "amber",
+        "stroke": "ink",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "Freeform"
+        }
+      }
+    ]
+  },
+  "title": "Lines and connectors",
+  "ext": {
+    "pptxPart": "ppt/slides/slide2.xml",
+    "pptxSlideId": 257
+  }
+}

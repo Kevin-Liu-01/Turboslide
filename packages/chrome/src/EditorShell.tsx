@@ -5,6 +5,10 @@ import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
 import type { ShapeCategory } from '@turboslide/schema/shapes';
+import { createMediaController } from '@turboslide/viewer/present/media-controller';
+import type { MediaController } from '@turboslide/viewer/present/media-controller';
+import { advanceMotionPreview, motionPreview } from '@turboslide/viewer/present/SlideshowLayer';
+import { PRESENT_TEXT } from '@turboslide/viewer/present/strings';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
@@ -67,7 +71,9 @@ import type {
 import { InboxPanel } from './inbox/InboxPanel';
 import { FormatOptions } from './FormatOptions';
 import { HistoryPanel } from './HistoryPanel';
+import { hasMediaPlayback } from './inspector/media';
 import type { FormatSectionId } from './inspector/format-sections';
+import type { SectionWrite } from './inspector/fields';
 import { LayoutGrid } from './LayoutGrid';
 import { LintPanel } from './LintPanel';
 import { MenuBar } from './MenuBar';
@@ -107,6 +113,18 @@ import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
 import type { Version } from '@turboslide/schema/mutations';
+import type { Preferences } from '@turboslide/schema/preferences';
+import { preferencesMirror } from '@turboslide/schema/preferences';
+import { EquationToolbar } from './EquationToolbar';
+import { isEquationBlock } from './inspector/equation';
+import { SidebarStrip } from './SidebarStrip';
+import { VerbalizeRegion } from './accessibility/VerbalizeRegion';
+import { announceVerbalize } from './accessibility/verbalize';
+import { readStashedImportReport } from './dialogs/ImportReport';
+import { screenDetailsSupported } from './dialogs/DisplayOptions';
+import { deckLanguageOf, preferencesOf, writePreference } from './text-tools';
+import type { ChatRow, SpellingFinding } from './text-tools';
+import { ROUND_FIVE } from './menus/strings';
 
 import './EditorShell.css';
 
@@ -212,11 +230,101 @@ const SpecialCharactersDialog = lazyDialog(() =>
 );
 const DiagramPanel = lazyDialog(() => import('./DiagramPanel').then((m) => m.DiagramPanel));
 const EditHtmlPanel = lazyDialog(() => import('./EditHtmlPanel').then((m) => m.EditHtmlPanel));
+/**
+ * The Accessibility menu's Go to rows (gslides-parity SPEC-5 7.5): the caret moves to the start of
+ * the next or previous text run whose marks differ from the current one, inside the focused text
+ * box. False when no caret sits in a run.
+ */
+function moveCaretToFormattingChange(direction: 1 | -1): boolean {
+  if (typeof window === 'undefined') return false;
+  const selection = window.getSelection();
+  const node = selection?.anchorNode;
+  if (!selection || !node) return false;
+  const element = node instanceof Element ? node : node.parentElement;
+  const run = element?.closest<HTMLElement>('[data-run]');
+  const box = run?.closest<HTMLElement>('[contenteditable]');
+  if (!run || !box) return false;
+  const runs = Array.from(box.querySelectorAll<HTMLElement>('[data-run]'));
+  const at = runs.indexOf(run);
+  const next = runs[at + direction];
+  if (next === undefined) return false;
+  const range = document.createRange();
+  range.setStart(next.firstChild ?? next, 0);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  return true;
+}
+
+/* round five (gslides-parity SPEC-5 14.1; merge 2): B1's Motion panel, B2's four dialogs, B3's
+   two dialogs and two panes, B5's seven dialogs and three panels, each behind one import() */
+const MotionPanel = lazyDialog(() => import('./panels/MotionPanel').then((m) => m.MotionPanel));
+const InsertAudioDialog = lazyDialog(() =>
+  import('./dialogs/InsertAudio').then((m) => m.InsertAudioDialog),
+);
+const InsertVideoDialog = lazyDialog(() =>
+  import('./dialogs/InsertVideo').then((m) => m.InsertVideoDialog),
+);
+const CameraDialog = lazyDialog(() => import('./dialogs/Camera').then((m) => m.CameraDialog));
+const DisplayOptionsDialog = lazyDialog(() =>
+  import('./dialogs/DisplayOptions').then((m) => m.DisplayOptionsDialog),
+);
+const ImportThemeDialog = lazyDialog(() =>
+  import('./dialogs/ImportTheme').then((m) => m.ImportThemeDialog),
+);
+const ImportReportDialog = lazyDialog(() =>
+  import('./dialogs/ImportReport').then((m) => m.ImportReportDialog),
+);
+const TemplatesPane = lazyDialog(() =>
+  import('./panels/TemplatesPane').then((m) => m.TemplatesPane),
+);
+const BuildingBlocksPane = lazyDialog(() =>
+  import('./panels/BuildingBlocksPane').then((m) => m.BuildingBlocksPane),
+);
+const PreferencesDialog = lazyDialog(() =>
+  import('./dialogs/Preferences').then((m) => m.PreferencesDialog),
+);
+const PersonalDictionaryDialog = lazyDialog(() =>
+  import('./dialogs/PersonalDictionary').then((m) => m.PersonalDictionaryDialog),
+);
+const GuidesDialog = lazyDialog(() => import('./dialogs/Guides').then((m) => m.GuidesDialog));
+const IndentationOptionsDialog = lazyDialog(() =>
+  import('./dialogs/IndentationOptions').then((m) => m.IndentationOptionsDialog),
+);
+const RestartNumberingDialog = lazyDialog(() =>
+  import('./dialogs/ListOptions').then((m) => m.RestartNumberingDialog),
+);
+const PrefixSuffixDialog = lazyDialog(() =>
+  import('./dialogs/ListOptions').then((m) => m.PrefixSuffixDialog),
+);
+const DeleteVersionsDialog = lazyDialog(() =>
+  import('./dialogs/DeleteVersions').then((m) => m.DeleteVersionsDialog),
+);
+const SpellCheckPanel = lazyDialog(() =>
+  import('./panels/SpellCheck').then((m) => m.SpellCheckPanel),
+);
+const ChatPanel = lazyDialog(() => import('./panels/Chat').then((m) => m.ChatPanel));
+const DictionaryPanel = lazyDialog(() =>
+  import('./panels/Dictionary').then((m) => m.DictionaryPanel),
+);
 const ShortcutsDialog = lazyDialog(() =>
   import('./ShortcutsDialog').then((m) => m.ShortcutsDialog),
 );
 
 const LAZY_DIALOGS = [
+  InsertAudioDialog,
+  InsertVideoDialog,
+  CameraDialog,
+  DisplayOptionsDialog,
+  ImportThemeDialog,
+  ImportReportDialog,
+  PreferencesDialog,
+  PersonalDictionaryDialog,
+  GuidesDialog,
+  IndentationOptionsDialog,
+  RestartNumberingDialog,
+  PrefixSuffixDialog,
+  DeleteVersionsDialog,
   AgentAccessDialog,
   AvatarBuilderDialog,
   BackgroundDialog,
@@ -328,6 +436,35 @@ export function EditorShell({
   );
   const [makeCopySelected, setMakeCopySelected] = useState(false);
   const [publishTab, setPublishTab] = useState<'link' | 'embed'>('link');
+  /* round five (gslides-parity SPEC-5 7.1; b5.md request 4): the caller's preferences, the route's
+     record first, else the browser mirror the `prefs.set` window handler writes; every write goes
+     through `writePreference`, whose answer lands here so the rulers, the toggles and the dialogs
+     re-render on the stored value */
+  const [preferences, setPreferences] = useState<Preferences>(() => preferencesOf(input));
+  useEffect(() => {
+    if (input.preferences !== undefined) setPreferences(input.preferences);
+  }, [input.preferences]);
+  const shellInput = useMemo<EditorShellInput>(
+    () => ({
+      ...input,
+      preferences,
+      language: input.language ?? input.document.deck.language ?? 'en-US',
+      screens: input.screens ?? screenDetailsSupported(),
+    }),
+    [input, preferences],
+  );
+  const writePref = useCallback(async (path: string, value?: unknown) => {
+    const stored = await writePreference(inputRef.current, path, value);
+    setPreferences(stored);
+    if (typeof window !== 'undefined') preferencesMirror(window.localStorage).write(stored);
+    return stored;
+  }, []);
+  /* the Import report of a `.pptx` this deck was made from, once, on the first mount (SPEC-5 5.2; b3.md B3-23) */
+  useMountEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (readStashedImportReport(input.deckId) !== null && window.location.hash === '')
+      setDialog({ id: 'importReport' });
+  });
   /* round three (SPEC-3 5.3, 5.7): the comment card the overlay draws, the Show changes diff */
   const [commentCard, setCommentCard] = useState<CommentCardRequest | null>(null);
   const [diff, setDiff] = useState<VersionDiffView | null>(null);
@@ -429,9 +566,18 @@ export function EditorShell({
       sourceDrawer: input.toggles?.source ?? false,
       suggestionMarks: input.toggles?.suggestionMarks ?? false,
       sections: settings.sections ?? input.document.deck.sections.length > 1,
+      /* round five (SPEC-5 7.2, 7.5, 7.7): the preference backed toggles read the record */
+      spellcheck: preferences.spelling.underline,
+      screenReader: preferences.accessibility.screenReader,
+      braille: preferences.accessibility.braille,
+      speakAloud: preferences.accessibility.speakAloud,
+      starred: preferences.starred.includes(input.deckId),
+      equationToolbar: settings.equationToolbar ?? true,
     }),
     [
       settings,
+      preferences,
+      input.deckId,
       shell.mode,
       shell.sidebarOpen,
       compact,
@@ -446,8 +592,9 @@ export function EditorShell({
   );
 
   const menuContext = useMemo(
-    () => buildMenuContext({ ...input, regroup: regroup !== null }, effectiveSettings, platform),
-    [input, effectiveSettings, platform, regroup],
+    () =>
+      buildMenuContext({ ...shellInput, regroup: regroup !== null }, effectiveSettings, platform),
+    [shellInput, effectiveSettings, platform, regroup],
   );
 
   const say = useCallback(
@@ -813,6 +960,29 @@ export function EditorShell({
         case 'accountMenu':
           document.querySelector<HTMLButtonElement>('[data-control="title.account"]')?.click();
           return;
+        /* round five (gslides-parity SPEC-5 7.3, 9.2, A5; merge 2) */
+        case 'themeMode':
+          if (current.onThemeMode) current.onThemeMode();
+          else say('Edit theme opens from the editor');
+          return;
+        case 'dictate':
+          if (current.onDictate) current.onDictate();
+          else say('Dictation needs the notes pane; open the presentation in the editor');
+          return;
+        case 'fontPicker':
+          document.querySelector<HTMLElement>('[data-control="toolbar.font"]')?.click();
+          return;
+        case 'nextFormattingChange':
+        case 'previousFormattingChange':
+          if (!moveCaretToFormattingChange(handler === 'nextFormattingChange' ? 1 : -1))
+            say('Place the caret in a text box first');
+          return;
+        case 'nextSlide':
+          s.step(1);
+          return;
+        case 'previousSlide':
+          s.step(-1);
+          return;
         default:
           say(`${item.label} is not available for the current selection`);
       }
@@ -896,13 +1066,47 @@ export function EditorShell({
         case 'appearance':
           if (value === 'light' || value === 'dark' || value === 'match') setAppearance(value);
           return;
+        /* round five (gslides-parity SPEC-5 7.2, 7.5, 7.7): the toggles over the preferences record */
+        case 'spellcheck':
+          void writePref('/spelling/underline', !(effectiveSettings.spellcheck !== false));
+          return;
+        case 'screenReader':
+        case 'braille':
+        case 'speakAloud': {
+          const on = !(effectiveSettings[setting] === true);
+          void writePref(`/accessibility/${setting}`, on).then(() => {
+            if (setting === 'screenReader' && on) {
+              announceVerbalize(ROUND_FIVE.screenReaderOn);
+              say(ROUND_FIVE.screenReaderOn);
+            }
+          });
+          return;
+        }
+        case 'starred': {
+          const list = preferences.starred;
+          const index = list.indexOf(current.deckId);
+          void writePref(
+            index >= 0 ? `/starred/${index}` : '/starred/-',
+            index >= 0 ? undefined : current.deckId,
+          ).then(() => say(index >= 0 ? 'Removed from Starred' : 'Added to Starred'));
+          return;
+        }
         default: {
           const now = effectiveSettings[setting];
           setSetting(setting, typeof value === 'string' ? value : !(now === true));
         }
       }
     },
-    [compact, effectiveSettings, setAppearance, setCompact, setSetting],
+    [
+      compact,
+      effectiveSettings,
+      preferences.starred,
+      say,
+      setAppearance,
+      setCompact,
+      setSetting,
+      writePref,
+    ],
   );
 
   /* the comment card (SPEC-3 5.3): the overlay draws it; the route learns the open thread */
@@ -1380,6 +1584,48 @@ export function EditorShell({
     [say],
   );
 
+  /* round five (gslides-parity SPEC-5 3.5, 15; VERIFICATION-5 finding 7): Enter on a selected audio
+     or video block plays it where it stands, through the show's controller mounted over the slide's
+     poster roots (`data-src` is the stored file, render/slide.ts), and Enter again pauses it. The
+     controller is created on the first press over the slide root in front and torn down with the
+     shell; a slide the person left is mounted again on the next press. */
+  const editorMedia = useRef<{ controller: MediaController; slideRoot: Element } | null>(null);
+  useEffect(
+    () => () => {
+      editorMedia.current?.controller.destroy();
+      editorMedia.current = null;
+    },
+    [],
+  );
+  const toggleSelectedMedia = useCallback(
+    (blockId: string): boolean => {
+      const root = document.querySelector<HTMLElement>(
+        `.ts-stage [data-media="${CSS.escape(blockId)}"], .pt-stagewrap [data-media="${CSS.escape(blockId)}"]`,
+      );
+      const slideRoot = root?.closest<HTMLElement>('[data-slide]') ?? null;
+      if (root === null || slideRoot === null) return false;
+      let entry = editorMedia.current;
+      if (
+        entry === null ||
+        entry.slideRoot !== slideRoot ||
+        !entry.controller.mounted().includes(blockId)
+      ) {
+        entry?.controller.destroy();
+        const controller = createMediaController({
+          origin: window.location.origin,
+          onSoundOff: () => say(PRESENT_TEXT.soundOff),
+        });
+        // the controller types the DOM structurally (`RootLike`) so its unit test drives fakes
+        controller.mount(slideRoot as unknown as Parameters<MediaController['mount']>[0]);
+        entry = { controller, slideRoot };
+        editorMedia.current = entry;
+      }
+      void entry.controller.toggle(blockId);
+      return true;
+    },
+    [say],
+  );
+
   const runBinding = useCallback(
     (binding: KeyBinding, _event: KeyboardEvent): boolean => {
       const current = inputRef.current;
@@ -1426,6 +1672,20 @@ export function EditorShell({
             return true;
           }
           return false;
+        /* round five (SPEC-5 2.1, 3.5, 15; VERIFICATION-5 finding 7): Enter dispatches by focus
+           beside the crop mode's Enter (SHARED_CHORDS): a waiting click step of the Motion panel's
+           preview continues, the selected media block plays or pauses; each answers false when its
+           surface is not in front, so the next binding reads the key */
+        case 'key.motion.preview':
+          if (motionPreview()?.waiting !== true) return false;
+          advanceMotionPreview();
+          return true;
+        case 'key.media.play': {
+          if (current.selection?.text === true) return false;
+          const block = selectedBlock(current.document.slides[current.slideId], current.selection);
+          if (block === undefined || !hasMediaPlayback(block)) return false;
+          return toggleSelectedMedia(block.id);
+        }
         /* round three (SPEC-3 0.42, section 14): Shift+Tab reaches the key owner when the open
            menu's list does not hold focus (the title button does); the menu closes and the
            roster takes focus once it is placed, as it would from inside the list */
@@ -1465,12 +1725,33 @@ export function EditorShell({
         case 'key.comment.previous':
           pendingChord.current = { direction: -1, at: Date.now() };
           return true;
+        /* round five (gslides-parity SPEC-5 7.2, 7.7; b5.md R16): the card steps itself while open */
+        case 'key.spelling.next':
+        case 'key.spelling.previous':
+          if (panel !== 'spellCheck') openPanel('spellCheck');
+          return true;
+        case 'key.table.borderSelection':
+          openPanel('formatOptions', { section: 'table' });
+          window.setTimeout(() => {
+            document
+              .querySelector<HTMLElement>('[data-control="formatOptions.table.cell.border.edges"]')
+              ?.focus();
+          }, 0);
+          return true;
         default:
           break;
       }
       return false;
     },
-    [commentCard?.threadId, openCommentCard, openDialog, openPanel, rotateBy, say],
+    [
+      commentCard?.threadId,
+      openCommentCard,
+      openDialog,
+      openPanel,
+      rotateBy,
+      say,
+      toggleSelectedMedia,
+    ],
   );
 
   useEditorKeys(
@@ -1497,7 +1778,7 @@ export function EditorShell({
 
   const state: EditorShellState = useMemo(
     () => ({
-      input,
+      input: shellInput,
       platform,
       menuContext,
       settings: effectiveSettings,
@@ -1582,6 +1863,33 @@ export function EditorShell({
 
   const slide = input.document.slides[input.slideId];
   const speakerNotes = effectiveSettings.speakerNotes !== false;
+  /* gslides-parity SPEC-5 8.2: the selected equation block and the write its toolbar makes (block.set on the block's fields) */
+  const equationBlock = (() => {
+    const block = selectedBlock(slide, input.selection);
+    return block !== undefined && isEquationBlock(block) ? block : undefined;
+  })();
+  const equationWrite = useMemo<SectionWrite>(
+    () => ({
+      slideId: input.slideId,
+      revision: input.revision,
+      dispatch: input.dispatch,
+      busy: input.busy === true,
+      report: (promise) => {
+        promise.catch((error: unknown) =>
+          say(error instanceof Error ? error.message : String(error)),
+        );
+      },
+      ...(input.editor === undefined ? {} : { editor: input.editor }),
+    }),
+    [input.busy, input.dispatch, input.editor, input.revision, input.slideId, say],
+  );
+  /* SPEC-5 7.4: the word under the selection for the Dictionary panel */
+  const selectedWord = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    const text = window.getSelection()?.toString().trim() ?? '';
+    const word = text.split(/\s+/)[0] ?? '';
+    return /^[\p{L}\p{M}'’-]{1,64}$/u.test(word) ? word : null;
+  };
   const followed =
     input.presence?.following === undefined || input.presence.following === null
       ? undefined
@@ -1594,7 +1902,11 @@ export function EditorShell({
           <ThemesPanel
             document={input.document}
             render={input.renderSlide}
+            renderThemed={input.renderThemed}
             commit={input.commit}
+            dispatch={input.dispatch}
+            revision={input.revision}
+            onImportTheme={() => openDialog('importTheme')}
             onNotice={say}
             onClose={closePanel}
           />
@@ -1792,6 +2104,126 @@ export function EditorShell({
             onClose={closePanel}
           />
         );
+      /* round five (gslides-parity SPEC-5 2.1, 4.4, 4.5, 7.2, 7.4, 10; merge 2) */
+      case 'motion':
+        return (
+          <MotionPanel.Component
+            document={input.document}
+            slideId={input.slideId}
+            selection={
+              input.selection?.blockIds ??
+              (input.selection?.blockId === undefined ? [] : [input.selection.blockId])
+            }
+            revision={input.revision}
+            dispatch={input.dispatch}
+            busy={input.busy}
+            onNotice={say}
+            onSelectBlock={(blockId) => input.onSelectBlock?.(blockId)}
+            onClose={closePanel}
+          />
+        );
+      case 'templates':
+        return (
+          <TemplatesPane.Component
+            slideId={input.slideId}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            deck={input.document.deck}
+            onClose={closePanel}
+            onNotice={say}
+            busy={input.busy}
+          />
+        );
+      case 'buildingBlocks':
+        return (
+          <BuildingBlocksPane.Component
+            slideId={input.slideId}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            deck={input.document.deck}
+            render={input.renderSlide}
+            theme={deckAppearance}
+            onClose={closePanel}
+            onNotice={say}
+            busy={input.busy}
+          />
+        );
+      case 'spellCheck':
+        return (
+          <SpellCheckPanel.Component
+            language={deckLanguageOf(shellInput)}
+            revision={input.revision}
+            check={async () => {
+              const run =
+                input.spellingCheck ?? ((request) => input.dispatch('spelling.check', request));
+              return (await run({
+                language: deckLanguageOf(shellInput),
+                notes: true,
+                ignore: preferences.spelling.dictionary,
+              })) as {
+                language: string;
+                dictionary?: string | null;
+                misspellings: SpellingFinding[];
+              };
+            }}
+            replace={(finding, text, all) =>
+              input.dispatch('spelling.replace', {
+                slideId: finding.slideId,
+                ...(finding.blockId === undefined ? {} : { blockId: finding.blockId }),
+                path: finding.path,
+                range: finding.range,
+                text,
+                ...(all ? { all: true } : {}),
+                baseRevision: input.revision,
+              })
+            }
+            ignore={(word, all) =>
+              input.dispatch('spelling.ignore', { word, ...(all ? { all: true } : {}) })
+            }
+            addWord={async (word) => {
+              await input.dispatch('dictionary.add', { word });
+              setPreferences(preferencesOf(inputRef.current));
+            }}
+            select={(finding) => {
+              if (finding.slideId !== input.slideId) shell.select(finding.slideId);
+              input.onSelectBlock?.(finding.blockId);
+            }}
+            onClose={closePanel}
+          />
+        );
+      case 'dictionary':
+        return (
+          <DictionaryPanel.Component
+            language={deckLanguageOf(shellInput)}
+            {...(selectedWord() === null ? {} : { initialWord: selectedWord() as string })}
+            lookup={(word) =>
+              input.dispatch('dictionary.lookup', {
+                word,
+                language: deckLanguageOf(shellInput),
+              }) as Promise<{ word: string; url: string }>
+            }
+            open={(url) => window.open(url, '_blank', 'noopener')}
+            onClose={closePanel}
+          />
+        );
+      case 'chat':
+        return (
+          <ChatPanel.Component
+            list={() => input.dispatch('chat.list', {}) as Promise<{ messages: ChatRow[] }>}
+            send={(text) => input.dispatch('chat.send', { text })}
+            canSend={
+              input.chat?.canSend ??
+              ((input.capabilities === undefined || input.capabilities.includes('comment')) &&
+                effectiveSettings.mode !== 'viewing')
+            }
+            participants={input.chat?.participants ?? (input.presence?.others.length ?? 0) + 1}
+            {...(input.sync?.tier === undefined ? {} : { tier: input.sync.tier })}
+            {...(input.account?.principal.principalId === undefined
+              ? {}
+              : { selfId: input.account.principal.principalId })}
+            onClose={closePanel}
+          />
+        );
       default:
         return null;
     }
@@ -1861,6 +2293,51 @@ export function EditorShell({
         return <RequestAccessDialog.Component role={dialog.role ?? 'editor'} />;
       case 'forgetBrowser':
         return <ForgetBrowserDialog.Component />;
+      /* round five (gslides-parity SPEC-5 3.2, 3.7, 5.3, 7.1, 7.2, 7.7; merge 2) */
+      case 'insertAudio':
+        return <InsertAudioDialog.Component />;
+      case 'insertVideo':
+        return <InsertVideoDialog.Component />;
+      case 'camera':
+        return <CameraDialog.Component />;
+      case 'displayOptions':
+        return (
+          <DisplayOptionsDialog.Component
+            host={{
+              deckId: input.deckId,
+              presenterPath: `/present/${encodeURIComponent(input.deckId)}`,
+              presenterWindowName: `turboslide-presenter:${input.deckId}`,
+              present: () => {
+                if (input.present?.start) input.present.start(false);
+                else shell.setPresent(true);
+              },
+            }}
+          />
+        );
+      case 'importTheme':
+        return <ImportThemeDialog.Component />;
+      case 'importReport':
+        return <ImportReportDialog.Component />;
+      case 'preferences':
+        return (
+          <PreferencesDialog.Component {...(dialog.tab === undefined ? {} : { tab: dialog.tab })} />
+        );
+      case 'personalDictionary':
+        return <PersonalDictionaryDialog.Component />;
+      case 'editGuides':
+        return <GuidesDialog.Component />;
+      case 'indentationOptions':
+        return <IndentationOptionsDialog.Component />;
+      case 'restartNumbering':
+        return <RestartNumberingDialog.Component />;
+      case 'prefixSuffix':
+        return <PrefixSuffixDialog.Component />;
+      case 'deleteVersions':
+        return (
+          <DeleteVersionsDialog.Component
+            {...(dialog.upTo === undefined ? {} : { upTo: dialog.upTo })}
+          />
+        );
     }
   })();
 
@@ -1985,7 +2462,18 @@ export function EditorShell({
       <MenuBar />
       <div className="ts-toolbar" role="toolbar" aria-label="Toolbar" data-control="toolbar">
         <ToolbarHead />
-        <ToolbarTail />
+        {equationBlock !== undefined ? (
+          /* gslides-parity SPEC-5 8.2: Google Docs' equation toolbar in the tail's place while an equation is selected */
+          <EquationToolbar
+            block={equationBlock}
+            write={equationWrite}
+            hidden={effectiveSettings.equationToolbar === false}
+          />
+        ) : (
+          <ToolbarTail />
+        )}
+        {/* SPEC-5 4.4: Google's 2025 sidebar strip, the Templates and Building blocks panes */}
+        <SidebarStrip />
       </div>
       {sidebar}
       <section className="pt-main" data-editor-main="">
@@ -2035,6 +2523,8 @@ export function EditorShell({
         <Suspense fallback={null}>{panelNode}</Suspense>
       </div>
       <BottomBar />
+      {/* SPEC-5 7.5: the Verbalize rows' live region, spoken too while Speak aloud is on */}
+      <VerbalizeRegion on={preferences.accessibility.screenReader} />
       {layoutPlate}
       {anchoredNode}
       <Suspense fallback={null}>{dialogNode}</Suspense>

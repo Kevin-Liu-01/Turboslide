@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "text",
+  "title": "Import fixture 01 text",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "opening",
+      "name": "Opening",
+      "slideIds": [
+        "slide-1"
+      ]
+    },
+    {
+      "id": "body",
+      "name": "Body",
+      "slideIds": [
+        "runs-and-lists",
+        "slide-3"
+      ]
+    }
+  ],
+  "assets": {},
+  "revision": 0,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

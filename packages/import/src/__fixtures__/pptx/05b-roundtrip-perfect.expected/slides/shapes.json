@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "shapes",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Shape presets",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shapes#h/text"
+        }
+      },
+      {
+        "id": "hex",
+        "type": "text",
+        "text": "Hexagon",
+        "pos": {
+          "x": 180.33,
+          "y": 287.27,
+          "w": 213.33,
+          "h": 156.44,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shapes#hex/text"
+        }
+      },
+      {
+        "id": "right",
+        "type": "text",
+        "text": "Right arrow",
+        "pos": {
+          "x": 477,
+          "y": 330.5,
+          "w": 265,
+          "h": 70,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shapes#right/text"
+        }
+      },
+      {
+        "id": "callout",
+        "type": "text",
+        "text": "A callout with its wedge moved",
+        "pos": {
+          "x": 817,
+          "y": 255.5,
+          "w": 340,
+          "h": 180,
+          "z": 4
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:shapes#callout/text"
+        }
+      },
+      {
+        "id": "snip",
+        "type": "text",
+        "text": "Snipped corner",
+        "pos": {
+          "x": 137,
+          "y": 550.5,
+          "w": 405,
+          "h": 165,
+          "z": 5
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:shapes#snip/text"
+        }
+      }
+    ]
+  },
+  "title": "Shape presets",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide12.xml",
+    "pptxSlideId": 267
+  }
+}

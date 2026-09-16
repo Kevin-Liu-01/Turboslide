@@ -262,33 +262,58 @@ describe('every row of Google’s shortcut page', () => {
       if (binding.status === 'later' && binding.scope !== 'present')
         for (const id of binding.google) greyed.add(id);
     expect([...greyed].sort()).toEqual(
+      /* gslides-parity SPEC-5 15, 16.1 (merge 2): the motion, dictionary, cell border, misspelling
+         and screen reader rows left the greyed list for bindings; the remaining rows are Google's
+         input tools, Explore, captions, the HTML view, the paragraph moves and the list chords */
       [
         'select-none',
         'move-paragraph-up',
         'move-paragraph-down',
-        'animations-panel',
-        'verbalize-selection',
-        'screen-reader-support',
-        'braille-support',
-        'verbalize-from-cursor',
-        'announce-formatting',
         'input-tools-menu',
         'toggle-input-controls',
         'open-explore',
         'captions-while-presenting',
         'html-view',
-        'cell-border-selection',
         'select-list-item',
         'select-list-items-level',
-        'next-formatting-change',
-        'previous-formatting-change',
       ].sort(),
     );
-    /* the misspelling rows left the greyed list: the browser's marks have no key the page drives */
+    /* the misspelling rows are bound (SPEC-5 7.2): the Spell check card's two steps */
     for (const id of ['next-misspelling', 'previous-misspelling']) {
-      expect(byGoogle.get(id)).toBeUndefined();
-      expect(omitted.get(id)?.status).toBe('omit');
+      expect(byGoogle.get(id), id).toBeDefined();
+      expect(omitted.get(id)).toBeUndefined();
     }
+  });
+
+  it('binds the round five media and motion rows of SPEC-5 15 to Google’s keys and omits none of them (VERIFICATION-5 finding 7)', () => {
+    const rows: Record<string, [id: string, mac: string, scope: string]> = {
+      'animation-preview': ['key.motion.preview', 'Enter', 'editor'],
+      'play-video': ['key.media.play', 'Enter', 'canvas'],
+      'video-play-pause': ['key.present.mediaToggle', 'K', 'present'],
+      'video-rewind': ['key.present.mediaRewind', 'U', 'present'],
+      'video-forward': ['key.present.mediaForward', 'O', 'present'],
+    };
+    for (const [google, [id, mac, scope]] of Object.entries(rows)) {
+      expect(omitted.get(google), google).toBeUndefined();
+      const bindings = byGoogle.get(google) ?? [];
+      expect(
+        bindings.map((binding) => binding.id),
+        google,
+      ).toEqual([id]);
+      expect(bindings[0]?.key.mac, google).toBe(mac);
+      expect(bindings[0]?.scope, google).toBe(scope);
+      expect(bindings[0]?.status, google).toBe('now');
+    }
+    /* the three Enter bindings dispatch by focus (SHARED_CHORDS): crop mode first, then a waiting
+       preview (the panel is in front while it waits), then the selected media block */
+    expect(
+      buildEditorKeymap('mac')
+        .get('Enter')
+        ?.bindings.map((binding) => binding.id),
+    ).toEqual(['key.commit', 'key.motion.preview', 'key.media.play']);
+    /* the player letters stay out of the editor map (SPEC 0.28) */
+    for (const chord of ['K', 'U', 'O'])
+      expect(buildEditorKeymap('mac').get(chord)).toBeUndefined();
   });
 
   it('binds the comment chords of SPEC-3 section 14 to Google’s rows: the modifier chords in the editor, the letters in the card', () => {

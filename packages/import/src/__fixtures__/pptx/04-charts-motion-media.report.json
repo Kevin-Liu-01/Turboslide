@@ -1,0 +1,117 @@
+{
+  "summary": {
+    "imported": 17,
+    "substituted": 5,
+    "dropped": 0,
+    "slides": 4
+  },
+  "rows": [
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "Chart 1",
+      "status": "substituted",
+      "code": "chart.kind",
+      "message": "A doughnut chart became a pie chart"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "Chart 2",
+      "status": "substituted",
+      "code": "chart.kind",
+      "message": "A 3D bar chart became a flat one"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "Chart 3",
+      "status": "substituted",
+      "code": "chart.kind",
+      "message": "A stacked chart is drawn clustered"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "Chart 4",
+      "status": "substituted",
+      "code": "chart.truncated",
+      "message": "12 of the categories and 6 of the 7 series were kept"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "Combination",
+      "status": "substituted",
+      "code": "chart.kind",
+      "message": "A combination chart of 2 plots kept its first (barChart)"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "chart-substitutions",
+      "object": "transition",
+      "status": "kept",
+      "code": "transition.advance",
+      "message": "An automatic advance after 4000 ms was kept out; the show advances on a click"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "media",
+      "object": "Equation",
+      "status": "kept",
+      "code": "equation.mathml",
+      "message": "An equation was kept as MathML, editable in LaTeX after retyping"
+    },
+    {
+      "slideIndex": 1,
+      "status": "kept",
+      "code": "theme.layouts",
+      "message": "11 layouts of the file were not imported as custom layouts; the slides keep their positions"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Calibri",
+      "runs": 7,
+      "substituted": "Inter"
+    }
+  ],
+  "theme": {
+    "mode": "adopt",
+    "imported": false,
+    "scheme": {
+      "colors": {
+        "ink": "#000000",
+        "paper": "#ffffff",
+        "ink-2": "#1f497d",
+        "plate": "#eeece1",
+        "ok": "#4f81bd",
+        "warn": "#c0504d",
+        "no": "#9bbb59",
+        "info": "#8064a2",
+        "titanium": "#4bacc6",
+        "raised": "#f79646",
+        "link": "#0000ff"
+      },
+      "fonts": {
+        "major": "Calibri",
+        "minor": "Calibri"
+      }
+    }
+  },
+  "source": {
+    "file": "04-charts-motion-media.pptx",
+    "slides": 4,
+    "page": {
+      "width": 1600,
+      "height": 900
+    },
+    "producer": "python-pptx",
+    "sections": 0,
+    "modifyVerifier": false
+  },
+  "validation": {
+    "ok": true,
+    "issues": 6
+  }
+}

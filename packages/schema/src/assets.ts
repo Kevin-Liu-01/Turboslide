@@ -19,6 +19,8 @@ export const ASSET_ROLES = [
   'logo',
   'frame',
   'other',
+  /* round five (gslides-parity SPEC-5 1.2): a stored audio or video file; the asset picker lists pictures only */
+  'media',
 ] as const;
 export type AssetRole = (typeof ASSET_ROLES)[number];
 
@@ -57,6 +59,8 @@ export type AssetSource =
       license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string;
       shareAlike: boolean;
     }
+  /** the Camera dialog's photo with its capture time (gslides-parity SPEC-5 3.7; b2.md R16) */
+  | { kind: 'camera'; at: string }
   | { kind: 'file' };
 
 export type TwoToneTreatment = {
@@ -139,6 +143,76 @@ export type Asset = {
 /** A variant key: the sha256 hex digest of 06 4.5. */
 export const ASSET_VARIANT_KEY = /^[0-9a-f]{64}$/;
 
+/**
+ * The 320 px twin variant (gslides-parity SPEC-5 11; SPEC-4 7): an `AssetVariant` with this size,
+ * a palette PNG for a two tone picture and a JPEG for a continuous one, written at intake and by
+ * `picture.materialize --clone`; the filmstrip clone's `srcset` names it beside the 1600 twin.
+ */
+export const TWIN_VARIANT_SIZE: readonly [number, number] = [320, 180];
+
+// ---------------------------------------------------------------------------------------------
+// Media assets (gslides-parity SPEC-5 0.16, 1.2; R11 1.4)
+
+export const MEDIA_ASSET_KINDS = ['audio', 'video'] as const;
+export type MediaAssetKind = (typeof MEDIA_ASSET_KINDS)[number];
+
+/** The five formats the intake accepts (SPEC-5 0.18): mp4, webm, mp3, m4a, wav. */
+export const MEDIA_MIMES = [
+  'video/mp4',
+  'video/webm',
+  'audio/mpeg',
+  'audio/mp4',
+  'audio/wav',
+] as const;
+export type MediaMime = (typeof MEDIA_MIMES)[number];
+
+/** The file extension per accepted mime (R11 1.1). */
+export const MEDIA_EXTENSIONS: Readonly<Record<MediaMime, string>> = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'audio/mpeg': 'mp3',
+  'audio/mp4': 'm4a',
+  'audio/wav': 'wav',
+};
+
+export type MediaAssetSource =
+  | { kind: 'file' }
+  | { kind: 'url'; origin: string }
+  | { kind: 'upload' }
+  /** a recording of the device's camera or microphone, with its capture time (gslides-parity SPEC-5 3.7) */
+  | { kind: 'camera' | 'recording'; at: string };
+
+/**
+ * A stored audio or video file in `deck.assets` beside the pictures (R11 1.4): the digest named
+ * file under `assets/`, its container facts as the sniff and Turboslide's own parsers read them,
+ * an optional default poster (a picture asset; a block's own poster wins) and where it came from.
+ * A picture asset has no `kind`, so `isMediaAsset` tells the two apart in one map.
+ */
+export type MediaAsset = {
+  id: AssetId;
+  kind: MediaAssetKind;
+  role: 'media';
+  /** `assets/<id>.<sha8>.<ext>`, digest named like a twin, never overwritten */
+  file: string;
+  mime: MediaMime;
+  bytes: number;
+  sha256: string;
+  /** null when the container states none (a recorded webm); refreshed from the browser */
+  durationMs: number | null;
+  /** video: coded pixels */
+  size?: [number, number];
+  /** the sample entry codes or Matroska codec ids: ['avc1', 'mp4a'], ['V_VP9', 'A_OPUS'] */
+  codecs: string[];
+  /** the default poster, a picture asset; a block may name its own */
+  poster?: AssetId;
+  title?: string;
+  source: MediaAssetSource;
+  ext?: Record<string, unknown>;
+};
+
+/** A value of `deck.assets`: a picture asset (today's record) or a media asset (SPEC-5 0.16). */
+export type DeckAsset = Asset | MediaAsset;
+
 const relativePath = z
   .string()
   .min(1)
@@ -180,6 +254,7 @@ export const assetSourceSchema = z.discriminatedUnion('kind', [
     license: z.string().min(1),
     shareAlike: z.boolean(),
   }),
+  z.strictObject({ kind: z.literal('camera'), at: z.string().min(1) }),
   z.strictObject({ kind: z.literal('file') }),
 ]) satisfies z.ZodType<AssetSource>;
 
@@ -311,6 +386,84 @@ export const assetSchema = z.strictObject({
     .optional(),
   ext: extSchema,
 }) satisfies z.ZodType<Asset>;
+
+const mediaFilePath = z
+  .string()
+  .min(1)
+  .refine(
+    (value) => value.startsWith('assets/') && !value.includes('..'),
+    'a media file under assets/',
+  );
+
+export const mediaAssetSourceSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('file') }),
+  z.strictObject({ kind: z.literal('url'), origin: z.string().min(1) }),
+  z.strictObject({ kind: z.literal('upload') }),
+  z.strictObject({ kind: z.enum(['camera', 'recording']), at: z.string().min(1) }),
+]) satisfies z.ZodType<MediaAssetSource>;
+
+export const mediaAssetSchema = z.strictObject({
+  id: slugSchema,
+  kind: annotate(z.enum(MEDIA_ASSET_KINDS), {
+    label: 'Kind',
+    control: 'select',
+    snap: MEDIA_ASSET_KINDS,
+    group: 'Asset',
+  }),
+  role: z.literal('media'),
+  file: mediaFilePath,
+  mime: z.enum(MEDIA_MIMES),
+  bytes: z.number().int().nonnegative(),
+  sha256: z.string().regex(/^[0-9a-f]{64}$/, 'a sha256 hex digest'),
+  durationMs: z.number().int().nonnegative().nullable(),
+  size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
+  codecs: z.array(z.string().min(1)).max(8),
+  poster: annotate(slugSchema.optional(), {
+    label: 'Poster',
+    control: 'asset',
+    group: 'Asset',
+    help: 'The picture asset every still shows for this media; a block may name its own (gslides-parity SPEC-5 0.16).',
+  }),
+  title: annotate(z.string().max(200).optional(), {
+    label: 'Title',
+    control: 'text',
+    group: 'Asset',
+  }),
+  source: mediaAssetSourceSchema,
+  ext: extSchema,
+}) satisfies z.ZodType<MediaAsset>;
+
+/** A value of `deck.assets`: the picture record first, the media record when `kind` is present. */
+export const deckAssetSchema = z.union([
+  assetSchema,
+  mediaAssetSchema,
+]) satisfies z.ZodType<DeckAsset>;
+
+/** True for a stored audio or video record; a picture asset carries no `kind`. */
+export function isMediaAsset(asset: DeckAsset): asset is MediaAsset {
+  return 'kind' in asset && (asset.kind === 'audio' || asset.kind === 'video');
+}
+
+/** True for a picture asset, the record every twin reader takes. */
+export function isPictureAsset(asset: DeckAsset): asset is Asset {
+  return !isMediaAsset(asset);
+}
+
+/** The picture assets of a deck's map, media left out (the readers of twins, the asset picker, the bundle's twin logic). */
+export function pictureAssets(assets: Readonly<Record<string, DeckAsset>>): Record<string, Asset> {
+  const out: Record<string, Asset> = {};
+  for (const [id, asset] of Object.entries(assets)) if (isPictureAsset(asset)) out[id] = asset;
+  return out;
+}
+
+/** The picture asset of an id, or undefined when the id names nothing or a media file. */
+export function pictureAssetOf(
+  assets: Readonly<Record<string, DeckAsset>>,
+  id: string,
+): Asset | undefined {
+  const asset = assets[id];
+  return asset !== undefined && isPictureAsset(asset) ? asset : undefined;
+}
 
 /** The variant twins for a theme, or undefined when no variant carries the key. */
 export function assetVariantTwin(

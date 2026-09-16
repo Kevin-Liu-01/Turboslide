@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "columns",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Equal columns"
+      },
+      {
+        "id": "p",
+        "type": "paragraph",
+        "text": "The 1166 px content box gives two columns of 547 px with the 72 px gap between them.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "The right column reads the same width, so the seam sits at the page's centre.",
+        "measure": 56
+      }
+    ]
+  },
+  "template": "cols"
+}

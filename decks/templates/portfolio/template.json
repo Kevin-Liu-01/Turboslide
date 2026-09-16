@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "portfolio",
+  "name": "Portfolio",
+  "description": "Eight slides for a portfolio: about, three work slides with captions, the process and a contact plate.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 8
+    }
+  ],
+  "archetypes": [],
+  "category": "personal",
+  "useCases": [
+    "team intros",
+    "milestone celebrations"
+  ],
+  "cover": "title",
+  "slideCount": 8
+}

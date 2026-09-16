@@ -923,6 +923,36 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     group: 'Menus',
     google: [],
   }),
+  /* round five (gslides-parity SPEC-5 7.2, 7.7; b5.md R16): the Spell check card's two steps and
+     the cell border edge picker; the shell opens the card when it is closed and the card itself
+     listens while open */
+  extra({
+    id: 'spelling.next',
+    label: 'Move to next misspelling',
+    key: K("Cmd+'"),
+    scope: 'editor',
+    group: 'Text',
+    google: ['next-misspelling'],
+    enabled: 'write',
+  }),
+  extra({
+    id: 'spelling.previous',
+    label: 'Move to previous misspelling',
+    key: K('Cmd+;'),
+    scope: 'editor',
+    group: 'Text',
+    google: ['previous-misspelling'],
+    enabled: 'write',
+  }),
+  extra({
+    id: 'table.borderSelection',
+    label: 'Open cell border selection',
+    key: K('Ctrl+Cmd+E then P', 'Ctrl+Alt+E then P'),
+    scope: 'editor',
+    group: 'Text',
+    google: ['cell-border-selection'],
+    enabled: 'tableCellSelected',
+  }),
   /* presenting (SPEC 9.2, R04 A10): B6 binds them; the dialog lists them from here */
   extra({
     id: 'present.stop',
@@ -1022,6 +1052,57 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     group: 'Presenting',
     google: ['present-white'],
   }),
+  /* round five (gslides-parity SPEC-5 3.5, 15; VERIFICATION-5 finding 7): the letters of Google's
+     Video player table act on the media of the current slide in the show (the playing one, else
+     the first poster root); Slideshow.tsx dispatches them through presentKeys.ts like the other
+     letters of the presenting table, so they never enter the editor map */
+  extra({
+    id: 'present.mediaToggle',
+    label: 'Play or pause the media',
+    key: K('K', 'K'),
+    scope: 'present',
+    group: 'Video player',
+    google: ['video-play-pause'],
+  }),
+  extra({
+    id: 'present.mediaRewind',
+    label: 'Rewind 10 seconds',
+    key: K('U', 'U'),
+    scope: 'present',
+    group: 'Video player',
+    google: ['video-rewind'],
+  }),
+  extra({
+    id: 'present.mediaForward',
+    label: 'Fast forward 10 seconds',
+    key: K('O', 'O'),
+    scope: 'present',
+    group: 'Video player',
+    google: ['video-forward'],
+  }),
+  /* SPEC-5 2.1 and 3.5 (finding 7): Enter continues a waiting click step of the Motion panel's
+     preview and plays or pauses the selected audio or video block on the canvas; both dispatch by
+     focus beside the crop mode's Enter (SHARED_CHORDS), each handler answering false when its
+     surface is not the one in front (EditorShell.tsx runBinding) */
+  extra({
+    id: 'motion.preview',
+    label: 'Continue in the Motion panel’s preview',
+    key: K('Enter', 'Enter'),
+    scope: 'editor',
+    group: 'Common actions',
+    google: ['animation-preview'],
+    note: 'While the preview waits on a click step',
+  }),
+  extra({
+    id: 'media.play',
+    label: 'Play the selected media',
+    key: K('Enter', 'Enter'),
+    scope: 'canvas',
+    group: 'Common actions',
+    google: ['play-video'],
+    enabled: 'objectSelected',
+    note: 'With an audio or video block selected; Enter again pauses it',
+  }),
 ];
 
 /**
@@ -1039,7 +1120,6 @@ export type OmittedShortcut = {
   reason: string;
 };
 
-const SCREEN_READER_GREY = 'Your screen reader reads the page as it is';
 const INPUT_TOOLS_GREY = 'The operating system input methods work in every field';
 const LIST_CHORD_GREY = 'A screen reader chord; lists are edited as text';
 
@@ -1060,22 +1140,8 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
     status: 'later',
     reason: 'The web page download is the HTML form of the presentation',
   },
-  { google: 'animations-panel', status: 'later', reason: 'The GT theme presents still slides' },
-  { google: 'animation-preview', status: 'omit', reason: 'No animations' },
   { google: 'open-explore', status: 'later', reason: 'Google retired Explore in 2024' },
-  {
-    google: 'open-dictionary',
-    status: 'omit',
-    reason: 'The operating system dictionary works on selected text',
-  },
   { google: 'side-panel', status: 'omit', reason: 'Tab reaches the right panel' },
-  {
-    google: 'cell-border-selection',
-    status: 'later',
-    reason: 'Border colour applies to the selected cells',
-  },
-  { google: 'play-video', status: 'omit', reason: 'No video' },
-  { google: 'accessibility-menu', status: 'omit', reason: SCREEN_READER_GREY },
   { google: 'input-tools-menu', status: 'later', reason: INPUT_TOOLS_GREY },
   { google: 'toggle-input-controls', status: 'later', reason: INPUT_TOOLS_GREY },
   {
@@ -1086,20 +1152,6 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   { google: 'move-paragraph-up', status: 'later', reason: 'Paragraphs are moved by cut and paste' },
   { google: 'select-list-item', status: 'later', reason: LIST_CHORD_GREY },
   { google: 'select-list-items-level', status: 'later', reason: LIST_CHORD_GREY },
-  { google: 'next-formatting-change', status: 'later', reason: 'A screen reader chord' },
-  { google: 'previous-formatting-change', status: 'later', reason: 'A screen reader chord' },
-  /* SPEC-2 section 9 leaves the misspelling rows out of the greyed list: the browser's spelling
-     marks have no key the page can drive */
-  {
-    google: 'next-misspelling',
-    status: 'omit',
-    reason: 'Your browser marks misspellings and steps through them from its own menu',
-  },
-  {
-    google: 'previous-misspelling',
-    status: 'omit',
-    reason: 'Your browser marks misspellings and steps through them from its own menu',
-  },
   {
     google: 'add-to-selection',
     status: 'omit',
@@ -1115,22 +1167,46 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
     status: 'omit',
     reason: 'A number then Enter is a sequence, not a chord; B6 binds it in present mode',
   },
-  { google: 'video-play-pause', status: 'omit', reason: 'No video' },
-  { google: 'video-rewind', status: 'omit', reason: 'No video' },
-  { google: 'video-forward', status: 'omit', reason: 'No video' },
-  { google: 'video-previous-frame', status: 'omit', reason: 'No video' },
-  { google: 'video-next-frame', status: 'omit', reason: 'No video' },
-  { google: 'video-slower', status: 'omit', reason: 'No video' },
-  { google: 'video-faster', status: 'omit', reason: 'No video' },
-  { google: 'video-seek', status: 'omit', reason: 'No video' },
-  { google: 'video-captions', status: 'omit', reason: 'No video' },
-  { google: 'video-full-screen', status: 'omit', reason: 'No video' },
-  { google: 'video-mute', status: 'omit', reason: 'No video' },
-  { google: 'verbalize-selection', status: 'later', reason: SCREEN_READER_GREY },
-  { google: 'screen-reader-support', status: 'later', reason: SCREEN_READER_GREY },
-  { google: 'braille-support', status: 'later', reason: SCREEN_READER_GREY },
-  { google: 'verbalize-from-cursor', status: 'later', reason: SCREEN_READER_GREY },
-  { google: 'announce-formatting', status: 'later', reason: SCREEN_READER_GREY },
+  {
+    google: 'video-previous-frame',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-next-frame',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-slower',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-faster',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-seek',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-captions',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-full-screen',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
+  {
+    google: 'video-mute',
+    status: 'omit',
+    reason: 'The show’s media controls take the click; the player keys are the browser’s',
+  },
 ];
 
 /**
@@ -1240,6 +1316,9 @@ export const SHARED_CHORDS: ReadonlyArray<{ items: ReadonlyArray<string>; why: '
     { items: ['file.versionHistory.see', 'title.lastEdit'], why: 'same' },
     { items: ['view.fullScreen', 'toolbar.hideMenus'], why: 'same' },
     { items: ['toolbar.paintFormat', 'key.copyFormatting', 'key.pasteFormatting'], why: 'same' },
+    /* round five (SPEC-5 2.1, 3.5; VERIFICATION-5 finding 7): Enter leaves crop mode, plays the
+       selected media block, or continues the Motion panel's waiting preview, by which is in front */
+    { items: ['key.commit', 'key.media.play', 'key.motion.preview'], why: 'focus' },
   ];
 
 /** The chords a menu item, toolbar control or extra binding prints, with the menu group it lists under. */
@@ -1379,6 +1458,16 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
   'toolbar.paintFormat': ['copy-formatting', 'paste-formatting'],
   'toolbar.insertComment': ['insert-comment'],
   'toolbar.hideMenus': ['compact-mode'],
+  /* round five (gslides-parity SPEC-5 15, 16.1): the Google rows the flipped items answer */
+  'slide.transition': ['animations-panel'],
+  'tools.dictionary': ['open-dictionary'],
+  'tools.accessibilitySettings.screenReader': ['screen-reader-support'],
+  'tools.accessibilitySettings.braille': ['braille-support'],
+  'accessibility.verbalize.selection': ['verbalize-selection'],
+  'accessibility.verbalize.formatting': ['announce-formatting'],
+  'accessibility.verbalize.fromCursor': ['verbalize-from-cursor'],
+  'accessibility.nextFormattingChange': ['next-formatting-change'],
+  'accessibility.previousFormattingChange': ['previous-formatting-change'],
 };
 
 /**
@@ -1399,6 +1488,258 @@ export const TURBOSLIDE_ONLY_KEYS: ReadonlyArray<string> = [
   'key.rotateRight15Alias',
   'key.comment.exitEsc',
   'key.roster',
+  /* round five (gslides-parity SPEC-5 8.2): the equation block has no Google Slides row */
+  'insert.equation',
+];
+
+/** One key row round five binds (gslides-parity SPEC-5 15, 16.1), with the lane that binds it. */
+export type PlannedKeyRow = {
+  /** the binding id the row takes: the menu item id, or `key.<name>` for a binding with no item */
+  id: string;
+  label: string;
+  mac: string;
+  win: string;
+  scope: KeyScope;
+  group: ShortcutGroup;
+  /** the R04 fixture row the binding answers; absent on a Turboslide addition */
+  google?: string;
+  turboslide?: true;
+  lane: string;
+};
+
+/**
+ * The key rows round five lands (SPEC-5 7.2, 7.4, 7.5, 8.2, 15; the integrator's day 0 seam of
+ * 1.6): the eleven Google rows that leave `OMITTED_SHORTCUTS` (the greyed list above holds them
+ * until each lane flips its row, so `shortcuts.test.ts`'s greyed set stays pinned) and the
+ * Turboslide additions. A lane lands a row by adding the chord to its menu item or an `extra`
+ * binding, removing the `OMITTED_SHORTCUTS` entry, and moving the fixture id out of the test's
+ * greyed list; the `id`, `scope` and `group` here are the ones the binding takes.
+ */
+export const GS5_KEY_ROWS: ReadonlyArray<PlannedKeyRow> = [
+  /* motion (SPEC-5 2.1; B1) */
+  {
+    id: 'slide.transition',
+    label: 'Open the Motion panel',
+    mac: 'Cmd+Option+Shift+B',
+    win: 'Ctrl+Alt+Shift+B',
+    scope: 'editor',
+    group: 'Common actions',
+    google: 'animations-panel',
+    lane: 'B1',
+  },
+  {
+    id: 'key.motion.preview',
+    label: 'Continue in the Motion panel’s preview',
+    mac: 'Enter',
+    win: 'Enter',
+    scope: 'editor',
+    group: 'Common actions',
+    google: 'animation-preview',
+    lane: 'B1',
+  },
+  {
+    id: 'key.motion.up',
+    label: 'Move the animation up',
+    mac: 'Option+Up',
+    win: 'Alt+Up',
+    scope: 'editor',
+    group: 'Common actions',
+    turboslide: true,
+    lane: 'B1',
+  },
+  {
+    id: 'key.motion.down',
+    label: 'Move the animation down',
+    mac: 'Option+Down',
+    win: 'Alt+Down',
+    scope: 'editor',
+    group: 'Common actions',
+    turboslide: true,
+    lane: 'B1',
+  },
+  {
+    id: 'key.present.pen',
+    label: 'Turn on the pen',
+    mac: 'P',
+    win: 'P',
+    scope: 'present',
+    group: 'Presenting',
+    turboslide: true,
+    lane: 'B1',
+  },
+  /* media (SPEC-5 3.5; B2): Enter on a media block, the player letters in the show */
+  {
+    id: 'key.media.play',
+    label: 'Play the selected media',
+    mac: 'Enter',
+    win: 'Enter',
+    scope: 'canvas',
+    group: 'Common actions',
+    google: 'play-video',
+    lane: 'B2',
+  },
+  {
+    id: 'key.present.mediaToggle',
+    label: 'Play or pause the media',
+    mac: 'K',
+    win: 'K',
+    scope: 'present',
+    group: 'Video player',
+    google: 'video-play-pause',
+    lane: 'B2',
+  },
+  {
+    id: 'key.present.mediaRewind',
+    label: 'Rewind 10 seconds',
+    mac: 'U',
+    win: 'U',
+    scope: 'present',
+    group: 'Video player',
+    google: 'video-rewind',
+    lane: 'B2',
+  },
+  {
+    id: 'key.present.mediaForward',
+    label: 'Fast forward 10 seconds',
+    mac: 'O',
+    win: 'O',
+    scope: 'present',
+    group: 'Video player',
+    google: 'video-forward',
+    lane: 'B2',
+  },
+  /* the text tools and the Accessibility menu (SPEC-5 7.2, 7.4, 7.5, 7.7; B5) */
+  {
+    id: 'key.spelling.next',
+    label: 'Move to next misspelling',
+    mac: "Cmd+'",
+    win: "Ctrl+'",
+    scope: 'editor',
+    group: 'Text',
+    google: 'next-misspelling',
+    lane: 'B5',
+  },
+  {
+    id: 'key.spelling.previous',
+    label: 'Move to previous misspelling',
+    mac: 'Cmd+;',
+    win: 'Ctrl+;',
+    scope: 'editor',
+    group: 'Text',
+    google: 'previous-misspelling',
+    lane: 'B5',
+  },
+  {
+    id: 'tools.dictionary',
+    label: 'Open dictionary',
+    mac: 'Cmd+Shift+Y',
+    win: 'Ctrl+Shift+Y',
+    scope: 'editor',
+    group: 'Common actions',
+    google: 'open-dictionary',
+    lane: 'B5',
+  },
+  {
+    id: 'key.table.borderSelection',
+    label: 'Open cell border selection',
+    mac: 'Ctrl+Cmd+E then P',
+    win: 'Ctrl+Alt+E then P',
+    scope: 'editor',
+    group: 'Text',
+    google: 'cell-border-selection',
+    lane: 'B5',
+  },
+  {
+    id: 'tools.accessibilitySettings.screenReader',
+    label: 'Turn on screen reader support',
+    mac: 'Cmd+Option+Z',
+    win: 'Ctrl+Alt+Z',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'screen-reader-support',
+    lane: 'B5',
+  },
+  {
+    id: 'tools.accessibilitySettings.braille',
+    label: 'Turn on braille support',
+    mac: 'Cmd+Option+H',
+    win: 'Ctrl+Alt+H',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'braille-support',
+    lane: 'B5',
+  },
+  {
+    id: 'menu.accessibility',
+    label: 'Accessibility menu',
+    mac: 'Ctrl+Option+A',
+    win: 'Alt+A',
+    scope: 'menu',
+    group: 'Menus',
+    google: 'accessibility-menu',
+    lane: 'B5',
+  },
+  {
+    id: 'accessibility.verbalize.selection',
+    label: 'Verbalize selection',
+    mac: 'Cmd+Option+X',
+    win: 'Ctrl+Alt+X',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'verbalize-selection',
+    lane: 'B5',
+  },
+  {
+    id: 'accessibility.verbalize.formatting',
+    label: 'Verbalize selection formatting',
+    mac: 'Cmd+Option+A then F',
+    win: 'Ctrl+Alt+A then F',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'announce-formatting',
+    lane: 'B5',
+  },
+  {
+    id: 'accessibility.verbalize.fromCursor',
+    label: 'Verbalize from cursor location',
+    mac: 'Cmd+Option+R',
+    win: 'Ctrl+Alt+R',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'verbalize-from-cursor',
+    lane: 'B5',
+  },
+  {
+    id: 'accessibility.nextFormattingChange',
+    label: 'Move to next formatting change',
+    mac: 'Cmd+Option+Shift+N',
+    win: 'Ctrl+Alt+Shift+N',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'next-formatting-change',
+    lane: 'B5',
+  },
+  {
+    id: 'accessibility.previousFormattingChange',
+    label: 'Move to previous formatting change',
+    mac: 'Cmd+Option+Shift+P',
+    win: 'Ctrl+Alt+Shift+P',
+    scope: 'editor',
+    group: 'Screen reader support',
+    google: 'previous-formatting-change',
+    lane: 'B5',
+  },
+  /* the equation (SPEC-5 8.2; B6) */
+  {
+    id: 'insert.equation',
+    label: 'Insert equation',
+    mac: 'Cmd+Option+Shift+E',
+    win: 'Ctrl+Alt+Shift+E',
+    scope: 'editor',
+    group: 'Common actions',
+    turboslide: true,
+    lane: 'B6',
+  },
 ];
 
 /**
@@ -1425,8 +1766,14 @@ export function buildKeyTable(): KeyBinding[] {
       scope: 'menu',
       group: 'Menus',
       status: 'now',
-      /* Google publishes no access key for Extensions (SPEC 2.11) */
-      google: menu.id === 'extensions' ? [] : [`menu-${menu.id}`],
+      /* Google publishes no access key for Extensions (SPEC 2.11); the Accessibility menu's row is
+         spelt the other way round on Google's page (SPEC-5 7.5) */
+      google:
+        menu.id === 'extensions'
+          ? []
+          : menu.id === 'accessibility'
+            ? ['accessibility-menu']
+            : [`menu-${menu.id}`],
       items: [],
     });
   }
@@ -1509,19 +1856,40 @@ export function isBareKey(chord: Chord): boolean {
  * a copy.
  */
 export function assignAccessKeys<T extends MenuItem>(items: ReadonlyArray<T>): T[] {
-  const taken = new Set<string>();
   /* letters, then the digits of a label with none (50%, 1.15) */
   const letters = items.map((item) => [
     ...new Set(item.label.toLowerCase().replace(/[^a-z0-9]/g, '')),
   ]);
-  const chosen = new Map<number, string>();
   const order = Array.from(items.keys())
     .filter((index) => items[index]?.status !== 'omit')
     .sort((a, b) => (letters[a]?.length ?? 0) - (letters[b]?.length ?? 0) || a - b);
+  /* one letter per row where the labels allow it: a greedy pass, then an augmenting path for a
+     row the greedy pass left without a letter (gslides-parity SPEC-5 14.1 added rows to View and
+     Insert, whose labels share most of their letters) */
+  const owner = new Map<string, number>();
+  const chosen = new Map<number, string>();
+  const assign = (index: number, seen: Set<string>): boolean => {
+    for (const letter of letters[index] ?? []) {
+      if (seen.has(letter)) continue;
+      seen.add(letter);
+      const holder = owner.get(letter);
+      if (holder === undefined || assign(holder, seen)) {
+        owner.set(letter, index);
+        chosen.set(index, letter);
+        return true;
+      }
+    }
+    return false;
+  };
+  for (const index of order) assign(index, new Set());
+  /* a row whose every letter another sibling holds takes a free letter of the alphabet, the way
+     Google's menus underline a letter the label does not carry when the siblings run out */
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
   for (const index of order) {
-    const letter = letters[index]?.find((each) => !taken.has(each));
-    if (letter === undefined) continue;
-    taken.add(letter);
+    if (chosen.has(index)) continue;
+    const letter = [...alphabet].find((each) => !owner.has(each));
+    if (letter === undefined) break;
+    owner.set(letter, index);
     chosen.set(index, letter);
   }
   return items.map((item, index) => {

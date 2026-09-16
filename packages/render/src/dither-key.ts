@@ -23,7 +23,16 @@
 import type { Asset, AssetTwins, AssetVariant } from '@turboslide/schema/assets';
 import { sha256Hex } from './sha256.ts';
 
-export type DitherPattern = 'bayer8' | 'bayer4' | 'blue64' | 'random';
+/** The pattern ids of `@turboslide/schema/blocks/dither` `DITHER_PATTERNS`, spelled here so this module stays out of the schema's runtime graph (SPEC-4 3.12); `dither-key.test.ts` pins the two lists equal. */
+export type DitherPattern =
+  | 'bayer8'
+  | 'bayer4'
+  | 'blue64'
+  | 'random'
+  | 'floyd-steinberg'
+  | 'atkinson'
+  | 'halftone-dot'
+  | 'halftone-line';
 export type DitherTone = 'two' | 'three' | 'original';
 export type DitherPolarity = 'auto' | 'dark-ground' | 'light-ground' | 'same';
 export type DitherChannel = 'gray' | 'r' | 'g' | 'b';
@@ -44,10 +53,12 @@ export type PictureDitherLike = {
   minFilter?: number;
   channel?: DitherChannel;
   seed?: number;
+  /** the halftone screen's angle (gslides-parity SPEC-5 11); optional in the resolved record too, so every existing key is unchanged */
+  angle?: number;
 };
 
-/** The field with every default filled in, in the key order below. */
-export type ResolvedDither = Required<PictureDitherLike>;
+/** The field with every default filled in, in the key order below; `angle` rides along only when written. */
+export type ResolvedDither = Required<Omit<PictureDitherLike, 'angle'>> & { angle?: number };
 
 /** The defaults of SPEC-3 10.1 and 10.9: the pipeline's identity, the Format options default. */
 export const DITHER_DEFAULTS: Omit<ResolvedDither, 'pattern'> = {
@@ -77,7 +88,16 @@ export const DITHER_PHOTOGRAPH: PictureDitherLike = {
 /** The Neutral preset, the identity: the toggle of the Format options section (SPEC-3 10.7). */
 export const DITHER_NEUTRAL: PictureDitherLike = { pattern: 'bayer8' };
 
-const PATTERNS: readonly DitherPattern[] = ['bayer8', 'bayer4', 'blue64', 'random'];
+const PATTERNS: readonly DitherPattern[] = [
+  'bayer8',
+  'bayer4',
+  'blue64',
+  'random',
+  'floyd-steinberg',
+  'atkinson',
+  'halftone-dot',
+  'halftone-line',
+];
 
 /** The key order of the resolved record; fixed so two writers hash one string. */
 const KEY_ORDER: readonly (keyof ResolvedDither)[] = [
@@ -102,6 +122,8 @@ export function resolveDither(dither: PictureDitherLike): ResolvedDither {
   const merged: ResolvedDither = { ...DITHER_DEFAULTS, ...stripUndefined(dither) };
   const ordered: Partial<ResolvedDither> = {};
   for (const key of KEY_ORDER) (ordered as Record<string, unknown>)[key] = merged[key];
+  // the round five halftone angle joins the key only when a dither writes it (SPEC-5 0.7)
+  if (merged.angle !== undefined) ordered.angle = merged.angle;
   return ordered as ResolvedDither;
 }
 

@@ -1,0 +1,37 @@
+{
+  "id": "quotes/pull-quote",
+  "category": "quotes",
+  "label": "Pull quote with a credit",
+  "blocks": [
+    {
+      "id": "quote",
+      "pos": {
+        "x": 0,
+        "y": 80,
+        "w": 1326,
+        "h": 260,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "We replaced three tools and a spreadsheet the first month."
+    },
+    {
+      "id": "credit",
+      "pos": {
+        "x": 0,
+        "y": 360,
+        "w": 1326,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A customer, head of operations",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    400
+  ]
+}

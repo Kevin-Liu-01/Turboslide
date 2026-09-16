@@ -506,5 +506,12 @@
     "tests": [
       "packages/lint/src/lint.test.ts"
     ]
+  },
+  "text/spelling": {
+    "layer": "static",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/static/spelling.test.ts"
+    ]
   }
 }

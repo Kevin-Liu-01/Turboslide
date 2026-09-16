@@ -17,26 +17,37 @@ import sharp from 'sharp';
 import { describe, expect, test } from 'vitest';
 
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
+import { resolveDither } from '@turboslide/schema/blocks/dither';
 
 import { cellAgreement } from './diff.ts';
 import {
   BAYER4,
   BAYER4_THRESHOLDS,
   DITHER_COLORS,
+  DITHER_PREVIEW_BUDGET_MS,
+  FLOYD_STEINBERG,
   baseSpecKey,
   baseSpecOf,
   centeringOf,
   cropOfTrim,
+  diffuseLevels,
+  diffusionKernel,
   ditherCells,
   ditherFrame,
   ditherPicture,
+  ditherPreviewBudget,
+  halftoneThreshold,
   hash32,
+  isDiffusion,
+  isHalftone,
   paintPlane,
   planeAlpha,
   polarityOf,
   positiveOf,
   prepareToneBase,
+  previewFallsBack,
   quantise,
+  setDitherPreviewBudget,
   thresholdAt,
 } from './dither.ts';
 import { encodeOneBit, isOneBit, renderVariant } from './dither-io.ts';
@@ -398,4 +409,162 @@ describe('the variant files', () => {
     expect(original.neutral).toBe(true);
     expect(original.files[0]?.format).toBe('png-rgba');
   }, 60_000);
+});
+
+describe('the round five families (gslides-parity SPEC-5 11)', () => {
+  const gradient = (): { width: number; height: number; data: Uint8Array } => {
+    const width = 64;
+    const height = 32;
+    const data = new Uint8Array(width * height);
+    for (let y = 0; y < height; y += 1)
+      for (let x = 0; x < width; x += 1) data[y * width + x] = Math.round((x / (width - 1)) * 255);
+    return { width, height, data };
+  };
+
+  test('floyd-steinberg and atkinson diffuse a ramp to a positive whose lit fraction tracks the mean tone, serpentine and deterministic', () => {
+    const tone = gradient();
+    for (const pattern of ['floyd-steinberg', 'atkinson'] as const) {
+      const kernel = diffusionKernel(pattern);
+      const once = diffuseLevels(tone, kernel, 2);
+      const twice = diffuseLevels(tone, kernel, 2);
+      expect(Buffer.compare(Buffer.from(once), Buffer.from(twice))).toBe(0);
+      const lit = once.reduce((n, b) => n + b, 0) / once.length;
+      expect(lit).toBeGreaterThan(0.45);
+      expect(lit).toBeLessThan(0.55);
+      // the left third of the ramp is mostly ink, the right third mostly paper
+      const third = tone.width / 3;
+      let leftLit = 0;
+      let rightLit = 0;
+      for (let y = 0; y < tone.height; y += 1)
+        for (let x = 0; x < tone.width; x += 1) {
+          const bit = once[y * tone.width + x] ?? 0;
+          if (x < third) leftLit += bit;
+          if (x >= 2 * third) rightLit += bit;
+        }
+      expect(leftLit).toBeLessThan(rightLit);
+      // through the stages: positiveOf routes a diffusion pattern to the kernel
+      const resolved = { ...resolveDither({ pattern }), pattern };
+      expect(Buffer.compare(Buffer.from(positiveOf(tone, resolved).bits), Buffer.from(once))).toBe(
+        0,
+      );
+      // three levels quantise to 0, 1, 2 with the middle present on the ramp
+      const levels = diffuseLevels(tone, kernel, 3);
+      expect(new Set(levels)).toEqual(new Set([0, 1, 2]));
+      expect(Math.max(...levels)).toBe(2);
+    }
+  });
+
+  test('a diffusion of a flat mid gray lights about half the cells with no visible tiling', () => {
+    const width = 40;
+    const height = 40;
+    const tone = { width, height, data: new Uint8Array(width * height).fill(128) };
+    const bits = diffuseLevels(tone, FLOYD_STEINBERG, 2);
+    const lit = bits.reduce((n, b) => n + b, 0);
+    expect(Math.abs(lit / bits.length - 0.5)).toBeLessThan(0.03);
+  });
+
+  test('the halftone screens are thresholds of the cell under the angle: a dot grows from the pitch centre, a line from its axis', () => {
+    // at angle 0 the dot centre of the first pitch is at (3.5, 3.5) plus a half cell: the cell (3, 3) is nearest
+    const centre = halftoneThreshold('halftone-dot', 3, 3, 0);
+    const corner = halftoneThreshold('halftone-dot', 0, 0, 0);
+    expect(centre).toBeLessThan(corner);
+    expect(centre).toBeLessThan(40);
+    expect(corner).toBeGreaterThan(200);
+    // the line screen at angle 0 does not vary along x
+    expect(halftoneThreshold('halftone-line', 0, 2, 0)).toBe(
+      halftoneThreshold('halftone-line', 5, 2, 0),
+    );
+    expect(halftoneThreshold('halftone-line', 0, 3, 0)).toBeLessThan(
+      halftoneThreshold('halftone-line', 0, 0, 0),
+    );
+    // the angle rotates the screen: at 90 degrees the line varies along x instead
+    expect(halftoneThreshold('halftone-line', 0, 2, 90)).not.toBe(
+      halftoneThreshold('halftone-line', 5, 2, 90),
+    );
+    // every threshold is in 0 to 254 so a full paper tone lights every cell
+    for (let y = 0; y < 16; y += 1)
+      for (let x = 0; x < 16; x += 1) {
+        for (const pattern of ['halftone-dot', 'halftone-line'] as const) {
+          const t = thresholdAt(pattern, x, y, 0, 45);
+          expect(t).toBeGreaterThanOrEqual(0);
+          expect(t).toBeLessThanOrEqual(254);
+        }
+      }
+    // 45 degrees is the default and reads through the resolved field
+    const tone = gradient();
+    const dot45 = positiveOf(tone, {
+      ...resolveDither({ pattern: 'halftone-dot' }),
+      pattern: 'halftone-dot',
+    });
+    const dot0 = positiveOf(tone, {
+      ...resolveDither({ pattern: 'halftone-dot', angle: 0 }),
+      pattern: 'halftone-dot',
+      angle: 0,
+    });
+    expect(Buffer.compare(Buffer.from(dot45.bits), Buffer.from(dot0.bits))).not.toBe(0);
+    expect(isHalftone('halftone-dot')).toBe(true);
+    expect(isDiffusion('halftone-dot')).toBe(false);
+    expect(isDiffusion('atkinson')).toBe(true);
+  });
+
+  test('the preview budget: a family over the budget draws as Bayer in later previews and never in a file', () => {
+    const source: RgbaImage = {
+      width: 64,
+      height: 36,
+      data: new Uint8Array(64 * 36 * 4).map((_, i) => (i % 4 === 3 ? 255 : (i >> 2) % 256)),
+    };
+    const dither: PictureDither = { pattern: 'atkinson', cell: 1 };
+    const base = prepareToneBase(source, baseSpecOf(dither, { width: 64, height: 36 }));
+    try {
+      setDitherPreviewBudget(0);
+      const first = ditherFrame(base, dither, 'dark', { preview: true });
+      expect(first.pattern).toBe('atkinson');
+      expect(first.fallback).toBeUndefined();
+      expect(previewFallsBack('atkinson', base.screen)).toBe(true);
+      const second = ditherFrame(base, dither, 'dark', { preview: true });
+      expect(second.pattern).toBe('bayer8');
+      expect(second.fallback).toBe('bayer8');
+      // a file render keeps the family
+      const file = ditherFrame(base, dither, 'dark');
+      expect(file.pattern).toBe('atkinson');
+      expect(file.fallback).toBeUndefined();
+      // a smaller screen than the one measured stays on the family
+      expect(previewFallsBack('atkinson', [8, 8])).toBe(false);
+    } finally {
+      setDitherPreviewBudget(DITHER_PREVIEW_BUDGET_MS);
+    }
+    expect(ditherPreviewBudget()).toBe(100);
+    expect(previewFallsBack('atkinson', base.screen)).toBe(false);
+    expect(previewFallsBack('bayer8', base.screen)).toBe(false);
+  });
+
+  test('every family runs stages 2 to 5 on a 400 by 225 screen under the 100 ms budget on this host (the measured number is the note)', () => {
+    const width = 800;
+    const height = 450;
+    const source: RgbaImage = {
+      width,
+      height,
+      data: new Uint8Array(width * height * 4).map((_, i) =>
+        i % 4 === 3 ? 255 : ((i >> 2) * 7) % 256,
+      ),
+    };
+    const times: Record<string, number> = {};
+    for (const pattern of [
+      'floyd-steinberg',
+      'atkinson',
+      'halftone-dot',
+      'halftone-line',
+      'bayer8',
+    ] as const) {
+      const dither: PictureDither = { pattern, cell: 2 };
+      const base = prepareToneBase(source, baseSpecOf(dither, { width, height }));
+      ditherFrame(base, dither, 'dark');
+      const frame = ditherFrame(base, dither, 'dark');
+      times[pattern] = Math.round(frame.ms * 10) / 10;
+      expect(frame.screen).toEqual([400, 225]);
+    }
+    // eslint-disable-next-line no-console
+    console.log(`dither families, stages 2 to 5 at 400 by 225 cells, ms: ${JSON.stringify(times)}`);
+    for (const [, ms] of Object.entries(times)) expect(ms).toBeLessThan(100);
+  });
 });

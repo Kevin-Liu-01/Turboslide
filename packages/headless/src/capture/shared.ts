@@ -168,6 +168,27 @@ export function assertAllowedHost(
 export const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 
 // ---------------------------------------------------------------------------------------------
+// The media intake's entries (gslides-parity SPEC-5 3.3; R11 1.2, 1.7, 4.3; B2): the container
+// sniff the store's parsers share, re-exported so `readInput`'s callers and the bundle scan run
+// one code; the per kind byte caps a media read takes in place of the picture's 25 MB; and the
+// two hosts the YouTube title and thumbnail reads may reach, passed as `allowHosts` for that one
+// fetch and never added to the general allowlist.
+
+export { sniffMedia } from '@turboslide/store/media/sniff';
+export type { MediaContainer, SniffedMedia } from '@turboslide/store/media/sniff';
+
+/** The byte cap a media read takes per kind (SPEC-5 0.18: the account and agent tiers' rows). */
+export const MEDIA_INPUT_BYTES: Readonly<Record<'audio' | 'video', number>> = {
+  audio: 50 * 1024 * 1024,
+  video: 200 * 1024 * 1024,
+};
+
+/** `www.youtube.com` for the oEmbed title (R11 4.3, M3). */
+export const YOUTUBE_OEMBED_HOST = 'www.youtube.com';
+/** `i.ytimg.com` for the live thumbnail the editor shows and never stores (R11 4.3, M4). */
+export const YOUTUBE_THUMBNAIL_FETCH_HOST = 'i.ytimg.com';
+
+// ---------------------------------------------------------------------------------------------
 // The pinned lookup (gslides-parity SPEC-3 0.30, 8.6; report 04 F3 sketches 3 and 4): a host name
 // is resolved once, every address it resolves to is checked against the private, loopback, link
 // local, multicast, reserved and mapped ranges, and the connection is made to the checked address

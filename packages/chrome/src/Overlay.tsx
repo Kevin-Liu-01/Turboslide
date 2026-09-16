@@ -13,6 +13,7 @@ import { EditorShellContext } from './editor-shell-context';
 import { cn } from './lib/cn';
 import { CANVAS } from './menus/strings';
 import { Rulers } from './Rulers';
+import { preferencesOf } from './text-tools';
 import { tipProps } from './Tooltip';
 
 import './Overlay.css';
@@ -442,6 +443,8 @@ export function Overlay({ view }: OverlayProps) {
       {view.rulers ? (
         <Rulers
           k={k}
+          page={view.rulers.page}
+          unit={shell !== null ? preferencesOf(shell.input).units : undefined}
           pointer={view.rulers.pointer}
           selection={view.rulers.selection}
           onRulerDown={view.onRulerDown}

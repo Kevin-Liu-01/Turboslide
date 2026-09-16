@@ -24,6 +24,8 @@ import { exportReportSchema } from '@turboslide/schema/export';
 import { resolveExecutable } from '@turboslide/headless/launch';
 import { pdfPageCount, pdfPageSize } from '@turboslide/headless/pdf';
 
+import { textInset } from '@turboslide/schema/shapes';
+
 import { checkPptx, describeCheck } from './check.ts';
 import { exportPptx } from './export-pptx.ts';
 import type { ExportPptxResult } from './export-pptx.ts';
@@ -460,17 +462,27 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
     expect(part('canvas-title')).toContain(
       'name="ts:canvas-title#padded" descr="A rounded rectangle holding a short label"',
     );
-    // the padded shape keeps its middle alignment and its four sided padding as the insets
-    // the side insets are the padding; the top inset gives the first baseline shift to the bottom
-    // one so the centred text moves up by it (pptx/text.ts addShapeText), the sum stays the padding
+    // the padded shape keeps its middle alignment and its four sided padding as the insets: the
+    // side insets are the 24 px padding plus the rounded rectangle's own text rectangle inset
+    // (the shape interpreter's `rect` guides, gslides-parity SPEC-5 6.5: the corner radius times
+    // 29289 over 100000 in from every side, 5.86 px on the 300 by 120 shape at adj 16667), the
+    // top inset gives the first baseline shift to the bottom one so the centred text moves up by
+    // it (pptx/text.ts addShapeText), and the top and bottom sum to the 8 px paddings plus the
+    // same inset twice; each figure within one sheet pixel (7,620 EMU) of the measured box
     const padded =
-      /lIns="182880" tIns="(\d+)" rIns="182880" bIns="(\d+)" rtlCol="0" anchor="ctr"/.exec(
+      /lIns="(\d+)" tIns="(\d+)" rIns="(\d+)" bIns="(\d+)" rtlCol="0" anchor="ctr"/.exec(
         part('canvas-title'),
       );
     expect(padded).not.toBeNull();
-    const [tIns, bIns] = [Number(padded?.[1]), Number(padded?.[2])];
-    expect(tIns + bIns).toBe(121920);
-    expect(tIns).toBeLessThan(60960);
+    const [lIns, tIns, rIns, bIns] = [1, 2, 3, 4].map((i) => Number(padded?.[i]));
+    const shapeInset = textInset('roundRect', 300, 120);
+    const emu = (px: number): number => Math.round(px * 7620);
+    expect(Math.abs((lIns ?? 0) - emu(24 + shapeInset.x))).toBeLessThanOrEqual(7620);
+    expect(Math.abs((rIns ?? 0) - emu(24 + shapeInset.x))).toBeLessThanOrEqual(7620);
+    expect(Math.abs((tIns ?? 0) + (bIns ?? 0) - emu(16 + 2 * shapeInset.y))).toBeLessThanOrEqual(
+      2 * 7620,
+    );
+    expect(tIns ?? 0).toBeLessThan(bIns ?? 0);
   });
 
   test('a two column block measures its lines in reading order, paragraph by paragraph and column by column (2.2.10)', () => {

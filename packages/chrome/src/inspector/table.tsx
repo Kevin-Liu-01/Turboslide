@@ -2,7 +2,13 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import type { Block } from '@turboslide/schema/blocks';
-import type { CellBorder, TableBlock, TableBorderWeight } from '@turboslide/schema/blocks/table';
+import type {
+  CellBorder,
+  CellBorderEdge,
+  TableBlock,
+  TableBorderWeight,
+} from '@turboslide/schema/blocks/table';
+import { CELL_BORDER_EDGES } from '@turboslide/schema/blocks/table';
 import { TABLE_BORDER_WEIGHTS } from '@turboslide/schema/blocks/table';
 import type { Color } from '@turboslide/schema/color';
 import { COLOR_TOKENS } from '@turboslide/schema/color';
@@ -79,6 +85,19 @@ export function tableFormatSlot(props: TableSlotLikeProps): ReactNode {
     />
   );
 }
+
+/** Google's nine edge selections of the border picker (SPEC-5 7.7), sentence case. */
+const EDGE_LABELS: Readonly<Record<CellBorderEdge, string>> = {
+  all: 'All',
+  outer: 'Outer',
+  inner: 'Inner',
+  top: 'Top',
+  bottom: 'Bottom',
+  left: 'Left',
+  right: 'Right',
+  horizontal: 'Horizontal',
+  vertical: 'Vertical',
+};
 
 const WEIGHT_LABELS: Readonly<Record<TableBorderWeight, string>> = {
   0: 'None',
@@ -163,6 +182,28 @@ export function TableSection({
   const cellStyle = cell === undefined ? {} : cellStyleAt(block, cell);
   const [count, setCount] = useState(1);
   const [heightDrafts, setHeightDrafts] = useState<Record<number, string>>({});
+  /* the edge picker's pick (SPEC-5 7.7); All is the round two form of the cell border rows */
+  const [edges, setEdges] = useState<CellBorderEdge>('all');
+  /** The cell border write of the three rows below: the plan's cellStyle when All, the widened form otherwise. */
+  const writeCellBorder = (border: CellBorder | null) => {
+    if (edges === 'all' || range === null) {
+      command('cellBorder', { border });
+      return;
+    }
+    const cells: [number, number][] = [];
+    for (let r = range.r0; r <= range.r1; r += 1)
+      for (let c = range.c0; c <= range.c1; c += 1) cells.push([r, c]);
+    report(
+      dispatch('table.cellStyle', {
+        slideId,
+        blockId: block.id,
+        cells,
+        border,
+        edges: [edges],
+        baseRevision: revision,
+      }),
+    );
+  };
 
   const say = (message: string) => onNotice?.(message);
   const report = (promise: Promise<unknown>) =>
@@ -406,6 +447,31 @@ export function TableSection({
       </div>
 
       <div className="ts-table-group" role="group" aria-label="Cell">
+        {/* the edge picker of Google's border selection chord (gslides-parity SPEC-5 7.7): the
+            Border color and Border weight rows below write the picked edges of the range when the
+            pick is not All, through the widened `table.cellStyle` (apps/cli/src/actions/prefs.ts) */}
+        <div className="ts-table-row">
+          <span className="ts-table-label">Apply to</span>
+          <select
+            className="ts-ctl-select"
+            aria-label="Border edges"
+            data-control={`${control}.cell.border.edges`}
+            value={edges}
+            disabled={busy || !hasCell}
+            onChange={(event) => setEdges(event.target.value as CellBorderEdge)}
+            {...tipProps({
+              name: 'Border edges',
+              doc: 'Which edges of the selected cells the border colour and weight write: all, the outer or inner lines, one side, or the horizontal or vertical lines',
+              key: 'Ctrl Cmd E then P',
+            })}
+          >
+            {CELL_BORDER_EDGES.map((edge) => (
+              <option key={edge} value={edge}>
+                {EDGE_LABELS[edge]}
+              </option>
+            ))}
+          </select>
+        </div>
         <span className="ts-table-heading">
           {range === null
             ? 'Cell'
@@ -437,12 +503,10 @@ export function TableSection({
               if (raw === '') {
                 const rest: CellBorder = { ...cellBorder };
                 delete rest.weight;
-                command('cellBorder', { border: Object.keys(rest).length === 0 ? null : rest });
+                writeCellBorder(Object.keys(rest).length === 0 ? null : rest);
                 return;
               }
-              command('cellBorder', {
-                border: { ...cellBorder, weight: Number(raw) as TableBorderWeight },
-              });
+              writeCellBorder({ ...cellBorder, weight: Number(raw) as TableBorderWeight });
             }}
             {...tipProps({
               name: 'Border weight',
@@ -470,7 +534,7 @@ export function TableSection({
               const next: CellBorder = { ...cellBorder };
               if (raw === '') delete next.dash;
               else next.dash = raw as Dash;
-              command('cellBorder', { border: Object.keys(next).length === 0 ? null : next });
+              writeCellBorder(Object.keys(next).length === 0 ? null : next);
             }}
             {...tipProps({ name: 'Border dash', doc: cellDoc ?? 'The cell’s own dash' })}
           >
@@ -493,7 +557,7 @@ export function TableSection({
               const next: CellBorder = { ...cellBorder };
               if (color === null) delete next.color;
               else next.color = color;
-              command('cellBorder', { border: Object.keys(next).length === 0 ? null : next });
+              writeCellBorder(Object.keys(next).length === 0 ? null : next);
             }}
           />
         </div>

@@ -11,6 +11,7 @@ import { PlateMenu } from './PlateMenu';
 import {
   canFollow,
   displayNameFor,
+  othersOf,
   rosterRoleWord,
   slideNumberOf,
   trustWordFor,
@@ -54,7 +55,8 @@ export function RosterMenu({
   const joinChat = itemById('title.presence.joinChat');
   const rows: PresenceParticipant[] = [
     ...(presence.self === undefined ? [] : [presence.self]),
-    ...presence.others,
+    // never this tab or this person twice (SPEC-5-amendments A3 item 5)
+    ...othersOf(presence),
   ];
   return (
     <PlateMenu

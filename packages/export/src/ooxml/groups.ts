@@ -9,6 +9,18 @@
 // (the outer grpSp) and, inside it, the row group (a nested grpSp). The shape regex matches
 // `p:sp`, `p:pic`, `p:graphicFrame` (tables, charts) and `p:cxnSp` (connectors), so a group can hold
 // any of them; a group needs two members at its level (a lone shape with a key stays as it is).
+//
+// Round five (gslides-parity SPEC-5 0.48, 2.4; MILESTONES-5 "The seams"): the shape regex also
+// admits `mc:AlternateContent`, the wrapper the equation rewrite (`ooxml/math.ts`) and PowerPoint's
+// own writers put around a shape with a `mc:Choice` and a `mc:Fallback`, so a wrapped shape is
+// listed once (its id, name and box read from the Choice, which the Fallback repeats) and grouped
+// with its neighbours instead of being read twice or skipped; and every group written carries its
+// own `cNvPr id` (`GroupResult.groups[].id`) so the timing writer (`ooxml/timing.ts`) can target a
+// group block's `p:grpSp` by `spid`. Nesting by the group path of `Position.group` (B3, day 6):
+// a `@g:outer/inner` key expands to `g:outer` then `g:outer/inner` (`expandGroupPath`), so the
+// existing key nesting writes one grpSp per path level, the outermost outside.
+
+export type ShapeKind = 'sp' | 'pic' | 'graphicFrame' | 'cxnSp' | 'alternateContent';
 
 export type ShapeInfo = {
   xml: string;
@@ -18,15 +30,25 @@ export type ShapeInfo = {
   name: string;
   off: [number, number];
   ext: [number, number];
+  /** the element matched; `alternateContent` is a shape inside an `mc:AlternateContent` wrapper (SPEC-5 0.48) */
+  kind: ShapeKind;
 };
 
-const SHAPE_RE = /<p:(sp|pic|graphicFrame|cxnSp)>[\s\S]*?<\/p:\1>/g;
+/**
+ * A top level shape: `p:sp`, `p:pic`, `p:graphicFrame`, `p:cxnSp`, or an `mc:AlternateContent`
+ * wrapper holding one of them in its Choice and its Fallback. The wrapper alternative consumes the
+ * shapes inside it, so they are never listed on their own.
+ */
+const SHAPE_RE =
+  /<p:(sp|pic|graphicFrame|cxnSp)>[\s\S]*?<\/p:\1>|<mc:AlternateContent(?:\s[^>]*)?>[\s\S]*?<\/mc:AlternateContent>/g;
 
 /** Every top-level sp, pic, graphicFrame and cxnSp of a slide part with its id, name and xfrm. */
 export function listShapes(xml: string): ShapeInfo[] {
   const out: ShapeInfo[] = [];
   for (const match of xml.matchAll(SHAPE_RE)) {
     const shape = match[0];
+    const kind: ShapeKind = match[1] === undefined ? 'alternateContent' : (match[1] as ShapeKind);
+    // a wrapper's id, name and box are the Choice's; the Fallback repeats them (ooxml/math.ts)
     const id = Number(/<p:cNvPr id="(\d+)"/.exec(shape)?.[1] ?? 0);
     const name = /<p:cNvPr id="\d+" name="([^"]*)"/.exec(shape)?.[1] ?? '';
     const off = /<a:off x="(-?\d+)" y="(-?\d+)"\/>/.exec(shape);
@@ -39,6 +61,7 @@ export function listShapes(xml: string): ShapeInfo[] {
       name: decodeEntities(name),
       off: [Number(off?.[1] ?? 0), Number(off?.[2] ?? 0)],
       ext: [Number(ext?.[1] ?? 0), Number(ext?.[2] ?? 0)],
+      kind,
     });
   }
   return out;
@@ -64,12 +87,27 @@ function encodeEntities(value: string): string {
 /** The group keys of an object name, left to right: the parts after the first `@`. */
 export function groupKeysOf(name: string): string[] {
   const at = name.indexOf('@');
-  return at >= 0
-    ? name
-        .slice(at + 1)
-        .split('@')
-        .filter((k) => k.length > 0)
-    : [];
+  if (at < 0) return [];
+  const keys = name
+    .slice(at + 1)
+    .split('@')
+    .filter((k) => k.length > 0);
+  return keys.flatMap(expandGroupPath);
+}
+
+/**
+ * A user group key whose tag is a group path (gslides-parity SPEC-5 0.48: `g:outer/inner`, the
+ * outermost first) reads as one key per level, `g:outer` then `g:outer/inner`, so the members of
+ * `outer/inner` nest inside the grpSp of `outer` beside the members of `outer` alone. A flat tag
+ * and every other key are one key.
+ */
+export function expandGroupPath(key: string): string[] {
+  if (!key.startsWith('g:') || !key.includes('/')) return [key];
+  const segments = key
+    .slice(2)
+    .split('/')
+    .filter((segment) => segment.length > 0);
+  return segments.map((_, index) => `g:${segments.slice(0, index + 1).join('/')}`);
 }
 
 /** The innermost group key of an object name (the round one reading), or undefined. */
@@ -80,8 +118,11 @@ export function groupKeyOf(name: string): string | undefined {
 
 export type GroupResult = {
   xml: string;
-  /** Every grpSp written, the outer ones first; `ids` are the shape ids it holds at any depth. */
-  groups: { key: string; ids: number[]; depth: number }[];
+  /**
+   * Every grpSp written, the outer ones first; `ids` are the shape ids it holds at any depth and
+   * `id` is the group's own `cNvPr id`, the `spid` a timing node targets (SPEC-5 0.48).
+   */
+  groups: { key: string; id: number; ids: number[]; depth: number }[];
 };
 
 type Member = { shape: ShapeInfo; keys: string[] };
@@ -112,7 +153,7 @@ function groupMarkup(
   const shapes = members.map((m) => m.shape);
   const b = boundsOf(shapes);
   const id = nextId();
-  report.push({ key, ids: shapes.map((s) => s.id), depth });
+  report.push({ key, id, ids: shapes.map((s) => s.id), depth });
   // the children in order: a nested group at the position of its first member
   const nested = new Map<string, Member[]>();
   for (const member of members) {

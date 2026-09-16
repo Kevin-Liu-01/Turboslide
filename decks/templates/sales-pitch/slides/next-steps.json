@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "next-steps",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Next steps",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What happens after this call.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Pilot scope: one team, one workflow, four weeks"
+          },
+          {
+            "text": "Success criteria: the report lands before the Monday meeting"
+          },
+          {
+            "text": "Decision date: the last Friday of the pilot"
+          }
+        ],
+        "numbered": true,
+        "marker": "number"
+      }
+    ]
+  },
+  "title": "Next steps"
+}

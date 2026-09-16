@@ -29,6 +29,7 @@
     "@turboslide/fonts": "workspace:*",
     "@turboslide/headless": "workspace:*",
     "@turboslide/identity": "workspace:*",
+    "@turboslide/import": "workspace:*",
     "@turboslide/lint": "workspace:*",
     "@turboslide/materials": "workspace:*",
     "@turboslide/mcp": "workspace:*",
@@ -36,6 +37,7 @@
     "@turboslide/render": "workspace:*",
     "@turboslide/render-worker": "workspace:*",
     "@turboslide/schema": "workspace:*",
+    "@turboslide/spelling": "workspace:*",
     "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "@turboslide/viewer": "workspace:*",
@@ -48,7 +50,8 @@
     "pg": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "resend": "catalog:"
+    "resend": "catalog:",
+    "web-vitals": "catalog:"
   },
   "optionalDependencies": {
     "@sparticuz/chromium": "catalog:"

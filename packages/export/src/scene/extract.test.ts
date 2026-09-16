@@ -1,4 +1,4 @@
-// Two browser tests over extractScenes.
+// Three browser tests over extractScenes.
 //
 // The measurement order of gslides-parity SPEC-2 1.5 on a rotated picture: with the `.ts-measure`
 // class on, the transforms are off, so the boxes and the element screenshots are the unrotated
@@ -14,8 +14,17 @@
 // extractScenes: the 1x, 2x and 3x contexts must all stay open on the flagged browser, and the
 // same run on an unflagged browser must close them. Runs where the binary and the deck exist;
 // TURBOSLIDE_SKIP_BROWSER_TESTS=1 skips it. One browser at a time (AGENTS.md).
+//
+// The catalog faces reach the capture (gslides-parity SPEC-5-amendments A5 items 5 and 7;
+// VERIFICATION-5 finding 5): the scene's `family` is the computed font-family of the export
+// capture, so the capture's theme bundle has to carry the @font-face rules and the
+// `--ts-font-<id>` rule of every family the deck uses, else the variable resolves to `inherit`
+// and every heading measures, shoots and exports in Inter. The third test builds a five family
+// deck (the verifier's shape: five h2 headings on a freeform slide, one per `typography.family`),
+// extracts its slide and reads the family of every run, then exports it as Editable text and
+// reads the `a:latin typeface` values of the slide part.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -24,6 +33,8 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { decodeImage } from '@turboslide/effects/io';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { slideOrder } from '@turboslide/schema/deck';
+import type { FontId } from '@turboslide/schema/fonts';
+import { fontFamilyName } from '@turboslide/fonts/names';
 import {
   isSingleProcessBrowser,
   launchBrowser,
@@ -32,6 +43,9 @@ import {
 } from '@turboslide/headless/launch';
 import type { LaunchedBrowser } from '@turboslide/headless/launch';
 
+import { exportPptx } from '../export-pptx.ts';
+import { readAllAttributes } from '../ooxml/geometry.ts';
+import { openPackage, slideParts } from '../ooxml/zip.ts';
 import { extractScenes } from './extract.ts';
 import type { ExtractResult } from './extract.ts';
 
@@ -239,5 +253,126 @@ describe.skipIf(skip)('extractScenes on a single-process browser', () => {
       // Chrome for Testing closes cleanly; only the serverless shell is killed by pid
       await launched.close();
     }
+  }, 120_000);
+});
+
+/** The five families of SPEC-5-amendments A7's deck: four proportional faces and one mono. */
+const FIVE_FAMILIES: readonly FontId[] = [
+  'roboto',
+  'merriweather',
+  'playfair-display',
+  'jetbrains-mono',
+  'oswald',
+];
+
+/**
+ * The verifier's five family deck (VERIFICATION-5 section 6.2): a 16:10 page, one freeform slide,
+ * five h2 headings each set in one catalog face through `typography.family`. Built here rather
+ * than stored under decks/ because it needs no tool and the shape is five rows.
+ */
+function fiveFamilyDocument(): { deck: Deck; slides: Record<string, Slide> } {
+  const deck = {
+    schemaVersion: 1,
+    id: 'five-families',
+    title: 'Five families',
+    theme: 'gt-ink-paper',
+    page: { width: 1440, height: 900, preset: 'widescreen-16-10' },
+    sections: [{ id: 'kinds', name: 'Kinds', slideIds: ['canvas'] }],
+    assets: {},
+    defaults: { appearance: 'light', counter: 'on' },
+    revision: 1,
+    createdAt: '2026-09-15T00:00:00.000Z',
+    updatedAt: '2026-09-15T00:00:00.000Z',
+  } as unknown as Deck;
+  const canvas = {
+    schemaVersion: 1,
+    id: 'canvas',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: FIVE_FAMILIES.map((family, i) => ({
+        id: `t-${family}`,
+        type: 'heading',
+        level: 'h2',
+        text: `The face ${family} on the sheet`,
+        typography: { family },
+        pos: { x: 120, y: 100 + 140 * i, w: 1200, h: 80, z: i },
+      })),
+    },
+  } as unknown as Slide;
+  return { deck, slides: { canvas } };
+}
+
+describe.skipIf(skip)('the capture draws the catalog faces a deck uses (A5 item 5)', () => {
+  let out = '';
+  let deckDir = '';
+  const { deck, slides } = fiveFamilyDocument();
+
+  beforeAll(async () => {
+    out = await mkdtemp(join(tmpdir(), 'turboslide-extract-fonts-'));
+    // the deck has no assets, so an empty folder is its asset base
+    deckDir = join(out, 'deck');
+    await mkdir(deckDir, { recursive: true });
+  });
+
+  afterAll(async () => {
+    await rm(out, { recursive: true, force: true });
+  });
+
+  test("every heading measures in its own face and none in the sheet's Inter", async () => {
+    const result = await extractScenes({
+      deckDir,
+      document: { deck, slides },
+      themes: ['light'],
+      mode: 'native',
+      slideIds: ['canvas'],
+      workDir: join(out, 'scenes'),
+    });
+    expect(result.scenes).toHaveLength(1);
+    const scene = result.scenes[0];
+    expect(scene).toBeDefined();
+    if (!scene) return;
+    for (const family of FIVE_FAMILIES) {
+      const texts = scene.texts.filter((t) => t.blockId === `t-${family}`);
+      expect(texts.length, `text objects of t-${family}`).toBeGreaterThan(0);
+      const families = new Set(
+        texts.flatMap((t) => t.lines.flatMap((line) => line.runs.map((run) => run.style.family))),
+      );
+      expect([...families], `the computed family of t-${family}`).toEqual([fontFamilyName(family)]);
+    }
+  }, 120_000);
+
+  test('the Editable text file names the proportional faces in a:latin typeface', async () => {
+    const result = await exportPptx({
+      deckDir,
+      document: { deck, slides },
+      outDir: join(out, 'native'),
+      mode: 'native',
+      themes: ['light'],
+      slideIds: ['canvas'],
+    });
+    expect(result.merged.passed).toBe(true);
+    const path = result.files.find((f) => f.endsWith('-light.pptx')) ?? '';
+    const zip = await openPackage(readFileSync(path));
+    const parts = slideParts(zip);
+    expect(parts).toHaveLength(1);
+    const attrs = await readAllAttributes(zip);
+    const typefaces = new Set(attrs[parts[0] ?? '']?.typefaces ?? []);
+    // the four proportional faces travel by name; the mono face measures as 'JetBrains Mono'
+    // (the row above) but pptx/text.ts familyFor writes the code panel's stack for a run whose
+    // computed stack ends in monospace (B5's file; b1.md Fix round request 2 names the line), so
+    // its typeface is not pinned here
+    for (const family of ['roboto', 'merriweather', 'playfair-display', 'oswald'] as const)
+      expect(typefaces.has(fontFamilyName(family)), `typeface ${fontFamilyName(family)}`).toBe(
+        true,
+      );
+    // the residual names every face PowerPoint may substitute (A5 item 5)
+    for (const family of ['roboto', 'merriweather', 'playfair-display', 'oswald'] as const)
+      expect(
+        result.merged.residual.some((line) =>
+          line.startsWith(`font: ${fontFamilyName(family)} travels by name`),
+        ),
+        `residual line for ${fontFamilyName(family)}`,
+      ).toBe(true);
   }, 120_000);
 });

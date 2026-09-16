@@ -9,6 +9,7 @@ import type {
 import {
   openPresentChannel,
   parsePresentEnvelope,
+  PRESENT_PROTOCOL,
   presentChannelName,
   presentStorageKey,
 } from '../presentSync';
@@ -81,10 +82,25 @@ describe('openPresentChannel', () => {
     presenter.post({ type: 'hello' });
     audience.post({ type: 'goto', slideId: 'two' });
     expect(heardByAudience).toEqual([
-      { type: 'hello', from: presenter.id, role: 'presenter', v: 1, at: 1000, seq: 1 },
+      {
+        type: 'hello',
+        from: presenter.id,
+        role: 'presenter',
+        v: PRESENT_PROTOCOL,
+        at: 1000,
+        seq: 1,
+      },
     ]);
     expect(heardByPresenter).toEqual([
-      { type: 'goto', slideId: 'two', from: audience.id, role: 'audience', v: 1, at: 1000, seq: 1 },
+      {
+        type: 'goto',
+        slideId: 'two',
+        from: audience.id,
+        role: 'audience',
+        v: PRESENT_PROTOCOL,
+        at: 1000,
+        seq: 1,
+      },
     ]);
     /* another deck's channel is silent */
     const other: PresentMessage[] = [];
@@ -136,7 +152,7 @@ describe('openPresentChannel', () => {
 });
 
 describe('parsePresentEnvelope', () => {
-  const base = { v: 1, from: 'w1', role: 'audience', at: 1, seq: 1 };
+  const base = { v: PRESENT_PROTOCOL, from: 'w1', role: 'audience', at: 1, seq: 1 };
 
   it('accepts the five message types with their fields, as an object or as JSON text', () => {
     expect(parsePresentEnvelope({ ...base, type: 'hello' })).not.toBeNull();
@@ -161,7 +177,7 @@ describe('parsePresentEnvelope', () => {
   it('refuses noise, another protocol version and malformed fields', () => {
     expect(parsePresentEnvelope(null)).toBeNull();
     expect(parsePresentEnvelope('not json')).toBeNull();
-    expect(parsePresentEnvelope({ ...base, v: 2, type: 'hello' })).toBeNull();
+    expect(parsePresentEnvelope({ ...base, v: PRESENT_PROTOCOL + 1, type: 'hello' })).toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'dance' })).toBeNull();
     expect(parsePresentEnvelope({ ...base, role: 'viewer', type: 'hello' })).toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'goto' })).toBeNull();
@@ -177,5 +193,72 @@ describe('parsePresentEnvelope', () => {
         laser: true,
       }),
     ).toBeNull();
+  });
+});
+
+// Round five (gslides-parity SPEC-5 2.2; R11 5.6): the step on `state` and `goto`, the media
+// messages, the pen's strokes, and the protocol version that keeps a round four window silent.
+describe('the round five messages', () => {
+  const base = { from: 'w', role: 'audience', v: PRESENT_PROTOCOL, at: 1, seq: 1 };
+
+  it('accepts a state and a goto with steps and refuses a step that is not a number', () => {
+    const state = {
+      ...base,
+      type: 'state',
+      slideId: 'a',
+      index: 0,
+      total: 3,
+      blank: null,
+      laser: false,
+      step: 2,
+      steps: 4,
+    };
+    expect(parsePresentEnvelope(state)?.type).toBe('state');
+    expect(parsePresentEnvelope({ ...state, step: 'two' })).toBeNull();
+    expect(parsePresentEnvelope({ ...base, type: 'goto', slideId: 'b', step: 1 })?.type).toBe(
+      'goto',
+    );
+    expect(parsePresentEnvelope({ ...base, type: 'goto', slideId: 'b', step: 'x' })).toBeNull();
+  });
+
+  it('accepts the media, mediaControl, stroke and strokesClear messages and refuses malformed ones', () => {
+    const media = {
+      ...base,
+      type: 'media',
+      media: {
+        blockId: 'clip',
+        state: 'playing',
+        positionMs: 120,
+        durationMs: 1000,
+        title: 'Bars',
+      },
+    };
+    expect(parsePresentEnvelope(media)?.type).toBe('media');
+    expect(parsePresentEnvelope({ ...media, media: { ...media.media, state: 'gone' } })).toBeNull();
+    expect(
+      parsePresentEnvelope({ ...base, type: 'mediaControl', blockId: 'clip', action: 'pause' })
+        ?.type,
+    ).toBe('mediaControl');
+    expect(
+      parsePresentEnvelope({ ...base, type: 'mediaControl', blockId: 'clip', action: 'stop' }),
+    ).toBeNull();
+    const stroke = {
+      ...base,
+      type: 'stroke',
+      stroke: { slideId: 'a', id: 's1', done: false, points: [10, 20, 30, 40] },
+    };
+    expect(parsePresentEnvelope(stroke)?.type).toBe('stroke');
+    expect(
+      parsePresentEnvelope({ ...stroke, stroke: { ...stroke.stroke, points: [1, 2, 3] } }),
+    ).toBeNull();
+    expect(parsePresentEnvelope({ ...base, type: 'strokesClear', slideId: 'a' })?.type).toBe(
+      'strokesClear',
+    );
+    expect(parsePresentEnvelope({ ...base, type: 'strokesClear' })).toBeNull();
+  });
+
+  it('drops a round four envelope (protocol 1)', () => {
+    expect(parsePresentEnvelope({ ...base, v: 1, type: 'hello' })).toBeNull();
+    expect(parsePresentEnvelope({ ...base, type: 'hello' })?.v).toBe(2);
   });
 });

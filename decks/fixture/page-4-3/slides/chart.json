@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "chart",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A bar chart on 4:3"
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "bar",
+        "legend": "right",
+        "height": 420,
+        "categories": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        "series": [
+          {
+            "name": "Decks",
+            "values": [
+              12,
+              18,
+              24,
+              31
+            ]
+          },
+          {
+            "name": "Exports",
+            "values": [
+              30,
+              42,
+              55,
+              70
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "template": "one-column"
+}

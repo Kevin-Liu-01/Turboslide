@@ -137,7 +137,11 @@ export function boxOf(root: HTMLElement, img: HTMLElement): [number, number] {
   const w = Number(img.getAttribute('width'));
   const h = Number(img.getAttribute('height'));
   if (w > 0 && h > 0) return [w, h];
-  return [1600, 900];
+  // the deck's page from the stage root's custom properties (gslides-parity SPEC-5 6.1); 1600 by 900 when the root carries none
+  const sheetRoot = root.closest<HTMLElement>('.ts-sheet');
+  const pageW = sheetRoot ? parseFloat(sheetRoot.style.getPropertyValue('--ts-sheet-w')) : NaN;
+  const pageH = sheetRoot ? parseFloat(sheetRoot.style.getPropertyValue('--ts-sheet-h')) : NaN;
+  return [pageW > 0 ? pageW : 1600, pageH > 0 ? pageH : 900];
 }
 
 /** Reads a dithered root, or null when it is not one the runtime can draw. */

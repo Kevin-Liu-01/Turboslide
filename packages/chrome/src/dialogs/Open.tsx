@@ -4,14 +4,20 @@ import { Dialog, DialogTabs } from '../Dialog';
 import type { DeckHeadRow } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
 import { cn } from '../lib/cn';
-import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
+import { DIALOGS, ROUND_FIVE } from '../menus/strings';
+import { stashImportReport } from './ImportReport';
+import { UPLOAD_ACCEPT, isPptxFile } from './upload-accept';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
 
 /**
  * File > Open (gslides-parity SPEC 2.1, 12 "Dialogs"; Cmd+O): a search field and this studio's
- * presentations newest first (deck.list), an Upload tab that takes a Turboslide bundle (.zip),
- * and Open. A .pptx is refused with the sentence of SPEC 12. Opening navigates to /edit/<id>.
+ * presentations newest first (deck.list), an Upload tab that takes a Turboslide bundle (.zip) or,
+ * since round five, a PowerPoint file (.pptx; SPEC-5 0.26, 5.2), and Open. Both go through the
+ * route's `uploadBundle`; a `.pptx` runs the one reader on the server and answers the new deck's
+ * id with its import report, which the dialog keeps for the editor (`stashImportReport`) and
+ * announces in the snackbar with the sentence of SPEC-5 15 and an Open action for the report card
+ * (B3-13). Opening navigates to /edit/<id>.
  */
 export function OpenDialog() {
   const shell = useEditorShell();
@@ -64,18 +70,30 @@ export function OpenDialog() {
       return;
     }
     if (file === null) return;
-    if (/\.pptx$/i.test(file.name)) {
-      setError(IMPORT_PPTX);
-      return;
-    }
     if (input.uploadBundle === undefined) {
-      setError('Upload a bundle from the home page');
+      setError(
+        isPptxFile(file)
+          ? 'Upload a PowerPoint file from the home page'
+          : 'Upload a bundle from the home page',
+      );
       return;
     }
     setBusy(true);
     input
       .uploadBundle(file)
-      .then(({ id }) => {
+      .then((answer) => {
+        const { id } = answer;
+        const report = (
+          answer as { report?: import('@turboslide/schema/import-report').ImportReport }
+        ).report;
+        if (report !== undefined) {
+          stashImportReport(id, report);
+          const { imported, substituted, dropped } = report.summary;
+          shell.say(
+            `${ROUND_FIVE.importSummary(imported, substituted, dropped)}${substituted + dropped > 0 ? `. ${ROUND_FIVE.importNotice}` : ''}`,
+            { label: 'Open', run: () => shell.openDialog('importReport' as never) },
+          );
+        }
         shell.closeDialog();
         navigate(`/edit/${encodeURIComponent(id)}`);
       })
@@ -101,7 +119,9 @@ export function OpenDialog() {
           doc:
             tab === 'presentations'
               ? 'Opens the selected presentation'
-              : 'Uploads the bundle and opens it',
+              : file !== null && isPptxFile(file)
+                ? 'Imports the PowerPoint file as a new presentation and opens it'
+                : 'Uploads the bundle and opens it',
         },
       ]}
     >
@@ -164,18 +184,24 @@ export function OpenDialog() {
         </>
       ) : (
         <>
-          <p>A Turboslide bundle (.zip) from Download, or from the command line.</p>
+          <p>
+            A Turboslide bundle (.zip) from Download or the command line, or a PowerPoint file
+            (.pptx).
+          </p>
           <input
             ref={fileInput}
             type="file"
-            accept=".zip,application/zip"
-            aria-label="Bundle file"
+            accept={UPLOAD_ACCEPT}
+            aria-label="Presentation file"
             data-control="dialog.open.file"
             onChange={(event) => {
               setError(null);
               setFile(event.target.files?.[0] ?? null);
             }}
-            {...tipProps({ name: 'Bundle file', doc: 'A Turboslide bundle (.zip)' })}
+            {...tipProps({
+              name: 'Presentation file',
+              doc: 'A Turboslide bundle (.zip) or a PowerPoint file (.pptx)',
+            })}
           />
         </>
       )}

@@ -1,15 +1,16 @@
 // build.run (SPEC 7.1, 7.2): `turboslide build --out public/brand-deck.html --budget 16` inlines
 // every asset twin by its inline rule, writes the standalone file, prints the size and the
 // inlining decisions per asset class, and fails over budget or when an asset is missing.
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 
-import { flagNumber, flagString } from '../args.ts';
+import { flagBoolean, flagNumber, flagString } from '../args.ts';
 import { inlineAssets } from '../assets.ts';
 import type { CommandContext } from '../context.ts';
 import { findDeckDir, loadDeck, resolveOut } from '../deck-files.ts';
 import { renderStandaloneFile } from '../deps/render.ts';
-import { EXIT } from '../exit.ts';
+import { EXIT, UsageError } from '../exit.ts';
 import { formatBytes } from '../output.ts';
 
 export async function build(ctx: CommandContext): Promise<number> {
@@ -19,7 +20,32 @@ export async function build(ctx: CommandContext): Promise<number> {
   const out = resolveOut(ctx.cwd, flagString(ctx.args, 'out'), `${loaded.deck.id}.html`);
   const assets = await inlineAssets(dir, loaded.deck.assets);
   for (const f of assets.failed) ctx.out.warn(`build: asset ${f.path}: ${f.error}`);
-  const built = renderStandaloneFile(loaded, assets.uris, { budgetMB });
+  /* round five (gslides-parity SPEC-5 2.3, 3.6; b1.md request 9): --motion keep|drop, --autoplay <ms>
+     with --loop, --media embed|poster|url; a media file travels as a data URI under embed */
+  const motionFlag = flagString(ctx.args, 'motion') ?? 'keep';
+  if (motionFlag !== 'keep' && motionFlag !== 'drop')
+    throw new UsageError('--motion wants keep or drop');
+  const mediaFlag = flagString(ctx.args, 'media') ?? 'embed';
+  if (mediaFlag !== 'embed' && mediaFlag !== 'poster' && mediaFlag !== 'url')
+    throw new UsageError('--media wants embed, poster or url');
+  const autoplayMs = flagNumber(ctx.args, 'autoplay', 0);
+  const loop = flagBoolean(ctx.args, 'loop');
+  const mediaUris: Record<string, string> = {};
+  if (mediaFlag === 'embed') {
+    for (const record of Object.values(loaded.deck.media ?? {})) {
+      const path = join(dir, record.file);
+      if (!existsSync(path)) continue;
+      mediaUris[record.file] =
+        `data:${record.mime};base64,${readFileSync(path).toString('base64')}`;
+    }
+  }
+  const built = renderStandaloneFile(loaded, assets.uris, {
+    budgetMB,
+    motion: motionFlag,
+    media: mediaFlag,
+    mediaUris,
+    ...(autoplayMs > 0 ? { autoplay: { intervalMs: autoplayMs, loop } } : {}),
+  });
   await mkdir(dirname(out), { recursive: true });
   await writeFile(out, built.html, 'utf8');
   const ok = !built.overBudget && built.missing.length === 0 && assets.failed.length === 0;

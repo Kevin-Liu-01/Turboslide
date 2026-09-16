@@ -57,6 +57,7 @@
 // 0.38), and with `--template-copy` one deck is created from the GT template through
 // `deck.create`, moved to the trash and deleted forever, so the row leaves the store as it found
 // it (the row writes; pass it against a preview or a store you own).
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -76,11 +77,14 @@ function parseArgs(argv) {
     shareToken: null,
     publishToken: null,
     templateCopy: false,
+    /* round five (SPEC-5 16.8): the sync stress probe against the preview (b7.md request 21) */
+    syncProbe: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--deck') out.deck = argv[++i] ?? out.deck;
     else if (arg === '--template-copy') out.templateCopy = true;
+    else if (arg === '--sync-probe') out.syncProbe = true;
     else if (arg === '--asset') out.asset = argv[++i] ?? null;
     else if (arg === '--base' || arg === '--url') out.url = argv[++i] ?? null;
     else if (arg === '--timeout') out.timeoutMs = Number(argv[++i] ?? out.timeoutMs);
@@ -402,6 +406,29 @@ function checks(deck, asset) {
       expect: 'a 200 page',
       pass: isPage,
       detail: (r) => `${r.bytes} chars`,
+    },
+    /* round five (gslides-parity SPEC-5 16.8): the template gallery, the two help pages and the vitals endpoint */
+    {
+      name: '/decks/templates',
+      path: '/decks/templates',
+      expect: 'a 200 page with the gallery heading',
+      pass: (r) => r.status === 200 && r.text.includes('ts-gallery-heading'),
+      detail: (r) =>
+        `${r.status}; ${r.text.includes('ts-gallery-heading') ? 'gallery heading' : 'no gallery heading'}`,
+    },
+    {
+      name: '/help/training',
+      path: '/help/training',
+      expect: 'a 200 page with the training article',
+      pass: (r) => r.status === 200 && r.text.includes('help-training'),
+      detail: (r) => `${r.status}; ${r.bytes} chars`,
+    },
+    {
+      name: '/api/vitals',
+      path: '/api/vitals',
+      expect: 'a 200 JSON answer naming the endpoint',
+      pass: (r) => r.status === 200 && r.text.includes('/api/vitals'),
+      detail: (r) => `${r.status}; ${r.text.slice(0, 80)}`,
     },
     {
       // gslides-parity SPEC-4 2.6 (build-4/b2.md R4): the product page's root, the hero sentence
@@ -751,6 +778,148 @@ async function thumbnailRows(base, deck, timeoutMs) {
 }
 
 /**
+ * Round five (gslides-parity SPEC-5 16.8): /help/updates twice, the second answer a CDN hit; the
+ * page is prerendered (vite.deploy.config.ts) so the edge serves it.
+ */
+async function helpUpdatesRows(base, timeoutMs) {
+  const first = await probe(base, '/help/updates', timeoutMs);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const second = await probe(base, '/help/updates', timeoutMs);
+  const cache = second.headers['x-vercel-cache'] ?? null;
+  return [
+    {
+      row: {
+        name: '/help/updates twice',
+        expect: 'a 200 page both times; the second answer a CDN hit (x-vercel-cache HIT)',
+        detail: () =>
+          `first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'}; second ${second.status} ${cache ?? '-'}; ${second.headers['cache-control'] ?? 'no cache-control'}`,
+      },
+      r: second,
+      ok: first.status === 200 && second.status === 200 && cache === 'HIT',
+    },
+  ];
+}
+
+/**
+ * Round five (SPEC-5 16.8, 5.2): the 01-text fixture through the bundle route as a .pptx with the
+ * bearer, then the deck trashed and removed; the row reads the report sentence's counts.
+ */
+async function pptxImportRow(base, headers) {
+  const fixture = 'packages/import/src/__fixtures__/pptx/01-text.pptx';
+  const t = performance.now();
+  if (!existsSync(fixture))
+    return { ok: false, detail: `${fixture} is not in this checkout`, ms: 0 };
+  const bytes = readFileSync(fixture);
+  const response = await fetch(
+    new URL('api/decks/bundle?as=smoke-pptx-' + Math.random().toString(36).slice(2, 6), base),
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'x-turboslide-file-name': '01-text.pptx',
+        ...protectionHeaders(),
+        ...headers,
+      },
+      body: bytes,
+    },
+  );
+  const text = await response.text();
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = null;
+  }
+  if (response.status !== 201 || json?.deckId === undefined)
+    return {
+      ok: false,
+      detail: `bundle route ${response.status}: ${text.slice(0, 160)}`,
+      ms: Math.round(performance.now() - t),
+    };
+  const id = json.deckId;
+  const rows = json.report?.rows?.length ?? 0;
+  const lines = [`imported ${id} (${rows} report row(s), ${json.counts?.slides ?? '?'} slide(s))`];
+  const info = await postJson(base, `/api/actions/deck.info?deck=${id}`, {}, headers, 60_000);
+  const revision = info.json?.deck?.revision ?? info.json?.revision ?? 1;
+  const trashed = await postJson(
+    base,
+    `/api/actions/deck.trash?deck=${id}`,
+    { id, baseRevision: revision },
+    headers,
+    60_000,
+  );
+  const afterTrash = trashed.json?.revision ?? revision;
+  const removed = await postJson(
+    base,
+    `/api/actions/deck.remove?deck=${id}`,
+    { id, confirm: true, baseRevision: afterTrash },
+    headers,
+    60_000,
+  );
+  lines.push(`trashed ${trashed.status}, removed ${removed.status}`);
+  return {
+    ok: trashed.status === 200 && removed.status === 200,
+    detail: lines.join('; '),
+    ms: Math.round(performance.now() - t),
+  };
+}
+
+/** Round five (SPEC-5 16.8, 10): a chat message sent with the bearer and read back from the room. */
+async function chatRow(base, deck, headers) {
+  const t = performance.now();
+  const text = `smoke ${new Date().toISOString()}`;
+  const sent = await postJson(
+    base,
+    `/api/actions/chat.send?deck=${deck}`,
+    { text },
+    headers,
+    60_000,
+  );
+  if (sent.status !== 200)
+    return {
+      ok: false,
+      detail: `chat.send ${sent.status}: ${sent.text.slice(0, 160)}`,
+      ms: Math.round(performance.now() - t),
+    };
+  const listed = await postJson(base, `/api/actions/chat.list?deck=${deck}`, {}, headers, 60_000);
+  const messages = listed.json?.messages ?? listed.json?.output?.messages ?? [];
+  const found = Array.isArray(messages) && messages.some((row) => row.text === text);
+  return {
+    ok: listed.status === 200 && found,
+    detail: `sent in ${sent.ms} ms; chat.list ${listed.status} with ${Array.isArray(messages) ? messages.length : '?'} message(s)${found ? ', the sent one among them' : ', the sent one missing'}`,
+    ms: Math.round(performance.now() - t),
+  };
+}
+
+/** Round five (SPEC-5-amendments A3 item 7; b7.md request 21): the sync stress probe against the preview. */
+async function syncProbeRow(base) {
+  const t = performance.now();
+  const out = `.turboslide/sync-stress-smoke-${new Date().toISOString().slice(0, 10)}.json`;
+  const result = spawnSync(
+    process.execPath,
+    [
+      'scripts/probes/sync-stress-probe.mjs',
+      '--base',
+      base.replace(/\/$/, ''),
+      '--quick',
+      '--json',
+      out,
+    ],
+    { encoding: 'utf8', timeout: 15 * 60_000 },
+  );
+  const tail = `${result.stdout ?? ''}${result.stderr ?? ''}`
+    .trim()
+    .split('\n')
+    .slice(-3)
+    .join(' | ');
+  return {
+    ok: result.status === 0,
+    detail: `exit ${result.status}; ${tail.slice(0, 240)}`,
+    ms: Math.round(performance.now() - t),
+  };
+}
+
+/**
  * The instance facts of /api/agent with the bearer (SPEC-4 0.38, 3.9; b4.md R11): the effects
  * backend the function selected and the runtime's glibc. Reported until the Linux addon is
  * committed; the row fails only when the block is missing.
@@ -916,11 +1085,32 @@ async function main() {
   // the round four rows without a bearer: the static layer twice, the thumbnail cache
   results.push(...(await cdnRows(base, args.timeoutMs)));
   results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs)));
+  // round five (SPEC-5 16.8): the prerendered help page twice
+  results.push(...(await helpUpdatesRows(base, args.timeoutMs)));
+  if (args.syncProbe) {
+    const probed = await syncProbeRow(base);
+    results.push({
+      row: {
+        name: 'sync stress probe',
+        expect: 'scripts/probes/sync-stress-probe.mjs --quick exits 0 against the deployment',
+        detail: () => probed.detail,
+      },
+      r: { status: probed.ok ? 200 : '-', ms: probed.ms },
+      ok: probed.ok,
+    });
+  } else {
+    console.log(
+      'skip  sync stress probe: pass --sync-probe (two browser contexts through the engine)',
+    );
+  }
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
   if (args.tokenEnv === null) {
     console.log(
       'skip  effects backend: pass --token-env <VAR> (the row reads /api/agent with the bearer)',
+    );
+    console.log(
+      'skip  pptx import, chat message: pass --token-env <VAR> (both rows write through the bearer; SPEC-5 16.8)',
     );
     console.log(
       'skip  template copy: pass --token-env <VAR> and --template-copy (the row writes one deck and removes it)',
@@ -951,6 +1141,28 @@ async function main() {
           'skip  template copy: pass --template-copy (the row writes one deck and removes it)',
         );
       }
+      // round five (SPEC-5 16.8): a .pptx through the bundle route, a chat message through the room
+      const imported = await pptxImportRow(base, headers);
+      results.push({
+        row: {
+          name: 'pptx import',
+          expect:
+            'the 01-text fixture imported through the bundle route, then trashed and deleted forever',
+          detail: () => imported.detail,
+        },
+        r: { status: imported.ok ? 201 : '-', ms: imported.ms },
+        ok: imported.ok,
+      });
+      const chatted = await chatRow(base, args.deck, headers);
+      results.push({
+        row: {
+          name: 'chat message',
+          expect: 'chat.send then chat.list carrying the message',
+          detail: () => chatted.detail,
+        },
+        r: { status: chatted.ok ? 200 : '-', ms: chatted.ms },
+        ok: chatted.ok,
+      });
       const snap = await snapshotsRow(base, args.deck, headers);
       results.push({
         row: {

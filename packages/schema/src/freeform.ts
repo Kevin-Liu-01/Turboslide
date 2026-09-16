@@ -13,9 +13,16 @@ import type { ColsRatio, ContentSlide, Layout, SlotName } from './deck.ts';
 import { slotsForLayout } from './deck.ts';
 import type { BlockId } from './ids.ts';
 import type { Flip, Position } from './position.ts';
-import { normalizeRotation, toggleFlip, zOf } from './position.ts';
-import type { Box } from './render.ts';
-import { CONTENT_BOX, RAIL_PX, SHEET_HEIGHT, SHEET_WIDTH } from './render.ts';
+import {
+  groupDepth,
+  membersAtLevel,
+  normalizeRotation,
+  sharesGroupLevel,
+  toggleFlip,
+  zOf,
+} from './position.ts';
+import type { Box, Page } from './render.ts';
+import { CONTENT_BOX, DEFAULT_PAGE, RAIL_PX, contentBox } from './render.ts';
 
 /** Boxes snap to this grid when no guide is closer (docs/freeform.md). */
 export const FREEFORM_GRID = 8;
@@ -26,13 +33,24 @@ export const COLS_GAP = 72;
 /** The plate widths of the three full-picture kinds (SPEC 2.1). */
 export const PLATE_WIDTHS = { opener: 740, mood: 560, closing: 720 } as const;
 
-const [CONTENT_X, CONTENT_Y, CONTENT_W, CONTENT_H] = CONTENT_BOX;
+/** The default page's content width, what `columnWidths` reads when no content width is given. */
+const CONTENT_W = CONTENT_BOX[2];
+
+/** A page size in sheet pixels; every sheet arithmetic below takes one and reads the GT sheet when it is absent (gslides-parity SPEC-5 6.1). */
+export type PageSize = Pick<Page, 'width' | 'height'>;
 
 export type Guide = { at: number; name: string };
 
-/** Pixel widths of the two columns of a cols layout on the content width (render/geometry.ts). */
-export function columnWidths(ratio: ColsRatio, gap: number = COLS_GAP): [number, number] {
-  const total = CONTENT_W - gap;
+/**
+ * Pixel widths of the two columns of a cols layout on a content width (render/geometry.ts): the
+ * default page's 1326 px unless a page's content width is given.
+ */
+export function columnWidths(
+  ratio: ColsRatio,
+  gap: number = COLS_GAP,
+  contentWidth: number = CONTENT_W,
+): [number, number] {
+  const total = contentWidth - gap;
   if (typeof ratio === 'string') {
     const parts = ratio.split('/').map(Number);
     const a = parts[0] ?? 1;
@@ -44,38 +62,48 @@ export function columnWidths(ratio: ColsRatio, gap: number = COLS_GAP): [number,
   return [total - ratio.right, ratio.right];
 }
 
-/** The vertical guide lines (x values): rails, content edges and center, column seams, plate edges. */
-export function verticalGuides(): Guide[] {
+/** The vertical guide lines (x values) of a page: rails, content edges and center, column seams, plate edges. */
+export function verticalGuides(page: PageSize = DEFAULT_PAGE): Guide[] {
+  const [cx, , cw] = contentBox(page);
   const out: Guide[] = [
     { at: RAIL_PX, name: 'left rail' },
-    { at: SHEET_WIDTH - RAIL_PX, name: 'right rail' },
-    { at: CONTENT_X, name: 'content left' },
-    { at: CONTENT_X + CONTENT_W, name: 'content right' },
-    { at: CONTENT_X + CONTENT_W / 2, name: 'content center' },
+    { at: page.width - RAIL_PX, name: 'right rail' },
+    { at: cx, name: 'content left' },
+    { at: cx + cw, name: 'content right' },
+    { at: cx + cw / 2, name: 'content center' },
   ];
   for (const ratio of ['5/7', '4/8', '1/1'] as const) {
-    const [left] = columnWidths(ratio);
-    out.push({ at: CONTENT_X + left, name: `${ratio} left column edge` });
-    out.push({ at: CONTENT_X + left + COLS_GAP, name: `${ratio} right column edge` });
+    const [left] = columnWidths(ratio, COLS_GAP, cw);
+    out.push({ at: cx + left, name: `${ratio} left column edge` });
+    out.push({ at: cx + left + COLS_GAP, name: `${ratio} right column edge` });
   }
-  out.push({ at: CONTENT_X + PLATE_WIDTHS.opener, name: 'opener plate edge' });
-  out.push({ at: CONTENT_X + PLATE_WIDTHS.closing, name: 'closing plate edge' });
-  out.push({ at: CONTENT_X + CONTENT_W - PLATE_WIDTHS.mood, name: 'mood plate edge' });
+  out.push({ at: cx + PLATE_WIDTHS.opener, name: 'opener plate edge' });
+  out.push({ at: cx + PLATE_WIDTHS.closing, name: 'closing plate edge' });
+  out.push({ at: cx + cw - PLATE_WIDTHS.mood, name: 'mood plate edge' });
   return out.sort((a, b) => a.at - b.at);
 }
 
-/** The horizontal guide lines (y values): rules, content edges and center. */
-export function horizontalGuides(): Guide[] {
+/** The horizontal guide lines (y values) of a page: rules, content edges and center. */
+export function horizontalGuides(page: PageSize = DEFAULT_PAGE): Guide[] {
+  const [, cy, , ch] = contentBox(page);
   return [
     { at: RAIL_PX, name: 'top rule' },
-    { at: SHEET_HEIGHT - RAIL_PX, name: 'bottom rule' },
-    { at: CONTENT_Y, name: 'content top' },
-    { at: CONTENT_Y + CONTENT_H, name: 'content bottom' },
-    { at: CONTENT_Y + CONTENT_H / 2, name: 'content middle' },
+    { at: page.height - RAIL_PX, name: 'bottom rule' },
+    { at: cy, name: 'content top' },
+    { at: cy + ch, name: 'content bottom' },
+    { at: cy + ch / 2, name: 'content middle' },
   ].sort((a, b) => a.at - b.at);
 }
 
+/** The default page's guide lines; `guidesFor(page)` derives another page's. */
 export const GUIDES = { x: verticalGuides(), y: horizontalGuides() } as const;
+
+/** The snap guide lines of a page (gslides-parity SPEC-5 6.1): the default page answers `GUIDES`. */
+export function guidesFor(page: PageSize = DEFAULT_PAGE): { x: Guide[]; y: Guide[] } {
+  if (page.width === DEFAULT_PAGE.width && page.height === DEFAULT_PAGE.height)
+    return { x: [...GUIDES.x], y: [...GUIDES.y] };
+  return { x: verticalGuides(page), y: horizontalGuides(page) };
+}
 
 export function snapToGrid(value: number, grid: number = FREEFORM_GRID): number {
   return Math.round(value / grid) * grid;
@@ -147,32 +175,30 @@ export function boundingBox(pos: Position): Position {
   return { x: cx - w / 2, y: cy - h / 2, w, h };
 }
 
-/** True when the box lies inside the content box, where the renderer places it under `.in`. */
-export function insideContent(pos: Position): boolean {
-  return (
-    pos.x >= CONTENT_X &&
-    pos.y >= CONTENT_Y &&
-    pos.x + pos.w <= CONTENT_X + CONTENT_W &&
-    pos.y + pos.h <= CONTENT_Y + CONTENT_H
-  );
+/** True when the box lies inside the page's content box, where the renderer places it under `.in`. */
+export function insideContent(pos: Position, page: PageSize = DEFAULT_PAGE): boolean {
+  const [cx, cy, cw, ch] = contentBox(page);
+  return pos.x >= cx && pos.y >= cy && pos.x + pos.w <= cx + cw && pos.y + pos.h <= cy + ch;
 }
 
 /**
- * Where a rotated object's bounding box lies against the 1600 by 900 sheet (SPEC-2 0.96):
- * `inside`, `crossing` an edge (part of it shows), or wholly `outside` (nothing of it shows).
- * `freeform/off-sheet` reads it: severity 3 for `outside`, 2 for `crossing`.
+ * Where a rotated object's bounding box lies against the page (SPEC-2 0.96; the GT sheet when no
+ * page is given): `inside`, `crossing` an edge (part of it shows), or wholly `outside` (nothing of
+ * it shows). `freeform/off-sheet` reads it: severity 3 for `outside`, 2 for `crossing`.
  */
-export function offSheetKind(pos: Position): 'inside' | 'crossing' | 'outside' {
+export function offSheetKind(
+  pos: Position,
+  page: PageSize = DEFAULT_PAGE,
+): 'inside' | 'crossing' | 'outside' {
   const b = boundingBox(pos);
-  if (b.x + b.w <= 0 || b.y + b.h <= 0 || b.x >= SHEET_WIDTH || b.y >= SHEET_HEIGHT)
-    return 'outside';
-  if (b.x < 0 || b.y < 0 || b.x + b.w > SHEET_WIDTH || b.y + b.h > SHEET_HEIGHT) return 'crossing';
+  if (b.x + b.w <= 0 || b.y + b.h <= 0 || b.x >= page.width || b.y >= page.height) return 'outside';
+  if (b.x < 0 || b.y < 0 || b.x + b.w > page.width || b.y + b.h > page.height) return 'crossing';
   return 'inside';
 }
 
-/** True when any part of the rotated bounding box leaves the 1600 by 900 sheet (freeform/off-sheet). */
-export function offSheet(pos: Position): boolean {
-  return offSheetKind(pos) !== 'inside';
+/** True when any part of the rotated bounding box leaves the page (freeform/off-sheet). */
+export function offSheet(pos: Position, page: PageSize = DEFAULT_PAGE): boolean {
+  return offSheetKind(pos, page) !== 'inside';
 }
 
 /** The area two boxes share, read over their rotated bounding boxes; 0 when they only touch. */
@@ -228,10 +254,11 @@ export function resolveAlignTarget(
 export function alignReference(
   positions: ReadonlyArray<Position>,
   target: AlignTarget | undefined,
+  page: PageSize = DEFAULT_PAGE,
 ): Box {
   const resolved = resolveAlignTarget(positions, target);
-  if (resolved === 'sheet') return [0, 0, SHEET_WIDTH, SHEET_HEIGHT];
-  if (resolved === 'content') return CONTENT_BOX;
+  if (resolved === 'sheet') return [0, 0, page.width, page.height];
+  if (resolved === 'content') return contentBox(page);
   return unionOf(positions.map(boundingBox));
 }
 
@@ -253,9 +280,10 @@ export function alignPositions(
   edge: AlignEdge,
   target?: AlignTarget,
   snap = false,
+  page: PageSize = DEFAULT_PAGE,
 ): Position[] {
   const resolved = resolveAlignTarget(positions, target);
-  const [rx, ry, rw, rh] = alignReference(positions, resolved);
+  const [rx, ry, rw, rh] = alignReference(positions, resolved, page);
   const horizontal = edge === 'left' || edge === 'center' || edge === 'right';
   let line =
     edge === 'left'
@@ -270,8 +298,9 @@ export function alignPositions(
               ? ry + rh / 2
               : ry + rh;
   if (snap && resolved === 'selection') {
-    const snapped = snapCoordinate(line, horizontal ? GUIDES.x : GUIDES.y).value;
-    const extent = horizontal ? SHEET_WIDTH : SHEET_HEIGHT;
+    const guides = guidesFor(page);
+    const snapped = snapCoordinate(line, horizontal ? guides.x : guides.y).value;
+    const extent = horizontal ? page.width : page.height;
     if (snapped >= 0 && snapped <= extent) line = snapped;
   }
   // a rotated object aligns by its bounding box (SPEC-2 0.107): the box moves by the distance its
@@ -467,19 +496,22 @@ export function reorderZ(
 // ---------------------------------------------------------------------------------------------
 // Layout conversion (slide.setLayout)
 
-/** Boxes of every slot of a layout in sheet pixels; heights are the content height (render/geometry.ts). */
-export function layoutSlotBoxes(layout: Layout): Partial<Record<SlotName, Box>> {
-  const [x, y, w, h] = CONTENT_BOX;
+/** Boxes of every slot of a layout in sheet pixels on a page; heights are the content height (render/geometry.ts). */
+export function layoutSlotBoxes(
+  layout: Layout,
+  page: PageSize = DEFAULT_PAGE,
+): Partial<Record<SlotName, Box>> {
+  const [x, y, w, h] = contentBox(page);
   switch (layout.type) {
     case 'cols': {
       const gap = layout.gap ?? COLS_GAP;
-      const [left, right] = columnWidths(layout.ratio, gap);
+      const [left, right] = columnWidths(layout.ratio, gap, w);
       return { left: [x, y, left, h], right: [x + left + gap, y, right, h] };
     }
     case 'split': {
       const head = layout.head;
       if (head !== undefined && head !== 'single') {
-        const [left, right] = columnWidths(head.cols);
+        const [left, right] = columnWidths(head.cols, COLS_GAP, w);
         return {
           headLeft: [x, y, left, h],
           headRight: [x + left + COLS_GAP, y, right, h],
@@ -527,11 +559,15 @@ export function readingOrder(slide: ContentSlide): { slot: SlotName; block: Bloc
  * one slot takes everything). Between grammar layouts the slots map by index (left to head, right
  * to body) and a slot the target lacks folds into the last one.
  */
-export function convertLayout(slide: ContentSlide, layout: Layout): ContentSlide {
+export function convertLayout(
+  slide: ContentSlide,
+  layout: Layout,
+  page: PageSize = DEFAULT_PAGE,
+): ContentSlide {
   const rows = readingOrder(slide);
   const next: ContentSlide = { ...slide, layout, slots: {} };
   if (layout.type === 'freeform') {
-    const boxes = layoutSlotBoxes(slide.layout);
+    const boxes = layoutSlotBoxes(slide.layout, page);
     const perSlot = new Map<SlotName, { slot: SlotName; block: Block }[]>();
     for (const row of rows) {
       const list = perSlot.get(row.slot) ?? [];
@@ -541,7 +577,7 @@ export function convertLayout(slide: ContentSlide, layout: Layout): ContentSlide
     const main: Block[] = [];
     let z = 0;
     for (const [slot, list] of perSlot) {
-      const box = boxes[slot] ?? CONTENT_BOX;
+      const box = boxes[slot] ?? contentBox(page);
       const [bx, by, bw, bh] = box;
       const rowHeight = bh / Math.max(1, list.length);
       list.forEach(({ block }, i) => {
@@ -574,7 +610,7 @@ export function convertLayout(slide: ContentSlide, layout: Layout): ContentSlide
       continue;
     }
     if (slide.layout.type === 'freeform') {
-      put(slotByGeometry(block, targets), block);
+      put(slotByGeometry(block, targets, page), block);
       continue;
     }
     const index = Math.min(sourceSlots.indexOf(slot), targets.length - 1);
@@ -584,22 +620,84 @@ export function convertLayout(slide: ContentSlide, layout: Layout): ContentSlide
   return next;
 }
 
-/** The grammar slot a positioned block falls into, by its box against the target layout's slots. */
-function slotByGeometry(block: Block, targets: ReadonlyArray<SlotName>): SlotName {
+/** The grammar slot a positioned block falls into, by its box against the target layout's slots on the page. */
+function slotByGeometry(
+  block: Block,
+  targets: ReadonlyArray<SlotName>,
+  page: PageSize = DEFAULT_PAGE,
+): SlotName {
   const pos = block.pos;
   const first = targets[0] ?? 'main';
   if (pos === undefined) return first;
+  const [cx, cy, cw, ch] = contentBox(page);
   if (targets.includes('left') && targets.includes('right')) {
-    return pos.x + pos.w / 2 < CONTENT_X + CONTENT_W / 2 ? 'left' : 'right';
+    return pos.x + pos.w / 2 < cx + cw / 2 ? 'left' : 'right';
   }
   if (targets.includes('body')) {
     const isHeading = block.type === 'heading';
     if (targets.includes('headLeft') && targets.includes('headRight')) {
       if (isHeading) return 'headLeft';
-      if (block.type === 'paragraph' && pos.y < CONTENT_Y + CONTENT_H / 3) return 'headRight';
+      if (block.type === 'paragraph' && pos.y < cy + ch / 3) return 'headRight';
       return 'body';
     }
     return isHeading ? 'head' : 'body';
   }
   return first;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Nested groups on the canvas (gslides-parity SPEC-5 0.48; MILESTONES-5 B3 day 6)
+
+/** The level a click selects: the group path and how many of its segments the selection spans. */
+export type SelectionLevel = { path: string; depth: number };
+
+/**
+ * The selection level after a click on a member of a group (SPEC-5 0.48; Google's rule): the
+ * first click on a member selects the outermost group (level 1, every block whose path starts
+ * with the same segment); a click on a member already inside the selected group goes one level
+ * in, until the member's own path is exhausted and the block alone is selected (`null`). A click
+ * on a member of another group starts again at level 1; a block without a group is selected
+ * alone. `current` is the level the selection stands at, null when nothing grouped is selected.
+ */
+export function selectionLevelOnClick(
+  clickedGroup: string | undefined,
+  current: SelectionLevel | null,
+): SelectionLevel | null {
+  if (clickedGroup === undefined) return null;
+  const depth = groupDepth(clickedGroup);
+  if (current === null || !sharesGroupLevel(current.path, clickedGroup, current.depth))
+    return { path: clickedGroup, depth: 1 };
+  if (current.depth >= depth) return null;
+  return { path: clickedGroup, depth: current.depth + 1 };
+}
+
+/**
+ * The block ids a selection level covers on a slide: the members at that level of the path
+ * (`membersAtLevel`), in slide order; every block for a level nothing reaches is none.
+ */
+export function selectionAtLevel(blocks: ReadonlyArray<Block>, level: SelectionLevel): BlockId[] {
+  return membersAtLevel(blocks, level.path, level.depth).map((block) => block.id);
+}
+
+/**
+ * The union box of the members at a level (the handles a nested group selection draws; SPEC-5
+ * 0.48), or null when none is positioned. Rotation is ignored: the box is the members' boxes'
+ * bounds, the way `groupBox` reads a flat group.
+ */
+export function groupBoxAtLevel(blocks: ReadonlyArray<Block>, level: SelectionLevel): Box | null {
+  const members = membersAtLevel(blocks, level.path, level.depth);
+  let x0 = Number.POSITIVE_INFINITY;
+  let y0 = Number.POSITIVE_INFINITY;
+  let x1 = Number.NEGATIVE_INFINITY;
+  let y1 = Number.NEGATIVE_INFINITY;
+  for (const block of members) {
+    const pos = block.pos;
+    if (pos === undefined) continue;
+    x0 = Math.min(x0, pos.x);
+    y0 = Math.min(y0, pos.y);
+    x1 = Math.max(x1, pos.x + pos.w);
+    y1 = Math.max(y1, pos.y + pos.h);
+  }
+  if (!Number.isFinite(x0)) return null;
+  return [x0, y0, x1 - x0, y1 - y0];
 }

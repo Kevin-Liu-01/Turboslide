@@ -1,0 +1,57 @@
+{
+  "id": "people/one-person",
+  "category": "people",
+  "label": "One person",
+  "blocks": [
+    {
+      "id": "picture",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name",
+      "pos": {
+        "x": 280,
+        "y": 40,
+        "w": 800,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Name"
+    },
+    {
+      "id": "role",
+      "pos": {
+        "x": 280,
+        "y": 120,
+        "w": 800,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Role, team",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1080,
+    240
+  ]
+}

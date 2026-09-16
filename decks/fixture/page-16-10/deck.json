@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "page-16-10",
+  "title": "Page fixture, Widescreen (16:10)",
+  "theme": "gt-ink-paper",
+  "page": {
+    "width": 1440,
+    "height": 900,
+    "preset": "widescreen-16-10"
+  },
+  "sections": [
+    {
+      "id": "kinds",
+      "name": "Kinds",
+      "slideIds": [
+        "title",
+        "columns",
+        "canvas"
+      ]
+    }
+  ],
+  "assets": {},
+  "defaults": {
+    "appearance": "light",
+    "counter": "on"
+  },
+  "revision": 1,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

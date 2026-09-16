@@ -14,14 +14,18 @@ import { cn } from '../lib/cn';
 import { DIALOGS } from '../menus/strings';
 import { gridKey } from '../pickers/grid';
 import { tipProps } from '../Tooltip';
+import { ROUND_FIVE } from '../menus/strings';
 import {
   SPECIAL_CHARACTER_CATEGORIES,
   searchSpecialCharacters,
   specialCharacterName,
 } from './special-characters-data';
 import type { SpecialCharacter, SpecialCharacterCategory } from './special-characters-data';
+import { recognizeStrokes } from './stroke-recognizer';
+import type { Guess, Point, Stroke } from './stroke-recognizer';
 
 import '../pickers/Pickers.css';
+import './text-tools-dialogs.css';
 
 /**
  * Insert > Special characters (gslides-parity SPEC-2 0.36, 6.2, section 10): a category
@@ -29,8 +33,12 @@ import '../pickers/Pickers.css';
  * caret through the editor's handle (`text.insert` at the caret's offset) and keeps the dialog
  * open, announcing the character's name; with no caret the first pick creates a text box as an
  * object centred on the sheet (480 by 64) holding the character. The recent row is remembered per
- * browser. Google's drawing box is not built (round three).
+ * browser. The drawing box (gslides-parity SPEC-5 0.41, 7.7; round five B5): a 160 by 160 canvas
+ * whose strokes run through Turboslide's own recogniser (stroke-recognizer.ts, eight direction
+ * histograms against the Math and Arrows templates); its result list is labelled "Best guesses"
+ * and a pick inserts the character. No service is called.
  */
+const DRAW_SIZE = 160;
 const RECENT_STORAGE = 'ts-special-characters-recent';
 const GRID_COLUMNS = 10;
 
@@ -67,6 +75,59 @@ export function SpecialCharactersDialog() {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const grid = useRef<HTMLDivElement>(null);
+  /* the drawing box: the strokes drawn so far and the guesses they make */
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const strokes = useRef<Stroke[]>([]);
+  const drawing = useRef(false);
+  const [guesses, setGuesses] = useState<Guess[]>([]);
+  const [drawn, setDrawn] = useState(0);
+
+  const paint = () => {
+    const node = canvas.current;
+    const context = node?.getContext('2d');
+    if (!node || !context) return;
+    context.clearRect(0, 0, node.width, node.height);
+    context.lineWidth = 3;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.strokeStyle = getComputedStyle(node).color;
+    for (const stroke of strokes.current) {
+      if (stroke.length === 1) {
+        const point = stroke[0] as Point;
+        context.beginPath();
+        context.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
+        context.fill();
+        continue;
+      }
+      context.beginPath();
+      stroke.forEach((point, i) =>
+        i === 0 ? context.moveTo(point.x, point.y) : context.lineTo(point.x, point.y),
+      );
+      context.stroke();
+    }
+  };
+  const pointOf = (event: { clientX: number; clientY: number }): Point => {
+    const node = canvas.current;
+    const rect = node?.getBoundingClientRect();
+    if (!node || !rect) return { x: 0, y: 0 };
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * node.width,
+      y: ((event.clientY - rect.top) / rect.height) * node.height,
+    };
+  };
+  const finishStroke = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    setGuesses(recognizeStrokes(strokes.current));
+    setDrawn(strokes.current.length);
+  };
+  const clearDrawing = () => {
+    strokes.current = [];
+    drawing.current = false;
+    setGuesses([]);
+    setDrawn(0);
+    paint();
+  };
 
   const results = useMemo(
     () => searchSpecialCharacters(query, query.trim() === '' ? category : null),
@@ -272,6 +333,90 @@ export function SpecialCharactersDialog() {
           ))}
         </div>
       )}
+      <div className="ts-draw-box" data-control="dialog.specialCharacters.draw">
+        <canvas
+          ref={canvas}
+          className="ts-draw-canvas"
+          width={DRAW_SIZE}
+          height={DRAW_SIZE}
+          role="img"
+          aria-label="Draw a character"
+          data-control="dialog.specialCharacters.canvas"
+          {...tipProps({
+            name: 'Draw a character',
+            doc: 'Draw the symbol with the pointer; the best guesses appear beside it',
+          })}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            drawing.current = true;
+            strokes.current = [...strokes.current, [pointOf(event)]];
+            paint();
+          }}
+          onPointerMove={(event) => {
+            if (!drawing.current) return;
+            const current = strokes.current[strokes.current.length - 1];
+            if (current !== undefined) current.push(pointOf(event));
+            paint();
+          }}
+          onPointerUp={finishStroke}
+          onPointerCancel={finishStroke}
+          onPointerLeave={finishStroke}
+        />
+        <div className="ts-draw-guesses">
+          <span
+            className="ts-dialog-field-label"
+            data-control="dialog.specialCharacters.bestGuesses"
+          >
+            {ROUND_FIVE.bestGuesses}
+          </span>
+          {guesses.length === 0 ? (
+            <span className="ts-tt-note">
+              {drawn === 0 ? 'Draw a character in the box' : 'Nothing close yet; keep drawing'}
+            </span>
+          ) : (
+            <div
+              className="ts-picker-grid"
+              role="list"
+              aria-label={ROUND_FIVE.bestGuesses}
+              style={{ gridTemplateColumns: 'repeat(5, 40px)' }}
+            >
+              {guesses.map((guess) => (
+                <button
+                  key={guess.char}
+                  type="button"
+                  role="listitem"
+                  className="ts-picker-tile"
+                  aria-label={specialCharacterName(guess.char)}
+                  data-control={`dialog.specialCharacters.guess.${guess.char.codePointAt(0)}`}
+                  {...tipProps({
+                    name: specialCharacterName(guess.char),
+                    doc: 'Inserts this guess',
+                  })}
+                  onClick={() =>
+                    insert({
+                      char: guess.char,
+                      name: specialCharacterName(guess.char),
+                      category: 'Math',
+                    })
+                  }
+                >
+                  {guess.char}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className="ts-tt-small"
+            disabled={drawn === 0}
+            data-control="dialog.specialCharacters.clearDrawing"
+            {...tipProps({ name: 'Clear', doc: 'Clears the drawing' })}
+            onClick={clearDrawing}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
       <p
         className="ts-dialog-hint"
         role="status"

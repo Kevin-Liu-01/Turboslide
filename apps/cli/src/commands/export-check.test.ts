@@ -49,6 +49,29 @@ describe('turboslide export check', () => {
     expect(result.stdout).toContain('check: valid');
   });
 
+  test('--page WxH names the page the file must carry (gslides-parity SPEC-5 6.1)', async () => {
+    // the fixture writes the default page: 1600 by 900 sheet px reads valid, 1200 by 900 does not
+    const same = await run(
+      ['export', 'check', file, '--no-quick-look', '--page', '1600x900'],
+      root,
+    );
+    expect(same.code).toBe(0);
+    expect(same.stdout).toContain('check: valid');
+    const other = await run(
+      ['export', 'check', file, '--no-quick-look', '--page', '1200x900'],
+      root,
+    );
+    expect(other.code).toBe(1);
+    expect(other.stdout).toContain('expected 9144000 by 6858000');
+    expect(other.stdout).toContain('check: INVALID');
+    const malformed = await run(
+      ['export', 'check', file, '--no-quick-look', '--page', '12x'],
+      root,
+    );
+    expect(malformed.code).toBe(2);
+    expect(malformed.stderr).toContain('--page wants WxH');
+  });
+
   test('--json puts the ExportCheck on stdout', async () => {
     const result = await run(['export', 'check', file, '--json'], root);
     expect(result.code).toBe(0);

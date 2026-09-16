@@ -595,3 +595,22 @@ definition; adopting the dssim crate is Kevin's licensing decision.
 The remaining dependencies are listed with their licenses by `pnpm licenses list` from the repo
 root. Chromium, Chrome for Testing and LibreOffice run as separate programs and are not
 redistributed by this repository.
+
+## The font catalog (SIL Open Font License 1.1, per family)
+
+What: the woff2 files under `packages/fonts/assets/<id>/` for the twenty five families the Font
+menu offers beside Inter (gslides-parity SPEC-5-amendments A5; `packages/fonts/src/catalog.ts`):
+Roboto, Open Sans, Lato, Montserrat, Poppins, Source Sans 3, Source Serif 4, Merriweather,
+Playfair Display, Lora, PT Serif, Libre Baskerville, EB Garamond, Nunito, Raleway, Work Sans,
+DM Sans, Space Grotesk, Oswald, Bebas Neue, Roboto Mono, JetBrains Mono, IBM Plex Sans, IBM Plex
+Mono and Fira Code. Source: the Google Fonts repository (https://github.com/google/fonts) at
+commit `1ac2012c34919f5fa2675aacf723fa98edb30b5f`, the file named per face in
+`packages/fonts/src/catalog-files.ts` with its sha256. Each woff2 is a fontTools format
+conversion of the TrueType file, nothing subset, renamed or instanced, so every family keeps its
+name table and, where the licence declares one, its Reserved Font Name (Lato, Merriweather,
+Playfair Display, Lora, PT Serif, Libre Baskerville, Raleway, Source Sans 3's "Source", IBM Plex
+Sans and IBM Plex Mono's "Plex"). Every family is under the SIL Open Font License 1.1; the
+family's own licence text, with its copyright statement and Reserved Font Names, is committed
+verbatim as `packages/fonts/assets/<id>/LICENSE` beside its files (the OFL text itself is the one
+reproduced under Inter above). The fetch is `packages/fonts/scripts/fetch-fonts.mjs`; the check
+chain never fetches.

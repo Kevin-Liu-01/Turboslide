@@ -9,6 +9,7 @@ import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import type { RenderJobResult } from '@turboslide/render-worker/jobs/render';
 import type { Slide } from '@turboslide/schema/deck';
+import { deckAppearance } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
@@ -70,7 +71,7 @@ export type ThumbWidth = (typeof THUMB_WIDTHS)[number];
 /** 320 px is 0.2x: crisp for the 64 px sidebar mini at any pixel ratio and for a 272 px grid tile at 1x. */
 export const DEFAULT_THUMB_WIDTH: ThumbWidth = 320;
 
-/** The sheet's aspect, so a thumbnail is width by width times 9/16 (SPEC 2.1). */
+/** The default page's aspect, so a thumbnail of a 16:9 deck is width by width times 9/16 (SPEC 2.1); a deck's own page comes through `ThumbResult.page` (gslides-parity SPEC-5 6.1). */
 const SHEET = { width: 1600, height: 900 } as const;
 
 /** A stamp the URL may carry: the editor's eight hex digits, a revision, or a short opaque name. */
@@ -137,6 +138,8 @@ export type ThumbResult = {
   /** true when the answer was already in a cache (the disk or the store) */
   cached: boolean;
   source: 'disk' | 'blob' | 'render';
+  /** The deck's page in sheet pixels, for the `x-turboslide-thumb` height (gslides-parity SPEC-5 6.1); the default page when absent. */
+  page?: { width: number; height: number };
   /** false when an answer without `r` is an older stamp and the current one renders after the response */
   fresh: boolean;
   /** the render record the capture came from; absent on a cache hit */
@@ -528,7 +531,7 @@ export function thumbHeaders(
     'x-turboslide-revision': String(result.revision),
     'x-turboslide-stamp': result.stamp,
     'x-turboslide-fresh': result.fresh ? '1' : '0',
-    'x-turboslide-thumb': `${request.width}x${Math.round((request.width * SHEET.height) / SHEET.width)}`,
+    'x-turboslide-thumb': `${request.width}x${Math.round((request.width * (result.page ?? SHEET).height) / (result.page ?? SHEET).width)}`,
     'x-turboslide-cached': result.cached ? '1' : '0',
     'x-turboslide-source': result.source,
     'x-turboslide-worker': worker().mode,
@@ -696,4 +699,133 @@ export async function warmThumbs(
     cached,
     ms: Math.round(performance.now() - t),
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The per deck card (gslides-parity SPEC-5 11 "The per deck card", SPEC-4 7; B4, fix round)
+
+/** The card frame: the Open Graph size every link unfurler reads. */
+export const CARD_SIZE = { width: 1200, height: 630 } as const;
+/** The card's margin around the slide, in card pixels. */
+export const CARD_MARGIN_PX = 40;
+/** The card's ground: the chrome's `--pt-panel-ink` (packages/chrome/src/tokens.css). */
+export const CARD_INK_HEX = '#101010';
+
+export type CardResult = {
+  png: Uint8Array<ArrayBuffer>;
+  /** The deck revision the card was rendered at. */
+  revision: number;
+  slideId: string;
+  theme: Theme;
+  cached: boolean;
+};
+
+/**
+ * The slide contained in the card frame at its own aspect (SPEC-5 11): the box inside the margin
+ * that keeps the deck's page aspect, centred. A 16:9 slide fills 1120 by 630 less the margin; a
+ * 4:3 slide is narrower and centred.
+ */
+export function cardSlideBox(
+  aspect: number,
+  size: { width: number; height: number } = CARD_SIZE,
+  margin = CARD_MARGIN_PX,
+): { x: number; y: number; width: number; height: number } {
+  const innerW = size.width - 2 * margin;
+  const innerH = size.height - 2 * margin;
+  let width = innerW;
+  let height = Math.round(width / aspect);
+  if (height > innerH) {
+    height = innerH;
+    width = Math.round(height * aspect);
+  }
+  return {
+    x: Math.round((size.width - width) / 2),
+    y: Math.round((size.height - height) / 2),
+    width,
+    height,
+  };
+}
+
+function hexChannels(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/**
+ * The card image: the slide's render downsampled by area averaging into its box on the ink
+ * ground (a pure function over pixels, so `thumbs.test.ts` pins it without a browser).
+ */
+/** An image grown to a width by nearest neighbour (a render smaller than its card box, the test's case; the worker's 1x render is larger and shrinks). */
+export function growNearest(image: RgbaImage, width: number): RgbaImage {
+  const height = Math.max(1, Math.round((image.height * width) / image.width));
+  const out = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y += 1) {
+    const sy = Math.min(image.height - 1, Math.floor((y * image.height) / height));
+    for (let x = 0; x < width; x += 1) {
+      const sx = Math.min(image.width - 1, Math.floor((x * image.width) / width));
+      const i = (sy * image.width + sx) * 4;
+      const o = (y * width + x) * 4;
+      out[o] = image.data[i] ?? 0;
+      out[o + 1] = image.data[i + 1] ?? 0;
+      out[o + 2] = image.data[i + 2] ?? 0;
+      out[o + 3] = image.data[i + 3] ?? 255;
+    }
+  }
+  return { width, height, data: out };
+}
+
+export function composeCard(slide: RgbaImage, inkHex: string = CARD_INK_HEX): RgbaImage {
+  const box = cardSlideBox(slide.width / slide.height);
+  const small =
+    slide.width >= box.width ? downsample(slide, box.width) : growNearest(slide, box.width);
+  const [r, g, b] = hexChannels(inkHex);
+  const out = new Uint8Array(CARD_SIZE.width * CARD_SIZE.height * 4);
+  for (let i = 0; i < out.length; i += 4) {
+    out[i] = r;
+    out[i + 1] = g;
+    out[i + 2] = b;
+    out[i + 3] = 255;
+  }
+  const rows = Math.min(small.height, CARD_SIZE.height - box.y);
+  for (let y = 0; y < rows; y += 1) {
+    const src = y * small.width * 4;
+    const dst = ((box.y + y) * CARD_SIZE.width + box.x) * 4;
+    out.set(small.data.subarray(src, src + small.width * 4), dst);
+  }
+  return { width: CARD_SIZE.width, height: CARD_SIZE.height, data: out };
+}
+
+/** `<state>/thumbs/<deckId>/card/<revision>.png`: the disk cache of a rendered card. */
+export function cardPath(deckId: string, revision: number): string {
+  return join(stateDir(), 'thumbs', deckId, 'card', `${revision}.png`);
+}
+
+/**
+ * The deck's card (SPEC-5 11): the first slide of the play list rendered through the worker at 1x
+ * in the deck's appearance, composed into the 1200 by 630 frame, cached on this instance's disk
+ * by the deck revision (the URL's `?r=<revision>` names it immutable). RangeError when the deck or
+ * its first slide is missing; the caller decides the access rule before asking.
+ */
+export async function renderCard(deckId: string): Promise<CardResult> {
+  assertSlug('deckId', deckId);
+  if (await isUnsavedDraft(deckId)) throw new RangeError(`no deck ${deckId} until its first write`);
+  const { document } = await (await openDeckStore(deckId)).read();
+  const revision = document.deck.revision;
+  const theme: Theme = deckAppearance(document.deck);
+  const order = document.deck.sections.flatMap((section) => section.slideIds);
+  const slideId =
+    order.find((id) => document.slides[id] !== undefined && document.slides[id]?.skip !== true) ??
+    order[0];
+  if (slideId === undefined) throw new RangeError(`no slide in ${deckId} for its card`);
+  const path = cardPath(deckId, revision);
+  if (existsSync(path)) {
+    return { png: new Uint8Array(readFileSync(path)), revision, slideId, theme, cached: true };
+  }
+  await ensureDeckAssets(deckId);
+  const rendered = await worker().renderSlide({ deckId, slideId, theme, scale: 1 });
+  const image = await decodeImage(rendered.png);
+  const png = new Uint8Array(await encodePngRgba(composeCard(image)));
+  mkdirSync(join(path, '..'), { recursive: true });
+  writeFileSync(path, png);
+  return { png, revision, slideId, theme, cached: false };
 }

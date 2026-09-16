@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "agenda",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Agenda",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What we cover in the next twenty minutes.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "The problem"
+          },
+          {
+            "text": "What we built"
+          },
+          {
+            "text": "How it works"
+          },
+          {
+            "text": "Results"
+          },
+          {
+            "text": "Next steps"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Agenda"
+}

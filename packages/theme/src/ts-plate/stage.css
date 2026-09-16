@@ -1,0 +1,12 @@
+/* ts-plate stage (gslides-parity SPEC-5 9.3): the backdrop, the sheet mat, the stage and the slide
+   box are the GT theme's (../gt-ink-paper/stage.css, loaded before this file by theme.ts
+   stageCss('ts-plate')); the Plate theme changes nothing of the stage geometry, so Change theme
+   never moves an object. The one rule here keeps a full picture slide's sheet edge on the Plate
+   theme as the GT theme draws it, keyed on the theme id so a GT sheet in the same document is
+   untouched. */
+.ts-sheet[data-sheet='ts-plate'].is-picture .sheet,
+.ts-sheet[data-sheet='ts-plate'].is-picture.sheet {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}

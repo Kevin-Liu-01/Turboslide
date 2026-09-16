@@ -34,7 +34,8 @@ import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
 import { isLineKind, isPathKind } from '@turboslide/schema/shapes';
 import type { LineKind } from '@turboslide/schema/shapes';
-import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
+import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET, grid } from '@turboslide/theme/tokens';
+import type { PageSize } from '@turboslide/theme/tokens';
 
 import { labelClearance, snapHalf, unitsPerPixel } from '@turboslide/render/dia/snap';
 import type { DiaBox } from '@turboslide/render/dia/snap';
@@ -202,13 +203,14 @@ export function locateBlock(
   return null;
 }
 
-/** Client pixels to sheet pixels through the stage's box: k is the box width over 1600 (SPEC 6.4). */
+/** Client pixels to sheet pixels through the stage's box: k is the box width over the page's width, 1600 on the default page (SPEC 6.4). */
 export function sheetPoint(
   stage: { left: number; top: number; width: number },
   clientX: number,
   clientY: number,
+  page: PageSize = SHEET,
 ): Point {
-  const k = stage.width > 0 ? stage.width / SHEET.width : 1;
+  const k = stage.width > 0 ? stage.width / page.width : 1;
   return { x: (clientX - stage.left) / k, y: (clientY - stage.top) / k };
 }
 
@@ -243,6 +245,8 @@ export type HandleOptions = {
   ids?: readonly string[];
   /** crop mode on the anchor: the eight crop handles over the frame replace the object's handles */
   crop?: { frame: Box };
+  /** the deck's page in sheet pixels (gslides-parity SPEC-5 6.1); the default page when absent */
+  page?: PageSize;
 };
 
 /** The eight resize squares around a box, for an object or a selection's union. */
@@ -392,10 +396,11 @@ export function handlesFor(
     if (left && right) {
       const x0 = left[0] + left[2];
       const x1 = right[0];
+      const content = grid(options.page ?? SHEET).content;
       handles.push({
         id: 'col-seam',
         kind: 'col-seam',
-        box: [x0, CONTENT_ORIGIN[1], Math.max(HANDLE_HIT, x1 - x0), CONTENT[1]],
+        box: [x0, CONTENT_ORIGIN[1], Math.max(HANDLE_HIT, x1 - x0), content[1]],
         cursor: 'col-resize',
         label: 'Layout: Column seam',
         control: 'handle.layout.ratio',
@@ -710,8 +715,13 @@ export type FreeContext = {
   spacing?: Box[];
 };
 
-/** What a gesture reads: the slide as it was when the drag began and the boxes measured then. */
-export type GestureContext = { slide: Slide; boxes: MeasuredBoxes; free?: FreeContext };
+/** What a gesture reads: the slide as it was when the drag began, the boxes measured then and the deck's page (the default when absent). */
+export type GestureContext = {
+  slide: Slide;
+  boxes: MeasuredBoxes;
+  free?: FreeContext;
+  page?: PageSize;
+};
 
 /**
  * The modifier keys a canvas gesture reads on every move (SPEC-2 0.79): Shift constrains a move
@@ -730,11 +740,13 @@ function slideSet(slide: Slide, path: string, value: unknown): Mutation {
   return { op: 'slide.set', slideId: slide.id, path, value };
 }
 
-/** The slot box a block sits in, for the shot snaps; the content box when nothing was measured. */
-function slotBoxOf(slide: Slide, blockId: string, boxes: MeasuredBoxes): Box {
+/** The slot box a block sits in, for the shot snaps; the page's content box when nothing was measured. */
+function slotBoxOf(slide: Slide, blockId: string, boxes: MeasuredBoxes, page?: PageSize): Box {
   const located = locateBlock(slide, blockId);
   const measured = located ? boxes.slots[located.slot] : undefined;
-  return measured ?? [CONTENT_ORIGIN[0], CONTENT_ORIGIN[1], CONTENT[0], CONTENT[1]];
+  if (measured) return measured;
+  const content = page ? grid(page).content : CONTENT;
+  return [CONTENT_ORIGIN[0], CONTENT_ORIGIN[1], content[0], content[1]];
 }
 
 /** The gap between the blocks of a stack, for the drop line; the deck's .stack gap (head:86). */
@@ -896,7 +908,7 @@ export function gestureMutation(
     case 'shot-width': {
       if (block.type !== 'shot') return null;
       const box = boxes.blocks[blockId];
-      const slotBox = slotBoxOf(slide, blockId, boxes);
+      const slotBox = slotBoxOf(slide, blockId, boxes, ctx.page);
       const from = block.width ?? box?.[2] ?? slotBox[2];
       const next = snapShotWidth(from + dx, slotBox[2], slotBox[3]);
       if (next === slotBox[2]) {
@@ -1212,7 +1224,7 @@ export function nudgeMutation(
     }
     case 'shot-width': {
       if (block?.type !== 'shot') return null;
-      const slotBox = slotBoxOf(slide, blockId, boxes);
+      const slotBox = slotBoxOf(slide, blockId, boxes, ctx.page);
       const from = block.width ?? boxes.blocks[blockId]?.[2] ?? slotBox[2];
       const next = snapShotWidth(from + delta * 10, slotBox[2], slotBox[3]);
       if (next === slotBox[2])
@@ -1638,11 +1650,11 @@ export function toolInsertMutation(
   };
 }
 
-/** The default box of a block inserted without a click: centred on the sheet at the tool's default size (SPEC-2 6.2). */
-export function centredBox(size: readonly [number, number]): Box {
+/** The default box of a block inserted without a click: centred on the page at the tool's default size (SPEC-2 6.2). */
+export function centredBox(size: readonly [number, number], page: PageSize = SHEET): Box {
   return [
-    Math.round((SHEET.width - size[0]) / 2),
-    Math.round((SHEET.height - size[1]) / 2),
+    Math.round((page.width - size[0]) / 2),
+    Math.round((page.height - size[1]) / 2),
     size[0],
     size[1],
   ];

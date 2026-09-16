@@ -10,7 +10,11 @@ import type { Author, MarkMutation, Mutation, SpliceMutation } from '@turboslide
 export const REALTIME_TIERS = ['memory', 'redis', 'blob'] as const;
 export type RealtimeTier = (typeof REALTIME_TIERS)[number];
 
-export type EntryKind = 'edit' | 'comment';
+/** An edit, a comment op or, since round five, a chat message (gslides-parity SPEC-5 0.46, 10). */
+export type EntryKind = 'edit' | 'comment' | 'chat';
+
+/** A chat message on the stream (SPEC-5 10): transient, admitted with the comment caps, never checkpointed. */
+export type ChatMessage = { id: string; principalId: string; text: string; at: string };
 
 /**
  * SPEC-3 3.1's two text ops, the schema's own types since merge 1 (`@turboslide/schema/mutations`
@@ -66,6 +70,8 @@ export type Entry = {
   opId: string;
   mutations?: RoomMutation[];
   comment?: CommentOp;
+  /** the message of a `chat` entry (SPEC-5 10) */
+  chat?: ChatMessage;
   /** the admission time, ISO 8601 */
   at: string;
 };

@@ -4,6 +4,7 @@ import { applyLayout, appliedLabel } from '@turboslide/schema/apply-layout';
 import type { Slide } from '@turboslide/schema/deck';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
+import { slideHasMotion } from '@turboslide/schema/motion';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
 import type { ClipboardPayload } from '@turboslide/viewer/clipboard';
 import { useNearWindow } from '@turboslide/viewer/GridView';
@@ -94,7 +95,12 @@ type CardFacts = {
   template: LayoutId | undefined;
   kind: string;
   pictureLayout: boolean;
+  /** the slide carries a transition or an animation: the motion glyph (gslides-parity SPEC-5 2.1) */
+  motion: boolean;
 };
+
+/** The renderer's mark on a slide root that carries motion (SPEC-5 0.3), read off the card's HTML. */
+const MOTION_ROOT = /^<[^>]*\sdata-motion="1"/;
 
 /** Where dragged cards would land: before or after a card, or first in a section. */
 type FilmDrop = { id: string; half: 'before' | 'after' } | { sectionId: string };
@@ -228,6 +234,7 @@ function sameCard(prev: FilmCardProps, next: FilmCardProps): boolean {
     prev.facts.template === next.facts.template &&
     prev.facts.kind === next.facts.kind &&
     prev.facts.pictureLayout === next.facts.pictureLayout &&
+    prev.facts.motion === next.facts.motion &&
     prev.current === next.current &&
     prev.selected === next.selected &&
     prev.theme === next.theme &&
@@ -244,8 +251,9 @@ function sameCard(prev: FilmCardProps, next: FilmCardProps): boolean {
 /**
  * One card (SPEC 4.1): the number in a 28 px gutter in tabular figures, the 16:9 thumbnail in a
  * --pt-edge frame, the current card ringed in ink at 2 px, a skipped card at 40 percent with the
- * eye-slash glyph; the title is the tooltip. No title under the card, no kind glyph, no lint
- * badge, no lease dot, no row menu. The thumbnail is clone first and capture never (gslides-parity
+ * eye-slash glyph, a card whose slide carries a transition or an animation with the motion glyph
+ * (Heroicons sparkles, gslides-parity SPEC-5 2.1; R01 1); the title is the tooltip. No title under
+ * the card, no kind glyph, no lint badge, no lease dot, no row menu. The thumbnail is clone first and capture never (gslides-parity
  * SPEC-4 0.30, reversing SPEC 5.5 for the editor on R04's measurements): the renderer's HTML for
  * the slide at the local commit, so an edit shows on its card at the next frame and the card asks
  * the render route for nothing; the clone mounts while the shared window says the card is near
@@ -340,6 +348,18 @@ const FilmCard = memo(function FilmCardBase({
           <span className="ts-card-skip" aria-hidden="true">
             <svg viewBox="0 0 20 20" fill="currentColor">
               <use href="#i-eye-slash" />
+            </svg>
+          </span>
+        ) : null}
+        {facts.motion ? (
+          <span
+            className="ts-card-motion"
+            data-control={`filmstrip.motion.${item.id}`}
+            aria-hidden="true"
+            {...tipProps({ name: 'Motion', doc: 'This slide has a transition or an animation' })}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <use href="#i-sparkles" />
             </svg>
           </span>
         ) : null}
@@ -462,6 +482,7 @@ export function Filmstrip({
         kind: record.kind,
         pictureLayout:
           record.kind === 'opener' || record.kind === 'mood' || record.kind === 'closing',
+        motion: slideHasMotion(record),
       };
     }
     const row = rows.get(item.id);
@@ -471,6 +492,7 @@ export function Filmstrip({
       template: row?.template !== undefined && isLayoutId(row.template) ? row.template : undefined,
       kind,
       pictureLayout: kind === 'opener' || kind === 'mood' || kind === 'closing',
+      motion: item.html !== undefined && MOTION_ROOT.test(item.html),
     };
   };
   const kinds = new Map(order.map((id) => [id, factsOf(items.get(id) ?? { id, title: id }).kind]));

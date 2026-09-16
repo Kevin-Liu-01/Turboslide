@@ -1,0 +1,208 @@
+/* The Font dropdown and the More fonts dialog (gslides-parity SPEC-5-amendments A5 item 4; B7):
+   the toolbar control is a text button 120 px wide whose label is the family name, the plate is a
+   280 px column with the search field over the grouped list, every row a 32 px option with the
+   check column and the name drawn in its own face, and the dialog is Google's two column form.
+   Tokens only; radius 0; the plate grammar of Pickers.css. */
+.ts-font-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ts-font-control {
+  width: 128px;
+  justify-content: space-between;
+}
+
+.ts-font-control .ts-font-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.ts-font-slot.is-disabled .ts-font-control {
+  color: var(--pt-titanium);
+}
+
+/* the plate while More fonts is open: out of the way of the dialog's clicks */
+.ts-font-plate.is-aside {
+  display: none;
+}
+
+.ts-font-plate {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 280px;
+  max-height: 420px;
+  padding: 8px;
+  gap: 6px;
+}
+
+.ts-font-search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-font-search:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-font-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+}
+
+.ts-font-list:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-font-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+}
+
+.ts-font-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 0 8px 0 4px;
+  color: var(--pt-ink);
+  font: 15px/1.2 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-font-row.is-active {
+  background: var(--pt-plate);
+}
+
+.ts-font-row.is-picked .ts-font-name {
+  font-weight: 500;
+}
+
+.ts-font-check {
+  display: inline-flex;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.ts-font-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-font-more .ts-font-name {
+  font: 13px/1.2 var(--pt-text);
+}
+
+.ts-font-empty {
+  margin: 0;
+  padding: 8px 4px;
+  color: var(--pt-titanium);
+  font: 13px/1.3 var(--pt-text);
+}
+
+/* the More fonts dialog: the catalog on the left, the chosen families on the right */
+.ts-more-fonts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 16px;
+  min-height: 360px;
+}
+
+.ts-more-fonts-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ts-more-fonts-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: 8px;
+}
+
+.ts-more-fonts-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-more-fonts-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 4px 8px 4px 6px;
+  color: var(--pt-ink);
+  cursor: pointer;
+}
+
+.ts-more-fonts-row + .ts-more-fonts-row {
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-more-fonts-row.is-picked {
+  background: var(--pt-plate);
+}
+
+.ts-more-fonts-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ts-more-fonts-name {
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.ts-more-fonts-meta {
+  color: var(--pt-titanium);
+  font: 11px/1.3 var(--pt-text);
+}
+
+.ts-more-fonts-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 16px;
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-more-fonts-chosen {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-more-fonts-chosen li {
+  padding: 6px 0;
+  color: var(--pt-ink);
+  font: 15px/1.2 var(--pt-text);
+}

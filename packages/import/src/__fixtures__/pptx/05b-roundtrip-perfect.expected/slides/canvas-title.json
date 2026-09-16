@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-title",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "heading",
+        "type": "text",
+        "text": "A title slide as a canvas",
+        "pos": {
+          "x": 137,
+          "y": 423.12,
+          "w": 1326,
+          "h": 89.76,
+          "z": 1
+        },
+        "typography": {
+          "size": 88,
+          "leading": 1.02
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:canvas-title#heading/text"
+        }
+      },
+      {
+        "id": "lead",
+        "type": "text",
+        "text": "The mark, the heading and this lead are objects; a text box grows, another shrinks, a shape holds padded text and an icon sits beside it.",
+        "pos": {
+          "x": 137,
+          "y": 531.65,
+          "w": 901,
+          "h": 75.39,
+          "z": 2
+        },
+        "typography": {
+          "size": 26,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:canvas-title#lead/text"
+        }
+      },
+      {
+        "id": "grow",
+        "type": "text",
+        "text": "A text box that resizes to fit its text",
+        "pos": {
+          "x": 137,
+          "y": 635.5,
+          "w": 520,
+          "h": 60,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:canvas-title#grow/text"
+        }
+      },
+      {
+        "id": "shrink",
+        "type": "text",
+        "text": "A text box with shrink text on overflow: the copy is long enough at 26 px that the fit steps the size down the ladder to 24 or 22 before it fits the box it was given.",
+        "pos": {
+          "x": 700,
+          "y": 635.35,
+          "w": 420,
+          "h": 80,
+          "z": 4
+        },
+        "typography": {
+          "size": 26,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:canvas-title#shrink/text"
+        }
+      },
+      {
+        "id": "padded",
+        "type": "text",
+        "text": "Padded, middle aligned",
+        "pos": {
+          "x": 1165.84,
+          "y": 621.34,
+          "w": 288.28,
+          "h": 108.28,
+          "z": 5
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 24,
+          "top": 8,
+          "right": 24,
+          "bottom": 8
+        },
+        "ext": {
+          "pptxName": "ts:canvas-title#padded/text"
+        }
+      }
+    ]
+  },
+  "title": "A title slide as a canvas",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide8.xml",
+    "pptxSlideId": 263
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "edits",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "title": "Display, aliases, kept MathML and a parse error",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Display, aliases, kept MathML and a parse error",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "t",
+        "type": "text",
+        "text": "The energy of a photon is",
+        "padding": 0,
+        "pos": {
+          "x": 137,
+          "y": 230,
+          "w": 360,
+          "h": 60,
+          "z": 1
+        }
+      },
+      {
+        "id": "e-inline",
+        "type": "equation",
+        "tex": "E = h \\nu",
+        "pos": {
+          "x": 500,
+          "y": 230,
+          "w": 200,
+          "h": 60,
+          "z": 2
+        },
+        "display": "inline",
+        "alt": "E equals h nu"
+      },
+      {
+        "id": "e-aliases",
+        "type": "equation",
+        "tex": "\\rootof{3}{x} + \\abs{y} + \\subsuperscript{z}{1}{2} + \\limab{x}{0} f",
+        "pos": {
+          "x": 137,
+          "y": 340,
+          "w": 640,
+          "h": 150,
+          "z": 3
+        },
+        "alt": "The Google aliases",
+        "size": 34
+      },
+      {
+        "id": "e-kept",
+        "type": "equation",
+        "tex": "",
+        "pos": {
+          "x": 823,
+          "y": 340,
+          "w": 640,
+          "h": 150,
+          "z": 4
+        },
+        "mathml": "<math display=\"block\"><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></math>",
+        "alt": "Kept from an import"
+      },
+      {
+        "id": "e-error",
+        "type": "equation",
+        "tex": "\\frac{a}{",
+        "pos": {
+          "x": 137,
+          "y": 540,
+          "w": 640,
+          "h": 150,
+          "z": 5
+        },
+        "alt": "A source that does not parse"
+      },
+      {
+        "id": "e-color",
+        "type": "equation",
+        "tex": "\\mathbf{F} = m \\mathbf{a}",
+        "pos": {
+          "x": 823,
+          "y": 540,
+          "w": 640,
+          "h": 150,
+          "z": 6
+        },
+        "color": "blue",
+        "size": 44,
+        "shadow": {
+          "blur": 8,
+          "distance": 2,
+          "angle": 90,
+          "opacity": 0.2
+        }
+      }
+    ]
+  }
+}

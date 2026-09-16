@@ -24,6 +24,8 @@ export type StageProps = {
   theme: Theme;
   dir: 'next' | 'prev';
   onStep?: (delta: number) => void;
+  /** the deck's page in sheet pixels (gslides-parity SPEC-5 6.1); 1600 by 900 when absent */
+  page?: { width: number; height: number };
 };
 
 /**
@@ -45,6 +47,7 @@ export function Stage({
   theme,
   dir,
   onStep,
+  page,
 }: StageProps) {
   const picture = slide && isPictureKind(slide.kind) ? slide.picture : undefined;
   const isPicture = Boolean(picture) && mode === 'slide';
@@ -68,6 +71,7 @@ export function Stage({
         dir={dir}
         onStep={onStep}
         hidden={mode !== 'slide'}
+        page={page}
       >
         <Frame index={index} total={total} />
         {slide ? <SlideView slideId={slide.id} html={slide.html} theme={theme} /> : null}

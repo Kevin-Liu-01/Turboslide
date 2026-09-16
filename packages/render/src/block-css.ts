@@ -12,9 +12,10 @@ export const BLOCK_CSS = `
 .ts-sheet .rows.links span { color: var(--ink-2); }
 
 /* ---- full-picture kinds: opener, mood, closing (s01:3-11, s06:3-12, s85:3-13) ---- */
-.ts-sheet .slide.opener .opener-img, .ts-sheet .slide.mood .mood-img { position: absolute; inset: -57px; z-index: -1; width: 1600px; height: 900px; object-fit: cover; display: block; }
-/* the two paper chips under the wordmark and the counter, emitted only with chrome (OPENERS.md:47) */
-.ts-sheet .ts-chips { position: absolute; inset: -57px; z-index: -1; pointer-events: none; background: linear-gradient(var(--paper), var(--paper)) 66px 858px / 40px 30px no-repeat, linear-gradient(var(--paper), var(--paper)) 1474px 856px / 60px 28px no-repeat; }
+/* the photograph covers the page: the stage root's --ts-sheet-w and --ts-sheet-h, 1600 by 900 when the root carries none (gslides-parity SPEC-5 6.1) */
+.ts-sheet .slide.opener .opener-img, .ts-sheet .slide.mood .mood-img { position: absolute; inset: -57px; z-index: -1; width: var(--ts-sheet-w, 1600px); height: var(--ts-sheet-h, 900px); object-fit: cover; display: block; }
+/* the two paper chips under the wordmark and the counter, emitted only with chrome (OPENERS.md:47), at 66, H - 42 and W - 126, H - 44 (R08 3c) */
+.ts-sheet .ts-chips { position: absolute; inset: -57px; z-index: -1; pointer-events: none; background: linear-gradient(var(--paper), var(--paper)) 66px calc(var(--ts-sheet-h, 900px) - 42px) / 40px 30px no-repeat, linear-gradient(var(--paper), var(--paper)) calc(var(--ts-sheet-w, 1600px) - 126px) calc(var(--ts-sheet-h, 900px) - 44px) / 60px 28px no-repeat; }
 .ts-sheet .opener-plate { position: absolute; left: 0; bottom: 0; width: fit-content; max-width: 740px; padding: 22px 26px 20px; background: var(--paper); color: var(--ink); }
 .ts-sheet .opener-plate .big { color: var(--ink); }
 .ts-sheet .opener-plate p { margin-top: 14px; max-width: 56ch; color: var(--ink); }
@@ -146,7 +147,7 @@ export const BLOCK_CSS = `
 /* ---- the freeform layout and the primitives (docs/freeform.md) ---- */
 /* the layer over the content box and the layer at the sheet origin; a .free wrapper is one block's box */
 .ts-sheet .freeform { position: absolute; inset: 0; }
-.ts-sheet .freeform-sheet { position: absolute; width: 1600px; height: 900px; pointer-events: none; }
+.ts-sheet .freeform-sheet { position: absolute; width: var(--ts-sheet-w, 1600px); height: var(--ts-sheet-h, 900px); pointer-events: none; }
 .ts-sheet .freeform-sheet > .free { pointer-events: auto; }
 .ts-sheet .free { position: absolute; }
 .ts-sheet .free > .box, .ts-sheet .free > svg.shape { width: 100%; height: 100%; }

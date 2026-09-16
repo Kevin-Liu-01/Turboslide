@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "decisions-needed",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Decisions needed",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The calls this group makes today.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Hold the date or add a week for the connector"
+          },
+          {
+            "text": "Take the fourth team now or after the pilot"
+          },
+          {
+            "text": "Fund the second workflow in the next quarter"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Decisions needed"
+}

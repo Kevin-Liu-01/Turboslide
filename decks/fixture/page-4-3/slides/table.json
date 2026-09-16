@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "table",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A table on the narrower page"
+      },
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {
+            "align": "left"
+          },
+          {
+            "align": "right"
+          },
+          {
+            "align": "right"
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Preset",
+              "Width",
+              "Height"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Standard (4:3)",
+              "1200",
+              "900"
+            ]
+          },
+          {
+            "cells": [
+              "Widescreen (16:9)",
+              "1600",
+              "900"
+            ]
+          },
+          {
+            "cells": [
+              "Widescreen (16:10)",
+              "1440",
+              "900"
+            ]
+          }
+        ],
+        "border": {
+          "weight": 1
+        }
+      }
+    ]
+  },
+  "template": "table"
+}

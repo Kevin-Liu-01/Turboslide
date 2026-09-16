@@ -1,0 +1,422 @@
+{
+  "schemaVersion": 1,
+  "id": "table",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Pricing table",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 418,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#h/text"
+        }
+      },
+      {
+        "id": "table-rows-0-cells-0",
+        "type": "text",
+        "text": "Plan",
+        "pos": {
+          "x": 137,
+          "y": 402.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 2,
+          "group": "table-row-0"
+        },
+        "typography": {
+          "size": 20,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/0/cells/0@table/row/0",
+          "pptxGroupPath": "table/row/0"
+        }
+      },
+      {
+        "id": "table-rows-0-cells-1",
+        "type": "text",
+        "text": "Seats",
+        "pos": {
+          "x": 468.5,
+          "y": 402.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 3,
+          "group": "table-row-0"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/0/cells/1@table/row/0",
+          "pptxGroupPath": "table/row/0"
+        }
+      },
+      {
+        "id": "table-rows-0-cells-2",
+        "type": "text",
+        "text": "Locales",
+        "pos": {
+          "x": 800,
+          "y": 402.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 4,
+          "group": "table-row-0"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/0/cells/2@table/row/0",
+          "pptxGroupPath": "table/row/0"
+        }
+      },
+      {
+        "id": "table-rows-0-cells-3",
+        "type": "text",
+        "text": "Price",
+        "pos": {
+          "x": 1131.5,
+          "y": 402.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 5,
+          "group": "table-row-0"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/0/cells/3@table/row/0",
+          "pptxGroupPath": "table/row/0"
+        }
+      },
+      {
+        "id": "table-rows-1-cells-0",
+        "type": "text",
+        "text": "Starter",
+        "pos": {
+          "x": 137,
+          "y": 456.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 6,
+          "group": "table-row-1"
+        },
+        "typography": {
+          "size": 20,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/1/cells/0@table/row/1",
+          "pptxGroupPath": "table/row/1"
+        }
+      },
+      {
+        "id": "table-rows-1-cells-1",
+        "type": "text",
+        "text": "5",
+        "pos": {
+          "x": 468.5,
+          "y": 456.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 7,
+          "group": "table-row-1"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/1/cells/1@table/row/1",
+          "pptxGroupPath": "table/row/1"
+        }
+      },
+      {
+        "id": "table-rows-1-cells-2",
+        "type": "text",
+        "text": "2",
+        "pos": {
+          "x": 800,
+          "y": 456.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 8,
+          "group": "table-row-1"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/1/cells/2@table/row/1",
+          "pptxGroupPath": "table/row/1"
+        }
+      },
+      {
+        "id": "table-rows-1-cells-3",
+        "type": "text",
+        "text": "$0",
+        "pos": {
+          "x": 1131.5,
+          "y": 456.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 9,
+          "group": "table-row-1"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/1/cells/3@table/row/1",
+          "pptxGroupPath": "table/row/1"
+        }
+      },
+      {
+        "id": "table-rows-2-cells-0",
+        "type": "text",
+        "text": "Team",
+        "pos": {
+          "x": 137,
+          "y": 510.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 10,
+          "group": "table-row-2"
+        },
+        "typography": {
+          "size": 20,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/2/cells/0@table/row/2",
+          "pptxGroupPath": "table/row/2"
+        }
+      },
+      {
+        "id": "table-rows-2-cells-1",
+        "type": "text",
+        "text": "25",
+        "pos": {
+          "x": 468.5,
+          "y": 510.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 11,
+          "group": "table-row-2"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/2/cells/1@table/row/2",
+          "pptxGroupPath": "table/row/2"
+        }
+      },
+      {
+        "id": "table-rows-2-cells-2",
+        "type": "text",
+        "text": "10",
+        "pos": {
+          "x": 800,
+          "y": 510.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 12,
+          "group": "table-row-2"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/2/cells/2@table/row/2",
+          "pptxGroupPath": "table/row/2"
+        }
+      },
+      {
+        "id": "table-rows-2-cells-3",
+        "type": "text",
+        "text": "$99",
+        "pos": {
+          "x": 1131.5,
+          "y": 510.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 13,
+          "group": "table-row-2"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/2/cells/3@table/row/2",
+          "pptxGroupPath": "table/row/2"
+        }
+      },
+      {
+        "id": "table-rows-3-cells-0",
+        "type": "text",
+        "text": "Enterprise",
+        "pos": {
+          "x": 137,
+          "y": 564.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 14,
+          "group": "table-row-3"
+        },
+        "typography": {
+          "size": 20,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/3/cells/0@table/row/3",
+          "pptxGroupPath": "table/row/3"
+        }
+      },
+      {
+        "id": "table-rows-3-cells-1",
+        "type": "text",
+        "text": "Unlimited",
+        "pos": {
+          "x": 468.5,
+          "y": 564.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 15,
+          "group": "table-row-3"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/3/cells/1@table/row/3",
+          "pptxGroupPath": "table/row/3"
+        }
+      },
+      {
+        "id": "table-rows-3-cells-2",
+        "type": "text",
+        "text": "Every locale",
+        "pos": {
+          "x": 800,
+          "y": 564.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 16,
+          "group": "table-row-3"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/3/cells/2@table/row/3",
+          "pptxGroupPath": "table/row/3"
+        }
+      },
+      {
+        "id": "table-rows-3-cells-3",
+        "type": "text",
+        "text": "Contact sales",
+        "pos": {
+          "x": 1131.5,
+          "y": 564.86,
+          "w": 331.5,
+          "h": 29,
+          "z": 17,
+          "group": "table-row-3"
+        },
+        "typography": {
+          "size": 20,
+          "align": "right",
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table#table/rows/3/cells/3@table/row/3",
+          "pptxGroupPath": "table/row/3"
+        }
+      }
+    ]
+  },
+  "title": "Pricing table",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide3.xml",
+    "pptxSlideId": 258
+  }
+}

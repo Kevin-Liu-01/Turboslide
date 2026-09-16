@@ -11,7 +11,9 @@ import {
   checkQuota,
   hasUpstash,
   kvLimiter,
+  largestMediaBytes,
   largestPictureBytes,
+  mediaTooLargeSentence,
   memoryLimiter,
   quotaKey,
   quotasShared,
@@ -57,6 +59,45 @@ describe('the table', () => {
     expect(DECK_CAPS.mutationsPerWrite).toBe(200);
     expect(largestPictureBytes('anonymous')).toBe(25 * 1024 * 1024);
     expect(largestPictureBytes('account')).toBe(50 * 1024 * 1024);
+  });
+
+  it('carries the four media rows, the chat row and the deck media cap of gslides-parity SPEC-5 0.18 and 10', () => {
+    const MB = 1024 * 1024;
+    expect(QUOTAS.largestAudioBytes.limits).toEqual({
+      anonymous: 25 * MB,
+      account: 50 * MB,
+      agent: 50 * MB,
+    });
+    expect(QUOTAS.largestVideoBytes.limits).toEqual({
+      anonymous: 25 * MB,
+      account: 200 * MB,
+      agent: 200 * MB,
+    });
+    expect(QUOTAS.largestAudioBytes.windowMs).toBe(0);
+    expect(QUOTAS.largestVideoBytes.windowMs).toBe(0);
+    expect(QUOTAS.mediaPerDay.limits).toEqual({ anonymous: 10, account: 100, agent: 300 });
+    expect(QUOTAS.mediaBytesPerDay.limits).toEqual({
+      anonymous: 200 * MB,
+      account: 5 * 1024 * MB,
+      agent: 10 * 1024 * MB,
+    });
+    expect(QUOTAS.mediaPerDay.sentence).toBe('You have reached today’s limit for audio and video');
+    expect(QUOTAS.mediaBytesPerDay.sentence).toBe(QUOTAS.mediaPerDay.sentence);
+    expect(largestMediaBytes('audio', 'anonymous')).toBe(25 * MB);
+    expect(largestMediaBytes('audio', 'agent')).toBe(50 * MB);
+    expect(largestMediaBytes('video', 'account')).toBe(200 * MB);
+    expect(mediaTooLargeSentence('audio')).toBe('This audio file is too large');
+    expect(mediaTooLargeSentence('video')).toBe('This video is too large');
+    expect(DECK_CAPS.mediaBytes).toBe(300 * MB);
+    expect(QUOTAS.chatMessagesPerMinutePerDeck.perDeck).toBe(true);
+    expect(QUOTAS.chatMessagesPerMinutePerDeck.limits).toEqual({
+      anonymous: 20,
+      account: 60,
+      agent: 60,
+    });
+    expect(quotaKey('chatMessagesPerMinutePerDeck', 'anon_1', 'q4')).toBe(
+      'anon_1:chatMessagesPerMinutePerDeck:q4',
+    );
   });
 
   it('reads the tier from the context and keys per deck where the row says so', () => {

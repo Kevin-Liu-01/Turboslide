@@ -1,0 +1,50 @@
+{
+  "id": "calls-to-action/contact-line",
+  "category": "calls-to-action",
+  "label": "Contact line",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 1326,
+        "h": 80,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "Talk to us"
+    },
+    {
+      "id": "rows",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 300,
+        "group": "block"
+      },
+      "type": "rows",
+      "key": 150,
+      "items": [
+        {
+          "key": "Email",
+          "value": "name@company.com"
+        },
+        {
+          "key": "Phone",
+          "value": "+1 555 0100"
+        },
+        {
+          "key": "Web",
+          "value": "company.com"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    400
+  ]
+}

@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { customProperties, declarationsOf, parseCss } from './css.ts';
+import { FRAME_VARIABLES, THEME_SPECS, frameVariables, plateBoxes } from './themes.ts';
 import {
   CHIPS,
   COLUMNS,
@@ -34,13 +35,32 @@ import {
   WORDMARK,
   columnWidths,
   compositeOnPaper,
+  grid,
 } from './tokens.ts';
+import { DEFAULT_PAGE, PAGE_PRESET_SIZES, contentBox } from '@turboslide/schema/render';
 
 const sheet = parseCss(readFileSync(new URL('./gt-ink-paper/sheet.css', import.meta.url), 'utf8'));
 const stage = parseCss(readFileSync(new URL('./gt-ink-paper/stage.css', import.meta.url), 'utf8'));
 const all = [...sheet, ...stage];
 
 const px = (value: number): string => `${value}px`;
+
+/** The custom properties `.ts-sheet` declares, keyed with the dashes (`--rail`). */
+const rootVariables = Object.fromEntries(
+  Object.entries(customProperties(sheet, '.ts-sheet')).map(([name, value]) => [`--${name}`, value]),
+);
+
+/**
+ * A declared value with one level of `var(--name[, fallback])` resolved against the root's custom
+ * properties (gslides-parity SPEC-5 9.1: the frame, wordmark and counter rules read the frame
+ * variables, whose defaults are today's values), so the base theme stays pinned to the constants.
+ */
+function resolve(value: string | undefined): string | undefined {
+  if (value === undefined) return value;
+  const match = /^var\((--[\w-]+)(?:,\s*(.+))?\)$/.exec(value);
+  if (match === null) return value;
+  return rootVariables[match[1] ?? ''] ?? match[2];
+}
 
 describe('tokens agree with sheet.css', () => {
   it('declares the light tokens on .ts-sheet and the dark remap on .ts-sheet[data-theme="dark"]', () => {
@@ -52,14 +72,39 @@ describe('tokens agree with sheet.css', () => {
     }
     expect(declarationsOf(sheet, '.ts-sheet')['color-scheme']).toBe('light');
     expect(declarationsOf(sheet, '.ts-sheet[data-theme="dark"]')['color-scheme']).toBe('dark');
+    const frameNames = FRAME_VARIABLES.map((name) => name.slice(2));
     expect(
       Object.keys(light)
         .filter(
           (k) =>
-            !k.startsWith('display') && !['text', 'mono', 'cjk', 'arabic', 'indic'].includes(k),
+            !k.startsWith('display') &&
+            !['text', 'mono', 'cjk', 'arabic', 'indic'].includes(k) &&
+            !frameNames.includes(k),
         )
         .sort(),
     ).toEqual([...TOKEN_NAMES].sort());
+  });
+
+  it('declares the frame variables with the GT spec values and nothing else (SPEC-5 9.1)', () => {
+    const expected = frameVariables(THEME_SPECS['gt-ink-paper']);
+    for (const name of FRAME_VARIABLES) {
+      expect(rootVariables[name], name).toBe(expected[name]);
+    }
+    expect(expected['--rail']).toBe(px(RAIL));
+    expect(expected['--cross-offset']).toBe(px(CROSS.offset));
+    expect(expected['--mark-left']).toBe(px(WORDMARK.left));
+    expect(expected['--mark-bottom']).toBe(px(WORDMARK.bottom));
+    expect(expected['--mark-height']).toBe(px(WORDMARK.height));
+    expect(expected['--counter-inset']).toBe(px(COUNTER.right));
+    expect(expected['--counter-bottom']).toBe(px(COUNTER.bottom));
+    const declared = Object.keys(rootVariables).filter((name) => name.startsWith('--'));
+    const outside = declared.filter(
+      (name) =>
+        !(TOKEN_NAMES as ReadonlyArray<string>).includes(name.slice(2)) &&
+        !['--display', '--text', '--mono', '--cjk', '--arabic', '--indic'].includes(name) &&
+        !(FRAME_VARIABLES as ReadonlyArray<string>).includes(name),
+    );
+    expect(outside).toEqual([]);
   });
 
   it('declares the font stacks', () => {
@@ -106,21 +151,28 @@ describe('tokens agree with sheet.css', () => {
 
 describe('the grid agrees with the CSS', () => {
   it('draws the rails, rules and crosses at the stated offsets', () => {
-    expect(declarationsOf(sheet, '.ts-sheet .frame::before').left).toBe(px(RAIL));
-    expect(declarationsOf(sheet, '.ts-sheet .frame::after').right).toBe(px(RAIL));
-    expect(declarationsOf(sheet, '.ts-sheet .frame .rule.top').top).toBe(px(RAIL));
-    expect(declarationsOf(sheet, '.ts-sheet .frame .rule.bottom').bottom).toBe(px(RAIL));
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame::before').left)).toBe(px(RAIL));
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame::after').right)).toBe(px(RAIL));
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame .rule.top').top)).toBe(px(RAIL));
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame .rule.bottom').bottom)).toBe(px(RAIL));
     const cross = declarationsOf(sheet, '.ts-sheet .frame .cross');
     expect(cross.width).toBe(px(CROSS.size));
     expect(cross.height).toBe(px(CROSS.size));
-    expect(declarationsOf(sheet, '.ts-sheet .frame .cross.tl').left).toBe(px(CROSS.offset));
-    expect(declarationsOf(sheet, '.ts-sheet .frame .cross.br').bottom).toBe(px(CROSS.offset));
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame .cross.tl').left)).toBe(
+      px(CROSS.offset),
+    );
+    expect(resolve(declarationsOf(sheet, '.ts-sheet .frame .cross.br').bottom)).toBe(
+      px(CROSS.offset),
+    );
   });
 
   it('sizes the sheet, the stage and the slide box', () => {
+    // since round five the two boxes read the stage's custom properties with the default page as
+    // the fallback (gslides-parity SPEC-5 6.1; R08 1.2 stage.css), so a deck without a page draws
+    // the same 1600 by 900 sheet
     for (const selector of ['.ts-sheet .sheet', '.ts-sheet .stage']) {
-      expect(declarationsOf(stage, selector).width).toBe(px(SHEET.width));
-      expect(declarationsOf(stage, selector).height).toBe(px(SHEET.height));
+      expect(declarationsOf(stage, selector).width).toBe(`var(--ts-sheet-w, ${px(SHEET.width)})`);
+      expect(declarationsOf(stage, selector).height).toBe(`var(--ts-sheet-h, ${px(SHEET.height)})`);
     }
     const slide = declarationsOf(stage, '.ts-sheet .slide');
     expect(slide.inset).toBe(px(INSET));
@@ -134,12 +186,12 @@ describe('the grid agrees with the CSS', () => {
 
   it('places the wordmark and the counter', () => {
     const wordmark = declarationsOf(sheet, '.ts-sheet .wordmark');
-    expect(wordmark.left).toBe(px(WORDMARK.left));
-    expect(wordmark.bottom).toBe(px(WORDMARK.bottom));
-    expect(wordmark.height).toBe(px(WORDMARK.height));
+    expect(resolve(wordmark.left)).toBe(px(WORDMARK.left));
+    expect(resolve(wordmark.bottom)).toBe(px(WORDMARK.bottom));
+    expect(resolve(wordmark.height)).toBe(px(WORDMARK.height));
     const counter = declarationsOf(sheet, '.ts-sheet .counter');
-    expect(counter.right).toBe(px(COUNTER.right));
-    expect(counter.bottom).toBe(px(COUNTER.bottom));
+    expect(resolve(counter.right)).toBe(px(COUNTER.right));
+    expect(resolve(counter.bottom)).toBe(px(COUNTER.bottom));
     expect(counter['font-size']).toBe(px(COUNTER.fontSize));
     expect(CHIPS[0].x + CHIPS[0].w).toBeGreaterThan(WORDMARK.left);
   });
@@ -157,6 +209,55 @@ describe('the grid agrees with the CSS', () => {
     expect(columnWidths('1/1')).toEqual([...COLUMNS['1/1']]);
     expect(columnWidths({ left: 390 })).toEqual([390, 864]);
     expect(columnWidths({ right: 568 })).toEqual([686, 568]);
+  });
+});
+
+describe('the grid of a page (gslides-parity SPEC-5 6.1; R08 3c)', () => {
+  it('states the default page as the schema does', () => {
+    expect({ width: SHEET.width, height: SHEET.height }).toEqual({
+      width: DEFAULT_PAGE.width,
+      height: DEFAULT_PAGE.height,
+    });
+  });
+
+  it('derives the legacy constants from the default page', () => {
+    const g = grid(DEFAULT_PAGE);
+    expect(g.sheet).toEqual({ width: SHEET.width, height: SHEET.height });
+    expect(g.content).toEqual([...CONTENT]);
+    expect(g.contentOrigin).toEqual([...CONTENT_ORIGIN]);
+    expect(g.contentBox).toEqual([...contentBox(DEFAULT_PAGE)]);
+    expect(g.chips).toEqual([{ ...CHIPS[0] }, { ...CHIPS[1] }]);
+    expect(g.columns).toEqual({
+      '5/7': [...COLUMNS['5/7']],
+      '4/8': [...COLUMNS['4/8']],
+      '1/1': [...COLUMNS['1/1']],
+    });
+    expect(g.centre).toEqual({ x: 800, y: 450 });
+  });
+
+  it('yields a 926 by 642 content box with the chips at 66, 858 and 1074, 856 on Standard (4:3)', () => {
+    const g = grid({ width: 1200, height: 900 });
+    expect(g.content).toEqual([926, 642]);
+    expect(g.contentOrigin).toEqual([137, 129]);
+    expect(g.contentBox).toEqual([137, 129, 926, 642]);
+    expect(g.chips).toEqual([
+      { x: 66, y: 858, w: 40, h: 30 },
+      { x: 1074, y: 856, w: 60, h: 28 },
+    ]);
+    expect(g.contentBox).toEqual([...contentBox(PAGE_PRESET_SIZES['standard-4-3'])]);
+    // the columns derive from `content - gap`: 854 usable px (R08 3c)
+    const [left, right] = g.columns['5/7'];
+    expect(left + right).toBe(926 - COLUMN_GAP);
+    expect(left).toBeCloseTo(355.8, 1);
+    expect(right).toBeCloseTo(498.2, 1);
+    expect(g.columns['1/1']).toEqual([427, 427]);
+    expect(g.centre).toEqual({ x: 600, y: 450 });
+  });
+
+  it('keeps the chips edge relative on Widescreen (16:10)', () => {
+    const g = grid({ width: 1440, height: 900 });
+    expect(g.content).toEqual([1166, 642]);
+    expect(g.chips[1]).toEqual({ x: 1314, y: 856, w: 60, h: 28 });
   });
 });
 
@@ -253,5 +354,70 @@ describe('the type ladder agrees with the CSS', () => {
     );
     expect(cut?.media).toBe('@media (prefers-reduced-motion: no-preference)');
     expect(cut?.declarations.animation).toBe(`cut ${MOTION.cut}ms ease-out`);
+  });
+});
+
+describe('the Plate theme agrees with its stylesheet (gslides-parity SPEC-5 9.3; R08 3c)', () => {
+  const plateSheet = readFileSync(new URL('./ts-plate/sheet.css', import.meta.url), 'utf8');
+  const plateStage = readFileSync(new URL('./ts-plate/stage.css', import.meta.url), 'utf8');
+  const rules = parseCss(plateSheet);
+  const selectors = rules.flatMap((rule) => rule.selector.split(',').map((part) => part.trim()));
+  const KEY = ".ts-sheet[data-sheet='ts-plate']";
+
+  it('keys every rule of both files on the theme id, so a GT sheet in the same document is untouched', () => {
+    expect(selectors.length).toBeGreaterThan(0);
+    for (const selector of selectors) expect(selector.startsWith(KEY), selector).toBe(true);
+    for (const rule of parseCss(plateStage))
+      for (const part of rule.selector.split(','))
+        expect(part.trim().startsWith(KEY), part).toBe(true);
+  });
+
+  it('draws the frame as the left rail and the bottom rule alone, no crosses, no mark, no chips', () => {
+    const hidden = (selector: string) =>
+      declarationsOf(rules, `${KEY} ${selector}`).display === 'none';
+    expect(hidden('.frame::after')).toBe(true);
+    expect(hidden('.frame .rule.top')).toBe(true);
+    expect(hidden('.frame .cross')).toBe(true);
+    expect(hidden('.wordmark')).toBe(true);
+    expect(hidden('.ts-chips')).toBe(true);
+    // the left rail (::before) and the bottom rule stay: no rule of the Plate sheet hides them
+    expect(hidden('.frame::before')).toBe(false);
+    expect(hidden('.frame .rule.bottom')).toBe(false);
+    expect(THEME_SPECS['ts-plate'].frame.sides).toEqual(['left', 'bottom']);
+    expect(THEME_SPECS['ts-plate'].frame.crosses).toBe(false);
+    expect(THEME_SPECS['ts-plate'].mark.kind).toBe('none');
+    expect(THEME_SPECS['ts-plate'].chips).toBe(false);
+  });
+
+  it('places the plates as fractions of the page: 800 by 338 at 200, 450 on 16:9, mirrored for the mood plate', () => {
+    expect(plateBoxes('ts-plate')).toEqual({
+      opener: [200, 450, 800, 338],
+      mood: [600, 450, 800, 338],
+      closing: [200, 113, 800, 338],
+    });
+    expect(plateBoxes('ts-plate', { width: 1200, height: 900 })).toEqual({
+      opener: [150, 450, 600, 338],
+      mood: [450, 450, 600, 338],
+      closing: [150, 113, 600, 338],
+    });
+    // the GT plates stay the measured boxes of the deck (effects metrics.ts PLATE_BOXES)
+    expect(plateBoxes('gt-ink-paper')).toEqual({
+      opener: [137, 500, 740, 271],
+      mood: [851, 539, 612, 232],
+      closing: [137, 129, 720, 271],
+    });
+    const decl = declarationsOf(rules, `${KEY} .slide.opener .opener-plate`);
+    // the slide box is inset 57 px (stage.css), so the offsets subtract it and the sizes read the page
+    expect(decl.left).toBe('calc(var(--ts-sheet-w, 1600px) / 8 - 57px)');
+    expect(decl.top).toBe('calc(var(--ts-sheet-h, 900px) / 2 - 57px)');
+    expect(decl.width).toBe('calc(var(--ts-sheet-w, 1600px) / 2)');
+    expect(decl['min-height']).toBe('calc(var(--ts-sheet-h, 900px) * 3 / 8)');
+  });
+
+  it('keeps the ten token values of the GT theme in both appearances (SPEC-5 0.45)', () => {
+    expect(THEME_SPECS['ts-plate'].tokens).toEqual(THEME_SPECS['gt-ink-paper'].tokens);
+    expect(THEME_SPECS['ts-plate'].display).toEqual(DISPLAY);
+    expect(DISPLAY.weight).toBe(500);
+    expect(plateSheet).toContain("font-feature-settings: 'cv11', 'ss01'");
   });
 });

@@ -1,0 +1,49 @@
+{
+  "id": "headlines/headline-with-rule",
+  "category": "headlines",
+  "label": "Headline with a rule",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 120,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "The headline"
+    },
+    {
+      "id": "rule",
+      "pos": {
+        "x": 0,
+        "y": 240,
+        "w": 1326,
+        "h": 1,
+        "group": "block"
+      },
+      "type": "rule",
+      "orientation": "horizontal",
+      "length": 1326
+    },
+    {
+      "id": "sub",
+      "pos": {
+        "x": 0,
+        "y": 264,
+        "w": 1326,
+        "h": 48,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A short line under the rule."
+    }
+  ],
+  "box": [
+    1326,
+    312
+  ]
+}

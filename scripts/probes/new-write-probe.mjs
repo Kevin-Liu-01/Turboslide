@@ -19,15 +19,14 @@
 // next revision with the tab's own earlier id never drawn as a collaborator (zero chips, marks,
 // outlines, carets, pointers, and one roster row: the self row); and a second tab of the same
 // deck in a second context sharing the first context's cookies, where neither tab ever lists
-// itself as a collaborator.
+// itself or the other tab as a collaborator (gslides-parity SPEC-5-amendments A3 item 5: the self
+// filter applies by client id and by principal id on every presence surface, so one person in
+// two tabs sees nobody; two people are sync-stress-probe.mjs and presence.spec.ts).
 //
 // Reused by the verifier and the ship step: it takes a base URL and drives the product's own UI, so
-// it runs against a dev server (memory tier) and against production (blob tier). The self facts of
-// cause B (a tab never drawn as its own collaborator; the alone roster is one self row) are
-// asserted on every tier. Cross tab presence accuracy (each of two tabs lists exactly the other,
-// once, and forgets it on close) needs one roster and is asserted on a single roster tier; on the
-// blob tier the roster is per instance under fluid compute (the title row shows BLOB_TIER_NOTICE),
-// so those counts are recorded, not asserted (build-4/hotfix-2.md deviation 2, a round item).
+// it runs against a dev server (memory tier) and against production (blob tier). Since round five
+// the blob tier's roster is one record across instances (the presence shards of blob.ts, A8 row
+// 4), so the presence rows are asserted on every tier.
 //   node scripts/probes/new-write-probe.mjs [--base http://localhost:4351]
 import { createRequire } from 'node:module';
 
@@ -147,11 +146,11 @@ const others = async (page) => {
 /**
  * The realtime tier the deployment runs (SPEC-3 2.5). On the blob tier the roster is per instance
  * under fluid compute (the title row shows the Redis notice, BLOB_TIER_NOTICE), so a leave a
- * closed tab posts lands on one instance while the first tab's stream reads another until
- * PRESENCE_EXPIRY_MS; the cross instance forget is the documented limitation of build-4/
- * hotfix-2.md deviation 2, not the reported defect. The self facts this probe guards (the tab is
- * never drawn as its own collaborator, the alone roster is one self row, and the first tab lists
- * an open second tab as one other) hold on every tier.
+ * closed tab posts lands on one instance while the first tab's stream reads another; since round
+ * five the instances share the roster through the store's presence shards (blob.ts, A8 row 4), so
+ * a leave reaches every instance within the shard poll. The self facts this probe guards (the tab
+ * is never drawn as its own collaborator, the alone roster is one self row, and a second tab of
+ * the same person is nobody in either tab, A3 item 5) hold on every tier.
  */
 const tierOf = async (page) => (await state(page)).sync?.tier ?? 'memory';
 /** Counts the streams a page opened (an EventSource wrapper installed before the page's scripts). */
@@ -389,8 +388,9 @@ try {
   );
 
   // 2d. a second tab of the deck in a second context that shares the first context's cookies
-  //     (the same person): the first tab lists exactly one other participant while it is open,
-  //     and nobody once it closed (hotfix 2, cause B)
+  //     (the same person): neither tab lists the other or itself (SPEC-5-amendments A3 item 5, the
+  //     self filter by client id and by principal id), nothing is drawn in either, and the roster
+  //     menu of each is one self row; the second tab's close changes nothing the first tab sees
   const shared = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     extraHTTPHeaders,
@@ -408,81 +408,60 @@ try {
   const secondSelf = (await state(S)).presence?.clientId ?? null;
   const firstSelf = (await state(A)).presence?.clientId ?? null;
   const tier = await tierOf(A);
-  // The invariant this hotfix owns and that holds on every tier: neither tab ever lists its own
-  // client id among the others, so a person never sees itself editing (cause B, Kevin's report).
-  // Cross tab accuracy (each tab lists exactly the other, once) needs one roster; on the blob
-  // tier the roster is per instance under fluid compute, so a tab may see zero, one or two others
-  // of the same person depending on which instance its stream and the other's presence POST
-  // landed on (the title row shows BLOB_TIER_NOTICE). That is the declared limitation of the tier,
-  // not the reported defect, so on the blob tier the counts are recorded and only the self filter
-  // is asserted; on a single roster tier the exact one other each is asserted.
+  // a presence round trip on both tabs (and, on the blob tier, one shard poll) before the read
+  await new Promise((r) => setTimeout(r, tier === 'blob' ? 6000 : 1500));
   const withSecond = await pollUntil(
-    async () => ({ a: await others(A), s: await others(S), dom: await remotePresence(A) }),
-    (v) =>
-      tier === 'blob'
-        ? v.a.length >= 1 || v.s.length >= 1
-        : v.a.length === 1 &&
-          v.a[0]?.clientId === secondSelf &&
-          v.s.length === 1 &&
-          v.s[0]?.clientId === firstSelf &&
-          v.dom.chips === 1,
-    30_000,
+    async () => ({
+      a: await others(A),
+      s: await others(S),
+      dom: await remotePresence(A),
+      domS: await remotePresence(S),
+    }),
+    (v) => v.a.length === 0 && v.s.length === 0 && v.dom.chips === 0 && v.domS.chips === 0,
+    20_000,
   );
   const noSelfInOthers =
     withSecond.a.every((p) => p.clientId !== firstSelf) &&
     withSecond.s.every((p) => p.clientId !== secondSelf);
   const detail = `first tab others ${withSecond.a.length} (${withSecond.a
-    .map((p) => p.clientId.slice(0, 8))
+    .map((p) => `${p.clientId.slice(0, 8)}:${(p.principalId ?? '').slice(0, 12)}`)
     .join(',')}), second tab others ${withSecond.s.length} (${withSecond.s
-    .map((p) => p.clientId.slice(0, 8))
+    .map((p) => `${p.clientId.slice(0, 8)}:${(p.principalId ?? '').slice(0, 12)}`)
     .join(
       ',',
-    )}), chips ${withSecond.dom.chips}, first self ${firstSelf?.slice(0, 8) ?? 'none'}, second self ${secondSelf?.slice(0, 8) ?? 'none'}, tier ${tier}`;
-  if (tier === 'blob') {
-    step(
-      noSelfInOthers,
-      'with a second tab open, neither tab lists itself as a collaborator (hotfix 2, cause B)',
-      detail,
-    );
-    console.log(
-      `note the per instance roster on the blob tier makes the cross tab count depend on the instance (BLOB_TIER_NOTICE): ${detail}`,
-    );
-  } else {
-    step(
-      withSecond.a.length === 1 &&
-        withSecond.a[0]?.clientId === secondSelf &&
-        withSecond.s.length === 1 &&
-        withSecond.s[0]?.clientId === firstSelf &&
-        withSecond.dom.chips === 1 &&
-        noSelfInOthers,
-      'a second tab of the same person is exactly one other participant in each tab (hotfix 2)',
-      detail,
-    );
-  }
+    )}), chips ${withSecond.dom.chips}/${withSecond.domS.chips}, first self ${firstSelf?.slice(0, 8) ?? 'none'}, second self ${secondSelf?.slice(0, 8) ?? 'none'}, tier ${tier}`;
+  step(
+    noSelfInOthers,
+    'with a second tab open, neither tab lists itself as a collaborator (hotfix 2, cause B)',
+    detail,
+  );
+  step(
+    withSecond.a.length === 0 &&
+      withSecond.s.length === 0 &&
+      withSecond.dom.chips === 0 &&
+      withSecond.domS.chips === 0 &&
+      withSecond.dom.outlines === 0 &&
+      withSecond.dom.carets === 0,
+    'a second tab of the same person is nobody in either tab: the self filter by principal id on every surface (SPEC-5-amendments A3 item 5)',
+    detail,
+  );
+  const rosterWithSecond = await rosterRows(A).catch(() => null);
+  step(
+    rosterWithSecond !== null && rosterWithSecond.total === 1 && rosterWithSecond.self === 1,
+    'with a second tab of the same person open, the roster menu is still one row, the self row (A3 item 5)',
+    JSON.stringify(rosterWithSecond),
+  );
   // close the second tab through the browser so its page fires pagehide and the room client posts
-  // the leave with keepalive (cause B1), then wait for the first tab to forget it
+  // the leave with keepalive (cause B1); the first tab has nothing to forget and nothing appears
   await S.close({ runBeforeUnload: true }).catch(() => undefined);
   await shared.close();
-  const afterClose = await pollUntil(
-    async () => ({ a: await others(A), dom: await remotePresence(A) }),
-    (v) => v.a.length === 0 && v.dom.chips === 0,
-    tier === 'blob' ? 20_000 : 130_000,
+  await new Promise((r) => setTimeout(r, tier === 'blob' ? 5000 : 1500));
+  const afterClose = { a: await others(A), dom: await remotePresence(A) };
+  step(
+    afterClose.a.length === 0 && afterClose.dom.chips === 0,
+    'after the second tab closed the first tab still lists nobody (hotfix 2; A3 item 5)',
+    `others ${afterClose.a.length}, chips ${afterClose.dom.chips}, tier ${tier}`,
   );
-  if (tier === 'blob' && (afterClose.a.length !== 0 || afterClose.dom.chips !== 0)) {
-    // the blob tier's roster is per instance under fluid compute, so the leave lands on one
-    // instance while the first tab's stream reads another until PRESENCE_EXPIRY_MS (build-4/
-    // hotfix-2.md deviation 2; the title row shows BLOB_TIER_NOTICE). Recorded, not a failure: a
-    // shared roster is a round item and this is not the reported defect.
-    console.log(
-      `note the first tab still lists the closed second tab on the blob tier (per instance roster, BLOB_TIER_NOTICE): others ${afterClose.a.length}, chips ${afterClose.dom.chips}`,
-    );
-  } else {
-    step(
-      afterClose.a.length === 0 && afterClose.dom.chips === 0,
-      'the first tab forgets the second tab once it closed (hotfix 2)',
-      `others ${afterClose.a.length}, chips ${afterClose.dom.chips}, tier ${tier}`,
-    );
-  }
 
   // 3. reopen in a second page and type once immediately (finding 33: the first write of a page
   //    that has just opened a deck one revision ahead must land, not be refused as stale or lost)

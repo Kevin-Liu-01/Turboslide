@@ -22,6 +22,8 @@ export type FormatSectionId =
   | 'position'
   | 'layout'
   | 'textFitting'
+  /** gslides-parity SPEC-5 8.2: the equation block's source and display */
+  | 'equation'
   | 'text'
   | 'colour'
   | 'picture'
@@ -65,6 +67,12 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     title: 'Text fitting',
     icon: 'arrows-pointing-in',
     doc: 'Autofit, indentation, padding and vertical alignment',
+  },
+  {
+    id: 'equation',
+    title: 'Equation',
+    icon: 'code',
+    doc: 'The LaTeX of the equation, its display mode and its size',
   },
   {
     id: 'text',

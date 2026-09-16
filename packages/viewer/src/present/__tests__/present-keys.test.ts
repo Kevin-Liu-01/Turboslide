@@ -39,6 +39,17 @@ describe('presentKeyAction', () => {
     expect(presentKeyAction({ key: ',' }, ctx)).toEqual({ type: 'blank', blank: 'white' });
   });
 
+  it('binds K, U and O of Google’s Video player table to the media of the slide (SPEC-5 3.5, 15)', () => {
+    expect(presentKeyAction({ key: 'k' }, ctx)).toEqual({ type: 'mediaToggle' });
+    expect(presentKeyAction({ key: 'K', shiftKey: true }, ctx)).toEqual({ type: 'mediaToggle' });
+    expect(presentKeyAction({ key: 'u' }, ctx)).toEqual({ type: 'mediaRewind' });
+    expect(presentKeyAction({ key: 'o' }, ctx)).toEqual({ type: 'mediaForward' });
+    /* a blank slide and a field keep their rules */
+    expect(presentKeyAction({ key: 'k' }, { ...ctx, blank: 'black' })).toEqual({ type: 'unblank' });
+    expect(presentKeyAction({ key: 'k' }, { ...ctx, editable: true })).toBeNull();
+    expect(presentKeyAction({ key: 'k', metaKey: true }, ctx)).toBeNull();
+  });
+
   it('returns from a blank slide on any key and does nothing else', () => {
     const blank = { ...ctx, blank: 'black' as const };
     for (const key of ['ArrowRight', 'b', 'Escape', 'x', ' '])
@@ -68,8 +79,12 @@ describe('presentKeyAction', () => {
   });
 
   it('swallows the bare keys Google does not list, so the reading keys never act while presenting', () => {
-    for (const key of ['g', 'd', 'f', 'p', '?', 'j', 'k', '[', 'ArrowDown'])
+    /* k left this list in round five: it is Google's play or pause row (SPEC-5 3.5, 15) */
+    for (const key of ['g', 'd', 'f', '?', 'j', 'x', '[', 'ArrowDown'])
       expect(presentKeyAction({ key }, ctx)).toEqual({ type: 'swallow' });
+    /* round five (gslides-parity SPEC-5 0.15): P is the pen */
+    expect(presentKeyAction({ key: 'p' }, ctx)).toEqual({ type: 'pen' });
+    expect(presentKeyAction({ key: 'P' }, ctx)).toEqual({ type: 'pen' });
   });
 
   it('passes modifiers alone, Tab and text fields through, and keeps Enter and Space for a focused control', () => {
@@ -98,6 +113,10 @@ describe('presentKeyRows', () => {
       'Open speaker notes',
       'Open audience tools',
       'Toggle laser pointer',
+      'Turn on the pen',
+      'Play or pause the media',
+      'Rewind 10 seconds',
+      'Fast forward 10 seconds',
       'Print',
       'Toggle captions',
       'Toggle full screen',
@@ -110,6 +129,7 @@ describe('presentKeyRows', () => {
     expect(win.find((row) => row.action === 'Toggle full screen')?.keys).toBe('F11');
     expect(mac.filter((row) => row.note !== undefined).map((row) => row.action)).toEqual([
       'Open audience tools',
+      'Turn on the pen',
       'Toggle captions',
     ]);
   });

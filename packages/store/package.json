@@ -14,6 +14,7 @@
     "./lease": "./src/lease.ts",
     "./watch": "./src/watch.ts",
     "./templates": "./src/templates.ts",
+    "./building-blocks": "./src/building-blocks.ts",
     "./select": "./src/select.ts",
     "./seed": "./src/seed.ts",
     "./hosted": "./src/hosted.ts",
@@ -31,6 +32,12 @@
     "./bundle": "./src/bundle.ts",
     "./pack": "./src/pack.ts",
     "./unpack": "./src/unpack.ts",
+    "./media/sniff": "./src/media/sniff.ts",
+    "./media/info": "./src/media/info.ts",
+    "./media/isobmff": "./src/media/isobmff.ts",
+    "./media/ebml": "./src/media/ebml.ts",
+    "./media/mp3": "./src/media/mp3.ts",
+    "./media/wav": "./src/media/wav.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

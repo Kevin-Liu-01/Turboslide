@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "risks",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Risks",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What could move the date.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Connector",
+            "value": "The billing connector waits on a vendor fix."
+          },
+          {
+            "key": "Staffing",
+            "value": "One engineer is out for two weeks in March."
+          },
+          {
+            "key": "Scope",
+            "value": "The fourth team asked for a second workflow."
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Risks"
+}

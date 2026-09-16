@@ -16,9 +16,13 @@ import { promisify } from 'node:util';
 import type { ExportCheck } from '@turboslide/schema/export';
 import { exportCheckSchema } from '@turboslide/schema/export';
 
+import { checkEquations } from './check/equations.ts';
+import { checkMedia } from './check/media.ts';
+import { checkMotion } from './check/motion.ts';
 import { listParts, openPackage, readPart, readPartBytes, slideParts } from './ooxml/zip.ts';
 import { hasTitlePlaceholder, readSlideName } from './ooxml/titles.ts';
 import { validatePackage } from './ooxml/validate.ts';
+import { EMU_PER_IN, PAGE_EMU } from './units.ts';
 import { checkGeometry } from './verify/geometry.ts';
 import { quickLookBinary, quickLookThumbnail } from './verify/quicklook.ts';
 import { workspaceRoot } from './verify/reference.ts';
@@ -34,6 +38,11 @@ export type CheckOptions = {
   /** Where the QuickLook thumbnail lands; default `<file dir>/check`. */
   outDir?: string;
   log?: (line: string) => void;
+  /**
+   * The page the file is expected to carry, in sheet pixels (gslides-parity SPEC-5 6.1; the CLI's
+   * `--page WxH`): `p:sldSz` is asserted against `pageEmu(page)`; the default page when absent.
+   */
+  page?: { width: number; height: number };
 };
 
 /** TURBOSLIDE_PYTHON, else the workspace's `.turboslide/venv/bin/python` when it exists. */
@@ -97,7 +106,7 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
   const bytes = new Uint8Array(await readFile(path));
   const zip = await openPackage(bytes);
   const validation = await validatePackage(zip);
-  const geometry = await checkGeometry(bytes);
+  const geometry = await checkGeometry(bytes, options.page);
   const parts = listParts(zip);
 
   const slideNames: string[] = [];
@@ -167,11 +176,21 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     }
   }
 
+  // the round five sections (gslides-parity SPEC-5 16.7): the motion, media and equation checks
+  // of B1, B2 and B6, each `{ ok: true, lines: [] }` on day 0; a section that fails names its
+  // lines among the issues so `valid` reads them
+  const motion = await checkMotion(zip);
+  const media = await checkMedia(zip);
+  const equations = await checkEquations(zip);
+
   const issues = [...validation.issues];
-  if (!geometry.pageSizeOk)
+  for (const section of [motion, media, equations]) if (!section.ok) issues.push(...section.lines);
+  if (!geometry.pageSizeOk) {
+    const expected = geometry.expected ?? PAGE_EMU;
     issues.push(
-      `page size ${geometry.pageSize.cx} by ${geometry.pageSize.cy} EMU, expected 12192000 by 6858000`,
+      `page size ${geometry.pageSize.cx} by ${geometry.pageSize.cy} EMU, expected ${expected.width} by ${expected.height}`,
     );
+  }
   if (pythonPptx.python && !pythonPptx.ran)
     issues.push(`python-pptx could not open the file: ${pythonPptx.error ?? ''}`);
   if (pythonPptx.ran && pythonPptx.slides !== geometry.slideParts)
@@ -210,8 +229,16 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     quickLook,
     issues,
     valid: issues.length === 0,
+    motion,
+    media,
+    equations,
   };
   return exportCheckSchema.parse(check);
+}
+
+/** An EMU length in inches at three decimals with no trailing zeros: 12,192,000 reads 13.333, 9,144,000 reads 10. */
+function inchesOfEmu(emu: number): string {
+  return String(Math.round((emu / EMU_PER_IN) * 1000) / 1000);
 }
 
 /** The human lines of a check, in order, for the CLI. */
@@ -222,7 +249,7 @@ export function describeCheck(check: ExportCheck): string[] {
     .join(', ');
   const lines = [
     `${check.file}: ${(check.bytes / (1024 * 1024)).toFixed(2)} MiB, ${check.parts} parts, ${check.slides} slide(s), ${check.notes} notes part(s)`,
-    `page: ${check.pageSize.cx} by ${check.pageSize.cy} EMU ${check.pageSizeOk ? '(13.333 by 7.5 in)' : 'UNEXPECTED'}; ${check.shapes} shapes, ${check.outOfBounds} out of bounds`,
+    `page: ${check.pageSize.cx} by ${check.pageSize.cy} EMU ${check.pageSizeOk ? `(${inchesOfEmu(check.pageSize.cx)} by ${inchesOfEmu(check.pageSize.cy)} in)` : 'UNEXPECTED'}; ${check.shapes} shapes, ${check.outOfBounds} out of bounds`,
     `media: ${formats === '' ? 'none' : formats}; ${(check.mediaBytes / (1024 * 1024)).toFixed(2)} MiB`,
     `fonts embedded: ${check.embeddedFonts.length === 0 ? 'none' : check.embeddedFonts.join(', ')}`,
     `titles: ${check.titledSlides} of ${check.slides} slide(s) carry a title placeholder; slide names ${check.slideNames.filter((n) => n !== '').length} set`,
@@ -236,6 +263,12 @@ export function describeCheck(check: ExportCheck): string[] {
       ? `quicklook: first page rendered at ${check.quickLook.width} by ${check.quickLook.height} in ${check.quickLook.ms} ms (${check.quickLook.png ?? ''})`
       : `quicklook: not run (${check.quickLook.error ?? 'off'})`,
   ];
+  /* round five (gslides-parity SPEC-5 16.7): the first line of each section the round added */
+  for (const section of [check.motion, check.media, check.equations]) {
+    const first = section?.lines[0];
+    if (first !== undefined)
+      lines.push(first.startsWith('round five') ? first : `round five ${first}`);
+  }
   for (const issue of check.issues) lines.push(`issue: ${issue}`);
   lines.push(check.valid ? 'valid' : 'INVALID');
   return lines;

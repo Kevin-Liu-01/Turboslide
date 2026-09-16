@@ -13,6 +13,8 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, posix } from 'node:path';
 
 import { STATE_DIR } from './file-store.ts';
+import type { MediaFormat } from './media/info.ts';
+import { MEDIA_FORMATS, mediaFormatProblem } from './media/info.ts';
 import { isSafeKey } from './seed.ts';
 
 export const BUNDLE_VERSION = 1;
@@ -187,9 +189,15 @@ export function listDeckFiles(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The asset scan: every file under assets/ must be an image of the type its name claims, or JSON
+// The asset scan: every file under assets/ must be an image of the type its name claims, JSON, or
+// a media file whose bytes carry the container its name claims (gslides-parity SPEC-5 3.3; R11
+// 1.2, 1.6: a `.mp4` holding webm bytes is refused before a byte is written, by the same sniff
+// the intake runs)
 
-export type AssetKind = 'png' | 'jpeg' | 'gif' | 'webp' | 'svg' | 'json';
+export type AssetKind = 'png' | 'jpeg' | 'gif' | 'webp' | 'svg' | 'json' | MediaFormat;
+
+/** The media formats the scan admits, as `assetKindOf` answers them (m4v files are mp4). */
+export const MEDIA_ASSET_KINDS: ReadonlyArray<MediaFormat> = MEDIA_FORMATS;
 
 const KIND_BY_EXTENSION: Record<string, AssetKind> = {
   '.png': 'png',
@@ -199,6 +207,12 @@ const KIND_BY_EXTENSION: Record<string, AssetKind> = {
   '.webp': 'webp',
   '.svg': 'svg',
   '.json': 'json',
+  '.mp4': 'mp4',
+  '.m4v': 'mp4',
+  '.m4a': 'm4a',
+  '.webm': 'webm',
+  '.mp3': 'mp3',
+  '.wav': 'wav',
 };
 
 /** The asset kind an extension announces, or null for an extension the bundle does not carry. */
@@ -235,13 +249,16 @@ export function sniffImage(bytes: Uint8Array): Exclude<AssetKind, 'json'> | null
 
 /**
  * Why an asset entry is refused, or null when it passes: the extension must be one the deck
- * layout uses (png, jpg, jpeg, gif, webp, svg, json), an image must carry the signature of its
- * extension, and a .json file (a recipe) must parse.
+ * layout uses (png, jpg, jpeg, gif, webp, svg, json, and the media extensions mp4, m4v, m4a,
+ * webm, mp3, wav), an image must carry the signature of its extension, a media file the
+ * container of its extension (`mediaFormatProblem`), and a .json file (a recipe) must parse.
  */
 export function assetProblem(path: string, bytes: Uint8Array): string | null {
   const kind = assetKindOf(path);
   if (kind === null)
-    return `${path}: only png, jpg, gif, webp, svg and json files travel under assets/`;
+    return `${path}: only png, jpg, gif, webp, svg, json and the media files mp4, m4a, webm, mp3 and wav travel under assets/`;
+  if ((MEDIA_ASSET_KINDS as ReadonlyArray<string>).includes(kind))
+    return mediaFormatProblem(path, bytes);
   if (kind === 'json') {
     try {
       JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));

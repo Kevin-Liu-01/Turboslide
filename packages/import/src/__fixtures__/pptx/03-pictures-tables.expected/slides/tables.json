@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "id": "tables",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "background",
+        "type": "picture",
+        "asset": "image8",
+        "alt": "Slide background",
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 1
+        },
+        "ext": {
+          "pptxBackground": true
+        }
+      },
+      {
+        "id": "plans-table",
+        "type": "table",
+        "columns": [
+          {
+            "width": 240
+          },
+          {
+            "width": 240
+          },
+          {
+            "width": 240
+          },
+          {
+            "width": 240
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "*Plan*",
+              "*Seats*",
+              "*Price*",
+              "*Support*"
+            ],
+            "height": 96,
+            "header": true
+          },
+          {
+            "cells": [
+              "Starter",
+              "5",
+              "$49",
+              "Email"
+            ],
+            "height": 96
+          },
+          {
+            "cells": [
+              "Team",
+              "25 to unlimited",
+              "$199",
+              "Chat"
+            ],
+            "height": 96
+          },
+          {
+            "cells": [
+              "Enterprise",
+              "",
+              "Call us",
+              "Phone"
+            ],
+            "height": 96
+          },
+          {
+            "cells": [
+              "Prices are per month",
+              "",
+              "",
+              ""
+            ],
+            "height": 96
+          }
+        ],
+        "pos": {
+          "x": 120,
+          "y": 120,
+          "w": 960,
+          "h": 480,
+          "z": 2
+        },
+        "spans": [
+          {
+            "row": 2,
+            "column": 1,
+            "rows": 2,
+            "columns": 1
+          },
+          {
+            "row": 4,
+            "column": 0,
+            "rows": 1,
+            "columns": 4
+          }
+        ],
+        "cells": [
+          {
+            "row": 0,
+            "column": 0,
+            "fill": "ink"
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "fill": "ink"
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "fill": "ink"
+          },
+          {
+            "row": 0,
+            "column": 3,
+            "fill": "ink"
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 2,
+            "fill": "paper",
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 3,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              },
+              "left": {
+                "weight": 2,
+                "color": "blue"
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 1,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 2,
+            "fill": "paper",
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 3,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "fill": "paper",
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 3,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 4,
+            "column": 0,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 4,
+            "column": 1,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 4,
+            "column": 2,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          },
+          {
+            "row": 4,
+            "column": 3,
+            "border": {
+              "bottom": {
+                "weight": 1.5,
+                "color": "ink"
+              }
+            }
+          }
+        ],
+        "size": 20,
+        "ext": {
+          "pptxName": "Plans table"
+        }
+      },
+      {
+        "id": "wide-table",
+        "type": "table",
+        "columns": [
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          },
+          {
+            "width": 70.48
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "C1",
+              "C2",
+              "C3",
+              "C4",
+              "C5",
+              "C6",
+              "C7",
+              "C8",
+              "C9",
+              "C10",
+              "C11",
+              "C12",
+              "C13",
+              "C14",
+              "C15",
+              "C16",
+              "C17",
+              "C18",
+              "C19",
+              "C20"
+            ],
+            "height": 60,
+            "header": true
+          },
+          {
+            "cells": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20"
+            ],
+            "height": 60
+          }
+        ],
+        "pos": {
+          "x": 60,
+          "y": 660,
+          "w": 1480,
+          "h": 120,
+          "z": 3
+        },
+        "size": 20,
+        "ext": {
+          "pptxName": "Wide table"
+        }
+      }
+    ]
+  },
+  "title": "Tables",
+  "ext": {
+    "pptxPart": "ppt/slides/slide2.xml",
+    "pptxSlideId": 257
+  }
+}

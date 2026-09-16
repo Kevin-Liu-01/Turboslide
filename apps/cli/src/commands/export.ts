@@ -22,9 +22,18 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { BAYER8 } from '@turboslide/effects/bayer';
-import type { ExportMode } from '@turboslide/schema/export';
+import type {
+  ExportMode,
+  Orientation,
+  Paper,
+  PrintLayout,
+  PrintOrder,
+} from '@turboslide/schema/export';
+import { ORIENTATIONS, PAPERS, PRINT_LAYOUTS, PRINT_ORDERS } from '@turboslide/schema/export';
 import { deckAppearance } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
+import { deckPage } from '@turboslide/schema/render';
+import { exportOdp } from '@turboslide/export/export-odp';
 import { exportPptx } from '@turboslide/export/export-pptx';
 import type { TableMode } from '@turboslide/export/export-pptx';
 import { exportPdf } from '@turboslide/export/pdf/build';
@@ -47,10 +56,10 @@ import { EXIT, UsageError } from '../exit.ts';
 import { formatBytes } from '../output.ts';
 import { selectSlides } from '../select.ts';
 import { deckText } from '../store-actions.ts';
-import { exportCheck } from './export-check.ts';
+import { CHECKABLE_EXTENSIONS, exportCheck } from './export-check.ts';
 
-/** The formats `turboslide export` writes (export.run's pptx and pdf, export.text, render.slide jpg). */
-export const EXPORT_FORMATS = ['pptx', 'pdf', 'txt', 'jpeg'] as const;
+/** The formats `turboslide export` writes (export.run's pptx, pdf and odp, export.text, render.slide jpg). */
+export const EXPORT_FORMATS = ['pptx', 'pdf', 'odp', 'txt', 'jpeg'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 /** The render surface stamps this when fonts, images and dither canvases are in place (render/runtime.ts). */
@@ -83,7 +92,7 @@ export function parseExportTarget(ctx: CommandContext): {
   let format: ExportFormat | undefined;
   if (rest[0] === 'gslides') {
     throw new UsageError(
-      'export gslides was removed on 2026-09-11: PPTX is the one export target (docs/pptx.md); the other formats are pdf, txt and jpeg',
+      'export gslides was removed on 2026-09-11: PPTX is the one export target (docs/pptx.md); the other formats are pdf, odp, txt and jpeg',
     );
   }
   if (isFormatWord(rest[0])) {
@@ -224,6 +233,13 @@ async function exportPptxCommand(
   const tableMode: TableMode = tablesFlag;
   const verify = flagBoolean(ctx.args, 'verify');
   const noJpeg = flagBoolean(ctx.args, 'no-jpeg');
+  /* round five (gslides-parity SPEC-5 2.4, 3.6; b1.md request 8): the timing tree and the media files in Editable text */
+  const motionFlag = flagString(ctx.args, 'motion') ?? 'keep';
+  if (motionFlag !== 'keep' && motionFlag !== 'drop')
+    throw new UsageError('--motion wants keep (the transitions and the timing tree) or drop');
+  const mediaFlag = flagString(ctx.args, 'media') ?? 'embed';
+  if (mediaFlag !== 'embed' && mediaFlag !== 'poster' && mediaFlag !== 'url')
+    throw new UsageError('--media wants embed (the file in the package), poster or url');
   const startedAt = Date.now();
 
   ctx.out.human(
@@ -246,6 +262,8 @@ async function exportPptxCommand(
     ...(noJpeg ? { noJpeg: true } : {}),
     ...(includeSkipped ? { includeSkipped: true } : {}),
     ...(includeNotes ? { includeNotes: true } : {}),
+    motion: motionFlag,
+    media: mediaFlag,
     slideIds: ids,
     writeScenes: flagBoolean(ctx.args, 'scenes'),
     // the verify pass runs inside the export so a table that misses the per cell budget is
@@ -276,7 +294,53 @@ async function exportPptxCommand(
   return merged.passed ? EXIT.ok : EXIT.findings;
 }
 
-/** `turboslide export pdf [<deckDir>] [ids|all] [--appearance light|dark] [--include-skipped] [--verify] --out <dir>`. */
+/** One of a closed list of words, or a usage error naming the list. */
+function parseChoice<T extends string>(
+  ctx: CommandContext,
+  flag: string,
+  choices: readonly T[],
+): T | undefined {
+  const value = flagString(ctx.args, flag);
+  if (value === undefined) return undefined;
+  if (!(choices as readonly string[]).includes(value))
+    throw new UsageError(`--${flag} wants ${choices.join(', ')}`);
+  return value as T;
+}
+
+/**
+ * The print layout flags of `export pdf` (gslides-parity SPEC-5 6.2): `--layout slides|notes|
+ * handout-2|3|4|6|9`, `--paper slide|letter|a4`, `--orientation landscape|portrait`, `--order
+ * across|down`, `--hide-background`; absent, one slide per page on the slide's own paper.
+ */
+export function parsePrintLayout(ctx: CommandContext): {
+  layout?: PrintLayout;
+  paper?: Paper;
+  orientation?: Orientation;
+  order?: PrintOrder;
+  hideBackground?: boolean;
+} {
+  const layout = parseChoice(ctx, 'layout', PRINT_LAYOUTS);
+  const paper = parseChoice(ctx, 'paper', PAPERS);
+  const orientation = parseChoice(ctx, 'orientation', ORIENTATIONS);
+  const order = parseChoice(ctx, 'order', PRINT_ORDERS);
+  if (paper === 'slide' && layout !== undefined && layout !== 'slides')
+    throw new UsageError(
+      `--paper slide is the one slide layout's alone; ${layout} needs letter or a4`,
+    );
+  return {
+    ...(layout !== undefined ? { layout } : {}),
+    ...(paper !== undefined ? { paper } : {}),
+    ...(orientation !== undefined ? { orientation } : {}),
+    ...(order !== undefined ? { order } : {}),
+    ...(flagBoolean(ctx.args, 'hide-background') ? { hideBackground: true } : {}),
+  };
+}
+
+/**
+ * `turboslide export pdf [<deckDir>] [ids|all] [--appearance light|dark] [--include-skipped]
+ * [--layout <layout>] [--paper <paper>] [--orientation <orientation>] [--order <order>]
+ * [--hide-background] [--verify] --out <dir>` (gslides-parity SPEC 7.6; SPEC-5 6.2).
+ */
 async function exportPdfCommand(
   ctx: CommandContext,
   dir: string,
@@ -291,9 +355,16 @@ async function exportPdfCommand(
     join(derivedDir(dir, ctx.cwd), 'export'),
   );
   const verify = flagBoolean(ctx.args, 'verify');
+  const print = parsePrintLayout(ctx);
   const startedAt = Date.now();
+  const layoutWords =
+    print.layout !== undefined || print.paper !== undefined
+      ? `, ${print.layout ?? 'slides'} on ${print.paper ?? (print.layout === undefined || print.layout === 'slides' ? 'the slide' : 'letter')}${print.orientation ? ` ${print.orientation}` : ''}${print.hideBackground ? ', background hidden' : ''}`
+      : print.hideBackground
+        ? ', background hidden'
+        : '';
   ctx.out.human(
-    `export: pdf ${theme}, ${ids?.length ?? loaded.order.length} slide(s)${includeSkipped ? ', skipped slides included' : ''}${verify ? ', gated against the web render' : ''} -> ${outDir}`,
+    `export: pdf ${theme}${layoutWords}, ${ids?.length ?? loaded.order.length} slide(s)${includeSkipped ? ', skipped slides included' : ''}${verify ? ', gated against the web render' : ''} -> ${outDir}`,
   );
   const result = await exportPdf({
     deckDir: dir,
@@ -302,13 +373,15 @@ async function exportPdfCommand(
     theme,
     ...(ids !== undefined ? { slideIds: ids } : {}),
     ...(includeSkipped ? { includeSkipped: true } : {}),
+    ...print,
     verify,
     env: ctx.env,
     log: (line) => ctx.out.human(`  ${line}`),
   });
   ctx.out.result(result.report);
+  const cells = result.report.cells ?? [];
   ctx.out.human(
-    `export: ${result.path} (${formatBytes(result.bytes)}), ${result.pages} page(s) at ${result.pageSize ? `${result.pageSize.width} by ${result.pageSize.height} pt` : 'an unread size'}, gate ${result.gate}${result.rasterizer ? ` (${result.rasterizer})` : ''}, passed ${result.passed}${result.omitted.length > 0 ? `, ${result.omitted.length} skipped slide(s) left out` : ''}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
+    `export: ${result.path} (${formatBytes(result.bytes)}), ${result.pages} page(s) at ${result.pageSize ? `${result.pageSize.width} by ${result.pageSize.height} pt` : 'an unread size'}${result.report.layout !== undefined && result.report.layout !== 'slides' ? `, ${cells.length} cell(s), ${cells.filter((c) => c.ok).length} ok` : ''}, gate ${result.gate}${result.rasterizer ? ` (${result.rasterizer})` : ''}, passed ${result.passed}${result.omitted.length > 0 ? `, ${result.omitted.length} skipped slide(s) left out` : ''}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
   );
   for (const line of result.report.residual) ctx.out.human(`  residual: ${line}`);
   return result.passed ? EXIT.ok : EXIT.findings;
@@ -349,7 +422,11 @@ async function exportJpegCommand(
       ctx.out.human(
         `export: jpeg ${theme} at ${scale}x, ${wanted.length} slide(s) with ${launched.renderer} -> ${outDir}`,
       );
-      const sheetPage = await openSheetPage(launched.browser, { theme, scale });
+      const sheetPage = await openSheetPage(launched.browser, {
+        theme,
+        scale,
+        viewport: deckPage(loaded.deck),
+      });
       try {
         for (const slideId of wanted) {
           const n =
@@ -392,17 +469,84 @@ async function exportJpegCommand(
   return errors.length > 0 ? EXIT.findings : EXIT.ok;
 }
 
-/** `export check <file.pptx | dir>`: one file, or every .pptx of a folder (exit 1 when any is not valid). */
+/**
+ * `turboslide export odp [<deckDir>] [ids|all] [--mode flatten|native] [--theme light,dark|both]
+ * [--include-skipped] [--include-notes] [--motion keep|drop] [--media embed|poster|url]
+ * [--verify] --out <dir>` (gslides-parity SPEC-5 6.3): one `.odp` per theme through exportOdp,
+ * the report the shape of every export, `export check` folded into `passed`.
+ */
+async function exportOdpCommand(
+  ctx: CommandContext,
+  dir: string,
+  loaded: LoadedDeck,
+  rest: string[],
+): Promise<number> {
+  const { ids, includeSkipped } = playSelection(ctx, loaded, rest);
+  const includeNotes = flagBoolean(ctx.args, 'include-notes');
+  const mode = parseMode(ctx);
+  const themes = parseThemes(ctx);
+  const outDir = resolveOut(
+    ctx.cwd,
+    flagString(ctx.args, 'out'),
+    join(derivedDir(dir, ctx.cwd), 'export'),
+  );
+  const motionFlag = flagString(ctx.args, 'motion') ?? 'keep';
+  if (motionFlag !== 'keep' && motionFlag !== 'drop')
+    throw new UsageError('--motion wants keep (the transitions and the animation tree) or drop');
+  const mediaFlag = flagString(ctx.args, 'media') ?? 'embed';
+  if (mediaFlag !== 'embed' && mediaFlag !== 'poster' && mediaFlag !== 'url')
+    throw new UsageError('--media wants embed (the file in the package), poster or url');
+  const verify = flagBoolean(ctx.args, 'verify');
+  const startedAt = Date.now();
+  ctx.out.human(
+    `export: odp ${mode}${mode === 'flatten' ? ' (perfect)' : ' (editable text)'}, ${ids?.length ?? loaded.order.length} slide(s) x ${themes.join(',')}${includeSkipped ? ', skipped slides included' : ''}${includeNotes ? ', notes included' : ''} -> ${outDir}`,
+  );
+  const result = await exportOdp({
+    deckDir: dir,
+    document: { deck: loaded.deck, slides: loaded.slides },
+    outDir,
+    mode,
+    themes,
+    ...(includeSkipped ? { includeSkipped: true } : {}),
+    ...(includeNotes ? { includeNotes: true } : {}),
+    motion: motionFlag,
+    media: mediaFlag,
+    slideIds: ids,
+    verify,
+    env: ctx.env,
+    writeScenes: flagBoolean(ctx.args, 'scenes'),
+    onSlide: (scene, ms) =>
+      ctx.out.human(
+        `  ${String(scene.n).padStart(2)} ${scene.slideId} ${scene.theme} ${ms} ms, ${scene.texts.length} text(s), ${scene.rasters.length} raster(s)`,
+      ),
+    onPage: (scene, raster) =>
+      ctx.out.human(
+        `  ${String(scene.n).padStart(2)} ${scene.slideId} ${scene.theme} page ${raster.format} ${formatBytes(raster.bytes.byteLength)}, ${(raster.fraction * 100).toFixed(3)} percent mismatch`,
+      ),
+    onFile: (path, bytes) => ctx.out.human(`export: wrote ${path} (${formatBytes(bytes)})`),
+    log: (line) => ctx.out.human(`  ${line}`),
+  });
+  const merged = result.merged;
+  ctx.out.result(merged);
+  ctx.out.human(
+    `export: ${result.files.length} file(s)${result.zipPath ? ' plus the zip of both' : ''}, revision ${merged.revision}, perfect ${merged.perfect}, passed ${merged.passed}${result.omitted.length > 0 ? `, ${result.omitted.length} skipped slide(s) left out` : ''}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
+  );
+  for (const line of merged.residual) ctx.out.human(`  residual: ${line}`);
+  return merged.passed ? EXIT.ok : EXIT.findings;
+}
+
+/** `export check <file.pptx | file.odp | file.svg | dir>`: one file, or every checkable file of a folder (exit 1 when any is not valid). */
 async function exportCheckTarget(ctx: CommandContext, rest: string[]): Promise<number> {
   const [target] = rest;
   if (target !== undefined) {
     const path = resolve(ctx.cwd, target);
     if (existsSync(path) && statSync(path).isDirectory()) {
       const files = readdirSync(path)
-        .filter((name) => name.endsWith('.pptx'))
+        .filter((name) => CHECKABLE_EXTENSIONS.some((extension) => name.endsWith(extension)))
         .sort()
         .map((name) => join(path, name));
-      if (files.length === 0) throw new UsageError(`export check: no .pptx under ${target}`);
+      if (files.length === 0)
+        throw new UsageError(`export check: no .pptx, .odp or .svg under ${target}`);
       let code: number = EXIT.ok;
       for (const file of files) {
         const result = await exportCheck(ctx, [file, ...rest.slice(1)]);
@@ -425,6 +569,8 @@ export async function exportCommand(ctx: CommandContext): Promise<number> {
       return exportPdfCommand(ctx, dir, loaded, rest);
     case 'jpeg':
       return exportJpegCommand(ctx, dir, loaded, rest);
+    case 'odp':
+      return exportOdpCommand(ctx, dir, loaded, rest);
     case 'pptx':
       return exportPptxCommand(ctx, dir, loaded, rest);
   }

@@ -62,7 +62,15 @@ export type QuotaName =
   | 'accessRequestsPerDay'
   | 'linkCreatesPerDeckPerDay'
   | 'mentionMailsPerDay'
-  | 'redisCommandsPerDay';
+  | 'redisCommandsPerDay'
+  /* round five (gslides-parity SPEC-5 0.18, 3.3; R11 1.7): the four media rows, checked by the
+     media grant and `media.insert`; the two size rows compare a number and hold on every tier */
+  | 'largestAudioBytes'
+  | 'largestVideoBytes'
+  | 'mediaPerDay'
+  | 'mediaBytesPerDay'
+  /* round five (SPEC-5 10; b5.md request 1 to B2): chat messages per minute per deck */
+  | 'chatMessagesPerMinutePerDeck';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -84,6 +92,7 @@ export type Quota = {
 
 const TOO_MANY = 'Too many changes at once. Try again in a minute';
 const EXPORT_LIMIT = 'You have reached today’s export limit';
+const MEDIA_LIMIT = 'You have reached today’s limit for audio and video';
 
 /** SPEC-3 8.3, the "Application quota beside it" column and the three rows without a WAF rule. */
 export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
@@ -252,6 +261,37 @@ export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
     limits: { anonymous: 500_000, account: 2_000_000, agent: 2_000_000 },
     sentence: TOO_MANY,
   },
+  largestAudioBytes: {
+    name: 'largestAudioBytes',
+    windowMs: 0,
+    limits: { anonymous: 25 * MB, account: 50 * MB, agent: 50 * MB },
+    sentence: 'This audio file is too large',
+  },
+  largestVideoBytes: {
+    name: 'largestVideoBytes',
+    windowMs: 0,
+    limits: { anonymous: 25 * MB, account: 200 * MB, agent: 200 * MB },
+    sentence: 'This video is too large',
+  },
+  mediaPerDay: {
+    name: 'mediaPerDay',
+    windowMs: DAY,
+    limits: { anonymous: 10, account: 100, agent: 300 },
+    sentence: MEDIA_LIMIT,
+  },
+  mediaBytesPerDay: {
+    name: 'mediaBytesPerDay',
+    windowMs: DAY,
+    limits: { anonymous: 200 * MB, account: 5 * GB, agent: 10 * GB },
+    sentence: MEDIA_LIMIT,
+  },
+  chatMessagesPerMinutePerDeck: {
+    name: 'chatMessagesPerMinutePerDeck',
+    windowMs: MINUTE,
+    limits: { anonymous: 20, account: 60, agent: 60 },
+    sentence: 'Too many chat messages at once. Try again in a minute',
+    perDeck: true,
+  },
 };
 
 export const QUOTA_NAMES: readonly QuotaName[] = Object.keys(QUOTAS) as QuotaName[];
@@ -264,6 +304,8 @@ export const DECK_CAPS = {
   htmlBlockBytes: 5 * MB,
   documentBytes: 25 * MB,
   publicAssetBytes: 200 * MB,
+  /** the sum of a deck's stored media bytes (gslides-parity SPEC-5 0.18; R11 1.7), checked by `media.insert` */
+  mediaBytes: 300 * MB,
   continuousSourceBytes: 250 * MB,
   commentBytes: 5 * MB,
   commentsPerThread: 200,
@@ -582,4 +624,20 @@ export async function releaseQuota(name: QuotaName, ctx: QuotaContext, cost = 1)
  */
 export function largestPictureBytes(tier: Tier): number {
   return QUOTAS.largestPictureBytes.limits[tier];
+}
+
+/**
+ * The size ceiling of a media file for a tier and kind (gslides-parity SPEC-5 0.18: audio 25 and
+ * 50 MB, video 25 and 200 MB), a quota with no window; the media grant and `media.insert` compare
+ * here and the refusal is the row's sentence.
+ */
+export function largestMediaBytes(kind: 'audio' | 'video', tier: Tier): number {
+  return kind === 'audio'
+    ? QUOTAS.largestAudioBytes.limits[tier]
+    : QUOTAS.largestVideoBytes.limits[tier];
+}
+
+/** The sentence of the media size refusal for a kind (the quota row's). */
+export function mediaTooLargeSentence(kind: 'audio' | 'video'): string {
+  return kind === 'audio' ? QUOTAS.largestAudioBytes.sentence : QUOTAS.largestVideoBytes.sentence;
 }

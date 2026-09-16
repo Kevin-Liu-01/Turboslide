@@ -1,0 +1,63 @@
+{
+  "id": "quotes/two-quotes",
+  "category": "quotes",
+  "label": "Two quotes side by side",
+  "blocks": [
+    {
+      "id": "left",
+      "pos": {
+        "x": 0,
+        "y": 40,
+        "w": 620,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "It stays out of the way."
+    },
+    {
+      "id": "left-credit",
+      "pos": {
+        "x": 0,
+        "y": 220,
+        "w": 620,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A user, operations",
+      "role": "cap"
+    },
+    {
+      "id": "right",
+      "pos": {
+        "x": 706,
+        "y": 40,
+        "w": 620,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "One set of numbers, at last."
+    },
+    {
+      "id": "right-credit",
+      "pos": {
+        "x": 706,
+        "y": 220,
+        "w": 620,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A buyer, finance",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    260
+  ]
+}

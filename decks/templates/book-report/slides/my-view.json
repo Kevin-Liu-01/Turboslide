@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "my-view",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "My view",
+        "autofit": "shrink"
+      },
+      {
+        "id": "say",
+        "type": "say",
+        "items": [
+          {
+            "quote": "The book earns its ending; the last chapter changes what the first one meant.",
+            "note": "My view, in one sentence"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "My view"
+}

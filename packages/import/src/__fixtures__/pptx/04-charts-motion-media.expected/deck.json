@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "charts-motion-media",
+  "title": "Import fixture 04 charts, motion and media",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Import fixture 04 charts, motion and media",
+      "slideIds": [
+        "charts",
+        "chart-substitutions",
+        "motion",
+        "media"
+      ]
+    }
+  ],
+  "assets": {
+    "image1": {
+      "id": "image1",
+      "role": "other",
+      "alt": "Demo clip",
+      "twins": {
+        "neutral": "assets/image1-58c0b6edc56e.png"
+      },
+      "size": [
+        320,
+        180
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native",
+      "ext": {
+        "pptxPart": "ppt/media/image1.png"
+      }
+    },
+    "image2": {
+      "id": "image2",
+      "role": "other",
+      "alt": "Tone",
+      "twins": {
+        "neutral": "assets/image2-eec599004902.png"
+      },
+      "size": [
+        64,
+        64
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native",
+      "ext": {
+        "pptxPart": "ppt/media/image2.png"
+      }
+    }
+  },
+  "revision": 0,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z",
+  "media": {
+    "media1": {
+      "id": "media1",
+      "kind": "video",
+      "role": "media",
+      "file": "assets/media1.91d4a279.mp4",
+      "mime": "video/mp4",
+      "bytes": 13265,
+      "sha256": "91d4a2791d715afe5399a749a5ea655fb21d859332692088752fe4ea02434f18",
+      "durationMs": 1000,
+      "codecs": [
+        "avc1",
+        "mp4a"
+      ],
+      "source": {
+        "kind": "file"
+      },
+      "ext": {
+        "pptxPart": "ppt/media/media1.mp4"
+      },
+      "size": [
+        320,
+        180
+      ],
+      "poster": "image1",
+      "title": "Demo clip"
+    },
+    "media2": {
+      "id": "media2",
+      "kind": "audio",
+      "role": "media",
+      "file": "assets/media2.99fa2579.mp3",
+      "mime": "audio/mpeg",
+      "bytes": 4941,
+      "sha256": "99fa2579ed6d8316d61b06cb0e1870d325d111bfdb6485bf27e19c61338ff6d7",
+      "durationMs": 1000,
+      "codecs": [
+        "mp3"
+      ],
+      "source": {
+        "kind": "file"
+      },
+      "ext": {
+        "pptxPart": "ppt/media/media2.mp3"
+      },
+      "poster": "image2",
+      "title": "Tone"
+    }
+  }
+}

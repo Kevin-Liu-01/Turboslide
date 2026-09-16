@@ -27,15 +27,18 @@ describe('finderRows', () => {
     const pdf = rows.find((row) => row.item.id === 'file.download.pdf');
     expect(pdf?.path).toBe(['File', 'Download'].join(PATH_SEPARATOR));
     expect(pdf?.title).toBe('PDF Document (.pdf)');
-    /* Italic is Now since SPEC-2 0.1 (disabled with nothing selected); Edit guides stays Later */
+    /* Italic is Now since SPEC-2 0.1 (disabled with nothing selected); Edit guides opens its
+       dialog since gslides-parity SPEC-5 7.7, so Page setup is the Later row read here */
     const italic = rows.find((row) => row.item.id === 'format.text.italic');
     expect(italic?.later).toBe(false);
     expect(italic?.enabled).toBe(false);
     const editGuides = rows.find((row) => row.item.id === 'view.guides.edit');
-    expect(editGuides?.later).toBe(true);
-    expect(editGuides?.enabled).toBe(false);
-    expect(editGuides?.doc?.startsWith('Not available in Turboslide yet')).toBe(true);
+    expect(editGuides?.later).toBe(false);
     expect(editGuides?.path).toBe(['View', 'Guides'].join(PATH_SEPARATOR));
+    const pageSetup = rows.find((row) => row.item.id === 'file.pageSetup');
+    expect(pageSetup?.later).toBe(true);
+    expect(pageSetup?.enabled).toBe(false);
+    expect(pageSetup?.doc?.startsWith('Not available in Turboslide yet')).toBe(true);
     /* Insert > Table is listed (its plate is dynamic), the plain containers are not */
     expect(rows.some((row) => row.item.id === 'insert.table')).toBe(true);
     expect(rows.some((row) => row.item.id === 'view.guides')).toBe(false);
@@ -70,7 +73,12 @@ describe('toolFinderEntries', () => {
       },
     );
     const groups = new Set(entries.map((entry) => entry.group));
-    expect([...groups]).toEqual(['menus', 'slides', 'layouts']);
+    /* gslides-parity SPEC-5 7.4: the deck text group joins after the menus (empty on a deck whose text carries no entries) */
+    expect([...groups].filter((group) => group !== 'deckText')).toEqual([
+      'menus',
+      'slides',
+      'layouts',
+    ]);
     expect(entries.filter((entry) => entry.group === 'layouts')).toHaveLength(LAYOUTS.length);
     expect(entries.filter((entry) => entry.group === 'slides')).toHaveLength(
       Object.keys(document.slides).length,

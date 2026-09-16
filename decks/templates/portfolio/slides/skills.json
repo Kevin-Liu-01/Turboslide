@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "skills",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Skills",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What the work draws on.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Research",
+            "value": "Interviews, diary studies and the synthesis that follows."
+          },
+          {
+            "key": "Design",
+            "value": "Flows, systems and the detail work in the last week."
+          },
+          {
+            "key": "Leading",
+            "value": "A team of six, hiring and the reviews."
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Skills"
+}

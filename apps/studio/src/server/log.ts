@@ -69,6 +69,8 @@ export const SECURITY_EVENT_NAMES = [
   'comment.edit',
   'comment.delete',
   'comment.resolve',
+  'chat.send',
+  'chat.clear',
   'mention.email',
   'mention.suppressed',
   'notify.deliver',
@@ -499,3 +501,28 @@ export const RETENTION: readonly RetentionClass[] = [
     where: 'apps/studio/src/server/log.ts',
   },
 ];
+
+/**
+ * A chat message admitted to a deck's room (gslides-parity SPEC-5 10, 0.46): logged as a comment
+ * write is, with the principal, the deck, the text's length and the mention count, never the
+ * text. `chat.clear` logs the count removed under `opCount`.
+ */
+export function logChatMessage(input: {
+  identity?: string;
+  deckId: string;
+  length: number;
+  mentions: number;
+  transport?: SecurityEvent['transport'];
+  requestId?: string;
+}): SecurityLine {
+  return logSecurityEvent({
+    event: 'chat.send',
+    ...(input.identity === undefined ? {} : { identity: input.identity }),
+    deckId: input.deckId,
+    action: 'chat.send',
+    bytes: input.length,
+    mentionCount: input.mentions,
+    ...(input.transport === undefined ? {} : { transport: input.transport }),
+    ...(input.requestId === undefined ? {} : { requestId: input.requestId }),
+  });
+}

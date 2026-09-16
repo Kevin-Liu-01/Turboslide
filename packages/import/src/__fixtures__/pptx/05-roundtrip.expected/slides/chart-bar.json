@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-bar",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A bar chart in a narrow box",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:chart-bar#h/text"
+        }
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "bar",
+        "categories": [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec"
+        ],
+        "series": [
+          {
+            "name": "Docs",
+            "values": [
+              1200,
+              1350,
+              1480,
+              1600,
+              1720,
+              1900,
+              2050,
+              2200,
+              2400,
+              2600,
+              2750,
+              3000
+            ],
+            "color": "ink"
+          },
+          {
+            "name": "App",
+            "values": [
+              800,
+              860,
+              900,
+              980,
+              1050,
+              1100,
+              1240,
+              1300,
+              1420,
+              1500,
+              1580,
+              1700
+            ],
+            "color": "ink-2"
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 229,
+          "w": 720,
+          "h": 480,
+          "z": 3
+        },
+        "title": "Words translated per month",
+        "legend": "right",
+        "numberFormat": "thousands",
+        "ext": {
+          "pptxName": "ts:chart-bar#chart",
+          "pptxChartPart": "ppt/charts/chart1.xml"
+        }
+      }
+    ]
+  },
+  "title": "A bar chart in a narrow box",
+  "ext": {
+    "pptxPart": "ppt/slides/slide22.xml",
+    "pptxSlideId": 277
+  }
+}

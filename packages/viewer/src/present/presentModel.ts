@@ -1,3 +1,5 @@
+import type { MotionSchedule } from '@turboslide/schema/motion';
+
 import type { ViewerSlide } from '../model';
 
 /**
@@ -95,4 +97,95 @@ export function isNotesFont(value: unknown): value is number {
     value <= NOTES_FONT.max &&
     (value - NOTES_FONT.min) % NOTES_FONT.step === 0
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The step model (gslides-parity SPEC-5 2.2, 0.14): a slide with motion has `stepCount` click
+// steps after its entry step; a next consumes a step before the slide moves, a previous reverses
+// a step before the slide moves back and lands on the previous slide's last step; a digit jump,
+// Home, End and the slide list land on step 0 of the target with its entry step played. The
+// schedule rides on the viewer slide as `motion` when the loader compiled one (ViewerSlide
+// carries no field for it yet; `motionOf` reads it structurally the way `isSkippedSlide` reads
+// `skip`), so the audience payload, the editor's viewer deck and the presenter agree on one
+// schedule without a second compile in the browser.
+
+/** The schedule a loader attached to a viewer slide, when the slide carries motion. */
+export function motionOf(slide: ViewerSlide | undefined): MotionSchedule | undefined {
+  if (slide === undefined || !('motion' in slide)) return undefined;
+  const motion = (slide as { motion?: unknown }).motion;
+  if (typeof motion !== 'object' || motion === null) return undefined;
+  const record = motion as { steps?: unknown; slideId?: unknown };
+  return Array.isArray(record.steps) && typeof record.slideId === 'string'
+    ? (motion as MotionSchedule)
+    : undefined;
+}
+
+/** The click steps of a schedule after its entry step; 0 for a slide without motion. */
+export function stepCount(schedule: MotionSchedule | undefined): number {
+  if (schedule === undefined) return 0;
+  return Math.max(0, schedule.steps.length - 1);
+}
+
+/** A position in the show: the play list index and the step reached on that slide. */
+export type ShowPosition = { index: number; step: number };
+
+/** The step counts per play list position, or a function answering them. */
+export type StepCounts = ReadonlyArray<number> | ((index: number) => number);
+
+function stepsAt(steps: StepCounts, index: number): number {
+  const count = typeof steps === 'function' ? steps(index) : steps[index];
+  return Math.max(0, count ?? 0);
+}
+
+/**
+ * Where a next lands (SPEC-5 2.2): the next step while one remains, else step 0 of the next
+ * slide, else null at the end of the show.
+ */
+export function nextPosition(
+  index: number,
+  step: number,
+  total: number,
+  steps: StepCounts,
+): ShowPosition | null {
+  if (total <= 0) return null;
+  if (step < stepsAt(steps, index)) return { index, step: step + 1 };
+  if (index < total - 1) return { index: index + 1, step: 0 };
+  return null;
+}
+
+/**
+ * Where a previous lands (SPEC-5 0.14): the state before the current step while one was played,
+ * else the previous slide at its last step, else null at the start of the show.
+ */
+export function previousPosition(
+  index: number,
+  step: number,
+  total: number,
+  steps: StepCounts,
+): ShowPosition | null {
+  if (total <= 0) return null;
+  if (step > 0) return { index, step: step - 1 };
+  if (index > 0) return { index: index - 1, step: stepsAt(steps, index - 1) };
+  return null;
+}
+
+/** The presenter's step line: "Step 2 of 4"; empty for a slide without steps (`turboslide: true`). */
+export function stepCounterText(step: number, steps: number): string {
+  if (steps <= 0) return '';
+  return `Step ${Math.max(0, step)} of ${steps}`;
+}
+
+/**
+ * The show's Auto-play intervals (SPEC-5 2.2, R01 4): every 1, 2, 3, 5, 10, 15 and 30 seconds
+ * and every minute, in milliseconds; each tick is one advance, so a step and a slide change take
+ * a tick each (unverified against Google, SPEC-5 16.9).
+ */
+export const AUTO_PLAY_INTERVALS_MS = [1000, 2000, 3000, 5000, 10000, 15000, 30000, 60000] as const;
+export type AutoPlayIntervalMs = (typeof AUTO_PLAY_INTERVALS_MS)[number];
+
+/** The label of an Auto-play interval: "Every 5 seconds", "Every minute". */
+export function autoPlayLabel(ms: number): string {
+  if (ms >= 60000) return ms === 60000 ? 'Every minute' : `Every ${ms / 60000} minutes`;
+  const seconds = ms / 1000;
+  return seconds === 1 ? 'Every second' : `Every ${seconds} seconds`;
 }

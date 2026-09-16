@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "consulting-proposal",
+  "name": "Consulting proposal",
+  "description": "Ten slides for an engagement proposal: the summary, the situation, the scope, the approach, the timeline, the team, the investment, the terms and the signatures.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 10
+    }
+  ],
+  "archetypes": [],
+  "category": "work",
+  "useCases": [
+    "business proposals",
+    "strategic plans"
+  ],
+  "cover": "title",
+  "slideCount": 10
+}

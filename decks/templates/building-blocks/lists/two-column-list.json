@@ -1,0 +1,83 @@
+{
+  "id": "lists/two-column-list",
+  "category": "lists",
+  "label": "Two column list",
+  "blocks": [
+    {
+      "id": "left-h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 620,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Before"
+    },
+    {
+      "id": "left",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 620,
+        "h": 300,
+        "group": "block"
+      },
+      "type": "plain",
+      "marker": "bullet",
+      "items": [
+        {
+          "text": "Three spreadsheets"
+        },
+        {
+          "text": "A week of reconciling"
+        },
+        {
+          "text": "Numbers nobody trusts"
+        }
+      ]
+    },
+    {
+      "id": "right-h",
+      "pos": {
+        "x": 706,
+        "y": 0,
+        "w": 620,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "After"
+    },
+    {
+      "id": "right",
+      "pos": {
+        "x": 706,
+        "y": 100,
+        "w": 620,
+        "h": 300,
+        "group": "block"
+      },
+      "type": "plain",
+      "marker": "bullet",
+      "items": [
+        {
+          "text": "One model"
+        },
+        {
+          "text": "One owner per field"
+        },
+        {
+          "text": "The Monday report"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    400
+  ]
+}

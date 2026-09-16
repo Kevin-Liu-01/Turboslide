@@ -1,8 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { refuse } from '@turboslide/agent/http/errors';
+import { PPTX_MIME } from '@turboslide/chrome/dialogs/upload-accept';
+import { importPptxIntoFolder } from '@turboslide/import/lane-node';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
+import { pushDeckDir } from '@turboslide/store/blob-store';
 
 import {
   authorize,
@@ -21,7 +24,7 @@ import {
 } from '../../server/bundle-core';
 import { assertFlag } from '../../server/flags';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
-import { ensureDecks } from '../../server/root';
+import { ensureDecks, exportBlobClient } from '../../server/root';
 
 // POST /api/decks/bundle (docs/deck-transfer.md): uploads a deck bundle and creates the deck it
 // holds on this studio, or replaces one. The body is the zip itself (`application/zip` or
@@ -175,6 +178,37 @@ export const Route = createFileRoute('/api/decks/bundle')({
         const url = new URL(request.url);
         const options = optionsOf(url, read.body);
         if (options instanceof Response) return options;
+        /* a .pptx (gslides-parity SPEC-5 5.2; b3.md B3-18, B3-22): the one reader writes the deck
+           folder under the collection and answers the id with the row report; pushed to the Blob
+           store the way a bundle is */
+        if ((request.headers.get('content-type') ?? '').toLowerCase().includes(PPTX_MIME)) {
+          try {
+            const decks = await ensureDecks();
+            const fileName = decodeURIComponent(
+              request.headers.get('x-turboslide-file-name') ?? 'upload.pptx',
+            );
+            const result = await importPptxIntoFolder(read.zip, decks.decksDir, {
+              fileName,
+              ...(options.as !== undefined ? { as: options.as } : {}),
+              exists: (deckId) => decks.has(deckId),
+            });
+            const client = await exportBlobClient();
+            if (client !== null && decks.kind === 'blob')
+              await pushDeckDir(client, result.deckId, result.dir, { overwrite: false });
+            const editUrl = `/edit/${encodeURIComponent(result.deckId)}`;
+            return Response.json(
+              { ...result, editUrl },
+              { status: 201, headers: { location: editUrl, 'cache-control': 'no-store' } },
+            );
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (error instanceof TypeError) return badRequest(message);
+            return Response.json(
+              { error: { name: 'Error', message, status: 500 } },
+              { status: 500 },
+            );
+          }
+        }
         // replacing a deck that exists needs `write` on it for the identity behind the ticket
         if (
           options.as !== undefined &&

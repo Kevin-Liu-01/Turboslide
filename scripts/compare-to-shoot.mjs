@@ -41,7 +41,8 @@ import sharp from 'sharp';
 
 import { escapeSlideIds } from './lib/import-report.mjs';
 
-const SHEET = { width: 1600, height: 900 };
+/** The default page; the deck's own `page` field replaces it once deck.json is read (gslides-parity SPEC-5 6.1; R08 3i). */
+const DEFAULT_SHEET = { width: 1600, height: 900 };
 
 function parseArgs(argv) {
   const out = {};
@@ -99,6 +100,11 @@ const deck = JSON.parse(readFileSync(join(deckDir, 'deck.json'), 'utf8'));
 if (!Array.isArray(deck.sections)) fail('deck.json has no sections array');
 const order = deck.sections.flatMap((section) => section.slideIds ?? []);
 if (order.length === 0) fail('deck.json lists no slides');
+// the deck's page (schema render.ts deckPage): the GT deck carries none, so the numbers do not change
+const SHEET =
+  deck.page && Number.isFinite(deck.page.width) && Number.isFinite(deck.page.height)
+    ? { width: deck.page.width, height: deck.page.height }
+    : DEFAULT_SHEET;
 
 // 2. Escape slides.
 const escapes = new Set();

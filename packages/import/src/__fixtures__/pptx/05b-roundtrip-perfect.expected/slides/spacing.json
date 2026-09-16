@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "spacing",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Spacing, columns and indent",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:spacing#h/text"
+        }
+      },
+      {
+        "id": "spaced",
+        "type": "text",
+        "text": "The first paragraph of a two column block at line spacing 1.5.\nThe second paragraph follows 12 px of space before it and leaves 12 px after.\nThe third paragraph fills the second column when the first is full.",
+        "pos": {
+          "x": 137,
+          "y": 212.39,
+          "w": 1326,
+          "h": 90,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5,
+          "spaceAfter": 12
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:spacing#spaced/text"
+        }
+      },
+      {
+        "id": "indented",
+        "type": "text",
+        "text": "An indented paragraph, 64 px in from the left edge of the block.",
+        "pos": {
+          "x": 201,
+          "y": 375.39,
+          "w": 703.58,
+          "h": 33,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:spacing#indented/text"
+        }
+      }
+    ]
+  },
+  "title": "Spacing, columns and indent",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide27.xml",
+    "pptxSlideId": 282
+  }
+}

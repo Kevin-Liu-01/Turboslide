@@ -15,6 +15,7 @@ import {
   FLAG_FADE_MS,
   displayNameFor,
   flagText,
+  othersOf,
   pointersDrawn,
   stackFlags,
 } from './presence-model';
@@ -92,7 +93,10 @@ export function RemoteCursors({
   now = Date.now(),
 }: RemoteCursorsProps) {
   const { k, boxes } = view;
-  const others = presence.others.filter((each) => each.slideId === view.slideId);
+  // the self filter by client id and by principal id (SPEC-5-amendments A3 item 5): this tab
+  // and this person's other tabs draw no outline, caret, flag or pointer
+  const collaborators = othersOf(presence);
+  const others = collaborators.filter((each) => each.slideId === view.slideId);
   const selfBlocks = new Set<string>([
     ...(view.selection?.blockId === undefined ? [] : [view.selection.blockId]),
   ]);
@@ -160,7 +164,7 @@ export function RemoteCursors({
     flagH,
   );
 
-  const drawPointers = pointersDrawn(presence, presence.others.length, present);
+  const drawPointers = pointersDrawn(presence, collaborators.length, present);
   const pointerSize = COLLAB_GEOMETRY.pointer;
 
   return (

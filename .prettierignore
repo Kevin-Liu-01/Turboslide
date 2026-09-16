@@ -28,3 +28,8 @@ packages/fonts/export/fonts.json
 # output, committed as a build product whose bytes packages/native/BUILD-RECORD.json pins, so the
 # formatter never touches it (check step 29 compares the sha256, step 19 would otherwise reflow the glue)
 packages/native/wasm/
+
+# Round five (gslides-parity SPEC-5 5, 16.3; the integrator at merge 2): the PowerPoint import's expected
+# documents are canonicalJson output compared byte for byte by packages/import/src/pptx/fixtures.test.ts
+# and written by packages/import/src/__fixtures__/pptx/write-expected.mjs, so the formatter never reflows them
+packages/import/src/__fixtures__/pptx/*.expected/

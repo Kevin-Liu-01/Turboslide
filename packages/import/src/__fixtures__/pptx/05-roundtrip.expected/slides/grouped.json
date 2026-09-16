@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "id": "grouped",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "s1",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 240,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 1,
+          "group": "four"
+        },
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:grouped#s1@g:four",
+          "pptxGroupPath": "g:four"
+        }
+      },
+      {
+        "id": "s2",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 520,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 2,
+          "group": "four"
+        },
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:grouped#s2@g:four",
+          "pptxGroupPath": "g:four"
+        }
+      },
+      {
+        "id": "s3",
+        "type": "shape",
+        "shape": "triangle",
+        "pos": {
+          "x": 800,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 3,
+          "group": "four"
+        },
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:grouped#s3@g:four",
+          "pptxGroupPath": "g:four"
+        }
+      },
+      {
+        "id": "label",
+        "type": "text",
+        "text": "One group tag on three shapes and this text box",
+        "pos": {
+          "x": 240,
+          "y": 495.5,
+          "w": 800,
+          "h": 48,
+          "z": 4,
+          "group": "four"
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:grouped#label/text@g:four",
+          "pptxGroupPath": "g:four"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A group of four objects",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 5
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:grouped#h/text"
+        }
+      }
+    ]
+  },
+  "title": "A group of four objects",
+  "ext": {
+    "pptxPart": "ppt/slides/slide11.xml",
+    "pptxSlideId": 266
+  }
+}

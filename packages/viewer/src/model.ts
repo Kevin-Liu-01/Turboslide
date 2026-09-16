@@ -6,9 +6,22 @@
  * kinds and the HTML string it sets as innerHTML (SPEC 5.3).
  */
 
-/** The sheet (SPEC 2.1): 1600 by 900 sheet pixels. */
+import type { FontId } from '@turboslide/schema/fonts';
+
+/** The default sheet (SPEC 2.1): 1600 by 900 sheet pixels, the page a deck without one draws on (gslides-parity SPEC-5 6.1). */
 export const SHEET_W = 1600;
 export const SHEET_H = 900;
+
+/** A page size in sheet pixels; the viewer's sheet arithmetic takes one and reads the default when it is absent. */
+export type PageSize = { width: number; height: number };
+
+/** The default page as a size. */
+export const DEFAULT_PAGE_SIZE: Readonly<PageSize> = { width: SHEET_W, height: SHEET_H };
+
+/** The two custom properties the stage root carries for its page (stage.css reads them). */
+export function sheetSizeVars(page: PageSize): Record<string, string> {
+  return { '--ts-sheet-w': `${page.width}px`, '--ts-sheet-h': `${page.height}px` };
+}
 
 export type ViewerTheme = 'light' | 'dark';
 
@@ -47,6 +60,13 @@ export type ViewerDeck = {
   id: string;
   title: string;
   revision: number;
+  /**
+   * The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the sheet the viewer fits and the
+   * clones scale by; the loaders write `deckPage(deck)`, so a deck without one reads 1600 by 900.
+   */
+  page?: { width: number; height: number };
+  /** the catalog font ids the document uses (gslides-parity SPEC-5-amendments A5 item 3): the viewer links their stylesheet */
+  fonts?: readonly FontId[];
   sections: readonly ViewerSection[];
   /** every slide in section order */
   slides: readonly ViewerSlide[];

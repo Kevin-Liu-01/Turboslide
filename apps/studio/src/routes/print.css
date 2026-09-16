@@ -175,7 +175,7 @@ html:has(.ts-print) {
 .ts-print-sheet {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   overflow: hidden;
 }
 
@@ -227,7 +227,102 @@ html:has(.ts-print) {
   color: var(--pt-ink);
 }
 
-/* ---- the printed pages ---- */
+/* ---- the paper layouts on screen (gslides-parity SPEC-5 6.2): the paper's box at 1 pt per
+   1/0.6 px, the cells, the slide boxes with a hairline, the ruled lines, the notes and the footer
+   placed by printLayout in the route ---- */
+.ts-print-paper-page {
+  position: relative;
+  display: block;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid var(--pt-hair);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ts-print-cell-slide,
+.ts-print-rule,
+.ts-print-paper-notes,
+.ts-print-footer {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.ts-print-cell-slide {
+  outline: 0.83px solid #bfbfbf;
+  overflow: hidden;
+}
+
+.ts-print-cell-slide[data-skipped] {
+  opacity: 0.72;
+}
+
+.ts-print-cell-sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  transform: scale(var(--k, 0.5));
+}
+
+.ts-print-cell-sheet > .ts-sheet.sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.ts-print-cell-sheet .ts-stage > .pt-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-print-cell-sheet .ts-stage > .pt-slide > .slide {
+  display: block;
+}
+
+.ts-print-rule {
+  height: 0;
+  border-top: 0.83px solid #bfbfbf;
+}
+
+.ts-print-paper-notes {
+  overflow: hidden;
+  font-family: var(--pt-text);
+  color: #070707;
+  white-space: pre-wrap;
+}
+
+.ts-print-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--pt-text);
+  font-size: 15px;
+  line-height: 1;
+  color: #8a8f98;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-print-footer-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Hide background (SPEC-5 6.2): the paper and the plates white, the background colour layers gone */
+.ts-print[data-hide-background] .ts-sheet {
+  --paper: #ffffff;
+  --plate: #ffffff;
+}
+
+.ts-print[data-hide-background] .slide-bg {
+  display: none;
+}
+
+/* ---- the printed pages: the route writes the paper's @page inline; the slide's own page is the default ---- */
 @page {
   size: 13.333in 7.5in;
   margin: 0;
@@ -251,10 +346,11 @@ html:has(.ts-print) {
     padding: 0;
   }
 
+  /* the slide's own page in inches (13.333 by 7.5 on the GT sheet; the route sets the deck's) */
   .ts-print-page {
     display: block;
-    width: 13.333in;
-    height: 7.5in;
+    width: var(--ts-page-in-w, 13.333in);
+    height: var(--ts-page-in-h, 7.5in);
     padding: 0;
     border: 0;
     background: none;
@@ -269,12 +365,25 @@ html:has(.ts-print) {
     page-break-after: auto;
   }
 
-  /* 13.333 inches is 1280 CSS pixels: the sheet scales by 0.8 to fill the page */
+  /* 13.333 inches is 1280 CSS pixels: the sheet scales by 0.8 to fill the page (the route sets
+     the deck's own page box in the two variables) */
   .ts-print-sheet {
-    width: 1280px;
-    height: 720px;
+    width: var(--ts-page-print-w, 1280px);
+    height: var(--ts-page-print-h, 720px);
     aspect-ratio: auto;
     --k: 0.8;
+  }
+
+  /* a paper layout prints its own box: the paper laid out at 1 pt per 1/0.6 px and zoomed by
+     0.8 lands on the paper whole (a Letter page's 1020 px box is 8.5 in at 96 px per in); the
+     PDF export takes the exact print scale path, this is the browser dialog's fallback */
+  .ts-print[data-paper='letter'] .ts-print-paper-page,
+  .ts-print[data-paper='a4'] .ts-print-paper-page {
+    width: var(--ts-paper-w);
+    height: var(--ts-paper-h);
+    zoom: 0.8;
+    border: 0;
+    background: #ffffff;
   }
 
   /* with notes: the sheet takes the upper 60 percent of the page, the notes the rest */

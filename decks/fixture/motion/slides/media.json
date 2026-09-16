@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "media",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A video that plays on entry and an audio that waits for a click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "clip",
+        "type": "media",
+        "kind": "video",
+        "source": {
+          "asset": "bars-1s"
+        },
+        "playback": {
+          "start": "auto"
+        },
+        "alt": "Colour bars for one second",
+        "pos": {
+          "x": 137,
+          "y": 220,
+          "w": 640,
+          "h": 360,
+          "z": 1
+        }
+      },
+      {
+        "id": "tone",
+        "type": "media",
+        "kind": "audio",
+        "source": {
+          "asset": "tone-1s"
+        },
+        "playback": {
+          "start": "click",
+          "volume": 50
+        },
+        "alt": "A 440 Hz tone for one second",
+        "pos": {
+          "x": 900,
+          "y": 220,
+          "w": 240,
+          "h": 240,
+          "z": 2
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "clip",
+      "effect": "playMedia",
+      "trigger": "withPrevious",
+      "durationMs": 500
+    }
+  ]
+}

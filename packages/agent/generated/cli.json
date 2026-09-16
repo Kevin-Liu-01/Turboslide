@@ -51,13 +51,9 @@
         {
           "key": "from",
           "flag": "--from",
-          "type": "\"gt-brand\" | \"blank\"",
+          "type": "\"gt-brand\" | \"blank\" | string",
           "required": true,
-          "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
-          "enum": [
-            "gt-brand",
-            "blank"
-          ]
+          "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; any id of the template index (decks/templates/templates.json) copies that template (gslides-parity SPEC-5 4.6)"
         },
         {
           "key": "id",
@@ -523,6 +519,13 @@
           "description": "Remove every guide"
         },
         {
+          "key": "colors",
+          "flag": "--colors",
+          "type": "record",
+          "required": false,
+          "description": "Guide colours by axis and position (`x:800`, `y:450`); null clears one (gslides-parity SPEC-5 7.7, Edit guides)"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -940,7 +943,7 @@
     },
     {
       "action": "slide.import",
-      "usage": "turboslide slide import <sourceDeckId> <slideIds> --after <after> --section <sectionId>",
+      "usage": "turboslide slide import <sourceDeckId> <slideIds> --file <sourceFile> --template <sourceTemplateId> --indexes <slideIndexes> --after <after> --section <sectionId> --keep-theme",
       "command": [
         "slide",
         "import"
@@ -951,11 +954,32 @@
       ],
       "options": [
         {
+          "key": "sourceFile",
+          "flag": "--file",
+          "type": "string",
+          "required": false,
+          "description": "A .pptx (or a bundle) the slides come from (gslides-parity SPEC-5 5.2)"
+        },
+        {
+          "key": "sourceTemplateId",
+          "flag": "--template",
+          "type": "string",
+          "required": false,
+          "description": "A template of the index the slides come from (SPEC-5 4.6)"
+        },
+        {
+          "key": "slideIndexes",
+          "flag": "--indexes",
+          "type": "integer[]",
+          "required": false,
+          "description": "The one based slide numbers to copy from a file (SPEC-5 5.2)"
+        },
+        {
           "key": "after",
           "flag": "--after",
           "type": "string",
           "required": false,
-          "description": "The slide the copies follow; first in the section when absent"
+          "description": "The slide the copies follow; the last slide when absent (gslides-parity SPEC-5 0.27)"
         },
         {
           "key": "sectionId",
@@ -965,6 +989,13 @@
           "description": "The section; the anchor's section, or the last section, when absent"
         },
         {
+          "key": "keepTheme",
+          "flag": "--keep-theme",
+          "type": "boolean",
+          "required": false,
+          "description": "Google's Keep original theme: the source's theme record joins In this presentation; off by default (SPEC-5 0.27)"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -972,7 +1003,11 @@
           "description": "The revision the caller read; a stale value is rejected with 409"
         }
       ],
-      "custom": [],
+      "custom": [
+        {
+          "flag": "--keep-theme"
+        }
+      ],
       "mutates": true,
       "milestone": "GS1"
     },
@@ -1709,7 +1744,7 @@
     },
     {
       "action": "block.adjust",
-      "usage": "turboslide block adjust <slideId>#<blockId> --transparency <transparency> --brightness <brightness> --contrast <contrast>",
+      "usage": "turboslide block adjust <slideId>#<blockId> --transparency <transparency> --brightness <brightness> --contrast <contrast> --reflection <reflection> --recolor <recolor>",
       "command": [
         "block",
         "adjust"
@@ -1736,6 +1771,20 @@
           "flag": "--contrast",
           "type": "number | null",
           "required": false
+        },
+        {
+          "key": "reflection",
+          "flag": "--reflection",
+          "type": "object | null",
+          "required": false,
+          "description": "Google's three Reflection sliders (gslides-parity SPEC-5 0.47); null removes it"
+        },
+        {
+          "key": "recolor",
+          "flag": "--recolor",
+          "type": "\"none\" | \"grayscale\" | \"sepia\" | \"negative\" | \"ink-light\" | \"ink-dark\" | \"ink-2-light\" | \"ink-2-dark\" | \"titanium-light\" | \"titanium-dark\" | \"green-light\" | \"green-dark\" | \"amber-light\" | \"amber-dark\" | \"red-light\" | \"red-dark\" | \"blue-light\" | \"blue-dark\" | null",
+          "required": false,
+          "description": "A Recolor preset (SPEC-5 0.47); null or none removes it"
         },
         {
           "key": "baseRevision",
@@ -1915,7 +1964,7 @@
     },
     {
       "action": "text.list",
-      "usage": "turboslide text list <slideId>#<blockId> --marker <marker> --preset <preset> --items <items> --level <level>",
+      "usage": "turboslide text list <slideId>#<blockId> --marker <marker> --preset <preset> --items <items> --level <level> --start <start> --prefix <prefix> --suffix <suffix>",
       "command": [
         "text",
         "list"
@@ -1981,6 +2030,27 @@
             1,
             -1
           ]
+        },
+        {
+          "key": "start",
+          "flag": "--start",
+          "type": "integer | null",
+          "required": false,
+          "description": "Restart numbering at this count; null returns to 1 (gslides-parity SPEC-5 7.7)"
+        },
+        {
+          "key": "prefix",
+          "flag": "--prefix",
+          "type": "string | null",
+          "required": false,
+          "description": "The text before each numeral; null removes it (SPEC-5 7.7)"
+        },
+        {
+          "key": "suffix",
+          "flag": "--suffix",
+          "type": "string | null",
+          "required": false,
+          "description": "The text after each numeral; null returns to the period (SPEC-5 7.7)"
         },
         {
           "key": "baseRevision",
@@ -2073,7 +2143,7 @@
     },
     {
       "action": "text.indent",
-      "usage": "turboslide text indent <slideId>#<blockId> --in --out --to <to> --items <items>",
+      "usage": "turboslide text indent <slideId>#<blockId> --in --out --to <to> --items <items> --first-line <firstLine> --hanging <hanging>",
       "command": [
         "text",
         "indent"
@@ -2112,6 +2182,20 @@
           "type": "integer[]",
           "required": false,
           "description": "List items whose level steps"
+        },
+        {
+          "key": "firstLine",
+          "flag": "--first-line",
+          "type": "number | null",
+          "required": false,
+          "description": "The first line indent in px; null clears it (gslides-parity SPEC-5 7.7)"
+        },
+        {
+          "key": "hanging",
+          "flag": "--hanging",
+          "type": "number | null",
+          "required": false,
+          "description": "The hanging indent in px; null clears it (SPEC-5 7.7)"
         },
         {
           "key": "baseRevision",
@@ -2531,7 +2615,7 @@
     },
     {
       "action": "table.cellStyle",
-      "usage": "turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash>",
+      "usage": "turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash> --edges <edges>",
       "command": [
         "table",
         "cell-style"
@@ -2558,6 +2642,13 @@
           "flag": "--border",
           "type": "object | null",
           "required": false
+        },
+        {
+          "key": "edges",
+          "flag": "--edges",
+          "type": "\"all\" | \"outer\" | \"inner\" | \"top\" | \"bottom\" | \"left\" | \"right\" | \"horizontal\" | \"vertical\"[]",
+          "required": false,
+          "description": "Google's edge picker over the cell range: all, outer, inner, top, bottom, left, right, horizontal, vertical (gslides-parity SPEC-5 7.7); every edge when absent"
         },
         {
           "key": "baseRevision",
@@ -2940,7 +3031,7 @@
         {
           "key": "role",
           "flag": "--role",
-          "type": "\"opener\" | \"mood\" | \"capture\" | \"detail\" | \"thumb\" | \"render\" | \"icon\" | \"logo\" | \"frame\" | \"other\"",
+          "type": "\"opener\" | \"mood\" | \"capture\" | \"detail\" | \"thumb\" | \"render\" | \"icon\" | \"logo\" | \"frame\" | \"other\" | \"media\"",
           "required": true,
           "enum": [
             "opener",
@@ -2952,7 +3043,8 @@
             "icon",
             "logo",
             "frame",
-            "other"
+            "other",
+            "media"
           ]
         },
         {
@@ -2964,7 +3056,7 @@
         {
           "key": "source",
           "flag": "--source",
-          "type": "object | object | object | object",
+          "type": "object | object | object | object | object",
           "required": false,
           "description": "The provenance record; built from title, artist, license and sourceUrl when omitted"
         },
@@ -3133,14 +3225,18 @@
         {
           "key": "pattern",
           "flag": "--pattern",
-          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\"",
+          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\" | \"floyd-steinberg\" | \"atkinson\" | \"halftone-dot\" | \"halftone-line\"",
           "required": false,
           "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
           "enum": [
             "bayer8",
             "bayer4",
             "blue64",
-            "random"
+            "random",
+            "floyd-steinberg",
+            "atkinson",
+            "halftone-dot",
+            "halftone-line"
           ]
         },
         {
@@ -3435,7 +3531,7 @@
     },
     {
       "action": "render.slide",
-      "usage": "turboslide render <slideIds> --theme <themes> --out <out> --json",
+      "usage": "turboslide render <slideIds> --theme <themes> --format <format> --text <text> --out <out> --json",
       "command": [
         "render"
       ],
@@ -3463,11 +3559,25 @@
         {
           "key": "format",
           "flag": "--format",
-          "type": "\"png\" | \"jpg\"",
+          "type": "\"png\" | \"jpg\" | \"svg\"",
           "required": false,
+          "description": "png (the default), jpg, or svg from the scene (gslides-parity SPEC-5 6.4)",
           "enum": [
             "png",
-            "jpg"
+            "jpg",
+            "svg"
+          ]
+        },
+        {
+          "key": "text",
+          "flag": "--text",
+          "type": "\"embed\" | \"outline\" | \"link\"",
+          "required": false,
+          "description": "svg only: embed the font (the default), outline the glyphs, or link the family names (SPEC-5 6.4); the preference's SVG text row when absent",
+          "enum": [
+            "embed",
+            "outline",
+            "link"
           ]
         },
         {
@@ -3567,7 +3677,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\" | \"text/spelling\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -3625,7 +3735,8 @@
             "html/sanitize",
             "export/non-native",
             "numbers/contradiction",
-            "count/hard-coded"
+            "count/hard-coded",
+            "text/spelling"
           ]
         }
       ],
@@ -3650,7 +3761,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\" | \"text/spelling\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -3708,7 +3819,8 @@
             "html/sanitize",
             "export/non-native",
             "numbers/contradiction",
-            "count/hard-coded"
+            "count/hard-coded",
+            "text/spelling"
           ]
         },
         {
@@ -3862,7 +3974,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --motion <motion> --media <media> --autoplay <autoplay> --loop --layout <layout> --paper <paper> --orientation <orientation> --order <order> --hide-background --verify --out <out>",
       "command": [
         "export"
       ],
@@ -3880,6 +3992,100 @@
             "native",
             "flatten"
           ]
+        },
+        {
+          "key": "motion",
+          "flag": "--motion",
+          "type": "\"keep\" | \"drop\"",
+          "required": false,
+          "description": "Editable text: keep the transitions and the timing tree (the default) or drop them (gslides-parity SPEC-5 2.4)",
+          "enum": [
+            "keep",
+            "drop"
+          ]
+        },
+        {
+          "key": "media",
+          "flag": "--media",
+          "type": "\"embed\" | \"poster\" | \"url\"",
+          "required": false,
+          "description": "Embed the stored media files (the default under the deck cap), carry posters alone, or link them for the web page (SPEC-5 3.6)",
+          "enum": [
+            "embed",
+            "poster",
+            "url"
+          ]
+        },
+        {
+          "key": "autoplay",
+          "flag": "--autoplay",
+          "type": "integer",
+          "required": false,
+          "description": "The web page advances one step every this many ms; 0 or absent is off (SPEC-5 2.3)"
+        },
+        {
+          "key": "loop",
+          "flag": "--loop",
+          "type": "boolean",
+          "required": false,
+          "description": "The web page restarts after the last slide under autoplay"
+        },
+        {
+          "key": "layout",
+          "flag": "--layout",
+          "type": "\"slides\" | \"notes\" | \"handout-2\" | \"handout-3\" | \"handout-4\" | \"handout-6\" | \"handout-9\"",
+          "required": false,
+          "description": "PDF: one slide per page, one slide with notes, or a handout of 2, 3, 4, 6 or 9 (SPEC-5 6.2)",
+          "enum": [
+            "slides",
+            "notes",
+            "handout-2",
+            "handout-3",
+            "handout-4",
+            "handout-6",
+            "handout-9"
+          ]
+        },
+        {
+          "key": "paper",
+          "flag": "--paper",
+          "type": "\"slide\" | \"letter\" | \"a4\"",
+          "required": false,
+          "description": "PDF: the slide's own page (the default), Letter or A4 (SPEC-5 6.2)",
+          "enum": [
+            "slide",
+            "letter",
+            "a4"
+          ]
+        },
+        {
+          "key": "orientation",
+          "flag": "--orientation",
+          "type": "\"landscape\" | \"portrait\"",
+          "required": false,
+          "description": "PDF on paper: landscape or portrait",
+          "enum": [
+            "landscape",
+            "portrait"
+          ]
+        },
+        {
+          "key": "order",
+          "flag": "--order",
+          "type": "\"across\" | \"down\"",
+          "required": false,
+          "description": "PDF handouts: fill across the rows first or down the columns first",
+          "enum": [
+            "across",
+            "down"
+          ]
+        },
+        {
+          "key": "hideBackground",
+          "flag": "--hide-background",
+          "type": "boolean",
+          "required": false,
+          "description": "PDF: the light appearance on white with every background colour removed (SPEC-5 6.2)"
         },
         {
           "key": "theme",
@@ -3998,7 +4204,7 @@
     },
     {
       "action": "export.check",
-      "usage": "turboslide export check <file> --python <python> --out <out>",
+      "usage": "turboslide export check <file> --python <python> --out <out> --page <page> --libreoffice",
       "command": [
         "export",
         "check"
@@ -4027,9 +4233,27 @@
           "type": "string",
           "required": false,
           "description": "Where the QuickLook thumbnail lands; defaults to a folder beside the file"
+        },
+        {
+          "key": "page",
+          "flag": "--page",
+          "type": "string",
+          "required": false,
+          "description": "The page the file must carry, `1200x900` in sheet px; 1600x900 when absent (gslides-parity SPEC-5 6.1)"
+        },
+        {
+          "key": "libreoffice",
+          "flag": "--libreoffice",
+          "type": "boolean",
+          "required": false,
+          "description": "Read an ODP back through LibreOffice when soffice exists (SPEC-5 6.3)"
         }
       ],
-      "custom": [],
+      "custom": [
+        {
+          "flag": "--libreoffice"
+        }
+      ],
       "mutates": false,
       "milestone": "M6"
     },
@@ -4076,7 +4300,7 @@
     },
     {
       "action": "build.run",
-      "usage": "turboslide build --out <out> --budget <budgetMB>",
+      "usage": "turboslide build --out <out> --budget <budgetMB> --motion <motion> --autoplay <autoplay> --loop --media <media>",
       "command": [
         "build"
       ],
@@ -4114,6 +4338,43 @@
           "type": "boolean",
           "required": false,
           "description": "Carry the speaker notes into the file"
+        },
+        {
+          "key": "motion",
+          "flag": "--motion",
+          "type": "\"keep\" | \"drop\"",
+          "required": false,
+          "description": "Keep the transitions and animations in the web page (the default) or drop them (gslides-parity SPEC-5 2.3)",
+          "enum": [
+            "keep",
+            "drop"
+          ]
+        },
+        {
+          "key": "autoplay",
+          "flag": "--autoplay",
+          "type": "integer",
+          "required": false,
+          "description": "Advance one step every this many ms; 0 or absent is off (SPEC-5 2.3)"
+        },
+        {
+          "key": "loop",
+          "flag": "--loop",
+          "type": "boolean",
+          "required": false,
+          "description": "Restart after the last slide under autoplay"
+        },
+        {
+          "key": "media",
+          "flag": "--media",
+          "type": "\"embed\" | \"poster\" | \"url\"",
+          "required": false,
+          "description": "Inline the media files (the default under the cap), posters alone, or links to the studio (SPEC-5 3.6)",
+          "enum": [
+            "embed",
+            "poster",
+            "url"
+          ]
         }
       ],
       "custom": [],
@@ -6046,6 +6307,13 @@
           "required": false
         },
         {
+          "key": "clone",
+          "flag": "--clone",
+          "type": "boolean",
+          "required": false,
+          "description": "Writes the 320 px twin variant of every picture asset that lacks one (SPEC-5 11)"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -6186,6 +6454,1623 @@
       ],
       "mutates": true,
       "milestone": "GS3"
+    },
+    {
+      "action": "motion.setTransition",
+      "usage": "turboslide motion transition <slideId> --kind <kind> --duration <durationMs> --apply-to-all",
+      "command": [
+        "motion",
+        "transition"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "kind",
+          "flag": "--kind",
+          "type": "\"none\" | \"dissolve\" | \"fade\" | \"slideRight\" | \"slideLeft\" | \"flip\" | \"cube\" | \"gallery\"",
+          "required": false,
+          "description": "Google's eight transitions in Google's order; the slide's current kind when absent",
+          "enum": [
+            "none",
+            "dissolve",
+            "fade",
+            "slideRight",
+            "slideLeft",
+            "flip",
+            "cube",
+            "gallery"
+          ]
+        },
+        {
+          "key": "durationMs",
+          "flag": "--duration",
+          "type": "integer",
+          "required": false,
+          "description": "100 to 5000 ms; 500 for a new transition (gslides-parity SPEC-5 0.11)"
+        },
+        {
+          "key": "applyToAll",
+          "flag": "--apply-to-all",
+          "type": "boolean",
+          "required": false,
+          "description": "Google's Apply to all slides: every slide takes the transition in one write"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--apply-to-all"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "motion.add",
+      "usage": "turboslide motion add <slideId> <blockIds> --effect <effect> --direction <direction> --trigger <trigger> --duration <durationMs> --by-paragraph --at <at>",
+      "command": [
+        "motion",
+        "add"
+      ],
+      "positionals": [
+        "slideId",
+        "blockIds"
+      ],
+      "options": [
+        {
+          "key": "effect",
+          "flag": "--effect",
+          "type": "\"appear\" | \"disappear\" | \"fadeIn\" | \"fadeOut\" | \"flyIn\" | \"flyOut\" | \"zoomIn\" | \"zoomOut\" | \"spin\" | \"playMedia\"",
+          "required": false,
+          "description": "appear when absent",
+          "enum": [
+            "appear",
+            "disappear",
+            "fadeIn",
+            "fadeOut",
+            "flyIn",
+            "flyOut",
+            "zoomIn",
+            "zoomOut",
+            "spin",
+            "playMedia"
+          ]
+        },
+        {
+          "key": "direction",
+          "flag": "--direction",
+          "type": "\"left\" | \"right\" | \"top\" | \"bottom\"",
+          "required": false,
+          "description": "flyIn and flyOut only; left when absent",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "key": "trigger",
+          "flag": "--trigger",
+          "type": "\"click\" | \"afterPrevious\" | \"withPrevious\"",
+          "required": false,
+          "description": "click when absent",
+          "enum": [
+            "click",
+            "afterPrevious",
+            "withPrevious"
+          ]
+        },
+        {
+          "key": "durationMs",
+          "flag": "--duration",
+          "type": "integer",
+          "required": false,
+          "description": "100 to 5000 ms; 500 when absent"
+        },
+        {
+          "key": "byParagraph",
+          "flag": "--by-paragraph",
+          "type": "boolean",
+          "required": false,
+          "description": "One step per paragraph or list item of a text block (gslides-parity SPEC-5 1.3)"
+        },
+        {
+          "key": "at",
+          "flag": "--at",
+          "type": "integer",
+          "required": false,
+          "description": "The list index the new entries land at; the end when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "motion.update",
+      "usage": "turboslide motion update <slideId> <animationId> --effect <effect> --direction <direction> --trigger <trigger> --duration <durationMs> --by-paragraph",
+      "command": [
+        "motion",
+        "update"
+      ],
+      "positionals": [
+        "slideId",
+        "animationId"
+      ],
+      "options": [
+        {
+          "key": "effect",
+          "flag": "--effect",
+          "type": "\"appear\" | \"disappear\" | \"fadeIn\" | \"fadeOut\" | \"flyIn\" | \"flyOut\" | \"zoomIn\" | \"zoomOut\" | \"spin\" | \"playMedia\"",
+          "required": false,
+          "enum": [
+            "appear",
+            "disappear",
+            "fadeIn",
+            "fadeOut",
+            "flyIn",
+            "flyOut",
+            "zoomIn",
+            "zoomOut",
+            "spin",
+            "playMedia"
+          ]
+        },
+        {
+          "key": "direction",
+          "flag": "--direction",
+          "type": "\"left\" | \"right\" | \"top\" | \"bottom\" | null",
+          "required": false
+        },
+        {
+          "key": "trigger",
+          "flag": "--trigger",
+          "type": "\"click\" | \"afterPrevious\" | \"withPrevious\"",
+          "required": false,
+          "enum": [
+            "click",
+            "afterPrevious",
+            "withPrevious"
+          ]
+        },
+        {
+          "key": "durationMs",
+          "flag": "--duration",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "byParagraph",
+          "flag": "--by-paragraph",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--by-paragraph"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "motion.remove",
+      "usage": "turboslide motion remove <slideId> <animationId> --block <blockId>",
+      "command": [
+        "motion",
+        "remove"
+      ],
+      "positionals": [
+        "slideId",
+        "animationId"
+      ],
+      "options": [
+        {
+          "key": "blockId",
+          "flag": "--block",
+          "type": "string",
+          "required": false,
+          "description": "Every animation of this block"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "motion.reorder",
+      "usage": "turboslide motion reorder <slideId> <order>",
+      "command": [
+        "motion",
+        "reorder"
+      ],
+      "positionals": [
+        "slideId",
+        "order"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "motion.compile",
+      "usage": "turboslide motion compile <slideId> --json",
+      "command": [
+        "motion",
+        "compile"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "media.insert",
+      "usage": "turboslide media insert <slideId> --file <file> --url <url> --upload <upload> --youtube <youtube> --start <start> --start-at <startMs> --end-at <endMs> --mute --loop --volume <volume> --alt <alt>",
+      "command": [
+        "media",
+        "insert"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "kind",
+          "flag": "--kind",
+          "type": "\"audio\" | \"video\"",
+          "required": false,
+          "description": "audio or video; read from the container when absent",
+          "enum": [
+            "audio",
+            "video"
+          ]
+        },
+        {
+          "key": "file",
+          "flag": "--file",
+          "type": "string",
+          "required": false,
+          "description": "A path on the machine"
+        },
+        {
+          "key": "url",
+          "flag": "--url",
+          "type": "string",
+          "required": false,
+          "description": "An http(s) URL fetched through safeFetch and stored"
+        },
+        {
+          "key": "upload",
+          "flag": "--upload",
+          "type": "string",
+          "required": false,
+          "description": "Hosted: the key of a presigned client upload"
+        },
+        {
+          "key": "youtube",
+          "flag": "--youtube",
+          "type": "string",
+          "required": false,
+          "description": "A YouTube URL in any of the eight forms, or the eleven character video id"
+        },
+        {
+          "key": "pos",
+          "flag": "--pos",
+          "type": "object",
+          "required": false,
+          "description": "The box; a centred 16:9 box when absent"
+        },
+        {
+          "key": "playback",
+          "flag": "--playback",
+          "type": "object",
+          "required": false,
+          "description": "Google’s playback fields; Play (on click) when absent"
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "title",
+          "flag": "--title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--start",
+          "template": "<start>"
+        },
+        {
+          "flag": "--start-at",
+          "template": "<startMs>"
+        },
+        {
+          "flag": "--end-at",
+          "template": "<endMs>"
+        },
+        {
+          "flag": "--volume",
+          "template": "<volume>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "media.setPlayback",
+      "usage": "turboslide media playback <slideId>#<blockId> --start <start> --start-at <startMs> --end-at <endMs> --mute --loop --volume <volume> --hide-icon --no-stop-on-slide-change",
+      "command": [
+        "media",
+        "playback"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "start",
+          "flag": "--start",
+          "type": "\"click\" | \"auto\" | \"manual\"",
+          "required": false,
+          "enum": [
+            "click",
+            "auto",
+            "manual"
+          ]
+        },
+        {
+          "key": "startMs",
+          "flag": "--start-at",
+          "type": "integer | null",
+          "required": false
+        },
+        {
+          "key": "endMs",
+          "flag": "--end-at",
+          "type": "integer | null",
+          "required": false
+        },
+        {
+          "key": "mute",
+          "flag": "--mute",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "loop",
+          "flag": "--loop",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "volume",
+          "flag": "--volume",
+          "type": "number | null",
+          "required": false
+        },
+        {
+          "key": "hideIcon",
+          "flag": "--hide-icon",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "stopOnSlideChange",
+          "flag": "--stop-on-slide-change",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--no-stop-on-slide-change"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "media.poster",
+      "usage": "turboslide media poster <slideId>#<blockId> --at <atMs> --file <file>",
+      "command": [
+        "media",
+        "poster"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "atMs",
+          "flag": "--at",
+          "type": "integer",
+          "required": false,
+          "description": "The frame time of a video"
+        },
+        {
+          "key": "file",
+          "flag": "--file",
+          "type": "string",
+          "required": false,
+          "description": "A picture file used as the poster"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "media.info",
+      "usage": "turboslide media info <id> --refresh",
+      "command": [
+        "media",
+        "info"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "refresh",
+          "flag": "--refresh",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--refresh"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "media.list",
+      "usage": "turboslide media list",
+      "command": [
+        "media",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "camera.capture",
+      "usage": "turboslide camera capture --slide <slideId> --from <studio>",
+      "command": [
+        "camera",
+        "capture"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "slideId",
+          "flag": "--slide",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "pos",
+          "flag": "--pos",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "studio",
+          "flag": "--from",
+          "type": "string",
+          "required": false,
+          "description": "The studio to talk to; the hosts.json default otherwise"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "view.presentOnScreen",
+      "usage": "turboslide view present --screen <screen> --from <studio>",
+      "command": [
+        "view",
+        "present"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "screen",
+          "flag": "--screen",
+          "type": "\"other\" | \"this\"",
+          "required": true,
+          "description": "other is Google's row; this keeps the show here",
+          "enum": [
+            "other",
+            "this"
+          ]
+        },
+        {
+          "key": "slideId",
+          "flag": "--slide-id",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "studio",
+          "flag": "--from",
+          "type": "string",
+          "required": false,
+          "description": "The studio to talk to; the hosts.json default otherwise"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "template.list",
+      "usage": "turboslide template list",
+      "command": [
+        "template",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "template.slides",
+      "usage": "turboslide template slides <id>",
+      "command": [
+        "template",
+        "slides"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "buildingBlock.list",
+      "usage": "turboslide blocks list --category <category>",
+      "command": [
+        "blocks",
+        "list"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "category",
+          "flag": "--category",
+          "type": "\"agendas\" | \"lists\" | \"key-statistics\" | \"quotes\" | \"headlines\" | \"text-callouts\" | \"calls-to-action\" | \"people\" | \"cards\"",
+          "required": false,
+          "enum": [
+            "agendas",
+            "lists",
+            "key-statistics",
+            "quotes",
+            "headlines",
+            "text-callouts",
+            "calls-to-action",
+            "people",
+            "cards"
+          ]
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "buildingBlock.insert",
+      "usage": "turboslide blocks insert <slideId> <id> --at <at>",
+      "command": [
+        "blocks",
+        "insert"
+      ],
+      "positionals": [
+        "slideId",
+        "id"
+      ],
+      "options": [
+        {
+          "key": "at",
+          "flag": "--at",
+          "type": "[number, number]",
+          "required": false,
+          "description": "The top left in sheet px; the content box’s when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "import.pptx",
+      "usage": "turboslide import <file> --into <into> --theme <theme> --sheet <sheet> --snap-ladder --no-master-shapes --comments --dry-run --json",
+      "command": [
+        "import"
+      ],
+      "positionals": [
+        "file"
+      ],
+      "options": [
+        {
+          "key": "into",
+          "flag": "--into",
+          "type": "string",
+          "required": false,
+          "description": "The deck id to create or write into; derived from the file name when absent"
+        },
+        {
+          "key": "theme",
+          "flag": "--theme",
+          "type": "\"adopt\" | \"keep\"",
+          "required": false,
+          "description": "adopt (the default) snaps neutrals to tokens; keep keeps every hex",
+          "enum": [
+            "adopt",
+            "keep"
+          ]
+        },
+        {
+          "key": "sheet",
+          "flag": "--sheet",
+          "type": "\"match\" | \"fit\"",
+          "required": false,
+          "description": "match (the default) sets the page to the source’s; fit scales into the current page",
+          "enum": [
+            "match",
+            "fit"
+          ]
+        },
+        {
+          "key": "snapLadder",
+          "flag": "--snap-ladder",
+          "type": "boolean",
+          "required": false,
+          "description": "Snap text sizes to the type ladder; off by default"
+        },
+        {
+          "key": "masterShapes",
+          "flag": "--master-shapes",
+          "type": "boolean",
+          "required": false,
+          "description": "Bring the master and layout shapes onto each slide; on by default"
+        },
+        {
+          "key": "comments",
+          "flag": "--comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Import the comment threads; off by default"
+        },
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.import",
+      "usage": "turboslide theme import <file> --deck-id <deckId> --index <themeIndex>",
+      "command": [
+        "theme",
+        "import"
+      ],
+      "positionals": [
+        "file"
+      ],
+      "options": [
+        {
+          "key": "deckId",
+          "flag": "--deck-id",
+          "type": "string",
+          "required": false,
+          "description": "A Turboslide deck whose theme edits and imported records are copied"
+        },
+        {
+          "key": "themeIndex",
+          "flag": "--index",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.applyImported",
+      "usage": "turboslide theme apply-imported <index>",
+      "command": [
+        "theme",
+        "apply-imported"
+      ],
+      "positionals": [
+        "index"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "deck.setPageSize",
+      "usage": "turboslide deck page-size --preset <preset> --width <width> --height <height> --unit <unit> --objects <objects>",
+      "command": [
+        "deck",
+        "page-size"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "preset",
+          "flag": "--preset",
+          "type": "\"standard-4-3\" | \"widescreen-16-9\" | \"widescreen-16-10\" | \"custom\"",
+          "required": false,
+          "enum": [
+            "standard-4-3",
+            "widescreen-16-9",
+            "widescreen-16-10",
+            "custom"
+          ]
+        },
+        {
+          "key": "width",
+          "flag": "--width",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "height",
+          "flag": "--height",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "unit",
+          "flag": "--unit",
+          "type": "\"in\" | \"cm\" | \"pt\" | \"px\"",
+          "required": false,
+          "description": "The unit of width and height; px, sheet pixels, when absent",
+          "enum": [
+            "in",
+            "cm",
+            "pt",
+            "px"
+          ]
+        },
+        {
+          "key": "objects",
+          "flag": "--objects",
+          "type": "\"keep\" | \"fit\" | \"maximize\"",
+          "required": false,
+          "description": "keep (Google's default) leaves every coordinate; fit and maximize scale the canvas objects (gslides-parity SPEC-5 6.1)",
+          "enum": [
+            "keep",
+            "fit",
+            "maximize"
+          ]
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "prefs.get",
+      "usage": "turboslide prefs get <path>",
+      "command": [
+        "prefs",
+        "get"
+      ],
+      "positionals": [
+        "path"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "prefs.set",
+      "usage": "turboslide prefs set <path> <value>",
+      "command": [
+        "prefs",
+        "set"
+      ],
+      "positionals": [
+        "path",
+        "value"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "text.autocorrect",
+      "usage": "turboslide text autocorrect <slideId>#<blockId> <path> --dry-run",
+      "command": [
+        "text",
+        "autocorrect"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId",
+        "path"
+      ],
+      "options": [
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--dry-run"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "spelling.check",
+      "usage": "turboslide spelling check --slides <slideIds> --notes --alt --json",
+      "command": [
+        "spelling",
+        "check"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "slideIds",
+          "flag": "--slides",
+          "type": "\"all\" | string[]",
+          "required": false,
+          "description": "A subset; 'all' when absent"
+        },
+        {
+          "key": "notes",
+          "flag": "--notes",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "language",
+          "flag": "--language",
+          "type": "string",
+          "required": false,
+          "description": "The dictionary; the deck's language when absent"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "spelling.replace",
+      "usage": "turboslide spelling replace <slideId>#<blockId> <path> --range <range> <text> --all",
+      "command": [
+        "spelling",
+        "replace"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId",
+        "path",
+        "text"
+      ],
+      "options": [
+        {
+          "key": "range",
+          "flag": "--range",
+          "type": "[integer, integer]",
+          "required": true,
+          "description": "The range in the plain text of the Text, [start, end], one character per paragraph break"
+        },
+        {
+          "key": "all",
+          "flag": "--all",
+          "type": "boolean",
+          "required": false,
+          "description": "Every occurrence of the word in the deck"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--all"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "dictionary.add",
+      "usage": "turboslide dictionary add <word>",
+      "command": [
+        "dictionary",
+        "add"
+      ],
+      "positionals": [
+        "word"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "dictionary.remove",
+      "usage": "turboslide dictionary remove <word>",
+      "command": [
+        "dictionary",
+        "remove"
+      ],
+      "positionals": [
+        "word"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "dictionary.list",
+      "usage": "turboslide dictionary list",
+      "command": [
+        "dictionary",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "dictionary.lookup",
+      "usage": "turboslide dictionary lookup <word> --language <language>",
+      "command": [
+        "dictionary",
+        "lookup"
+      ],
+      "positionals": [
+        "word"
+      ],
+      "options": [
+        {
+          "key": "language",
+          "flag": "--language",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "equation.insert",
+      "usage": "turboslide equation insert <slideId> <tex> --display <display> --alt <alt>",
+      "command": [
+        "equation",
+        "insert"
+      ],
+      "positionals": [
+        "slideId",
+        "tex"
+      ],
+      "options": [
+        {
+          "key": "pos",
+          "flag": "--pos",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "display",
+          "flag": "--display",
+          "type": "\"inline\" | \"block\"",
+          "required": false,
+          "enum": [
+            "inline",
+            "block"
+          ]
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "equation.render",
+      "usage": "turboslide equation render <tex> --display <display> --out <out>",
+      "command": [
+        "equation",
+        "render"
+      ],
+      "positionals": [
+        "tex"
+      ],
+      "options": [
+        {
+          "key": "display",
+          "flag": "--display",
+          "type": "\"inline\" | \"block\"",
+          "required": false,
+          "enum": [
+            "inline",
+            "block"
+          ]
+        },
+        {
+          "key": "size",
+          "flag": "--size",
+          "type": "number",
+          "required": false,
+          "description": "Font size in sheet px; the body size when absent"
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "\"mathml\" | \"png\"",
+          "required": false,
+          "description": "mathml (the default) or png, the raster beside it",
+          "enum": [
+            "mathml",
+            "png"
+          ]
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "equation.symbols",
+      "usage": "turboslide equation symbols --json",
+      "command": [
+        "equation",
+        "symbols"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.get",
+      "usage": "turboslide theme get",
+      "command": [
+        "theme",
+        "get"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.set",
+      "usage": "turboslide theme set <path> <value>",
+      "command": [
+        "theme",
+        "set"
+      ],
+      "positionals": [
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.rename",
+      "usage": "turboslide theme rename <name>",
+      "command": [
+        "theme",
+        "rename"
+      ],
+      "positionals": [
+        "name"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "theme.reset",
+      "usage": "turboslide theme reset <path>",
+      "command": [
+        "theme",
+        "reset"
+      ],
+      "positionals": [
+        "path"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.list",
+      "usage": "turboslide layout list",
+      "command": [
+        "layout",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.create",
+      "usage": "turboslide layout create --from <from> --name <name>",
+      "command": [
+        "layout",
+        "create"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "from",
+          "flag": "--from",
+          "type": "\"title\" | \"opener\" | \"split\" | \"cols\" | \"title-only\" | \"one-column\" | \"statement\" | \"section-description\" | \"mood\" | \"big-number\" | \"blank\" | \"rows\" | \"plain\" | \"table\" | \"figure\" | \"pair\" | \"tiles\" | \"details\" | \"board\" | \"matrix\" | \"closing\" | string",
+          "required": false
+        },
+        {
+          "key": "name",
+          "flag": "--name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.duplicate",
+      "usage": "turboslide layout duplicate <id>",
+      "command": [
+        "layout",
+        "duplicate"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.rename",
+      "usage": "turboslide layout rename <id> <name>",
+      "command": [
+        "layout",
+        "rename"
+      ],
+      "positionals": [
+        "id",
+        "name"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.delete",
+      "usage": "turboslide layout delete <id> --confirm",
+      "command": [
+        "layout",
+        "delete"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "confirm",
+          "flag": "--confirm",
+          "type": "true",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--confirm"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "layout.setPlaceholder",
+      "usage": "turboslide layout placeholder <layoutId> <blockId> <placeholder>",
+      "command": [
+        "layout",
+        "placeholder"
+      ],
+      "positionals": [
+        "layoutId",
+        "blockId",
+        "placeholder"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "chat.send",
+      "usage": "turboslide chat send <text> --to <studio>",
+      "command": [
+        "chat",
+        "send"
+      ],
+      "positionals": [
+        "text"
+      ],
+      "options": [
+        {
+          "key": "studio",
+          "flag": "--to",
+          "type": "string",
+          "required": false,
+          "description": "The studio to talk to; the hosts.json default otherwise"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "chat.list",
+      "usage": "turboslide chat list --since <since>",
+      "command": [
+        "chat",
+        "list"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "string",
+          "required": false,
+          "description": "An ISO time; everything retained when absent"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS5"
+    },
+    {
+      "action": "chat.clear",
+      "usage": "turboslide chat clear --to <studio>",
+      "command": [
+        "chat",
+        "clear"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "studio",
+          "flag": "--to",
+          "type": "string",
+          "required": false,
+          "description": "The studio to talk to; the hosts.json default otherwise"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "version.delete",
+      "usage": "turboslide version delete --up-to <upTo> --all --confirm",
+      "command": [
+        "version",
+        "delete"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "upTo",
+          "flag": "--up-to",
+          "type": "integer",
+          "required": false,
+          "description": "The version record and every older one"
+        },
+        {
+          "key": "all",
+          "flag": "--all",
+          "type": "boolean",
+          "required": false,
+          "description": "Delete history: every record"
+        },
+        {
+          "key": "confirm",
+          "flag": "--confirm",
+          "type": "true",
+          "required": true
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--confirm"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS5"
+    },
+    {
+      "action": "font.list",
+      "usage": "turboslide fonts list --json",
+      "command": [
+        "fonts",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS5"
     }
   ]
 }

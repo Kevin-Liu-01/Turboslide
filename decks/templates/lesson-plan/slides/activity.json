@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "activity",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Activity",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "In pairs, draw the cycle and label each step; twelve minutes.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "",
+        "fit": "width",
+        "caption": "A labelled drawing from last year’s class",
+        "captionSize": 16
+      }
+    ]
+  },
+  "title": "Activity"
+}

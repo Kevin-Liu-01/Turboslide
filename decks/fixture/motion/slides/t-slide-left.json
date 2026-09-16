@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "t-slide-left",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Slide from left, the star spins on click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "star5",
+        "stroke": "ink",
+        "text": "Spin",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "fill": "plate",
+        "pos": {
+          "x": 700,
+          "y": 300,
+          "w": 300,
+          "h": 300,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "slideLeft",
+    "durationMs": 1000
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "spin",
+      "trigger": "click",
+      "durationMs": 2000
+    }
+  ]
+}

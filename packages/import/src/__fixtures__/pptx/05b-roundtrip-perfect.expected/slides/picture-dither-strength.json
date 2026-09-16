@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "picture-dither-strength",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A dithered picture at a box",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 700,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:picture-dither-strength#h/text"
+        }
+      },
+      {
+        "id": "p",
+        "type": "text",
+        "text": "The two tone plane is composited at 60 percent over the continuous picture, so the tones show through the screen.",
+        "pos": {
+          "x": 137,
+          "y": 205,
+          "w": 700,
+          "h": 66,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:picture-dither-strength#p/text"
+        }
+      }
+    ]
+  },
+  "title": "A dithered picture at a box",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide19.xml",
+    "pptxSlideId": 274
+  }
+}

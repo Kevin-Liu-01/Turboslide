@@ -1,0 +1,89 @@
+{
+  "id": "cards/two-cards",
+  "category": "cards",
+  "label": "Two cards",
+  "blocks": [
+    {
+      "id": "card-1",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 620,
+        "h": 360,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "stroke": "hair",
+      "width": 1
+    },
+    {
+      "id": "title-1",
+      "pos": {
+        "x": 32,
+        "y": 32,
+        "w": 556,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Option one"
+    },
+    {
+      "id": "text-1",
+      "pos": {
+        "x": 32,
+        "y": 100,
+        "w": 556,
+        "h": 200,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "What the option costs, what it gives and who picks it."
+    },
+    {
+      "id": "card-2",
+      "pos": {
+        "x": 706,
+        "y": 0,
+        "w": 620,
+        "h": 360,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "stroke": "hair",
+      "width": 1
+    },
+    {
+      "id": "title-2",
+      "pos": {
+        "x": 738,
+        "y": 32,
+        "w": 556,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Option two"
+    },
+    {
+      "id": "text-2",
+      "pos": {
+        "x": 738,
+        "y": 100,
+        "w": 556,
+        "h": 200,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "What the option costs, what it gives and who picks it."
+    }
+  ],
+  "box": [
+    1326,
+    360
+  ]
+}

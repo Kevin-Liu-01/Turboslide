@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "heading",
+        "type": "text",
+        "text": "Export fixture",
+        "pos": {
+          "x": 137,
+          "y": 423.56,
+          "w": 1326,
+          "h": 89.76,
+          "z": 1
+        },
+        "typography": {
+          "size": 88,
+          "leading": 1.02
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:title#heading/text"
+        }
+      },
+      {
+        "id": "lead",
+        "type": "text",
+        "text": "One of every object the Google Slides parity round added, for both export modes.",
+        "pos": {
+          "x": 137,
+          "y": 531.84,
+          "w": 901.45,
+          "h": 75.39,
+          "z": 2
+        },
+        "typography": {
+          "size": 26,
+          "leading": 1.45
+        },
+        "color": "ink-2",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:title#lead/text"
+        }
+      }
+    ]
+  },
+  "title": "Export fixture",
+  "ext": {
+    "pptxPart": "ppt/slides/slide1.xml",
+    "pptxSlideId": 256
+  }
+}

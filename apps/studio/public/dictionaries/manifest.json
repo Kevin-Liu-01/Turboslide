@@ -1,0 +1,136 @@
+{
+  "$comment": "Written by scripts/check-dictionaries.mjs --write from the dictionary-* packages of packages/spelling; the spell check Worker loads index.aff.gz and index.dic.gz per tag and inflates them; LICENSE is each package’s notice (gslides-parity SPEC-5 7.2).",
+  "files": {
+    "aff": "index.aff.gz",
+    "dic": "index.dic.gz",
+    "licence": "LICENSE"
+  },
+  "tags": {
+    "en": {
+      "package": "dictionary-en",
+      "version": "4.0.0",
+      "licence": "MIT AND BSD",
+      "spdx": "(MIT AND BSD)",
+      "aff": {
+        "bytes": 3086,
+        "gzipBytes": 997,
+        "sha256": "8ae1f19d4840d957728ad90555d5a8dff6cc5c046279c95ff0c00fc0a0136c7b"
+      },
+      "dic": {
+        "bytes": 551762,
+        "gzipBytes": 193142,
+        "sha256": "f0b1a234bd178bdd01875b2a392a9647f888b8fe879f79c52aae62c2759b3647"
+      },
+      "gzipBytes": 194139,
+      "budgetGzipBytes": 220000
+    },
+    "en-GB": {
+      "package": "dictionary-en-gb",
+      "version": "3.0.0",
+      "licence": "MIT AND BSD",
+      "spdx": "(MIT AND BSD)",
+      "aff": {
+        "bytes": 3086,
+        "gzipBytes": 997,
+        "sha256": "8ae1f19d4840d957728ad90555d5a8dff6cc5c046279c95ff0c00fc0a0136c7b"
+      },
+      "dic": {
+        "bytes": 552106,
+        "gzipBytes": 193113,
+        "sha256": "869fe17ba4ee4b5401c60a666ee2d6a3dcc237f460b7294435df1cc6a799aa57"
+      },
+      "gzipBytes": 194110,
+      "budgetGzipBytes": 220000
+    },
+    "fr": {
+      "package": "dictionary-fr",
+      "version": "3.0.0",
+      "licence": "MPL-2.0",
+      "spdx": "MPL-2.0",
+      "aff": {
+        "bytes": 199870,
+        "gzipBytes": 23622,
+        "sha256": "05a735d34c912e4e381ff08ee7c747923ccf5cf9dca81d8467982fa1ca51c2b7"
+      },
+      "dic": {
+        "bytes": 1229133,
+        "gzipBytes": 315548,
+        "sha256": "984e933237bc1224a48f42828233be9b03228260ef67aa8e2bdddcd03a26230d"
+      },
+      "gzipBytes": 339170,
+      "budgetGzipBytes": 380000
+    },
+    "es": {
+      "package": "dictionary-es",
+      "version": "4.0.0",
+      "licence": "MPL-1.1",
+      "spdx": "(GPL-3.0 OR LGPL-3.0 OR MPL-1.1)",
+      "aff": {
+        "bytes": 167135,
+        "gzipBytes": 25632,
+        "sha256": "892039d59db11d747061b81c3a92a52d48ba0e055b5835af1943cbd3c2fba85b"
+      },
+      "dic": {
+        "bytes": 706202,
+        "gzipBytes": 207437,
+        "sha256": "907f786a8ceb3456722b20ad91dd4dbe99c5c16e45015ea63155e36f26b06d2c"
+      },
+      "gzipBytes": 233069,
+      "budgetGzipBytes": 260000
+    },
+    "pt": {
+      "package": "dictionary-pt",
+      "version": "4.0.0",
+      "licence": "MPL-2.0",
+      "spdx": "(LGPL-3.0 OR MPL-2.0)",
+      "aff": {
+        "bytes": 979789,
+        "gzipBytes": 94448,
+        "sha256": "a9f3621b94eb4d6838474bf9982027758e77dcb248815f49409b1a4a477dbd27"
+      },
+      "dic": {
+        "bytes": 4477692,
+        "gzipBytes": 1288715,
+        "sha256": "32e2edd83541d58613bcc83ef731a79aadf85ed57e977a16c6b5f711a7a36cee"
+      },
+      "gzipBytes": 1383163,
+      "budgetGzipBytes": 1500000
+    },
+    "pt-PT": {
+      "package": "dictionary-pt-pt",
+      "version": "2.0.0",
+      "licence": "MPL-1.1",
+      "spdx": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+      "aff": {
+        "bytes": 95089,
+        "gzipBytes": 9718,
+        "sha256": "975a209fcc892cb382fa5f34a28c391a39668661ce373ae071287809c5fcae24"
+      },
+      "dic": {
+        "bytes": 1475328,
+        "gzipBytes": 221350,
+        "sha256": "fcac21564163586df74ba88cde362bb75560548b35bcaa780558c8f97f43de04"
+      },
+      "gzipBytes": 231068,
+      "budgetGzipBytes": 260000
+    },
+    "nl": {
+      "package": "dictionary-nl",
+      "version": "2.0.0",
+      "licence": "BSD-3-Clause",
+      "spdx": "(BSD-3-Clause OR CC-BY-3.0)",
+      "aff": {
+        "bytes": 46732,
+        "gzipBytes": 17005,
+        "sha256": "b430d9cf5f4170d9e5072397927e1402b34aa877d1f4c8fbc00dab6370d87312"
+      },
+      "dic": {
+        "bytes": 2489166,
+        "gzipBytes": 809507,
+        "sha256": "be192fdc36efd39dde0fb9a5a113143e0a906782e81ed68a74a710edced378d0"
+      },
+      "gzipBytes": 826512,
+      "budgetGzipBytes": 900000
+    }
+  }
+}

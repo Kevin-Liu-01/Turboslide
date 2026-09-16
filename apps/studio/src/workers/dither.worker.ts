@@ -342,6 +342,9 @@ export function prepareBlockBase(
 export type BlockFrame = {
   plane: RgbaImage;
   litFraction: number;
+  /** the pattern drawn and whether the preview budget fell back to Bayer (gslides-parity SPEC-5 11; b6.md R15) */
+  pattern: string;
+  fallback?: 'bayer8';
 };
 
 /**
@@ -355,8 +358,15 @@ export function blockFrame(state: BlockDitherState, request: DitherWorkerFrame):
   state.served.set(request.key, request.id);
   const frame = ditherFrame(base, request.dither, request.theme, {
     ...(request.adjust !== undefined ? { adjust: request.adjust } : {}),
+    /* a live frame keeps the 100 ms budget: a family over it draws as Bayer and says so */
+    preview: true,
   });
-  return { plane: frame.plane, litFraction: frame.metrics.litFraction };
+  return {
+    plane: frame.plane,
+    litFraction: frame.metrics.litFraction,
+    pattern: frame.pattern,
+    ...(frame.fallback === undefined ? {} : { fallback: frame.fallback }),
+  };
 }
 
 /** One block level request to its reply and the bitmaps to transfer. */
@@ -403,6 +413,8 @@ export function answerBlock(
         width: frame.plane.width,
         height: frame.plane.height,
         litFraction: frame.litFraction,
+        pattern: frame.pattern,
+        ...(frame.fallback === undefined ? {} : { fallback: frame.fallback }),
         ms: performance.now() - t,
       },
       transfer: [image],

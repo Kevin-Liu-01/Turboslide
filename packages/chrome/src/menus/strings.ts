@@ -834,6 +834,11 @@ export const HOME = {
   gallery: 'Template gallery',
   recent: 'Recent presentations',
   search: 'Search presentations',
+  /* the Starred view of the home page (gslides-parity SPEC-5 7.7): Google's word, the list filtered to the caller's starred presentations */
+  starred: 'Starred',
+  starredDoc: 'Shows the presentations you starred. Click again to see every presentation.',
+  starredEmpty: 'No starred presentations',
+  starredEmptySentence: "Click the star in a presentation's title row to keep it here.",
   opened: (ago: string) => `Opened ${ago}`,
   edited: (date: string) => `Edited ${date}`,
   sortOpened: 'Last opened by me',
@@ -849,9 +854,46 @@ export const HOME = {
   inTrash: 'This presentation is in the trash · Restore',
 } as const;
 
-/** The PowerPoint import refusal (SPEC 12 "Import"). */
-export const IMPORT_PPTX =
-  'PowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text';
+/**
+ * The sentences of round five (gslides-parity SPEC-5 15), landed on day 0 so every lane reads one
+ * spelling and the copy lints run on them from the start; a lane that needs another sentence
+ * adds it here by request. The title row's Star tooltip and the Google labels of the new rows
+ * live on their menu items and controls, not here.
+ */
+export const ROUND_FIVE = {
+  /** the first automatic medium that the browser refused to play with sound (SPEC-5 0.21) */
+  soundOff: 'Sound is off until you click',
+  /** the Chat panel's first line (SPEC-5 0.46) */
+  chatNotSaved: 'Messages are not saved. Leave a comment for something that should stay',
+  /** the Join chat row for a viewer (SPEC-5 10) */
+  chatViewers: 'Commenters and editors can chat',
+  /** the Open snackbar and the report card (SPEC-5 0.29) */
+  importNotice: 'Some PowerPoint features look different in Turboslide',
+  importSummary: (imported: number, substituted: number, dropped: number) =>
+    `${imported} objects imported, ${substituted} shown differently, ${dropped} dropped`,
+  /** the tmp tier and a missing Blob store (SPEC-5 0.18) */
+  mediaNeedsBlob: 'Audio and video need the Blob store on this instance',
+  /** the Search YouTube tab (SPEC-5 14.3) */
+  youtubeSearchKey: 'Search needs a YouTube Data API key',
+  /** the sixth Import theme (SPEC-5 0.28) */
+  fiveThemes: 'This presentation already holds five themes',
+  /** Dictate speaker notes (SPEC-5 7.3) */
+  speechOnDevice: 'Speech stays on this device',
+  speechRemote: 'Your browser sends audio to its speech service for recognition',
+  speechUnsupported: 'This browser has no speech recognition',
+  /** the Accessibility toggle (SPEC-5 7.5) */
+  screenReaderOn: 'Screen reader support enabled',
+  /** the drawing box's result list (SPEC-5 0.41) */
+  bestGuesses: 'Best guesses',
+  /** the spell check card (SPEC-5 7.2) */
+  noMisspellings: 'No misspellings found',
+  /** the presenter's step line (SPEC-5 0.14) */
+  stepOf: (step: number, steps: number) => `Step ${step} of ${steps}`,
+  /** the Themes panel's third group (SPEC-5 0.28) */
+  inThisPresentation: 'In this presentation',
+  /** the theme mode's working label for the second theme (SPEC-5 0.45; the label is Kevin's) */
+  plate: 'Plate',
+};
 
 /** Present mode and Presenter view (SPEC 12 "Present mode"). */
 export const PRESENT = {

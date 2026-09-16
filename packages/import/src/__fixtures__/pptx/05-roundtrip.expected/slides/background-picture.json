@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "background-picture",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "background",
+        "type": "picture",
+        "asset": "slide-17-image-1",
+        "alt": "Slide background",
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 1
+        },
+        "ext": {
+          "pptxBackground": true
+        }
+      },
+      {
+        "id": "heading",
+        "type": "text",
+        "text": "A picture behind a title",
+        "pos": {
+          "x": 137,
+          "y": 423.12,
+          "w": 901,
+          "h": 89.76,
+          "z": 2
+        },
+        "typography": {
+          "size": 88,
+          "leading": 1.02
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-picture#heading/text"
+        }
+      },
+      {
+        "id": "lead",
+        "type": "text",
+        "text": "Change background, Choose image: the picture object sits at the bottom of the stack under the mark, the heading and the lead.",
+        "pos": {
+          "x": 137,
+          "y": 531.65,
+          "w": 901,
+          "h": 75.39,
+          "z": 3
+        },
+        "typography": {
+          "size": 26,
+          "leading": 1.45
+        },
+        "color": "ink-2",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-picture#lead/text"
+        }
+      }
+    ]
+  },
+  "title": "A picture behind a title",
+  "ext": {
+    "pptxPart": "ppt/slides/slide17.xml",
+    "pptxSlideId": 272
+  }
+}

@@ -13,15 +13,29 @@ import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
 import { slideTitle } from '@turboslide/schema/deck';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { deckPage } from '@turboslide/schema/render';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { PresenterConsole } from '@turboslide/viewer/present/PresenterConsole';
+import {
+  motionOf,
+  nextPosition,
+  previousPosition,
+  stepCount,
+} from '@turboslide/viewer/present/presentModel';
 import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
-import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
+import type {
+  PresentChannel,
+  PresentMediaState,
+  PresentMessage,
+  PresentStroke,
+} from '@turboslide/viewer/present/presentSync';
+import { mergeStroke } from '@turboslide/viewer/present/SlideshowLayer';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
 import { installThemeBridge, readTheme, useTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import type { EditorDeck } from '../server/write';
+import { withMotion } from './presentActions';
 import { useMountEffect } from './useMountEffect';
 import { useStudioSession } from './useStudioSession';
 
@@ -39,6 +53,12 @@ import { useStudioSession } from './useStudioSession';
  * move both. The console is a window API owner too (`presenter`, with view.goto and view.present)
  * and attaches to the studio's session registry, so `deck_goto_slide` over /mcp lands here when
  * this is the page attached, and the audience window follows over the channel.
+ *
+ * Round five (gslides-parity SPEC-5 2.2; MILESTONES-5 B1 day 4): every slide carries its schedule
+ * (`withMotion`), the audience's `state` brings the step reached, Next and Previous run the step
+ * model (a step before a slide, the previous slide at its last step) and send `goto` with the
+ * step, `view.goto` and `view.present` take `step`, the `media` messages fill the console's rows
+ * and its Pause and Restart send `mediaControl`, the pen's strokes are mirrored over the frame.
  */
 
 const ICONS: PresentIcons = {
@@ -53,8 +73,8 @@ const tip: PresentTip = (content) => tipProps(content);
 
 /**
  * The play list of the console: the deck's unskipped slides in order (SPEC 7.2.1), each rendered
- * once through the same renderer the viewer routes use, with its notes. `n` keeps the deck
- * position so the counter and the audience agree on which slide is which.
+ * once through the same renderer the viewer routes use, with its notes and its schedule. `n`
+ * keeps the deck position so the counter and the audience agree on which slide is which.
  */
 export function presenterSlides(
   document: DeckDocument,
@@ -75,18 +95,25 @@ export function presenterSlides(
         theme,
         chrome: true,
         assetBase,
-        blockAttrs: false,
+        // the motion layer addresses the blocks of the clones by data-block (SPEC-5 1.5)
+        blockAttrs: true,
         gtWord: true,
       });
-      out.push({
-        id: slideId,
-        n,
-        title: slideTitle(slide, n),
-        kind: slide.kind,
-        sectionId: section.id,
-        html: rendered.html,
-        ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
-      });
+      out.push(
+        withMotion(
+          {
+            id: slideId,
+            n,
+            title: slideTitle(slide, n),
+            kind: slide.kind,
+            sectionId: section.id,
+            html: rendered.html,
+            ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
+          },
+          document,
+          slide,
+        ),
+      );
     }
   }
   return out;
@@ -95,6 +122,7 @@ export function presenterSlides(
 type Live = {
   play: readonly ViewerSlide[];
   index: number;
+  step: number;
   connected: boolean;
   revision: number;
 };
@@ -104,19 +132,30 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
   const theme = useTheme();
   const platform = useMemo(() => detectPlatform(), []);
   const play = useMemo(() => presenterSlides(document, deckId, theme), [document, deckId, theme]);
+  const page = useMemo(() => deckPage(document.deck), [document.deck]);
   const [index, setIndex] = useState(0);
+  const [step, setStep] = useState(0);
   const [connected, setConnected] = useState(false);
+  const [media, setMedia] = useState<PresentMediaState[]>([]);
+  const [strokes, setStrokes] = useState<PresentStroke[]>([]);
   const toast = useToast();
   const channel = useRef<PresentChannel | null>(null);
-  const live = useRef<Live>({ play, index, connected, revision: document.deck.revision });
-  live.current = { play, index, connected, revision: document.deck.revision };
+  const live = useRef<Live>({ play, index, step, connected, revision: document.deck.revision });
+  live.current = { play, index, step, connected, revision: document.deck.revision };
+  const stepsOf = useMemo(() => play.map((slide) => stepCount(motionOf(slide))), [play]);
 
   useMountEffect(() => installThemeBridge());
 
   /* follow the audience window: its state on hello and on every move, and its own goto */
-  const follow = useCallback((slideId: string) => {
-    const at = live.current.play.findIndex((slide) => slide.id === slideId);
-    if (at >= 0) setIndex(at);
+  const follow = useCallback((slideId: string, at?: number) => {
+    const found = live.current.play.findIndex((slide) => slide.id === slideId);
+    if (found < 0) return;
+    setIndex((current) => {
+      if (current !== found) setStrokes([]);
+      return found;
+    });
+    if (at !== undefined) setStep(at);
+    else if (found !== live.current.index) setStep(0);
   }, []);
 
   useMountEffect(() => {
@@ -124,13 +163,28 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
       switch (message.type) {
         case 'state':
           setConnected(true);
-          follow(message.slideId);
+          follow(message.slideId, message.step ?? 0);
           return;
         case 'goto':
-          if (message.role === 'audience') follow(message.slideId);
+          if (message.role === 'audience') follow(message.slideId, message.step);
+          return;
+        case 'media':
+          setMedia((rows) => {
+            const rest = rows.filter((row) => row.blockId !== message.media.blockId);
+            return message.media.state === 'ended' ? rest : [...rest, message.media];
+          });
+          return;
+        case 'stroke':
+          setStrokes((rows) => mergeStroke(rows, message.stroke));
+          return;
+        case 'strokesClear':
+          setStrokes([]);
           return;
         case 'bye':
-          if (message.role === 'audience') setConnected(false);
+          if (message.role === 'audience') {
+            setConnected(false);
+            setMedia([]);
+          }
           return;
         default:
           return;
@@ -146,18 +200,36 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
     };
   });
 
-  /* the console's own move: local first, then the audience window follows */
-  const goto = useCallback((to: number) => {
+  /* the console's own move: local first, then the audience window follows (with the step, SPEC-5 2.2) */
+  const goto = useCallback((to: number, at = 0) => {
     const target = live.current.play[to];
     if (target === undefined) return;
     setIndex(to);
-    channel.current?.post({ type: 'goto', slideId: target.id });
+    setStep(at);
+    if (to !== live.current.index) setStrokes([]);
+    channel.current?.post({ type: 'goto', slideId: target.id, step: at });
+  }, []);
+
+  const next = useCallback(() => {
+    const state = live.current;
+    const target = nextPosition(state.index, state.step, state.play.length, stepsOf);
+    if (target !== null) goto(target.index, target.step);
+  }, [goto, stepsOf]);
+
+  const previous = useCallback(() => {
+    const state = live.current;
+    const target = previousPosition(state.index, state.step, state.play.length, stepsOf);
+    if (target !== null) goto(target.index, target.step);
+  }, [goto, stepsOf]);
+
+  const mediaControl = useCallback((blockId: string, action: 'play' | 'pause' | 'restart') => {
+    channel.current?.post({ type: 'mediaControl', blockId, action });
   }, []);
 
   /* the window API owner (SPEC 7.4: the presenter answers view.goto and view.present) */
   const [ownerEl, setOwnerEl] = useState<HTMLElement | null>(null);
-  const adapter = useRef(createLiveAdapter(presenterAdapter(deckId, live, goto, channel)));
-  adapter.current.update(presenterAdapter(deckId, live, goto, channel));
+  const adapter = useRef(createLiveAdapter(presenterAdapter(deckId, live, goto, channel, stepsOf)));
+  adapter.current.update(presenterAdapter(deckId, live, goto, channel, stepsOf));
   useLayoutEffect(() => {
     if (!ownerEl) return;
     return registerStudioAutomation(adapter.current.adapter, ownerEl);
@@ -176,11 +248,18 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
         title={document.deck.title}
         slides={play}
         index={index}
+        step={step}
         theme={theme}
         connected={connected}
         platform={platform}
-        onGoto={goto}
+        onGoto={(to) => goto(to, 0)}
+        onNext={next}
+        onPrevious={previous}
         onSay={toast.say}
+        media={media}
+        onMediaControl={mediaControl}
+        strokes={strokes}
+        page={page}
         icons={ICONS}
         tip={tip}
       />
@@ -193,8 +272,9 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
 function presenterAdapter(
   deckId: string,
   live: { current: Live },
-  goto: (index: number) => void,
+  goto: (index: number, step?: number) => void,
   channel: { current: PresentChannel | null },
+  stepsOf: readonly number[],
 ): StudioAdapter {
   const dispatcher: Dispatcher = createDispatcher();
   const context: ActionContext = { author: { kind: 'human', name: 'presenter' } };
@@ -202,7 +282,7 @@ function presenterAdapter(
     dispatcher.register(id, (input) => run(input as T));
   };
   /* the view.* outputs: exactly the view state the action table declares (viewStateSchema) */
-  const viewState = (at: number, present: boolean) => {
+  const viewState = (at: number, present: boolean, step?: number) => {
     const current = live.current.play[at];
     return {
       slideId: current?.id ?? '',
@@ -210,6 +290,8 @@ function presenterAdapter(
       mode: 'slide' as const,
       theme: readTheme(),
       present,
+      step: step ?? live.current.step,
+      steps: stepsOf[at] ?? 0,
     };
   };
   /* describe().state: the view state plus the console's own facts */
@@ -217,15 +299,17 @@ function presenterAdapter(
     const { play, index, connected, revision } = live.current;
     return { deckId, revision, ...viewState(index, true), index, total: play.length, connected };
   };
-  on<{ slideId: string }>('view.goto', (input) => {
+  on<{ slideId: string; step?: number }>('view.goto', (input) => {
     const at = live.current.play.findIndex((slide) => slide.id === input.slideId);
     if (at < 0) throw new RangeError(`No slide "${input.slideId}" in the show`);
-    goto(at);
-    return viewState(at, true);
+    const step = Math.max(0, Math.min(input.step ?? 0, stepsOf[at] ?? 0));
+    goto(at, step);
+    return viewState(at, true, step);
   });
-  on<{ on: boolean }>('view.present', (input) => {
+  on<{ on: boolean; step?: number }>('view.present', (input) => {
     channel.current?.post({ type: 'present', on: input.on });
-    return viewState(live.current.index, input.on);
+    if (input.on && input.step !== undefined) goto(live.current.index, input.step);
+    return viewState(live.current.index, input.on, input.on ? input.step : undefined);
   });
   return {
     owner: 'presenter',

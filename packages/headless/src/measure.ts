@@ -37,6 +37,8 @@ export type MeasureOptions = {
   slideSelector?: string;
   /** Overflow entries kept; the deck's report kept six, the record keeps more for the lint. */
   maxOverflow?: number;
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the fallback sheet rect and the overflow bound; 1600 by 900 when absent. */
+  page?: { width: number; height: number };
 };
 
 export const DEFAULT_SHEET_SELECTOR = '.ts-sheet, .sheet, body';
@@ -47,9 +49,9 @@ export async function measureSlide(
   options: MeasureOptions = {},
 ): Promise<SlideMeasure> {
   return page.evaluate(
-    ({ sheetSelector, slideSelector, maxOverflow }) => {
-      const W = 1600;
-      const H = 900;
+    ({ sheetSelector, slideSelector, maxOverflow, pageW, pageH }) => {
+      const W = pageW;
+      const H = pageH;
       // Selector lists are tried in order (a comma list handed to querySelector would return the
       // first match in document order, which is body). The sheet's own rect, else the stage's,
       // else the viewport: in present mode the sheet fills the 1600 by 900 viewport.
@@ -225,6 +227,8 @@ export async function measureSlide(
       sheetSelector: options.sheetSelector ?? DEFAULT_SHEET_SELECTOR,
       slideSelector: options.slideSelector ?? DEFAULT_SLIDE_SELECTOR,
       maxOverflow: options.maxOverflow ?? 40,
+      pageW: options.page?.width ?? 1600,
+      pageH: options.page?.height ?? 900,
     },
   ) as Promise<SlideMeasure>;
 }

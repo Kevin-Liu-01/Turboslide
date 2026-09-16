@@ -97,3 +97,22 @@ describe('retireClients', () => {
     expect(left.sort()).toEqual(ids.slice(RETIRE_MAX).sort());
   });
 });
+
+describe('bindClient (SPEC-5-amendments A3 item 5: one client id per tab)', () => {
+  it('keeps the id a tab asks for when it names this deck and this identity, and mints otherwise', async () => {
+    const room = roomOver('gt-brand');
+    const me = identity('anon_me');
+    const held = await bindClient(room, me);
+    // a reload or a reconnect asks for the id it holds: the same id comes back, bound again
+    expect(await bindClient(room, me, held)).toBe(held);
+    expect(await room.channel.presence.owner('gt-brand', held)).toBe('anon_me');
+    // another person's id, another deck's id, a malformed one and no id: a fresh id each time
+    const strangers = mintClientId('gt-brand', 'anon_stranger');
+    expect(await bindClient(room, me, strangers)).not.toBe(strangers);
+    const elsewhere = mintClientId('other-deck', 'anon_me');
+    expect(await bindClient(room, me, elsewhere)).not.toBe(elsewhere);
+    expect(await bindClient(room, me, 'not-an-id')).toMatch(/^[0-9a-f]{32}$/);
+    expect(await bindClient(room, me, null)).toMatch(/^[0-9a-f]{32}$/);
+    expect(await bindClient(room, me, undefined)).toMatch(/^[0-9a-f]{32}$/);
+  });
+});

@@ -2,7 +2,7 @@
 // roots addressable (SPEC 5.2: data-block, data-type, data-run, data-raster).
 import { classes, escapeAttr, style } from '../html.ts';
 import type { AssetId, BlockId, SlideId } from '@turboslide/schema/ids';
-import type { Asset, AssetTwins } from '@turboslide/schema/assets';
+import type { Asset, AssetTwins, MediaAsset } from '@turboslide/schema/assets';
 import type { Block, BlockOf, Icon } from '@turboslide/schema/blocks';
 import { EMPTY_ASSET_REF } from '@turboslide/schema/blocks';
 import type { LayoutId, SlideKind } from '@turboslide/schema/deck';
@@ -36,7 +36,15 @@ export type BlockContext = {
   slideId: SlideId;
   theme: Theme;
   blockAttrs: boolean;
+  /**
+   * A render for a show (RenderOptions.motion, gslides-parity SPEC-5 0.5; B1's request R1): every
+   * top level block root carries `data-block` so the present layer and the standalone motion
+   * script address it, with or without the other block attributes.
+   */
+  motion?: boolean;
   gtWord: boolean;
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1); a block without a slot reads its fallback width from it; 1600 by 900 when absent. */
+  page?: { width: number; height: number };
   /** Resolves an asset to image URLs; undefined when the deck has no such asset. */
   image: (assetId: AssetId) => ResolvedImage | undefined;
   /** Resolves an asset file path (`assets/x-light.jpg`) to a URL, for escape markup. */
@@ -47,6 +55,17 @@ export type BlockContext = {
    * context has no deck.
    */
   asset?: (assetId: AssetId) => Asset | undefined;
+  /**
+   * The stored media record of an id (gslides-parity SPEC-5 0.16, 3.5; B2): `deck.media[id]`,
+   * read by the media block's poster root for `data-src`, the title and the duration; undefined
+   * when the context has no deck or the id names nothing. Set by `renderSlide` beside `asset`.
+   */
+  media?: (assetId: AssetId) => MediaAsset | undefined;
+  /**
+   * A media file's path (`assets/talk.0123abcd.mp4`) as the URL the show mounts (SPEC-5 3.3):
+   * the asset base on a checkout, the Blob URL hosted; `assetUrl` when absent.
+   */
+  mediaUrl?: (path: string) => string;
   /** Emit the chips of a picture kind or a covering picture object (RenderOptions.chrome). */
   chrome?: boolean;
   /** The width in sheet pixels available to the block, when the layout knows it. */
@@ -90,7 +109,10 @@ export type BlockContext = {
   rasterCount: number;
 };
 
-/** Attributes shared by every block root. */
+/**
+ * Attributes shared by every block root: `data-block` under `blockAttrs` or `motion` (SPEC-5 0.5:
+ * one id, four spellings; the show addresses a block by it), `data-type` under `blockAttrs` alone.
+ */
 export function rootAttrs(
   block: Block,
   ctx: BlockContext,
@@ -101,7 +123,8 @@ export function rootAttrs(
   return {
     class: classes(className, ...(residual?.classes ?? [])),
     style: style(inline, residual?.style),
-    ...(ctx.blockAttrs ? { 'data-block': block.id, 'data-type': block.type } : {}),
+    ...(ctx.blockAttrs || ctx.motion === true ? { 'data-block': block.id } : {}),
+    ...(ctx.blockAttrs ? { 'data-type': block.type } : {}),
     ...rest,
   };
 }

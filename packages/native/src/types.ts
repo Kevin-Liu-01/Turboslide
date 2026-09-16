@@ -86,6 +86,30 @@ export type NativeModule = {
   lanczosCoeffs: (inSize: number, in0: number, in1: number, outSize: number) => NativeCoeffs;
   gaussianKernel: (sigma: number) => Float64Array;
   bayerThresholds: () => Uint8Array;
+  /**
+   * The block level dither patterns (gslides-parity SPEC-4 7, SPEC-5 11): the thresholds of an
+   * ordered screen (`bayer8`, `bayer4`, `blue64`, `random`, `halftone-dot`, `halftone-line`;
+   * a diffusion id answers the Bayer 8 table), row major.
+   */
+  ditherThresholds: (
+    pattern: string,
+    width: number,
+    height: number,
+    seed: number,
+    angle: number,
+  ) => Uint8Array;
+  /** The levels (0 to levels minus 1) of a tone image under any pattern, the diffusions included (`levelsOf`). */
+  ditherLevels: (
+    tone: Uint8Array,
+    width: number,
+    height: number,
+    pattern: string,
+    levels: number,
+    seed: number,
+    angle: number,
+  ) => Uint8Array;
+  /** `round(clamp(strength, 0, 1) * 255)`, the painted plane's alpha (`planeAlpha`). */
+  planeAlpha: (strength: number) => number;
 };
 
 /** The functions every binding must export; the loaders check for them before trusting a module. */
@@ -101,6 +125,9 @@ export const NATIVE_FUNCTIONS: readonly (keyof Omit<NativeModule, 'kind'>)[] = [
   'lanczosCoeffs',
   'gaussianKernel',
   'bayerThresholds',
+  'ditherThresholds',
+  'ditherLevels',
+  'planeAlpha',
 ];
 
 /** True when `value` carries every function of the surface. */

@@ -90,7 +90,10 @@
       "deck.guides",
       "section.set",
       "import.run",
-      "validate.run"
+      "validate.run",
+      "template.list",
+      "template.slides",
+      "deck.setPageSize"
     ],
     "slide": [
       "slide.list",
@@ -112,7 +115,10 @@
       "diagram.insert",
       "slide.lease",
       "slide.setBackgroundPicture",
-      "slide.setBackgroundMaterial"
+      "slide.setBackgroundMaterial",
+      "spelling.check",
+      "spelling.replace",
+      "spelling.ignore"
     ],
     "block": [
       "block.set",
@@ -155,7 +161,11 @@
       "shape.set",
       "line.set",
       "picture.dither",
-      "picture.materialize"
+      "picture.materialize",
+      "buildingBlock.list",
+      "buildingBlock.insert",
+      "text.autocorrect",
+      "equation.insert"
     ],
     "asset": [
       "asset.add",
@@ -166,7 +176,10 @@
     ],
     "render": [
       "render.slide",
-      "render.sheet"
+      "render.sheet",
+      "equation.render",
+      "equation.symbols",
+      "font.list"
     ],
     "lint": [
       "lint.run",
@@ -178,14 +191,18 @@
       "version.save",
       "version.list",
       "version.restore",
-      "version.diff"
+      "version.diff",
+      "version.delete"
     ],
     "view": [
       "view.goto",
       "view.mode",
       "view.theme",
       "view.present",
-      "view.zoom"
+      "view.zoom",
+      "view.presentOnScreen",
+      "dictionary.lookup",
+      "accessibility.verbalize"
     ],
     "export": [
       "export.run",
@@ -229,7 +246,10 @@
       "notification.list",
       "notification.markRead",
       "notification.settings",
-      "activity.list"
+      "activity.list",
+      "chat.send",
+      "chat.list",
+      "chat.clear"
     ],
     "share": [
       "share.get",
@@ -264,7 +284,12 @@
       "account.setAvatar",
       "account.sessions",
       "account.signOut",
-      "account.forget"
+      "account.forget",
+      "prefs.get",
+      "prefs.set",
+      "dictionary.add",
+      "dictionary.remove",
+      "dictionary.list"
     ],
     "admin": [
       "admin.bootstrap",
@@ -272,9 +297,43 @@
       "admin.flag",
       "admin.migrateStorage",
       "admin.mail.list"
+    ],
+    "motion": [
+      "motion.setTransition",
+      "motion.add",
+      "motion.update",
+      "motion.remove",
+      "motion.reorder",
+      "motion.compile",
+      "motion.play"
+    ],
+    "media": [
+      "media.insert",
+      "media.setPlayback",
+      "media.poster",
+      "media.info",
+      "media.list",
+      "camera.capture"
+    ],
+    "import": [
+      "import.pptx",
+      "theme.import"
+    ],
+    "theme": [
+      "theme.applyImported",
+      "theme.get",
+      "theme.set",
+      "theme.rename",
+      "theme.reset",
+      "layout.list",
+      "layout.create",
+      "layout.duplicate",
+      "layout.rename",
+      "layout.delete",
+      "layout.setPlaceholder"
     ]
   },
-  "actionCount": 169,
+  "actionCount": 220,
   "resources": [
     {
       "uri": "deck://manifest",

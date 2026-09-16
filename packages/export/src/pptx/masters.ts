@@ -7,10 +7,12 @@ import type PptxGenJS from 'pptxgenjs';
 import type { Theme } from '@turboslide/schema/render';
 
 import type { Scene } from '../scene/types.ts';
-import { PAGE_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
+import { layoutName, pageIn, parseCssColor, pxToIn, pxToPt } from '../units.ts';
+import type { PageSize } from '../units.ts';
 import { dataUri } from './images.ts';
 import { lineColor, ruleGeometry } from './lines.ts';
 
+/** The layout name of the default page; `layoutName(page)` names another page's (gslides-parity SPEC-5 6.1). */
 export const LAYOUT_NAME = 'TS_SHEET_16x9';
 
 export function paperMasterName(theme: Theme): string {
@@ -21,9 +23,12 @@ export function pictureMasterName(theme: Theme): string {
   return `DECK_PICTURE_${theme.toUpperCase()}`;
 }
 
-export function defineLayout(pptx: PptxGenJS): void {
-  pptx.defineLayout({ name: LAYOUT_NAME, width: PAGE_IN.width, height: PAGE_IN.height });
-  pptx.layout = LAYOUT_NAME;
+/** The one layout of the file at the deck's page (`TS_SHEET_<W>x<H>`, 13.333333 by 7.5 in on the default page). */
+export function defineLayout(pptx: PptxGenJS, page?: PageSize): void {
+  const name = layoutName(page);
+  const size = pageIn(page);
+  pptx.defineLayout({ name, width: size.width, height: size.height });
+  pptx.layout = name;
 }
 
 export type MasterInput = {

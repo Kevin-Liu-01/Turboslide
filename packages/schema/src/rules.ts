@@ -74,6 +74,8 @@ export const RULE_IDS = [
   'export/non-native',
   'numbers/contradiction',
   'count/hard-coded',
+  /* round five (gslides-parity SPEC-5 7.2, 1.2; b5.md request 11): the spell check as a lint rule */
+  'text/spelling',
 ] as const;
 
 export type RuleId = (typeof RULE_IDS)[number];
@@ -537,7 +539,7 @@ export const RULES: Readonly<Record<RuleId, Rule>> = {
     'static',
     3,
     'defect',
-    'an object whose rotated bounding box lies wholly outside the 1600 by 900 sheet; one that crosses an edge is severity 2 (gslides-parity SPEC-2 0.96)',
+    'an object whose rotated bounding box lies wholly outside the sheet (the deck’s page, 1600 by 900 by default); one that crosses an edge is severity 2 (gslides-parity SPEC-2 0.96)',
     false,
     'DECK-GRAMMAR.md:15; docs/freeform.md; gslides-parity SPEC-2 0.96',
   ),
@@ -594,6 +596,15 @@ export const RULES: Readonly<Record<RuleId, Rule>> = {
     'a numeral equal to the slide count inside copy that should derive from the deck',
     false,
     'report 06 section 4 item 2',
+  ),
+  'text/spelling': rule(
+    'text/spelling',
+    'static',
+    1,
+    'copy',
+    'a word the language dictionary and the personal dictionary do not hold (gslides-parity SPEC-5 7.2); reported only when the caller injects the spelling engine, so a brand name never moves a score',
+    false,
+    'gslides-parity SPEC-5 7.2; R10 4.10',
   ),
 };
 

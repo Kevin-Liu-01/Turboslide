@@ -62,7 +62,7 @@
   display: block;
   box-sizing: border-box;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
   overflow: hidden;
@@ -106,6 +106,26 @@
 }
 
 .ts-card-skip svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* the motion glyph of a slide with a transition or an animation (gslides-parity SPEC-5 2.1):
+   Heroicons sparkles at the frame's bottom right, the skip glyph's box */
+.ts-card-motion {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-card-motion svg {
   width: 14px;
   height: 14px;
 }

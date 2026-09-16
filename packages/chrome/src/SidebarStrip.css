@@ -1,0 +1,40 @@
+/* The sidebar strip (gslides-parity SPEC-5 0.22, 4.4; B3): a narrow column of two icon buttons at
+   the left edge of the editor, Templates and Building blocks, the way Google's editor shows its
+   side panel entries. The strip owns its right edge in --pt-hair; a pressed button is the one
+   ink state (the chrome line law). */
+.ts-strip-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 44px;
+  padding: 8px 4px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-strip-bar .ts-strip-btn {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+}
+
+.ts-strip-bar .ts-strip-btn:hover,
+.ts-strip-bar .ts-strip-btn:focus-visible {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+  outline: none;
+}
+
+.ts-strip-bar .ts-strip-btn[aria-pressed='true'] {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}

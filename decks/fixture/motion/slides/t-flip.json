@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "t-flip",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Flip, the box fades out on click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "box",
+        "stroke": "hair",
+        "padding": 16,
+        "text": "Fade out on click",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 600,
+          "h": 200,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "flip",
+    "durationMs": 2000
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "fadeOut",
+      "trigger": "click",
+      "durationMs": 1000
+    }
+  ]
+}

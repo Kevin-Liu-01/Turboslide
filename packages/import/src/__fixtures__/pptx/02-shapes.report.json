@@ -1,0 +1,133 @@
+{
+  "summary": {
+    "imported": 27,
+    "substituted": 3,
+    "dropped": 1,
+    "slides": 3
+  },
+  "rows": [
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Rounded plate",
+      "status": "kept",
+      "code": "shape.strokeWidth",
+      "message": "A 2.5 px outline snapped to 2 px"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Ellipse",
+      "status": "kept",
+      "code": "shape.strokeWidth",
+      "message": "A 3.333 px outline snapped to 3 px"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Decision",
+      "status": "kept",
+      "code": "shape.strokeWidth",
+      "message": "A 5 px outline snapped to 4 px"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Outline only",
+      "status": "kept",
+      "code": "shape.strokeWidth",
+      "message": "A 6.667 px outline snapped to 4 px"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Gradient",
+      "status": "substituted",
+      "code": "shape.fill",
+      "message": "A gradient of 2 stops became its first colour"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Hidden box",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "presets-and-outlines",
+      "object": "Three D",
+      "status": "substituted",
+      "code": "shape.effect",
+      "message": "The 3D format was dropped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "lines-and-connectors",
+      "object": "Freeform",
+      "status": "substituted",
+      "code": "shape.custom",
+      "message": "A custom geometry was sampled into a polyline"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "groups",
+      "object": "Inner",
+      "status": "kept",
+      "code": "group.nested",
+      "message": "A nested group kept its tree as the path outer/inner"
+    },
+    {
+      "slideIndex": 1,
+      "status": "kept",
+      "code": "theme.layouts",
+      "message": "11 layouts of the file were not imported as custom layouts; the slides keep their positions"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Calibri",
+      "runs": 6,
+      "substituted": "Inter"
+    }
+  ],
+  "theme": {
+    "mode": "adopt",
+    "imported": false,
+    "scheme": {
+      "colors": {
+        "ink": "#000000",
+        "paper": "#ffffff",
+        "ink-2": "#1f497d",
+        "plate": "#eeece1",
+        "ok": "#4f81bd",
+        "warn": "#c0504d",
+        "no": "#9bbb59",
+        "info": "#8064a2",
+        "titanium": "#4bacc6",
+        "raised": "#f79646",
+        "link": "#0000ff"
+      },
+      "fonts": {
+        "major": "Calibri",
+        "minor": "Calibri"
+      }
+    }
+  },
+  "source": {
+    "file": "02-shapes.pptx",
+    "slides": 3,
+    "page": {
+      "width": 1600,
+      "height": 900
+    },
+    "producer": "python-pptx",
+    "sections": 0,
+    "modifyVerifier": false
+  },
+  "validation": {
+    "ok": true,
+    "issues": 7
+  }
+}

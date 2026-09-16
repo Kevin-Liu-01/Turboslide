@@ -8,8 +8,133 @@ import { z } from 'zod';
 import type { BlockId, SlideId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 
-export type ExportFormat = 'pptx' | 'pdf';
+/** The export formats: PPTX, PDF and, since round five, ODP (gslides-parity SPEC-5 6.3). */
+export const EXPORT_FORMATS = ['pptx', 'pdf', 'odp'] as const;
+export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 export type ExportMode = 'native' | 'flatten';
+
+// ---------------------------------------------------------------------------------------------
+// Round five (gslides-parity SPEC-5 1.2, 2.4, 2.5, 3.6, 6.2): the widened inputs of export.run
+// and build.run, as data so the Download dialog, the CLI help and the skills read one list
+
+/** Editable text keeps the timing tree or drops it (SPEC-5 2.4 `export.run --motion`). */
+export const MOTION_EXPORT_MODES = ['keep', 'drop'] as const;
+export type MotionExportMode = (typeof MOTION_EXPORT_MODES)[number];
+
+/** How media travels (SPEC-5 3.6): the stored file, the poster alone, or a link for the web page. */
+export const MEDIA_EXPORT_MODES = ['embed', 'poster', 'url'] as const;
+export type MediaExportMode = (typeof MEDIA_EXPORT_MODES)[number];
+
+/** Google's print layouts (SPEC-5 6.2; R08 4.5): one slide with or without notes, the handouts. */
+export const PRINT_LAYOUTS = [
+  'slides',
+  'notes',
+  'handout-2',
+  'handout-3',
+  'handout-4',
+  'handout-6',
+  'handout-9',
+] as const;
+export type PrintLayout = (typeof PRINT_LAYOUTS)[number];
+
+/** Google's layout dropdown strings (SPEC-5 6.2; the handout strings are unverified). */
+export const PRINT_LAYOUT_LABELS: Readonly<Record<PrintLayout, string>> = {
+  slides: '1 slide without notes',
+  notes: '1 slide with notes',
+  'handout-2': 'Handout: 2 slides per page',
+  'handout-3': 'Handout: 3 slides per page',
+  'handout-4': 'Handout: 4 slides per page',
+  'handout-6': 'Handout: 6 slides per page',
+  'handout-9': 'Handout: 9 slides per page',
+};
+
+/** The slides per page of each layout; the page count is `ceil(slides / perPage)`. */
+export const PRINT_SLIDES_PER_PAGE: Readonly<Record<PrintLayout, number>> = {
+  slides: 1,
+  notes: 1,
+  'handout-2': 2,
+  'handout-3': 3,
+  'handout-4': 4,
+  'handout-6': 6,
+  'handout-9': 9,
+};
+
+/** The paper (SPEC-5 6.2; a Turboslide dropdown): the slide's own page, Letter or A4. */
+export const PAPERS = ['slide', 'letter', 'a4'] as const;
+export type Paper = (typeof PAPERS)[number];
+
+export const ORIENTATIONS = ['landscape', 'portrait'] as const;
+export type Orientation = (typeof ORIENTATIONS)[number];
+
+/** The fill order of a handout's cells (R08 4.5): across the rows first, or down the columns. */
+export const PRINT_ORDERS = ['across', 'down'] as const;
+export type PrintOrder = (typeof PRINT_ORDERS)[number];
+
+/** Google's Auto-play intervals (SPEC-5 0.14), in milliseconds. */
+export const AUTOPLAY_INTERVALS_MS = [1000, 2000, 3000, 5000, 10000, 15000, 30000, 60000] as const;
+
+/** One row of a lossy path's report (SPEC-5 0.29): what an agent and the Details view both read. */
+export type ExportReportRow = {
+  slideId?: string;
+  blockId?: string;
+  /** a stable code: `transition.fallback`, `media.poster-only`, `equation.raster`, `notes.clipped` */
+  code: string;
+  message: string;
+};
+
+/** The motion summary of an Editable text export (SPEC-5 2.4). */
+export type ExportMotionSummary = {
+  transitions: number;
+  animations: number;
+  media: number;
+  equations: { native: number; raster: number };
+  rows: ExportReportRow[];
+};
+
+/** One handout cell's gate result (SPEC-5 6.2; R08 4.11). */
+export type ExportCellEntry = {
+  page: number;
+  cell: number;
+  slideId: string;
+  /** the mismatched fraction against the area averaged 2x reference */
+  fraction?: number;
+  ok: boolean;
+};
+
+/** One section of `export check` (SPEC-5 16.7): a verdict with its lines and any counts. */
+export type ExportCheckSection = { ok: boolean; lines: string[]; counts?: Record<string, number> };
+
+export const exportReportRowSchema = z.strictObject({
+  slideId: z.string().optional(),
+  blockId: z.string().optional(),
+  code: z.string().min(1),
+  message: z.string(),
+}) satisfies z.ZodType<ExportReportRow>;
+
+export const exportMotionSummarySchema = z.strictObject({
+  transitions: z.number().int().nonnegative(),
+  animations: z.number().int().nonnegative(),
+  media: z.number().int().nonnegative(),
+  equations: z.strictObject({
+    native: z.number().int().nonnegative(),
+    raster: z.number().int().nonnegative(),
+  }),
+  rows: z.array(exportReportRowSchema),
+}) satisfies z.ZodType<ExportMotionSummary>;
+
+export const exportCellEntrySchema = z.strictObject({
+  page: z.number().int().positive(),
+  cell: z.number().int().nonnegative(),
+  slideId: z.string(),
+  fraction: z.number().min(0).max(1).optional(),
+  ok: z.boolean(),
+}) satisfies z.ZodType<ExportCellEntry>;
+
+export const exportCheckSectionSchema = z.strictObject({
+  ok: z.boolean(),
+  lines: z.array(z.string()),
+  counts: z.record(z.string(), z.number()).optional(),
+}) satisfies z.ZodType<ExportCheckSection>;
 
 /**
  * How a flatten page raster is encoded (docs/pptx.md "The raster policy"): a two-color page as a
@@ -101,7 +226,17 @@ export type ExportOption = {
     | 'headings'
     | 'rasterScale'
     | 'pictureScale'
-    | 'verify';
+    | 'verify'
+    /* round five (gslides-parity SPEC-5 1.2): motion and media for Editable text and the web
+       page, the print layouts for PDF, the web page's autoplay */
+    | 'motion'
+    | 'media'
+    | 'layout'
+    | 'paper'
+    | 'orientation'
+    | 'order'
+    | 'hideBackground'
+    | 'autoplay';
   label: string;
   /** `one` picks one value, `many` several (theme), `flag` is on or off. */
   kind: 'one' | 'many' | 'flag';
@@ -122,6 +257,11 @@ export const EXPORT_OPTIONS: readonly ExportOption[] = [
         doc: 'One file per theme plus a zip of both, verified through LibreOffice (SPEC 8.2).',
       },
       { value: 'pdf', label: 'PDF', doc: 'Book mode through Chromium print (M6).' },
+      {
+        value: 'odp',
+        label: 'ODP Document (.odp)',
+        doc: 'One file per theme for LibreOffice Impress, verified through the same loop as PowerPoint (gslides-parity SPEC-5 6.3).',
+      },
     ],
   },
   {
@@ -234,6 +374,137 @@ export const EXPORT_OPTIONS: readonly ExportOption[] = [
       },
     ],
   },
+  /* round five (gslides-parity SPEC-5 2.4, 2.5, 3.6, 6.2): the rows below land with their
+     builders' writers (B1 motion and autoplay, B2 media, B4 the print layouts); the Download
+     dialog draws a row once its writer answers */
+  {
+    id: 'motion',
+    label: 'Motion',
+    kind: 'one',
+    default: 'keep',
+    choices: [
+      {
+        value: 'keep',
+        label: 'Keep transitions and animations',
+        doc: 'Editable text writes the transition and the timing tree of every slide (gslides-parity SPEC-5 2.4); Perfect writes neither.',
+      },
+      { value: 'drop', label: 'Drop motion', doc: 'Every object at rest and no timing tree.' },
+    ],
+  },
+  {
+    id: 'media',
+    label: 'Media',
+    kind: 'one',
+    default: 'embed',
+    choices: [
+      {
+        value: 'embed',
+        label: 'Embed the media files',
+        doc: 'The stored audio and video travel as parts of the file, under the deck’s media cap (gslides-parity SPEC-5 0.20).',
+      },
+      {
+        value: 'poster',
+        label: 'Posters only',
+        doc: 'Every media block travels as its poster picture.',
+      },
+      {
+        value: 'url',
+        label: 'Link to the media',
+        doc: 'The web page plays the media from the studio instead of carrying it (SPEC-5 3.6).',
+      },
+    ],
+  },
+  {
+    id: 'layout',
+    label: 'Layout',
+    kind: 'one',
+    default: 'slides',
+    choices: PRINT_LAYOUTS.map((layout) => ({
+      value: layout,
+      label: PRINT_LAYOUT_LABELS[layout],
+      doc:
+        layout === 'slides'
+          ? 'One slide per page at the slide’s own size (gslides-parity SPEC-5 6.2).'
+          : layout === 'notes'
+            ? 'The slide over its speaker notes on the paper (SPEC-5 6.2).'
+            : `${PRINT_SLIDES_PER_PAGE[layout]} slides per page on the paper (SPEC-5 6.2).`,
+    })),
+  },
+  {
+    id: 'paper',
+    label: 'Paper',
+    kind: 'one',
+    default: 'slide',
+    choices: [
+      {
+        value: 'slide',
+        label: 'Slide size',
+        doc: 'The slide’s own page; the one slide layout keeps today’s PDF page.',
+      },
+      {
+        value: 'letter',
+        label: 'Letter',
+        doc: '8.5 by 11 in; the default under en-US (SPEC-5 6.2).',
+      },
+      { value: 'a4', label: 'A4', doc: '210 by 297 mm; the default elsewhere.' },
+    ],
+  },
+  {
+    id: 'orientation',
+    label: 'Orientation',
+    kind: 'one',
+    default: 'landscape',
+    choices: [
+      { value: 'landscape', label: 'Landscape', doc: 'The paper on its side.' },
+      { value: 'portrait', label: 'Portrait', doc: 'The paper upright.' },
+    ],
+  },
+  {
+    id: 'order',
+    label: 'Order',
+    kind: 'one',
+    default: 'across',
+    choices: [
+      {
+        value: 'across',
+        label: 'Across, then down',
+        doc: 'A handout fills each row before the next (R08 4.5).',
+      },
+      {
+        value: 'down',
+        label: 'Down, then across',
+        doc: 'A handout fills each column before the next.',
+      },
+    ],
+  },
+  {
+    id: 'hideBackground',
+    label: 'Hide background',
+    kind: 'flag',
+    default: false,
+    choices: [
+      {
+        value: true,
+        label: 'Hide background',
+        doc: 'The light appearance on white with the paper ground and every background colour removed; the frame, the wordmark, the counter and every picture kept (SPEC-5 6.2).',
+      },
+    ],
+  },
+  {
+    id: 'autoplay',
+    label: 'Auto-play',
+    kind: 'one',
+    default: 0,
+    choices: [
+      { value: 0, label: 'Off', doc: 'The web page advances on clicks and keys alone.' },
+      ...AUTOPLAY_INTERVALS_MS.map((ms) => ({
+        value: ms,
+        label:
+          ms >= 60000 ? 'Every 1 minute' : `Every ${ms / 1000} second${ms === 1000 ? '' : 's'}`,
+        doc: 'The web page advances one step per tick and restarts after the last slide under Loop (gslides-parity SPEC-5 0.14, 2.3).',
+      })),
+    ],
+  },
 ];
 
 export function isNativeBlockType(type: string): type is NativeBlockType {
@@ -311,6 +582,26 @@ export type ExportReport = {
   perfect: boolean;
   passed: boolean;
   residual: string[];
+  /* round five (gslides-parity SPEC-5 1.2, 0.29): every lossy path writes rows; absent on a
+     report written before the round or by a writer that has nothing to say */
+  /** the page the file was written at (SPEC-5 6.1) */
+  page?: { width: number; height: number };
+  /** the Editable text motion summary (SPEC-5 2.4) */
+  motion?: ExportMotionSummary;
+  /** the media that travelled and the ones reduced to a poster (SPEC-5 3.6) */
+  media?: ExportReportRow[];
+  /** the equations written as OMML and the ones that fell back to the picture (SPEC-5 8.3) */
+  equations?: ExportReportRow[];
+  /** the print layout of a PDF (SPEC-5 6.2) */
+  layout?: PrintLayout;
+  paper?: Paper;
+  orientation?: Orientation;
+  /** the PDF's page count */
+  pages?: number;
+  /** the per cell gate of a handout (SPEC-5 6.2) */
+  cells?: ExportCellEntry[];
+  /** the slide ids whose notes the notes page clipped */
+  truncatedNotes?: string[];
 };
 
 export const pageRasterEntrySchema = z.strictObject({
@@ -324,7 +615,7 @@ export const pageRasterEntrySchema = z.strictObject({
 export const exportReportSchema = z.strictObject({
   deckId: slugSchema,
   revision: z.number().int().nonnegative(),
-  format: z.enum(['pptx', 'pdf']),
+  format: z.enum(EXPORT_FORMATS),
   mode: z.enum(['native', 'flatten']),
   theme: z.enum(['light', 'dark']),
   fontSet: z.enum(['exact', 'standard']),
@@ -380,6 +671,18 @@ export const exportReportSchema = z.strictObject({
   perfect: z.boolean(),
   passed: z.boolean(),
   residual: z.array(z.string()),
+  page: z
+    .strictObject({ width: z.number().int().positive(), height: z.number().int().positive() })
+    .optional(),
+  motion: exportMotionSummarySchema.optional(),
+  media: z.array(exportReportRowSchema).optional(),
+  equations: z.array(exportReportRowSchema).optional(),
+  layout: z.enum(PRINT_LAYOUTS).optional(),
+  paper: z.enum(PAPERS).optional(),
+  orientation: z.enum(ORIENTATIONS).optional(),
+  pages: z.number().int().nonnegative().optional(),
+  cells: z.array(exportCellEntrySchema).optional(),
+  truncatedNotes: z.array(z.string()).optional(),
 }) satisfies z.ZodType<ExportReport>;
 
 /**
@@ -432,6 +735,20 @@ export type ExportCheck = {
   };
   issues: string[];
   valid: boolean;
+  /* round five (gslides-parity SPEC-5 1.2, 16.7): one section per check module, absent when the
+     module had nothing to read (a PPTX has no odf section, an SVG no motion section) */
+  /** an ODP's package rules: mimetype first and stored, the manifest complete (SPEC-5 6.3) */
+  container?: ExportCheckSection;
+  /** an ODP's transition, animation, media and preset attribute names (SPEC-5 6.3) */
+  odf?: ExportCheckSection;
+  /** one transition per slide, the effect nodes with their presetID, the bldP count (SPEC-5 2.6) */
+  motion?: ExportCheckSection;
+  /** a:audioFile, a:videoFile, p14:media, the parts and the five content types (SPEC-5 3.9) */
+  media?: ExportCheckSection;
+  /** the a14:m count against the block count (SPEC-5 8.4) */
+  equations?: ExportCheckSection;
+  /** an SVG's root namespace, viewBox, no script, no on*, hrefs, use targets, one title and desc (SPEC-5 0.33) */
+  svg?: ExportCheckSection;
 };
 
 export const exportCheckSchema = z.strictObject({
@@ -486,4 +803,10 @@ export const exportCheckSchema = z.strictObject({
   }),
   issues: z.array(z.string()),
   valid: z.boolean(),
+  container: exportCheckSectionSchema.optional(),
+  odf: exportCheckSectionSchema.optional(),
+  motion: exportCheckSectionSchema.optional(),
+  media: exportCheckSectionSchema.optional(),
+  equations: exportCheckSectionSchema.optional(),
+  svg: exportCheckSectionSchema.optional(),
 }) satisfies z.ZodType<ExportCheck>;

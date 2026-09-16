@@ -11,18 +11,31 @@ import { DIALOGS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
 /**
- * Download (gslides-parity SPEC 0.22, 6.7, 12 "Dialogs"): for a PowerPoint file a Seg Perfect |
- * Editable text with one sentence under each, Include speaker notes (off), Include skipped
- * slides (off), More options (Light, Dark or Both defaulting to the deck's appearance, fonts
- * Exact or Standard, Embed fonts, Headings as pictures), Download; then the progress sentence with
- * the time estimate (2.5 s per slide rounded up to the half minute) and "Your file is ready" with
- * a Details link to the report card. For a PDF the same dialog without the Seg and More options.
- * The notes and skipped slides defaults are the deliberate departure of SPEC 0.23.
+ * Download (gslides-parity SPEC 0.22, 6.7, 12 "Dialogs"; SPEC-5 6.3): for a PowerPoint file a Seg
+ * Perfect | Editable text with one sentence under each, Include speaker notes (off), Include
+ * skipped slides (off), More options (Light, Dark or Both defaulting to the deck's appearance,
+ * fonts Exact or Standard, Embed fonts, Headings as pictures), Download; then the progress
+ * sentence with the time estimate (2.5 s per slide rounded up to the half minute) and "Your file
+ * is ready" with a Details link to the report card. For a PDF the same dialog without the Seg and
+ * More options. For an ODP Document the same Seg with the LibreOffice sentences (the file opens in
+ * LibreOffice Impress; Perfect keeps the pixels, Editable text the frames), the notes and skipped
+ * rows and the appearance. The notes and skipped slides defaults are the deliberate departure of
+ * SPEC 0.23.
  */
-export type DownloadDialogProps = { format: 'pptx' | 'pdf' };
+export type DownloadFormat = 'pptx' | 'pdf' | 'odp';
+export type DownloadDialogProps = { format: DownloadFormat };
+
+/** The LibreOffice sentences of the ODP row (SPEC-5 6.3). */
+export const ODP_SENTENCES = {
+  perfect:
+    'Every slide looks exactly like the screen in LibreOffice Impress; the text is there but not editable',
+  editable:
+    'Text frames you can edit in LibreOffice Impress; layout within a few pixels, the fonts by name',
+  lead: 'An OpenDocument presentation for LibreOffice Impress.',
+} as const;
 
 /** "about 3 minutes for 85 slides": 2.5 s per slide, rounded up to the half minute (SPEC 6.7). */
-export function estimateSentence(slides: number, format: 'pptx' | 'pdf'): string {
+export function estimateSentence(slides: number, format: DownloadFormat): string {
   const seconds = slides * (format === 'pdf' ? 0.6 : 2.5);
   const halfMinutes = Math.max(1, Math.ceil(seconds / 30));
   const minutes = halfMinutes / 2;
@@ -32,7 +45,8 @@ export function estimateSentence(slides: number, format: 'pptx' | 'pdf'): string
       : minutes === 1
         ? 'about a minute'
         : `about ${minutes} minutes`;
-  return `Preparing your ${format === 'pdf' ? 'PDF' : 'PowerPoint file'}, ${time} for ${slides} slide${slides === 1 ? '' : 's'}`;
+  const noun = format === 'pdf' ? 'PDF' : format === 'odp' ? 'ODP Document' : 'PowerPoint file';
+  return `Preparing your ${noun}, ${time} for ${slides} slide${slides === 1 ? '' : 's'}`;
 }
 
 export function DownloadDialog({ format }: DownloadDialogProps) {
@@ -60,7 +74,11 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
     input
       .dispatch('export.run', {
         format,
-        ...(format === 'pptx' ? { mode, theme: themes, fonts } : { theme: themes }),
+        ...(format === 'pptx'
+          ? { mode, theme: themes, fonts }
+          : format === 'odp'
+            ? { mode, theme: themes }
+            : { theme: themes }),
         ...(format === 'pptx' && mode === 'native' && embed ? { embedFonts: true } : {}),
         ...(format === 'pptx' && raster ? { headings: 'raster' } : {}),
         ...(skipped ? { includeSkipped: true } : {}),
@@ -104,14 +122,19 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
                 doc:
                   format === 'pdf'
                     ? 'One slide per page'
-                    : mode === 'flatten'
-                      ? 'Every slide looks exactly like the screen'
-                      : 'Text boxes you can edit in PowerPoint',
+                    : format === 'odp'
+                      ? mode === 'flatten'
+                        ? ODP_SENTENCES.perfect
+                        : ODP_SENTENCES.editable
+                      : mode === 'flatten'
+                        ? 'Every slide looks exactly like the screen'
+                        : 'Text boxes you can edit in PowerPoint',
               },
             ]
       }
     >
-      {format === 'pptx' ? (
+      {format === 'odp' ? <p>{ODP_SENTENCES.lead}</p> : null}
+      {format === 'pptx' || format === 'odp' ? (
         <div className="ts-dialog-modes" role="radiogroup" aria-label="File type">
           <button
             type="button"
@@ -122,11 +145,16 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
             onClick={() => setMode('flatten')}
             {...tipProps({
               name: DIALOGS.download.perfect,
-              doc: 'Every slide looks exactly like the screen; the text is there but not editable',
+              doc:
+                format === 'odp'
+                  ? ODP_SENTENCES.perfect
+                  : 'Every slide looks exactly like the screen; the text is there but not editable',
             })}
           >
             <b>{DIALOGS.download.perfect}</b>
-            Every slide looks exactly like the screen; the text is there but not editable
+            {format === 'odp'
+              ? ODP_SENTENCES.perfect
+              : 'Every slide looks exactly like the screen; the text is there but not editable'}
           </button>
           <button
             type="button"
@@ -137,11 +165,16 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
             onClick={() => setMode('native')}
             {...tipProps({
               name: DIALOGS.download.editable,
-              doc: 'Text boxes you can edit in PowerPoint; layout within a few pixels',
+              doc:
+                format === 'odp'
+                  ? ODP_SENTENCES.editable
+                  : 'Text boxes you can edit in PowerPoint; layout within a few pixels',
             })}
           >
             <b>{DIALOGS.download.editable}</b>
-            Text boxes you can edit in PowerPoint; layout within a few pixels
+            {format === 'odp'
+              ? ODP_SENTENCES.editable
+              : 'Text boxes you can edit in PowerPoint; layout within a few pixels'}
           </button>
         </div>
       ) : (
@@ -161,6 +194,22 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
         control="dialog.download.includeSkipped"
         doc="Skipped slides are left out unless checked"
       />
+      {format === 'odp' ? (
+        <label className="ts-dialog-field">
+          <span className="ts-dialog-field-label">Appearance</span>
+          <select
+            value={theme}
+            aria-label="Appearance"
+            data-control="dialog.download.theme"
+            onChange={(event) => setTheme(event.target.value as 'light' | 'dark' | 'both')}
+            {...tipProps({ name: 'Appearance', doc: 'Light, Dark, or one file of each' })}
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="both">Both</option>
+          </select>
+        </label>
+      ) : null}
       {format === 'pptx' ? (
         <details data-control="dialog.download.more">
           <summary

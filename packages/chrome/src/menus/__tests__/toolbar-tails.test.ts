@@ -60,7 +60,12 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     expect(byId('toolbar.bulletedList')?.arrow).toBe('format.bulletsNumbering.bulleted');
     expect(byId('toolbar.numberedList')?.arrow).toBe('format.bulletsNumbering.numbered');
     expect(byId('toolbar.borderDash')?.op).toBe('borderDash');
-    expect(byId('toolbar.font')?.enabled).toBe('never');
+    /* the Font dropdown is live since round five (SPEC-5-amendments A5 item 4): the picker over
+       the catalog, in Google's position left of the font size control */
+    expect(byId('toolbar.font')?.enabled).toBeUndefined();
+    expect(byId('toolbar.font')?.op).toBe('font');
+    expect(byId('toolbar.font')?.dropdown).toBe(true);
+    expect(tailLabels('text').indexOf('Font')).toBe(tailLabels('text').indexOf('Font size') - 1);
   });
 
   it('a shape: Change shape, then the text tail with the text controls enabled (3.3, SPEC-2 0.11)', () => {

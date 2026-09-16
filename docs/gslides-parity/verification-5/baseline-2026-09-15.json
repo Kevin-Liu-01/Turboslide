@@ -1,0 +1,6923 @@
+{
+  "round": 5,
+  "day": 0,
+  "role": "verifier",
+  "date": "2026-09-15",
+  "productionUrl": "https://turboslide.vercel.app",
+  "facts": {
+    "recordedAt": "2026-09-15T10:59:19Z",
+    "production": {
+      "url": "https://turboslide.vercel.app",
+      "deploymentId": "dpl_3CBG3zfZW7CfewaCaGa2JoWG2imN",
+      "deploymentUrl": "https://turboslide-knoksgnju-kl01s-projects.vercel.app",
+      "target": "production",
+      "readyState": "READY",
+      "createdAt": "2026-09-15T10:55:45.069Z",
+      "createdAtLocal": "2026-09-15 03:55:45 PDT",
+      "source": "vercel inspect https://turboslide.vercel.app (read only); the git deploy of main, created seven seconds after the commit",
+      "commit": "d5a1be5f9c0e81201f0d85be14c99c2e5eb458d8",
+      "commitShort": "d5a1be5",
+      "commitSubject": "Turboslide round five: the handoffs from the hotfix afternoon",
+      "committedAt": "2026-09-15T10:55:38Z",
+      "githubMainSha": "d5a1be5f9c0e81201f0d85be14c99c2e5eb458d8",
+      "entryChunk": "/assets/index-CYGrLim1.js",
+      "newShellModulepreload": [
+        "/assets/index-CYGrLim1.js",
+        "/assets/new-CsXFdKXe.js",
+        "/assets/Frame-Di5h-sQ0.js",
+        "/assets/EditorRoot-CaFtyhvz.js"
+      ],
+      "newShellBytes": 73216,
+      "tiers": "TURBOSLIDE_REALTIME=blob, TURBOSLIDE_AUTHORIZE=shadow, TURBOSLIDE_MAIL=off, no DATABASE_URL, anonymous principals, one public Blob store, fluid compute (the orchestrator's statement; not re-read from the Vercel env)",
+      "functions": "__server, _serverFn/[...], api/decks/[...]/bundle, api/decks/bundle, api/export/[...] at 87.24 MB each in iad1 (vercel inspect)"
+    },
+    "localBuild": {
+      "note": "No build of d5a1be5 exists on the tree and none was made (the rules forbid a build outside scripts/check.mjs). apps/studio/.output (2026-09-14 22:49) carries index-zmcb2DMX.js, a pre ship build; apps/studio/dist (2026-09-11) holds no assets."
+    },
+    "machine": {
+      "hardware": "Apple M5 Max",
+      "os": "macOS 26.4 (25E246)",
+      "node": "v24.13.0",
+      "playwrightCore": "1.62.1",
+      "chromium": "chromium-1217 (Chrome for Testing 147.0.7727.15) through packages/headless launch with --use-gl=angle --use-angle=metal --ignore-gpu-blocklist, headless, 1440 by 900; the layout shift audit records the version it launched",
+      "loadAverageAtStart": "3.05 3.25 4.04 (uptime at 04:03 PDT)"
+    },
+    "network": {
+      "tool": "networkQuality -s at 11:00Z",
+      "uplinkMbps": 752.711,
+      "downlinkMbps": 846.914,
+      "uplinkResponsivenessMs": 33.893,
+      "downlinkResponsivenessMs": 33.089,
+      "idleLatencyMs": 15.539
+    },
+    "routeProbe": {
+      "at": "2026-09-15T10:59:13Z",
+      "method": "node fetch, redirect manual, one request per path, before any browser run; ttfb is the time to the response headers from the process",
+      "rows": [
+        {
+          "path": "/",
+          "status": 307,
+          "location": "/new",
+          "ttfbMs": 182,
+          "bytes": 15,
+          "cache": null,
+          "edgeOnly": true
+        },
+        {
+          "path": "/new",
+          "status": 200,
+          "ttfbMs": 1581,
+          "bytes": 73218,
+          "cache": "MISS",
+          "note": "the first request of the four minute old deployment; a cold function"
+        },
+        {
+          "path": "/home",
+          "status": 200,
+          "ttfbMs": 211,
+          "bytes": 95423,
+          "cache": "MISS"
+        },
+        {
+          "path": "/decks",
+          "status": 200,
+          "ttfbMs": 434,
+          "bytes": 66045,
+          "cache": "MISS"
+        },
+        {
+          "path": "/decks/trash",
+          "status": 200,
+          "ttfbMs": 250,
+          "bytes": 37833,
+          "cache": "MISS"
+        },
+        {
+          "path": "/deck/gt-brand",
+          "status": 200,
+          "ttfbMs": 977,
+          "bytes": 180469,
+          "cache": "MISS"
+        },
+        {
+          "path": "/edit/gt-brand",
+          "status": 200,
+          "ttfbMs": 384,
+          "bytes": 295599,
+          "cache": "MISS"
+        },
+        {
+          "path": "/present/gt-brand",
+          "status": 200,
+          "ttfbMs": 238,
+          "bytes": 294395,
+          "cache": "MISS"
+        },
+        {
+          "path": "/print/gt-brand",
+          "status": 200,
+          "ttfbMs": 230,
+          "bytes": 591510,
+          "cache": "MISS"
+        },
+        {
+          "path": "/favicon.ico",
+          "status": 200,
+          "ttfbMs": 109,
+          "bytes": 15086,
+          "cache": "MISS"
+        },
+        {
+          "path": "/help/training",
+          "status": 404,
+          "ttfbMs": 92,
+          "bytes": 41801,
+          "cache": "MISS",
+          "note": "a round five route (SPEC-5 7); not built yet"
+        },
+        {
+          "path": "/help/updates",
+          "status": 404,
+          "ttfbMs": 84,
+          "bytes": 41801,
+          "cache": "MISS",
+          "note": "a round five route (SPEC-5 7); not built yet"
+        },
+        {
+          "path": "/decks/templates",
+          "status": 404,
+          "ttfbMs": 118,
+          "bytes": 41849,
+          "cache": "MISS",
+          "note": "a round five route (SPEC-5 4); not built yet"
+        },
+        {
+          "path": "/openapi.json",
+          "status": 200,
+          "ttfbMs": 84,
+          "bytes": 2072829,
+          "cache": "MISS"
+        },
+        {
+          "path": "/llms.txt",
+          "status": 200,
+          "ttfbMs": 80,
+          "bytes": 6417,
+          "cache": "MISS"
+        },
+        {
+          "path": "/api/agent",
+          "status": 401,
+          "ttfbMs": 80,
+          "bytes": 156,
+          "cache": "MISS",
+          "note": "the bearer rule"
+        },
+        {
+          "path": "/og/turboslide.png",
+          "status": 200,
+          "ttfbMs": 128,
+          "bytes": 29818,
+          "cache": "MISS"
+        }
+      ],
+      "headersOfNew": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy-report-only": "present with worker-src self blob, img-src and connect-src naming the public Blob host, report-uri /api/x/csp/report",
+        "permissions-policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-id": "sfo1::iad1::… (every function answer)"
+      }
+    },
+    "deckInventory": {
+      "at": "2026-09-15T11:03Z",
+      "method": "the data-control=home.open.<id> attributes of GET /decks and the untitled ids in GET /decks/trash, anonymous",
+      "cards": 26,
+      "ids": [
+        "untitled-20260914-y0mk",
+        "untitled-20260915-vgz6",
+        "untitled-20260915-tsv1",
+        "untitled-20260915-1g7z",
+        "untitled-20260915-fatr",
+        "untitled-20260915-blw3",
+        "untitled-20260915-0o93",
+        "untitled-20260915-qfnh",
+        "untitled-20260915-15hi",
+        "untitled-20260914-qbha",
+        "gt-brand",
+        "editor-depth-09120307",
+        "untitled-20260913-tii2",
+        "gt-brand-mu05h5vq",
+        "editor-depth-09120413",
+        "editor-depth-09120252",
+        "editor-depth-09120230",
+        "fixture-p8-193001",
+        "editor-depth-09120205",
+        "fixture-p7-190558",
+        "fixture-pushed-181201",
+        "editor-depth-09120131",
+        "editor-depth-09120057",
+        "bundle-round-trip",
+        "editor-depth-09120035",
+        "fixture-verifier-0912"
+      ],
+      "trashUntitledIds": [
+        "untitled-20260915-7ki1",
+        "untitled-20260915-xmu5",
+        "untitled-20260914-ah39"
+      ]
+    }
+  },
+  "hostedSmoke": {
+    "log": "hosted-smoke-production-2026-09-15.txt",
+    "started": "2026-09-15T11:01:06Z",
+    "finished": "2026-09-15T11:01:15Z",
+    "exit": 0,
+    "file": "hosted-smoke-production-2026-09-15.txt",
+    "verdict": "37/37 passed against https://turboslide.vercel.app/",
+    "passed": 37,
+    "total": 37,
+    "skipped": [
+      "/s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)",
+      "410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)",
+      "private document 403: the private store of SPEC-3 11.5 R2 is not connected this round",
+      "twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration",
+      "restricted 404: pass --restricted <deck id> with an access record",
+      "template copy: pass --template-copy (the row writes one deck and removes it)"
+    ],
+    "rows": [
+      {
+        "path": "/",
+        "status": 307,
+        "ms": 85,
+        "result": "pass",
+        "detail": "location /new; x-robots-tag noindex"
+      },
+      {
+        "path": "/new",
+        "status": 200,
+        "ms": 213,
+        "result": "pass",
+        "detail": "73216 chars; 3/3 shell marks; noindex"
+      },
+      {
+        "path": "/deck/gt-brand",
+        "status": 200,
+        "ms": 469,
+        "result": "pass",
+        "detail": "180467 chars; 0 notes key(s)"
+      },
+      {
+        "path": "/edit/gt-brand",
+        "status": 200,
+        "ms": 681,
+        "result": "pass",
+        "detail": "295433 chars; 3/3 shell marks"
+      },
+      {
+        "path": "/decks",
+        "status": 200,
+        "ms": 307,
+        "result": "pass",
+        "detail": "26 card(s)"
+      },
+      {
+        "path": "/decks/trash",
+        "status": 200,
+        "ms": 354,
+        "result": "pass",
+        "detail": "37830 chars"
+      },
+      {
+        "path": "/print/gt-brand",
+        "status": 200,
+        "ms": 341,
+        "result": "pass",
+        "detail": "85 page(s)"
+      },
+      {
+        "path": "/present/gt-brand",
+        "status": 200,
+        "ms": 429,
+        "result": "pass",
+        "detail": "294225 chars"
+      },
+      {
+        "path": "/home",
+        "status": 200,
+        "ms": 17,
+        "result": "pass",
+        "detail": "95423 chars; 3/3 marks; no noindex meta; x-robots-tag none"
+      },
+      {
+        "path": "/decks/gt-brand/assets/cover-fumadocs.png",
+        "status": 200,
+        "ms": 197,
+        "result": "pass",
+        "detail": "image/png 335538 B"
+      },
+      {
+        "path": "/api/agent",
+        "status": 401,
+        "ms": 83,
+        "result": "pass",
+        "detail": "bearer rule"
+      },
+      {
+        "path": "headers /edit/gt-brand",
+        "status": 200,
+        "ms": 596,
+        "result": "pass",
+        "detail": "every header; csp worker-src blob ok; x-frame-options DENY"
+      },
+      {
+        "path": "headers /deck/gt-brand",
+        "status": 200,
+        "ms": 317,
+        "result": "pass",
+        "detail": "every header; csp worker-src blob ok; x-frame-options DENY"
+      },
+      {
+        "path": "headers /embed/gt-brand",
+        "status": 200,
+        "ms": 278,
+        "result": "pass",
+        "detail": "x-frame-options none; https://prototemplate.com https://*.prototemplate.com"
+      },
+      {
+        "path": "json asset attachment",
+        "status": 200,
+        "ms": 113,
+        "result": "pass",
+        "detail": "attachment; sandbox; default-src 'none'"
+      },
+      {
+        "path": "cross site text/plain POST",
+        "status": 415,
+        "ms": 80,
+        "result": "pass",
+        "detail": "415"
+      },
+      {
+        "path": "unsigned thumbnail",
+        "status": 302,
+        "ms": 344,
+        "result": "pass",
+        "detail": "shadow: the stored object (https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.)"
+      },
+      {
+        "path": "csp report endpoint",
+        "status": 204,
+        "ms": 82,
+        "result": "pass",
+        "detail": "204"
+      },
+      {
+        "path": "cdn /favicon.ico",
+        "status": 200,
+        "ms": 16,
+        "result": "pass",
+        "detail": "image/vnd.microsoft.icon 15086 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /icon.svg",
+        "status": 200,
+        "ms": 22,
+        "result": "pass",
+        "detail": "image/svg+xml 957 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /apple-touch-icon.png",
+        "status": 200,
+        "ms": 16,
+        "result": "pass",
+        "detail": "image/png 753 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /manifest.webmanifest",
+        "status": 200,
+        "ms": 14,
+        "result": "pass",
+        "detail": "application/manifest+json; charset=utf-8 971 B; first 200 MISS, second 200 HIT; public, max-age=86400"
+      },
+      {
+        "path": "cdn /icons/icon-512.png",
+        "status": 200,
+        "ms": 133,
+        "result": "pass",
+        "detail": "image/png 460 B; first 200 MISS, second 200 HIT; public, max-age=604800, stale-while-revalidate=2592000"
+      },
+      {
+        "path": "cdn /og/turboslide.png",
+        "status": 200,
+        "ms": 18,
+        "result": "pass",
+        "detail": "image/png 29818 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/hero-dark.png",
+        "status": 200,
+        "ms": 17,
+        "result": "pass",
+        "detail": "image/png 13679 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/hero-light.png",
+        "status": 200,
+        "ms": 14,
+        "result": "pass",
+        "detail": "image/png 13689 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/figure-dark.png",
+        "status": 200,
+        "ms": 14,
+        "result": "pass",
+        "detail": "image/png 13873 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/figure-light.png",
+        "status": 200,
+        "ms": 12,
+        "result": "pass",
+        "detail": "image/png 13892 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/notfound-dark.png",
+        "status": 200,
+        "ms": 26,
+        "result": "pass",
+        "detail": "image/png 13866 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/notfound-light.png",
+        "status": 200,
+        "ms": 16,
+        "result": "pass",
+        "detail": "image/png 13862 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/og-screen-dark.png",
+        "status": 200,
+        "ms": 16,
+        "result": "pass",
+        "detail": "image/png 1885 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /brand/og-screen-light.png",
+        "status": 200,
+        "ms": 54,
+        "result": "pass",
+        "detail": "image/png 1887 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800"
+      },
+      {
+        "path": "cdn /home",
+        "status": 200,
+        "ms": 15,
+        "result": "pass",
+        "detail": "text/html; charset=utf-8 95423 B; first 200 HIT, second 200 HIT; public, max-age=0, must-revalidate"
+      },
+      {
+        "path": "thumbnail without r",
+        "status": 302,
+        "ms": 205,
+        "result": "pass",
+        "detail": "302 -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/deck; public; MISS; set-cookie present (the CDN does not cache it); stamp 277d772f; source blob; fresh 1"
+      },
+      {
+        "path": "thumbnail with r twice",
+        "status": 302,
+        "ms": 304,
+        "result": "pass",
+        "detail": "first 302 MISS blob; second 302 MISS blob -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.thumbs/2; public, max-age=31536000, immutable"
+      },
+      {
+        "path": "effects backend",
+        "status": 200,
+        "ms": 429,
+        "result": "pass",
+        "detail": "typescript; glibc 2.34; node v24.19.0 linux (the TypeScript or wasm stages: the Linux addon is not committed, SPEC-4 0.38)"
+      },
+      {
+        "path": "deck.info snapshots",
+        "status": 200,
+        "ms": 206,
+        "result": "pass",
+        "detail": "1 snapshot(s), revision 32"
+      }
+    ]
+  },
+  "checkList": {
+    "file": "check-list-2026-09-15.txt",
+    "rows": 31,
+    "steps": [
+      {
+        "step": 1,
+        "needs": null,
+        "command": "pnpm install --frozen-lockfile"
+      },
+      {
+        "step": 2,
+        "needs": null,
+        "command": "pnpm exec tsr generate --config apps/studio/tsr.config.json"
+      },
+      {
+        "step": 3,
+        "needs": null,
+        "command": "git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtu"
+      },
+      {
+        "step": 4,
+        "needs": null,
+        "command": "pnpm exec tsc -b"
+      },
+      {
+        "step": 5,
+        "needs": null,
+        "command": "pnpm test"
+      },
+      {
+        "step": 6,
+        "needs": null,
+        "command": "pnpm build && node scripts/check-client-bundle.mjs apps/studio/dist && node scripts/check.mjs --greps"
+      },
+      {
+        "step": 7,
+        "needs": "prototemplate",
+        "command": "pnpm exec turboslide import /Users/kevinliu/repos/Prototemplate/deck --into gt-brand --json > .turboslide/import.json"
+      },
+      {
+        "step": 8,
+        "needs": "prototemplate",
+        "command": "node -e \"const r=require('./.turboslide/import.json'); if(r.slides!==85||r.sections!==8||r.htmlBlocks!==0) process.exit(1)\""
+      },
+      {
+        "step": 9,
+        "needs": null,
+        "command": "pnpm exec turboslide validate decks/gt-brand"
+      },
+      {
+        "step": 10,
+        "needs": null,
+        "command": "pnpm exec turboslide render all --theme light,dark --scale 1 --out .turboslide/render --json"
+      },
+      {
+        "step": 11,
+        "needs": null,
+        "command": "node -e \"const r=require('./.turboslide/render/render.json'); if(r.length!==170||r.some(x=>x.pageErrors.length)) process.exit(1)\""
+      },
+      {
+        "step": 12,
+        "needs": "prototemplate",
+        "command": "node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render .turboslide/render --shoot /Users/kevinliu/repos/Prototemplate/deck --max-m"
+      },
+      {
+        "step": 13,
+        "needs": null,
+        "command": "pnpm exec turboslide sheet all --cols 4 --thumb 480 --numbered --out .turboslide/sheet"
+      },
+      {
+        "step": 14,
+        "needs": null,
+        "command": "node -e \"const fs=require('fs'); for (const t of ['light','dark']) { fs.statSync('.turboslide/sheet/sheet-'+t+'.png'); const m=JSON.parse(fs"
+      },
+      {
+        "step": 15,
+        "needs": null,
+        "command": "pnpm exec turboslide lint all --json > .turboslide/lint.json"
+      },
+      {
+        "step": 16,
+        "needs": null,
+        "command": "pnpm exec turboslide build --out .turboslide/brand-deck.html --budget 16"
+      },
+      {
+        "step": 17,
+        "needs": "server",
+        "command": "pnpm exec playwright test apps/studio/e2e/viewer.spec.ts"
+      },
+      {
+        "step": 18,
+        "needs": "server",
+        "command": "pnpm exec turboslide lint --chrome --url http://localhost:4321/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turbosl"
+      },
+      {
+        "step": 19,
+        "needs": null,
+        "command": "pnpm format:check"
+      },
+      {
+        "step": 20,
+        "needs": "server",
+        "command": "node scripts/gslides-parity-audit.mjs --base http://localhost:4321 --out docs/gslides-parity/verification-3/parity-audit.json"
+      },
+      {
+        "step": 21,
+        "needs": "server",
+        "command": "pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/stud"
+      },
+      {
+        "step": 22,
+        "needs": null,
+        "command": "pnpm exec turboslide export decks/fixture/gslides --mode native --out .turboslide/gs-native && pnpm exec turboslide export check .turboslide"
+      },
+      {
+        "step": 23,
+        "needs": "python",
+        "command": "pnpm exec turboslide fonts build --check"
+      },
+      {
+        "step": 24,
+        "needs": null,
+        "command": "node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005"
+      },
+      {
+        "step": 25,
+        "needs": "docker",
+        "command": "docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker . && docker run --rm -v \"$PWD/.turboslide/container:/work\" turbo"
+      },
+      {
+        "step": 26,
+        "needs": "server",
+        "command": "pnpm exec playwright test apps/studio/e2e/realtime.spec.ts apps/studio/e2e/presence.spec.ts apps/studio/e2e/comments.spec.ts apps/studio/e2e"
+      },
+      {
+        "step": 27,
+        "needs": "preview",
+        "command": "node scripts/layout-shift-audit.mjs --base http://localhost:4344 --out docs/gslides-parity/verification-3/layout-shift.json"
+      },
+      {
+        "step": 28,
+        "needs": null,
+        "command": "node scripts/check.mjs --audit"
+      },
+      {
+        "step": 29,
+        "needs": "brand",
+        "command": "node scripts/build-brand.ts --check && node scripts/build-home-assets.ts --check && node packages/schema/scripts/build-definitions.mjs --che"
+      },
+      {
+        "step": 30,
+        "needs": "vercel",
+        "command": "NITRO_PRESET=vercel pnpm --filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs"
+      },
+      {
+        "step": 31,
+        "needs": "node-server",
+        "command": "node scripts/perf-budget.mjs --base http://localhost:4321 --profile local --write --runs 3 --json .turboslide/perf-budget.json && node scrip"
+      }
+    ]
+  },
+  "perfBudget": {
+    "log": "perf-budget-production-2026-09-15.log",
+    "started": "2026-09-15T11:02:02Z",
+    "finished": "2026-09-15T11:06:01Z",
+    "exit": 0,
+    "file": "perf-budget-production-2026-09-15.json",
+    "base": "https://turboslide.vercel.app",
+    "profile": "deployment",
+    "startedAt": "2026-09-15T11:02:02.345Z",
+    "finishedAt": "2026-09-15T11:06:01.302Z",
+    "chromeFlags": ["--use-gl=angle", "--use-angle=metal", "--ignore-gpu-blocklist"],
+    "asserted": 151,
+    "met": 114,
+    "failures": 37,
+    "misses": [
+      {
+        "check": "routes",
+        "name": "/ cold js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold js decoded",
+        "value": 678814,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm js decoded",
+        "value": 678814,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold ttfb",
+        "value": 456.462,
+        "limit": 400,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold lcp",
+        "value": 1252,
+        "limit": 1000,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold js decoded",
+        "value": 2152912,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ttfb",
+        "value": 2600.838,
+        "limit": 300,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm lcp",
+        "value": 2776,
+        "limit": 600,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ready",
+        "value": 2732.699999988079,
+        "limit": 600,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm js decoded",
+        "value": 2152912,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold js decoded",
+        "value": 633457,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold longest animation frame",
+        "value": 161,
+        "limit": 150,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm ttfb",
+        "value": 376.493,
+        "limit": 300,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm js decoded",
+        "value": 633457,
+        "limit": 600000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold js decoded",
+        "value": 1844701,
+        "limit": 1000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold dom nodes (after GC; 1602 live elements)",
+        "value": 2503,
+        "limit": 1500,
+        "unit": "count",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm lcp",
+        "value": 452,
+        "limit": 400,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm js decoded",
+        "value": 1844701,
+        "limit": 1000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm dom nodes (after GC; 1602 live elements)",
+        "value": 2502,
+        "limit": 1500,
+        "unit": "count",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold ttfb",
+        "value": 581.69,
+        "limit": 200,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold fcp",
+        "value": 676,
+        "limit": 400,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold js decoded",
+        "value": 2238488,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold dom nodes (after GC; 1529 live elements)",
+        "value": 2134,
+        "limit": 1500,
+        "unit": "count",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm ttfb",
+        "value": 263.915,
+        "limit": 150,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm fcp",
+        "value": 332,
+        "limit": 250,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm js decoded",
+        "value": 2238488,
+        "limit": 2000000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm dom nodes (after GC; 1529 live elements)",
+        "value": 2134,
+        "limit": 1500,
+        "unit": "count",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold ttfb",
+        "value": 296.297,
+        "limit": 200,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold js decoded",
+        "value": 1365710,
+        "limit": 1200000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ttfb",
+        "value": 366.932,
+        "limit": 150,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ready",
+        "value": 572.6000000238419,
+        "limit": 500,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm js decoded",
+        "value": 1365710,
+        "limit": 1200000,
+        "unit": "bytes",
+        "kind": "ceiling"
+      },
+      {
+        "check": "transitions",
+        "name": "home->new (wall, document navigation, no prerender activation)",
+        "value": 302,
+        "limit": 300,
+        "unit": "ms",
+        "kind": "ceiling"
+      },
+      {
+        "check": "filmstrip",
+        "name": "dom nodes with 85 cards (after GC; 1821 live elements)",
+        "value": 2694,
+        "limit": 1500,
+        "unit": "count",
+        "kind": "ceiling"
+      }
+    ],
+    "rows": [
+      {
+        "check": "routes",
+        "name": "/ cold ttfb",
+        "value": 119.452,
+        "limit": 200,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold fcp",
+        "value": 364,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold lcp",
+        "value": 440,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold ready",
+        "value": 486.5,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold longest animation frame",
+        "value": 127,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold dom nodes (after GC; 497 live elements)",
+        "value": 590,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/ cold images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm ttfb",
+        "value": 113.819,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm fcp",
+        "value": 188,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm lcp",
+        "value": 188,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm ready",
+        "value": 264.19999998807907,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm longest animation frame",
+        "value": 0,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm dom nodes (after GC; 497 live elements)",
+        "value": 590,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/ warm images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold ttfb",
+        "value": 47.546,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold fcp",
+        "value": 164,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold lcp",
+        "value": 164,
+        "limit": 800,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold ready",
+        "value": 110.19999998807907,
+        "limit": 800,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold js decoded",
+        "value": 678814,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold longest animation frame",
+        "value": 76,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold dom nodes (after GC; 783 live elements)",
+        "value": 1017,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold images before ready (decoded)",
+        "value": 40468,
+        "limit": 500000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold images after a full scroll (decoded)",
+        "value": 486017,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home cold lcp element is the plate text or the twin (DIV.ts-product-hero-twin)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm ttfb",
+        "value": 16.148,
+        "limit": 100,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm fcp",
+        "value": 84,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm lcp",
+        "value": 84,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm ready",
+        "value": 38.80000001192093,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm js decoded",
+        "value": 678814,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm longest animation frame",
+        "value": 0,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm dom nodes (after GC; 783 live elements)",
+        "value": 1017,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm images before ready (decoded)",
+        "value": 68020,
+        "limit": 500000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm images after a full scroll (decoded)",
+        "value": 486017,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/home warm lcp element is the plate text or the twin (DIV.ts-product-hero-twin)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold ttfb",
+        "value": 135.079,
+        "limit": 200,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold fcp",
+        "value": 236,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold lcp",
+        "value": 268,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold ready",
+        "value": 342,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold longest animation frame",
+        "value": 68,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold dom nodes (after GC; 497 live elements)",
+        "value": 590,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/new cold first byte, worst cold sample (a fresh instance is not forced; reported)",
+        "value": 144.097,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm ttfb",
+        "value": 114.229,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm fcp",
+        "value": 188,
+        "limit": 250,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm lcp",
+        "value": 188,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm ready",
+        "value": 255.29999995231628,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm js decoded",
+        "value": 2235742,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm longest animation frame",
+        "value": 0,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm dom nodes (after GC; 497 live elements)",
+        "value": 590,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/new warm images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold ttfb",
+        "value": 456.462,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold fcp",
+        "value": 572,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold lcp",
+        "value": 1252,
+        "limit": 1000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold ready",
+        "value": 610.3999999761581,
+        "limit": 1000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold js decoded",
+        "value": 2152912,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold longest animation frame",
+        "value": 87,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold dom nodes (after GC; 364 live elements)",
+        "value": 513,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold images with 26 cards (decoded)",
+        "value": 957,
+        "limit": 1500000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold first byte, worst cold sample (a fresh instance is not forced; reported)",
+        "value": 2604.159,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ttfb",
+        "value": 2600.838,
+        "limit": 300,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm fcp",
+        "value": 2708,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm lcp",
+        "value": 2776,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ready",
+        "value": 2732.699999988079,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm js decoded",
+        "value": 2152912,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm longest animation frame",
+        "value": 68,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm dom nodes (after GC; 364 live elements)",
+        "value": 518,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm images with 26 cards (decoded)",
+        "value": 957,
+        "limit": 1500000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold ttfb",
+        "value": 348.187,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold fcp",
+        "value": 508,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold lcp",
+        "value": 508,
+        "limit": 1000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold ready",
+        "value": 610.6000000238419,
+        "limit": 1000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold js decoded",
+        "value": 633457,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold longest animation frame",
+        "value": 161,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold dom nodes (after GC; 114 live elements)",
+        "value": 146,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold images before ready (decoded)",
+        "value": 957,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm ttfb",
+        "value": 376.493,
+        "limit": 300,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm fcp",
+        "value": 464,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm lcp",
+        "value": 464,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm ready",
+        "value": 476.4000000357628,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm js decoded",
+        "value": 633457,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm longest animation frame",
+        "value": 53,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm dom nodes (after GC; 114 live elements)",
+        "value": 146,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm images before ready (decoded)",
+        "value": 957,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold ttfb",
+        "value": 278.687,
+        "limit": 500,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold fcp",
+        "value": 412,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold lcp",
+        "value": 412,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold ready",
+        "value": 506.69999998807907,
+        "limit": 800,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold js decoded",
+        "value": 1844701,
+        "limit": 1000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold longest animation frame",
+        "value": 93,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold cls",
+        "value": 0.0021485001929012343,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold dom nodes (after GC; 1602 live elements)",
+        "value": 2503,
+        "limit": 1500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold images before ready (decoded)",
+        "value": 516149,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm ttfb",
+        "value": 271.981,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm fcp",
+        "value": 376,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm lcp",
+        "value": 452,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm ready",
+        "value": 504.89999997615814,
+        "limit": 600,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm js decoded",
+        "value": 1844701,
+        "limit": 1000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm longest animation frame",
+        "value": 0,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm cls",
+        "value": 0.0021485001929012343,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm dom nodes (after GC; 1602 live elements)",
+        "value": 2502,
+        "limit": 1500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm images before ready (decoded)",
+        "value": 516149,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold ttfb",
+        "value": 581.69,
+        "limit": 200,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold fcp",
+        "value": 676,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold lcp",
+        "value": 988,
+        "limit": 1200,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold ready",
+        "value": 935.4000000357628,
+        "limit": 1200,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold js decoded",
+        "value": 2238488,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold longest animation frame",
+        "value": 92,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold dom nodes (after GC; 1529 live elements)",
+        "value": 2134,
+        "limit": 1500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm ttfb",
+        "value": 263.915,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm fcp",
+        "value": 332,
+        "limit": 250,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm lcp",
+        "value": 596,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm ready",
+        "value": 570.3999999761581,
+        "limit": 700,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm js decoded",
+        "value": 2238488,
+        "limit": 2000000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm longest animation frame",
+        "value": 90,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm dom nodes (after GC; 1529 live elements)",
+        "value": 2134,
+        "limit": 1500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm images before ready (decoded)",
+        "value": 530022,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold ttfb",
+        "value": 296.297,
+        "limit": 200,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold fcp",
+        "value": 412,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold lcp",
+        "value": 412,
+        "limit": 800,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold ready",
+        "value": 583.2999999523163,
+        "limit": 800,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold js decoded",
+        "value": 1365710,
+        "limit": 1200000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold longest animation frame",
+        "value": 69,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold dom nodes (after GC; 303 live elements)",
+        "value": 368,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ttfb",
+        "value": 366.932,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm fcp",
+        "value": 420,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm lcp",
+        "value": 420,
+        "limit": 500,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ready",
+        "value": 572.6000000238419,
+        "limit": 500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm js decoded",
+        "value": 1365710,
+        "limit": 1200000,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm largest js (index-CYGrLim1.js)",
+        "value": 579024,
+        "limit": 600000,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm longest animation frame",
+        "value": 0,
+        "limit": 150,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ratio"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm dom nodes (after GC; 303 live elements)",
+        "value": 368,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm images before ready (decoded)",
+        "value": 14830,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "bytes"
+      },
+      {
+        "check": "transitions",
+        "name": "decks->edit (in page)",
+        "value": 94.39999997615814,
+        "limit": 500,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "back (wall)",
+        "value": 30,
+        "limit": 100,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "edit->decks (in page)",
+        "value": 15.299999952316284,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "trash->decks (in page)",
+        "value": 5.699999988079071,
+        "limit": 400,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "home->new (wall, document navigation, no prerender activation)",
+        "value": 302,
+        "limit": 300,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "slideChange (in page, painted frame)",
+        "value": 10.600000023841858,
+        "limit": 50,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "slideshow (in page, painted frame)",
+        "value": 20.19999998807907,
+        "limit": 50,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "transitions",
+        "name": "layoutGrid (in page, painted frame)",
+        "value": 9.799999952316284,
+        "limit": 50,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "filmstrip",
+        "name": "first pass longest frame",
+        "value": 25.5,
+        "limit": 100,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes p95 frame",
+        "value": 10.199999999998909,
+        "limit": 20,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes longest frame",
+        "value": 17,
+        "limit": 50,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes fps",
+        "value": 119.51802526952531,
+        "limit": 50,
+        "kind": "floor",
+        "ok": true,
+        "unit": "fps"
+      },
+      {
+        "check": "filmstrip",
+        "name": "dom nodes with 85 cards (after GC; 1821 live elements)",
+        "value": 2694,
+        "limit": 1500,
+        "kind": "ceiling",
+        "ok": false,
+        "unit": "count"
+      },
+      {
+        "check": "idle",
+        "name": "server function calls per minute (60 s window)",
+        "value": 2,
+        "limit": 4,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "idle",
+        "name": "stream connections per minute (/api/decks/*/stream, 60 s window)",
+        "value": 0,
+        "limit": 2,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "twins",
+        "name": "twins re-fetched on the second visit (of 16; 0 revalidated with a 304)",
+        "value": 0,
+        "limit": 0,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "count"
+      },
+      {
+        "check": "cdn",
+        "name": "/favicon.ico second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/icon.svg second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/apple-touch-icon.png second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/manifest.webmanifest second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/icons/icon-512.png second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/og/turboslide.png second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "cdn",
+        "name": "/home second request is a CDN hit (status 200, x-vercel-cache HIT)",
+        "value": 1,
+        "limit": 1,
+        "kind": "flag",
+        "ok": true,
+        "unit": "flag"
+      },
+      {
+        "check": "vitals",
+        "name": "field INP p75 from /api/vitals (reserved; no ceiling this round)",
+        "value": null,
+        "limit": null,
+        "kind": "ceiling",
+        "ok": true,
+        "unit": "ms"
+      }
+    ],
+    "routes": [
+      {
+        "route": "/",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 119.452,
+        "fcp": 364,
+        "lcp": 440,
+        "ready": 486.5,
+        "jsDecoded": 2235742,
+        "jsTransfer": 673838,
+        "jsCount": 22,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 127,
+        "cls": 0,
+        "nodes": 590,
+        "elements": 497,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-curtain",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 113.487,
+            "fcp": 432,
+            "lcp": 448,
+            "ready": 772.6000000238419,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 237,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 229.766,
+            "fcp": 364,
+            "lcp": 364,
+            "ready": 486.5,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 59,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 119.452,
+            "fcp": 316,
+            "lcp": 440,
+            "ready": 423.39999997615814,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 127,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 113.819,
+        "fcp": 188,
+        "lcp": 188,
+        "ready": 264.19999998807907,
+        "jsDecoded": 2235742,
+        "jsTransfer": 0,
+        "jsCount": 22,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 0,
+        "cls": 0,
+        "nodes": 590,
+        "elements": 497,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-curtain",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 111.298,
+            "fcp": 188,
+            "lcp": 188,
+            "ready": 260.7000000476837,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 113.819,
+            "fcp": 180,
+            "lcp": 180,
+            "ready": 264.19999998807907,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 113.915,
+            "fcp": 236,
+            "lcp": 236,
+            "ready": 319,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 75,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/home",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 47.546,
+        "fcp": 164,
+        "lcp": 164,
+        "ready": 110.19999998807907,
+        "jsDecoded": 678814,
+        "jsTransfer": 227159,
+        "jsCount": 6,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 76,
+        "cls": 0,
+        "nodes": 1017,
+        "elements": 783,
+        "imagesBeforeReady": 40468,
+        "imagesAfterScroll": 486017,
+        "lcpEl": "DIV.ts-product-hero-twin",
+        "lcpUrl": "https://turboslide.vercel.app/brand/hero-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 61.948,
+            "fcp": 164,
+            "lcp": 164,
+            "ready": 124.19999998807907,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 73,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          },
+          {
+            "ttfb": 41.524,
+            "fcp": 176,
+            "lcp": 176,
+            "ready": 109.60000002384186,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 101,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          },
+          {
+            "ttfb": 47.546,
+            "fcp": 164,
+            "lcp": 164,
+            "ready": 110.19999998807907,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 76,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/home",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 16.148,
+        "fcp": 84,
+        "lcp": 84,
+        "ready": 38.80000001192093,
+        "jsDecoded": 678814,
+        "jsTransfer": 0,
+        "jsCount": 6,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 0,
+        "cls": 0,
+        "nodes": 1017,
+        "elements": 783,
+        "imagesBeforeReady": 68020,
+        "imagesAfterScroll": 486017,
+        "lcpEl": "DIV.ts-product-hero-twin",
+        "lcpUrl": "https://turboslide.vercel.app/brand/hero-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 19.916,
+            "fcp": 84,
+            "lcp": 84,
+            "ready": 44.69999998807907,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          },
+          {
+            "ttfb": 14.52,
+            "fcp": 72,
+            "lcp": 72,
+            "ready": 38.10000002384186,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          },
+          {
+            "ttfb": 16.148,
+            "fcp": 84,
+            "lcp": 84,
+            "ready": 38.80000001192093,
+            "jsDecoded": 678814,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 1017,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/new",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 135.079,
+        "fcp": 236,
+        "lcp": 268,
+        "ready": 342,
+        "jsDecoded": 2235742,
+        "jsTransfer": 673838,
+        "jsCount": 22,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 68,
+        "cls": 0,
+        "nodes": 590,
+        "elements": 497,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-curtain",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 135.079,
+            "fcp": 236,
+            "lcp": 260,
+            "ready": 342,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 68,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 144.097,
+            "fcp": 336,
+            "lcp": 360,
+            "ready": 476.69999998807907,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 165,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 131.764,
+            "fcp": 228,
+            "lcp": 268,
+            "ready": 333.39999997615814,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 64,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/new",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 114.229,
+        "fcp": 188,
+        "lcp": 188,
+        "ready": 255.29999995231628,
+        "jsDecoded": 2235742,
+        "jsTransfer": 0,
+        "jsCount": 22,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 0,
+        "cls": 0,
+        "nodes": 590,
+        "elements": 497,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-curtain",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 112.339,
+            "fcp": 164,
+            "lcp": 164,
+            "ready": 254.9000000357628,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 139.28,
+            "fcp": 196,
+            "lcp": 196,
+            "ready": 279.19999998807907,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          },
+          {
+            "ttfb": 114.229,
+            "fcp": 188,
+            "lcp": 188,
+            "ready": 255.29999995231628,
+            "jsDecoded": 2235742,
+            "largestJs": 579024,
+            "loafMax": 51,
+            "cls": 0,
+            "nodes": 590,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/decks",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 456.462,
+        "fcp": 572,
+        "lcp": 1252,
+        "ready": 610.3999999761581,
+        "jsDecoded": 2152912,
+        "jsTransfer": 645810,
+        "jsCount": 23,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 87,
+        "cls": 0,
+        "nodes": 513,
+        "elements": 364,
+        "imagesBeforeReady": 957,
+        "imagesAfterScroll": null,
+        "lcpEl": "P.ts-recent-lead",
+        "lcpUrl": null,
+        "cards": 26,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 2604.159,
+            "fcp": 2728,
+            "lcp": 2728,
+            "ready": 2755.199999988079,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 85,
+            "cls": 0,
+            "nodes": 518,
+            "error": null
+          },
+          {
+            "ttfb": 313.313,
+            "fcp": 508,
+            "lcp": 1252,
+            "ready": 548.8000000119209,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 163,
+            "cls": 0,
+            "nodes": 513,
+            "error": null
+          },
+          {
+            "ttfb": 456.462,
+            "fcp": 572,
+            "lcp": 680,
+            "ready": 610.3999999761581,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 87,
+            "cls": 0,
+            "nodes": 510,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/decks",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 2600.838,
+        "fcp": 2708,
+        "lcp": 2776,
+        "ready": 2732.699999988079,
+        "jsDecoded": 2152912,
+        "jsTransfer": 0,
+        "jsCount": 23,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 68,
+        "cls": 0,
+        "nodes": 518,
+        "elements": 364,
+        "imagesBeforeReady": 957,
+        "imagesAfterScroll": null,
+        "lcpEl": "IMG",
+        "lcpUrl": "https://turboslide.vercel.app/api/render/opener-brand?deck=gt-brand&theme=dark&w=320&r=32",
+        "cards": 26,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 2764.859,
+            "fcp": 2876,
+            "lcp": 2936,
+            "ready": 2895.399999976158,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 79,
+            "cls": 0,
+            "nodes": 518,
+            "error": null
+          },
+          {
+            "ttfb": 229.845,
+            "fcp": 304,
+            "lcp": 368,
+            "ready": 328.5999999642372,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 510,
+            "error": null
+          },
+          {
+            "ttfb": 2600.838,
+            "fcp": 2708,
+            "lcp": 2776,
+            "ready": 2732.699999988079,
+            "jsDecoded": 2152912,
+            "largestJs": 579024,
+            "loafMax": 68,
+            "cls": 0,
+            "nodes": 518,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/decks/trash",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 348.187,
+        "fcp": 508,
+        "lcp": 508,
+        "ready": 610.6000000238419,
+        "jsDecoded": 633457,
+        "jsTransfer": 210097,
+        "jsCount": 7,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 161,
+        "cls": 0,
+        "nodes": 146,
+        "elements": 114,
+        "imagesBeforeReady": 957,
+        "imagesAfterScroll": null,
+        "lcpEl": "P",
+        "lcpUrl": null,
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 310.558,
+            "fcp": 504,
+            "lcp": 504,
+            "ready": 537.6000000238419,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 161,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          },
+          {
+            "ttfb": 348.187,
+            "fcp": 580,
+            "lcp": 580,
+            "ready": 610.6000000238419,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 201,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          },
+          {
+            "ttfb": 389.046,
+            "fcp": 508,
+            "lcp": 508,
+            "ready": 727.1999999880791,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 90,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/decks/trash",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 376.493,
+        "fcp": 464,
+        "lcp": 464,
+        "ready": 476.4000000357628,
+        "jsDecoded": 633457,
+        "jsTransfer": 0,
+        "jsCount": 7,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 53,
+        "cls": 0,
+        "nodes": 146,
+        "elements": 114,
+        "imagesBeforeReady": 957,
+        "imagesAfterScroll": null,
+        "lcpEl": "P",
+        "lcpUrl": null,
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 376.493,
+            "fcp": 464,
+            "lcp": 464,
+            "ready": 476.4000000357628,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 53,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          },
+          {
+            "ttfb": 2032.388,
+            "fcp": 2120,
+            "lcp": 2120,
+            "ready": 2132.300000011921,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 53,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          },
+          {
+            "ttfb": 367.959,
+            "fcp": 420,
+            "lcp": 420,
+            "ready": 439.0999999642372,
+            "jsDecoded": 633457,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 146,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/deck/gt-brand",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 278.687,
+        "fcp": 412,
+        "lcp": 412,
+        "ready": 506.69999998807907,
+        "jsDecoded": 1844701,
+        "jsTransfer": 547585,
+        "jsCount": 20,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 93,
+        "cls": 0.0021485001929012343,
+        "nodes": 2503,
+        "elements": 1602,
+        "imagesBeforeReady": 516149,
+        "imagesAfterScroll": null,
+        "lcpEl": "IMG",
+        "lcpUrl": "https://turboslide.vercel.app/decks/gt-brand/assets/opener-brand-dark.jpg",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 876.818,
+            "fcp": 1160,
+            "lcp": 1160,
+            "ready": 1252.300000011921,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 240,
+            "cls": 0.0021485001929012343,
+            "nodes": 2503,
+            "error": null
+          },
+          {
+            "ttfb": 252.211,
+            "fcp": 380,
+            "lcp": 380,
+            "ready": 499,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 86,
+            "cls": 0.0021485001929012343,
+            "nodes": 2503,
+            "error": null
+          },
+          {
+            "ttfb": 278.687,
+            "fcp": 412,
+            "lcp": 412,
+            "ready": 506.69999998807907,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 93,
+            "cls": 0.0021485001929012343,
+            "nodes": 2503,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/deck/gt-brand",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 271.981,
+        "fcp": 376,
+        "lcp": 452,
+        "ready": 504.89999997615814,
+        "jsDecoded": 1844701,
+        "jsTransfer": 0,
+        "jsCount": 20,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 0,
+        "cls": 0.0021485001929012343,
+        "nodes": 2502,
+        "elements": 1602,
+        "imagesBeforeReady": 516149,
+        "imagesAfterScroll": null,
+        "lcpEl": "IMG",
+        "lcpUrl": "https://turboslide.vercel.app/decks/gt-brand/assets/opener-brand-dark.jpg",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 236.439,
+            "fcp": 436,
+            "lcp": 468,
+            "ready": 526,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0.0021485001929012343,
+            "nodes": 2502,
+            "error": null
+          },
+          {
+            "ttfb": 286.094,
+            "fcp": 376,
+            "lcp": 452,
+            "ready": 504.89999997615814,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0.0045193528163580245,
+            "nodes": 2502,
+            "error": null
+          },
+          {
+            "ttfb": 271.981,
+            "fcp": 352,
+            "lcp": 352,
+            "ready": 418.39999997615814,
+            "jsDecoded": 1844701,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0.0021485001929012343,
+            "nodes": 2502,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/edit/gt-brand",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 581.69,
+        "fcp": 676,
+        "lcp": 988,
+        "ready": 935.4000000357628,
+        "jsDecoded": 2238488,
+        "jsTransfer": 675775,
+        "jsCount": 24,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 92,
+        "cls": 0,
+        "nodes": 2134,
+        "elements": 1529,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "IMG",
+        "lcpUrl": "https://turboslide.vercel.app/decks/gt-brand/assets/opener-brand-dark.jpg",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 581.69,
+            "fcp": 676,
+            "lcp": 988,
+            "ready": 935.4000000357628,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 92,
+            "cls": 0,
+            "nodes": 2159,
+            "error": null
+          },
+          {
+            "ttfb": 1180.89,
+            "fcp": 1328,
+            "lcp": 1756,
+            "ready": 1703.8999999761581,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 117,
+            "cls": 0,
+            "nodes": 2134,
+            "error": null
+          },
+          {
+            "ttfb": 319.255,
+            "fcp": 404,
+            "lcp": 756,
+            "ready": 704.1999999880791,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 90,
+            "cls": 0,
+            "nodes": 2134,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/edit/gt-brand",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 263.915,
+        "fcp": 332,
+        "lcp": 596,
+        "ready": 570.3999999761581,
+        "jsDecoded": 2238488,
+        "jsTransfer": 0,
+        "jsCount": 24,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 90,
+        "cls": 0,
+        "nodes": 2134,
+        "elements": 1529,
+        "imagesBeforeReady": 530022,
+        "imagesAfterScroll": null,
+        "lcpEl": "IMG",
+        "lcpUrl": "https://turboslide.vercel.app/decks/gt-brand/assets/opener-brand-dark.jpg",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 348.326,
+            "fcp": 396,
+            "lcp": 596,
+            "ready": 570.3999999761581,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 89,
+            "cls": 0,
+            "nodes": 2159,
+            "error": null
+          },
+          {
+            "ttfb": 263.915,
+            "fcp": 320,
+            "lcp": 480,
+            "ready": 454.7000000476837,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 90,
+            "cls": 0,
+            "nodes": 2134,
+            "error": null
+          },
+          {
+            "ttfb": 249.604,
+            "fcp": 332,
+            "lcp": 616,
+            "ready": 591.3000000119209,
+            "jsDecoded": 2238488,
+            "largestJs": 579024,
+            "loafMax": 96,
+            "cls": 0,
+            "nodes": 2134,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/present/gt-brand",
+        "kind": "cold",
+        "n": 3,
+        "ttfb": 296.297,
+        "fcp": 412,
+        "lcp": 412,
+        "ready": 583.2999999523163,
+        "jsDecoded": 1365710,
+        "jsTransfer": 396003,
+        "jsCount": 11,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 69,
+        "cls": 0,
+        "nodes": 368,
+        "elements": 303,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-presenter-frame",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 374.167,
+            "fcp": 564,
+            "lcp": 564,
+            "ready": 679.8000000119209,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 142,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          },
+          {
+            "ttfb": 296.297,
+            "fcp": 412,
+            "lcp": 412,
+            "ready": 583.2999999523163,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 66,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          },
+          {
+            "ttfb": 291.883,
+            "fcp": 392,
+            "lcp": 392,
+            "ready": 454.4000000357628,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 69,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          }
+        ]
+      },
+      {
+        "route": "/present/gt-brand",
+        "kind": "warm",
+        "n": 3,
+        "ttfb": 366.932,
+        "fcp": 420,
+        "lcp": 420,
+        "ready": 572.6000000238419,
+        "jsDecoded": 1365710,
+        "jsTransfer": 0,
+        "jsCount": 11,
+        "largestJs": 579024,
+        "largestJsName": "index-CYGrLim1.js",
+        "loafMax": 0,
+        "cls": 0,
+        "nodes": 368,
+        "elements": 303,
+        "imagesBeforeReady": 14830,
+        "imagesAfterScroll": null,
+        "lcpEl": "DIV.ts-presenter-frame",
+        "lcpUrl": "https://turboslide.vercel.app/brand/figure-dark.png",
+        "cards": null,
+        "errors": [],
+        "samples": [
+          {
+            "ttfb": 586.854,
+            "fcp": 660,
+            "lcp": 660,
+            "ready": 834.6999999880791,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          },
+          {
+            "ttfb": 299.759,
+            "fcp": 396,
+            "lcp": 396,
+            "ready": 572.6000000238419,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          },
+          {
+            "ttfb": 366.932,
+            "fcp": 420,
+            "lcp": 420,
+            "ready": 490.39999997615814,
+            "jsDecoded": 1365710,
+            "largestJs": 579024,
+            "loafMax": 0,
+            "cls": 0,
+            "nodes": 368,
+            "error": null
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "name": "decks->edit",
+        "ms": 94.39999997615814,
+        "how": "in page"
+      },
+      {
+        "name": "back",
+        "ms": 30,
+        "how": "wall"
+      },
+      {
+        "name": "edit->decks",
+        "ms": 15.299999952316284,
+        "how": "in page"
+      },
+      {
+        "name": "trash->decks",
+        "ms": 5.699999988079071,
+        "how": "in page"
+      },
+      {
+        "name": "home->new",
+        "ms": 302,
+        "how": "wall, document navigation, no prerender activation",
+        "activationStart": 0,
+        "hoverMs": 1000
+      },
+      {
+        "name": "slideChange",
+        "ms": 10.600000023841858,
+        "how": "in page, painted frame",
+        "slideId": "thesis"
+      },
+      {
+        "name": "slideshow",
+        "ms": 20.19999998807907,
+        "how": "in page, painted frame"
+      },
+      {
+        "name": "layoutGrid",
+        "ms": 9.799999952316284,
+        "how": "in page, painted frame"
+      }
+    ],
+    "filmstrip": {
+      "passes": [
+        {
+          "pass": 1,
+          "direction": "down",
+          "frames": 246,
+          "fps": 118.62683387401349,
+          "median": 8.300000000000182,
+          "p95": 10.099999999999909,
+          "max": 25.5,
+          "over33": 0,
+          "over50": 0
+        },
+        {
+          "pass": 2,
+          "direction": "up",
+          "frames": 246,
+          "fps": 119.51802526952531,
+          "median": 8.300000000000182,
+          "p95": 10.099999999999454,
+          "max": 17,
+          "over33": 0,
+          "over50": 0
+        },
+        {
+          "pass": 3,
+          "direction": "down",
+          "frames": 245,
+          "fps": 119.57267470351854,
+          "median": 8.300000000001091,
+          "p95": 10.199999999998909,
+          "max": 15.100000000000364,
+          "over33": 0,
+          "over50": 0
+        }
+      ],
+      "nodes": 2694,
+      "elements": 1821,
+      "cards": 85
+    },
+    "idle": {
+      "seconds": 60,
+      "serverFn": 2,
+      "perMinute": 2,
+      "events": 0,
+      "eventsPerMinute": 0,
+      "pattern": "\\/api\\/decks\\/[^/?]+\\/stream",
+      "other": 12
+    },
+    "twins": {
+      "total": 16,
+      "refetched": 0,
+      "revalidated": 0,
+      "list": [
+        {
+          "name": "opener-brand-dark.jpg",
+          "initiator": "link",
+          "transfer": 0,
+          "encoded": 515192,
+          "decoded": 515192
+        },
+        {
+          "name": "mood-earth-dark.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 232175,
+          "decoded": 232175
+        },
+        {
+          "name": "mood-rosetta-dark.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 464051,
+          "decoded": 464051
+        },
+        {
+          "name": "ref-brockmann.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 27471,
+          "decoded": 27471
+        },
+        {
+          "name": "ref-vignelli.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 60755,
+          "decoded": 60755
+        },
+        {
+          "name": "ref-aicher.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 23849,
+          "decoded": 23849
+        },
+        {
+          "name": "ref-solari.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 72314,
+          "decoded": 72314
+        },
+        {
+          "name": "ref-chart.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 140236,
+          "decoded": 140236
+        },
+        {
+          "name": "ref-rosetta.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 101564,
+          "decoded": 101564
+        },
+        {
+          "name": "ref-chrysler.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 33351,
+          "decoded": 33351
+        },
+        {
+          "name": "ref-whole-earth.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 45939,
+          "decoded": 45939
+        },
+        {
+          "name": "ref-subway-sign.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 67012,
+          "decoded": 67012
+        },
+        {
+          "name": "ref-rams.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 49366,
+          "decoded": 49366
+        },
+        {
+          "name": "ref-stamp.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 72187,
+          "decoded": 72187
+        },
+        {
+          "name": "logo-gm.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 21779,
+          "decoded": 21779
+        },
+        {
+          "name": "logo-ge.jpg",
+          "initiator": "img",
+          "transfer": 0,
+          "encoded": 58454,
+          "decoded": 58454
+        }
+      ]
+    },
+    "cdn": [
+      {
+        "path": "/favicon.ico",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+        "type": "image/vnd.microsoft.icon",
+        "bytes": 15086
+      },
+      {
+        "path": "/icon.svg",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+        "type": "image/svg+xml",
+        "bytes": 957
+      },
+      {
+        "path": "/apple-touch-icon.png",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+        "type": "image/png",
+        "bytes": 753
+      },
+      {
+        "path": "/manifest.webmanifest",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=86400",
+        "type": "application/manifest+json; charset=utf-8",
+        "bytes": 971
+      },
+      {
+        "path": "/icons/icon-512.png",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=604800, stale-while-revalidate=2592000",
+        "type": "image/png",
+        "bytes": 460
+      },
+      {
+        "path": "/og/turboslide.png",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+        "type": "image/png",
+        "bytes": 29818
+      },
+      {
+        "path": "/home",
+        "status": [200, 200],
+        "cache": "HIT",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "type": "text/html; charset=utf-8",
+        "bytes": 95423
+      }
+    ],
+    "vitals": {
+      "endpoint": "/api/vitals",
+      "collected": false
+    },
+    "write": null
+  },
+  "layoutShift": {
+    "log": "layout-shift-production-2026-09-15.log",
+    "started": "2026-09-15T11:06:01Z",
+    "finished": "2026-09-15T11:17:09Z",
+    "exit": 0,
+    "file": "layout-shift-production-2026-09-15.json",
+    "base": "https://turboslide.vercel.app",
+    "deck": "gt-brand",
+    "startedAt": "2026-09-15T11:06:01.873Z",
+    "seconds": 667,
+    "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL",
+    "version": "147.0.7727.15",
+    "cells": 109,
+    "failureCount": 71,
+    "skippedCount": 8,
+    "cellsAtZeroLoadEntries": 57,
+    "cellsWithErrors": 0,
+    "failures": [
+      {
+        "cell": "edit 1440 light",
+        "id": "?",
+        "why": "state panel: entries in 16 frames"
+      },
+      {
+        "cell": "edit 1440 light",
+        "id": "?",
+        "why": "state inbox: entries in 17 frames"
+      },
+      {
+        "cell": "edit 1440 light notesHidden",
+        "id": "E2",
+        "why": "load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+      },
+      {
+        "cell": "edit 1440 dark notesHidden",
+        "id": "E2",
+        "why": "load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+      },
+      {
+        "cell": "edit 1280 light",
+        "id": "G1",
+        "why": "load entry 0.0002 from body > div.pt-viewer.is-editor.ts-skeleton > nav.ts-menubar.ts-skeleton-row > div.ts-menubar-titles > span.ts-skeleton-menu | body > div.pt-viewer.is-editor.ts-skeleton > nav.ts-menubar.ts-skeleton-row > div.ts-menubar-titles > span.ts-skeleton-menu | body > div.pt-viewer.is-editor.ts-skeleton > nav.ts-menubar.ts-skeleton-row > div.ts-menubar-titles > span.ts-skeleton-menu | body > div.pt-viewer.is-editor.ts-skeleton > nav.ts-menubar.ts-skeleton-row > div.ts-menubar-titles > span.ts-skeleton-menu | body > div.pt-viewer.is-editor.ts-skeleton > nav.ts-menubar.ts-skeleton-row > div.ts-menubar-titles > span.ts-skeleton-menu"
+      },
+      {
+        "cell": "edit 1280 light notesHidden",
+        "id": "E2",
+        "why": "load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+      },
+      {
+        "cell": "edit 1280 dark notesHidden",
+        "id": "E2",
+        "why": "load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+      },
+      {
+        "cell": "deck 1440 light",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 light listClosed",
+        "id": "D1",
+        "why": "load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 light outline",
+        "id": "D1",
+        "why": "load entry 0.0025 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 light outline",
+        "id": "D1",
+        "why": "load entry 0.0516 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp"
+      },
+      {
+        "cell": "deck 1440 light listClosedOutline",
+        "id": "D1",
+        "why": "load entry 0.0025 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 light listClosedOutline",
+        "id": "D1",
+        "why": "load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 light gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0003 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count"
+      },
+      {
+        "cell": "deck 1440 light gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 light hash",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 dark",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 dark listClosed",
+        "id": "D1",
+        "why": "load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 dark outline",
+        "id": "D1",
+        "why": "load entry 0.0516 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp"
+      },
+      {
+        "cell": "deck 1440 dark listClosedOutline",
+        "id": "D1",
+        "why": "load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 dark gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1440 dark hash",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1280 light",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "deck 1280 light listClosed",
+        "id": "D1",
+        "why": "load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 light outline",
+        "id": "D1",
+        "why": "load entry 0.0021 from div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-copy"
+      },
+      {
+        "cell": "deck 1280 light outline",
+        "id": "D1",
+        "why": "load entry 0.0476 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp"
+      },
+      {
+        "cell": "deck 1280 light listClosedOutline",
+        "id": "D1",
+        "why": "load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 light gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 light hash",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "deck 1280 dark",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "deck 1280 dark listClosed",
+        "id": "D1",
+        "why": "load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 dark outline",
+        "id": "D1",
+        "why": "load entry 0.0705 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full"
+      },
+      {
+        "cell": "deck 1280 dark listClosedOutline",
+        "id": "D1",
+        "why": "load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 dark gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0035 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1280 dark gridSaved",
+        "id": "D1",
+        "why": "load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep"
+      },
+      {
+        "cell": "deck 1280 dark hash",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "deck 390 light",
+        "id": "D1",
+        "why": "load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 390 dark",
+        "id": "D1",
+        "why": "load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r"
+      },
+      {
+        "cell": "embed 1440 light",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "embed 1440 dark",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "embed 1280 light",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "embed 1280 dark",
+        "id": "D1",
+        "why": "load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next | section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg"
+      },
+      {
+        "cell": "embed 390 light",
+        "id": "D1",
+        "why": "load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r"
+      },
+      {
+        "cell": "embed 390 dark",
+        "id": "D1",
+        "why": "load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r"
+      },
+      {
+        "cell": "decks 1440 light",
+        "id": "L5",
+        "why": "state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail"
+      },
+      {
+        "cell": "decks 1440 light",
+        "id": "L5",
+        "why": "state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail"
+      },
+      {
+        "cell": "decks 1440 light",
+        "id": "?",
+        "why": "state filter: entries in 2 frames"
+      },
+      {
+        "cell": "decks 1280 light sortTitle",
+        "id": "L1",
+        "why": "load entry 0.0001 from body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools | body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery"
+      },
+      {
+        "cell": "trash 1440 dark",
+        "id": "L5",
+        "why": "load entry 0.0000 from html > body > main.ts-home.ts-home-page.ts-trash-page > div.ts-trash-head > div.ts-trash-actions"
+      },
+      {
+        "cell": "present 1440 light",
+        "id": "?",
+        "why": "state timerHour: body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn | body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn"
+      },
+      {
+        "cell": "present 1440 light",
+        "id": "?",
+        "why": "state timerHour: entries in 1 frames"
+      },
+      {
+        "cell": "deckPresent 1440 light",
+        "id": "E2",
+        "why": "load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage"
+      },
+      {
+        "cell": "deckPresent 1440 light",
+        "id": "E2",
+        "why": "load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present | div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage | div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips"
+      },
+      {
+        "cell": "deckPresent 1440 dark",
+        "id": "E2",
+        "why": "load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage"
+      },
+      {
+        "cell": "deckPresent 1440 dark",
+        "id": "E2",
+        "why": "load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present | div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage"
+      },
+      {
+        "cell": "deckPresent 1280 light",
+        "id": "E2",
+        "why": "load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage"
+      },
+      {
+        "cell": "deckPresent 1280 light",
+        "id": "E2",
+        "why": "load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present | div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage"
+      },
+      {
+        "cell": "deckPresent 1280 dark",
+        "id": "E2",
+        "why": "load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage"
+      },
+      {
+        "cell": "deckPresent 1280 dark",
+        "id": "E2",
+        "why": "load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present | div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage"
+      },
+      {
+        "cell": "deckPresent 390 light",
+        "id": "E2",
+        "why": "load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present"
+      },
+      {
+        "cell": "deckPresent 390 dark",
+        "id": "E2",
+        "why": "load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present"
+      },
+      {
+        "cell": "deck 1440 light F",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 light F",
+        "id": "D1",
+        "why": "load entry 0.0005 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next | div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count | div.pt-slide > section.slide.is-on > div.in > div.center > div.big | "
+      },
+      {
+        "cell": "deck 1440 light I",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      },
+      {
+        "cell": "edit 1440 light F",
+        "id": "G1",
+        "why": "load entry 0.0007 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r | div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title | div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot | div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot | div.pt-slide > section.slide.is-on > div.in > div.center > div.big"
+      },
+      {
+        "cell": "decks 1440 light F",
+        "id": "E10",
+        "why": "load entry 0.0010 from body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card | body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card | body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card | body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card | body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card"
+      },
+      {
+        "cell": "print 1440 light F",
+        "id": "?",
+        "why": "load entry 0.0002 from html > body > main.ts-print > header.ts-print-bar > label.ts-print-layout | html > body > main.ts-print > header.ts-print-bar > button.pt-ib.is-text | html > body > main.ts-print > header.ts-print-bar > label.ts-print-check | html > body > main.ts-print > header.ts-print-bar > span.ts-print-title"
+      },
+      {
+        "cell": "print 1440 light B",
+        "id": "D2",
+        "why": "anchors moved with scripts blocked: .ts-print-pages, .ts-print-pages, .ts-print-pages, transform:.ts-print-sheet .ts-stage"
+      },
+      {
+        "cell": "present 1440 light F",
+        "id": "P3",
+        "why": "load entry 0.0002 from div.ts-presenter-row > div.ts-presenter-current > div.ts-presenter-pick > button.ts-presenter-counter > span.ts-presenter-counter-title | div.ts-presenter > div.ts-presenter-body > aside.ts-presenter-side > div.ts-presenter-tabs > button#ts-presenter-tab-audience.ts-presenter-tab.is-disabled |  | body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-link | body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-clock"
+      },
+      {
+        "cell": "deck 1440 light reduced",
+        "id": "D1",
+        "why": "load entry 0.0024 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r"
+      },
+      {
+        "cell": "deck 1440 light reduced",
+        "id": "D1",
+        "why": "load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r"
+      }
+    ],
+    "skipped": [
+      "edit 1440 light: filmstrip (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n)",
+      "edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide.vercel.app/assets/useStudioSession-DTD-VfmZ.js:1:1859)\n    at Object.dispatch (https://turboslide.vercel.app/assets/useStudioSession-DTD-VfmZ.js:1:2059)\n    at q (https://turboslide.vercel.app/assets/EditorRoot-CaFtyhvz.js:18:25712)\n    at Object.<anonymous> (https://turboslide.vercel.app/assets/useStudioSession-DTD-VfmZ.js:1:2724)\n    at nt (https://turboslide.vercel.app/assets/useStudioSession-DTD-VfmZ.js:1:8958)\n    at Object.invoke (https://turboslide.vercel.app/assets/useStudioSession-DTD-VfmZ.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30)",
+      "edit 1440 light: ditherDrag (control absent: [data-control=\"formatOptions.dither.black.slider\"])",
+      "edit 1440 light: share (control absent: [data-control=\"title.share\"])",
+      "edit 1440 light: signIn (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"title.account.signIn\"]')\n)",
+      "edit 1440 light: follow (control absent: [data-control=\"title.presence.more\"])",
+      "edit 1440 light: join20 (enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44))",
+      "print 1440 light: printSkipped (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"print.skipped\"]')\n    - locator resolved to <input type=\"checkbox\" data-control=\"print.skipped\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-hm-dialog-box\"></span> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-hm-dialog-box\"></span> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <span aria-hidden=\"true\" class=\"ts-hm-dialog-box\"></span> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n)"
+    ],
+    "perCell": [
+      {
+        "cell": "new 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 1,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "new 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "new 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "new 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "new 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "new 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 11,
+        "statesSkipped": 7
+      },
+      {
+        "cell": "edit 1440 light notesHidden",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.013387506430041152,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 light listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 dark notesHidden",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.013387506430041152,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 dark listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0001742596626281738,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 light notesHidden",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.011904656982421874,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 light listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 dark notesHidden",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.011904656982421874,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1280 dark listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 1,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0008050392433449073,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light outline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.054023380567343966,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light listClosedOutline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.003271174359942987,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light gridSaved",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0030533674326453184,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light hash",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0008050392433449073,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark outline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.05155724545074589,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark listClosedOutline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0008050392433449073,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark gridSaved",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0027161760746206272,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 dark hash",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.004316316151618958,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light outline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.049701713562011716,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light listClosedOutline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.004316316151618958,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light gridSaved",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0036911128520965577,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 light hash",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark listClosed",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.004316316151618958,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark outline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.070453125,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark listClosedOutline",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.004316316151618958,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark gridSaved",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.007202465391159058,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1280 dark hash",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.001748073196411133,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 1,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light listView",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light sortTitle",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light openedHistory",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 dark listView",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 dark sortTitle",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 dark openedHistory",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 light listView",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 light sortTitle",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.00005156292915344238,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 light openedHistory",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 dark listView",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 dark sortTitle",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1280 dark openedHistory",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.000048311042524005495,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "trash 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 2,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 1,
+        "statesSkipped": 1
+      },
+      {
+        "cell": "print 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 1440 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.06470138888888888,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 1440 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.06470138888888888,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 1280 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0728740234375,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 1280 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0728740234375,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 390 light",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deckPresent 390 dark",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light F",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0020791795267489713,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light I",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0021485001929012343,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light B",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 light F",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0006576103069654708,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "edit 1440 light I",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light F",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0010312060948752574,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light I",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "decks 1440 light B",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1440 light F",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.00016637731481481484,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1440 light I",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "print 1440 light B",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1440 light F",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.00017944060483914183,
+        "loadEntries": 1,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "present 1440 light I",
+        "status": 200,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "deck 1440 light reduced",
+        "status": 200,
+        "error": null,
+        "loadCls": 0.0045193528163580245,
+        "loadEntries": 2,
+        "statesRun": 0,
+        "statesSkipped": 0
+      },
+      {
+        "cell": "embed 1440 light framed",
+        "status": null,
+        "error": null,
+        "loadCls": 0,
+        "loadEntries": 0,
+        "statesRun": 0,
+        "statesSkipped": 0
+      }
+    ]
+  },
+  "parityAudit": {
+    "log": "parity-audit-production-2026-09-15.log",
+    "started": "2026-09-15T11:17:13Z",
+    "finished": "2026-09-15T11:45:28Z",
+    "exit": 0,
+    "file": "parity-audit-production-2026-09-15.json",
+    "base": "https://turboslide.vercel.app",
+    "at": "2026-09-15T11:45:28.041Z",
+    "commit": "d5a1be5",
+    "seconds": 1695,
+    "scratchDeck": "untitled-20260915-wes8",
+    "summary": {
+      "pass": 2574,
+      "fail": 22,
+      "skip": 445
+    },
+    "perSection": {
+      "firstOpen": {
+        "pass": 12,
+        "fail": 0,
+        "skip": 0
+      },
+      "defaultViewWords": {
+        "pass": 42,
+        "fail": 0,
+        "skip": 0
+      },
+      "toolbar:new": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "presence:scratch": {
+        "pass": 2,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:scratch": {
+        "pass": 303,
+        "fail": 0,
+        "skip": 59
+      },
+      "contextMenu:scratch": {
+        "pass": 2,
+        "fail": 0,
+        "skip": 0
+      },
+      "effects:scratch": {
+        "pass": 137,
+        "fail": 4,
+        "skip": 123
+      },
+      "effects:twoSlides": {
+        "pass": 5,
+        "fail": 0,
+        "skip": 1
+      },
+      "shortcuts:scratch": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "retiredKeys:scratch": {
+        "pass": 14,
+        "fail": 0,
+        "skip": 0
+      },
+      "toolbar:scratch": {
+        "pass": 5,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:textBlock": {
+        "pass": 329,
+        "fail": 0,
+        "skip": 34
+      },
+      "contextMenu:textBlock": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "effects:textBlock": {
+        "pass": 15,
+        "fail": 0,
+        "skip": 3
+      },
+      "effects:textBlock2": {
+        "pass": 16,
+        "fail": 1,
+        "skip": 2
+      },
+      "pickers:objects": {
+        "pass": 10,
+        "fail": 0,
+        "skip": 0
+      },
+      "shortcuts:text": {
+        "pass": 7,
+        "fail": 0,
+        "skip": 0
+      },
+      "formatOptions:objects": {
+        "pass": 7,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:shape": {
+        "pass": 328,
+        "fail": 0,
+        "skip": 34
+      },
+      "contextMenu:objects": {
+        "pass": 6,
+        "fail": 1,
+        "skip": 1
+      },
+      "effects:shape": {
+        "pass": 23,
+        "fail": 0,
+        "skip": 0
+      },
+      "shortcuts:objects": {
+        "pass": 11,
+        "fail": 0,
+        "skip": 0
+      },
+      "effects:line": {
+        "pass": 5,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:image": {
+        "pass": 328,
+        "fail": 0,
+        "skip": 34
+      },
+      "effects:image": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0
+      },
+      "toolbar:objects": {
+        "pass": 4,
+        "fail": 0,
+        "skip": 0
+      },
+      "effects:chart": {
+        "pass": 2,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:twoObjects": {
+        "pass": 328,
+        "fail": 0,
+        "skip": 34
+      },
+      "effects:objects": {
+        "pass": 5,
+        "fail": 1,
+        "skip": 0
+      },
+      "rows:objects": {
+        "pass": 4,
+        "fail": 0,
+        "skip": 0
+      },
+      "contextMenu:coversSheet": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "versions:scratch": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 1
+      },
+      "dither:scratch": {
+        "pass": 6,
+        "fail": 0,
+        "skip": 0
+      },
+      "roles:scratch": {
+        "pass": 5,
+        "fail": 9,
+        "skip": 0
+      },
+      "rows:scratch:viewer": {
+        "pass": 257,
+        "fail": 5,
+        "skip": 59
+      },
+      "tooltipAudit": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "titleRow:gt-brand": {
+        "pass": 2,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:gt-brand": {
+        "pass": 301,
+        "fail": 1,
+        "skip": 60
+      },
+      "toolbar:gt-brand": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "contextMenu:gt-brand": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      },
+      "retiredKeys:gt-brand": {
+        "pass": 14,
+        "fail": 0,
+        "skip": 0
+      },
+      "rows:decks": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "totals": {
+      "scratch": {
+        "title": {
+          "now": {
+            "pass": 39,
+            "fail": 1,
+            "skip": 2
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 58,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 10,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 23,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 78,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 69,
+            "fail": 0,
+            "skip": 8
+          },
+          "later": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 126,
+            "fail": 4,
+            "skip": 66
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 4
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 25,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "arrange": {
+          "now": {
+            "pass": 17,
+            "fail": 0,
+            "skip": 36
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 37,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 5,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 5,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 9,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "textBlock": {
+        "arrange": {
+          "now": {
+            "pass": 25,
+            "fail": 0,
+            "skip": 2
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "title": {
+          "now": {
+            "pass": 20,
+            "fail": 0,
+            "skip": 1
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 29,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 1
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 39,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 34,
+            "fail": 0,
+            "skip": 4
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 77,
+            "fail": 0,
+            "skip": 24
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 18,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "shape": {
+        "title": {
+          "now": {
+            "pass": 20,
+            "fail": 0,
+            "skip": 1
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 29,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 1
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 39,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 34,
+            "fail": 0,
+            "skip": 4
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 77,
+            "fail": 0,
+            "skip": 24
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "arrange": {
+          "now": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 2
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 18,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "image": {
+        "title": {
+          "now": {
+            "pass": 20,
+            "fail": 0,
+            "skip": 1
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 29,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 1
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 39,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 34,
+            "fail": 0,
+            "skip": 4
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 77,
+            "fail": 0,
+            "skip": 24
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "arrange": {
+          "now": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 2
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 18,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "twoObjects": {
+        "title": {
+          "now": {
+            "pass": 20,
+            "fail": 0,
+            "skip": 1
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 29,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 1
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 39,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 34,
+            "fail": 0,
+            "skip": 4
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 77,
+            "fail": 0,
+            "skip": 24
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "arrange": {
+          "now": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 2
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 18,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "objects": {
+        "view": {
+          "now": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "context": {
+          "now": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "gt-brand": {
+        "title": {
+          "now": {
+            "pass": 18,
+            "fail": 1,
+            "skip": 2
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "file": {
+          "now": {
+            "pass": 29,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 1
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "edit": {
+          "now": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "view": {
+          "now": {
+            "pass": 39,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "insert": {
+          "now": {
+            "pass": 34,
+            "fail": 0,
+            "skip": 4
+          },
+          "later": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "format": {
+          "now": {
+            "pass": 68,
+            "fail": 0,
+            "skip": 33
+          },
+          "later": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 2
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "slide": {
+          "now": {
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "arrange": {
+          "now": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 18
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "tools": {
+          "now": {
+            "pass": 18,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "extensions": {
+          "now": {
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "help": {
+          "now": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      },
+      "decks": {
+        "title": {
+          "now": {
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          "later": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          },
+          "omit": {
+            "pass": 0,
+            "fail": 0,
+            "skip": 0
+          }
+        }
+      }
+    },
+    "pageErrors": [],
+    "scratchDeckCleanup": [
+      "# 2026-09-15T11:49:09.721Z the parity audit's scratch deck, trashed by the audit at File > Move to trash and left in the trash when its Delete forever step did not run (BASELINE.md section 6 class 4, finding 9); removed here the way round four's verifier did (verification-4/preview-pass2/remove-write-deck-2026-09-14.txt)",
+      "untitled-20260915-wes8 deck.info 200 {\"revision\":258,\"title\":\"Audit scratch\",\"counts\":{\"slides\":3,\"sections\":1,\"assets\":5,\"htmlBlocks\":0,\"skipped\":0,\"canvas\":2,\"charts\":0,\"guides\":0,\"snapshots\":50},\"trashedAt\":\"2026-09-15T11:44:44.782Z\"}",
+      "untitled-20260915-wes8 deck.remove 200 {\"id\":\"untitled-20260915-wes8\",\"removed\":true}",
+      "untitled-20260915-wes8 /deck/untitled-20260915-wes8 probe 404",
+      "untitled-20260915-wes8 /edit/untitled-20260915-wes8 probe 404",
+      "untitled-20260915-wes8 /decks/trash mentions the id: false",
+      "/decks cards after: 26"
+    ],
+    "failures": [
+      {
+        "section": "effects:scratch",
+        "id": "title.presence.me",
+        "menu": "title",
+        "status": null,
+        "evidence": "threw: TimeoutError: page.click: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.me\"]')\n"
+      },
+      {
+        "section": "effects:scratch",
+        "id": "insert.comment",
+        "menu": "insert",
+        "status": null,
+        "evidence": "no comment card opened; snackbar \"\""
+      },
+      {
+        "section": "effects:scratch",
+        "id": "insert.chart.line",
+        "menu": "insert",
+        "status": null,
+        "evidence": "threw: TimeoutError: page.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"][data-level=\"1\"] > .ts-menu-group > [data-menu-item][data-menu-item=\"insert.chart.line\"]')\n    - locator resolved to <div tabindex=\"-1\" role="
+      },
+      {
+        "section": "effects:textBlock2",
+        "id": "format.dropShadow",
+        "menu": "context",
+        "status": null,
+        "evidence": "Format options opened; section shadow absent"
+      },
+      {
+        "section": "contextMenu:objects",
+        "id": "guide",
+        "menu": null,
+        "status": null,
+        "evidence": "TimeoutError: page.waitForSelector: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"]') to be visible\n"
+      },
+      {
+        "section": "effects:objects",
+        "id": "view.guides.delete",
+        "menu": "view",
+        "status": null,
+        "evidence": "no Delete guide row in the guide menu"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "viewer.landing",
+        "menu": null,
+        "status": null,
+        "evidence": "the viewer link landed on https://turboslide.vercel.app/s/OEjes4HRMuxoLp8GsZXyGK (the /s/ address stayed); address carries a token: true"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "viewer.mode",
+        "menu": null,
+        "status": null,
+        "evidence": "data-edit-mode editing; access facts {\"deckId\":\"untitled-20260915-wes8\",\"revision\":0,\"owner\":\"anon_0dfd2d83-f4b2-4a8b-8875-a40d2e9dbe05\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"v"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "toolbar.viewOnly",
+        "menu": null,
+        "status": null,
+        "evidence": "View only button absent"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "view.mode.absent",
+        "menu": null,
+        "status": null,
+        "evidence": "Mode rows 0, Edit menu 1 (SPEC-3 13.1: no Mode menu for a viewer)"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "viewer.role",
+        "menu": null,
+        "status": null,
+        "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260915-wes8\",\"revision\":0,\"owner\":\"anon_0dfd2d83-f4b2-4a8b-8875-a40d2e9dbe05\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersC"
+      },
+      {
+        "section": "rows:scratch:viewer",
+        "id": "title.presence.me",
+        "menu": "title",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered for a viewer"
+      },
+      {
+        "section": "rows:scratch:viewer",
+        "id": "format.chartType.bar",
+        "menu": "format",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered for a viewer"
+      },
+      {
+        "section": "rows:scratch:viewer",
+        "id": "format.chartType.column",
+        "menu": "format",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered for a viewer"
+      },
+      {
+        "section": "rows:scratch:viewer",
+        "id": "format.chartType.line",
+        "menu": "format",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered for a viewer"
+      },
+      {
+        "section": "rows:scratch:viewer",
+        "id": "format.chartType.pie",
+        "menu": "format",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered for a viewer"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "viewer.handles",
+        "menu": null,
+        "status": null,
+        "evidence": "10 handle(s) after a click on a block"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "commenter.landing",
+        "menu": null,
+        "status": null,
+        "evidence": "the commenter link landed on https://turboslide.vercel.app/s/TZPyrH4mwlAtrmoCY35i5w"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "commenter.edit",
+        "menu": null,
+        "status": null,
+        "evidence": "the editor did not settle for the commenter"
+      },
+      {
+        "section": "roles:scratch",
+        "id": "share.stop",
+        "menu": null,
+        "status": null,
+        "evidence": "after Stop sharing: general access link, 2 live link(s)"
+      },
+      {
+        "section": "effects:scratch",
+        "id": "trash.card",
+        "menu": "home",
+        "status": null,
+        "evidence": "/decks/trash lists no card for untitled-20260915-wes8"
+      },
+      {
+        "section": "rows:gt-brand",
+        "id": "title.presence.me",
+        "menu": "title",
+        "status": "now",
+        "evidence": "no [data-menu-item] rendered on its path"
+      }
+    ]
+  }
+}

@@ -28,6 +28,7 @@ import type {
   PictureTarget,
 } from '@turboslide/chrome/editor-shell';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
+import { FontFaces } from '@turboslide/chrome/FontFaces';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
 import type { MenuContext } from '@turboslide/chrome/menus/model';
@@ -66,6 +67,14 @@ import type { Author, Lease } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { authorLabel, sameAuthor } from '@turboslide/store/store';
 import { SHEET } from '@turboslide/theme/tokens';
+import { deckPage } from '@turboslide/schema/render';
+import { THEME_CSS_STYLE_ID, themeCss } from '@turboslide/render/theme-css';
+import { defaultPreferences, preferencesMirror } from '@turboslide/schema/preferences';
+import type { Preferences } from '@turboslide/schema/preferences';
+import { PPTX_MIME, isPptxFile } from '@turboslide/chrome/dialogs/upload-accept';
+import { stashImportReport } from '@turboslide/chrome/dialogs/ImportReport';
+import type { ImportReport } from '@turboslide/schema/import-report';
+import { ThemeMode } from './theme-mode';
 import { BookView } from '@turboslide/viewer/BookView';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
@@ -388,23 +397,58 @@ function regionOf(target: EventTarget | null): FocusRegion | null {
  * The Upload tab of Open and Import slides (SPEC 6.5): the bundle route with a ticket from the
  * server function, the zip as the body; answers the new deck's id.
  */
-async function uploadBundleFile(file: File): Promise<{ id: string }> {
+async function uploadBundleFile(file: File): Promise<{ id: string; report?: ImportReport }> {
   const ticket = await bundleUploadTicket();
   if (file.size > ticket.maxBytes) {
     throw new Error(
       `${file.name} is ${file.size} bytes; a bundle is at most ${ticket.maxBytes} bytes`,
     );
   }
+  /* a .pptx goes to the same route with its own type (gslides-parity SPEC-5 5.2; b3.md B3-18): the
+     reader answers the deck id and the row report, stashed for the Import report dialog */
+  const pptx = isPptxFile(file);
   const response = await fetch(new URL(ticket.url, window.location.origin), {
     method: 'POST',
-    headers: { 'content-type': 'application/zip', accept: 'application/json' },
+    headers: {
+      'content-type': pptx ? PPTX_MIME : 'application/zip',
+      accept: 'application/json',
+      ...(pptx ? { 'x-turboslide-file-name': encodeURIComponent(file.name) } : {}),
+    },
     body: file,
   });
-  const answer = (await response.json()) as { deckId?: string; error?: { message?: string } };
+  const answer = (await response.json()) as {
+    deckId?: string;
+    report?: ImportReport;
+    error?: { message?: string };
+  };
   if (!response.ok || answer.deckId === undefined) {
     throw new Error(answer.error?.message ?? `The upload answered ${response.status}`);
   }
-  return { id: answer.deckId };
+  if (answer.report !== undefined) stashImportReport(answer.deckId, answer.report);
+  return { id: answer.deckId, ...(answer.report === undefined ? {} : { report: answer.report }) };
+}
+
+/**
+ * The caller's preferences as the browser mirror holds them (gslides-parity SPEC-5 7.1): the
+ * `prefs.set` window handler writes the mirror and raises `ts-preferences`, so the notes pane's
+ * autocorrect and the dictation default follow the stored record without a second read path.
+ */
+function useMirroredPreferences(): Preferences {
+  const read = (): Preferences =>
+    typeof window === 'undefined'
+      ? defaultPreferences()
+      : (preferencesMirror(window.localStorage).read() ?? defaultPreferences());
+  const [prefs, setPrefs] = useState<Preferences>(read);
+  useEffect(() => {
+    const refresh = () => setPrefs(read());
+    window.addEventListener('ts-preferences', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('ts-preferences', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+  return prefs;
 }
 
 /** The OS file picker for one picture. */
@@ -494,6 +538,26 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [editorHandle, setEditorHandle] = useState<EditorHandle | null>(null);
   /* the toolbar's draw tool; Select between inserts */
   const [tool, setTool] = useState<EditorTool>('select');
+  /* Tools > Dictate speaker notes (SPEC-5 7.3): the box over the notes pane */
+  const [dictateOpen, setDictateOpen] = useState(false);
+  const mirroredPreferences = useMirroredPreferences();
+  /* Edit theme's override sheet (SPEC-5 9.1; b6.md R14): the live editor draws the record the
+     exports carry, one <style> in the head kept in step with the document */
+  const themeCssText = useMemo(() => themeCss(snap.document.deck), [snap.document.deck]);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    let style = document.getElementById(THEME_CSS_STYLE_ID) as HTMLStyleElement | null;
+    if (themeCssText === '') {
+      style?.remove();
+      return;
+    }
+    if (style === null) {
+      style = document.createElement('style');
+      style.id = THEME_CSS_STYLE_ID;
+      document.head.appendChild(style);
+    }
+    if (style.textContent !== themeCssText) style.textContent = themeCssText;
+  }, [themeCssText]);
   /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
      colour), reported by the stage; a state so the shell re-reads the selection facts on change */
   const [caret, setCaret] = useState<CaretInfo | null>(null);
@@ -707,8 +771,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   /* this tab is every id it was issued (hotfix 2 cause B3), so a roster row of its earlier id after
      a reload or a remount is never a chip, a mark, an outline, a caret or a roster row */
   const { self: ownRow, others: otherRows } = useMemo(
-    () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
-    [rosterRows, snap.ownClientIds, ownClientId],
+    () =>
+      partitionRoster(
+        rosterRows,
+        new Set(snap.ownClientIds),
+        ownClientId,
+        payload.identity?.principalId ?? null,
+      ),
+    [rosterRows, snap.ownClientIds, ownClientId, payload.identity?.principalId],
   );
   const presence: EditorPresence = {
     ...(ownRow !== null ? { self: ownRow } : {}),
@@ -1339,6 +1409,21 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
        transition with the list's loader preloaded on intent, in place of a document load */
     linkComponent: RouterLinkSlot,
     document: snap.document,
+    /* round five (gslides-parity SPEC-5 7.1, 7.3, 9.2, 9.3; merge 2) */
+    language: deck.language ?? 'en-US',
+    editorMode: snap.editorMode,
+    onThemeMode: () => controller.setEditorMode(snap.editorMode === 'theme' ? 'edit' : 'theme'),
+    onDictate: () => setDictateOpen((open) => !open),
+    renderThemed: (record, renderTheme, themeId) =>
+      renderSlide({ ...deck, theme: themeId }, record, {
+        theme: renderTheme,
+        chrome: false,
+        assetBase,
+        blockAttrs: false,
+        gtWord: true,
+        live: true,
+        active: true,
+      }).html,
     slideId: snap.activeSlide,
     selectedSlideIds: selectedSlideIds.length > 0 ? selectedSlideIds : [snap.activeSlide],
     selection: toShellSelection(selection, selectionFacts),
@@ -1415,6 +1500,15 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
             <NotesPane
               slideId={slide.id}
               notes={slide.notes ?? ''}
+              language={deck.language ?? 'en-US'}
+              preferences={mirroredPreferences}
+              dictate={{
+                open: dictateOpen,
+                onClose: () => setDictateOpen(false),
+                ...(mirroredPreferences.dictation.lang === undefined
+                  ? {}
+                  : { preferred: mirroredPreferences.dictation.lang }),
+              }}
               onCommit={(notes) => {
                 const current = controller.getSnapshot();
                 const target = current.document.slides[slide.id];
@@ -1536,6 +1630,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       className="ts-editor"
       data-editing={editing ? '1' : '0'}
       data-status={status}
+      data-editor-mode={snap.editorMode}
+      style={{ '--ts-page-aspect': `${deckPage(deck).width} / ${deckPage(deck).height}` } as never}
       {...(draft ? { 'data-draft': '' } : {})}
       {...scopeAttr}
     >
@@ -1563,7 +1659,22 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         editor={editorInput}
       >
         <ShellBridge controller={controller} editing={canWrite} api={shellApi} />
+        {/* the catalog faces the document uses, one stylesheet link (SPEC-5-amendments A5 item 3; B7) */}
+        <FontFaces document={snap.document} />
         <SessionBridge deckId={deckId} author={author} />
+        {snap.editorMode === 'theme' ? (
+          <ThemeMode
+            document={snap.document}
+            revision={revision}
+            appearance={deckAppearance(deck)}
+            renderSlide={editorInput.renderSlide as NonNullable<EditorShellInput['renderSlide']>}
+            invoke={(action, input) => controller.invoke(action as never, input)}
+            commit={controller.commit}
+            say={controller.say}
+            onBackground={() => shellApi.current?.openDialog('background')}
+            onExit={() => controller.setEditorMode('edit')}
+          />
+        ) : null}
         <EditorStage
           controller={controller}
           snap={snap}
@@ -1821,9 +1932,14 @@ function EditorStage({
           slides={play}
           activeId={shell.active}
           theme={theme}
+          page={viewerDeck.page}
           onGoto={shell.select}
           onExit={() => shell.setPresent(false)}
           say={say}
+          onState={(state) => controller.setShowState(state)}
+          onDownload={(format) =>
+            editorShell.openDialog(format === 'pdf' ? 'downloadPdf' : 'download')
+          }
         />
       ) : null}
       {shell.mode === 'grid' ? (
@@ -1977,7 +2093,10 @@ function TwinOverlay({
       return;
     }
     const s = stage.getBoundingClientRect();
-    const k = s.width / SHEET.width || 1;
+    /* the stage root carries the deck's page as custom properties (gslides-parity SPEC-5 6.1) */
+    const pageWidth =
+      Number.parseFloat(getComputedStyle(stage).getPropertyValue('--ts-sheet-w')) || SHEET.width;
+    const k = s.width / pageWidth || 1;
     const r = target.getBoundingClientRect();
     setBox({
       left: (r.left - s.left) / k,

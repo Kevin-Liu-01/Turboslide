@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-bar",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A bar chart in a narrow box",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:chart-bar#h/text"
+        }
+      },
+      {
+        "id": "chart-title",
+        "type": "text",
+        "text": "Words translated per month",
+        "pos": {
+          "x": 145,
+          "y": 236.97,
+          "w": 254.28,
+          "h": 24.2,
+          "z": 2
+        },
+        "typography": {
+          "size": 20,
+          "leading": 1.21
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:chart-bar#chart/title"
+        }
+      }
+    ]
+  },
+  "title": "A bar chart in a narrow box",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide22.xml",
+    "pptxSlideId": 277
+  }
+}

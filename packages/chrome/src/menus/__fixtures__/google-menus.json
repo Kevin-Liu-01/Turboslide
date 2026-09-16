@@ -64,6 +64,17 @@
         { "label": "Make available offline", "path": [] },
         { "label": "Details", "path": [] },
         { "label": "Language", "path": [] },
+        {
+          "label": "English (United States)",
+          "path": ["Language"],
+          "source": "SPEC-5 7.1 (the offered dictionaries)"
+        },
+        { "label": "English (United Kingdom)", "path": ["Language"], "source": "SPEC-5 7.1" },
+        { "label": "Español", "path": ["Language"], "source": "SPEC-5 7.1" },
+        { "label": "Français", "path": ["Language"], "source": "SPEC-5 7.1" },
+        { "label": "Nederlands", "path": ["Language"], "source": "SPEC-5 7.1" },
+        { "label": "Português (Brasil)", "path": ["Language"], "source": "SPEC-5 7.1" },
+        { "label": "Português (Portugal)", "path": ["Language"], "source": "SPEC-5 7.1" },
         { "label": "Page setup", "path": [] },
         { "label": "Print settings and preview", "path": [] },
         { "label": "Print", "path": [] }
@@ -171,6 +182,15 @@
         { "label": "New slide", "path": [] },
         { "label": "Slide numbers", "path": [] },
         { "label": "Placeholder", "path": [] },
+        {
+          "label": "Title",
+          "path": ["Placeholder"],
+          "source": "SPEC-5 9.2 (Google's Insert > Placeholder rows in the theme builder)"
+        },
+        { "label": "Subtitle", "path": ["Placeholder"], "source": "SPEC-5 9.2" },
+        { "label": "Body text", "path": ["Placeholder"], "source": "SPEC-5 9.2" },
+        { "label": "Slide number", "path": ["Placeholder"], "source": "SPEC-5 9.2" },
+        { "label": "Image", "path": ["Placeholder"], "source": "SPEC-5 9.2" },
         { "label": "Templates", "path": [] },
         { "label": "Building blocks", "path": [] },
         { "label": "Speaker spotlight", "path": [] }
@@ -462,7 +482,42 @@
       "items": [
         { "label": "Verbalize to screen reader", "path": [] },
         { "label": "Verbalize selection formatting", "path": ["Verbalize to screen reader"] },
-        { "label": "Verbalize selection", "path": ["Verbalize to screen reader"] }
+        { "label": "Verbalize selection", "path": ["Verbalize to screen reader"] },
+        {
+          "label": "Verbalize from cursor location",
+          "path": ["Verbalize to screen reader"],
+          "source": "SPEC-5 7.5; R10 7.3 (Google's shortcut page row verbalize-from-cursor)"
+        },
+        {
+          "label": "Go to",
+          "path": [],
+          "source": "SPEC-5 7.5; R10 7.3 (the navigation rows of Google's Accessibility menu)",
+          "unverified": true
+        },
+        {
+          "label": "Next formatting change",
+          "path": ["Go to"],
+          "source": "SPEC-5 7.5 (Google's shortcut page row next-formatting-change)",
+          "unverified": true
+        },
+        {
+          "label": "Previous formatting change",
+          "path": ["Go to"],
+          "source": "SPEC-5 7.5 (Google's shortcut page row previous-formatting-change)",
+          "unverified": true
+        },
+        {
+          "label": "Next slide",
+          "path": ["Go to"],
+          "source": "SPEC-5 7.5; R10 7.3",
+          "unverified": true
+        },
+        {
+          "label": "Previous slide",
+          "path": ["Go to"],
+          "source": "SPEC-5 7.5; R10 7.3",
+          "unverified": true
+        }
       ]
     }
   ]

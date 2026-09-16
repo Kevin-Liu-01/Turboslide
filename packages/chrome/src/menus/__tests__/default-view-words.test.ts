@@ -23,7 +23,6 @@ import {
   FORMAT,
   GUIDES,
   HOME,
-  IMPORT_PPTX,
   INBOX,
   PANELS,
   PICKERS,
@@ -31,6 +30,7 @@ import {
   PRESENT,
   PROMPTS,
   REFUSALS,
+  ROUND_FIVE,
   SNACKBARS,
   TITLE_ROW,
   WORD_ART,
@@ -147,7 +147,6 @@ describe('the shared strings of SPEC 12', () => {
     walk(HOME, 'HOME');
     walk(PRESENT, 'PRESENT');
     walk(ERRORS, 'ERRORS');
-    walk(IMPORT_PPTX, 'IMPORT_PPTX');
     /* round two (SPEC-2 section 10): the canvas chips, the rulers and guides, the Check slides
        sentences, the pickers, the Format options words and the Download dialog's progress */
     walk(CANVAS, 'CANVAS');
@@ -179,6 +178,8 @@ describe('the shared strings of SPEC 12', () => {
     expect(forbiddenWordsIn(tabs.join(' '))).toEqual(['glyph']);
     walk(ACCESS_PAGE, 'ACCESS_PAGE');
     walk(DITHER, 'DITHER');
+    /* round five (SPEC-5 15): the sentences of the round, landed on day 0 */
+    walk(ROUND_FIVE, 'ROUND_FIVE');
     /* the agent sentences carry the nouns on purpose and never reach the default view (the
        matcher reads whole words, so the plural "twins" passes it; "source" is caught) */
     expect(forbiddenWordsIn(AGENT_SENTENCES.noContinuousSource)).toEqual(['source']);

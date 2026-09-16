@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "the-customer",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The customer",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A two hundred person company in one sentence: what they make and for whom.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "",
+        "fit": "width",
+        "caption": "The customer at work",
+        "captionSize": 16
+      }
+    ]
+  },
+  "title": "The customer"
+}

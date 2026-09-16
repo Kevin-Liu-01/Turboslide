@@ -1,0 +1,23 @@
+export: pptx flatten (perfect), 3 slide(s) x light, fonts exact -> /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/v5/fonts-deck/flatten
+   1 title light 591 ms, 2 text(s), 2 raster(s)
+   2 columns light 217 ms, 3 text(s), 1 raster(s)
+   3 canvas light 296 ms, 5 text(s), 1 raster(s)
+   1 title light page png-palette 45.0 KiB, 642 colors, 0.000 percent mismatch
+   2 columns light page png-palette 38.4 KiB, 411 colors, 0.000 percent mismatch
+   3 canvas light page png-palette 60.8 KiB, 414 colors, 0.000 percent mismatch
+export: wrote /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/v5/fonts-deck/flatten/five-families-light.pptx (167.8 KiB)
+export: 1 file(s), revision 1, geometry in bounds, perfect true, fonts embedded 0, required on viewer 9, passed true, 2.7 s
+  residual: renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max
+  residual: flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder
+  residual: rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x
+  residual: package: 36 parts, 36 relationships, valid against the content types and relationships
+  residual: skipped: none; every slide of the deck is in the file
+  residual: font: Roboto travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)
+  residual: font: Merriweather travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)
+  residual: font: Playfair Display travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)
+  residual: font: Oswald travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)
+  residual: package: 2 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)
+  residual: package: 10 kern="0" attribute(s) and 0 empty ext list(s) removed; 0 custGeom
+  residual: pages: 3 png-palette; 0.14 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)
+  residual: notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)
+  residual: fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, Roboto, Merriweather, Playfair Display, DejaVu Sans Mono, Oswald; the text layer is invisible, so no viewer draws them (docs/pptx.md)

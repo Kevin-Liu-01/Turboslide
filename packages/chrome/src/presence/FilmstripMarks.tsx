@@ -6,7 +6,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import { cn } from '../lib/cn';
 import { PRESENCE } from '../menus/strings';
 import { IdentityChip, nameOf } from './IdentityChip';
-import { participantsOnSlide } from './presence-model';
+import { othersOf, participantsOnSlide } from './presence-model';
 
 /**
  * The filmstrip's collaborator marks and comment count (gslides-parity SPEC-3 4.3, 5.3; research
@@ -26,7 +26,8 @@ export function FilmstripMarks({
   picture?: boolean;
 }) {
   const shell = useContext(EditorShellContext);
-  const others = shell?.input.presence?.others ?? [];
+  // the self filter by client id and by principal id (SPEC-5-amendments A3 item 5)
+  const others = othersOf(shell?.input.presence);
   const here = participantsOnSlide(others, slideId);
   const shown = here.slice(0, 3);
   const more = here.length - shown.length;
@@ -56,7 +57,7 @@ export function FilmstripMarks({
 /** The 12 px chip of the outline density, where the lease dot was. */
 export function OutlineMarks({ slideId }: { slideId: string }) {
   const shell = useContext(EditorShellContext);
-  const others = shell?.input.presence?.others ?? [];
+  const others = othersOf(shell?.input.presence);
   const here = participantsOnSlide(others, slideId);
   const first = here[0];
   if (first === undefined) return null;

@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { defaultPreferences, setPreference } from '@turboslide/schema/preferences';
+
 import {
   PRINCIPAL_TTL_MS,
   isPrincipalExpired,
@@ -8,8 +10,11 @@ import {
   memoryPrincipalStore,
   newPrincipalRecord,
   parsePrincipalRecord,
+  preferencesOf,
   principalExpiresAt,
   principalKey,
+  principalPreferencesStore,
+  withPreferences,
 } from './principal.ts';
 import type { KvClient } from './principal.ts';
 
@@ -129,5 +134,79 @@ describe('the key value store', () => {
     await kv.set(principalKey(ID), JSON.stringify(old), DAY);
     expect(await kvStore.get(ID, new Date(T0))).toBeNull();
     expect(await store.get(ID, new Date(T0))).toBeNull();
+  });
+});
+
+// The preferences on the record (gslides-parity SPEC-5 7.1; R10 3.2, 3.4): absent reads as the
+// defaults, an older or partial record fills its members, a malformed one refuses the record, and
+// the store adapter behind prefs.get, prefs.set and the dictionary actions.
+describe('the preferences on the record', () => {
+  test('absent reads as the defaults; a stored record round trips; a partial one fills its members', () => {
+    const record = newPrincipalRecord(ID, new Date(T0));
+    expect(record.preferences).toBeUndefined();
+    expect(preferencesOf(record)).toEqual(defaultPreferences());
+    expect(preferencesOf(null)).toEqual(defaultPreferences());
+    expect(parsePrincipalRecord(JSON.parse(JSON.stringify(record)))?.preferences).toBeUndefined();
+
+    const prefs = setPreference(defaultPreferences(), '/units', 'cm');
+    const stored = withPreferences(record, prefs, new Date(T0 + DAY));
+    expect(stored.lastSeenAt).toBe(new Date(T0 + DAY).toISOString());
+    expect(stored.preferences).toEqual(prefs);
+    expect(record.preferences).toBeUndefined();
+    expect(parsePrincipalRecord(JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+
+    // a record written before svgText and starred existed, or with only one member
+    const older = { ...stored, preferences: { units: 'px', spelling: { underline: false } } };
+    const parsed = parsePrincipalRecord(JSON.parse(JSON.stringify(older)));
+    expect(parsed?.preferences?.units).toBe('px');
+    expect(parsed?.preferences?.spelling).toEqual({ underline: false, dictionary: [] });
+    expect(parsed?.preferences?.svgText).toBe('embed');
+    expect(parsed?.preferences?.starred).toEqual([]);
+    expect(parsed?.preferences?.substitutions.rows).toHaveLength(12);
+  });
+
+  test('a wrong type or an unknown member refuses the record', () => {
+    const record = newPrincipalRecord(ID, new Date(T0));
+    expect(parsePrincipalRecord({ ...record, preferences: null })).toBeNull();
+    expect(parsePrincipalRecord({ ...record, preferences: 'in' })).toBeNull();
+    expect(parsePrincipalRecord({ ...record, preferences: { units: 'pt' } })).toBeNull();
+    expect(parsePrincipalRecord({ ...record, preferences: { theme: 'dark' } })).toBeNull();
+    expect(parsePrincipalRecord({ ...record, preferences: { starred: 'q4' } })).toBeNull();
+  });
+
+  test('principalPreferencesStore creates the record on the first read, saves and re-arms the TTL', async () => {
+    let now = T0;
+    const kv = memoryKv(() => now);
+    const principals = kvPrincipalStore(kv);
+    const store = principalPreferencesStore(principals, ID, () => new Date(now));
+    expect(await principals.get(ID, new Date(now))).toBeNull();
+    expect(await store.load()).toEqual(defaultPreferences());
+    const created = await principals.get(ID, new Date(now));
+    expect(created?.principalId).toBe(ID);
+    expect(created?.preferences).toBeUndefined();
+
+    now += 10 * DAY;
+    const saved = await store.save(setPreference(defaultPreferences(), '/starred/-', 'gt-brand'));
+    expect(saved.starred).toEqual(['gt-brand']);
+    const stored = await principals.get(ID, new Date(now));
+    expect(stored?.preferences?.starred).toEqual(['gt-brand']);
+    expect(stored?.lastSeenAt).toBe(new Date(now).toISOString());
+    expect(stored?.label).toBe(created?.label);
+    expect(await store.load()).toEqual(saved);
+
+    // the record's other fields survive a save
+    await principals.put({ ...stored!, name: 'Maya Chen' });
+    await store.save(setPreference(saved, '/units', 'cm'));
+    const after = await principals.get(ID, new Date(now));
+    expect(after?.name).toBe('Maya Chen');
+    expect(after?.preferences?.units).toBe('cm');
+    expect(after?.preferences?.starred).toEqual(['gt-brand']);
+
+    // an expired record starts over at the defaults
+    now += 91 * DAY;
+    expect(await store.load()).toEqual(defaultPreferences());
+    expect(() => principalPreferencesStore(principals, 'kevin')).toThrow(RangeError);
+    expect(() => principalPreferencesStore(principals, 'local:kevin')).toThrow(RangeError);
+    expect(memoryPrincipalStore).toBeTypeOf('function');
   });
 });

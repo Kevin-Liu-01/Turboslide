@@ -363,16 +363,52 @@ export const SPRITE: Readonly<Record<IconName, SpriteSymbol>> = {
 
 export const SPRITE_NAMES = Object.keys(SPRITE) as ReadonlyArray<IconName>;
 
+/**
+ * Turboslide's own glyphs (gslides-parity SPEC-5 3.4, 3.7): the play and speaker glyphs of a
+ * media poster and the person glyph of the speaker spotlight, drawn by the renderers and never
+ * named by an icon block, so they are not IconNames; `spriteMarkup()` carries them by default.
+ */
+export type GlyphName = 'ts-play' | 'ts-speaker' | 'ts-person';
+
+export const GLYPHS: Readonly<Record<GlyphName, SpriteSymbol>> = {
+  'ts-play': {
+    id: 'ts-play',
+    viewBox: '0 0 20 20',
+    body: '<path d="M6 4.5v11a1 1 0 0 0 1.53.85l8.5-5.5a1 1 0 0 0 0-1.7l-8.5-5.5A1 1 0 0 0 6 4.5Z"/>',
+  },
+  'ts-speaker': {
+    id: 'ts-speaker',
+    viewBox: '0 0 20 20',
+    body: '<path d="M3 8a1 1 0 0 1 1-1h2.2l3.4-2.72A.75.75 0 0 1 10.8 4.86v10.28a.75.75 0 0 1-1.2.58L6.2 13H4a1 1 0 0 1-1-1V8Z"/><path d="M13.25 7.25a.75.75 0 0 1 1.06 0 3.9 3.9 0 0 1 0 5.5.75.75 0 1 1-1.06-1.06 2.4 2.4 0 0 0 0-3.38.75.75 0 0 1 0-1.06Z"/><path d="M15.4 5.1a.75.75 0 0 1 1.06 0 6.9 6.9 0 0 1 0 9.8.75.75 0 1 1-1.06-1.06 5.4 5.4 0 0 0 0-7.68.75.75 0 0 1 0-1.06Z"/>',
+  },
+  'ts-person': {
+    id: 'ts-person',
+    viewBox: '0 0 20 20',
+    body: '<path d="M10 3a3.25 3.25 0 1 0 0 6.5A3.25 3.25 0 0 0 10 3Z"/><path d="M3.5 16.25c0-3.04 2.9-5.25 6.5-5.25s6.5 2.21 6.5 5.25a.75.75 0 0 1-.75.75H4.25a.75.75 0 0 1-.75-.75Z"/>',
+  },
+};
+
+export const GLYPH_NAMES = Object.keys(GLYPHS) as ReadonlyArray<GlyphName>;
+
 /** One <symbol> element. */
-export function symbolMarkup(name: IconName): string {
-  const symbol = SPRITE[name];
+export function symbolMarkup(name: IconName | GlyphName): string {
+  const symbol = (
+    name in GLYPHS ? GLYPHS[name as GlyphName] : SPRITE[name as IconName]
+  ) as SpriteSymbol;
   return `<symbol id="${symbol.id}" viewBox="${symbol.viewBox}">${symbol.body}</symbol>`;
 }
 
-/** The hidden sprite the stage carries once; all symbols by default, or the named subset. */
-export function spriteMarkup(names: Iterable<IconName> = SPRITE_NAMES): string {
+/** The hidden sprite the stage carries once; every icon and glyph by default, or the named subset. */
+export function spriteMarkup(
+  names: Iterable<IconName | GlyphName> = [...SPRITE_NAMES, ...GLYPH_NAMES],
+): string {
   const symbols = [...names].map(symbolMarkup).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">${symbols}</svg>`;
+}
+
+/** A glyph's markup at the class the caller names: <svg class="ts-glyph" aria-hidden="true"><use href="#ts-play"/></svg>. */
+export function glyphMarkup(name: GlyphName, className = 'ts-glyph'): string {
+  return `<svg class="${className}" aria-hidden="true"><use href="#${name}"/></svg>`;
 }
 
 export type IconMarkupOptions = {

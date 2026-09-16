@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "id": "next-check-in",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "title": "Next check in",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Next check in",
+        "pos": {
+          "x": 137,
+          "y": 92,
+          "w": 1000,
+          "h": 72,
+          "z": 1
+        }
+      },
+      {
+        "id": "rule",
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "orientation": "horizontal",
+        "pos": {
+          "x": 137,
+          "y": 384,
+          "w": 1326,
+          "h": 8,
+          "z": 0,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "date-1",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 245,
+          "y": 376,
+          "w": 24,
+          "h": 24,
+          "z": 1,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "label-1",
+        "type": "text",
+        "text": "Date 1",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 412,
+          "w": 240,
+          "h": 228,
+          "z": 2,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "date-2",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 607,
+          "y": 376,
+          "w": 24,
+          "h": 24,
+          "z": 3,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "label-2",
+        "type": "text",
+        "text": "Date 2",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 499,
+          "y": 412,
+          "w": 240,
+          "h": 228,
+          "z": 4,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "date-3",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 969,
+          "y": 376,
+          "w": 24,
+          "h": 24,
+          "z": 5,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "label-3",
+        "type": "text",
+        "text": "Date 3",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 861,
+          "y": 412,
+          "w": 240,
+          "h": 228,
+          "z": 6,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "date-4",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 1331,
+          "y": 376,
+          "w": 24,
+          "h": 24,
+          "z": 7,
+          "group": "timeline"
+        }
+      },
+      {
+        "id": "label-4",
+        "type": "text",
+        "text": "Date 4",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 1223,
+          "y": 412,
+          "w": 240,
+          "h": 228,
+          "z": 8,
+          "group": "timeline"
+        }
+      }
+    ]
+  }
+}

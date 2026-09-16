@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "runs-and-lists",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h1",
+        "text": "Runs and lists",
+        "pos": {
+          "x": 80,
+          "y": 36.04,
+          "w": 1440,
+          "h": 150,
+          "z": 1
+        },
+        "typography": {
+          "size": 73.5,
+          "align": "center"
+        },
+        "autofit": "shrink",
+        "ext": {
+          "pptxName": "Title 1",
+          "placeholder": "title"
+        }
+      },
+      {
+        "id": "list",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "First level item"
+          },
+          {
+            "text": "Second level item",
+            "level": 2
+          },
+          {
+            "text": "Third level item",
+            "level": 3
+          },
+          {
+            "text": "Back to the first level"
+          }
+        ],
+        "pos": {
+          "x": 80,
+          "y": 210,
+          "w": 1440,
+          "h": 593.96,
+          "z": 2
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "Content Placeholder 2",
+          "placeholder": "obj"
+        }
+      },
+      {
+        "id": "text",
+        "type": "text",
+        "text": "Plain, *bold, *[italic, ]{i}[underlined, ]{u}[struck, ]{s}[sup]{sup} and [sub]{sub}, [blue, ]{c:blue}[highlighted, ]{h:#ffff00}[a link](https://turboslide.vercel.app) and [a jump to the hidden slide](#s/slide-3).",
+        "pos": {
+          "x": 90,
+          "y": 600,
+          "w": 840,
+          "h": 180,
+          "z": 3
+        },
+        "typography": {
+          "size": 30
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "autofit": "shrink",
+        "ext": {
+          "pptxName": "TextBox 3"
+        }
+      },
+      {
+        "id": "list-2",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "Fourth step"
+          },
+          {
+            "text": "Fifth step"
+          },
+          {
+            "text": "Sixth step"
+          }
+        ],
+        "pos": {
+          "x": 960,
+          "y": 600,
+          "w": 550,
+          "h": 180,
+          "z": 4
+        },
+        "numbered": true,
+        "start": 4,
+        "size": 24,
+        "ext": {
+          "pptxName": "TextBox 4"
+        }
+      }
+    ]
+  },
+  "title": "Runs and lists",
+  "ext": {
+    "pptxPart": "ppt/slides/slide2.xml",
+    "pptxSlideId": 257
+  }
+}

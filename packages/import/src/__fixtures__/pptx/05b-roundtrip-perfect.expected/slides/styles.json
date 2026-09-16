@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "styles",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Text styles",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:styles#h/text"
+        }
+      },
+      {
+        "id": "p1",
+        "type": "text",
+        "text": "A run in [italic]{i}, one [underlined]{u}, one [struck through]{s}, E = mc[2]{sup}, H[2]{sub}O, a coloured run and a highlighted run.",
+        "pos": {
+          "x": 137,
+          "y": 212.74,
+          "w": 767.58,
+          "h": 65.65,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:styles#p1/text"
+        }
+      },
+      {
+        "id": "justified",
+        "type": "text",
+        "text": "A justified text box sets every line but the last to the full measure. The word spaces stretch so both edges of the block are straight, which is what Google Slides does for the fourth alignment button.",
+        "pos": {
+          "x": 137,
+          "y": 318.39,
+          "w": 1326,
+          "h": 66,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "align": "justify",
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:styles#justified/text"
+        }
+      }
+    ]
+  },
+  "title": "Text styles",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide7.xml",
+    "pptxSlideId": 262
+  }
+}

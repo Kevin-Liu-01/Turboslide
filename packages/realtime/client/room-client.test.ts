@@ -18,11 +18,18 @@ import { until } from '../src/channel-contract.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import { fakeRoomServer, reconnectingTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
-import { memoryPendingStore } from './pending-store.ts';
-import { createRoomClient } from './room-client.ts';
+import { memoryPendingStore, pendingKey, unsavedCount } from './pending-store.ts';
+import {
+  HEARTBEAT_MS,
+  OFFLINE_AFTER_MS,
+  createRoomClient,
+  memoryOpCounter,
+} from './room-client.ts';
 import type {
   DocumentChange,
   OpenOptions,
+  OpsResponse,
+  PersistedOffer,
   RoomClientOptions,
   RoomTransport,
   SyncStatus,
@@ -768,5 +775,535 @@ describe('createRoomClient', () => {
     expect(transport.leaves[0]!.clientId).toBe(CLIENT_A);
     transport.hold(false);
     await stopping;
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Round five (gslides-parity SPEC-5-amendments A3; B7): one client id per tab, the rebase on a 409
+// that carries the entries since the base, a record's echo as the tab's own acknowledgement, the
+// tab's own persisted queue replayed on its own, an answer that names an op already landed, the
+// heartbeat pause of a hidden tab, the offline word, and the author a returned op names.
+
+describe('createRoomClient, round five (SPEC-5-amendments A3)', () => {
+  const CLIENT_A = 'a'.repeat(32);
+  const CLIENT_B = 'b'.repeat(32);
+  type Scripted = RoomTransport & {
+    fire: (event: RoomEvent) => void;
+    posts: OpsPost[];
+    opens: OpenOptions[];
+    presences: PresencePost[];
+    /** the next POST answers are taken from this list; the default admits at head + 1 */
+    answers: ((body: OpsPost) => OpsResponse)[];
+    hold: (on: boolean) => void;
+    head: () => number;
+  };
+
+  function scripted(options: { author: FakeIdentity['author']; head: number }): Scripted {
+    const posts: OpsPost[] = [];
+    const opens: OpenOptions[] = [];
+    const presences: PresencePost[] = [];
+    const answers: ((body: OpsPost) => OpsResponse)[] = [];
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    let head = options.head;
+    let held: (() => void) | null = null;
+    let holding = false;
+    const admit = (body: OpsPost): OpsResponse => {
+      head += 1;
+      const entries: Entry[] = body.entries.map((entry) => ({
+        seq: head,
+        rev: head - 1,
+        kind: 'edit',
+        author: options.author,
+        clientId: body.clientId,
+        opId: entry.opId,
+        mutations: (entry as { mutations?: Mutation[] }).mutations ?? [],
+        at: new Date().toISOString(),
+      }));
+      return { ok: true, entries, rejected: [], head, revision: head };
+    };
+    return {
+      fire: (event) => onEvent?.(event),
+      posts,
+      opens,
+      presences,
+      answers,
+      hold(on) {
+        holding = on;
+        if (!on && held !== null) {
+          held();
+          held = null;
+        }
+      },
+      head: () => head,
+      open(o) {
+        opens.push(o);
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        if (holding) await new Promise<void>((resolve) => (held = resolve));
+        const script = answers.shift();
+        if (script !== undefined) {
+          const answer = script(body);
+          if (!answer.ok && answer.head !== undefined) head = Math.max(head, answer.head);
+          return answer;
+        }
+        return admit(body);
+      },
+      async postPresence(body) {
+        presences.push(body);
+      },
+    };
+  }
+
+  const helloAt = (clientId: string, seq: number, revision: number): RoomEvent => ({
+    type: 'hello',
+    seq,
+    revision,
+    clientId,
+    role: 'editor',
+    clients: [],
+    editing: 1,
+    tier: 'blob',
+  });
+
+  const remoteEntry = (seq: number, mutations: Mutation[], author = maya.author): Entry => ({
+    seq,
+    rev: seq - 1,
+    kind: 'edit',
+    author,
+    clientId: CLIENT_B,
+    opId: `${CLIENT_B}:${seq}`,
+    mutations,
+    at: new Date().toISOString(),
+  });
+
+  it('asks the stream for the id the tab holds and counts its ops from where the earlier page stopped (item 5)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      opCounter: memoryOpCounter(41),
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    expect(transport.opens[0]?.clientId).toBe(CLIENT_A);
+    transport.fire(helloAt(CLIENT_A, base, base));
+    const applied = room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await applied.settled;
+    expect(transport.posts[0]?.entries[0]?.opId).toBe(`${CLIENT_A}:42`);
+    expect(room.status()).toMatchObject({ clientId: CLIENT_A, pending: 0, revision: base + 1 });
+    await room.stop();
+  });
+
+  it('rebases a refused write onto the entries the 409 carries and posts again once, without a reload (item 3)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    let resyncs = 0;
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      transform: testTransform,
+      onChange: () => undefined,
+      onResync: async () => {
+        resyncs += 1;
+        return null;
+      },
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    const before = textOf(room.document());
+    // another instance committed base + 1 while this write was on its way: the 409 names it
+    transport.answers.push(() => ({
+      ok: false,
+      status: 409,
+      code: 'resync',
+      message: `The presentation moved to revision ${base + 1} while this change was on its way`,
+      head: base + 1,
+      since: [remoteEntry(base + 1, [splice(0, 0, 'ZZ')])],
+    }));
+    const applied = room.apply([splice(0, 0, 'k')], 'type', 'now');
+    const outcome = await applied.settled;
+    expect(outcome).toEqual({ seq: base + 2 });
+    // one refusal, one retry on the new base, no reload and no prompt
+    expect(transport.posts).toHaveLength(2);
+    expect(transport.posts[1]?.base.seq).toBe(base + 1);
+    expect(resyncs).toBe(0);
+    expect(room.status()).toMatchObject({
+      rebased: 1,
+      pending: 0,
+      seq: base + 2,
+      revision: base + 2,
+    });
+    // the pending splice moved past the remote insert: both are in the text once
+    expect(textOf(room.document())).toBe(`ZZk${before}`);
+    await room.stop();
+  });
+
+  it('applies a record’s echo from another instance as its own acknowledgement and drops the late answer (items 5 and 6)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    const before = textOf(room.document());
+    transport.hold(true);
+    const a = room.apply([splice(0, 0, 'a')], 'type');
+    const b = room.apply([splice(1, 0, 'b')], 'type');
+    await until(() => transport.posts.length === 1, 1000);
+    expect(transport.posts[0]?.entries.map((entry) => entry.opId)).toEqual([
+      `${CLIENT_A}:1`,
+      `${CLIENT_A}:2`,
+    ]);
+    changes.length = 0;
+    // the stream's instance announces the record first: one entry naming the tab and its batch
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: base + 1,
+        rev: base,
+        kind: 'edit',
+        author: kevin.author,
+        clientId: CLIENT_A,
+        opId: `${CLIENT_A}:1+2`,
+        mutations: [splice(0, 0, 'ab')],
+        at: new Date().toISOString(),
+      },
+    });
+    expect(await a.settled).toEqual({ seq: base + 1 });
+    expect(await b.settled).toEqual({ seq: base + 1 });
+    expect(room.status()).toMatchObject({ pending: 0, seq: base + 1 });
+    expect(changes.every((change) => change.reason !== 'remote')).toBe(true);
+    expect(textOf(room.document())).toBe(`ab${before}`);
+    // the POST answer arrives afterwards with the two entries at the same seq: nothing doubles
+    transport.hold(false);
+    await room.flush();
+    expect(textOf(room.document())).toBe(`ab${before}`);
+    expect(room.status()).toMatchObject({ pending: 0, seq: base + 1, revision: base + 1 });
+    await room.stop();
+  });
+
+  it('settles an op the answer names at or below the position instead of leaving it pending (item 4)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    // the server answers a replayed op id with the record it already made, one revision back
+    transport.answers.push((body) => ({
+      ok: true,
+      entries: [
+        {
+          seq: base,
+          rev: base - 1,
+          kind: 'edit',
+          author: kevin.author,
+          clientId: body.clientId,
+          opId: body.entries[0]?.opId ?? '',
+          mutations: [splice(0, 0, 'k')],
+          at: new Date().toISOString(),
+        },
+      ],
+      rejected: [],
+      head: base,
+      revision: base,
+    }));
+    const applied = room.apply([splice(0, 0, 'k')], 'type', 'now');
+    expect(await applied.settled).toEqual({ seq: base });
+    expect(room.status().pending).toBe(0);
+    await room.stop();
+  });
+
+  it('replays the tab’s own persisted queue on its own after a reload and offers another tab’s (SPEC-3 0.7, item 5)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const store = memoryPendingStore();
+    await store.save({
+      key: pendingKey('gt-brand', CLIENT_A),
+      deckId: 'gt-brand',
+      clientId: CLIENT_A,
+      savedAt: new Date().toISOString(),
+      entries: [
+        { opId: `${CLIENT_A}:5`, kind: 'edit', mutations: [splice(0, 0, 'Q')], sent: true },
+        { opId: `${CLIENT_A}:6`, kind: 'edit', mutations: [splice(1, 0, 'R')] },
+        { opId: `${CLIENT_A}:4`, kind: 'edit', mutations: [splice(0, 0, 'P')], seq: base },
+      ],
+    });
+    await store.save({
+      key: pendingKey('gt-brand', CLIENT_B),
+      deckId: 'gt-brand',
+      clientId: CLIENT_B,
+      savedAt: new Date().toISOString(),
+      entries: [{ opId: `${CLIENT_B}:1`, kind: 'edit', mutations: [splice(0, 0, 'X')] }],
+    });
+    const transport = scripted({ author: kevin.author, head: base });
+    let offer: PersistedOffer | undefined;
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      opCounter: memoryOpCounter(6),
+      pendingStore: store,
+      transform: testTransform,
+      onChange: () => undefined,
+      onPersisted: (o) => (offer = o),
+    });
+    room.start();
+    // the own queue's two unsent ops are pending at once (the retained one is not), no prompt
+    await until(() => room.status().pending === 2, 1000);
+    expect(textOf(room.document()).startsWith('QR')).toBe(true);
+    // the other tab's queue is offered, as before
+    await until(() => offer !== undefined, 1000);
+    expect(offer?.count).toBe(1);
+    transport.fire(helloAt(CLIENT_A, base, base));
+    await until(() => room.status().pending === 0, 2000);
+    // the replay kept the op ids, so the server can answer the one that landed already
+    expect(transport.posts[0]?.entries.map((entry) => entry.opId)).toEqual([
+      `${CLIENT_A}:5`,
+      `${CLIENT_A}:6`,
+    ]);
+    // the own queue holds nothing unsaved any more; the other tab's stays until answered
+    const left = (await store.load('gt-brand')).filter((queue) => unsavedCount(queue) > 0);
+    expect(left.map((queue) => queue.clientId)).toEqual([CLIENT_B]);
+    await room.stop();
+  });
+
+  it('posts the heartbeat every 25 s while shown, none while hidden, and once when shown again (A8 rows 7 and 8)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const timers = new Map<number, { run: () => void; at: number }>();
+    let clock = 1_000_000;
+    let handle = 0;
+    const fakeTimers = {
+      setTimeout: (run: () => void, ms: number) => {
+        handle += 1;
+        timers.set(handle, { run, at: clock + ms });
+        return handle;
+      },
+      clearTimeout: (id: unknown) => {
+        timers.delete(id as number);
+      },
+    };
+    const advance = (ms: number): void => {
+      const until_ = clock + ms;
+      for (;;) {
+        const due = [...timers.entries()]
+          .filter(([, timer]) => timer.at <= until_)
+          .sort((a, b) => a[1].at - b[1].at)[0];
+        if (due === undefined) break;
+        timers.delete(due[0]);
+        clock = due[1].at;
+        due[1].run();
+      }
+      clock = until_;
+    };
+    let hidden = false;
+    const listeners = new Set<() => void>();
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      now: () => clock,
+      timers: fakeTimers,
+      visibility: {
+        hidden: () => hidden,
+        onChange: (listener) => {
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        },
+      },
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    advance(0);
+    await Promise.resolve();
+    const afterHello = transport.presences.length;
+    expect(afterHello).toBeGreaterThan(0);
+    // a shown tab: one heartbeat per HEARTBEAT_MS, under the roster's 30 s stale mark
+    advance(HEARTBEAT_MS);
+    await Promise.resolve();
+    expect(transport.presences.length).toBe(afterHello + 1);
+    expect(HEARTBEAT_MS).toBeLessThan(30_000);
+    // a hidden tab: none
+    hidden = true;
+    advance(HEARTBEAT_MS * 3);
+    await Promise.resolve();
+    expect(transport.presences.length).toBe(afterHello + 1);
+    // shown again: one at once
+    hidden = false;
+    for (const listener of listeners) listener();
+    advance(0);
+    await Promise.resolve();
+    expect(transport.presences.length).toBe(afterHello + 2);
+    // the clock outranks any state the earlier page of this tab left under the same client id
+    expect(transport.presences[0]?.clock).toBeGreaterThanOrEqual(1_000_000);
+    await room.stop();
+  });
+
+  it('reads offline after the stream has been down for OFFLINE_AFTER_MS and connected again on the next hello', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const timers = new Map<number, { run: () => void; at: number }>();
+    let clock = 0;
+    let handle = 0;
+    const fakeTimers = {
+      setTimeout: (run: () => void, ms: number) => {
+        handle += 1;
+        timers.set(handle, { run, at: clock + ms });
+        return handle;
+      },
+      clearTimeout: (id: unknown) => {
+        timers.delete(id as number);
+      },
+    };
+    const advance = (ms: number): void => {
+      clock += ms;
+      for (const [id, timer] of [...timers.entries()].sort((a, b) => a[1].at - b[1].at)) {
+        if (timer.at > clock) continue;
+        timers.delete(id);
+        timer.run();
+      }
+    };
+    const statuses: SyncStatus[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      now: () => clock,
+      timers: fakeTimers,
+      transform: testTransform,
+      onChange: () => undefined,
+      onStatus: (status) => statuses.push(status),
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    expect(room.status()).toMatchObject({ connected: true, offline: false });
+    transport.opens[0]?.onError(new Error('the stream closed'));
+    expect(room.status()).toMatchObject({ connected: false, offline: false });
+    advance(OFFLINE_AFTER_MS + 1);
+    expect(room.status()).toMatchObject({ connected: false, offline: true });
+    transport.fire(helloAt(CLIENT_A, base, base));
+    expect(room.status()).toMatchObject({ connected: true, offline: false });
+    await room.stop();
+  });
+
+  it('keeps a pending op’s mutations as they were applied when the caller appends to its own array later (item 7: an op held offline posts nothing twice)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    // the first POST meets the wire down, as it does offline; the op stays pending
+    transport.answers.push(() => {
+      throw new Error('offline');
+    });
+    const first: Mutation[] = [splice(0, 0, 'a')];
+    room.apply(first, 'type', 'now');
+    await until(() => transport.posts.length === 1, 1000);
+    // the editor's undo group appends the next keystroke to the array it passed before, and
+    // applies it as its own op too (controller.tsx `group.mutations.push`)
+    first.push(splice(1, 0, 'b'));
+    room.apply([splice(1, 0, 'b')], 'type', 'now');
+    // the retry after the backoff carries each keystroke once
+    await until(() => room.status().pending === 0, 4000);
+    const sent = transport.posts
+      .slice(1)
+      .flatMap((body) =>
+        body.entries.flatMap((entry) => (entry as { mutations?: Mutation[] }).mutations ?? []),
+      );
+    expect(sent).toEqual([splice(0, 0, 'a'), splice(1, 0, 'b')]);
+    expect(textOf(room.document())).toBe(`ab${textOf(document)}`);
+    await room.stop();
+  });
+
+  it('hands the entry that rewrote a pending op’s text to onUnplaceable, so the card can name its author (item 8)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const transport = scripted({ author: kevin.author, head: base });
+    const unplaceable: { opId: string; author?: string }[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      clientId: CLIENT_A,
+      transform: testTransform,
+      onChange: () => undefined,
+      onUnplaceable: (op, against) =>
+        unplaceable.push({ opId: op.opId, author: against?.author.name }),
+    });
+    room.start();
+    transport.fire(helloAt(CLIENT_A, base, base));
+    transport.hold(true);
+    room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await until(() => transport.posts.length === 1, 1000);
+    transport.fire({
+      type: 'op',
+      entry: remoteEntry(base + 1, [
+        { op: 'block.set', slideId: SLIDE, blockId: BLOCK, path: '/text', value: 'rewritten' },
+      ]),
+    });
+    expect(unplaceable).toHaveLength(1);
+    expect(unplaceable[0]?.author).toBe(maya.author.name);
+    expect(room.rejects()).toHaveLength(1);
+    transport.hold(false);
+    await room.stop();
   });
 });

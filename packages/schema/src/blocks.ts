@@ -50,6 +50,10 @@ import type { ChartFields } from './blocks/chart.ts';
 import { chartFieldsShape } from './blocks/chart.ts';
 import type { PictureDither } from './blocks/dither.ts';
 import { pictureDitherField } from './blocks/dither.ts';
+import type { EquationFields } from './blocks/equation.ts';
+import { equationFieldsShape } from './blocks/equation.ts';
+import type { MediaFields, SpotlightFields } from './blocks/media.ts';
+import { mediaFieldsShape, spotlightFieldsShape } from './blocks/media.ts';
 
 /** The table block's parts live in blocks/table.ts (gslides-parity SPEC 7.3). */
 export type {
@@ -219,6 +223,25 @@ export type BlockBase = {
   pos?: Position;
   link?: BlockLink;
   alt?: string;
+  /**
+   * The placeholder a block stands for inside a custom layout (gslides-parity SPEC-5 9.2; R03
+   * 4.1): Apply layout on that layout moves the slide's matching content into the block's box.
+   * Absent on every block of an ordinary slide.
+   */
+  placeholder?: PlaceholderKind;
+};
+
+/** Google's five Insert placeholder rows in the theme mode (SPEC-5 9.2). */
+export const PLACEHOLDER_KINDS = ['title', 'subtitle', 'body', 'slideNumber', 'picture'] as const;
+export type PlaceholderKind = (typeof PLACEHOLDER_KINDS)[number];
+
+/** Google's labels for the Insert placeholder submenu (SPEC-5 9.2). */
+export const PLACEHOLDER_LABELS: Readonly<Record<PlaceholderKind, string>> = {
+  title: 'Title',
+  subtitle: 'Subtitle',
+  body: 'Body text',
+  slideNumber: 'Slide number',
+  picture: 'Image',
 };
 
 /** Text fitting (gslides-parity SPEC-2 2.1.5, 0.23): explicit writes, never a render time fit. */
@@ -457,6 +480,12 @@ export type PlainBlock = BlockBase & {
   numbered?: true;
   marker?: ListMarker;
   preset?: BulletPreset | NumberPreset;
+  /** Restart numbering (gslides-parity SPEC-5 7.7): the count the first numbered item starts at; 1 when absent. */
+  start?: number;
+  /** Edit prefix and suffix (SPEC-5 7.7): the text before the numeral; none when absent. */
+  prefix?: string;
+  /** The text after the numeral; `.` when absent. */
+  suffix?: string;
   items: PlainItem[];
 };
 export type RefsBlock = BlockBase & { type: 'refs'; items: Text[] };
@@ -495,8 +524,48 @@ export type SwatchesBlock = BlockBase & {
 };
 /** Google's crop offsets as fractions of the picture (gslides-parity SPEC-2 2.5.1). */
 export type ShotTrim = { left: number; right: number; top: number; bottom: number };
-/** Transparency 0 to 1, brightness and contrast -1 to 1 (SPEC-2 2.5.3). */
-export type ShotAdjust = { transparency?: number; brightness?: number; contrast?: number };
+/**
+ * Google's Recolor presets (gslides-parity SPEC-5 0.47; the list `unverified: true`): No recolor,
+ * Grayscale, Sepia, Negative, and the light and dark duotones of ink, ink 2, titanium and the four
+ * semantic hues, built from the theme's colours as Google builds its list from the theme's. The
+ * Editable text file writes `a:grayscl` and `a:duotone` as native elements and bakes the rest.
+ */
+export const RECOLOR_PRESETS = [
+  'none',
+  'grayscale',
+  'sepia',
+  'negative',
+  'ink-light',
+  'ink-dark',
+  'ink-2-light',
+  'ink-2-dark',
+  'titanium-light',
+  'titanium-dark',
+  'green-light',
+  'green-dark',
+  'amber-light',
+  'amber-dark',
+  'red-light',
+  'red-dark',
+  'blue-light',
+  'blue-dark',
+] as const;
+export type RecolorPreset = (typeof RECOLOR_PRESETS)[number];
+
+/** Google's Reflection sliders (SPEC-5 0.47): transparency and size as fractions 0 to 1, distance in sheet px. */
+export type ShotReflection = { transparency: number; distance: number; size: number };
+
+/**
+ * Transparency 0 to 1, brightness and contrast -1 to 1 (SPEC-2 2.5.3); since round five the
+ * reflection and the recolor preset (SPEC-5 0.47), both absent by default.
+ */
+export type ShotAdjust = {
+  transparency?: number;
+  brightness?: number;
+  contrast?: number;
+  reflection?: ShotReflection;
+  recolor?: RecolorPreset;
+};
 /** The picture's border (SPEC-2 2.5.5); `border: true` stays the hairline frame. */
 export type ShotFrame = { weight?: 1 | 1.5 | 2; color?: Color; dash?: Dash };
 
@@ -637,6 +706,12 @@ export type HtmlBlock = BlockBase & {
 export type TableBlock = BlockBase & TableFields & { shadow?: Shadow };
 /** Google's chart as data drawn in the diagram grammar (gslides-parity SPEC-2 2.8; blocks/chart.ts). */
 export type ChartBlock = BlockBase & ChartFields & { shadow?: Shadow };
+/** Audio or video as a positioned object with a poster (gslides-parity SPEC-5 0.16; blocks/media.ts). */
+export type MediaBlock = BlockBase & MediaFields & { shadow?: Shadow };
+/** The speaker spotlight's placeholder the show fills with the camera (SPEC-5 3.7; blocks/media.ts). */
+export type SpotlightBlock = BlockBase & SpotlightFields & { shadow?: Shadow };
+/** LaTeX rendered as MathML, exported as native OMML (SPEC-5 0.43; blocks/equation.ts). */
+export type EquationBlock = BlockBase & EquationFields & { shadow?: Shadow };
 
 export type Block =
   | HeadingBlock
@@ -673,6 +748,9 @@ export type Block =
   | TableBlock
   | ChartBlock
   | PictureBlock
+  | MediaBlock
+  | SpotlightBlock
+  | EquationBlock
   | HtmlBlock;
 
 export type BlockType = Block['type'];
@@ -715,7 +793,17 @@ export const BLOCK_TYPES = [
   'table',
   'chart',
   'picture',
+  'media',
+  'spotlight',
+  'equation',
   'html',
+] as const satisfies ReadonlyArray<BlockType>;
+
+/** The block types round five added (gslides-parity SPEC-5 1.2): the renderer's switch, the catalog and the inspector gained them on day 0. */
+export const GS5_BLOCK_TYPES = [
+  'media',
+  'spotlight',
+  'equation',
 ] as const satisfies ReadonlyArray<BlockType>;
 
 /** The primitive block types the freeform round added (docs/freeform.md). */
@@ -842,6 +930,9 @@ const base = {
     group: 'Text',
     help: 'The description a screen reader and the export read; a picture keeps its description on the asset (gslides-parity SPEC-2 0.51).',
   }),
+  // not annotated on purpose: the inspector offers the placeholder inside the theme mode alone
+  // (gslides-parity SPEC-5 9.2, B6's theme-mode.tsx), never as a control on an ordinary block
+  placeholder: z.enum(PLACEHOLDER_KINDS).optional(),
 };
 
 const autofitField = annotate(z.enum(AUTOFITS).optional(), {
@@ -1078,6 +1169,24 @@ export const plainBlockSchema = z
       group: 'Block',
       help: 'Google’s bullet or numbering preset; the first of its family unless set (gslides-parity SPEC-2 2.2.13).',
     }),
+    start: annotate(z.number().int().min(0).max(9999).optional(), {
+      label: 'Start at',
+      control: 'number',
+      group: 'Block',
+      help: 'Restart numbering: the count the first numbered item starts at; 1 when absent (gslides-parity SPEC-5 7.7).',
+    }),
+    prefix: annotate(z.string().max(8).optional(), {
+      label: 'Prefix',
+      control: 'text',
+      group: 'Block',
+      help: 'The text before each numeral (Edit prefix and suffix); none when absent (gslides-parity SPEC-5 7.7).',
+    }),
+    suffix: annotate(z.string().max(8).optional(), {
+      label: 'Suffix',
+      control: 'text',
+      group: 'Block',
+      help: 'The text after each numeral; a period when absent (gslides-parity SPEC-5 7.7).',
+    }),
     items: z.array(plainItemSchema).min(1),
   })
   .refine(
@@ -1262,13 +1371,21 @@ const pictureToolFields = {
         transparency: z.number().min(0).max(1).optional(),
         brightness: z.number().min(-1).max(1).optional(),
         contrast: z.number().min(-1).max(1).optional(),
+        reflection: z
+          .strictObject({
+            transparency: z.number().min(0).max(1),
+            distance: z.number().min(0).max(200),
+            size: z.number().min(0).max(1),
+          })
+          .optional(),
+        recolor: z.enum(RECOLOR_PRESETS).optional(),
       })
       .optional(),
     {
       label: 'Adjustments',
       control: 'json',
       group: 'Block',
-      help: 'Transparency 0 to 1, brightness and contrast -1 to 1 (gslides-parity SPEC-2 2.5.3).',
+      help: 'Transparency 0 to 1, brightness and contrast -1 to 1 (gslides-parity SPEC-2 2.5.3); the reflection (transparency, distance in px, size) and the recolor preset (gslides-parity SPEC-5 0.47).',
     },
   ),
   frame: annotate(
@@ -1920,6 +2037,24 @@ export const chartBlockSchema = z.strictObject({
   shadow: shadowField,
 }) satisfies z.ZodType<ChartBlock>;
 
+export const mediaBlockSchema = z.strictObject({
+  ...base,
+  ...mediaFieldsShape,
+  shadow: shadowField,
+}) satisfies z.ZodType<MediaBlock>;
+
+export const spotlightBlockSchema = z.strictObject({
+  ...base,
+  ...spotlightFieldsShape,
+  shadow: shadowField,
+}) satisfies z.ZodType<SpotlightBlock>;
+
+export const equationBlockSchema = z.strictObject({
+  ...base,
+  ...equationFieldsShape,
+  shadow: shadowField,
+}) satisfies z.ZodType<EquationBlock>;
+
 /** Recursive through composite cells; typed explicitly so the cycle resolves. */
 export const blockSchema: z.ZodType<Block> = z.lazy(() => blockUnionSchema);
 
@@ -2006,6 +2141,9 @@ export const blockUnionSchema = z.discriminatedUnion('type', [
   tableBlockSchema,
   chartBlockSchema,
   pictureBlockSchema,
+  mediaBlockSchema,
+  spotlightBlockSchema,
+  equationBlockSchema,
   htmlBlockSchema,
 ]);
 
@@ -2045,5 +2183,8 @@ export const BLOCK_SCHEMAS = {
   table: tableBlockSchema,
   chart: chartBlockSchema,
   picture: pictureBlockSchema,
+  media: mediaBlockSchema,
+  spotlight: spotlightBlockSchema,
+  equation: equationBlockSchema,
   html: htmlBlockSchema,
 } as const satisfies Record<BlockType, z.ZodType>;

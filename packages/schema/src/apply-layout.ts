@@ -24,6 +24,7 @@
 // the new layout id. Kind changes are the same slide.replace with a new kind.
 import type { Block, TableBlock } from './blocks.ts';
 import { EMPTY_ASSET_REF } from './blocks.ts';
+import { pictureAssetOf } from './assets.ts';
 import type { ContentSlide, Deck, Layout, LayoutId, Slide, SlotName } from './deck.ts';
 import { slotsForLayout } from './deck.ts';
 import { CANVAS_GROUP } from './canvas.ts';
@@ -526,7 +527,7 @@ function fillPlate(
   const first = extracted.pictures[0];
   if (first !== undefined) {
     target.picture = { ...target.picture, asset: first.asset };
-    const credit = extracted.credit ?? deck.assets[first.asset]?.credit;
+    const credit = extracted.credit ?? pictureAssetOf(deck.assets, first.asset)?.credit;
     const creditBlock = blocks.find((block) => block.type === 'credit');
     if (creditBlock?.type === 'credit') creditBlock.text = credit ?? '';
   }

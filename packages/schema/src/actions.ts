@@ -24,8 +24,39 @@ import {
   assetTreatmentSchema,
   assetTwinsSchema,
   ASSET_ROLES,
+  mediaAssetSchema,
 } from './assets.ts';
-import { AUTOFITS, SHAPE_KINDS, blockSchema, shadowSchema } from './blocks.ts';
+import {
+  AUTOFITS,
+  PLACEHOLDER_KINDS,
+  RECOLOR_PRESETS,
+  SHAPE_KINDS,
+  blockSchema,
+  shadowSchema,
+} from './blocks.ts';
+import {
+  BUILDING_BLOCK_CATEGORIES,
+  buildingBlockIdSchema,
+  buildingBlockSchema,
+  templateIndexEntrySchema,
+} from './building-blocks.ts';
+import { EQUATION_DISPLAYS, EQUATION_SYMBOL_GROUPS } from './blocks/equation.ts';
+import { MEDIA_KINDS, PLAYBACK_STARTS, mediaPlaybackSchema } from './blocks/media.ts';
+import { CELL_BORDER_EDGES } from './blocks/table.ts';
+import { FONT_CATEGORIES, FONT_IDS, FONT_LICENCES } from './fonts.ts';
+import { IMPORT_SHEET_MODES, IMPORT_THEME_MODES, importReportSchema } from './import-report.ts';
+import {
+  ANIMATION_EFFECTS,
+  ANIMATION_TRIGGERS,
+  DURATION_MS,
+  FLY_DIRECTIONS,
+  TRANSITION_KINDS,
+  animationIdSchema,
+  animationSchema,
+  motionScheduleSchema,
+  transitionSchema,
+} from './motion.ts';
+import { SVG_TEXT_MODES, languageTagSchema, preferencesSchema } from './preferences.ts';
 import {
   DITHER_CELLS,
   DITHER_PATTERNS,
@@ -56,11 +87,27 @@ import {
   PLATE_SIDES,
   sectionSchema,
   slideBackgroundSchema,
+  deckSchema,
   slideSchema,
   SLIDE_KINDS,
   SLOT_NAMES,
+  THEMES,
+  customLayoutIdSchema,
+  customLayoutSchema,
+  themeEditsSchema,
+  themeRecordSchema,
 } from './deck.ts';
-import { exportCheckSchema, exportReportSchema } from './export.ts';
+import {
+  EXPORT_FORMATS,
+  MEDIA_EXPORT_MODES,
+  MOTION_EXPORT_MODES,
+  ORIENTATIONS,
+  PAPERS,
+  PRINT_LAYOUTS,
+  PRINT_ORDERS,
+  exportCheckSchema,
+  exportReportSchema,
+} from './export.ts';
 import { findingSchema } from './findings.ts';
 import { ALIGN_EDGES, ALIGN_TARGETS, DISTRIBUTE_AXES, ORDER_MOVES } from './freeform.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
@@ -72,7 +119,7 @@ import {
   versionSchema,
 } from './mutations.ts';
 import { positionObjectSchema } from './position.ts';
-import { renderRecordSchema } from './render.ts';
+import { PAGE_PRESETS, pageSchema, renderRecordSchema } from './render.ts';
 import { RULE_IDS } from './rules.ts';
 import { DASHES, LINE_ENDS, LINE_KINDS, isClosedShapeKind } from './shapes.ts';
 import {
@@ -88,11 +135,11 @@ export type Transport = 'cli' | 'mcp' | 'http' | 'window';
 export const TRANSPORTS = ['cli', 'mcp', 'http', 'window'] as const;
 export const ALL_TRANSPORTS: ReadonlyArray<Transport> = TRANSPORTS;
 
-/** M1 to M6 are the first six milestones; GS1, GS2 and GS3 are the Google Slides parity rounds (docs/gslides-parity). */
-export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3';
+/** M1 to M6 are the first six milestones; GS1, GS2, GS3 and GS5 are the Google Slides parity rounds (docs/gslides-parity; round four added no action). */
+export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3' | 'GS5';
 
 /** The milestones in landing order, for the manifest's "expected here" answer. */
-export const MILESTONES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3'] as const;
+export const MILESTONES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3', 'GS5'] as const;
 
 /**
  * The palette groups (SPEC 6.1) and the docs sections; presence, sync, comment, share, account and
@@ -114,7 +161,12 @@ export type ActionGroup =
   | 'comment'
   | 'share'
   | 'account'
-  | 'admin';
+  | 'admin'
+  /* round five (gslides-parity SPEC-5 0.50): motion, media, the theme record and the PPTX import */
+  | 'motion'
+  | 'media'
+  | 'theme'
+  | 'import';
 
 export const ACTION_GROUPS = [
   'deck',
@@ -133,6 +185,10 @@ export const ACTION_GROUPS = [
   'share',
   'account',
   'admin',
+  'motion',
+  'media',
+  'theme',
+  'import',
 ] as const satisfies ReadonlyArray<ActionGroup>;
 
 export type ActionCli = {
@@ -333,12 +389,71 @@ export const ACTION_IDS = [
   'picture.materialize',
   'slide.setBackgroundPicture',
   'slide.setBackgroundMaterial',
+  // the Google Slides parity round five (gslides-parity SPEC-5 13; SPEC-5-amendments A5): 51
+  // actions, counted once here; every row answers NotImplementedError until its lane lands it
+  'motion.setTransition',
+  'motion.add',
+  'motion.update',
+  'motion.remove',
+  'motion.reorder',
+  'motion.compile',
+  'motion.play',
+  'media.insert',
+  'media.setPlayback',
+  'media.poster',
+  'media.info',
+  'media.list',
+  'camera.capture',
+  'view.presentOnScreen',
+  'template.list',
+  'template.slides',
+  'buildingBlock.list',
+  'buildingBlock.insert',
+  'import.pptx',
+  'theme.import',
+  'theme.applyImported',
+  'deck.setPageSize',
+  'prefs.get',
+  'prefs.set',
+  'text.autocorrect',
+  'spelling.check',
+  'spelling.replace',
+  'spelling.ignore',
+  'dictionary.add',
+  'dictionary.remove',
+  'dictionary.list',
+  'dictionary.lookup',
+  'accessibility.verbalize',
+  'equation.insert',
+  'equation.render',
+  'equation.symbols',
+  'theme.get',
+  'theme.set',
+  'theme.rename',
+  'theme.reset',
+  'layout.list',
+  'layout.create',
+  'layout.duplicate',
+  'layout.rename',
+  'layout.delete',
+  'layout.setPlaceholder',
+  'chat.send',
+  'chat.list',
+  'chat.clear',
+  'version.delete',
+  'font.list',
 ] as const;
 
 export type ActionId = (typeof ACTION_IDS)[number];
 
 /** The 64 ids round three added (gslides-parity SPEC-3 12, 0.40), in table order. */
-export const GS3_ACTION_IDS = ACTION_IDS.slice(ACTION_IDS.indexOf('presence.list'));
+export const GS3_ACTION_IDS = ACTION_IDS.slice(
+  ACTION_IDS.indexOf('presence.list'),
+  ACTION_IDS.indexOf('motion.setTransition'),
+);
+
+/** The 51 ids round five added (gslides-parity SPEC-5 13; SPEC-5-amendments A5 `font.list`), in table order. */
+export const GS5_ACTION_IDS = ACTION_IDS.slice(ACTION_IDS.indexOf('motion.setTransition'));
 
 /**
  * The round three writes with no revisioned record to base on (gslides-parity SPEC-3 12): page
@@ -364,6 +479,15 @@ export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
   'admin.bootstrap',
   'admin.flag',
   'admin.migrateStorage',
+  // round five (gslides-parity SPEC-5 13): the principal record (`record`), the room's chat
+  // entries (`room`), the version log and a new deck from a file
+  'prefs.set',
+  'dictionary.add',
+  'dictionary.remove',
+  'chat.send',
+  'chat.clear',
+  'version.delete',
+  'import.pptx',
 ]);
 
 // ---------------------------------------------------------------------------------------------
@@ -415,8 +539,8 @@ const slideListRow = z.strictObject({
   lint: z.strictObject({ s3: z.number().int().nonnegative(), s2: z.number().int().nonnegative() }),
   /** true for a skipped slide (gslides-parity SPEC 7.2.1) */
   skip: z.boolean().optional(),
-  /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2) */
-  template: layoutId.optional(),
+  /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2); a custom layout's id since round five (SPEC-5 9.2) */
+  template: z.union([layoutId, customLayoutIdSchema]).optional(),
   /** true for a canvas slide, a content slide on the freeform layout (gslides-parity SPEC-2 0.93) */
   canvas: z.boolean().optional(),
   /** the top level block count of a canvas slide */
@@ -434,6 +558,9 @@ export const viewStateSchema = z.strictObject({
   zoom: z.union([z.number().positive(), z.literal('fit')]).optional(),
   /** the stage's scroll offset in stage px after a zoom (gslides-parity SPEC-2 0.81) */
   scroll: z.strictObject({ x: z.number(), y: z.number() }).optional(),
+  /** the show's step on the slide and how many it has (gslides-parity SPEC-5 2.2); absent outside the show */
+  step: z.number().int().nonnegative().optional(),
+  steps: z.number().int().nonnegative().optional(),
 });
 
 /** The list levels 1 to 9 (gslides-parity SPEC-2 0.58). */
@@ -926,6 +1053,15 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       /** the deck's guides, when any (SPEC-2 2.10) */
       guides: deckGuidesSchema.optional(),
       trashedAt: z.string().optional(),
+      /** the page with its inches and EMU (gslides-parity SPEC-5 6.1); always present once B4's reader lands */
+      page: pageSchema
+        .extend({
+          inches: z.tuple([z.number(), z.number()]),
+          emu: z.tuple([z.number().int(), z.number().int()]),
+        })
+        .optional(),
+      /** the deck's language tag; en-US when the deck names none (SPEC-5 7.1) */
+      language: z.string().optional(),
     }),
     cli: { usage: 'turboslide info' },
     mcp: 'deck_get_info',
@@ -942,9 +1078,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     input: z.strictObject({
       name: z.string().min(1).describe('The deck title; the id is its slug unless `id` is given'),
       from: z
-        .enum(DECK_TEMPLATES)
+        .union([z.enum(DECK_TEMPLATES), slugSchema])
         .describe(
-          "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
+          "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; any id of the template index (decks/templates/templates.json) copies that template (gslides-parity SPEC-5 4.6)",
         ),
       id: slugSchema
         .optional()
@@ -953,7 +1089,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     output: z.strictObject({
       deckId: slugSchema,
       title: z.string(),
-      from: z.enum(DECK_TEMPLATES),
+      from: z.union([z.enum(DECK_TEMPLATES), slugSchema]),
       revision,
       dir: z.string().describe('The deck directory'),
       counts: z.strictObject({
@@ -983,7 +1119,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.set': action({
     id: 'deck.set',
     label: 'Set a deck field',
-    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes, /language) as one deck.set mutation, the write the Themes panel, Slide numbers and File > Language make; an absent value removes the field. The page and the theme records have their own actions.',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -991,9 +1127,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     input: z.strictObject({
       path: z
         .string()
-        .regex(/^\/(title|theme|defaults(\/[a-zA-Z]+)?)$/)
+        .regex(/^\/(title|theme|language|defaults(\/[a-zA-Z]+)?)$/)
         .describe(
-          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes',
+          'JSON pointer into the manifest: /title, /theme, /language, /defaults/appearance, /defaults/counter or /defaults/notes; /page, /themeEdits, /importedThemes and /customLayouts are written by their own actions (gslides-parity SPEC-5 0.30, 0.44)',
         ),
       value: z.unknown().optional().describe('The new value; omit it to remove the field'),
       baseRevision,
@@ -1462,7 +1598,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mutates: true,
     transports: A,
     milestone: 'GS1',
-    input: z.strictObject({ slideIds: slideIdList, layout: layoutId, baseRevision }),
+    // a custom layout id applies the deck's own layout (SPEC-5 9.2; b6.md R9)
+    input: z.strictObject({
+      slideIds: slideIdList,
+      layout: z.union([layoutId, customLayoutIdSchema]),
+      baseRevision,
+    }),
     output: z.strictObject({
       slides: z.array(slideSchema),
       dropped: z.array(z.strictObject({ slideId: slugSchema, blockIds: z.array(blockIdSchema) })),
@@ -1483,17 +1624,51 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mutates: true,
     transports: A,
     milestone: 'GS1',
-    input: z.strictObject({
-      sourceDeckId: slugSchema.describe('The deck the slides come from'),
-      slideIds: slideIdList.describe('The slides to copy, in the order they land'),
-      after: slugSchema
-        .optional()
-        .describe('The slide the copies follow; first in the section when absent'),
-      sectionId: slugSchema
-        .optional()
-        .describe("The section; the anchor's section, or the last section, when absent"),
-      baseRevision,
-    }),
+    input: z
+      .strictObject({
+        sourceDeckId: slugSchema.optional().describe('The deck the slides come from'),
+        sourceFile: z
+          .string()
+          .optional()
+          .describe('A .pptx (or a bundle) the slides come from (gslides-parity SPEC-5 5.2)'),
+        sourceTemplateId: slugSchema
+          .optional()
+          .describe('A template of the index the slides come from (SPEC-5 4.6)'),
+        slideIds: slideIdList
+          .optional()
+          .describe('The slides to copy from a deck or a template, in the order they land'),
+        slideIndexes: z
+          .array(z.number().int().positive())
+          .min(1)
+          .optional()
+          .describe('The one based slide numbers to copy from a file (SPEC-5 5.2)'),
+        after: slugSchema
+          .optional()
+          .describe(
+            'The slide the copies follow; the last slide when absent (gslides-parity SPEC-5 0.27)',
+          ),
+        sectionId: slugSchema
+          .optional()
+          .describe("The section; the anchor's section, or the last section, when absent"),
+        keepTheme: z
+          .boolean()
+          .optional()
+          .describe(
+            "Google's Keep original theme: the source's theme record joins In this presentation; off by default (SPEC-5 0.27)",
+          ),
+        baseRevision,
+      })
+      .refine(
+        (input) =>
+          [input.sourceDeckId, input.sourceFile, input.sourceTemplateId].filter(
+            (v) => v !== undefined,
+          ).length === 1,
+        'exactly one of sourceDeckId, sourceFile or sourceTemplateId',
+      )
+      .refine(
+        (input) => input.slideIds !== undefined || input.slideIndexes !== undefined,
+        'slideIds (a deck or a template) or slideIndexes (a file)',
+      ),
     output: z.strictObject({
       slides: z.array(slideSchema),
       assets: z.array(slugSchema).describe('The asset ids copied into this deck'),
@@ -1503,7 +1678,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: {
       usage:
-        'turboslide slide import <sourceDeckId> <slideIds> --after <after> --section <sectionId>',
+        'turboslide slide import <sourceDeckId> <slideIds> --file <sourceFile> --template <sourceTemplateId> --indexes <slideIndexes> --after <after> --section <sectionId> --keep-theme',
     },
     mcp: 'deck_import_slides',
     example: { sourceDeckId: 'gt-brand', slideIds: ['thesis'], after: 'title', baseRevision: 412 },
@@ -2024,11 +2199,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideIds: slideIdsOrAll,
       themes: themes.optional(),
       scale: z.literal([1, 2]).optional(),
-      format: z.enum(['png', 'jpg']).optional(),
+      format: z
+        .enum(['png', 'jpg', 'svg'])
+        .optional()
+        .describe('png (the default), jpg, or svg from the scene (gslides-parity SPEC-5 6.4)'),
+      text: z
+        .enum(SVG_TEXT_MODES)
+        .optional()
+        .describe(
+          "svg only: embed the font (the default), outline the glyphs, or link the family names (SPEC-5 6.4); the preference's SVG text row when absent",
+        ),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/render'),
     }),
     output: z.strictObject({ records: z.array(renderRecordSchema), images: z.array(z.string()) }),
-    cli: { usage: 'turboslide render <slideIds> --theme <themes> --out <out> --json' },
+    cli: {
+      usage:
+        'turboslide render <slideIds> --theme <themes> --format <format> --text <text> --out <out> --json',
+    },
     mcp: 'deck_render',
     example: { slideIds: ['content-rule'], themes: ['light', 'dark'], scale: 1 },
   }),
@@ -2221,7 +2408,17 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mutates: false,
     transports: ['window', 'mcp'],
     milestone: 'M3',
-    input: z.strictObject({ slideId: slugSchema }),
+    input: z.strictObject({
+      slideId: slugSchema,
+      step: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe(
+          'The show step to land on (gslides-parity SPEC-5 2.2); 0, the entry step, when absent',
+        ),
+    }),
     output: viewStateSchema,
     mcp: 'deck_goto_slide',
     example: { slideId: 'content-rule' },
@@ -2260,7 +2457,15 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mutates: false,
     transports: ['window'],
     milestone: 'M3',
-    input: z.strictObject({ on: z.boolean() }),
+    input: z.strictObject({
+      on: z.boolean(),
+      step: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('The step of the current slide to open the show at (gslides-parity SPEC-5 2.2)'),
+    }),
     output: viewStateSchema,
     mcp: 'deck_set_view',
     example: { on: true },
@@ -2299,12 +2504,59 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     transports: A,
     milestone: 'M2',
     input: z.strictObject({
-      format: z.enum(['pptx', 'pdf']),
+      format: z
+        .enum(EXPORT_FORMATS)
+        .describe('pptx, pdf, or odp for LibreOffice Impress (gslides-parity SPEC-5 6.3)'),
       mode: z
         .enum(['native', 'flatten'])
         .optional()
         .describe(
           'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)',
+        ),
+      motion: z
+        .enum(MOTION_EXPORT_MODES)
+        .optional()
+        .describe(
+          'Editable text: keep the transitions and the timing tree (the default) or drop them (gslides-parity SPEC-5 2.4)',
+        ),
+      media: z
+        .enum(MEDIA_EXPORT_MODES)
+        .optional()
+        .describe(
+          'Embed the stored media files (the default under the deck cap), carry posters alone, or link them for the web page (SPEC-5 3.6)',
+        ),
+      autoplay: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe(
+          'The web page advances one step every this many ms; 0 or absent is off (SPEC-5 2.3)',
+        ),
+      loop: z
+        .boolean()
+        .optional()
+        .describe('The web page restarts after the last slide under autoplay'),
+      layout: z
+        .enum(PRINT_LAYOUTS)
+        .optional()
+        .describe(
+          'PDF: one slide per page, one slide with notes, or a handout of 2, 3, 4, 6 or 9 (SPEC-5 6.2)',
+        ),
+      paper: z
+        .enum(PAPERS)
+        .optional()
+        .describe("PDF: the slide's own page (the default), Letter or A4 (SPEC-5 6.2)"),
+      orientation: z.enum(ORIENTATIONS).optional().describe('PDF on paper: landscape or portrait'),
+      order: z
+        .enum(PRINT_ORDERS)
+        .optional()
+        .describe('PDF handouts: fill across the rows first or down the columns first'),
+      hideBackground: z
+        .boolean()
+        .optional()
+        .describe(
+          'PDF: the light appearance on white with every background colour removed (SPEC-5 6.2)',
         ),
       theme: themes
         .optional()
@@ -2389,7 +2641,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       omit: ['batch', 'merge'],
 
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --motion <motion> --media <media> --autoplay <autoplay> --loop --layout <layout> --paper <paper> --orientation <orientation> --order <order> --hide-background --verify --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
@@ -2397,7 +2649,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'export.check': action({
     id: 'export.check',
     label: 'Check export file',
-    doc: 'Reopens an exported PPTX with python-pptx, walks the package against its content types and relationships, and reports the pages, size, raster formats, fonts and any invalid part.',
+    doc: 'Reopens an exported PPTX with python-pptx, walks the package against its content types and relationships, and reports the pages, size, raster formats, fonts and any invalid part; since round five the motion, media and equation sections of a PPTX, an ODP (the container and the ODF attribute names) and an SVG (the root, the viewBox, no script) too.',
     group: 'export',
     mutates: false,
     transports: ['cli'],
@@ -2420,9 +2672,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe('Where the QuickLook thumbnail lands; defaults to a folder beside the file'),
+      page: z
+        .string()
+        .regex(/^\d+x\d+$/)
+        .optional()
+        .describe(
+          'The page the file must carry, `1200x900` in sheet px; 1600x900 when absent (gslides-parity SPEC-5 6.1)',
+        ),
+      libreoffice: z
+        .boolean()
+        .optional()
+        .describe('Read an ODP back through LibreOffice when soffice exists (SPEC-5 6.3)'),
     }),
     output: exportCheckSchema,
-    cli: { usage: 'turboslide export check <file> --python <python> --out <out>' },
+    cli: {
+      usage:
+        'turboslide export check <file> --python <python> --out <out> --page <page> --libreoffice',
+    },
     example: { file: '.turboslide/export/gt-brand-light.pptx' },
   }),
   'export.text': action({
@@ -2473,6 +2739,25 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .optional()
         .describe('Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)'),
       includeNotes: z.boolean().optional().describe('Carry the speaker notes into the file'),
+      motion: z
+        .enum(MOTION_EXPORT_MODES)
+        .optional()
+        .describe(
+          'Keep the transitions and animations in the web page (the default) or drop them (gslides-parity SPEC-5 2.3)',
+        ),
+      autoplay: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('Advance one step every this many ms; 0 or absent is off (SPEC-5 2.3)'),
+      loop: z.boolean().optional().describe('Restart after the last slide under autoplay'),
+      media: z
+        .enum(MEDIA_EXPORT_MODES)
+        .optional()
+        .describe(
+          'Inline the media files (the default under the cap), posters alone, or links to the studio (SPEC-5 3.6)',
+        ),
     }),
     output: z.strictObject({
       path: z.string(),
@@ -2481,7 +2766,10 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         z.strictObject({ name: z.string(), passed: z.boolean(), detail: z.string() }),
       ),
     }),
-    cli: { usage: 'turboslide build --out <out> --budget <budgetMB>' },
+    cli: {
+      usage:
+        'turboslide build --out <out> --budget <budgetMB> --motion <motion> --autoplay <autoplay> --loop --media <media>',
+    },
     mcp: 'deck_build',
     example: { out: 'public/brand-deck.html', budgetMB: 16 },
   }),
@@ -2682,14 +2970,20 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           .optional(),
         set: deckGuidesSchema.optional().describe('Replace both lists'),
         clear: z.literal(true).optional().describe('Remove every guide'),
+        colors: z
+          .record(z.string(), colorSchema.nullable())
+          .optional()
+          .describe(
+            'Guide colours by axis and position (`x:800`, `y:450`); null clears one (gslides-parity SPEC-5 7.7, Edit guides)',
+          ),
         baseRevision,
       })
       .refine(
         (value) =>
-          [value.add, value.remove, value.move, value.set, value.clear].some(
+          [value.add, value.remove, value.move, value.set, value.clear, value.colors].some(
             (part) => part !== undefined,
           ),
-        { message: 'deck.guides takes add, remove, move, set or clear', path: ['add'] },
+        { message: 'deck.guides takes add, remove, move, set, clear or colors', path: ['add'] },
       ),
     output: z.strictObject({ guides: deckGuidesSchema.nullable(), revision }),
     cli: {
@@ -2929,7 +3223,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.adjust': action({
     id: 'block.adjust',
     label: 'Adjustments',
-    doc: 'Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1); null clears one.',
+    doc: 'Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1), its reflection (transparency, distance, size) and its recolor preset; null clears one.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -2940,12 +3234,28 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       transparency: z.number().min(0).max(1).nullable().optional(),
       brightness: z.number().min(-1).max(1).nullable().optional(),
       contrast: z.number().min(-1).max(1).nullable().optional(),
+      reflection: z
+        .strictObject({
+          transparency: z.number().min(0).max(1),
+          distance: z.number().min(0).max(200),
+          size: z.number().min(0).max(1),
+        })
+        .nullable()
+        .optional()
+        .describe(
+          "Google's three Reflection sliders (gslides-parity SPEC-5 0.47); null removes it",
+        ),
+      recolor: z
+        .enum(RECOLOR_PRESETS)
+        .nullable()
+        .optional()
+        .describe('A Recolor preset (SPEC-5 0.47); null or none removes it'),
       baseRevision,
     }),
     output: slideResultSchema,
     cli: {
       usage:
-        'turboslide block adjust <slideId>#<blockId> --transparency <transparency> --brightness <brightness> --contrast <contrast>',
+        'turboslide block adjust <slideId>#<blockId> --transparency <transparency> --brightness <brightness> --contrast <contrast> --reflection <reflection> --recolor <recolor>',
     },
     mcp: 'deck_adjust_image',
     example: {
@@ -3071,7 +3381,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'text.list': action({
     id: 'text.list',
     label: 'List options',
-    doc: 'Writes the marker, the preset and the items’ levels of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.',
+    doc: 'Writes the marker, the preset, the items’ levels and the numbering’s start, prefix and suffix of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -3087,12 +3397,32 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe('The items a level write applies to; every item unless set'),
       level: listLevel.optional(),
       levelBy: z.literal([1, -1]).optional(),
+      start: z
+        .number()
+        .int()
+        .min(0)
+        .max(9999)
+        .nullable()
+        .optional()
+        .describe('Restart numbering at this count; null returns to 1 (gslides-parity SPEC-5 7.7)'),
+      prefix: z
+        .string()
+        .max(8)
+        .nullable()
+        .optional()
+        .describe('The text before each numeral; null removes it (SPEC-5 7.7)'),
+      suffix: z
+        .string()
+        .max(8)
+        .nullable()
+        .optional()
+        .describe('The text after each numeral; null returns to the period (SPEC-5 7.7)'),
       baseRevision,
     }),
     output: slideResultSchema,
     cli: {
       usage:
-        'turboslide text list <slideId>#<blockId> --marker <marker> --preset <preset> --items <items> --level <level>',
+        'turboslide text list <slideId>#<blockId> --marker <marker> --preset <preset> --items <items> --level <level> --start <start> --prefix <prefix> --suffix <suffix>',
     },
     mcp: 'deck_set_list',
     example: {
@@ -3149,7 +3479,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'text.indent': action({
     id: 'text.indent',
     label: 'Indent',
-    doc: 'Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead.',
+    doc: 'Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead; the first line and hanging indents of Indentation options write alone or beside it.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -3164,15 +3494,35 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           .array(z.number().int().nonnegative())
           .optional()
           .describe('List items whose level steps'),
+        firstLine: z
+          .number()
+          .nonnegative()
+          .nullable()
+          .optional()
+          .describe('The first line indent in px; null clears it (gslides-parity SPEC-5 7.7)'),
+        hanging: z
+          .number()
+          .nonnegative()
+          .nullable()
+          .optional()
+          .describe('The hanging indent in px; null clears it (SPEC-5 7.7)'),
         baseRevision,
       })
-      .refine((value) => (value.by === undefined) !== (value.to === undefined), {
-        message: 'text.indent takes by or to, not both and not neither',
-        path: ['by'],
-      }),
+      .refine(
+        (value) =>
+          (value.by === undefined) !== (value.to === undefined) ||
+          (value.by === undefined &&
+            value.to === undefined &&
+            (value.firstLine !== undefined || value.hanging !== undefined)),
+        {
+          message: 'text.indent takes by or to (not both), or firstLine and hanging alone',
+          path: ['by'],
+        },
+      ),
     output: slideResultSchema,
     cli: {
-      usage: 'turboslide text indent <slideId>#<blockId> --in --out --to <to> --items <items>',
+      usage:
+        'turboslide text indent <slideId>#<blockId> --in --out --to <to> --items <items> --first-line <firstLine> --hanging <hanging>',
     },
     mcp: 'deck_indent_text',
     example: { slideId: 'content-rule', blockIds: ['p1'], by: 1, baseRevision: 412 },
@@ -3438,7 +3788,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'table.cellStyle': action({
     id: 'table.cellStyle',
     label: 'Cell fill and border',
-    doc: 'Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.',
+    doc: 'Writes the fill and the border of cells in one write, the border on every edge or on the edges named; null clears one; a border weight of 0 is Google’s Transparent border.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -3449,12 +3799,19 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       cells: z.array(gridCell).min(1),
       fill: colorSchema.nullable().optional(),
       border: cellBorderSchema.nullable().optional(),
+      edges: z
+        .array(z.enum(CELL_BORDER_EDGES))
+        .min(1)
+        .optional()
+        .describe(
+          "Google's edge picker over the cell range: all, outer, inner, top, bottom, left, right, horizontal, vertical (gslides-parity SPEC-5 7.7); every edge when absent",
+        ),
       baseRevision,
     }),
     output: slideResultSchema,
     cli: {
       usage:
-        'turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash>',
+        'turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash> --edges <edges>',
     },
     mcp: 'deck_style_cells',
     example: {
@@ -4763,6 +5120,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       prune: z.boolean().optional(),
       scale: z.literal([1, 2]).optional().describe('Device pixels per sheet pixel; 2 unless set'),
       dryRun: z.boolean().optional(),
+      clone: z
+        .boolean()
+        .optional()
+        .describe(
+          'Writes the 320 px twin variant of every picture asset that lacks one (SPEC-5 11)',
+        ),
       baseRevision,
     }),
     output: z.strictObject({
@@ -4878,6 +5241,1248 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       dither: { pattern: 'bayer8' },
       baseRevision: 412,
     },
+  }),
+  // -------------------------------------------------------------------------------------------
+  // The Google Slides parity round five (gslides-parity SPEC-5 13; SPEC-5-amendments A5). Every
+  // row was landed by the integrator on day 0 with its full contract (SPEC-5 1.6) and answers
+  // NotImplementedError from every transport until its lane registers a handler: B1 motion, B2
+  // media, B3 templates and import, B4 the page, B5 the text tools and chat, B6 the equation and
+  // the theme record, B7 the font catalog. `record` writes go to the principal record and `room`
+  // writes to the deck's stream, so those carry no baseRevision (NO_REVISION_WRITES).
+  'motion.setTransition': action({
+    id: 'motion.setTransition',
+    label: 'Transition',
+    doc: 'Writes the transition into a slide (the kind and its duration in ms) as one slide.set, or removes it with kind none; applyToAll writes every slide of the deck in one commit so one Undo reverts it.',
+    group: 'motion',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      kind: z
+        .enum(TRANSITION_KINDS)
+        .optional()
+        .describe(
+          "Google's eight transitions in Google's order; the slide's current kind when absent",
+        ),
+      durationMs: z
+        .number()
+        .int()
+        .min(DURATION_MS.min)
+        .max(DURATION_MS.max)
+        .optional()
+        .describe('100 to 5000 ms; 500 for a new transition (gslides-parity SPEC-5 0.11)'),
+      applyToAll: z
+        .boolean()
+        .optional()
+        .describe("Google's Apply to all slides: every slide takes the transition in one write"),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slideIds: z.array(slugSchema).describe('The slides written'),
+      transition: transitionSchema.nullable(),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide motion transition <slideId> --kind <kind> --duration <durationMs> --apply-to-all',
+    },
+    mcp: 'deck_set_transition',
+    example: { slideId: 'content-rule', kind: 'fade', durationMs: 500, baseRevision: 412 },
+  }),
+  'motion.add': action({
+    id: 'motion.add',
+    label: 'Add animation',
+    doc: 'Appends one animation per named block to the slide’s list (Appear on click at 500 ms unless set), or inserts them at an index, as one slide.set; a text block may take By paragraph.',
+    group: 'motion',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      effect: z.enum(ANIMATION_EFFECTS).optional().describe('appear when absent'),
+      direction: z
+        .enum(FLY_DIRECTIONS)
+        .optional()
+        .describe('flyIn and flyOut only; left when absent'),
+      trigger: z.enum(ANIMATION_TRIGGERS).optional().describe('click when absent'),
+      durationMs: z
+        .number()
+        .int()
+        .min(DURATION_MS.min)
+        .max(DURATION_MS.max)
+        .optional()
+        .describe('100 to 5000 ms; 500 when absent'),
+      byParagraph: z
+        .boolean()
+        .optional()
+        .describe(
+          'One step per paragraph or list item of a text block (gslides-parity SPEC-5 1.3)',
+        ),
+      at: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('The list index the new entries land at; the end when absent'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      ids: z.array(animationIdSchema).describe('The ids of the entries added'),
+      animations: z.array(animationSchema).describe('The slide’s list after the write'),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide motion add <slideId> <blockIds> --effect <effect> --direction <direction> --trigger <trigger> --duration <durationMs> --by-paragraph --at <at>',
+    },
+    mcp: 'deck_add_animation',
+    example: {
+      slideId: 'content-rule',
+      blockIds: ['list'],
+      effect: 'fadeIn',
+      byParagraph: true,
+      baseRevision: 412,
+    },
+  }),
+  'motion.update': action({
+    id: 'motion.update',
+    label: 'Update animation',
+    doc: 'Rewrites the fields of one animation of a slide (the effect, direction, trigger, duration, By paragraph) as one slide.set; null clears the direction or By paragraph.',
+    group: 'motion',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      animationId: animationIdSchema,
+      effect: z.enum(ANIMATION_EFFECTS).optional(),
+      direction: z.enum(FLY_DIRECTIONS).nullable().optional(),
+      trigger: z.enum(ANIMATION_TRIGGERS).optional(),
+      durationMs: z.number().int().min(DURATION_MS.min).max(DURATION_MS.max).optional(),
+      byParagraph: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      animation: animationSchema,
+      animations: z.array(animationSchema),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide motion update <slideId> <animationId> --effect <effect> --direction <direction> --trigger <trigger> --duration <durationMs> --by-paragraph',
+    },
+    mcp: 'deck_update_animation',
+    example: {
+      slideId: 'content-rule',
+      animationId: 'a1',
+      trigger: 'withPrevious',
+      baseRevision: 412,
+    },
+  }),
+  'motion.remove': action({
+    id: 'motion.remove',
+    label: 'Remove animation',
+    doc: 'Removes one animation by id, or every animation of a block, from a slide’s list as one slide.set.',
+    group: 'motion',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        animationId: animationIdSchema.optional(),
+        blockId: blockIdSchema.optional().describe('Every animation of this block'),
+        baseRevision,
+      })
+      .refine((input) => (input.animationId === undefined) !== (input.blockId === undefined), {
+        message: 'motion.remove takes animationId or blockId, not both and not neither',
+        path: ['animationId'],
+      }),
+    output: z.strictObject({
+      removed: z.array(animationIdSchema),
+      animations: z.array(animationSchema),
+      revision,
+    }),
+    cli: { usage: 'turboslide motion remove <slideId> <animationId> --block <blockId>' },
+    mcp: 'deck_remove_animation',
+    example: { slideId: 'content-rule', animationId: 'a1', baseRevision: 412 },
+  }),
+  'motion.reorder': action({
+    id: 'motion.reorder',
+    label: 'Reorder animations',
+    doc: 'Writes the whole play order of a slide’s animations (a drag produces the whole order) as one slide.set; every id of the list appears once.',
+    group: 'motion',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      order: z
+        .array(animationIdSchema)
+        .min(1)
+        .describe('Every animation id of the slide, in play order'),
+      baseRevision,
+    }),
+    output: z.strictObject({ animations: z.array(animationSchema), revision }),
+    cli: { usage: 'turboslide motion reorder <slideId> <order>' },
+    mcp: 'deck_reorder_animations',
+    example: { slideId: 'content-rule', order: ['a3', 'a1', 'a2'], baseRevision: 412 },
+  }),
+  'motion.compile': action({
+    id: 'motion.compile',
+    label: 'Motion schedule',
+    doc: 'The click steps of a slide as the show, the web page, the PPTX timing tree and the ODP animation tree play them: the effects per step with their delays, the blocks hidden at the start, the transition and the animations skipped.',
+    group: 'motion',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ slideId: slugSchema }),
+    output: motionScheduleSchema,
+    cli: { usage: 'turboslide motion compile <slideId> --json' },
+    mcp: 'deck_motion_schedule',
+    example: { slideId: 'content-rule' },
+  }),
+  'motion.play': action({
+    id: 'motion.play',
+    label: 'Play',
+    doc: 'Plays a slide’s motion in the editor over the present layer’s classes from a step, the Motion panel’s Play; answers the step reached and the step count.',
+    group: 'motion',
+    mutates: false,
+    transports: ['window'],
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      from: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('The step to start at; 0 when absent'),
+    }),
+    output: z.strictObject({
+      slideId: slugSchema,
+      step: z.number().int().nonnegative(),
+      steps: z.number().int().nonnegative(),
+    }),
+    example: { slideId: 'content-rule' },
+  }),
+  'media.insert': action({
+    id: 'media.insert',
+    label: 'Insert media',
+    doc: 'Stores an audio or video file (a path, a URL through safeFetch, a presigned upload key) or a YouTube link and places a media block on the slide with Google’s Play (on click) default and a poster, in one write; a slide that is not a canvas converts first.',
+    group: 'media',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        kind: z
+          .enum(MEDIA_KINDS)
+          .optional()
+          .describe('audio or video; read from the container when absent'),
+        file: z.string().optional().describe('A path on the machine'),
+        url: z
+          .string()
+          .url()
+          .optional()
+          .describe('An http(s) URL fetched through safeFetch and stored'),
+        upload: z.string().optional().describe('Hosted: the key of a presigned client upload'),
+        youtube: z
+          .string()
+          .optional()
+          .describe('A YouTube URL in any of the eight forms, or the eleven character video id'),
+        pos: positionObjectSchema.optional().describe('The box; a centred 16:9 box when absent'),
+        playback: mediaPlaybackSchema
+          .partial()
+          .optional()
+          .describe('Google’s playback fields; Play (on click) when absent'),
+        alt: z.string().optional(),
+        title: z.string().max(200).optional(),
+        baseRevision,
+      })
+      .refine(
+        (input) =>
+          [input.file, input.url, input.upload, input.youtube].filter((v) => v !== undefined)
+            .length === 1,
+        'exactly one of file, url, upload or youtube',
+      ),
+    output: slideResultSchema.extend({
+      blockId: blockIdSchema,
+      assetId: slugSchema.optional().describe('The stored media record; absent for YouTube'),
+      asset: mediaAssetSchema.optional(),
+    }),
+    cli: {
+      usage:
+        'turboslide media insert <slideId> --file <file> --url <url> --upload <upload> --youtube <youtube> --start <start> --start-at <startMs> --end-at <endMs> --mute --loop --volume <volume> --alt <alt>',
+    },
+    mcp: 'deck_media_insert',
+    example: { slideId: 'content-rule', file: 'talk.mp4', baseRevision: 412 },
+  }),
+  'media.setPlayback': action({
+    id: 'media.setPlayback',
+    label: 'Format options',
+    doc: 'Writes the playback fields of a media block (start, start at, end at, mute, loop, volume, hide icon, stop on slide change) as one block.set; null clears one; a Play (automatically) start takes its place among the slide’s animations.',
+    group: 'media',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      start: z.enum(PLAYBACK_STARTS).optional(),
+      startMs: z.number().int().nonnegative().nullable().optional(),
+      endMs: z.number().int().positive().nullable().optional(),
+      mute: z.boolean().optional(),
+      loop: z.boolean().optional(),
+      volume: z.number().min(0).max(100).nullable().optional(),
+      hideIcon: z.boolean().optional(),
+      stopOnSlideChange: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide media playback <slideId>#<blockId> --start <start> --start-at <startMs> --end-at <endMs> --mute --loop --volume <volume> --hide-icon --no-stop-on-slide-change',
+    },
+    mcp: 'deck_media_playback',
+    example: { slideId: 'content-rule', blockId: 'demo', start: 'auto', baseRevision: 412 },
+  }),
+  'media.poster': action({
+    id: 'media.poster',
+    label: 'Poster',
+    doc: 'Writes a media block’s poster: the frame at a time captured from the stored video, or a picture file; the poster is what every still shows.',
+    group: 'media',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        blockId: blockIdSchema,
+        atMs: z.number().int().nonnegative().optional().describe('The frame time of a video'),
+        file: z.string().optional().describe('A picture file used as the poster'),
+        baseRevision,
+      })
+      .refine((input) => (input.atMs === undefined) !== (input.file === undefined), {
+        message: 'media.poster takes atMs or file, not both and not neither',
+        path: ['atMs'],
+      }),
+    output: slideResultSchema.extend({ posterAssetId: slugSchema }),
+    cli: { usage: 'turboslide media poster <slideId>#<blockId> --at <atMs> --file <file>' },
+    mcp: 'deck_media_poster',
+    example: { slideId: 'content-rule', blockId: 'demo', atMs: 12000, baseRevision: 412 },
+  }),
+  'media.info': action({
+    id: 'media.info',
+    label: 'Media info',
+    doc: 'The stored record of a media asset (kind, mime, bytes, duration, size, codecs, poster, source) and the blocks that play it; refresh re-reads the container.',
+    group: 'media',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      id: slugSchema.describe('A media asset id, or a block id whose media is answered'),
+      refresh: z.boolean().optional(),
+    }),
+    output: z.strictObject({
+      asset: mediaAssetSchema,
+      blocks: z.array(z.strictObject({ slideId: slugSchema, blockId: blockIdSchema })),
+    }),
+    cli: { usage: 'turboslide media info <id> --refresh' },
+    mcp: 'deck_media_info',
+    example: { id: 'talk' },
+  }),
+  'media.list': action({
+    id: 'media.list',
+    label: 'List media',
+    doc: 'Every stored audio and video record of the deck.',
+    group: 'media',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({ assets: z.array(mediaAssetSchema) }),
+    cli: { usage: 'turboslide media list' },
+    mcp: 'deck_media_list',
+    example: {},
+  }),
+  'camera.capture': action({
+    id: 'camera.capture',
+    label: 'Camera',
+    doc: 'Takes a picture with the camera in an open studio page (the Camera dialog is the executor) and places it as a picture object on the slide in one write; the CLI and MCP ask the page named by --from.',
+    group: 'media',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      pos: positionObjectSchema.optional(),
+      alt: z.string().optional(),
+      studio: studioUrl.optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ blockId: blockIdSchema, assetId: slugSchema }),
+    cli: { usage: 'turboslide camera capture --slide <slideId> --from <studio>' },
+    mcp: 'deck_camera_capture',
+    example: { slideId: 'content-rule', baseRevision: 412 },
+  }),
+  'view.presentOnScreen': action({
+    id: 'view.presentOnScreen',
+    label: 'Present on another screen',
+    doc: 'Opens the show on another screen through the Window Management API when the browser offers it, else answers unsupported so the row shows its disabled state.',
+    group: 'view',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      screen: z.enum(['other', 'this']).describe("other is Google's row; this keeps the show here"),
+      slideId: slugSchema.optional(),
+      studio: studioUrl.optional(),
+    }),
+    output: z.strictObject({
+      supported: z.boolean(),
+      screens: z.number().int().nonnegative(),
+      opened: z.boolean(),
+    }),
+    cli: { usage: 'turboslide view present --screen <screen> --from <studio>' },
+    mcp: 'deck_present_on_screen',
+    example: { screen: 'other' },
+  }),
+  'template.list': action({
+    id: 'template.list',
+    label: 'Templates',
+    doc: 'The template index: every template with its category, cover, use cases, slide count and theme, the rows the gallery page and File > New read.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({ templates: z.array(templateIndexEntrySchema) }),
+    cli: { usage: 'turboslide template list' },
+    mcp: 'deck_list_templates',
+    example: {},
+  }),
+  'template.slides': action({
+    id: 'template.slides',
+    label: 'Template slides',
+    doc: 'The slides of one template with their titles and render ids, the rows the Templates pane and slide.import --template read.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ id: slugSchema }),
+    output: z.strictObject({
+      id: slugSchema,
+      slides: z.array(
+        z.strictObject({
+          index: z.number().int().positive(),
+          slideId: slugSchema,
+          title: z.string(),
+          kind: z.enum(SLIDE_KINDS),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide template slides <id>' },
+    mcp: 'deck_template_slides',
+    example: { id: 'sales-pitch' },
+  }),
+  'buildingBlock.list': action({
+    id: 'buildingBlock.list',
+    label: 'Building blocks',
+    doc: 'The building block index by category: agendas, lists, key statistics, quotes, headlines, text callouts, calls to action, people and cards.',
+    group: 'block',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ category: z.enum(BUILDING_BLOCK_CATEGORIES).optional() }),
+    // the full records, so the pane renders each block's thumbnail (b3.md B3-14)
+    output: z.strictObject({ blocks: z.array(buildingBlockSchema) }),
+    cli: { usage: 'turboslide blocks list --category <category>' },
+    mcp: 'deck_list_building_blocks',
+    example: { category: 'quotes' },
+  }),
+  'buildingBlock.insert': action({
+    id: 'buildingBlock.insert',
+    label: 'Insert building block',
+    doc: 'Inserts a building block’s positioned blocks as one group on the slide in one write, at the content box or the point given, scaled by min(1, contentWidth / 1326) on a narrower page; a slide that is not a canvas converts first.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      id: buildingBlockIdSchema,
+      at: z
+        .tuple([z.number(), z.number()])
+        .optional()
+        .describe('The top left in sheet px; the content box’s when absent'),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ blockIds: z.array(blockIdSchema), group: slugSchema }),
+    cli: { usage: 'turboslide blocks insert <slideId> <id> --at <at>' },
+    mcp: 'deck_insert_building_block',
+    example: { slideId: 'content-rule', id: 'agendas/five-items', baseRevision: 412 },
+  }),
+  'import.pptx': action({
+    id: 'import.pptx',
+    label: 'Import PowerPoint',
+    doc: 'Reads a .pptx through the one reader into a new deck (or into an existing one) with every imported slide a canvas slide, the theme adopted or kept, the page matched or fit, and answers the row based report; dryRun answers the report alone.',
+    group: 'import',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      file: z
+        .string()
+        .describe('The .pptx on the machine, or hosted the key of a presigned upload'),
+      into: slugSchema
+        .optional()
+        .describe('The deck id to create or write into; derived from the file name when absent'),
+      theme: z
+        .enum(IMPORT_THEME_MODES)
+        .optional()
+        .describe('adopt (the default) snaps neutrals to tokens; keep keeps every hex'),
+      sheet: z
+        .enum(IMPORT_SHEET_MODES)
+        .optional()
+        .describe(
+          'match (the default) sets the page to the source’s; fit scales into the current page',
+        ),
+      snapLadder: z
+        .boolean()
+        .optional()
+        .describe('Snap text sizes to the type ladder; off by default'),
+      masterShapes: z
+        .boolean()
+        .optional()
+        .describe('Bring the master and layout shapes onto each slide; on by default'),
+      comments: z.boolean().optional().describe('Import the comment threads; off by default'),
+      dryRun: z.boolean().optional(),
+    }),
+    // the document and the slides under dryRun for the Import slides dialog's previews (b3.md B3-8)
+    output: importReportSchema.extend({
+      deck: deckSchema.optional(),
+      slides: z.array(slideSchema).optional(),
+    }),
+    cli: {
+      usage:
+        'turboslide import <file> --into <into> --theme <theme> --sheet <sheet> --snap-ladder --no-master-shapes --comments --dry-run --json',
+    },
+    mcp: 'deck_import_pptx',
+    example: { file: 'quarter.pptx', into: 'acme-q3', dryRun: true },
+  }),
+  'theme.import': action({
+    id: 'theme.import',
+    label: 'Import theme',
+    doc: 'Appends one theme record (its name, twelve colours and two faces) from a .pptx theme part or from another deck to In this presentation, at most five; the sixth is refused with its sentence.',
+    group: 'import',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        file: z.string().optional().describe('A .pptx; themeIndex picks one of its theme parts'),
+        deckId: slugSchema
+          .optional()
+          .describe('A Turboslide deck whose theme edits and imported records are copied'),
+        themeIndex: z.number().int().nonnegative().optional(),
+        baseRevision,
+      })
+      .refine((input) => (input.file === undefined) !== (input.deckId === undefined), {
+        message: 'theme.import takes file or deckId, not both and not neither',
+        path: ['file'],
+      }),
+    output: z.strictObject({
+      record: themeRecordSchema,
+      index: z.number().int().nonnegative(),
+      importedThemes: z.array(themeRecordSchema),
+      revision,
+    }),
+    cli: { usage: 'turboslide theme import <file> --deck-id <deckId> --index <themeIndex>' },
+    mcp: 'deck_import_theme',
+    example: { file: 'quarter.pptx', themeIndex: 0, baseRevision: 412 },
+  }),
+  'theme.applyImported': action({
+    id: 'theme.applyImported',
+    label: 'Apply imported theme',
+    doc: 'Writes an imported record’s colours and faces into the deck’s theme edits in one commit, the click on a tile under In this presentation.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ index: z.number().int().nonnegative(), baseRevision }),
+    output: z.strictObject({ themeEdits: themeEditsSchema, revision }),
+    cli: { usage: 'turboslide theme apply-imported <index>' },
+    mcp: 'deck_apply_imported_theme',
+    example: { index: 0, baseRevision: 412 },
+  }),
+  'deck.setPageSize': action({
+    id: 'deck.setPageSize',
+    label: 'Page setup',
+    doc: 'Writes the deck’s page from a preset or a custom size in inches, centimeters, points or sheet pixels (120 per inch), keeps every object where it is or scales the canvas objects to fit or maximize about the centre, drops the guides beyond the page under keep, and answers the page, the previous page and the counts, in one commit.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        preset: z.enum(PAGE_PRESETS).optional(),
+        width: z.number().positive().optional(),
+        height: z.number().positive().optional(),
+        unit: z
+          .enum(['in', 'cm', 'pt', 'px'])
+          .optional()
+          .describe('The unit of width and height; px, sheet pixels, when absent'),
+        objects: z
+          .enum(['keep', 'fit', 'maximize'])
+          .optional()
+          .describe(
+            "keep (Google's default) leaves every coordinate; fit and maximize scale the canvas objects (gslides-parity SPEC-5 6.1)",
+          ),
+        baseRevision,
+      })
+      .refine(
+        (input) =>
+          (input.preset !== undefined && input.preset !== 'custom') ||
+          (input.width !== undefined && input.height !== undefined),
+        'a preset, or width and height',
+      ),
+    output: z.strictObject({
+      page: pageSchema,
+      previous: pageSchema,
+      guidesDropped: z.number().int().nonnegative(),
+      objectsScaled: z.number().int().nonnegative(),
+      slidesTouched: z.number().int().nonnegative(),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide deck page-size --preset <preset> --width <width> --height <height> --unit <unit> --objects <objects>',
+    },
+    mcp: 'deck_set_page_size',
+    example: { preset: 'standard-4-3', baseRevision: 412 },
+  }),
+  'prefs.get': action({
+    id: 'prefs.get',
+    label: 'Preferences',
+    doc: 'The caller’s preferences (autocorrect, substitutions, autofit, units, spelling, accessibility, dictation, SVG text, starred), the whole record or the value at a JSON pointer.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      path: z
+        .string()
+        .optional()
+        .describe(
+          'A JSON pointer such as /units or /substitutions/rows; the whole record when absent',
+        ),
+    }),
+    output: z.strictObject({ path: z.string(), value: z.unknown().optional() }),
+    cli: { usage: 'turboslide prefs get <path>' },
+    mcp: 'deck_prefs_get',
+    example: { path: '/units' },
+  }),
+  'prefs.set': action({
+    id: 'prefs.set',
+    label: 'Set preference',
+    doc: 'Writes one value of the caller’s preferences by JSON pointer on the principal record and its browser mirror; an absent value deletes the member, /- appends to a list; the record is validated after the write.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      path: z
+        .string()
+        .min(1)
+        .describe('A JSON pointer into the preferences, such as /units or /starred/-'),
+      value: z.unknown().optional().describe('The new value; omit it to delete the member'),
+    }),
+    output: z.strictObject({ preferences: preferencesSchema }),
+    cli: { usage: 'turboslide prefs set <path> <value>' },
+    mcp: 'deck_prefs_set',
+    example: { path: '/units', value: 'cm' },
+  }),
+  'text.autocorrect': action({
+    id: 'text.autocorrect',
+    label: 'Autocorrect',
+    doc: 'Applies the autocorrect rules and the substitution table of the caller’s preferences to a Text, a block or the deck as text.splice mutations in one write; dryRun lists the changes without writing.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema.optional().describe('One slide; every slide when absent'),
+      blockId: blockIdSchema.optional().describe('One block of the slide'),
+      path: textPath.optional().describe('One Text of the block'),
+      dryRun: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      changes: z.array(
+        z.strictObject({
+          slideId: slugSchema,
+          /** absent for a slide level field or the notes (b5.md deviation 4) */
+          blockId: blockIdSchema.optional(),
+          path: z.string(),
+          from: z.string(),
+          to: z.string(),
+          rule: z.string(),
+        }),
+      ),
+      revision,
+    }),
+    cli: { usage: 'turboslide text autocorrect <slideId>#<blockId> <path> --dry-run' },
+    mcp: 'deck_autocorrect_text',
+    example: { slideId: 'content-rule', dryRun: true, baseRevision: 412 },
+  }),
+  'spelling.check': action({
+    id: 'spelling.check',
+    label: 'Spell check',
+    doc: 'Walks every Text of the named slides in reading order, then the notes and the alt texts when asked, through the deck’s language dictionary and the personal dictionary, and answers the misspellings with up to five suggestions each.',
+    group: 'slide',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideIds: slideIdsOrAll.optional().describe("A subset; 'all' when absent"),
+      notes: z.boolean().optional(),
+      alt: z.boolean().optional(),
+      language: languageTagSchema
+        .optional()
+        .describe("The dictionary; the deck's language when absent"),
+    }),
+    output: z.strictObject({
+      language: z.string(),
+      misspellings: z.array(
+        z.strictObject({
+          slideId: slugSchema,
+          blockId: blockIdSchema.optional(),
+          path: z.string(),
+          range: textRange,
+          word: z.string(),
+          suggestions: z.array(z.string()).max(5),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide spelling check --slides <slideIds> --notes --alt --json' },
+    mcp: 'deck_spell_check',
+    example: { slideIds: 'all' },
+  }),
+  'spelling.replace': action({
+    id: 'spelling.replace',
+    label: 'Change spelling',
+    doc: 'Replaces a misspelt range in one Text, or every occurrence of the word in the deck under all, as text.splice mutations in one write (the card’s Change and Change all).',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      path: textPath,
+      range: textRange,
+      text: z.string().min(1),
+      all: z.boolean().optional().describe('Every occurrence of the word in the deck'),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ replacements: z.number().int().nonnegative() }),
+    cli: {
+      usage: 'turboslide spelling replace <slideId>#<blockId> <path> --range <range> <text> --all',
+    },
+    mcp: 'deck_spell_replace',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'p1',
+      path: '/text',
+      range: [4, 9],
+      text: 'colour',
+      baseRevision: 412,
+    },
+  }),
+  'spelling.ignore': action({
+    id: 'spelling.ignore',
+    label: 'Ignore',
+    doc: 'Ignores a misspelling for this session in the editor, or every occurrence of the word under all (the card’s Ignore and Ignore all); nothing is written.',
+    group: 'slide',
+    mutates: false,
+    transports: ['window'],
+    milestone: 'GS5',
+    input: z.strictObject({ word: z.string().min(1), all: z.boolean().optional() }),
+    output: z.strictObject({ ignored: z.array(z.string()) }),
+    example: { word: 'Turboslide', all: true },
+  }),
+  'dictionary.add': action({
+    id: 'dictionary.add',
+    label: 'Add to dictionary',
+    doc: 'Adds a word to the caller’s personal dictionary on the principal record (and .turboslide/dictionary.txt on a checkout); the spell check skips it afterwards.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ word: z.string().min(1).max(64) }),
+    output: z.strictObject({ dictionary: z.array(z.string()) }),
+    cli: { usage: 'turboslide dictionary add <word>' },
+    mcp: 'deck_dictionary_add',
+    example: { word: 'Turboslide' },
+  }),
+  'dictionary.remove': action({
+    id: 'dictionary.remove',
+    label: 'Remove from dictionary',
+    doc: 'Removes a word from the caller’s personal dictionary.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ word: z.string().min(1).max(64) }),
+    output: z.strictObject({ dictionary: z.array(z.string()) }),
+    cli: { usage: 'turboslide dictionary remove <word>' },
+    mcp: 'deck_dictionary_remove',
+    example: { word: 'Turboslide' },
+  }),
+  'dictionary.list': action({
+    id: 'dictionary.list',
+    label: 'Personal dictionary',
+    doc: 'The words of the caller’s personal dictionary.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({ dictionary: z.array(z.string()) }),
+    cli: { usage: 'turboslide dictionary list' },
+    mcp: 'deck_dictionary_list',
+    example: {},
+  }),
+  'dictionary.lookup': action({
+    id: 'dictionary.lookup',
+    label: 'Dictionary',
+    doc: 'Looks a word up: the Wiktionary page address, and on the hosted studio the definitions per part of speech with their attribution through /api/define; under TURBOSLIDE_DICTIONARY=link the address alone.',
+    group: 'view',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      word: z.string().min(1).max(64).optional().describe('The selection when absent'),
+      language: languageTagSchema.optional(),
+    }),
+    output: z.strictObject({
+      word: z.string(),
+      url: z.string().url(),
+      definitions: z
+        .array(
+          z.strictObject({ partOfSpeech: z.string(), definitions: z.array(z.string()).min(1) }),
+        )
+        .optional(),
+      attribution: z.string().optional(),
+    }),
+    cli: { usage: 'turboslide dictionary lookup <word> --language <language>' },
+    mcp: 'deck_dictionary_lookup',
+    example: { word: 'presentation' },
+  }),
+  'accessibility.verbalize': action({
+    id: 'accessibility.verbalize',
+    label: 'Verbalize to screen reader',
+    doc: 'Writes the sentence for the selection, its formatting or the text from the cursor into the status live region (and speech under Speak selection aloud) and answers it.',
+    group: 'view',
+    mutates: false,
+    transports: ['window'],
+    milestone: 'GS5',
+    input: z.strictObject({ what: z.enum(['selection', 'selectionFormatting', 'fromCursor']) }),
+    output: z.strictObject({ sentence: z.string() }),
+    example: { what: 'selection' },
+  }),
+  'equation.insert': action({
+    id: 'equation.insert',
+    label: 'Insert equation',
+    doc: 'Places an equation block with a LaTeX source at the centre of the content box or at the box given, in one write; a slide that is not a canvas converts first.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      slideId: slugSchema,
+      tex: z.string(),
+      pos: positionObjectSchema.optional(),
+      display: z.enum(EQUATION_DISPLAYS).optional(),
+      alt: z.string().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ blockId: blockIdSchema }),
+    cli: { usage: 'turboslide equation insert <slideId> <tex> --display <display> --alt <alt>' },
+    mcp: 'deck_insert_equation',
+    example: { slideId: 'content-rule', tex: '\\frac{a}{b}', baseRevision: 412 },
+  }),
+  'equation.render': action({
+    id: 'equation.render',
+    label: 'Render equation',
+    doc: 'Renders a LaTeX source to MathML Core the way the sheet does and answers the markup, the measured box in sheet px and any parse finding; png writes the 2x raster too.',
+    group: 'render',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      tex: z.string(),
+      display: z.enum(EQUATION_DISPLAYS).optional(),
+      size: z
+        .number()
+        .positive()
+        .optional()
+        .describe('Font size in sheet px; the body size when absent'),
+      out: z
+        .enum(['mathml', 'png'])
+        .optional()
+        .describe('mathml (the default) or png, the raster beside it'),
+    }),
+    output: z.strictObject({
+      mathml: z.string(),
+      box: z.tuple([z.number(), z.number()]),
+      findings: z.array(findingSchema),
+      png: z.string().optional().describe('The raster path under out png'),
+    }),
+    cli: { usage: 'turboslide equation render <tex> --display <display> --out <out>' },
+    mcp: 'deck_render_equation',
+    example: { tex: '\\frac{a}{b}' },
+  }),
+  'equation.symbols': action({
+    id: 'equation.symbols',
+    label: 'Equation symbols',
+    doc: 'The equation toolbar’s table: Google Docs’ five groups (Greek letters, Miscellaneous operations, Relations, Math operators, Arrows) and More, each symbol with its command, LaTeX, code point and OMML form.',
+    group: 'render',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({
+      groups: z.array(
+        z.strictObject({
+          id: z.enum(EQUATION_SYMBOL_GROUPS),
+          label: z.string(),
+          symbols: z.array(
+            z.strictObject({
+              command: z.string(),
+              latex: z.string(),
+              unicode: z.string(),
+              omml: z.string(),
+            }),
+          ),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide equation symbols --json' },
+    mcp: 'deck_equation_symbols',
+    example: {},
+  }),
+  'theme.get': action({
+    id: 'theme.get',
+    label: 'Theme',
+    doc: 'The deck’s theme id, its edit record, its imported theme records and its custom layouts.',
+    group: 'theme',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({
+      theme: z.enum(THEMES),
+      themeEdits: themeEditsSchema.optional(),
+      importedThemes: z.array(themeRecordSchema).optional(),
+      customLayouts: z.record(customLayoutIdSchema, customLayoutSchema).optional(),
+    }),
+    cli: { usage: 'turboslide theme get' },
+    mcp: 'deck_theme_get',
+    example: {},
+  }),
+  'theme.set': action({
+    id: 'theme.set',
+    label: 'Set theme field',
+    doc: 'Writes one value of the theme edit record by JSON pointer (/name, /colors/light/ink, /fonts/text, /frame/rails, /mark, /counter, /chips, /type/levels/h1, /background) as one deck.set mutation, the write every Edit theme control makes; an absent value removes the field.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      path: z
+        .string()
+        .regex(
+          /^\/(name|colors|fonts|frame|mark|counter|chips|type|background)(\/[A-Za-z0-9_-]+)*$/,
+        )
+        .describe(
+          'A JSON pointer into themeEdits: /name, /colors/<appearance>/<token>, /fonts/<role>, /frame/<field>, /mark, /counter, /chips, /type/levels/<level>, /background',
+        ),
+      value: z.unknown().optional().describe('The new value; omit it to remove the field'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      path: z.string(),
+      value: z.unknown().optional(),
+      themeEdits: themeEditsSchema,
+      revision,
+    }),
+    cli: { usage: 'turboslide theme set <path> <value>' },
+    mcp: 'deck_theme_set',
+    example: { path: '/colors/light/ink', value: '#101010', baseRevision: 412 },
+  }),
+  'theme.rename': action({
+    id: 'theme.rename',
+    label: 'Rename theme',
+    doc: 'Writes the edited theme’s name, the label the Themes panel shows under In this presentation.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ name: z.string().min(1).max(120), baseRevision }),
+    output: z.strictObject({ name: z.string(), revision }),
+    cli: { usage: 'turboslide theme rename <name>' },
+    mcp: 'deck_theme_rename',
+    example: { name: 'Acme sales 2026', baseRevision: 412 },
+  }),
+  'theme.reset': action({
+    id: 'theme.reset',
+    label: 'Reset theme',
+    doc: 'Removes the theme edit record, or the field at a JSON pointer, so the base theme applies again.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      path: z.string().optional().describe('The field to remove; the whole record when absent'),
+      baseRevision,
+    }),
+    output: z.strictObject({ themeEdits: themeEditsSchema.optional(), revision }),
+    cli: { usage: 'turboslide theme reset <path>' },
+    mcp: 'deck_theme_reset',
+    example: { baseRevision: 412 },
+  }),
+  'layout.list': action({
+    id: 'layout.list',
+    label: 'Layouts',
+    doc: 'The built in layouts and the custom layouts of the deck with their names, whether each is hidden, and the placeholders a custom one carries.',
+    group: 'theme',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({
+      layouts: z.array(
+        z.strictObject({
+          id: z.string(),
+          name: z.string(),
+          builtIn: z.boolean(),
+          hidden: z.boolean(),
+          placeholders: z.array(z.enum(PLACEHOLDER_KINDS)),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide layout list' },
+    mcp: 'deck_layout_list',
+    example: {},
+  }),
+  'layout.create': action({
+    id: 'layout.create',
+    label: 'New layout',
+    doc: 'Adds a custom layout to the deck from a built in or custom layout’s blocks (blank when absent) with a name, as one deck.set; answers its id.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      from: z.union([layoutId, customLayoutIdSchema]).optional(),
+      name: z.string().min(1).max(120),
+      baseRevision,
+    }),
+    output: z.strictObject({ id: customLayoutIdSchema, layout: customLayoutSchema, revision }),
+    cli: { usage: 'turboslide layout create --from <from> --name <name>' },
+    mcp: 'deck_layout_create',
+    example: { from: 'title', name: 'Quote', baseRevision: 412 },
+  }),
+  'layout.duplicate': action({
+    id: 'layout.duplicate',
+    label: 'Duplicate layout',
+    doc: 'Copies a custom layout (or a built in one into a custom copy) under a new id and name.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ id: z.union([layoutId, customLayoutIdSchema]), baseRevision }),
+    output: z.strictObject({ id: customLayoutIdSchema, layout: customLayoutSchema, revision }),
+    cli: { usage: 'turboslide layout duplicate <id>' },
+    mcp: 'deck_layout_duplicate',
+    example: { id: 'custom-quote', baseRevision: 412 },
+  }),
+  'layout.rename': action({
+    id: 'layout.rename',
+    label: 'Rename layout',
+    doc: 'Writes a custom layout’s display name.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      id: customLayoutIdSchema,
+      name: z.string().min(1).max(120),
+      baseRevision,
+    }),
+    output: z.strictObject({ id: customLayoutIdSchema, name: z.string(), revision }),
+    cli: { usage: 'turboslide layout rename <id> <name>' },
+    mcp: 'deck_layout_rename',
+    example: { id: 'custom-quote', name: 'Customer quote', baseRevision: 412 },
+  }),
+  'layout.delete': action({
+    id: 'layout.delete',
+    label: 'Delete layout',
+    doc: 'Removes a custom layout, or hides a built in one from the four entry points (a built in layout is code and stays), after a confirm.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      id: z.union([layoutId, customLayoutIdSchema]),
+      confirm: z.literal(true),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      id: z.string(),
+      hidden: z.boolean().describe('True for a built in layout hidden rather than removed'),
+      revision,
+    }),
+    cli: { usage: 'turboslide layout delete <id> --confirm' },
+    mcp: 'deck_layout_delete',
+    example: { id: 'custom-quote', confirm: true, baseRevision: 412 },
+  }),
+  'layout.setPlaceholder': action({
+    id: 'layout.setPlaceholder',
+    label: 'Set placeholder',
+    doc: 'Marks a block of a custom layout as one of the five placeholders (title, subtitle, body, slide number, image), or clears the mark with null.',
+    group: 'theme',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      layoutId: customLayoutIdSchema,
+      blockId: blockIdSchema,
+      placeholder: z.enum(PLACEHOLDER_KINDS).nullable(),
+      baseRevision,
+    }),
+    output: z.strictObject({ layout: customLayoutSchema, revision }),
+    cli: { usage: 'turboslide layout placeholder <layoutId> <blockId> <placeholder>' },
+    mcp: 'deck_layout_set_placeholder',
+    example: { layoutId: 'custom-quote', blockId: 'h', placeholder: 'title', baseRevision: 412 },
+  }),
+  'chat.send': action({
+    id: 'chat.send',
+    label: 'Send message',
+    doc: 'Posts a chat message to the deck’s room as a chat entry on the operation stream under the comment caps and the chat rate rows; never stored beyond the retained stream.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      text: z.string().min(1).max(4000),
+      studio: studioUrl.optional(),
+    }),
+    output: z.strictObject({ id: z.string(), at: z.string() }),
+    cli: { usage: 'turboslide chat send <text> --to <studio>' },
+    mcp: 'deck_chat_send',
+    example: { text: 'Pricing slide is ready' },
+  }),
+  'chat.list': action({
+    id: 'chat.list',
+    label: 'Chat',
+    doc: 'The retained chat messages of the room since the room formed, or since a time.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({
+      since: z.string().optional().describe('An ISO time; everything retained when absent'),
+    }),
+    output: z.strictObject({
+      messages: z.array(
+        z.strictObject({
+          id: z.string(),
+          principalId: z.string(),
+          label: z.string(),
+          text: z.string(),
+          at: z.string(),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide chat list --since <since>' },
+    mcp: 'deck_chat_list',
+    example: {},
+  }),
+  'chat.clear': action({
+    id: 'chat.clear',
+    label: 'Clear chat',
+    doc: 'Removes the room’s chat entries, the owner’s action; the room does the same when the last participant leaves.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z.strictObject({ studio: studioUrl.optional() }),
+    output: z.strictObject({ cleared: z.number().int().nonnegative() }),
+    cli: { usage: 'turboslide chat clear --to <studio>' },
+    mcp: 'deck_chat_clear',
+    example: {},
+  }),
+  'version.delete': action({
+    id: 'version.delete',
+    label: 'Delete versions',
+    doc: 'Deletes this and older versions up to a record, or the whole history, after a confirm; named versions before the point are kept unless the whole history goes; hosted, a fresh sign in within 5 minutes or the agent bearer is required.',
+    group: 'version',
+    mutates: true,
+    transports: A,
+    milestone: 'GS5',
+    input: z
+      .strictObject({
+        upTo: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe('The version record and every older one'),
+        all: z.boolean().optional().describe('Delete history: every record'),
+        confirm: z.literal(true),
+      })
+      .refine((input) => (input.upTo === undefined) !== (input.all !== true), {
+        message: 'version.delete takes upTo or all, not both and not neither',
+        path: ['upTo'],
+      }),
+    output: z.strictObject({
+      deleted: z.number().int().nonnegative(),
+      kept: z.number().int().nonnegative(),
+    }),
+    cli: { usage: 'turboslide version delete --up-to <upTo> --all --confirm' },
+    mcp: 'deck_version_delete',
+    example: { upTo: 3, confirm: true },
+  }),
+  'font.list': action({
+    id: 'font.list',
+    label: 'Fonts',
+    doc: 'The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5).',
+    group: 'render',
+    mutates: false,
+    transports: A,
+    milestone: 'GS5',
+    input: empty,
+    output: z.strictObject({
+      fonts: z.array(
+        z.strictObject({
+          id: z.enum(FONT_IDS),
+          name: z.string(),
+          category: z.enum(FONT_CATEGORIES),
+          weights: z.array(z.number().int().min(100).max(900)).min(1),
+          italic: z.boolean(),
+          licence: z.enum(FONT_LICENCES),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide fonts list --json' },
+    mcp: 'deck_list_fonts',
+    example: {},
   }),
 };
 

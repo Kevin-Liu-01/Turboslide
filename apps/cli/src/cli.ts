@@ -8,9 +8,12 @@ import { banner } from './commands/banner.ts';
 import { block } from './commands/block.ts';
 import { build } from './commands/build.ts';
 import { chart } from './commands/chart.ts';
+import { chat } from './commands/chat.ts';
 import { deck } from './commands/deck.ts';
 import { diagram } from './commands/diagram.ts';
+import { dictionary } from './commands/dictionary.ts';
 import { diff } from './commands/diff.ts';
+import { equation } from './commands/equation.ts';
 import { exportCommand } from './commands/export.ts';
 import { fix } from './commands/fix.ts';
 import { fonts } from './commands/fonts.ts';
@@ -22,6 +25,8 @@ import { lease } from './commands/lease.ts';
 import { line } from './commands/line.ts';
 import { lint } from './commands/lint.ts';
 import { material } from './commands/material.ts';
+import { camera, media } from './commands/media.ts';
+import { motion } from './commands/motion.ts';
 import { mcp } from './commands/mcp.ts';
 import { render } from './commands/render.ts';
 import { sections } from './commands/sections.ts';
@@ -29,7 +34,10 @@ import { shape } from './commands/shape.ts';
 import { sheet } from './commands/sheet.ts';
 import { slide } from './commands/slide.ts';
 import { slides } from './commands/slides.ts';
+import { spelling } from './commands/spelling.ts';
 import { table } from './commands/table.ts';
+import { blocks, template } from './commands/template.ts';
+import { layout, theme } from './commands/theme.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
@@ -40,6 +48,7 @@ import { comment, comments } from './commands/comment.ts';
 import { login, logout } from './commands/login.ts';
 import { notifications } from './commands/notifications.ts';
 import { picture } from './commands/picture.ts';
+import { prefs } from './commands/prefs.ts';
 import { presence, sync } from './commands/presence.ts';
 import { share } from './commands/share.ts';
 import { parseAuthor } from './context.ts';
@@ -178,9 +187,19 @@ Commands
                                     skipped slides stay out unless asked (slide.skip); comments as classic p:cm parts for
                                     editors (parity SPEC-3 5.8); the table block as a:tbl, ruled rows when a cell
                                     misses the budget
+  export pptx ... [--motion keep|drop] [--media embed|poster|url]
+                                    Editable text keeps or drops the transitions and animations; the stored media travel
+                                    as parts, as posters alone, or as links (parity SPEC-5 2.4, 3.6; lands with B1, B2)
+  export odp [<deck>] [ids|all] [--mode flatten|native] [--verify] --out <dir>
+                                    one .odp per theme for LibreOffice Impress (parity SPEC-5 6.3; lands with B4)
   export pdf [<deck>] [ids|all] [--appearance light|dark] [--include-skipped] [--verify] --out <dir>
                                     one page per slide at 13.333 by 7.5 in; --verify gates every page against the
                                     web render where poppler exists
+  export pdf ... [--layout slides|notes|handout-2|handout-3|handout-4|handout-6|handout-9]
+             [--paper slide|letter|a4] [--orientation landscape|portrait] [--order across|down] [--hide-background]
+                                    the print layouts on Letter or A4 (parity SPEC-5 6.2; lands with B4)
+  export html [<deck>] [--autoplay <ms>] [--loop] [--motion keep|drop] [--media embed|poster|url] --out <file>
+                                    the web page's autoplay and media modes (parity SPEC-5 2.3; lands with B1)
   export jpeg [<deck>] [ids|all] [--theme light|dark] [--scale 1|2] --out <dir>
                                     JPEGs at quality 92
   export txt [<deck>] [ids|all] [--include-notes] [--include-skipped] [--include-comments]
@@ -188,8 +207,12 @@ Commands
   export check <file.pptx | dir> [--python <bin>] [--no-quick-look] [--out <dir>] [--json]
                                     read an exported file back with python-pptx: pages, size, media formats, fonts,
                                     slide names, invalid parts (ExportCheck with --json); exit 1 when it is not valid
+  export check <file.odp | file.svg> [--page <WxH>] [--libreoffice]
+                                    an ODP's container and attribute names, an SVG's root and viewBox, the page the
+                                    file must carry in sheet px (parity SPEC-5 6.1, 6.3, 6.4; lands with B4)
   fonts build [--check] [--python <bin>] [--out <dir>]
                                     cut the export font set into packages/fonts/export (scripts/build-fonts.py)
+  fonts list [--json]               the font catalog: every face with its name, category, weights, italic and licence (font.list)
   generate                          the contracts generator (pnpm generate:contracts)
   mcp [--derived <dir>]             the MCP server over stdio: deck_* tools, deck:// resources, the deck_review prompt
 
@@ -223,19 +246,69 @@ Collaboration (every command takes --to <studio> to run on a hosted deck)
   account me|name|avatar|decks|sessions|sign-out|tokens ...
                                     the caller's account (account.me, account.setName, account.setAvatar, account.decks,
                                     account.sessions, account.signOut, account.tokens.create, account.tokens.list, account.tokens.revoke)
+  prefs get [<path>] | prefs set <path> <value>|--unset
+                                    the caller's preferences by JSON pointer (prefs.get, prefs.set)
   admin flag <name> [on|off] | admin assign-owner <id> --email <a@x> | admin bootstrap --to <url> --email <a@x> |
         admin migrate-storage <step> --to <url> | admin mail --to <url>
                                     the deployment admin's actions (admin.flag, admin.assignOwner, admin.bootstrap,
                                     admin.migrateStorage, admin.mail.list)
   block dither <slide>#<block> [--pattern bayer8] [--black 120 --white 230 --gamma 0.9] [--photograph] [--off]
                                     the deck's two tone screen over a picture (picture.dither)
-  picture materialize [<slideIds>] [--prune] [--scale 2] [--dry-run]
-                                    the dither variants every export reads (picture.materialize)
+  picture materialize [<slideIds>] [--prune] [--scale 2] [--dry-run] [--clone]
+                                    the dither variants every export reads (picture.materialize); --clone writes the
+                                    320 px twin variant of every picture that lacks one
   slide background-picture <ids> --asset <id>|--file <path>|--url <url> [--dither] | slide background-material <ids> <materialId> [--dither]
                                     a covering picture, or a shader frame, at the back of each slide (slide.setBackgroundPicture,
                                     slide.setBackgroundMaterial)
   login --to <url> | logout --to <url>
                                     an API key over the device flow, kept in ~/.config/turboslide/hosts.json
+
+Round five (Google Slides parity, SPEC-5; every write takes --base-revision <n>, --author <name>, --json)
+  motion transition <slideId> [--kind <kind>] [--duration <ms>] [--all] | motion add <slideId> <blockIds> [--effect] [--trigger] [--by-paragraph] |
+        motion update <slideId> <animationId> ... | motion remove <slideId> <animationId>|--block <id> | motion reorder <slideId> <ids> |
+        motion compile <slideId>
+                                    the slide transitions and the object animations, and the compiled schedule (motion.setTransition,
+                                    motion.add, motion.update, motion.remove, motion.reorder, motion.compile)
+  media insert <slideId> --file <path>|--url <https>|--upload <key>|--youtube <url> [--kind audio|video] [--alt] [--title] [--pos x,y,w,h]
+        [--start click|auto|manual] [--start-at m:ss] [--end-at m:ss] [--mute] [--loop] [--volume 0-100] [--hide-icon] [--no-stop-on-slide-change]
+                                    a stored audio or video file, or a YouTube video, as a block (media.insert)
+  media playback <slideId>#<blockId> <the playback flags> | media poster <slideId>#<blockId> --at <ms>|--file <frame> |
+        media info <id> [--refresh] | media list
+                                    Google's playback fields, the poster still, the stored records (media.setPlayback, media.poster,
+                                    media.info, media.list)
+  camera capture --slide <slideId> --from <studio>
+                                    the Camera dialog on the attached studio page (camera.capture)
+  template list | template slides <id>
+                                    the template index and one template's slides (template.list, template.slides)
+  blocks list [--category <c>] | blocks insert <slideId> <id> [--at x,y]
+                                    the building blocks by category, and one placed as a group (buildingBlock.list, buildingBlock.insert)
+  import <file.pptx> [--into <id>] [--theme adopt|keep] [--sheet match|fit] [--snap-ladder] [--no-master-shapes] [--comments] [--dry-run]
+                                    a PowerPoint file read into a new deck with the row based report (import.pptx)
+  theme import <file.pptx> [--index <n>] | theme import --deck-id <id> [--index <n>]
+                                    one theme record appended to In this presentation, at most five (theme.import)
+  equation insert <slideId> <tex> [--display block|inline] [--alt] [--pos x,y,w,h] | equation render <tex> [--out mathml|png] |
+        equation symbols
+                                    the equation block, its MathML and Google Docs' symbol groups (equation.insert, equation.render,
+                                    equation.symbols)
+  theme get | theme set <path> <value>|--unset | theme rename <name> | theme reset [<path>] | theme apply-imported <index>
+                                    the edited theme's record (theme.get, theme.set, theme.rename, theme.reset, theme.applyImported)
+  layout list | layout create --name <name> [--from <id>] | layout duplicate <id> | layout rename <id> <name> |
+        layout delete <id> --confirm | layout placeholder <layoutId> <blockId> <kind>
+                                    the custom layouts (layout.list, layout.create, layout.duplicate, layout.rename, layout.delete,
+                                    layout.setPlaceholder)
+  spelling check [--slides <ids>] [--notes] [--alt] [--json] | spelling replace <slide>#<block> <path> --range a,b <text> [--all]
+                                    the misspellings and one replacement (spelling.check, spelling.replace)
+  dictionary add <word> | dictionary remove <word> | dictionary list | dictionary lookup <word> [--language <tag>]
+                                    the personal dictionary and the Wiktionary lookup (dictionary.add, dictionary.remove,
+                                    dictionary.list, dictionary.lookup)
+  chat send "<text>" --to <studio> | chat list [--since <iso>] --to <studio> | chat clear --to <studio>
+                                    the room's chat, never saved (chat.send, chat.list, chat.clear)
+  text autocorrect [<slide>[#<block>]] [<path>] [--dry-run]
+                                    the autocorrect rules and the substitution table over a Text, a block or the deck (text.autocorrect)
+  version delete --up-to <n> | --all --confirm
+                                    delete the version records up to n, or every one; the named ones stay unless --all (version.delete)
+  deck set-page <preset>|<WxH> [--objects keep|fit|maximize]
+                                    Page setup: the deck's page in sheet px with the objects kept, fit or maximized (deck.setPageSize)
 
 Global flags
   --version       the banner: the mark, the version, the hosted address, the action count and the effects backend
@@ -292,8 +365,23 @@ const COMMANDS: Record<string, Command> = {
   account,
   admin,
   picture,
+  prefs,
   login,
   logout,
+  /* round five (gslides-parity SPEC-5 13; merge 2): the lanes' command words, each parsing its
+     flags and running the shared action handlers (b1.md request 4, b2.md R5, b3.md B3-21, b5.md
+     request 9, b6.md R8) */
+  motion,
+  media,
+  camera,
+  template,
+  blocks,
+  equation,
+  theme,
+  layout,
+  spelling,
+  dictionary,
+  chat,
 };
 
 export type RunOptions = {

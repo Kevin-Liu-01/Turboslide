@@ -24,16 +24,19 @@ export const PRESENT_TEXT = {
   exitFullScreen: 'Exit full screen',
   exit: 'Exit',
   options: 'Options',
-  /** the options menu */
+  /** the options menu (gslides-parity SPEC-5 2.2, 0.15: Auto-play, the pen and the downloads are Now) */
   openNotes: 'Open speaker notes',
   autoPlay: 'Auto-play',
-  autoPlayStub: 'Auto-play comes in a later round',
+  autoPlayPlay: 'Play',
+  autoPlayPause: 'Pause',
+  autoPlayLoop: 'Loop',
   pen: 'Turn on the pen',
-  penStub: 'The pen comes in a later round',
+  penOff: 'Turn off the pen',
   more: 'More',
   downloadPdf: 'Download as PDF',
   downloadPptx: 'Download as PPTX',
-  downloadStub: 'Downloads open from the Download dialog after the show',
+  /** the viewer route has no Download dialog: the rows say where downloads live */
+  downloadElsewhere: 'Downloads open from the editor',
   print: 'Print',
   keyboardShortcuts: 'Keyboard shortcuts',
   /** the shortcuts card */
@@ -52,6 +55,16 @@ export const PRESENT_TEXT = {
   clock: 'Time',
   connected: 'Slideshow connected',
   disconnected: 'No slideshow window is open',
+  /** the step line beside the counter (SPEC-5 2.2, `turboslide: true`) */
+  stepLine: (step: number, steps: number) => `Step ${step} of ${steps}`,
+  /** the media rows (R11 5.6) */
+  playing: 'Playing',
+  mediaPause: 'Pause',
+  mediaPlay: 'Play',
+  mediaRestart: 'Restart',
+  nextStepPreview: 'Next step',
+  /** the autoplay toast of SPEC-5 0.21 (the chrome's ROUND_FIVE carries the same sentence) */
+  soundOff: 'Sound is off until you click',
   currentSlide: 'Current slide',
   previousSlide: 'Previous slide',
   nextSlide: 'Next slide',

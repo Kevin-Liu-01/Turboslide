@@ -2,9 +2,11 @@
 // thumbnail and book frames scale it by `--k` (SPEC 5.2, 5.5; tail:122-130, head:220, head:292).
 import { renderSlide } from './slide.ts';
 import type { RenderOptions, RenderedSlide } from './slide.ts';
-import { FRAME_HTML } from './stage.ts';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
+// the frame per theme (gslides-parity SPEC-5 9.3; B6's seam at merge 1): today's GT frame for
+// both ids, byte identical to stage.ts FRAME_HTML (theme-css.test.ts pins the two together)
+import { stageFrame } from '@turboslide/theme/themes';
 
 export type ThumbOptions = Partial<Omit<RenderOptions, 'theme' | 'chrome' | 'counter'>> & {
   /** `--k` written inline; the viewer recomputes it from the frame width (tail:154-156). */
@@ -37,6 +39,6 @@ export function renderThumb(
   const style = k !== undefined ? ` style="--k:${k}"` : '';
   return {
     ...rendered,
-    html: `<div class="mini"${style}>${FRAME_HTML}${rendered.html}</div>`,
+    html: `<div class="mini"${style}>${stageFrame(deck.theme)}${rendered.html}</div>`,
   };
 }

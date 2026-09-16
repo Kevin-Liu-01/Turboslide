@@ -1,0 +1,75 @@
+{
+  "n": 1,
+  "revision": 2,
+  "author": {
+    "kind": "human",
+    "name": "kevinliu"
+  },
+  "note": "",
+  "createdAt": "2026-09-15T13:01:05.136Z",
+  "mutations": [
+    {
+      "op": "asset.set",
+      "asset": {
+        "id": "fixture-photo",
+        "role": "other",
+        "alt": "Fixture geometry: a disc, a triangle, a horizon rule and a hatched band, drawn in one bit",
+        "twins": {
+          "light": "assets/fixture-photo-light.jpg",
+          "dark": "assets/fixture-photo-dark.jpg"
+        },
+        "size": [
+          1600,
+          900
+        ],
+        "scale": 1,
+        "source": {
+          "kind": "file"
+        },
+        "inline": "two-color",
+        "variants": {
+          "d447c823b884486efffb73603049ad6fd8934e4d9006c7bf6ae9f04c421e43e8": {
+            "key": "d447c823b884486efffb73603049ad6fd8934e4d9006c7bf6ae9f04c421e43e8",
+            "twins": {
+              "light": "assets/fixture-photo.dither-d447c823b884-light.png",
+              "dark": "assets/fixture-photo.dither-d447c823b884-dark.png"
+            },
+            "size": [
+              460,
+              260
+            ],
+            "scale": 2,
+            "metrics": {
+              "litFraction": 0.1906
+            },
+            "producedAt": "2026-09-15T13:01:05.133Z"
+          }
+        }
+      }
+    }
+  ],
+  "baseRevision": 1,
+  "inverse": [
+    {
+      "op": "asset.set",
+      "asset": {
+        "id": "fixture-photo",
+        "role": "other",
+        "alt": "Fixture geometry: a disc, a triangle, a horizon rule and a hatched band, drawn in one bit",
+        "twins": {
+          "light": "assets/fixture-photo-light.jpg",
+          "dark": "assets/fixture-photo-dark.jpg"
+        },
+        "size": [
+          1600,
+          900
+        ],
+        "scale": 1,
+        "source": {
+          "kind": "file"
+        },
+        "inline": "two-color"
+      }
+    }
+  ]
+}

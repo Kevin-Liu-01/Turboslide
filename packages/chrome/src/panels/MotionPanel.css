@@ -1,0 +1,352 @@
+/* The Motion panel (panels/MotionPanel.tsx; gslides-parity SPEC-5 2.1). Two sections under the
+   panel's title row: Slide Transition (the type select, the speed slider with its three stops and
+   the seconds readout, Apply to all slides) and Object Animations (one collapsible row per
+   animation in play order, the type and start selects, By paragraph, the slider, the trash, a
+   six dot handle; Add animation under the list). Play sits in the title row and reads Stop while
+   the canvas plays. 13 px Inter, --pt-hair rules, ink for the pressed state, titanium for the
+   labels; radius 0; tokens only. */
+.ts-motion-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-motion-head {
+  margin: 0;
+  padding: 12px 16px 4px;
+  font: 500 13px/1.2 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-motion-section .ts-panel-section-body {
+  gap: 10px;
+}
+
+.ts-motion-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-motion-label {
+  font-size: 11px;
+  color: var(--pt-titanium);
+}
+
+.ts-motion-select {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 8px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 13px/1 var(--pt-text);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
+    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 14px,
+    calc(100% - 9px) 14px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+
+.ts-motion-select:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-motion-select:disabled {
+  color: var(--pt-titanium);
+}
+
+/* the slider: the label and the seconds on one line, the range, the three stop words under it */
+.ts-motion-speed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ts-motion-speed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ts-motion-seconds {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-motion-speed input[type='range'] {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-motion-speed.is-disabled input[type='range'] {
+  opacity: 0.5;
+}
+
+.ts-motion-stops {
+  position: relative;
+  height: 14px;
+  font-size: 10px;
+  color: var(--pt-titanium);
+}
+
+.ts-motion-stops span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.ts-motion-stops span:first-child {
+  /* Slow sits at 2 s, past the middle; Fast at 0.5 s near the left edge */
+  transform: translateX(-50%);
+}
+
+/* text buttons: Apply to all slides, Add animation */
+.ts-motion-text-btn {
+  appearance: none;
+  align-self: flex-start;
+  height: 32px;
+  padding: 0 12px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 500 13px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-motion-text-btn:hover {
+  border-color: var(--pt-ink);
+}
+
+.ts-motion-text-btn:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-motion-text-btn:disabled,
+.ts-motion-text-btn.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-motion-text-btn.is-disabled:hover {
+  border-color: var(--pt-hair);
+}
+
+/* Play in the title row */
+.ts-motion-play {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 500 12px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-motion-play svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.ts-motion-play:hover {
+  border-color: var(--pt-ink);
+}
+
+.ts-motion-play.is-on {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  border-color: var(--pt-ink);
+}
+
+.ts-motion-play:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-motion-play:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+/* the rows */
+.ts-motion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+}
+
+.ts-motion-empty {
+  padding: 4px 16px 8px;
+  color: var(--pt-titanium);
+}
+
+.ts-motion-row {
+  position: relative;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-motion-row:last-child {
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-motion-row.is-dragging {
+  opacity: 0.5;
+}
+
+.ts-motion-row.is-drop-before::before,
+.ts-motion-row.is-drop-after::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--pt-ink);
+}
+
+.ts-motion-row.is-drop-before::before {
+  top: -1px;
+}
+
+.ts-motion-row.is-drop-after::after {
+  bottom: -1px;
+}
+
+.ts-motion-row-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 16px;
+}
+
+.ts-motion-row-title {
+  appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: var(--pt-ink);
+  font: 13px/1.2 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-motion-row-title:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-motion-row-label {
+  font-weight: 500;
+}
+
+.ts-motion-row-block {
+  font-size: 11px;
+  color: var(--pt-titanium);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-motion-handle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  color: var(--pt-titanium);
+  cursor: grab;
+}
+
+.ts-motion-handle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-motion-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 12px;
+}
+
+.ts-motion-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--pt-ink);
+}
+
+.ts-motion-check input {
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-motion-note {
+  margin: 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-motion-row-tools {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ts-motion-icon-btn {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: var(--pt-ink-2);
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.ts-motion-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-motion-icon-btn:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-motion-icon-btn:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}

@@ -208,6 +208,18 @@ export function diffDecks(a: DeckDocument, b: DeckDocument): Mutation[] {
     if (asset !== undefined && !jsonEqual(a.deck.assets[id], asset))
       out.push({ op: 'asset.set', asset: cloneJson(asset) });
   }
+  // the media records (gslides-parity SPEC-5 0.16) ride the same two ops
+  const mediaA = a.deck.media ?? {};
+  const mediaB = b.deck.media ?? {};
+  for (const id of Object.keys(mediaA).sort()) {
+    if (mediaB[id] === undefined && b.deck.assets[id] === undefined)
+      out.push({ op: 'asset.remove', assetId: id });
+  }
+  for (const id of Object.keys(mediaB).sort()) {
+    const asset = mediaB[id];
+    if (asset !== undefined && !jsonEqual(mediaA[id], asset))
+      out.push({ op: 'asset.set', asset: cloneJson(asset) });
+  }
 
   // Slides removed.
   const working = new Set(Object.keys(a.slides));

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { jsonResponse } from '@turboslide/agent/http/errors';
+import { waitUntil } from '@vercel/functions';
 import type { RoomEvent } from '@turboslide/realtime/channel';
 import { streamLifetimeMs, streamRetryMs } from '@turboslide/realtime/admission';
 import { STREAM_HEARTBEAT_MS, sseComment, sseFrame, sseRetry } from '@turboslide/realtime/protocol';
@@ -27,11 +28,18 @@ import {
  * GET /api/decks/:id/stream (gslides-parity SPEC-3 3.3; MILESTONES-3 B2 day 3): the room's
  * Server-Sent Events. `authorize(read)` at open and every 60 s, the stream counters of report 10
  * F24 (per identity, per address, per instance), a server issued `clientId` bound to the session
- * (F26), the tab's earlier ids of `?retire=` removed from this instance's roster (hotfix 2 cause
- * B1), `hello` with the roster filtered by role (4.8) and the editing count (0.9), the replay
+ * (F26) and reused from `?client=` when the tab asks for the id it already holds (SPEC-5-amendments
+ * A3 item 5), the tab's earlier ids of `?retire=` removed from this instance's roster (hotfix 2
+ * cause B1), `hello` with the roster filtered by role (4.8) and the editing count (0.9), the replay
  * since `Last-Event-ID` or `?since=` (or `resync` past 2,000 entries, F25), then every event the
  * reader may see, a heartbeat comment every 15 s, and a close at a random point between 240 and
- * 290 s with a `retry` between 1 and 4 s so tabs never reconnect together. On the catch all
+ * 290 s with a `retry` between 1 and 4 s so tabs never reconnect together. One stream per tab per
+ * instance (SPEC-5-amendments A3 item 5; the fix round of VERIFICATION-5 finding 14): a stream
+ * opening under a client id this instance already streams closes the earlier one first, since a
+ * tab holds one EventSource and the runtime does not always report a dropped connection as an
+ * abort, so its slot is free before this one is counted and the earlier stream's close posts no
+ * leave for a tab that is still here. The leave a closing stream posts runs inside `waitUntil`,
+ * so the roster write it makes (blob.ts) outlives the response on fluid compute. On the catch all
  * function rule, never `/_serverFn`.
  */
 
@@ -61,16 +69,30 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const decision = await decideFor(identity, deckId, 'read', 'stream');
   if (!decision.ok)
     return jsonResponse(denialBody(decision, 'read'), decision.status, cookieHeaders);
-  const slot = streamCounters().take(identity.identity, identity.kind, streamAddress(request));
+  const reader = await viewerFacts(deckId, decision, identity.ctx, identity.identity);
+  const url = new URL(request.url);
+  // one client id per tab (gslides-parity SPEC-5-amendments A3 item 5): the tab asks for the id
+  // it holds and keeps it when its MAC names this deck and this identity, so a reload or a
+  // reconnect replaces its own roster row instead of adding a ghost
+  const clientId = await bindClient(room, identity, url.searchParams.get('client'));
+  // one stream per tab on this instance: the earlier stream under this id closes now, its slot
+  // released and no leave posted for a tab that is still here (finding 14)
+  let superseded = false;
+  let closeStream: (() => void) | undefined;
+  const claim = (): void => {
+    superseded = true;
+    closeStream?.();
+  };
+  const counters = streamCounters();
+  counters.claim(deckId, clientId, claim);
+  const slot = counters.take(identity.identity, identity.kind, streamAddress(request));
   if (!slot.ok) {
+    counters.unclaim(deckId, clientId, claim);
     return jsonResponse({ error: 'too_many_streams', cap: slot.cap }, 503, {
       ...cookieHeaders,
       'retry-after': '5',
     });
   }
-  const reader = await viewerFacts(deckId, decision, identity.ctx, identity.identity);
-  const clientId = await bindClient(room, identity);
-  const url = new URL(request.url);
   const lastEventId = request.headers.get('last-event-id');
   const since = url.searchParams.get('since');
   const position = Number(lastEventId ?? since ?? NaN);
@@ -100,6 +122,13 @@ async function serve(request: Request, deckId: string): Promise<Response> {
           // closed by the reader already
         }
       };
+      closeStream = close;
+      if (superseded) {
+        // a newer stream of this tab opened while this one was starting
+        slot.release();
+        close();
+        return;
+      }
       // the tab's earlier ids leave this instance's roster before hello lists it (hotfix 2, B1):
       // a reload posts no leave and the blob tier's roster is per instance
       await retireClients(room, url.searchParams.get('retire'), identity, clientId);
@@ -156,7 +185,10 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         clearInterval(authorizeTimer);
         clearTimeout(life);
         slot.release();
-        void room.channel.presence.leave(deckId, clientId).catch(() => undefined);
+        counters.unclaim(deckId, clientId, claim);
+        // a superseded stream's tab is still here under a newer stream: no leave for it
+        if (superseded) return;
+        afterResponse(room.channel.presence.leave(deckId, clientId));
       };
       request.signal.addEventListener('abort', close, { once: true });
     },
@@ -175,4 +207,18 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       'x-turboslide-client': clientId,
     },
   });
+}
+
+/**
+ * Runs the leave of a closing stream after the response: inside Vercel's `waitUntil` when a
+ * request context exists, so the roster write it makes on the blob tier is not frozen with the
+ * instance; as a detached promise otherwise (a checkout, a test).
+ */
+function afterResponse(work: Promise<unknown>): void {
+  const settled = work.catch(() => undefined);
+  try {
+    waitUntil(settled);
+  } catch {
+    // no request context: the promise runs on its own
+  }
 }

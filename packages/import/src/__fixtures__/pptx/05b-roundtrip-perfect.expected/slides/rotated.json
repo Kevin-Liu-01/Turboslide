@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "rotated",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Rotated and flipped objects",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:rotated#h/text"
+        }
+      },
+      {
+        "id": "tilted",
+        "type": "text",
+        "text": "A text box rotated 37 degrees",
+        "pos": {
+          "x": 200,
+          "y": 315.5,
+          "w": 480,
+          "h": 64,
+          "rotate": 37,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:rotated#tilted/text"
+        }
+      }
+    ]
+  },
+  "title": "Rotated and flipped objects",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide10.xml",
+    "pptxSlideId": 265
+  }
+}

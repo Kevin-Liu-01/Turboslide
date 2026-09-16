@@ -242,7 +242,17 @@ export type MenuSetting =
   | 'pointerMine'
   | 'pointerOthers'
   | 'announce'
-  | 'showChanges';
+  | 'showChanges'
+  /* round five (gslides-parity SPEC-5 14.1; the integrator's day 0 seam): the three Accessibility
+     settings toggles that write `preferences.accessibility`, the equation toolbar's toggle and
+     the title row's Star over `prefs.set /starred` */
+  | 'screenReader'
+  | 'braille'
+  | 'speakAloud'
+  | 'equationToolbar'
+  | 'starred'
+  /** File > Language's radio rows read the deck's tag (SPEC-5 7.1); the shell mirrors `deck.language` */
+  | 'language';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -275,7 +285,18 @@ export type MenuClientHandler =
   | 'comment'
   | 'copyLink'
   | 'goToClient'
-  | 'accountMenu';
+  | 'accountMenu'
+  /* round five (SPEC-5 14.1): Edit theme's mode (9.2), Dictate speaker notes (7.3), the
+     toolbar's Font picker (SPEC-5-amendments A5) */
+  | 'themeMode'
+  | 'dictate'
+  | 'fontPicker'
+  /* the Accessibility menu's navigation rows (SPEC-5 7.5): the caret to the next or previous run
+     whose marks differ, and the filmstrip's next or previous slide */
+  | 'nextFormattingChange'
+  | 'previousFormattingChange'
+  | 'nextSlide'
+  | 'previousSlide';
 
 /**
  * The plates a dynamic submenu draws instead of a list of rows: the layout grid, a shape
@@ -384,7 +405,12 @@ export type MenuPredicate =
   | 'viewOnly'
   /** the own chip's menu: Sign out and Sessions for a signed in principal, Sign in for the others (7.5) */
   | 'signedIn'
-  | 'canSignIn';
+  | 'canSignIn'
+  /* round five (gslides-parity SPEC-5 3.7, 9.2): the Window Management API is present (Present on
+     another screen and Presentation display options), and the editor is in Edit theme (the
+     Insert > Placeholder rows) */
+  | 'multiScreen'
+  | 'themeMode';
 
 export type MenuCheck = { setting: MenuSetting; value?: string | boolean };
 
@@ -431,6 +457,8 @@ export type MenuItem = {
   turboslide?: true;
   /** reachable from a right-click menu and Search the menus, not drawn in the menu bar */
   contextOnly?: true;
+  /** a Google label no Google page states (gslides-parity SPEC-5 16.9); the audit lists the row */
+  unverified?: true;
 };
 
 export type MenuId =
@@ -443,7 +471,9 @@ export type MenuId =
   | 'arrange'
   | 'tools'
   | 'extensions'
-  | 'help';
+  | 'help'
+  /** gslides-parity SPEC-5 7.5: drawn while screen reader support is on */
+  | 'accessibility';
 
 export type Menu = {
   id: MenuId;
@@ -454,6 +484,12 @@ export type Menu = {
   items: ReadonlyArray<MenuItem>;
   /** the predicate that draws the whole menu (SPEC-3 13.4; 09 2.3: Edit, Format, Slide, Arrange and Extensions are absent below editor) */
   when?: MenuPredicate;
+  /**
+   * The setting that draws the whole menu (gslides-parity SPEC-5 0.39, 7.5): the Accessibility
+   * menu appears as the eleventh menu while `screenReader` is on and leaves `OMITTED_MENUS`; a
+   * menu without one is always drawn (under its `when`).
+   */
+  setting?: MenuSetting;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -531,20 +567,20 @@ const client = (handler: MenuClientHandler): MenuEffect => ({ kind: 'client', ha
 // ---------------------------------------------------------------------------------------------
 // Shared clauses (SPEC 12, SPEC-2 12, SPEC-3 13.3: one clause, no internal noun, no process word)
 
-/* SPEC-3 13.3: the four rows that stay Later this round, each with its clause; the comment stub
-   clause of rounds one and two is gone with the comment rows now live (5.3) */
-const CHAT_LATER = 'Leave a comment on the slide instead';
+/* SPEC-3 13.3 and gslides-parity SPEC-5 14.3: the two rows that stay Later, each with its clause;
+   the clauses of 14.2 (still slides, no media, the GT starter, numbering, guides by hand, chat and
+   the delete rows) retired at merge 2 with their rows. The download clause stays while ODP and
+   SVG are not in the tree (BUILD-STATUS-5.md, B4). */
 const EMAIL_COLLABORATORS_LATER = 'The invitation carries your message';
-const DELETE_VERSIONS_LATER = 'Named versions are kept; older records thin out after 30 days';
 const VIEWERS_TAB_LATER = 'Turboslide keeps no record of who viewed a presentation';
-const STILL_SLIDES = 'The GT theme presents still slides';
-const NUMBERING_STARTS = 'Numbering starts at 1';
-const NO_MEDIA = 'Link to a recording instead';
-const START_FROM_GT = 'Start from the GT brand deck on the home page';
 const DOWNLOAD_FORMATS = 'Only PowerPoint, PDF, text, pictures and the web page download';
 const GOOGLE_SERVICE = 'A Google service';
-/* SPEC-2 12: Edit guides stays Later; a guide is moved by dragging and removed from its right-click menu */
-const GUIDES_BY_HAND = 'Drag a guide to move it and right-click it to delete it';
+/* SPEC-5 3.7: the two second screen rows without the Window Management API */
+const NO_SECOND_SCREEN = 'Presenter view opens a second window you can drag to another screen';
+/* SPEC-5 10: the Join chat row for a viewer (ROUND_FIVE.chatViewers, one spelling) */
+const CHAT_VIEWERS = 'Commenters and editors can chat';
+/* SPEC-5 9.2: the Insert > Placeholder rows outside Edit theme */
+const PLACEHOLDER_IN_THEME = 'Open Slide > Edit theme to add a placeholder';
 
 /* the disabled reasons of the object rows (SPEC-2 4.1, section 1): every top level block of every
    slide kind is an object, so no row is disabled because of the slide's layout */
@@ -553,12 +589,35 @@ const SELECT_OBJECTS = 'Select two or more objects on the slide first';
 const SELECT_THREE_OBJECTS = 'Select three or more objects on the slide first';
 const SELECT_BORDERED = 'Select a box, shape, picture, line, table cell or word art first';
 
-/* the sheet is 1600 by 900: a new guide lands at its centre (SPEC-2 6.1 row 30) */
+/* a new guide lands at the centre of the default sheet (SPEC-2 6.1 row 30); the shell rewrites the
+   value from `guideCentre(deckPage(deck))` on another page (gslides-parity SPEC-5 6.1; b4.md R1) */
 const SHEET_CENTER_X = 800;
 const SHEET_CENTER_Y = 450;
 
+/* the seven languages File > Language offers (SPEC-5 7.1; the dictionaries of packages/spelling),
+   spelt here as well as in text-tools.ts so the model still loads under plain Node */
+const LANGUAGE_ROWS: ReadonlyArray<readonly [string, string]> = [
+  ['en-US', 'English (United States)'],
+  ['en-GB', 'English (United Kingdom)'],
+  ['es', 'Español'],
+  ['fr', 'Français'],
+  ['nl', 'Nederlands'],
+  ['pt-BR', 'Português (Brasil)'],
+  ['pt-PT', 'Português (Portugal)'],
+];
+
 /* SPEC-3 5.3: Viewing mode hides the Add comment controls; the sentence names the way back, never a role */
 const COMMENT_IN_MODE = 'Switch to Commenting or Editing under View > Mode to comment';
+
+/* the placeholder kinds of a custom layout with Google's labels (SPEC-5 9.2; PLACEHOLDER_LABELS of
+   @turboslide/schema/blocks, spelt here so the model loads under plain Node) */
+const PLACEHOLDER_ROWS: ReadonlyArray<readonly [string, string]> = [
+  ['title', 'Title'],
+  ['subtitle', 'Subtitle'],
+  ['body', 'Body text'],
+  ['slideNumber', 'Slide number'],
+  ['picture', 'Image'],
+];
 
 /**
  * The role gate of a menu (SPEC-3 13.4, 09 2.3): every row of the menu that carries no `when` of
@@ -653,11 +712,10 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     when: 'rename',
     doc: 'Click the title to rename the presentation; Enter keeps the name and Esc restores it',
   }),
-  omit(
-    'title.star',
-    'Star',
-    'Starring is a per person list; the home page lists every presentation',
-  ),
+  /* SPEC-5 7.7: the star over `prefs.set /starred` (the record follows the person, not the deck) */
+  now('title.star', 'Star', toggle('starred'), {
+    doc: 'Starred presentations sit first on the home page; the star follows your account',
+  }),
   omit('title.move', 'Move', 'No folders'),
   now('title.saveState', 'Document status', client('showSaveState'), {
     when: 'write',
@@ -684,7 +742,13 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
         turboslide: true,
         doc: 'A one time jump to the slide that person has open',
       }),
-      later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),
+      /* SPEC-5 10: the chat inside the file; a viewer reads the row disabled with its sentence */
+      now('title.presence.joinChat', 'Join chat', panel('Chat'), {
+        dividerBefore: true,
+        enabled: 'comment',
+        disabledReason: CHAT_VIEWERS,
+        doc: 'Messages are not saved; they leave when everyone has left',
+      }),
       now('title.presence.me', 'You', client('accountMenu'), {
         turboslide: true,
         dividerBefore: true,
@@ -721,16 +785,24 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
         client('presentFromBeginning'),
         { key: shortcut('Cmd+Shift+Enter', 'Ctrl+Shift+F5') },
       ),
-      later(
+      /* SPEC-5 3.7: the show on the other screen through the Window Management API; disabled at
+         runtime where the browser has none, with the drag clause as the tooltip */
+      now(
         'title.slideshow.presentOnAnotherScreen',
         'Present on another screen',
-        'Presenter view opens a second window you can drag to another screen',
-        { google: 'Present using Chromecast' },
+        action('view.presentOnScreen', { screen: 'other' }),
+        {
+          google: 'Present using Chromecast',
+          enabled: 'multiScreen',
+          disabledReason: NO_SECOND_SCREEN,
+          doc: 'The show opens on the other screen and Presenter view stays here',
+        },
       ),
-      omit(
+      now(
         'title.slideshow.displayOptions',
         'Presentation display options',
-        "Chrome's multi screen permission flow; Presenter view covers the two window case",
+        dialog('Presentation display options'),
+        { enabled: 'multiScreen', disabledReason: NO_SECOND_SCREEN },
       ),
     ],
   }),
@@ -792,8 +864,9 @@ const FILE: Menu = {
         icon: 'plus',
         turboslide: true,
       }),
-      now('file.new.templateGallery', 'From template gallery', route('/decks#templates', true), {
+      now('file.new.templateGallery', 'From template gallery', route('/decks/templates', true), {
         google: 'From Template Gallery',
+        doc: 'The eight templates on the Plate theme, by Personal, Work and Education',
       }),
     ]),
     now('file.open', 'Open…', dialog('Open'), { key: shortcut('Cmd+O'), icon: 'document' }),
@@ -898,16 +971,19 @@ const FILE: Menu = {
           contextOnly: true,
           doc: 'Marks what each person changed on the slide, with their chip',
         }),
-        later(
+        /* SPEC-5 7.7: the two delete rows run `version.delete` behind the Delete versions dialog's confirm */
+        now(
           'file.versionHistory.deleteOlder',
           'Delete this and older versions',
-          DELETE_VERSIONS_LATER,
+          dialog('Delete versions'),
           {
             contextOnly: true,
+            doc: 'Removes this record and every older one; named versions go too',
           },
         ),
-        later('file.versionHistory.deleteHistory', 'Delete history', DELETE_VERSIONS_LATER, {
+        now('file.versionHistory.deleteHistory', 'Delete history', dialog('Delete versions'), {
           contextOnly: true,
+          doc: 'Removes every version record of this presentation',
         }),
       ],
       { icon: 'clock', dividerBefore: true, when: 'history' },
@@ -919,10 +995,16 @@ const FILE: Menu = {
       'Present mode keeps working after load without the network (R07 rule 29)',
     ),
     now('file.details', 'Details', dialog('Details'), { icon: 'document' }),
-    omit(
+    /* SPEC-5 7.1: the deck's language tag, one radio per offered tag (text-tools.ts OFFERED_LANGUAGES) */
+    sub(
       'file.language',
       'Language',
-      'One face and English copy rules; spelling follows the browser',
+      LANGUAGE_ROWS.map(([tag, label]) =>
+        now(`file.language.${tag}`, label, action('deck.set', { path: '/language', value: tag }), {
+          checked: { setting: 'language', value: tag },
+        }),
+      ),
+      { doc: 'The spelling dictionary, the quote style and the notes field follow the language' },
     ),
     later('file.pageSetup', 'Page setup', 'The GT theme is 16:9 at 1600 by 900'),
     now('file.printPreview', 'Print settings and preview', route('/print/:deckId'), {
@@ -999,16 +1081,19 @@ const VIEW: Menu = {
       key: shortcut('Cmd+Enter', 'Ctrl+F5'),
       icon: 'present',
     }),
-    omit(
-      'view.motion',
-      'Motion',
-      'Section 0.5; the one Transition stub sits in Google’s three Transition positions',
-    ),
-    omit(
-      'view.themeBuilder',
-      'Theme builder',
-      'The GT theme is edited in the repository; Slide > Edit theme is the Later stub',
-    ),
+    /* gslides-parity SPEC-5 2.1, 9.2: the Motion panel and Edit theme's mode */
+    now('view.motion', 'Motion', panel('Motion'), {
+      icon: 'sparkles',
+      doc: 'The slide transition and the object animations of the current slide',
+    }),
+    now('view.themeBuilder', 'Theme builder', client('themeMode'), {
+      doc: 'Edit theme: the colours, fonts, frame and layouts every slide follows',
+    }),
+    /* SPEC-5 8.2: the equation toolbar over the canvas while an equation block is selected */
+    now('view.equationToolbar', 'Show equation toolbar', toggle('equationToolbar'), {
+      turboslide: true,
+      doc: 'The symbol groups over the canvas while an equation is selected',
+    }),
     now('view.gridView', 'Grid view', toggle('gridView'), {
       icon: 'grid',
       dividerBefore: true,
@@ -1064,7 +1149,10 @@ const VIEW: Menu = {
         action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
         { doc: 'A guide at the centre of the slide; drag it into place' },
       ),
-      later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
+      /* SPEC-5 7.7: the Edit guides dialog with the positions and colours */
+      now('view.guides.edit', 'Edit guides', dialog('Edit guides'), {
+        doc: 'Every guide with its position, its colour and a remove control',
+      }),
       now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
         enabled: 'hasGuides',
         disabledReason: 'Add a guide first',
@@ -1186,7 +1274,10 @@ const INSERT: Menu = {
           'Google services and the licensing hazard R07 names',
         ),
         omit('insert.image.drivePhotos', 'Drive & Photos', GOOGLE_SERVICE),
-        omit('insert.image.camera', 'Camera', GOOGLE_SERVICE),
+        /* SPEC-5 3.7: a photo from the device camera as a picture object */
+        now('insert.image.camera', 'Camera', dialog('Camera'), {
+          doc: 'A photo from this device’s camera, placed on the slide',
+        }),
         now('insert.image.byUrl', 'By URL', dialog('Image by URL')),
         now(
           'insert.image.fromThisPresentation',
@@ -1201,8 +1292,15 @@ const INSERT: Menu = {
       icon: 'text',
       doc: 'Click to place a box, or drag to draw one',
     }),
-    later('insert.audio', 'Audio', NO_MEDIA, { icon: 'speaker-wave' }),
-    later('insert.video', 'Video', NO_MEDIA, { icon: 'video-camera' }),
+    /* SPEC-5 3.2: Google's two dialogs with their tabs; the intake sniffs and caps the file */
+    now('insert.audio', 'Audio', dialog('Insert audio'), {
+      icon: 'speaker-wave',
+      doc: 'An audio file from this device, a URL or a recording; plays in the show',
+    }),
+    now('insert.video', 'Video', dialog('Insert video'), {
+      icon: 'video-camera',
+      doc: 'A video file, a URL or a YouTube link; plays in the show',
+    }),
     /* SPEC-2 4.1: each category is a glyph grid drawn from the shape table; a pick arms the draw
        tool. The rows under Shapes and Arrows are the legacy presets the draw tools already know;
        the grid replaces them as the drawn plate once the shell renders it. */
@@ -1322,7 +1420,26 @@ const INSERT: Menu = {
     now('insert.specialCharacters', 'Special characters', dialog('Insert special characters'), {
       doc: 'Arrows, punctuation, currency, math, symbols and emoji, by name',
     }),
-    omit('insert.animation', 'Animation', 'Section 0.5'),
+    /* SPEC-5 2.1: Animation adds an Appear on the selection and opens the Motion panel */
+    now('insert.animation', 'Animation', action('motion.add'), {
+      icon: 'sparkles',
+      enabled: 'objectSelected',
+      disabledReason: SELECT_OBJECT,
+      doc: 'Adds an entrance animation to the selected object and opens the Motion panel',
+    }),
+    /* the object menu's Animate row (SPEC-5 14.1, the row Google's right-click menu carries) */
+    now('block.animate', 'Animate', action('motion.add'), {
+      contextOnly: true,
+      enabled: 'objectSelected',
+      disabledReason: SELECT_OBJECT,
+      doc: 'Adds an entrance animation to this object and opens the Motion panel',
+    }),
+    /* SPEC-5 8.2: the equation block with Google Docs’ toolbar (no Google Slides row) */
+    now('insert.equation', 'Equation', action('equation.insert'), {
+      turboslide: true,
+      key: shortcut('Cmd+Option+Shift+E'),
+      doc: 'A LaTeX equation drawn as math; PowerPoint opens it as an equation',
+    }),
     now('insert.link', 'Link', client('link'), {
       key: shortcut('Cmd+K'),
       icon: 'link',
@@ -1348,10 +1465,60 @@ const INSERT: Menu = {
       doc: 'After the current slide, with the same layout',
     }),
     now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers')),
-    omit('insert.placeholder', 'Placeholder', 'Theme builder only'),
-    later('insert.templates', 'Templates', START_FROM_GT),
-    later('insert.buildingBlocks', 'Building blocks', START_FROM_GT),
-    omit('insert.speakerSpotlight', 'Speaker spotlight', 'Meet only'),
+    /* SPEC-5 9.2: the placeholder rows, live inside Edit theme (the mode's toolbar carries the same) */
+    sub(
+      'insert.placeholder',
+      'Placeholder',
+      PLACEHOLDER_ROWS.map(([kind, label]) =>
+        now(`insert.placeholder.${kind}`, label, action('block.insert', { placeholder: kind }), {
+          enabled: 'themeMode',
+          disabledReason: PLACEHOLDER_IN_THEME,
+        }),
+      ),
+      { enabled: 'themeMode', disabledReason: PLACEHOLDER_IN_THEME },
+    ),
+    /* SPEC-5 4.4, 4.5: the two panes of Google’s 2025 sidebar strip */
+    now('insert.templates', 'Templates', panel('Templates'), {
+      doc: 'Slides from the eight templates, inserted after the current slide',
+    }),
+    now('insert.buildingBlocks', 'Building blocks', panel('Building blocks'), {
+      doc: 'About thirty ready made groups of objects, by category',
+    }),
+    /* SPEC-5 3.7: the camera feed as a shape in the show */
+    now(
+      'insert.speakerSpotlight',
+      'Speaker spotlight',
+      action('block.insert', { type: 'spotlight' }),
+      {
+        doc: 'A shape that shows your camera while presenting',
+      },
+    ),
+    /* A8 row 10 (build-4/hotfix-4.md; b3.md B3-12): the three grammar objects the palette inserts,
+       under one row so Insert keeps a letter per sibling for its access keys */
+    sub(
+      'insert.more',
+      'More objects',
+      [
+        now('insert.more.mark', 'Mark', action('block.insert', { type: 'mark' }), {
+          turboslide: true,
+          doc: 'The theme’s mark as an object',
+        }),
+        now('insert.more.codePanel', 'Code panel', action('block.insert', { type: 'panel' }), {
+          turboslide: true,
+          doc: 'A code or terminal panel',
+        }),
+        now(
+          'insert.more.logoPlates',
+          'Logo plates',
+          action('block.insert', { type: 'logoPlates' }),
+          {
+            turboslide: true,
+            doc: 'A row of logo plates',
+          },
+        ),
+      ],
+      { turboslide: true, doc: 'The GT deck’s own objects' },
+    ),
     now('insert.icon', 'Icon', action('block.insert'), {
       turboslide: true,
       icon: 'sparkles',
@@ -1488,10 +1655,15 @@ const FORMAT: Menu = {
           doc: 'Moves the paragraph left, or a list item up a level',
         },
       ),
-      later(
+      /* SPEC-5 7.7: the dialog over `text.indent`'s first line and hanging fields */
+      now(
         'format.alignIndent.indentationOptions',
         'Indentation options',
-        'Set the indent under Text fitting',
+        dialog('Indentation options'),
+        {
+          enabled: 'textBlockSelected',
+          doc: 'The left indent, the first line and the hanging indent in your unit',
+        },
       ),
     ]),
     sub('format.spacing', 'Line & paragraph spacing', [
@@ -1555,15 +1727,20 @@ const FORMAT: Menu = {
         'format.bulletsNumbering.listOptions',
         'List options',
         [
-          later(
+          /* SPEC-5 7.7: the two dialogs over `text.list`'s start, prefix and suffix */
+          now(
             'format.bulletsNumbering.listOptions.restart',
             'Restart numbering',
-            NUMBERING_STARTS,
+            dialog('Restart numbering'),
+            {
+              enabled: 'listItemSelected',
+            },
           ),
-          later(
+          now(
             'format.bulletsNumbering.listOptions.prefixSuffix',
             'Edit prefix and suffix',
-            NUMBERING_STARTS,
+            dialog('Edit prefix and suffix'),
+            { enabled: 'listItemSelected' },
           ),
           now(
             'format.bulletsNumbering.listOptions.moreBullets',
@@ -1829,14 +2006,17 @@ const SLIDE: Menu = {
         doc: 'Keeps your content and moves it into the new layout',
       },
     ),
-    later('slide.transition', 'Transition', STILL_SLIDES),
-    /* SPEC-2 0.75, 12: the frame, the wordmark and the counter stay theme level until Edit theme */
-    later(
-      'slide.editTheme',
-      'Edit theme',
-      'The footer mark, the slide counter and the rails belong to the GT theme',
-      { dividerBefore: true },
-    ),
+    /* gslides-parity SPEC-5 2.1: the Motion panel at its Transition section, Google's three positions */
+    now('slide.transition', 'Transition', panel('Motion'), {
+      icon: 'sparkles',
+      key: shortcut('Cmd+Option+Shift+B'),
+      doc: 'The transition into this slide, its speed and Apply to all slides',
+    }),
+    /* SPEC-5 9.2: Edit theme is an editor mode over the deck's theme record */
+    now('slide.editTheme', 'Edit theme', client('themeMode'), {
+      dividerBefore: true,
+      doc: 'The colours, fonts, frame and layouts every slide follows',
+    }),
     now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch' }),
   ],
 };
@@ -2023,39 +2203,46 @@ const TOOLS: Menu = {
       'tools.spelling',
       'Spelling',
       [
-        later(
-          'tools.spelling.spellCheck',
-          'Spell check',
-          'Your browser underlines misspellings and offers suggestions on right-click',
-        ),
-        now('tools.spelling.underlineErrors', 'Underline errors', toggle('spellcheck'), {
-          doc: 'Your browser’s spelling marks in text and notes',
+        /* SPEC-5 7.2: the spell check card over the deck's language dictionary */
+        now('tools.spelling.spellCheck', 'Spell check', panel('Spell check'), {
+          doc: 'Every misspelling in order with Change, Ignore, Add to dictionary and Change all',
         }),
-        omit(
+        now('tools.spelling.underlineErrors', 'Underline errors', toggle('spellcheck'), {
+          doc: 'Red marks under misspellings in every text box and the notes',
+        }),
+        now(
           'tools.spelling.personalDictionary',
           'Personal dictionary',
-          'The browser’s dictionary applies',
+          dialog('Personal dictionary'),
+          {
+            doc: 'The words the spell check never marks; the list follows your account',
+          },
         ),
       ],
       { icon: 'language' },
     ),
     omit('tools.explore', 'Explore', 'Retired by Google in 2024 (R02 8.6)'),
     omit('tools.linkedObjects', 'Linked objects', 'No linked sources'),
-    omit('tools.dictionary', 'Dictionary', GOOGLE_SERVICE),
+    /* SPEC-5 7.4: the Dictionary panel over Wiktionary, or the link where the studio proxies nothing */
+    now('tools.dictionary', 'Dictionary', panel('Dictionary'), {
+      key: shortcut('Cmd+Shift+Y'),
+      doc: 'The definition of the selected word in the deck’s language',
+    }),
     omit('tools.qaHistory', 'Q&A history', GOOGLE_SERVICE),
-    omit('tools.dictateNotes', 'Dictate speaker notes', GOOGLE_SERVICE),
+    /* SPEC-5 7.3: the browser's speech recognition into the notes */
+    now('tools.dictateNotes', 'Dictate speaker notes', client('dictate'), {
+      doc: 'Speak and the notes take the words; the box says where the speech goes',
+    }),
     /* SPEC-3 5.5, 13.2: Google's per file row; All comments, Comments for you or None */
     now('tools.notificationSettings', 'Notification settings', dialog('Notification settings'), {
       when: 'comment',
       doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
     }),
-    later(
-      'tools.preferences',
-      'Preferences',
-      'Text fitting is set per text box in Format options; the ruler reads inches',
-    ),
-    /* SPEC-3 0.42, 4.9, 13.1: a submenu with the one row Turboslide can honour; the screen reader
-       and braille rows stay out with their reason */
+    /* SPEC-5 7.1: the Preferences dialog, General and Substitutions, per person */
+    now('tools.preferences', 'Preferences', dialog('Preferences'), {
+      doc: 'Autocorrect, autofit, the measurement unit and your substitutions',
+    }),
+    /* SPEC-3 0.42, 4.9, 13.1; SPEC-5 7.5: the four toggles of `preferences.accessibility` */
     sub('tools.accessibilitySettings', 'Accessibility settings', [
       now(
         'tools.accessibilitySettings.collaboratorAnnouncements',
@@ -2063,15 +2250,27 @@ const TOOLS: Menu = {
         toggle('announce'),
         { doc: 'Your screen reader says who joined, who left and who is on which slide' },
       ),
-      omit(
+      now(
         'tools.accessibilitySettings.screenReader',
         'Turn on screen reader support',
-        'The browser’s screen reader works on the DOM',
+        toggle('screenReader'),
+        {
+          key: shortcut('Cmd+Option+Z'),
+          doc: 'Verbalize rows, the Accessibility menu and a live region that reads what changed',
+        },
       ),
-      omit(
-        'tools.accessibilitySettings.braille',
-        'Turn on braille support',
-        'The browser’s screen reader works on the DOM',
+      now('tools.accessibilitySettings.braille', 'Turn on braille support', toggle('braille'), {
+        key: shortcut('Cmd+Option+H'),
+        doc: 'The filmstrip names slides with their number and title for a braille display',
+      }),
+      now(
+        'tools.accessibilitySettings.speakAloud',
+        'Speak verbalizations aloud',
+        toggle('speakAloud'),
+        {
+          turboslide: true,
+          doc: 'The Verbalize rows are spoken by the browser as well as written for the screen reader',
+        },
       ),
     ]),
     /* SPEC-3 5.7, 13.1, 13.3: the Activity panel for editors, and for commenters when the owner
@@ -2202,8 +2401,13 @@ const HELP: Menu = {
       icon: 'help',
       doc: 'The ten most common tasks, one line each',
     }),
-    omit('help.training', 'Training', 'No training site'),
-    omit('help.updates', 'Updates', 'No release notes page'),
+    /* SPEC-5 7.6: the two help pages rendered from docs/training.md and docs/updates.md */
+    now('help.training', 'Training', route('/help/training', true), {
+      doc: 'The ten tasks as steps, the commands that do the same and the keyboard shortcuts, in a new tab',
+    }),
+    now('help.updates', 'Updates', route('/help/updates', true), {
+      doc: 'What changed in Turboslide, newest first, in a new tab',
+    }),
     /* SPEC-2 0.28: the repository's issue page, in a new tab */
     now(
       'help.improve',
@@ -2221,9 +2425,76 @@ const HELP: Menu = {
 };
 
 /**
+ * The Accessibility menu (gslides-parity SPEC-5 7.5; R10 7.3): Google draws it as the eleventh
+ * menu while screen reader support is on; `setting: 'screenReader'` does the same here. The three
+ * Verbalize rows run `accessibility.verbalize`; the navigation rows carry Google's labels from the
+ * shortcuts page alone (`unverified: true`, 16.9).
+ */
+const ACCESSIBILITY: Menu = {
+  id: 'accessibility',
+  label: 'Accessibility',
+  accessKey: 'a',
+  key: shortcut('Ctrl+Option+A', 'Alt+A'),
+  setting: 'screenReader',
+  items: [
+    sub('accessibility.verbalize', 'Verbalize to screen reader', [
+      now(
+        'accessibility.verbalize.selection',
+        'Verbalize selection',
+        action('accessibility.verbalize', { what: 'selection' }),
+        { key: shortcut('Ctrl+Cmd+X') },
+      ),
+      now(
+        'accessibility.verbalize.formatting',
+        'Verbalize selection formatting',
+        action('accessibility.verbalize', { what: 'selectionFormatting' }),
+        { key: shortcut('Ctrl+Cmd+A then F') },
+      ),
+      now(
+        'accessibility.verbalize.fromCursor',
+        'Verbalize from cursor location',
+        action('accessibility.verbalize', { what: 'fromCursor' }),
+        { key: shortcut('Ctrl+Cmd+R') },
+      ),
+    ]),
+    sub(
+      'accessibility.goTo',
+      'Go to',
+      [
+        now(
+          'accessibility.nextFormattingChange',
+          'Next formatting change',
+          client('nextFormattingChange'),
+          {
+            key: shortcut('Ctrl+Cmd+N then W'),
+            unverified: true,
+          },
+        ),
+        now(
+          'accessibility.previousFormattingChange',
+          'Previous formatting change',
+          client('previousFormattingChange'),
+          { key: shortcut('Ctrl+Cmd+P then W'), unverified: true },
+        ),
+        now('accessibility.nextSlide', 'Next slide', client('nextSlide'), { unverified: true }),
+        now('accessibility.previousSlide', 'Previous slide', client('previousSlide'), {
+          unverified: true,
+        }),
+      ],
+      { dividerBefore: true },
+    ),
+    now('accessibility.speakAloud', 'Speak verbalizations aloud', toggle('speakAloud'), {
+      turboslide: true,
+      dividerBefore: true,
+    }),
+  ],
+};
+
+/**
  * The ten menus in Google's order (R01 row 2), with the role gates of SPEC-3 13.4 and 09 2.3:
  * Edit, Format, Slide, Arrange and Extensions are the editor's; Insert shows a commenter its
- * Comment row alone; File, View, Tools and Help gate row by row; Help is everyone's.
+ * Comment row alone; File, View, Tools and Help gate row by row; Help is everyone's. The
+ * Accessibility menu is the eleventh, drawn while its setting is on (SPEC-5 7.5).
  */
 export const MENUS: ReadonlyArray<Menu> = [
   FILE,
@@ -2248,16 +2519,113 @@ export const MENUS: ReadonlyArray<Menu> = [
   },
   { ...EXTENSIONS, when: 'write', items: gate(EXTENSIONS.items, 'write') },
   HELP,
+  ACCESSIBILITY,
 ];
 
-/** Google menus the bar does not carry at all, with the reason. */
-export const OMITTED_MENUS: ReadonlyArray<{ label: string; reason: string }> = [
-  {
-    label: 'Accessibility',
-    reason:
-      'Appears in Google only with screen reader support on; the browser’s screen reader reads the page as it is',
+/**
+ * The rows round five flips to Now with the effect each takes (gslides-parity SPEC-5 14.1; the
+ * integrator's day 0 seam of 1.6). The rows themselves stay `later` or `omit` until their lane
+ * lands the surface (`menu-model.test.ts` pins that a Later row carries no effect), so the final
+ * effect is recorded here and the flip is one edit: the row becomes `now(id, label, effect)`
+ * with this effect, the clause retires (14.2), and the count tables of the test move. A row that
+ * does not exist yet is a new row in Google's position, named here so the audit knows it. Every
+ * dialog and panel title below is the string the shell's `openDialog` and `openPanel` take.
+ */
+export const GS5_PLANNED_EFFECTS: Readonly<Record<string, { effect: MenuEffect; lane: string }>> = {
+  /* motion (SPEC-5 2.1; B1) */
+  'slide.transition': { effect: panel('Motion'), lane: 'B1' },
+  'toolbar.transition': { effect: panel('Motion'), lane: 'B1' },
+  'view.motion': { effect: panel('Motion'), lane: 'B1' },
+  'insert.animation': { effect: action('motion.add'), lane: 'B1' },
+  'block.animate': { effect: action('motion.add'), lane: 'B1' },
+  /* media, the camera and the second screen (SPEC-5 3.2, 3.7; B2) */
+  'insert.audio': { effect: dialog('Insert audio'), lane: 'B2' },
+  'insert.video': { effect: dialog('Insert video'), lane: 'B2' },
+  'insert.image.camera': { effect: dialog('Camera'), lane: 'B2' },
+  'insert.speakerSpotlight': { effect: action('block.insert', { type: 'spotlight' }), lane: 'B2' },
+  'title.slideshow.presentOnAnotherScreen': {
+    effect: action('view.presentOnScreen', { screen: 'other' }),
+    lane: 'B2',
   },
+  'title.slideshow.displayOptions': { effect: dialog('Presentation display options'), lane: 'B2' },
+  /* templates, building blocks and the import (SPEC-5 4.3 to 4.5, 5.2; B3) */
+  'insert.templates': { effect: panel('Templates'), lane: 'B3' },
+  'insert.buildingBlocks': { effect: panel('Building blocks'), lane: 'B3' },
+  'file.new.templateGallery': { effect: route('/decks/templates', true), lane: 'B3' },
+  /* the page, the downloads (SPEC-5 6.1, 6.3, 6.4; B4) */
+  'file.pageSetup': { effect: dialog('Page setup'), lane: 'B4' },
+  'file.download.odp': { effect: dialog('Download'), lane: 'B4' },
+  'file.download.svg': { effect: action('render.slide', { format: 'svg' }), lane: 'B4' },
+  /* the text tools, help and the remaining rows (SPEC-5 7; B5) */
+  'file.language': { effect: { kind: 'submenu' }, lane: 'B5' },
+  /* the two delete rows open the Delete versions dialog, whose confirm runs version.delete (7.7) */
+  'file.versionHistory.deleteOlder': { effect: dialog('Delete versions'), lane: 'B5' },
+  'file.versionHistory.deleteHistory': { effect: dialog('Delete versions'), lane: 'B5' },
+  'view.guides.edit': { effect: dialog('Edit guides'), lane: 'B5' },
+  'format.alignIndent.indentationOptions': { effect: dialog('Indentation options'), lane: 'B5' },
+  'format.bulletsNumbering.listOptions.restart': {
+    effect: dialog('Restart numbering'),
+    lane: 'B5',
+  },
+  'format.bulletsNumbering.listOptions.prefixSuffix': {
+    effect: dialog('Edit prefix and suffix'),
+    lane: 'B5',
+  },
+  'tools.spelling.spellCheck': { effect: panel('Spell check'), lane: 'B5' },
+  'tools.spelling.personalDictionary': { effect: dialog('Personal dictionary'), lane: 'B5' },
+  'tools.preferences': { effect: dialog('Preferences'), lane: 'B5' },
+  'tools.dictionary': { effect: panel('Dictionary'), lane: 'B5' },
+  'tools.dictateNotes': { effect: client('dictate'), lane: 'B5' },
+  'tools.accessibilitySettings.screenReader': { effect: toggle('screenReader'), lane: 'B5' },
+  'tools.accessibilitySettings.braille': { effect: toggle('braille'), lane: 'B5' },
+  'tools.accessibilitySettings.speakAloud': { effect: toggle('speakAloud'), lane: 'B5' },
+  'help.training': { effect: route('/help/training', true), lane: 'B5' },
+  'help.updates': { effect: route('/help/updates', true), lane: 'B5' },
+  'title.presence.joinChat': { effect: panel('Chat'), lane: 'B5' },
+  'title.star': { effect: toggle('starred'), lane: 'B5' },
+  /* the equation and the theme mode (SPEC-5 8.2, 9.2; B6) */
+  'insert.equation': { effect: action('equation.insert'), lane: 'B6' },
+  'view.equationToolbar': { effect: toggle('equationToolbar'), lane: 'B6' },
+  'slide.editTheme': { effect: client('themeMode'), lane: 'B6' },
+  'view.themeBuilder': { effect: client('themeMode'), lane: 'B6' },
+  'insert.placeholder': { effect: { kind: 'submenu' }, lane: 'B6' },
+  /* the font catalog (SPEC-5-amendments A5; B7): the toolbar's Font row exists as `toolbar.font`
+     (toolbar-tails.ts) disabled with its sentence; B7 flips `enabled` and wires the picker */
+  'toolbar.font': { effect: client('fontPicker'), lane: 'B7' },
+};
+
+/** The dialog titles round five adds (SPEC-5 14.1), the strings `dialog(title)` and the shell's registry take. */
+export const GS5_DIALOG_TITLES: ReadonlyArray<string> = [
+  'Insert audio',
+  'Insert video',
+  'Camera',
+  'Presentation display options',
+  'Import theme',
+  'Import report',
+  'Page setup',
+  'Edit guides',
+  'Indentation options',
+  'Restart numbering',
+  'Edit prefix and suffix',
+  'Personal dictionary',
+  'Preferences',
+  'More fonts',
+  /* merge 2: the confirm of the two version delete rows (7.7) */
+  'Delete versions',
 ];
+
+/** The panel titles round five adds (SPEC-5 14.1), the strings `panel(title)` and the shell's slot take. */
+export const GS5_PANEL_TITLES: ReadonlyArray<string> = [
+  'Motion',
+  'Templates',
+  'Building blocks',
+  'Spell check',
+  'Dictionary',
+  'Chat',
+];
+
+/** Google menus the bar does not carry at all, with the reason: none since the Accessibility menu joined (SPEC-5 7.5). */
+export const OMITTED_MENUS: ReadonlyArray<{ label: string; reason: string }> = [];
 
 // ---------------------------------------------------------------------------------------------
 // 3.1 The toolbar
@@ -2435,8 +2803,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     control: 'toolbar.transition',
     label: 'Transition',
     text: true,
-    status: 'later',
-    stubReason: STILL_SLIDES,
+    status: 'now',
     item: 'slide.transition',
   },
   {
@@ -2484,7 +2851,7 @@ const OBJECT_CLIPBOARD: ReadonlyArray<ContextEntry> = [
   'edit.duplicate',
 ];
 
-/** The Arrange rows of an object menu (SPEC 4.3; SPEC-2 4.3 adds Rotate, Group and Ungroup). */
+/** The Arrange rows of an object menu (SPEC 4.3; SPEC-2 4.3 adds Rotate, Group and Ungroup; gslides-parity SPEC-5 14.1 adds Animate after them). */
 const OBJECT_ARRANGE: ReadonlyArray<ContextEntry> = [
   'arrange.order',
   'arrange.rotate',
@@ -2493,6 +2860,8 @@ const OBJECT_ARRANGE: ReadonlyArray<ContextEntry> = [
   'arrange.distribute',
   'arrange.group',
   'arrange.ungroup',
+  DIVIDER,
+  'block.animate',
 ];
 
 /**
@@ -2795,6 +3164,11 @@ export type MenuContext = {
     /** pending access requests, for the dot on Share */
     pendingRequests?: number;
   };
+  /* round five (gslides-parity SPEC-5 3.7, 9.2), both optional so a context built before merge 2 reads as today */
+  /** the browser offers the Window Management API (`getScreenDetails`); the two second screen rows are disabled without it */
+  screens?: boolean;
+  /** the editor's own mode: Edit theme draws the Insert > Placeholder rows */
+  editorMode?: 'edit' | 'theme';
 };
 
 /** A fresh presentation with nothing selected (SPEC 11.1): the default state of every menu. */
@@ -2977,6 +3351,11 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return ctx.account?.signedIn === true;
     case 'canSignIn':
       return ctx.account !== undefined && !ctx.account.signedIn && ctx.account.signInAvailable;
+    /* round five (SPEC-5 3.7, 9.2) */
+    case 'multiScreen':
+      return ctx.screens === true;
+    case 'themeMode':
+      return ctx.editorMode === 'theme';
   }
 }
 
@@ -3083,8 +3462,11 @@ export function menuOf(itemId: string): MenuId | 'title' {
   const head = itemId.split('.')[0];
   if (head === 'title') return 'title';
   const menu = MENUS.find((each) => each.id === head);
-  if (menu === undefined) throw new Error(`no menu for ${itemId}`);
-  return menu.id;
+  if (menu !== undefined) return menu.id;
+  /* a row held under another menu (the object menu's `block.animate` under Insert, SPEC-5 14.1) */
+  const holder = MENUS.find((each) => walkItems(each.items).some((item) => item.id === itemId));
+  if (holder === undefined) throw new Error(`no menu for ${itemId}`);
+  return holder.id;
 }
 
 /** The labels from the menu title down to the item: ['File', 'Download', 'PDF Document (.pdf)']. */
@@ -3127,7 +3509,11 @@ export function visibleItems(
 
 /** The menus the bar draws in a context: a menu whose `when` says no is absent (SPEC-3 13.4). */
 export function visibleMenus(ctx: MenuContext, menus: ReadonlyArray<Menu> = MENUS): Menu[] {
-  return menus.filter((menu) => isPresent(menu, ctx));
+  /* a menu with a setting is drawn while the setting is on (SPEC-5 7.5: Accessibility under screen reader support) */
+  return menus.filter(
+    (menu) =>
+      isPresent(menu, ctx) && (menu.setting === undefined || ctx.settings[menu.setting] === true),
+  );
 }
 
 /**

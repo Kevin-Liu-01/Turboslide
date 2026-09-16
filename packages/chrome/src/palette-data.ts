@@ -17,22 +17,32 @@ import { actionsInOrder } from '@turboslide/schema/actions';
 import type { Block, BlockType, ShapeKind } from '@turboslide/schema/blocks';
 import { PRIMITIVE_BLOCK_TYPES } from '@turboslide/schema/blocks';
 import { CATALOG } from '@turboslide/schema/catalog';
-import type { Deck, Slide, SlideKind, SlotName } from '@turboslide/schema/deck';
-import { slideBlocks, slideTitle, slotsForLayout } from '@turboslide/schema/deck';
+import type { Deck, DeckDocument, Slide, SlideKind, SlotName } from '@turboslide/schema/deck';
+import { slideBlocks, slideOrder, slideTitle, slotsForLayout } from '@turboslide/schema/deck';
 import { FREEFORM_GRID, snapPosition } from '@turboslide/schema/freeform';
 import type { BlockId, SlideId } from '@turboslide/schema/ids';
 import type { BlockSlot, Version } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
-import { CONTENT_BOX } from '@turboslide/schema/render';
+import type { Page } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, contentBox } from '@turboslide/schema/render';
 
 import { authorName } from './dispatch';
 import type { IconName } from './icons';
 import { BLOCK_ICONS, KIND_ICONS } from './inspector/sections';
 import type { ShellMode } from './shell-data';
 import { LAYOUTS, pickAsset } from '@turboslide/schema/layouts';
+import { plainText } from '@turboslide/schema/text';
 
 export type PaletteGroupId =
-  'slides' | 'insert' | 'actions' | 'view' | 'versions' | 'menus' | 'layouts';
+  | 'slides'
+  | 'insert'
+  | 'actions'
+  | 'view'
+  | 'versions'
+  | 'menus'
+  | 'layouts'
+  /* gslides-parity SPEC-5 7.4, 0.38 (R10 9): the tool finder's deck text hits */
+  | 'deckText';
 
 export type PaletteGroup = {
   id: PaletteGroupId;
@@ -45,6 +55,7 @@ export type PaletteGroup = {
 /** The groups in the order the palette shows them (SPEC 6.3); the last two belong to Search the menus. */
 export const PALETTE_GROUPS: ReadonlyArray<PaletteGroup> = [
   { id: 'menus', label: 'Menus' },
+  { id: 'deckText', label: 'Text in this presentation' },
   { id: 'slides', label: 'Go to slide', prefix: '#' },
   { id: 'insert', label: 'Insert', prefix: '+' },
   { id: 'actions', label: 'Actions', prefix: '>' },
@@ -199,9 +210,14 @@ const DEFAULT_SIZE: Readonly<Record<string, [number, number]>> = {
  * Where a new block lands on a freeform slide: under the selected block when it has a box, else
  * at the content box's top left, snapped like a drag would be (freeform.ts snapPosition).
  */
-export function defaultPosition(slide: Slide, type: BlockType, blockId?: BlockId): Position {
+export function defaultPosition(
+  slide: Slide,
+  type: BlockType,
+  blockId?: BlockId,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): Position {
   const [w, h] = DEFAULT_SIZE[type] ?? [320, 160];
-  const [contentX, contentY] = CONTENT_BOX;
+  const [contentX, contentY] = contentBox(page);
   const anchor =
     blockId === undefined
       ? undefined
@@ -868,4 +884,73 @@ export function paletteCount(n: number): string {
 /** The slot names a content slide offers, for the insert hints. */
 export function slotNames(slide: Slide): ReadonlyArray<SlotName> {
   return slide.kind === 'content' ? slotsForLayout(slide.layout) : [];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Text in this presentation (gslides-parity SPEC-5 7.4, 0.38; R10 9; P1 5.9): the tool finder
+// lists up to five deck text hits by slide when the query matches visible text, with "Find and
+// replace <query>" as the group's first row, which opens Edit > Find and replace prefilled. The
+// entries are every Text of the deck as a row (the palette's filter picks the matches); the cap
+// and the first row are the Palette's (DECK_TEXT_GROUP_MAX, findReplaceEntry).
+
+/** How many deck text hits the group shows (SPEC-5 7.4 "up to five"). */
+export const DECK_TEXT_GROUP_MAX = 5;
+
+/** The id of the group's first row; the Palette builds it from the query. */
+export const FIND_REPLACE_ENTRY_ID = 'deckText:find-replace';
+
+/** One row per Text of the deck, titled by its plain text, previewing its slide. */
+export function deckTextEntries(document: DeckDocument): PaletteEntry[] {
+  const out: PaletteEntry[] = [];
+  const order = slideOrder(document.deck);
+  order.forEach((id, index) => {
+    const slide = document.slides[id];
+    if (slide === undefined) return;
+    const n = index + 1;
+    const texts: { key: string; text: string }[] = [];
+    if (slide.kind === 'title')
+      texts.push({ key: 'heading', text: slide.heading }, { key: 'lead', text: slide.lead });
+    if (slide.kind === 'statement') texts.push({ key: 'big', text: slide.big });
+    for (const { block } of slideBlocks(slide)) {
+      const record = block as unknown as Record<string, unknown>;
+      if (typeof record['text'] === 'string')
+        texts.push({ key: `${block.id}/text`, text: record['text'] });
+      if (Array.isArray(record['items']))
+        (record['items'] as unknown[]).forEach((item, i) => {
+          const text = typeof item === 'string' ? item : (item as { text?: unknown }).text;
+          if (typeof text === 'string') texts.push({ key: `${block.id}/items/${i}`, text });
+        });
+    }
+    if (slide.notes !== undefined && slide.notes !== '')
+      texts.push({ key: 'notes', text: slide.notes });
+    for (const entry of texts) {
+      const plain = plainText(entry.text).trim();
+      if (plain === '') continue;
+      out.push({
+        id: `deckText:${id}:${entry.key}`,
+        group: 'deckText',
+        title: plain.length > 96 ? `${plain.slice(0, 95)}…` : plain,
+        meta: `Slide ${n}`,
+        icon: 'text',
+        preview: id,
+        terms: plain,
+        run: { kind: 'dispatch', action: 'view.goto', input: { slideId: id } },
+      });
+    }
+  });
+  return out;
+}
+
+/** The group's first row: Edit > Find and replace prefilled with the query. */
+export function findReplaceEntry(query: string, open: (query: string) => void): PaletteEntry {
+  return {
+    id: FIND_REPLACE_ENTRY_ID,
+    group: 'deckText',
+    title: `Find and replace ${query}`,
+    hint: 'Opens Edit > Find and replace with these words',
+    keys: 'Cmd Shift H',
+    icon: 'search',
+    terms: query,
+    run: { kind: 'call', call: () => open(query) },
+  };
 }

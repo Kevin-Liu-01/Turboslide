@@ -1,0 +1,272 @@
+{
+  "generatedAt": "2026-09-15",
+  "ffprobe": "ffprobe version 8.1.2 Copyright (c) 2007-2026 the FFmpeg developers",
+  "accepted": {
+    "tone-1s.wav": {
+      "format": "wav",
+      "bytes": 16044,
+      "sha256": "cc960f1e7034664841d1934d254471f3553879b6b01e46f2bb406562b3351234",
+      "durationMs": 1000,
+      "formatName": "wav",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "pcm_s16le",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-1s-extensible.wav": {
+      "format": "wav",
+      "bytes": 16068,
+      "sha256": "af44c04170ad3e2545708044b01b78b31ee06294ea8dfc9ba2db8db56431aecf",
+      "durationMs": 1000,
+      "formatName": "wav",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "pcm_s16le",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-1s-float.wav": {
+      "format": "wav",
+      "bytes": 32056,
+      "sha256": "7453c050b4b988ceec1af3e6222f08b6107bf431d2519c3da5fa5166b7e15825",
+      "durationMs": 1000,
+      "formatName": "wav",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "pcm_f32le",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-1s-list.wav": {
+      "format": "wav",
+      "bytes": 16076,
+      "sha256": "692e26d29af6633b13567b3844415521e6fef938a56a74d0e9e6f048f89094af",
+      "durationMs": 1000,
+      "formatName": "wav",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "pcm_s16le",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-1s.mp3": {
+      "format": "mp3",
+      "bytes": 4941,
+      "sha256": "99fa2579ed6d8316d61b06cb0e1870d325d111bfdb6485bf27e19c61338ff6d7",
+      "durationMs": 1000,
+      "formatName": "mp3",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "mp3",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-cbr.mp3": {
+      "format": "mp3",
+      "bytes": 4608,
+      "sha256": "6ada437f7ca1daa20a5a4dd0b6a296e56b9071690a5c1508d95ca5e209f35845",
+      "durationMs": 1152,
+      "formatName": "mp3",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "mp3",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-vbr.mp3": {
+      "format": "mp3",
+      "bytes": 4987,
+      "sha256": "234b7dacb9e8381f19c2c1fdf6634fac0e270fd3e4a48af3ee1e1c0e8de05fa9",
+      "durationMs": 1000,
+      "formatName": "mp3",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "mp3",
+          "sampleRate": 44100,
+          "channels": 2
+        }
+      ]
+    },
+    "tone-id3.mp3": {
+      "format": "mp3",
+      "bytes": 4718,
+      "sha256": "440714ae9933dd6c273c6737900a8314ae561e14f1493e186fdacc0cb6efb4c5",
+      "durationMs": 1152,
+      "formatName": "mp3",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "mp3",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "tone-1s.m4a": {
+      "format": "m4a",
+      "bytes": 4953,
+      "sha256": "c2dcf408e1502f33e792abd0e9734c93e3e738c7fc468b9c90e322d4ae4a62ed",
+      "durationMs": 1000,
+      "formatName": "mov,mp4,m4a,3gp,3g2,mj2",
+      "streams": [
+        {
+          "type": "audio",
+          "codec": "aac",
+          "sampleRate": 8000,
+          "channels": 1
+        }
+      ]
+    },
+    "bars-1s.webm": {
+      "format": "webm",
+      "bytes": 16074,
+      "sha256": "00aac7adb9c885e5f666d271be8afe12ce7953abeace0cf3ca6e6c16d9afa82d",
+      "durationMs": 1008,
+      "formatName": "matroska,webm",
+      "streams": [
+        {
+          "type": "video",
+          "codec": "vp9",
+          "width": 320,
+          "height": 180
+        },
+        {
+          "type": "audio",
+          "codec": "opus",
+          "sampleRate": 48000,
+          "channels": 1
+        }
+      ]
+    },
+    "bars-live.webm": {
+      "format": "webm",
+      "bytes": 15979,
+      "sha256": "2c5b67fd96d658c738c0b6149513428f8c66372c038713b6dfb67bd4efcf40d7",
+      "durationMs": null,
+      "formatName": "matroska,webm",
+      "streams": [
+        {
+          "type": "video",
+          "codec": "vp9",
+          "width": 320,
+          "height": 180
+        },
+        {
+          "type": "audio",
+          "codec": "opus",
+          "sampleRate": 48000,
+          "channels": 1
+        }
+      ]
+    },
+    "bars-1s.mp4": {
+      "format": "mp4",
+      "bytes": 13265,
+      "sha256": "91d4a2791d715afe5399a749a5ea655fb21d859332692088752fe4ea02434f18",
+      "durationMs": 1000,
+      "formatName": "mov,mp4,m4a,3gp,3g2,mj2",
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "width": 320,
+          "height": 180
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "sampleRate": 48000,
+          "channels": 1
+        }
+      ]
+    },
+    "bars-1s-nofaststart.mp4": {
+      "format": "mp4",
+      "bytes": 13265,
+      "sha256": "7e97455c4f5531eda2657e3bcb7372eeba86ad2073e35a37cf54b9d5f61ffbf1",
+      "durationMs": 1000,
+      "formatName": "mov,mp4,m4a,3gp,3g2,mj2",
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "width": 320,
+          "height": 180
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "sampleRate": 48000,
+          "channels": 1
+        }
+      ]
+    }
+  },
+  "refused": {
+    "tone-adpcm.wav": {
+      "reason": "adpcm",
+      "bytes": 4220,
+      "sha256": "dd53ef99e1cf2710755a206fab3c3c7203e794db2b78cfca3e5c5da94dedca1a"
+    },
+    "bars-1s.mov": {
+      "reason": "mov",
+      "bytes": 13316,
+      "sha256": "9f7d8d196d1f37f373bd5381b14c5dff4bd5cbcb6c3f631d8dd6d1f4249eb864"
+    },
+    "tone.ogg": {
+      "reason": "ogg",
+      "bytes": 7967,
+      "sha256": "7ef6a149004d103236ff016176cbd3c08f395cd3a839631dd665449fef09ab1f"
+    },
+    "bars.mkv": {
+      "reason": "mkv",
+      "bytes": 16146,
+      "sha256": "c28128e46d2daff0b59670a651f2e68a7edd2af252678920cdf41be9eeb5037c"
+    },
+    "tone.flac": {
+      "reason": "flac",
+      "bytes": 12850,
+      "sha256": "1e7a1c91768dff3be356602e70d03f2a0ea075b57fbb3853421ea6dcd63a7b37"
+    },
+    "tone.aac": {
+      "reason": "aac",
+      "bytes": 4173,
+      "sha256": "ae18cc61e36790c51c8398b31f8806413338a45d5461e63028807c748b7365af"
+    },
+    "bars.avi": {
+      "reason": "avi",
+      "bytes": 39844,
+      "sha256": "bd4315b4657ad58e5dff5f465970e2475096c91e99e56ef77dc19b90b9ce4db8"
+    },
+    "webm-as.mp4": {
+      "reason": "mismatch",
+      "bytes": 16074,
+      "sha256": "00aac7adb9c885e5f666d271be8afe12ce7953abeace0cf3ca6e6c16d9afa82d"
+    },
+    "truncated.mp4": {
+      "reason": "truncated",
+      "bytes": 4096,
+      "sha256": "a35a44a9383b3a0952557a95264537977a84c42310e750cb8afdb07de1843d0b"
+    }
+  }
+}

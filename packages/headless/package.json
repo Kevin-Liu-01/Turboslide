@@ -29,6 +29,7 @@
     "@turboslide/effects": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",
+    "@turboslide/store": "workspace:*",
     "pixelmatch": "catalog:",
     "playwright-core": "catalog:",
     "pngjs": "catalog:",

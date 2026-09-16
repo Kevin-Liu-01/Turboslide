@@ -179,7 +179,10 @@ describe('the editor shell in its default state', () => {
     const titles = [...container.querySelectorAll('[role="menubar"] [role="menuitem"]')].map(
       (el) => el.textContent,
     );
-    expect(titles).toEqual(MENUS.map((menu) => menu.label));
+    /* the ten menus; the Accessibility menu joins while screen reader support is on (SPEC-5 7.5) */
+    expect(titles).toEqual(
+      MENUS.filter((menu) => menu.setting === undefined).map((menu) => menu.label),
+    );
     const toolbar = container.querySelector('[data-control="toolbar"]') as HTMLElement;
     const controls = [...toolbar.querySelectorAll<HTMLElement>('[data-control^="toolbar."]')]
       .map((el) => el.dataset.control as string)
@@ -189,12 +192,12 @@ describe('the editor shell in its default state', () => {
     expect(controls).toEqual(
       [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT].map((control) => control.control),
     );
-    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition stays the
-       Later control, in the tab order, aria-disabled, with the stub sentence */
+    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; gslides-parity SPEC-5
+       2.1: Transition opens the Motion panel, so it is live too and in the tab order */
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
     expect(comment.getAttribute('aria-disabled')).toBeNull();
     const transition = toolbar.querySelector('[data-control="toolbar.transition"]') as HTMLElement;
-    expect(transition.getAttribute('aria-disabled')).toBe('true');
+    expect(transition.getAttribute('aria-disabled')).toBeNull();
     expect(transition.hasAttribute('disabled')).toBe(false);
     expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
     expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();

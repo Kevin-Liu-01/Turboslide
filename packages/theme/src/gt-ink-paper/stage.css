@@ -33,13 +33,16 @@
 .ts-sheet.is-picture .slide.is-on .mood-img {
   visibility: hidden;
 }
+/* the sheet and the stage take the deck's page from the two custom properties the stage root
+   emits (gslides-parity SPEC-5 6.1; R08 1.2); the fallback is the GT sheet, 1600 by 900, so a
+   deck without a page draws as it always did */
 .ts-sheet .sheet,
 .ts-sheet.sheet {
   position: absolute;
   left: 0;
   top: 0;
-  width: 1600px;
-  height: 900px;
+  width: var(--ts-sheet-w, 1600px);
+  height: var(--ts-sheet-h, 900px);
   box-sizing: content-box;
   background: var(--paper);
   border: 1px solid var(--edge);
@@ -53,8 +56,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 1600px;
-  height: 900px;
+  width: var(--ts-sheet-w, 1600px);
+  height: var(--ts-sheet-h, 900px);
   transform-origin: 0 0;
 }
 .ts-sheet .slide {

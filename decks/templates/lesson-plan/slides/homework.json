@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "homework",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Homework",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Due at the next lesson.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Read pages 40 to 44"
+          },
+          {
+            "text": "Write three sentences on one part of the cycle"
+          },
+          {
+            "text": "Bring one question"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Homework"
+}

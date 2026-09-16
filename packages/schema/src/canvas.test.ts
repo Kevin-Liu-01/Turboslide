@@ -23,12 +23,19 @@ import {
   applyGuides,
   canvasUnmoved,
   fromCanvas,
+  GUIDE_CENTRE,
+  guideCentre,
   locksAspect,
   minLineBox,
   normalizeGuideList,
+  picturePos,
   resizeBox,
   resizeKindOf,
   rotatedBoxCorners,
+  scaleCanvas,
+  scaleFactor,
+  scaleGuides,
+  scalePosition,
   toCanvas,
 } from './canvas.ts';
 import type { CanvasBoxes, ResizeBox, ResizeHandle } from './canvas.ts';
@@ -741,5 +748,140 @@ describe('resizeBox', () => {
     expect(resizeBox('e', { dx: 25 / 0.25, dy: 0 }, {}, 0, 'text', box)).toEqual(
       resizeBox('e', { dx: 400 / 4, dy: 0 }, {}, 0, 'text', box),
     );
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The page (gslides-parity SPEC-5 6.1; R08 3a to 3d): the arithmetic on another page and scaleCanvas
+
+describe('the canvas arithmetic on a page', () => {
+  const standard = { width: 1200, height: 900 };
+
+  it('converts a picture kind onto the page: the picture covers the page and the plate sits in its content box', () => {
+    const boxes: CanvasBoxes = { blocks: {}, prompted: [] };
+    const converted = toCanvas(OPENER_BRAND, boxes, standard)!;
+    const picture = converted.slide.slots.main?.find((block) => block.type === 'picture');
+    expect(picture?.pos).toEqual({ x: 0, y: 0, w: 1200, h: 900, z: 0 });
+    const plate = converted.slide.slots.main?.find((block) => block.id === 'plate');
+    expect(plate?.pos?.x).toBe(137);
+    expect(plate?.pos?.w).toBe(740);
+    // the default page still puts the picture at 0, 0, 1600, 900
+    const legacy = toCanvas(OPENER_BRAND, boxes)!;
+    expect(legacy.slide.slots.main?.find((block) => block.type === 'picture')?.pos).toEqual(
+      PICTURE_POS,
+    );
+    expect(picturePos(standard)).toEqual({ x: 0, y: 0, w: 1200, h: 900, z: 0 });
+  });
+
+  it('clamps and centres the guides on the page', () => {
+    expect(normalizeGuideList([1500, 3, -2], 'x', standard)).toEqual([0, 3, 1200]);
+    expect(normalizeGuideList([1500, 3, -2], 'x')).toEqual([0, 3, 1500]);
+    expect(guideCentre(standard)).toEqual({ x: 600, y: 450 });
+    expect(guideCentre()).toEqual(GUIDE_CENTRE);
+    expect(
+      applyGuides({ x: [1500], y: [450] }, { add: [{ axis: 'x', at: 600 }] }, standard),
+    ).toEqual({ x: [600, 1200], y: [450] });
+  });
+});
+
+describe('scaleCanvas (R08 3d)', () => {
+  const slide: ContentSlide = {
+    schemaVersion: 1,
+    id: 'scale',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        {
+          id: 'centred',
+          type: 'box',
+          pos: { x: 600, y: 350, w: 400, h: 200, z: 0 },
+          padding: 16,
+        } as Block,
+        {
+          id: 'text',
+          type: 'text',
+          text: 'Scaled',
+          typography: { size: 22, tracking: -0.01, spaceBefore: 8 },
+          pos: { x: 137, y: 129, w: 300, h: 60, z: 1, rotate: 37 },
+        } as Block,
+        {
+          id: 'table',
+          type: 'table',
+          columns: [{ width: 240 }, {}],
+          rows: [{ cells: ['a', 'b'], height: 40 }, { cells: ['c', 'd'] }],
+          pos: { x: 1000, y: 600, w: 400, h: 120, z: 2 },
+        } as Block,
+        { id: 'flow', type: 'paragraph', text: 'no pos' } as Block,
+      ],
+    },
+  };
+  const from = { width: 1600, height: 900 };
+  const to = { width: 1200, height: 900 };
+
+  it('keeps every position under keep and answers k 1', () => {
+    const result = scaleCanvas(slide, from, to, 'keep');
+    expect(result.k).toBe(1);
+    expect(result.objectsScaled).toBe(0);
+    expect(result.slide).toBe(slide);
+  });
+
+  it('fits with the smaller ratio about the sheet centre: a centred object stays centred and 1600 maps to 1200', () => {
+    const result = scaleCanvas(slide, from, to, 'fit');
+    expect(result.k).toBe(0.75);
+    expect(result.objectsScaled).toBe(3);
+    const blocks = (result.slide as ContentSlide).slots.main ?? [];
+    const centred = blocks.find((block) => block.id === 'centred')!;
+    expect(centred.pos).toEqual({ x: 450, y: 375, w: 300, h: 150, z: 0 });
+    expect((centred as { padding?: number }).padding).toBe(12);
+    // the whole width maps to the whole width: x 0 to 0, x 1600 to 1200
+    expect(scalePosition({ x: 0, y: 0, w: 1600, h: 900, z: 0 }, from, to, 0.75)).toEqual({
+      x: 0,
+      y: 112.5,
+      w: 1200,
+      h: 675,
+      z: 0,
+    });
+    const text = blocks.find((block) => block.id === 'text')!;
+    expect(text.pos?.rotate).toBe(37);
+    expect(text.pos?.w).toBe(225);
+    expect(
+      (text as { typography?: { size?: number; tracking?: number; spaceBefore?: number } })
+        .typography,
+    ).toEqual({
+      size: 16.5,
+      tracking: -0.01,
+      spaceBefore: 6,
+    });
+    const table = blocks.find((block) => block.id === 'table') as {
+      columns: { width?: number }[];
+      rows: { height?: number }[];
+    };
+    expect(table.columns[0]?.width).toBe(180);
+    expect(table.columns[1]?.width).toBeUndefined();
+    expect(table.rows[0]?.height).toBe(30);
+    expect(table.rows[1]?.height).toBeUndefined();
+    const flow = blocks.find((block) => block.id === 'flow')!;
+    expect(flow.pos).toBeUndefined();
+  });
+
+  it('maximizes with the larger ratio and leaves a grammar slide alone', () => {
+    expect(scaleFactor(from, { width: 1200, height: 1200 }, 'maximize')).toBe(4 / 3);
+    expect(scaleFactor(from, { width: 1200, height: 1200 }, 'fit')).toBe(0.75);
+    const grammar = scaleCanvas(CONTENT_RULE, from, to, 'fit');
+    expect(grammar.slide).toBe(CONTENT_RULE);
+    expect(grammar.objectsScaled).toBe(0);
+  });
+
+  it('scales the guides under fit and drops the ones past the edge under keep', () => {
+    expect(scaleGuides({ x: [800, 1500], y: [450] }, from, to, 'keep')).toEqual({
+      guides: { x: [800], y: [450] },
+      dropped: 1,
+    });
+    expect(scaleGuides({ x: [800, 1500], y: [450] }, from, to, 'fit')).toEqual({
+      guides: { x: [600, 1125], y: [450] },
+      dropped: 0,
+    });
+    expect(scaleGuides(undefined, from, to, 'fit')).toEqual({ guides: undefined, dropped: 0 });
   });
 });

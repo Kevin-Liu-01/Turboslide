@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "comparison",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Comparison",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {},
+          {},
+          {},
+          {}
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Criteria",
+              "Today",
+              "Alternative",
+              "Us"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Setup time",
+              "Weeks",
+              "Days",
+              "One afternoon"
+            ]
+          },
+          {
+            "cells": [
+              "Owner",
+              "Everyone",
+              "A specialist",
+              "The team"
+            ]
+          },
+          {
+            "cells": [
+              "Reporting",
+              "By hand",
+              "Nightly",
+              "Live"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Comparison"
+}

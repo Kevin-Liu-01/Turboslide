@@ -47,6 +47,7 @@ const ROLE_WORDS: Record<AssetRole, string> = {
   logo: 'logos',
   frame: 'frames',
   other: 'other',
+  media: 'media',
 };
 
 /** The rows a filter and a role leave, in id order. */

@@ -57,13 +57,15 @@ type Row = {
   was?: MenuStatus;
   /** the round two status the row had before SPEC-3 section 13 flipped it */
   was3?: MenuStatus;
+  /** the round four status the row had before gslides-parity SPEC-5 14.1 flipped it (merge 2) */
+  was5?: MenuStatus;
 };
 
 const row = (
   menu: string,
   status: MenuStatus,
   ids: string[],
-  extra: { omits?: string[]; was?: MenuStatus; was3?: MenuStatus } = {},
+  extra: { omits?: string[]; was?: MenuStatus; was3?: MenuStatus; was5?: MenuStatus } = {},
 ): Row => ({ menu, status, ids, ...extra });
 
 /**
@@ -76,7 +78,7 @@ const SPEC_ROWS: Row[] = [
   /* 2.0 the title row; SPEC-3 4.2, 13.1, 13.2 add the presence slot, the inbox and the own chip */
   row('title', 'now', ['title.appIcon']),
   row('title', 'now', ['title.name']),
-  row('title', 'omit', ['title.star']),
+  row('title', 'now', ['title.star'], { was5: 'omit' }),
   row('title', 'omit', ['title.move']),
   row('title', 'now', ['title.saveState']),
   row('title', 'now', ['title.lastEdit']),
@@ -86,7 +88,7 @@ const SPEC_ROWS: Row[] = [
     'title.presence.goTo',
     'title.presence.me',
   ]),
-  row('title', 'later', ['title.presence.joinChat']),
+  row('title', 'now', ['title.presence.joinChat'], { was5: 'later' }),
   row('title', 'now', ['title.comments'], { was3: 'later' }),
   row('title', 'now', ['title.inbox']),
   row('title', 'omit', ['title.meet', 'title.record']),
@@ -138,11 +140,28 @@ const SPEC_ROWS: Row[] = [
   row('file', 'now', ['file.versionHistory.see']),
   /* SPEC-3 5.7, 13.2, 13.3: the panel's Show changes checkbox and its two disabled delete rows */
   row('file', 'now', ['file.versionHistory.showChanges']),
-  row('file', 'later', ['file.versionHistory.deleteOlder', 'file.versionHistory.deleteHistory']),
+  row('file', 'now', ['file.versionHistory.deleteOlder', 'file.versionHistory.deleteHistory'], {
+    was5: 'later',
+  }),
   row('file', 'omit', ['file.approvals']),
   row('file', 'omit', ['file.offline']),
   row('file', 'now', ['file.details']),
-  row('file', 'omit', ['file.language']),
+  /* SPEC-5 7.1: the language submenu with its seven radio rows */
+  row(
+    'file',
+    'now',
+    [
+      'file.language',
+      'file.language.en-US',
+      'file.language.en-GB',
+      'file.language.es',
+      'file.language.fr',
+      'file.language.nl',
+      'file.language.pt-BR',
+      'file.language.pt-PT',
+    ],
+    { was5: 'omit' },
+  ),
   row('file', 'later', ['file.pageSetup']),
   row('file', 'now', ['file.printPreview']),
   row('file', 'now', ['file.print']),
@@ -160,8 +179,10 @@ const SPEC_ROWS: Row[] = [
   row('edit', 'now', ['edit.findReplace']),
   /* 2.3 View */
   row('view', 'now', ['view.slideshow']),
-  row('view', 'omit', ['view.motion']),
-  row('view', 'omit', ['view.themeBuilder']),
+  row('view', 'now', ['view.motion'], { was5: 'omit' }),
+  row('view', 'now', ['view.themeBuilder'], { was5: 'omit' }),
+  /* SPEC-5 8.2: the equation toolbar toggle, a Turboslide row */
+  row('view', 'now', ['view.equationToolbar']),
   row('view', 'now', ['view.gridView']),
   row('view', 'now', [
     'view.zoom',
@@ -186,7 +207,7 @@ const SPEC_ROWS: Row[] = [
     ],
     { was: 'later' },
   ),
-  row('view', 'later', ['view.guides.edit']),
+  row('view', 'now', ['view.guides.edit'], { was5: 'later' }),
   row('view', 'now', ['view.snapTo.guides']),
   row('view', 'now', ['view.snapTo.grid']),
   /* SPEC-3 5.3, 13.1: the four display modes flip to Now with Show all comments joining them */
@@ -224,16 +245,13 @@ const SPEC_ROWS: Row[] = [
   ]),
   /* 2.4 Insert */
   row('insert', 'now', ['insert.image.upload']),
-  row('insert', 'omit', [
-    'insert.image.stockWeb',
-    'insert.image.drivePhotos',
-    'insert.image.camera',
-  ]),
+  row('insert', 'omit', ['insert.image.stockWeb', 'insert.image.drivePhotos']),
+  row('insert', 'now', ['insert.image.camera'], { was5: 'omit' }),
   row('insert', 'now', ['insert.image.byUrl']),
   row('insert', 'now', ['insert.image.fromThisPresentation']),
   row('insert', 'now', ['insert.textBox']),
   /* SPEC-2 12: Audio and Video are present with the recording clause */
-  row('insert', 'later', ['insert.audio', 'insert.video'], { was: 'omit' }),
+  row('insert', 'now', ['insert.audio', 'insert.video'], { was: 'omit', was5: 'later' }),
   row('insert', 'now', [
     'insert.shape.shapes',
     'insert.shape.shapes.rectangle',
@@ -273,16 +291,37 @@ const SPEC_ROWS: Row[] = [
     { was: 'omit' },
   ),
   row('insert', 'now', ['insert.specialCharacters'], { was: 'omit' }),
-  row('insert', 'omit', ['insert.animation']),
+  row('insert', 'now', ['insert.animation'], { was5: 'omit' }),
+  /* SPEC-5 8.2: the equation block, a Turboslide row */
+  row('insert', 'now', ['insert.equation']),
   row('insert', 'now', ['insert.link']),
   /* SPEC-3 5.3, 13.1: the card at the selection */
   row('insert', 'now', ['insert.comment'], { was3: 'later' }),
   row('insert', 'now', ['insert.newSlide']),
   row('insert', 'now', ['insert.slideNumbers']),
-  row('insert', 'omit', ['insert.placeholder']),
-  row('insert', 'later', ['insert.templates']),
-  row('insert', 'later', ['insert.buildingBlocks'], { was: 'omit' }),
-  row('insert', 'omit', ['insert.speakerSpotlight']),
+  row(
+    'insert',
+    'now',
+    [
+      'insert.placeholder',
+      'insert.placeholder.title',
+      'insert.placeholder.subtitle',
+      'insert.placeholder.body',
+      'insert.placeholder.slideNumber',
+      'insert.placeholder.picture',
+    ],
+    { was5: 'omit' },
+  ),
+  row('insert', 'now', ['insert.templates'], { was5: 'later' }),
+  row('insert', 'now', ['insert.buildingBlocks'], { was: 'omit', was5: 'later' }),
+  row('insert', 'now', ['insert.speakerSpotlight'], { was5: 'omit' }),
+  /* A8 row 10 (build-4/hotfix-4.md): the three grammar objects under one Turboslide row */
+  row('insert', 'now', [
+    'insert.more',
+    'insert.more.mark',
+    'insert.more.codePanel',
+    'insert.more.logoPlates',
+  ]),
   row('insert', 'now', ['insert.icon']),
   row('insert', 'now', ['insert.material']),
   /* 2.5 Format */
@@ -316,7 +355,7 @@ const SPEC_ROWS: Row[] = [
   row('format', 'now', ['format.alignIndent.increaseIndent', 'format.alignIndent.decreaseIndent'], {
     was: 'later',
   }),
-  row('format', 'later', ['format.alignIndent.indentationOptions'], { was: 'omit' }),
+  row('format', 'now', ['format.alignIndent.indentationOptions'], { was: 'omit', was5: 'later' }),
   row('format', 'now', [
     'format.spacing',
     'format.spacing.single',
@@ -337,12 +376,12 @@ const SPEC_ROWS: Row[] = [
   ),
   row(
     'format',
-    'later',
+    'now',
     [
       'format.bulletsNumbering.listOptions.restart',
       'format.bulletsNumbering.listOptions.prefixSuffix',
     ],
-    { was: 'omit' },
+    { was: 'omit', was5: 'later' },
   ),
   row('format', 'now', [
     'format.table.insertRowAbove',
@@ -408,8 +447,8 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-2 0.74: one Background dialog on every slide kind; the picture sources left the row */
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
-  row('slide', 'later', ['slide.transition']),
-  row('slide', 'later', ['slide.editTheme']),
+  row('slide', 'now', ['slide.transition'], { was5: 'later' }),
+  row('slide', 'now', ['slide.editTheme'], { was5: 'later' }),
   row('slide', 'now', ['slide.changeTheme']),
   /* 2.7 Arrange */
   row('arrange', 'now', [
@@ -452,19 +491,16 @@ const SPEC_ROWS: Row[] = [
   ),
   row('arrange', 'now', ['arrange.group', 'arrange.ungroup'], { was: 'later' }),
   /* 2.8 Tools */
-  row('tools', 'later', ['tools.spelling.spellCheck']),
+  row('tools', 'now', ['tools.spelling.spellCheck'], { was5: 'later' }),
   row('tools', 'now', ['tools.spelling.underlineErrors']),
-  row('tools', 'omit', ['tools.spelling.personalDictionary']),
+  row('tools', 'now', ['tools.spelling.personalDictionary'], { was5: 'omit' }),
   row('tools', 'omit', ['tools.explore']),
-  row('tools', 'omit', [
-    'tools.linkedObjects',
-    'tools.dictionary',
-    'tools.qaHistory',
-    'tools.dictateNotes',
-  ]),
+  row('tools', 'omit', ['tools.linkedObjects', 'tools.qaHistory']),
+  row('tools', 'now', ['tools.dictionary'], { was5: 'omit' }),
+  row('tools', 'now', ['tools.dictateNotes'], { was5: 'omit' }),
   /* SPEC-3 5.5, 13.2: Google's per file row */
   row('tools', 'now', ['tools.notificationSettings']),
-  row('tools', 'later', ['tools.preferences']),
+  row('tools', 'now', ['tools.preferences'], { was5: 'later' }),
   /* SPEC-3 0.42, 13.1: the submenu with the one row Turboslide can honour */
   row(
     'tools',
@@ -472,10 +508,14 @@ const SPEC_ROWS: Row[] = [
     ['tools.accessibilitySettings', 'tools.accessibilitySettings.collaboratorAnnouncements'],
     { was3: 'omit' },
   ),
-  row('tools', 'omit', [
-    'tools.accessibilitySettings.screenReader',
-    'tools.accessibilitySettings.braille',
-  ]),
+  row(
+    'tools',
+    'now',
+    ['tools.accessibilitySettings.screenReader', 'tools.accessibilitySettings.braille'],
+    { was5: 'omit' },
+  ),
+  /* SPEC-5 7.5: the fourth toggle, a Turboslide row */
+  row('tools', 'now', ['tools.accessibilitySettings.speakAloud']),
   /* SPEC-3 5.7, 13.1, 13.3: the Activity panel and its one Later tab */
   row('tools', 'now', ['tools.activityDashboard'], { was3: 'omit' }),
   row('tools', 'later', ['tools.activityDashboard.viewers']),
@@ -503,7 +543,7 @@ const SPEC_ROWS: Row[] = [
   /* 2.10 Help */
   row('help', 'now', ['help.searchMenus']),
   row('help', 'now', ['help.help']),
-  row('help', 'omit', ['help.training', 'help.updates']),
+  row('help', 'now', ['help.training', 'help.updates'], { was5: 'omit' }),
   row('help', 'now', ['help.improve'], { was: 'later' }),
   row('help', 'omit', ['help.privacyPolicy', 'help.termsOfService']),
   row('help', 'now', ['help.keyboardShortcuts']),
@@ -533,8 +573,25 @@ function LINE_END_IDS(prefix: string): string[] {
 const OTHER_ROWS: Row[] = [
   row('slideshow', 'now', ['title.slideshow.presenterView']),
   row('slideshow', 'now', ['title.slideshow.startFromBeginning']),
-  row('slideshow', 'later', ['title.slideshow.presentOnAnotherScreen']),
-  row('slideshow', 'omit', ['title.slideshow.displayOptions']),
+  row('slideshow', 'now', ['title.slideshow.presentOnAnotherScreen'], { was5: 'later' }),
+  row('slideshow', 'now', ['title.slideshow.displayOptions'], { was5: 'omit' }),
+  /* gslides-parity SPEC-5 14.1: the object menu's Animate row */
+  row('context', 'now', ['block.animate']),
+  /* SPEC-5 7.5: the Accessibility menu, drawn while screen reader support is on */
+  row('accessibility', 'now', [
+    'accessibility.verbalize',
+    'accessibility.verbalize.selection',
+    'accessibility.verbalize.formatting',
+    'accessibility.verbalize.fromCursor',
+  ]),
+  row('accessibility', 'now', [
+    'accessibility.goTo',
+    'accessibility.nextFormattingChange',
+    'accessibility.previousFormattingChange',
+    'accessibility.nextSlide',
+    'accessibility.previousSlide',
+  ]),
+  row('accessibility', 'now', ['accessibility.speakAloud']),
   row('context', 'now', ['format.altText']),
   row('context', 'now', ['format.textFitting'], { was: 'later' }),
   row('context', 'now', ['format.dropShadow']),
@@ -567,17 +624,17 @@ const OTHER_ROWS: Row[] = [
  * [146, 17, 24] over 187 rows (build-3/b6.md section 2 has the arithmetic per menu).
  */
 const COUNTS: Record<string, Counts> = {
-  title: [10, 1, 4],
-  file: [24, 5, 5],
+  title: [12, 0, 3],
+  file: [26, 4, 4],
   edit: [11, 0, 0],
-  view: [16, 1, 2],
-  insert: [21, 3, 5],
-  format: [28, 2, 0],
-  slide: [8, 2, 0],
+  view: [20, 0, 0],
+  insert: [30, 0, 2],
+  format: [30, 0, 0],
+  slide: [10, 0, 0],
   arrange: [7, 0, 0],
-  tools: [15, 3, 4],
+  tools: [22, 1, 2],
   extensions: [2, 0, 2],
-  help: [4, 0, 2],
+  help: [5, 0, 1],
 };
 
 /**
@@ -586,28 +643,33 @@ const COUNTS: Record<string, Counts> = {
  * gone: every comment row is Now (SPEC-3 5.3).
  */
 const LATER_CLAUSES = new Set<string>([
+  /* the two rows of gslides-parity SPEC-5 14.3 (SPEC-3 13.3) */
+  'The invitation carries your message',
+  'Turboslide keeps no record of who viewed a presentation',
+  /* the three B4 rows still Later at merge 2 (BUILD-STATUS-5.md "B4"): Page setup, ODP and SVG */
+  'The GT theme is 16:9 at 1600 by 900',
+  'Only PowerPoint, PDF, text, pictures and the web page download',
+]);
+
+/** The clauses gslides-parity SPEC-5 14.2 retires: no row carries one since merge 2. */
+const RETIRED_ROUND_FIVE_CLAUSES = [
   'The GT theme presents still slides',
   'Link to a recording instead',
   'Start from the GT brand deck on the home page',
-  'The GT theme is 16:9 at 1600 by 900',
-  'Drag a guide to move it and right-click it to delete it',
-  'Only PowerPoint, PDF, text, pictures and the web page download',
-  'Text fitting is set per text box in Format options; the ruler reads inches',
-  'Your browser underlines misspellings and offers suggestions on right-click',
   'Numbering starts at 1',
-  'Set the indent under Text fitting',
-  'Group the members instead',
-  'The footer mark, the slide counter and the rails belong to the GT theme',
-  'Points are edited by drawing the line again',
-  'Border colour applies to the selected cells',
-  'Search by name or browse the categories',
-  'Presenter view opens a second window you can drag to another screen',
-  /* SPEC-3 13.3 */
+  'Drag a guide to move it and right-click it to delete it',
   'Leave a comment on the slide instead',
-  'The invitation carries your message',
   'Named versions are kept; older records thin out after 30 days',
-  'Turboslide keeps no record of who viewed a presentation',
-]);
+  'Set the indent under Text fitting',
+  'The footer mark, the slide counter and the rails belong to the GT theme',
+  'Your browser underlines misspellings and offers suggestions on right-click',
+  'Text fitting is set per text box in Format options; the ruler reads inches',
+  'Theme builder only',
+  'Meet only',
+  'Section 0.5',
+  'No training site',
+  'No release notes page',
+];
 
 /** The comment stub clause of rounds one and two; no row carries it since SPEC-3 5.3. */
 const RETIRED_COMMENTS_CLAUSE = 'Leave a note in the speaker notes instead';
@@ -718,8 +780,11 @@ describe('the SPEC rows', () => {
     }
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
-    expect(total).toEqual([146, 17, 24]);
-    expect(total[0] + total[1] + total[2]).toBe(187);
+    /* round five (gslides-parity SPEC-5 14.1, merge 2): the flips of 14.1 and the rows it adds in
+       Google's position (File > Language and Insert > Placeholder with their children, the two
+       equation rows, the fourth accessibility toggle, More objects) */
+    expect(total).toEqual([175, 5, 14]);
+    expect(total[0] + total[1] + total[2]).toBe(194);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -843,9 +908,12 @@ describe('the SPEC rows', () => {
       kind: 'client',
       handler: 'goToClient',
     });
-    expect(itemById('title.presence.joinChat').status).toBe('later');
-    expect(itemById('title.presence.joinChat').stubReason).toBe(
-      'Leave a comment on the slide instead',
+    /* gslides-parity SPEC-5 10: Join chat opens the Chat panel, disabled for a viewer with its sentence */
+    expect(itemById('title.presence.joinChat').status).toBe('now');
+    expect(itemById('title.presence.joinChat').effect).toEqual({ kind: 'panel', title: 'Chat' });
+    expect(itemById('title.presence.joinChat').enabled).toBe('comment');
+    expect(itemById('title.presence.joinChat').disabledReason).toBe(
+      'Commenters and editors can chat',
     );
     expect(itemById('title.presence.me').effect).toEqual({
       kind: 'client',
@@ -870,18 +938,9 @@ describe('the SPEC rows', () => {
       setting: 'showChanges',
     });
     expect(itemById('file.versionHistory.showChanges').contextOnly).toBe(true);
-    /* 13.3: the Later rows with their clauses, present and never omitted */
+    /* 13.3: the Later rows with their clauses, present and never omitted (SPEC-5 14.3 keeps two) */
     for (const [id, clause] of [
-      ['title.presence.joinChat', 'Leave a comment on the slide instead'],
       ['file.email.collaborators', 'The invitation carries your message'],
-      [
-        'file.versionHistory.deleteOlder',
-        'Named versions are kept; older records thin out after 30 days',
-      ],
-      [
-        'file.versionHistory.deleteHistory',
-        'Named versions are kept; older records thin out after 30 days',
-      ],
       [
         'tools.activityDashboard.viewers',
         'Turboslide keeps no record of who viewed a presentation',
@@ -937,9 +996,23 @@ describe('the SPEC rows', () => {
       expect(LATER_CLAUSES.has(item.stubReason ?? ''), `${item.id}: ${item.stubReason}`).toBe(true);
       expect(forbiddenWordsIn(item.stubReason ?? ''), item.id).toEqual([]);
     }
-    expect(itemById('view.guides.edit').stubReason).toBe(
-      'Drag a guide to move it and right-click it to delete it',
-    );
+    for (const item of allItems())
+      for (const clause of RETIRED_ROUND_FIVE_CLAUSES) {
+        expect(item.stubReason, item.id).not.toBe(clause);
+        expect(item.omitReason, item.id).not.toBe(clause);
+      }
+    /* gslides-parity SPEC-5 14.2 reads the Later count at 2 leaves; the three B4 rows (Page setup,
+       ODP, SVG) are still Later at merge 2, so the leaf count reads 5 and allItems() 6 with the
+       `file.email` container (BUILD-STATUS-5.md "B4", deviation) */
+    const leaves = later.filter((item) => item.items === undefined);
+    expect(leaves.map((item) => item.id).sort()).toEqual([
+      'file.download.odp',
+      'file.download.svg',
+      'file.email.collaborators',
+      'file.pageSetup',
+      'tools.activityDashboard.viewers',
+    ]);
+    expect(later).toHaveLength(6);
   });
 
   it('marks the twenty Turboslide additions of SPEC 2.12 as ours', () => {
@@ -1128,7 +1201,10 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(contextMenuItems('textBlock', asRole('viewer'))).toEqual([]);
     /* an editor sees every row as before */
     const editor = asRole('editor');
-    expect(visibleMenus(editor).map((menu) => menu.id)).toEqual(MENUS.map((menu) => menu.id));
+    /* every menu without a setting; the Accessibility menu waits for screen reader support (SPEC-5 7.5) */
+    expect(visibleMenus(editor).map((menu) => menu.id)).toEqual(
+      MENUS.filter((menu) => menu.setting === undefined).map((menu) => menu.id),
+    );
     expect(contextMenuItems('filmstripCard', editor).length).toBe(
       contextMenuItems('filmstripCard', DEFAULT_MENU_CONTEXT).length,
     );
@@ -1272,7 +1348,7 @@ describe('every Google item of R01', () => {
     for (const menu of MENUS) check(menu.label, menu.items, [], false);
   });
 
-  it('keeps the ten menus in Google’s order', () => {
+  it('keeps the ten menus in Google’s order, with the Accessibility menu as the eleventh behind its setting (SPEC-5 7.5)', () => {
     expect(MENUS.map((menu) => menu.label)).toEqual([
       'File',
       'Edit',
@@ -1284,8 +1360,20 @@ describe('every Google item of R01', () => {
       'Tools',
       'Extensions',
       'Help',
+      'Accessibility',
     ]);
-    expect(MENUS.map((menu) => menu.accessKey).join('')).toBe('feviosrtxh');
+    expect(MENUS.map((menu) => menu.accessKey).join('')).toBe('feviosrtxha');
+    expect(MENUS.find((menu) => menu.id === 'accessibility')?.setting).toBe('screenReader');
+    expect(visibleMenus(DEFAULT_MENU_CONTEXT).map((menu) => menu.id)).not.toContain(
+      'accessibility',
+    );
+    expect(
+      visibleMenus({
+        ...DEFAULT_MENU_CONTEXT,
+        settings: { ...DEFAULT_MENU_CONTEXT.settings, screenReader: true },
+      }).map((menu) => menu.id),
+    ).toContain('accessibility');
+    expect(OMITTED_MENUS).toEqual([]);
   });
 });
 
@@ -1294,9 +1382,12 @@ describe('statuses and effects', () => {
 
   it('has unique dotted ids under the menu that holds them', () => {
     expect(new Set(items.map((item) => item.id)).size).toBe(items.length);
+    /* the object menu's Animate row (gslides-parity SPEC-5 14.1) is `block.animate`, reachable
+       from the right-click menus alone and held under Insert beside Animation */
+    const elsewhere = new Set(['block.animate']);
     for (const menu of MENUS)
       for (const item of walkItems(menu.items))
-        expect(item.id.startsWith(`${menu.id}.`), item.id).toBe(true);
+        if (!elsewhere.has(item.id)) expect(item.id.startsWith(`${menu.id}.`), item.id).toBe(true);
     for (const item of walkItems(TITLE_ROW_ITEMS))
       expect(item.id.startsWith('title.'), item.id).toBe(true);
   });
@@ -1465,6 +1556,8 @@ describe('statuses and effects', () => {
       [
         'title.appIcon',
         'title.name',
+        /* gslides-parity SPEC-5 7.7: the star over prefs.set */
+        'title.star',
         'title.saveState',
         'title.lastEdit',
         /* the right group, left to right: the presence slot, the comments glyph, the inbox plate, Slideshow, Share, then the own chip */
@@ -1513,7 +1606,9 @@ describe('the canvas rows of SPEC-2 section 4', () => {
     });
     expect(itemById('view.guides.delete').effect).toEqual({ kind: 'action', id: 'deck.guides' });
     expect(itemById('view.guides.delete').contextOnly).toBe(true);
-    expect(itemById('view.guides.edit').status).toBe('later');
+    /* gslides-parity SPEC-5 7.7: Edit guides opens its dialog since merge 2 */
+    expect(itemById('view.guides.edit').status).toBe('now');
+    expect(itemById('view.guides.edit').effect).toEqual({ kind: 'dialog', title: 'Edit guides' });
     expect(itemById('view.snapTo.guides').effect).toEqual({
       kind: 'toggle',
       setting: 'snapGuides',
@@ -1682,7 +1777,7 @@ describe('predicates and labels', () => {
     expect(resolveLabel(itemById('slide.skipSlide'), DEFAULT_MENU_CONTEXT)).toBe('Skip slide');
     expect(resolveLabel(itemById('slide.skipSlide'), skipped)).toBe('Unskip slide');
     expect(tooltipDoc(itemById('slide.transition'), DEFAULT_MENU_CONTEXT)).toBe(
-      `${STUB_PREFIX}. The GT theme presents still slides`,
+      'The transition into this slide, its speed and Apply to all slides',
     );
     expect(tooltipDoc(itemById('format.bulletsNumbering.bulleted'), DEFAULT_MENU_CONTEXT)).toBe(
       'Nine bullet styles; the button and the key apply the first',
@@ -1786,12 +1881,15 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       if (control.status === 'later')
         expect(control.stubReason?.length ?? 0, control.control).toBeGreaterThan(0);
     }
-    /* SPEC-3 5.3: Insert comment is live; Transition is the one Later control of the default tail */
+    /* SPEC-3 5.3: Insert comment is live; SPEC-5 2.1: Transition opens the Motion panel, so no control of the default tail is Later */
     expect(
       TOOLBAR_TAIL_DEFAULT.filter((control) => control.status === 'later').map(
         (control) => control.label,
       ),
-    ).toEqual(['Transition']);
+    ).toEqual([]);
+    expect(
+      TOOLBAR_TAIL_DEFAULT.find((control) => control.control === 'toolbar.transition')?.status,
+    ).toBe('now');
   });
 
   it('lists the card menu in the order of SPEC 4.2', () => {

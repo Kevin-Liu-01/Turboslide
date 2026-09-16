@@ -13,10 +13,17 @@ import type { DeckCopyInput, DeckIdInput, DeckListInput } from '@turboslide/cli/
 import { registerRecordActions } from '@turboslide/cli/record-actions';
 import type { RecordDeps } from '@turboslide/cli/record-actions';
 import type { Caller } from '@turboslide/cli/records/access';
-import { registerStoreActions, slideImport } from '@turboslide/cli/store-actions';
+import {
+  registerLaneActions,
+  registerStoreActions,
+  slideImport,
+} from '@turboslide/cli/store-actions';
 import type { SlideImportInput, StoreActionDeps } from '@turboslide/cli/store-actions';
+import { isPrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
 import { normalizeName } from '@turboslide/identity/names';
+import { principalPreferencesStore } from '@turboslide/identity/principal';
+import type { PreferencesStore } from '@turboslide/schema/preferences';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { parseJsonResult, runTurboslide } from '@turboslide/render-worker/cli';
 import { createWorkerClient } from '@turboslide/render-worker/client';
@@ -53,9 +60,9 @@ import {
   TOKENS,
 } from '@turboslide/theme/tokens';
 
-import { hostedAccessHooks } from './access';
+import { hostedAccessHooks, readAccess } from './access';
 import { agentAuth } from './auth';
-import { bootstrapAgentContext } from './authorize';
+import { authorize, bootstrapAgentContext } from './authorize';
 import type { AuthContext } from './authorize';
 import {
   registerAccountActions,
@@ -76,15 +83,37 @@ import type { NotificationCaller } from './comments';
 import { FLAG_DEFAULTS, flagOn, setFlag } from './flags';
 import type { FlagName } from './flags';
 import { lintLists } from './lint';
-import { logSecurityEvent } from './log';
+import { logChatMessage, logSecurityEvent } from './log';
 import { measureSlidesThroughWorker } from './measure';
 import { registerMigrateStorage } from './migrate';
 import {
   commentCallerFor,
   decideFor,
+  principalStore,
   redisCommands,
   requestIdentity as roomIdentity,
+  roomFor,
 } from './room';
+import { RateLimitedError, checkQuota, largestMediaBytes, tierOf } from './ratelimit';
+import { defineWord } from '../routes/api/define';
+import { nodeMediaIntake } from '@turboslide/cli/actions/media-node';
+import { importLaneDeps } from '@turboslide/import/lane-node';
+import { documentSpelling } from '@turboslide/spelling/node';
+import { deckTextRefs } from '@turboslide/lint/static/spelling';
+import { CORRECTIONS } from '@turboslide/schema/autocorrect-lists';
+import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
+import {
+  appendWithRetry,
+  chatBudget,
+  chatEntry,
+  chatMessagesOf,
+  checkChatMessage,
+  CHAT_RATE_SENTENCE,
+} from '@turboslide/realtime/admission';
+import type { ChatPort } from '@turboslide/cli/actions/chat';
+import type { LaneDeps } from '@turboslide/cli/actions/deps';
+import type { VersionsPort } from '@turboslide/cli/actions/prefs';
+import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
 import {
   deckDir,
   ensureDeckAssets,
@@ -97,7 +126,7 @@ import {
   workerClientOptions,
 } from './root';
 import { studioSessions } from './sessions';
-import { deleteUpload, readUpload } from './upload';
+import { deleteUpload, mediaUploadBackend, readUpload, stageMediaUpload } from './upload';
 
 /**
  * The dispatcher behind the hosted agent surface (SPEC 7.1 "one action table"; MILESTONES M4
@@ -567,6 +596,226 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
   return { identity, caller, author, origin };
 }
 
+/**
+ * The caller's preferences record for the round five lanes (gslides-parity SPEC-5 7.1; b5.md
+ * request 1): the principal store's record under the request's principal id (an account, an
+ * anonymous browser, the checkout holder `agent:localhost`, an API key's `agent:<tokenId>`, each
+ * with a record of its own as `account.me` reads it). A request less caller (a unit test, a bearer
+ * without a key) gets none, so `prefs.*` refuse instead of writing the shared nobody record.
+ */
+function preferencesStoreFor(facts: CallerFacts): PreferencesStore | undefined {
+  const { principalId } = facts.caller;
+  if (principalId === NO_PRINCIPAL || !isPrincipalId(principalId)) return undefined;
+  return principalPreferencesStore(principalStore(), principalId);
+}
+
+/**
+ * The round five lane ports of the hosted dispatcher (gslides-parity SPEC-5 1.6; merge 2):
+ *
+ * - `imports` (b3.md B3-7): the reader over the collection's decks folder with the staged upload
+ *   by key; file paths are refused hosted.
+ * - `media` (b2.md R4): the Node intake over the deck store's asset write, the staged presigned
+ *   upload, the tier's size caps, the two daily quota rows for the request's identity and the
+ *   keyed prefix of a restricted deck (SPEC-5 0.19).
+ * - `spelling`, `define`, `versions`, `chat` (b5.md request 9): nspell over the deck's language
+ *   with the caller's personal dictionary, Wiktionary through /api/define's provider switch, the
+ *   version log's removal behind the fresh sign in rule (SPEC-3 0.45), and the room's chat as
+ *   `chat` entries on the stream (SPEC-5 10; the entries are admitted with the caps, the role and
+ *   the per deck rate row and replayed by the stream like comments).
+ */
+function hostedLaneDeps(
+  deckId: string,
+  store: FileStore,
+  deckStore: DeckStore,
+  decks: HostedDecks,
+  request: Request | undefined,
+  facts: CallerFacts,
+  preferences: PreferencesStore | undefined,
+): Partial<LaneDeps> {
+  const ctx = facts.identity?.ctx ?? null;
+  const quotaContext = () => ({
+    identity: facts.caller.principalId,
+    tier: tierOf({ agent: ctx?.agent, principal: ctx?.principal ?? null }),
+    deckId,
+    transport: 'window' as const,
+  });
+  const imports = importLaneDeps({
+    decksDir: decks.decksDir,
+    allowPaths: false,
+    readUpload: (key) => readUpload(key),
+  });
+  const media = nodeMediaIntake({
+    deckDir: store.dir,
+    putAsset: (relative, bytes, contentType) => deckStore.putAsset(relative, bytes, contentType),
+    allowPaths: false,
+    hosted: true,
+    readUpload: async (key) => {
+      const staged = await stageMediaUpload(key);
+      if (staged === null) return null;
+      return {
+        bytes: new Uint8Array(readFileSync(staged.path)),
+        name: basename(key),
+        origin: key,
+        kind: 'upload' as const,
+        cleanup: staged.cleanup,
+      };
+    },
+    maxBytes: (kind) => largestMediaBytes(kind, quotaContext().tier),
+    refusal: (() => {
+      const backend = mediaUploadBackend(storeSelection().kind);
+      return backend.kind === 'refused' ? backend.sentence : null;
+    })(),
+    countMedia: async (bytes) => {
+      const perDay = await checkQuota('mediaPerDay', { ...quotaContext(), action: 'media.insert' });
+      if (perDay instanceof RateLimitedError) throw perDay;
+      const perBytes = await checkQuota(
+        'mediaBytesPerDay',
+        { ...quotaContext(), action: 'media.insert' },
+        bytes,
+      );
+      if (perBytes instanceof RateLimitedError) throw perBytes;
+    },
+  });
+  /* the keyed prefix of a restricted deck (SPEC-5 0.19; b2.md R4): the intake writes under it when the record says so */
+  media.assetKey = async () => {
+    const record = await readAccess(deckId);
+    return record !== null && record.generalAccess.mode === 'restricted' ? record.assetKey : null;
+  };
+  const spelling = documentSpelling({
+    corrections: CORRECTIONS,
+    ignore: [...PROPER_NOUNS, ...PRODUCT_TOKENS],
+    refs: deckTextRefs,
+    personal: async () =>
+      preferences === undefined ? [] : (await preferences.load()).spelling.dictionary,
+  });
+  const define = async (word: string, language: string) => {
+    const answer = await defineWord(word, language);
+    return answer.definitions === undefined
+      ? null
+      : { definitions: answer.definitions, attribution: answer.attribution ?? '' };
+  };
+  const versions: VersionsPort = {
+    remove: async () => {
+      throw new Error(
+        'Deleting versions is not offered on a hosted store this round: the log is the record of every write (docs/hosting.md)',
+      );
+    },
+    reauthenticated: async () =>
+      facts.caller.kind === 'agent' || facts.identity?.session?.fresh === true,
+  };
+  const chat: ChatPort | undefined =
+    request === undefined
+      ? undefined
+      : {
+          send: async (text) => {
+            const decision =
+              ctx === null
+                ? null
+                : await authorize(ctx, deckId, 'comment', {
+                    transport: 'window',
+                    action: 'chat.send',
+                  });
+            const role = decision !== null && decision.ok ? decision.role : 'viewer';
+            const checked = checkChatMessage(text, role);
+            if (!checked.ok) {
+              const error = new Error(checked.message) as Error & { status?: number };
+              error.status = checked.status;
+              throw error;
+            }
+            const room = await roomFor(deckId);
+            const kind =
+              facts.caller.kind === 'agent'
+                ? 'agent'
+                : ctx?.principal?.kind === 'account'
+                  ? 'signedIn'
+                  : 'anonymous';
+            const budget = chatBudget(deckId, kind, Date.now());
+            const refused = await checkQuota('chatMessagesPerMinutePerDeck', {
+              ...quotaContext(),
+              action: 'chat.send',
+            });
+            if (refused instanceof RateLimitedError) {
+              const error = new Error(CHAT_RATE_SENTENCE) as Error & { status?: number };
+              error.status = 429;
+              throw error;
+            }
+            void budget;
+            const at = new Date().toISOString();
+            const entry = chatEntry({
+              rev: room.revision(),
+              author: facts.author,
+              clientId: 'chat',
+              principalId: facts.caller.principalId,
+              text: checked.text,
+              at,
+            });
+            const head = await room.channel.head(deckId);
+            const result = await appendWithRetry(
+              room.channel,
+              deckId,
+              head,
+              [entry],
+              (entries) => entries,
+            );
+            if (!result.ok) {
+              const error = new Error('The room is busy; retry') as Error & { status?: number };
+              error.status = 409;
+              throw error;
+            }
+            logChatMessage({
+              identity: facts.caller.principalId,
+              deckId,
+              length: checked.text.length,
+              mentions: checked.mentions.length,
+              transport: 'window',
+            });
+            return { id: entry.chat?.id ?? entry.opId, at };
+          },
+          list: async (since) => {
+            const room = await roomFor(deckId);
+            const head = await room.channel.head(deckId);
+            const from = Math.max(0, head - REPLAY_MAX_ENTRIES);
+            const entries = await room.channel.since(deckId, from, head - from);
+            const labels = new Map<string, string>();
+            for (const entry of entries)
+              if (entry.kind === 'chat' && entry.chat !== undefined)
+                labels.set(entry.chat.principalId, entry.author.name);
+            return chatMessagesOf(entries, since).map((message) => ({
+              id: message.id,
+              principalId: message.principalId,
+              label: labels.get(message.principalId) ?? labelFor(message.principalId),
+              text: message.text,
+              at: message.at,
+            }));
+          },
+          clear: async () => {
+            /* the entries are stream records; the checkpointer folds them away with the stream's
+               window, so a clear ends the panel's view: the messages before now are not listed */
+            const room = await roomFor(deckId);
+            const head = await room.channel.head(deckId);
+            const from = Math.max(0, head - REPLAY_MAX_ENTRIES);
+            const entries = await room.channel.since(deckId, from, head - from);
+            const count = chatMessagesOf(entries).length;
+            logSecurityEvent({
+              event: 'chat.clear',
+              identity: facts.caller.principalId,
+              deckId,
+              opCount: count,
+              transport: 'window',
+            });
+            return { cleared: count };
+          },
+        };
+  return {
+    imports,
+    media,
+    spelling,
+    define,
+    versions,
+    ...(chat === undefined ? {} : { chat }),
+  };
+}
+
 /** The request facts B3's account and admin actions read (auth/actions.ts). */
 function accountFactsFor(request: Request, deckId: string): () => Promise<ActionRequestFacts> {
   return async () => ({
@@ -975,6 +1224,18 @@ export async function deckDispatcher(
   registerAssetActionsLazily(dispatcher, assets);
   registerWorkerActions(dispatcher, deckId, store);
   registerAdminActions(dispatcher);
+  // the round five lanes with the hosted facts (gslides-parity SPEC-5 1.6; the integrator's day 0
+  // seam): the same modules registerStoreActions spread for the checkout, registered again here so
+  // a lane whose hosted form needs the deck id or the request (chat over the room, the media
+  // grant, the principal's preferences) registers it under `deps.hosted`; the later registration
+  // of an id wins, and an empty module changes nothing
+  const preferences = preferencesStoreFor(facts);
+  registerLaneActions(dispatcher, {
+    ...storeDeps,
+    hosted: { deckId, ...(request !== undefined ? { request } : {}), origin: facts.origin },
+    ...(preferences !== undefined ? { preferences } : {}),
+    ...hostedLaneDeps(deckId, store, deckStore, decks, request, facts, preferences),
+  });
   const session = options.withView ? studioSessions().attached(deckId, 'view.goto') : undefined;
   if (session !== undefined) registerViewActions(dispatcher, deckId);
   const source: DeckSource = {

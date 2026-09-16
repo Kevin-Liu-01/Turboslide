@@ -105,6 +105,13 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'move',
   'z',
   'layout',
+  // the page and print flags of gslides-parity SPEC-5 6.1 to 6.4 (B4, fix round): `export check
+  // --page WxH`, `export pdf --paper letter --orientation portrait --order down`, `render --text embed`
+  'page',
+  'paper',
+  'orientation',
+  'order',
+  'text',
   'type',
   'ratio',
   'head',

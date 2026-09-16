@@ -11,6 +11,12 @@ import {
   socketHost,
   trustsProxy,
 } from '@turboslide/agent/http/dispatch';
+import { MEDIA_MIMES } from '@turboslide/schema/assets';
+import {
+  YOUTUBE_FRAME_HOSTS,
+  YOUTUBE_SCRIPT_HOSTS,
+  YOUTUBE_THUMBNAIL_HOST,
+} from '@turboslide/schema/blocks/media';
 
 import { logSecurityEvent } from './log';
 
@@ -62,22 +68,33 @@ function firstAddress(value: string): string | null {
   return first === '' ? null : first;
 }
 
-/** The file types the assets route serves inline; anything else is an attachment. */
-const INLINE_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+/**
+ * The file types the assets route serves inline; anything else is an attachment. The four raster
+ * types, and from round five the five media types (gslides-parity SPEC-5 3.3; R11 1.5), so a
+ * `<video>` or `<audio>` element in the show reads the file with `nosniff` and never as an
+ * attachment; a media file is bytes a decoder reads, never markup the origin runs.
+ */
+export const INLINE_TYPES: ReadonlyArray<string> = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  ...MEDIA_MIMES,
+];
 
 /**
  * The response headers of one asset file (SPEC-3 0.28, 11.3; report 04 F5): `nosniff` on every
  * file, `Cross-Origin-Resource-Policy: same-site` (8.8), and for `image/svg+xml`,
- * `application/json` and any type outside the raster four a `Content-Disposition: attachment`
- * with a sandboxing policy, so a navigation to the file cannot run script or CSS in the studio's
- * origin. The `<img>` tags the renderer emits never load an svg from this route on a hosted
- * instance (svg is refused at intake there), and a checkout's GT import keeps its svg files as
- * downloads.
+ * `application/json` and any type outside the raster four and the media five a
+ * `Content-Disposition: attachment` with a sandboxing policy, so a navigation to the file cannot
+ * run script or CSS in the studio's origin. The `<img>` tags the renderer emits never load an svg
+ * from this route on a hosted instance (svg is refused at intake there), and a checkout's GT
+ * import keeps its svg files as downloads.
  */
 export function assetResponseHeaders(
   relative: string,
   contentType: string,
-  cacheControl = 'public, max-age=60',
+  cacheControl: string = assetCacheControl(relative),
 ): Record<string, string> {
   const headers: Record<string, string> = {
     'content-type': contentType,
@@ -94,6 +111,31 @@ export function assetResponseHeaders(
   return headers;
 }
 
+/** A year, the cache life of a file whose name carries its content digest (gslides-parity SPEC-5 3.3; R11 2 rule 4). */
+export const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+
+/** The cache life of an asset whose name may be reused with other bytes (the GT deck's twins). */
+export const MUTABLE_ASSET_CACHE_CONTROL = 'public, max-age=60';
+
+/**
+ * True for an asset file whose name carries its content digest and is never overwritten (SPEC-3
+ * 0.26): the intake's `assets/<id>.<sha8>.<ext>` and `assets/<id>.<sha8>-light.png` twins, the
+ * dither variants `assets/<id>.dither-<key12>-light.png`, the material frames and the media files
+ * of SPEC-5 3.3. The GT deck's committed twins (`opener-brand-light.jpg`) carry none and keep the
+ * short cache.
+ */
+export function isDigestNamedAsset(relative: string): boolean {
+  const name = basename(relative);
+  return (
+    /\.[0-9a-f]{8}(?:[.-][^/]*)?\.[a-z0-9]+$/i.test(name) || /\.dither-[0-9a-f]{12}-/.test(name)
+  );
+}
+
+/** The `Cache-Control` of one asset file: a year and immutable for a digest named file, a minute otherwise (R11 2 rule 2). */
+export function assetCacheControl(relative: string): string {
+  return isDigestNamedAsset(relative) ? IMMUTABLE_CACHE_CONTROL : MUTABLE_ASSET_CACHE_CONTROL;
+}
+
 // ---------------------------------------------------------------------------------------------
 // The global headers (SPEC-3 8.8; report 04 8.3, the OWASP cheat sheet)
 
@@ -102,6 +144,33 @@ export const HSTS = 'max-age=63072000; includeSubDomains; preload';
 
 export const PERMISSIONS_POLICY =
   'geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()';
+
+/**
+ * The policy on the routes that use the device camera and microphone (gslides-parity SPEC-5 3.3,
+ * 3.7, 7.3; R11 6): the editor (the Camera dialog, Dictate speaker notes), the audience route
+ * (the speaker spotlight in the show) and the presenter (Voice type). `camera=(self)` and
+ * `microphone=(self)` name this origin alone; every other directive stays closed, and `/embed`
+ * and every other route keep `PERMISSIONS_POLICY`.
+ */
+export const DEVICE_PERMISSIONS_POLICY =
+  'geolocation=(), camera=(self), microphone=(self), payment=(), usb=(), interest-cohort=()';
+
+/** The routes whose pages may ask for the camera or the microphone: the editor, the draft, the audience route and the presenter. */
+export function isDeviceRoute(pathname: string): boolean {
+  return (
+    pathname === '/new' ||
+    /^\/edit\/[^/]+/.test(pathname) ||
+    /^\/deck\/[^/]+/.test(pathname) ||
+    /^\/present\/[^/]+/.test(pathname)
+  );
+}
+
+/** The `Permissions-Policy` of one route (SPEC-5 3.3): the device policy on the four device routes, the closed one elsewhere. */
+export function permissionsPolicyFor(pathname: string): string {
+  return isDeviceRoute(pathname) && !isEmbedPath(pathname)
+    ? DEVICE_PERMISSIONS_POLICY
+    : PERMISSIONS_POLICY;
+}
 
 /** The customer domains the embed is sold for, beside Prototemplate; a comma list in the variable. */
 export const EMBED_ANCESTORS_ENV = 'TURBOSLIDE_EMBED_ANCESTORS';
@@ -132,6 +201,11 @@ export function isExchangePath(pathname: string): boolean {
 /** The routes whose answers are never cached and never framed: every API and server function path. */
 export function isApiPath(pathname: string): boolean {
   return pathname.startsWith('/api/') || pathname.startsWith('/_serverFn/') || pathname === '/mcp';
+}
+
+/** The spelling dictionaries under `public/dictionaries/` (SPEC-5 7.2), served immutable. */
+export function isDictionaryPath(pathname: string): boolean {
+  return pathname.startsWith('/dictionaries/');
 }
 
 /** The asset routes: `Cross-Origin-Resource-Policy: same-site`. */
@@ -196,15 +270,22 @@ export function buildCsp(options: CspOptions): string {
   const store = publicStore ? ` https://${publicStore}` : '';
   const connect = `${store}${presign ? ` https://${presign}` : ''}`;
   const embed = options.pathname !== undefined && isEmbedPath(options.pathname);
+  // round five (gslides-parity SPEC-5 3.3; R11 2 rule 5, 4.2, 4.3): `media-src` names the page's
+  // own origin, `blob:` (the camera preview and a recording) and the public store the hosted
+  // media files are read from; `frame-src` names the two YouTube hosts the IFrame API mounts on
+  // and may rewrite to; `img-src` names the live thumbnail host the editor shows and never
+  // stores; `script-src` lists the IFrame API hosts for engines without `'strict-dynamic'`,
+  // which the strict dynamic engines ignore (the nonced loader inherits trust there)
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic'`,
+    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic' ${YOUTUBE_SCRIPT_HOSTS.join(' ')}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob:${store}`,
+    `img-src 'self' data: blob:${store} ${YOUTUBE_THUMBNAIL_HOST}`,
     "font-src 'self' data:",
     `connect-src 'self'${connect}`,
+    `media-src 'self' blob:${store}`,
     "worker-src 'self' blob:",
-    "frame-src 'self'",
+    `frame-src 'self' ${YOUTUBE_FRAME_HOSTS.join(' ')}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
@@ -236,9 +317,12 @@ export function securityHeadersFor(
   const headers: Record<string, string> = {
     'x-content-type-options': 'nosniff',
     'referrer-policy': isExchangePath(pathname) ? 'no-referrer' : 'strict-origin-when-cross-origin',
-    'permissions-policy': PERMISSIONS_POLICY,
+    'permissions-policy': permissionsPolicyFor(pathname),
     'x-request-id': options.requestId,
   };
+  // the dictionaries change only with a package bump and the Worker appends the manifest's
+  // digest as `?v=` (gslides-parity SPEC-5 7.2; b5.md request 5 to B2), so the files are immutable
+  if (isDictionaryPath(pathname)) headers['cache-control'] = IMMUTABLE_CACHE_CONTROL;
   if (options.secure) headers['strict-transport-security'] = HSTS;
   if (!embed) {
     headers['x-frame-options'] = 'DENY';

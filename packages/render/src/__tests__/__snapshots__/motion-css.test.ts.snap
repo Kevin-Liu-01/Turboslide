@@ -1,0 +1,263 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for effects on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-slide="effects"][data-step="1"] [data-block="b1"].is-entering{animation:ts-appear 1ms linear 0ms both}
+[data-slide="effects"][data-step="1"] [data-block="b2"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+[data-slide="effects"][data-step="1"] [data-block="b3"].is-entering{animation:ts-fade-in 1000ms ease-out 1ms both}
+[data-slide="effects"][data-step="2"] [data-block="b4"].is-leaving{animation:ts-fade-out 1000ms ease-in 0ms both}
+[data-slide="effects"][data-step="2"] [data-block="b5"].is-entering{animation:ts-fly-in-left-1453 800ms ease-out 0ms both}
+[data-slide="effects"][data-step="2"] [data-block="b6"].is-entering{animation:ts-fly-in-right-1063 800ms ease-out 1000ms both}
+[data-slide="effects"][data-step="3"] [data-block="b7"].is-entering{animation:ts-fly-in-top-610 800ms ease-out 0ms both}
+[data-slide="effects"][data-step="3"] [data-block="b8"].is-entering{animation:ts-fly-in-bottom-470 800ms ease-out 800ms both}
+[data-slide="effects"][data-step="4"] [data-block="b9"].is-leaving{animation:ts-fly-out-left-1184 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="4"] [data-block="b10"].is-leaving{animation:ts-fly-out-right-13 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="4"] [data-block="b11"].is-leaving{animation:ts-fly-out-top-820 800ms ease-in 800ms both}
+[data-slide="effects"][data-step="5"] [data-block="b12"].is-leaving{animation:ts-fly-out-bottom-260 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="5"] [data-block="b13"].is-entering{animation:ts-zoom-in 600ms ease-out 0ms both}
+[data-slide="effects"][data-step="5"] [data-block="b14"].is-leaving{animation:ts-zoom-out 600ms ease-in 800ms both}
+[data-slide="effects"][data-step="6"] [data-block="b15"].is-emph{animation:ts-spin 2000ms linear 0ms both}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes ts-fly-in-left-1453{from{translate:-1453px 0px}to{translate:0 0}}
+@keyframes ts-fly-in-right-1063{from{translate:1063px 0px}to{translate:0 0}}
+@keyframes ts-fly-in-top-610{from{translate:0px -610px}to{translate:0 0}}
+@keyframes ts-fly-in-bottom-470{from{translate:0px 470px}to{translate:0 0}}
+@keyframes ts-fly-out-left-1184{from{translate:0 0}to{translate:-1184px 0px}}
+@keyframes ts-fly-out-right-13{from{translate:0 0}to{translate:-13px 0px}}
+@keyframes ts-fly-out-top-820{from{translate:0 0}to{translate:0px -820px}}
+@keyframes ts-fly-out-bottom-260{from{translate:0 0}to{translate:0px 260px}}
+@keyframes ts-zoom-in{from{scale:0}to{scale:1}}
+@keyframes ts-zoom-out{from{scale:1}to{scale:0}}
+@keyframes ts-spin{from{rotate:0deg}to{rotate:360deg}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for effects on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-slide="effects"][data-step="1"] [data-block="b1"].is-entering{animation:ts-appear 1ms linear 0ms both}
+[data-slide="effects"][data-step="1"] [data-block="b2"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+[data-slide="effects"][data-step="1"] [data-block="b3"].is-entering{animation:ts-fade-in 1000ms ease-out 1ms both}
+[data-slide="effects"][data-step="2"] [data-block="b4"].is-leaving{animation:ts-fade-out 1000ms ease-in 0ms both}
+[data-slide="effects"][data-step="2"] [data-block="b5"].is-entering{animation:ts-fly-in-left-1453 800ms ease-out 0ms both}
+[data-slide="effects"][data-step="2"] [data-block="b6"].is-entering{animation:ts-fly-in-right-1463 800ms ease-out 1000ms both}
+[data-slide="effects"][data-step="3"] [data-block="b7"].is-entering{animation:ts-fly-in-top-610 800ms ease-out 0ms both}
+[data-slide="effects"][data-step="3"] [data-block="b8"].is-entering{animation:ts-fly-in-bottom-470 800ms ease-out 800ms both}
+[data-slide="effects"][data-step="4"] [data-block="b9"].is-leaving{animation:ts-fly-out-left-1184 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="4"] [data-block="b10"].is-leaving{animation:ts-fly-out-right-387 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="4"] [data-block="b11"].is-leaving{animation:ts-fly-out-top-820 800ms ease-in 800ms both}
+[data-slide="effects"][data-step="5"] [data-block="b12"].is-leaving{animation:ts-fly-out-bottom-260 800ms ease-in 0ms both}
+[data-slide="effects"][data-step="5"] [data-block="b13"].is-entering{animation:ts-zoom-in 600ms ease-out 0ms both}
+[data-slide="effects"][data-step="5"] [data-block="b14"].is-leaving{animation:ts-zoom-out 600ms ease-in 800ms both}
+[data-slide="effects"][data-step="6"] [data-block="b15"].is-emph{animation:ts-spin 2000ms linear 0ms both}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes ts-fly-in-left-1453{from{translate:-1453px 0px}to{translate:0 0}}
+@keyframes ts-fly-in-right-1463{from{translate:1463px 0px}to{translate:0 0}}
+@keyframes ts-fly-in-top-610{from{translate:0px -610px}to{translate:0 0}}
+@keyframes ts-fly-in-bottom-470{from{translate:0px 470px}to{translate:0 0}}
+@keyframes ts-fly-out-left-1184{from{translate:0 0}to{translate:-1184px 0px}}
+@keyframes ts-fly-out-right-387{from{translate:0 0}to{translate:387px 0px}}
+@keyframes ts-fly-out-top-820{from{translate:0 0}to{translate:0px -820px}}
+@keyframes ts-fly-out-bottom-260{from{translate:0 0}to{translate:0px 260px}}
+@keyframes ts-zoom-in{from{scale:0}to{scale:1}}
+@keyframes ts-zoom-out{from{scale:1}to{scale:0}}
+@keyframes ts-spin{from{rotate:0deg}to{rotate:360deg}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for media on the 16:9 and the 4:3 page > 4:3 1`] = `""`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for media on the 16:9 and the 4:3 page > 16:9 1`] = `""`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for paragraphs on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-slide="paragraphs"][data-step="0"] [data-block="h"].is-entering{animation:ts-fly-in-top-900 600ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="1"] [data-block="para"] [data-para="0"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="2"] [data-block="para"] [data-para="1"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="para"] [data-para="2"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="0"].is-entering{animation:ts-appear 1ms linear 500ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="1"].is-entering{animation:ts-appear 1ms linear 501ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="2"].is-entering{animation:ts-appear 1ms linear 502ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="3"].is-entering{animation:ts-appear 1ms linear 503ms both}
+[data-slide="paragraphs"][data-step="4"] [data-block="list"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+@keyframes ts-fly-in-top-900{from{translate:0px -900px}to{translate:0 0}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for paragraphs on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-slide="paragraphs"][data-step="0"] [data-block="h"].is-entering{animation:ts-fly-in-top-900 600ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="1"] [data-block="para"] [data-para="0"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="2"] [data-block="para"] [data-para="1"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="para"] [data-para="2"].is-entering{animation:ts-fade-in 500ms ease-out 0ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="0"].is-entering{animation:ts-appear 1ms linear 500ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="1"].is-entering{animation:ts-appear 1ms linear 501ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="2"].is-entering{animation:ts-appear 1ms linear 502ms both}
+[data-slide="paragraphs"][data-step="3"] [data-block="list"] [data-para="3"].is-entering{animation:ts-appear 1ms linear 503ms both}
+[data-slide="paragraphs"][data-step="4"] [data-block="list"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+@keyframes ts-fly-in-top-900{from{translate:0px -900px}to{translate:0 0}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-cube on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-cube"] [data-slide].is-entering{animation:ts-t-cube-in-600 999ms ease-in-out 0ms both}
+[data-transition="t-cube"] [data-slide].is-leaving{animation:ts-t-cube-out-600 999ms ease-in-out 0ms both}
+[data-transition="t-cube"][data-reverse] [data-slide].is-entering{animation:ts-t-cube-out-600 999ms ease-in-out 0ms reverse both}
+[data-transition="t-cube"][data-reverse] [data-slide].is-leaving{animation:ts-t-cube-in-600 999ms ease-in-out 0ms reverse both}
+[data-slide="t-cube"][data-step="1"] [data-block="obj"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+@keyframes ts-t-cube-in-600{from{transform:perspective(2400px) translateZ(-600px) rotateY(90deg) translateZ(600px)}to{transform:perspective(2400px) translateZ(-600px) rotateY(0) translateZ(600px)}}
+@keyframes ts-t-cube-out-600{from{transform:perspective(2400px) translateZ(-600px) rotateY(0) translateZ(600px)}to{transform:perspective(2400px) translateZ(-600px) rotateY(-90deg) translateZ(600px)}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-cube on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-cube"] [data-slide].is-entering{animation:ts-t-cube-in-800 999ms ease-in-out 0ms both}
+[data-transition="t-cube"] [data-slide].is-leaving{animation:ts-t-cube-out-800 999ms ease-in-out 0ms both}
+[data-transition="t-cube"][data-reverse] [data-slide].is-entering{animation:ts-t-cube-out-800 999ms ease-in-out 0ms reverse both}
+[data-transition="t-cube"][data-reverse] [data-slide].is-leaving{animation:ts-t-cube-in-800 999ms ease-in-out 0ms reverse both}
+[data-slide="t-cube"][data-step="1"] [data-block="obj"].is-leaving{animation:ts-disappear 1ms linear 0ms both}
+@keyframes ts-t-cube-in-800{from{transform:perspective(2400px) translateZ(-800px) rotateY(90deg) translateZ(800px)}to{transform:perspective(2400px) translateZ(-800px) rotateY(0) translateZ(800px)}}
+@keyframes ts-t-cube-out-800{from{transform:perspective(2400px) translateZ(-800px) rotateY(0) translateZ(800px)}to{transform:perspective(2400px) translateZ(-800px) rotateY(-90deg) translateZ(800px)}}
+@keyframes ts-disappear{from{visibility:visible}to{visibility:hidden}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-dissolve on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-dissolve"] [data-slide].is-entering{mask-size:8px 8px;mask-repeat:repeat;animation:ts-t-dissolve-in 500ms linear 0ms both}
+[data-transition="t-dissolve"][data-reverse] [data-slide].is-entering{animation:none}
+[data-transition="t-dissolve"][data-reverse] [data-slide].is-leaving{z-index:3;mask-size:8px 8px;mask-repeat:repeat;animation:ts-t-dissolve-in 500ms linear 0ms reverse both}
+[data-slide="t-dissolve"][data-step="1"] [data-block="obj"].is-entering{animation:ts-fade-in 1000ms ease-out 0ms both}
+@keyframes ts-t-dissolve-in{0%{mask-image:url(<png 116 bytes>)}1.587%{mask-image:url(<png 116 bytes>)}3.175%{mask-image:url(<png 116 bytes>)}4.762%{mask-image:url(<png 116 bytes>)}6.349%{mask-image:url(<png 116 bytes>)}7.937%{mask-image:url(<png 116 bytes>)}9.524%{mask-image:url(<png 116 bytes>)}11.111%{mask-image:url(<png 116 bytes>)}12.698%{mask-image:url(<png 116 bytes>)}14.286%{mask-image:url(<png 116 bytes>)}15.873%{mask-image:url(<png 116 bytes>)}17.46%{mask-image:url(<png 116 bytes>)}19.048%{mask-image:url(<png 116 bytes>)}20.635%{mask-image:url(<png 116 bytes>)}22.222%{mask-image:url(<png 116 bytes>)}23.81%{mask-image:url(<png 116 bytes>)}25.397%{mask-image:url(<png 116 bytes>)}26.984%{mask-image:url(<png 116 bytes>)}28.571%{mask-image:url(<png 116 bytes>)}30.159%{mask-image:url(<png 116 bytes>)}31.746%{mask-image:url(<png 116 bytes>)}33.333%{mask-image:url(<png 116 bytes>)}34.921%{mask-image:url(<png 116 bytes>)}36.508%{mask-image:url(<png 116 bytes>)}38.095%{mask-image:url(<png 116 bytes>)}39.683%{mask-image:url(<png 116 bytes>)}41.27%{mask-image:url(<png 116 bytes>)}42.857%{mask-image:url(<png 116 bytes>)}44.444%{mask-image:url(<png 116 bytes>)}46.032%{mask-image:url(<png 116 bytes>)}47.619%{mask-image:url(<png 116 bytes>)}49.206%{mask-image:url(<png 116 bytes>)}50.794%{mask-image:url(<png 116 bytes>)}52.381%{mask-image:url(<png 116 bytes>)}53.968%{mask-image:url(<png 116 bytes>)}55.556%{mask-image:url(<png 116 bytes>)}57.143%{mask-image:url(<png 116 bytes>)}58.73%{mask-image:url(<png 116 bytes>)}60.317%{mask-image:url(<png 116 bytes>)}61.905%{mask-image:url(<png 116 bytes>)}63.492%{mask-image:url(<png 116 bytes>)}65.079%{mask-image:url(<png 116 bytes>)}66.667%{mask-image:url(<png 116 bytes>)}68.254%{mask-image:url(<png 116 bytes>)}69.841%{mask-image:url(<png 116 bytes>)}71.429%{mask-image:url(<png 116 bytes>)}73.016%{mask-image:url(<png 116 bytes>)}74.603%{mask-image:url(<png 116 bytes>)}76.19%{mask-image:url(<png 116 bytes>)}77.778%{mask-image:url(<png 116 bytes>)}79.365%{mask-image:url(<png 116 bytes>)}80.952%{mask-image:url(<png 116 bytes>)}82.54%{mask-image:url(<png 116 bytes>)}84.127%{mask-image:url(<png 116 bytes>)}85.714%{mask-image:url(<png 116 bytes>)}87.302%{mask-image:url(<png 116 bytes>)}88.889%{mask-image:url(<png 116 bytes>)}90.476%{mask-image:url(<png 116 bytes>)}92.063%{mask-image:url(<png 116 bytes>)}93.651%{mask-image:url(<png 116 bytes>)}95.238%{mask-image:url(<png 116 bytes>)}96.825%{mask-image:url(<png 116 bytes>)}98.413%{mask-image:url(<png 116 bytes>)}100%{mask-image:url(<png 116 bytes>)}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-dissolve on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-dissolve"] [data-slide].is-entering{mask-size:8px 8px;mask-repeat:repeat;animation:ts-t-dissolve-in 500ms linear 0ms both}
+[data-transition="t-dissolve"][data-reverse] [data-slide].is-entering{animation:none}
+[data-transition="t-dissolve"][data-reverse] [data-slide].is-leaving{z-index:3;mask-size:8px 8px;mask-repeat:repeat;animation:ts-t-dissolve-in 500ms linear 0ms reverse both}
+[data-slide="t-dissolve"][data-step="1"] [data-block="obj"].is-entering{animation:ts-fade-in 1000ms ease-out 0ms both}
+@keyframes ts-t-dissolve-in{0%{mask-image:url(<png 116 bytes>)}1.587%{mask-image:url(<png 116 bytes>)}3.175%{mask-image:url(<png 116 bytes>)}4.762%{mask-image:url(<png 116 bytes>)}6.349%{mask-image:url(<png 116 bytes>)}7.937%{mask-image:url(<png 116 bytes>)}9.524%{mask-image:url(<png 116 bytes>)}11.111%{mask-image:url(<png 116 bytes>)}12.698%{mask-image:url(<png 116 bytes>)}14.286%{mask-image:url(<png 116 bytes>)}15.873%{mask-image:url(<png 116 bytes>)}17.46%{mask-image:url(<png 116 bytes>)}19.048%{mask-image:url(<png 116 bytes>)}20.635%{mask-image:url(<png 116 bytes>)}22.222%{mask-image:url(<png 116 bytes>)}23.81%{mask-image:url(<png 116 bytes>)}25.397%{mask-image:url(<png 116 bytes>)}26.984%{mask-image:url(<png 116 bytes>)}28.571%{mask-image:url(<png 116 bytes>)}30.159%{mask-image:url(<png 116 bytes>)}31.746%{mask-image:url(<png 116 bytes>)}33.333%{mask-image:url(<png 116 bytes>)}34.921%{mask-image:url(<png 116 bytes>)}36.508%{mask-image:url(<png 116 bytes>)}38.095%{mask-image:url(<png 116 bytes>)}39.683%{mask-image:url(<png 116 bytes>)}41.27%{mask-image:url(<png 116 bytes>)}42.857%{mask-image:url(<png 116 bytes>)}44.444%{mask-image:url(<png 116 bytes>)}46.032%{mask-image:url(<png 116 bytes>)}47.619%{mask-image:url(<png 116 bytes>)}49.206%{mask-image:url(<png 116 bytes>)}50.794%{mask-image:url(<png 116 bytes>)}52.381%{mask-image:url(<png 116 bytes>)}53.968%{mask-image:url(<png 116 bytes>)}55.556%{mask-image:url(<png 116 bytes>)}57.143%{mask-image:url(<png 116 bytes>)}58.73%{mask-image:url(<png 116 bytes>)}60.317%{mask-image:url(<png 116 bytes>)}61.905%{mask-image:url(<png 116 bytes>)}63.492%{mask-image:url(<png 116 bytes>)}65.079%{mask-image:url(<png 116 bytes>)}66.667%{mask-image:url(<png 116 bytes>)}68.254%{mask-image:url(<png 116 bytes>)}69.841%{mask-image:url(<png 116 bytes>)}71.429%{mask-image:url(<png 116 bytes>)}73.016%{mask-image:url(<png 116 bytes>)}74.603%{mask-image:url(<png 116 bytes>)}76.19%{mask-image:url(<png 116 bytes>)}77.778%{mask-image:url(<png 116 bytes>)}79.365%{mask-image:url(<png 116 bytes>)}80.952%{mask-image:url(<png 116 bytes>)}82.54%{mask-image:url(<png 116 bytes>)}84.127%{mask-image:url(<png 116 bytes>)}85.714%{mask-image:url(<png 116 bytes>)}87.302%{mask-image:url(<png 116 bytes>)}88.889%{mask-image:url(<png 116 bytes>)}90.476%{mask-image:url(<png 116 bytes>)}92.063%{mask-image:url(<png 116 bytes>)}93.651%{mask-image:url(<png 116 bytes>)}95.238%{mask-image:url(<png 116 bytes>)}96.825%{mask-image:url(<png 116 bytes>)}98.413%{mask-image:url(<png 116 bytes>)}100%{mask-image:url(<png 116 bytes>)}}
+@keyframes ts-fade-in{from{opacity:0}to{opacity:1}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-fade on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-fade"] [data-slide].is-entering{animation:ts-t-fade-in 500ms ease-in-out 0ms both}
+[data-transition="t-fade"] [data-slide].is-leaving{animation:ts-t-fade-out 500ms ease-in-out 0ms both}
+[data-transition="t-fade"][data-reverse] [data-slide].is-entering{animation:ts-t-fade-out 500ms ease-in-out 0ms reverse both}
+[data-transition="t-fade"][data-reverse] [data-slide].is-leaving{animation:ts-t-fade-in 500ms ease-in-out 0ms reverse both}
+[data-slide="t-fade"][data-step="0"] [data-block="obj"].is-entering{animation:ts-fly-in-left-657 800ms ease-out 0ms both}
+@keyframes ts-t-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-t-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes ts-fly-in-left-657{from{translate:-657px 0px}to{translate:0 0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-fade on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-fade"] [data-slide].is-entering{animation:ts-t-fade-in 500ms ease-in-out 0ms both}
+[data-transition="t-fade"] [data-slide].is-leaving{animation:ts-t-fade-out 500ms ease-in-out 0ms both}
+[data-transition="t-fade"][data-reverse] [data-slide].is-entering{animation:ts-t-fade-out 500ms ease-in-out 0ms reverse both}
+[data-transition="t-fade"][data-reverse] [data-slide].is-leaving{animation:ts-t-fade-in 500ms ease-in-out 0ms reverse both}
+[data-slide="t-fade"][data-step="0"] [data-block="obj"].is-entering{animation:ts-fly-in-left-657 800ms ease-out 0ms both}
+@keyframes ts-t-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ts-t-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes ts-fly-in-left-657{from{translate:-657px 0px}to{translate:0 0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-flip on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-flip"] [data-slide].is-entering{animation:ts-t-flip-in 2000ms ease-in-out 0ms both}
+[data-transition="t-flip"] [data-slide].is-leaving{animation:ts-t-flip-out 2000ms ease-in-out 0ms both}
+[data-transition="t-flip"][data-reverse] [data-slide].is-entering{animation:ts-t-flip-out 2000ms ease-in-out 0ms reverse both}
+[data-transition="t-flip"][data-reverse] [data-slide].is-leaving{animation:ts-t-flip-in 2000ms ease-in-out 0ms reverse both}
+[data-slide="t-flip"][data-step="1"] [data-block="obj"].is-leaving{animation:ts-fade-out 1000ms ease-in 0ms both}
+@keyframes ts-t-flip-in{0%,50%{transform:perspective(2400px) rotateY(90deg)}100%{transform:perspective(2400px) rotateY(0)}}
+@keyframes ts-t-flip-out{0%{transform:perspective(2400px) rotateY(0)}50%,100%{transform:perspective(2400px) rotateY(-90deg)}}
+@keyframes ts-fade-out{from{opacity:1}to{opacity:0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-flip on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-flip"] [data-slide].is-entering{animation:ts-t-flip-in 2000ms ease-in-out 0ms both}
+[data-transition="t-flip"] [data-slide].is-leaving{animation:ts-t-flip-out 2000ms ease-in-out 0ms both}
+[data-transition="t-flip"][data-reverse] [data-slide].is-entering{animation:ts-t-flip-out 2000ms ease-in-out 0ms reverse both}
+[data-transition="t-flip"][data-reverse] [data-slide].is-leaving{animation:ts-t-flip-in 2000ms ease-in-out 0ms reverse both}
+[data-slide="t-flip"][data-step="1"] [data-block="obj"].is-leaving{animation:ts-fade-out 1000ms ease-in 0ms both}
+@keyframes ts-t-flip-in{0%,50%{transform:perspective(2400px) rotateY(90deg)}100%{transform:perspective(2400px) rotateY(0)}}
+@keyframes ts-t-flip-out{0%{transform:perspective(2400px) rotateY(0)}50%,100%{transform:perspective(2400px) rotateY(-90deg)}}
+@keyframes ts-fade-out{from{opacity:1}to{opacity:0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-gallery on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-gallery"] [data-slide].is-entering{animation:ts-t-gallery-in 5000ms ease-in-out 0ms both}
+[data-transition="t-gallery"] [data-slide].is-leaving{animation:ts-t-gallery-out 5000ms ease-in-out 0ms both}
+[data-transition="t-gallery"][data-reverse] [data-slide].is-entering{animation:ts-t-gallery-out 5000ms ease-in-out 0ms reverse both}
+[data-transition="t-gallery"][data-reverse] [data-slide].is-leaving{animation:ts-t-gallery-in 5000ms ease-in-out 0ms reverse both}
+[data-slide="t-gallery"][data-step="0"] [data-block="obj"].is-leaving{animation:ts-zoom-out 700ms ease-in 0ms both}
+@keyframes ts-t-gallery-in{0%{transform:perspective(2400px) translateX(100%) rotateY(-8deg)}50%{transform:perspective(2400px) translateX(50%) rotateY(-8deg) scale(.9)}100%{transform:perspective(2400px) translateX(0) rotateY(0) scale(1)}}
+@keyframes ts-t-gallery-out{0%{transform:perspective(2400px) translateX(0) rotateY(0) scale(1)}50%{transform:perspective(2400px) translateX(-50%) rotateY(8deg) scale(.9)}100%{transform:perspective(2400px) translateX(-100%) rotateY(8deg)}}
+@keyframes ts-zoom-out{from{scale:1}to{scale:0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-gallery on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-gallery"] [data-slide].is-entering{animation:ts-t-gallery-in 5000ms ease-in-out 0ms both}
+[data-transition="t-gallery"] [data-slide].is-leaving{animation:ts-t-gallery-out 5000ms ease-in-out 0ms both}
+[data-transition="t-gallery"][data-reverse] [data-slide].is-entering{animation:ts-t-gallery-out 5000ms ease-in-out 0ms reverse both}
+[data-transition="t-gallery"][data-reverse] [data-slide].is-leaving{animation:ts-t-gallery-in 5000ms ease-in-out 0ms reverse both}
+[data-slide="t-gallery"][data-step="0"] [data-block="obj"].is-leaving{animation:ts-zoom-out 700ms ease-in 0ms both}
+@keyframes ts-t-gallery-in{0%{transform:perspective(2400px) translateX(100%) rotateY(-8deg)}50%{transform:perspective(2400px) translateX(50%) rotateY(-8deg) scale(.9)}100%{transform:perspective(2400px) translateX(0) rotateY(0) scale(1)}}
+@keyframes ts-t-gallery-out{0%{transform:perspective(2400px) translateX(0) rotateY(0) scale(1)}50%{transform:perspective(2400px) translateX(-50%) rotateY(8deg) scale(.9)}100%{transform:perspective(2400px) translateX(-100%) rotateY(8deg)}}
+@keyframes ts-zoom-out{from{scale:1}to{scale:0}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-none on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-slide="t-none"][data-step="1"] [data-block="obj"].is-entering{animation:ts-appear 1ms linear 0ms both}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-none on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-slide="t-none"][data-step="1"] [data-block="obj"].is-entering{animation:ts-appear 1ms linear 0ms both}
+@keyframes ts-appear{from{visibility:hidden}to{visibility:visible}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-slide-left on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-slide-left"] [data-slide].is-entering{animation:ts-t-slideLeft-in 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-left"] [data-slide].is-leaving{animation:ts-t-slideLeft-out 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-left"][data-reverse] [data-slide].is-entering{animation:ts-t-slideLeft-out 1000ms ease-in-out 0ms reverse both}
+[data-transition="t-slide-left"][data-reverse] [data-slide].is-leaving{animation:ts-t-slideLeft-in 1000ms ease-in-out 0ms reverse both}
+[data-slide="t-slide-left"][data-step="1"] [data-block="obj"].is-emph{animation:ts-spin 2000ms linear 0ms both}
+@keyframes ts-t-slideLeft-in{from{translate:-100% 0}to{translate:0 0}}
+@keyframes ts-t-slideLeft-out{from{translate:0 0}to{translate:100% 0}}
+@keyframes ts-spin{from{rotate:0deg}to{rotate:360deg}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-slide-left on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-slide-left"] [data-slide].is-entering{animation:ts-t-slideLeft-in 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-left"] [data-slide].is-leaving{animation:ts-t-slideLeft-out 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-left"][data-reverse] [data-slide].is-entering{animation:ts-t-slideLeft-out 1000ms ease-in-out 0ms reverse both}
+[data-transition="t-slide-left"][data-reverse] [data-slide].is-leaving{animation:ts-t-slideLeft-in 1000ms ease-in-out 0ms reverse both}
+[data-slide="t-slide-left"][data-step="1"] [data-block="obj"].is-emph{animation:ts-spin 2000ms linear 0ms both}
+@keyframes ts-t-slideLeft-in{from{translate:-100% 0}to{translate:0 0}}
+@keyframes ts-t-slideLeft-out{from{translate:0 0}to{translate:100% 0}}
+@keyframes ts-spin{from{rotate:0deg}to{rotate:360deg}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-slide-right on the 16:9 and the 4:3 page > 4:3 1`] = `
+"[data-transition="t-slide-right"] [data-slide].is-entering{animation:ts-t-slideRight-in 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-right"] [data-slide].is-leaving{animation:ts-t-slideRight-out 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-right"][data-reverse] [data-slide].is-entering{animation:ts-t-slideRight-out 1000ms ease-in-out 0ms reverse both}
+[data-transition="t-slide-right"][data-reverse] [data-slide].is-leaving{animation:ts-t-slideRight-in 1000ms ease-in-out 0ms reverse both}
+[data-slide="t-slide-right"][data-step="0"] [data-block="obj"].is-entering{animation:ts-zoom-in 600ms ease-out 0ms both}
+@keyframes ts-t-slideRight-in{from{translate:100% 0}to{translate:0 0}}
+@keyframes ts-t-slideRight-out{from{translate:0 0}to{translate:-100% 0}}
+@keyframes ts-zoom-in{from{scale:0}to{scale:1}}"
+`;
+
+exports[`motionCss over decks/fixture/motion (SPEC-5 2.6) > writes the pinned rules for t-slide-right on the 16:9 and the 4:3 page > 16:9 1`] = `
+"[data-transition="t-slide-right"] [data-slide].is-entering{animation:ts-t-slideRight-in 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-right"] [data-slide].is-leaving{animation:ts-t-slideRight-out 1000ms ease-in-out 0ms both}
+[data-transition="t-slide-right"][data-reverse] [data-slide].is-entering{animation:ts-t-slideRight-out 1000ms ease-in-out 0ms reverse both}
+[data-transition="t-slide-right"][data-reverse] [data-slide].is-leaving{animation:ts-t-slideRight-in 1000ms ease-in-out 0ms reverse both}
+[data-slide="t-slide-right"][data-step="0"] [data-block="obj"].is-entering{animation:ts-zoom-in 600ms ease-out 0ms both}
+@keyframes ts-t-slideRight-in{from{translate:100% 0}to{translate:0 0}}
+@keyframes ts-t-slideRight-out{from{translate:0 0}to{translate:-100% 0}}
+@keyframes ts-zoom-in{from{scale:0}to{scale:1}}"
+`;

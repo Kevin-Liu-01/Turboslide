@@ -6,12 +6,7 @@
     "blank-dark": {
       "file": "docs/gslides-parity/verification-4/production-ship/production-selection-shape-dark-slide.png",
       "ring": "rgb(61, 134, 240)",
-      "ringBox": [
-        679,
-        352,
-        338,
-        212
-      ],
+      "ringBox": [679, 352, 338, 212],
       "chipBackground": "rgb(61, 134, 240)",
       "chipColor": "rgb(7, 7, 7)",
       "handleBorder": "rgb(255, 255, 255)",
@@ -23,12 +18,7 @@
     "photo-dark": {
       "file": "docs/gslides-parity/verification-4/production-ship/production-selection-shape-dark-photo.png",
       "ring": "rgb(61, 134, 240)",
-      "ringBox": [
-        919,
-        507,
-        296,
-        169
-      ],
+      "ringBox": [919, 507, 296, 169],
       "chipBackground": "rgb(61, 134, 240)",
       "chipColor": "rgb(7, 7, 7)",
       "handleBorder": "rgb(255, 255, 255)",

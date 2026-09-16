@@ -11,6 +11,8 @@
 // client shaped like ioredis (`get`, `set` with a millisecond TTL, `del`, `pexpire`) and one in
 // memory for tests and the `memory` tier. The file backend lives in
 // apps/studio/src/server/auth/principal.ts because it reads the disk.
+import type { Preferences, PreferencesStore } from '@turboslide/schema/preferences';
+import { defaultPreferences, normalizePreferences } from '@turboslide/schema/preferences';
 import type { LinkGrant } from './access.ts';
 import { isPrincipalId } from './ids.ts';
 import { labelFor } from './labels.ts';
@@ -59,6 +61,16 @@ export type PrincipalRecord = {
   linkGrants: LinkGrant[];
   notificationSettings: NotificationLevel;
   livePointers: LivePointers;
+  /**
+   * Tools > Preferences and the Accessibility settings (gslides-parity SPEC-5 7.1, 0.34; R10 3.3):
+   * the record of `@turboslide/schema/preferences`, the defaults of 7.1 when absent
+   * (`preferencesOf`). Written by `prefs.set`, `dictionary.add` and `dictionary.remove` through
+   * `principalPreferencesStore`; a record stored before a member existed reads with that member's
+   * default (`normalizePreferences`, the migration of an older shape), and the one time migration
+   * of the browser's `spellcheck` and `announce` toggles arrives as two `prefs.set` writes from the
+   * shell (`migrateLegacySettings` in the schema module).
+   */
+  preferences?: Preferences;
   createdAt: string;
   lastSeenAt: string;
 };
@@ -142,6 +154,7 @@ export function parsePrincipalRecord(value: unknown): PrincipalRecord | null {
     'linkGrants',
     'notificationSettings',
     'livePointers',
+    'preferences',
     'createdAt',
     'lastSeenAt',
   ];
@@ -157,6 +170,13 @@ export function parsePrincipalRecord(value: unknown): PrincipalRecord | null {
   if (!isRecord(lp) || typeof lp.collaborators !== 'boolean' || !isRecord(lp.mine)) return null;
   if (!Object.values(lp.mine).every((v) => typeof v === 'boolean')) return null;
   if (!isIsoStamp(value.createdAt) || !isIsoStamp(value.lastSeenAt)) return null;
+  // the preferences (SPEC-5 7.1) read through the schema's normalizer: a member the record was
+  // written before takes its default (the migration of an older shape), while a wrong type or a
+  // member the record does not have refuses the whole record the way an unknown key does, so a
+  // later shape is never silently narrowed
+  const preferences =
+    value.preferences === undefined ? undefined : normalizePreferences(value.preferences);
+  if (preferences === null) return null;
   const record: PrincipalRecord = {
     principalId: value.principalId,
     label: value.label,
@@ -171,7 +191,56 @@ export function parsePrincipalRecord(value: unknown): PrincipalRecord | null {
     lastSeenAt: value.lastSeenAt,
   };
   if (typeof value.name === 'string') record.name = value.name;
+  if (preferences !== undefined) record.preferences = preferences;
   return record;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The preferences on the record (gslides-parity SPEC-5 7.1; R10 3.2, 3.4)
+
+/** The record's preferences, the defaults of SPEC-5 7.1 for a principal that never set one. */
+export function preferencesOf(record: Pick<PrincipalRecord, 'preferences'> | null): Preferences {
+  return record?.preferences ?? defaultPreferences();
+}
+
+/** The record with its preferences replaced and `lastSeenAt` stamped, the way every write re-arms the TTL. */
+export function withPreferences(
+  record: PrincipalRecord,
+  preferences: Preferences,
+  now: Date = new Date(),
+): PrincipalRecord {
+  return { ...record, preferences, lastSeenAt: now.toISOString() };
+}
+
+/**
+ * The `PreferencesStore` of `@turboslide/schema/preferences` over a principal's record in any
+ * `PrincipalStore` (Redis hosted, the file store on a checkout, the memory store in tests): the
+ * home of `prefs.get`, `prefs.set`, `dictionary.add` and `dictionary.remove` on the hosted
+ * dispatcher, composed by the studio with the request's principal. `load` touches the record
+ * (creating it for a principal seen for the first time, as every read re-arms the TTL) and
+ * answers its preferences or the defaults; `save` writes the whole record back. The id must be
+ * one of the three principal id formats; the CLI's `local:<name>` principal has its own file
+ * module in apps/cli/src/records/principal.ts.
+ */
+export function principalPreferencesStore(
+  store: PrincipalStore,
+  principalId: string,
+  now: () => Date = () => new Date(),
+): PreferencesStore {
+  if (!isPrincipalId(principalId))
+    throw new RangeError(`not a principal id: ${JSON.stringify(principalId)}`);
+  const recordOf = async (): Promise<PrincipalRecord> =>
+    (await store.touch(principalId, now(), true)) ?? newPrincipalRecord(principalId, now());
+  return {
+    async load() {
+      return preferencesOf(await recordOf());
+    },
+    async save(preferences) {
+      const record = withPreferences(await recordOf(), preferences, now());
+      await store.put(record);
+      return preferencesOf(record);
+    },
+  };
 }
 
 /**

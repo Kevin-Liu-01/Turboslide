@@ -84,7 +84,40 @@ export function cellBorders(
       : cell?.border !== undefined
         ? cellBorder(cell.border, paperHex, dash)
         : cellBorder(under, paperHex, dash);
-  return [rowIndex === 0 ? cellBorder(table.rule, paperHex, dash) : none, none, own, none];
+  const borders: [
+    PptxGenJS.BorderProps,
+    PptxGenJS.BorderProps,
+    PptxGenJS.BorderProps,
+    PptxGenJS.BorderProps,
+  ] = [rowIndex === 0 ? cellBorder(table.rule, paperHex, dash) : none, none, own, none];
+  // the per edge borders of Google's edge picker (gslides-parity SPEC-5 7.7; `TableCell.border`
+  // per edge): a measured edge replaces its side, `a:lnT`, `a:lnR`, `a:lnB` and `a:lnL` in the
+  // file; the scene carries them as `edges` once the measurer reads them (b5.md request 12)
+  const edges = cellEdgesOf(cell);
+  if (edges !== undefined) {
+    const order = ['top', 'right', 'bottom', 'left'] as const;
+    order.forEach((edge, index) => {
+      const rule = edges[edge];
+      if (rule === undefined) return;
+      borders[index] = rule === 'none' ? none : cellBorder(rule, paperHex, dash);
+    });
+  }
+  return borders;
+}
+
+/** The per edge rules of a cell as the measurer records them (SPEC-5 7.7); none until `SceneTableCell.edges` lands. */
+export type CellEdgeRules = Partial<
+  Record<
+    'top' | 'right' | 'bottom' | 'left',
+    { color: string; width: number; dash?: SceneDash } | 'none'
+  >
+>;
+
+/** The edge rules of a scene cell, read through an optional member the scene type may not carry yet. */
+export function cellEdgesOf(cell: SceneTableCell | undefined): CellEdgeRules | undefined {
+  if (cell === undefined) return undefined;
+  const edges = (cell as SceneTableCell & { edges?: CellEdgeRules }).edges;
+  return edges !== undefined && Object.keys(edges).length > 0 ? edges : undefined;
 }
 
 /**

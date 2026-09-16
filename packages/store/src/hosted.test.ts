@@ -17,6 +17,8 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import {
+  BlobExistsError,
+  isBlobExistsError,
   isMirroredDocument,
   openBlobStore,
   parseThumbPathname,
@@ -981,6 +983,40 @@ describe('hosted stores', () => {
       now,
     });
   }
+
+  // gslides-parity VERIFICATION-5 finding 11 (the round five fix round): the deployed bundle
+  // carries more than one copy of blob-store.ts, so a BlobExistsError thrown by one copy is not an
+  // instance of the other's class, and a ready() that cached its rejection answered 500 to every
+  // route of the instance for its whole life (production, 2026-09-15 16:13 PDT).
+  describe('the blob collection’s ready', () => {
+    const TWIN = 'decks/gt-brand/assets/liquid-metal-diamond-dark.png';
+
+    it('seeds past a BlobExistsError thrown by another copy of the store module', async () => {
+      const fake = memoryBlobClient();
+      const foreign = Object.assign(new Error(`${TWIN} exists in the Blob store already`), {
+        name: 'BlobExistsError',
+        pathname: TWIN,
+      });
+      expect(foreign).not.toBeInstanceOf(BlobExistsError);
+      expect(isBlobExistsError(foreign)).toBe(true);
+      fake.failNextPut(TWIN, foreign);
+      const decks = collection('blob', join(root, 'overlay-ready-1'), fake);
+      await expect(decks.ready()).resolves.toBeUndefined();
+      expect(fake.blobs.has('decks/gt-brand/deck.json')).toBe(true);
+      expect((await decks.list()).some((head) => head.id === 'gt-brand')).toBe(true);
+    });
+
+    it('retries the seed on the next call after ready rejected, instead of answering the failure for the instance’s life', async () => {
+      const fake = memoryBlobClient();
+      fake.failNextPut('decks/gt-brand/deck.json', new Error('Vercel Blob: service unavailable'));
+      const decks = collection('blob', join(root, 'overlay-ready-2'), fake);
+      await expect(decks.ready()).rejects.toThrow(/service unavailable/);
+      // the second call seeds again: the files of the first attempt are there (skipped), the manifest lands
+      await expect(decks.ready()).resolves.toBeUndefined();
+      expect(fake.blobs.has('decks/gt-brand/deck.json')).toBe(true);
+      expect((await decks.list()).some((head) => head.id === 'gt-brand')).toBe(true);
+    });
+  });
 
   describe.each<Kind>(['tmp', 'blob'])('%s collection', (kind) => {
     let fake: FakeBlobClient | null;

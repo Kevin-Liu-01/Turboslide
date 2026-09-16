@@ -1,0 +1,109 @@
+{
+  "summary": {
+    "imported": 10,
+    "substituted": 2,
+    "dropped": 0,
+    "slides": 2
+  },
+  "rows": [
+    {
+      "slideIndex": 1,
+      "slideId": "pictures",
+      "object": "BMP picture",
+      "status": "substituted",
+      "code": "picture.format",
+      "message": "ppt/media/image4.bmp is a BMP file; a labelled box stands in its place"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "tables",
+      "object": "background",
+      "status": "kept",
+      "code": "background.picture",
+      "message": "The background picture is the bottom of the stack"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "tables",
+      "object": "Plans table",
+      "status": "kept",
+      "code": "table.border",
+      "message": "1 left or right cell borders landed as per edge borders"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "tables",
+      "object": "Plans table",
+      "status": "kept",
+      "code": "table.style",
+      "message": "The table style {5C22544A-7EE6-4342-B048-85BDC9FD1C3A} (banding, first column) was dropped; the cells keep their own fills and borders"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "tables",
+      "object": "Wide table",
+      "status": "substituted",
+      "code": "table.columns",
+      "message": "A 21 by 2 table was truncated to 20 by 2"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "tables",
+      "object": "Wide table",
+      "status": "kept",
+      "code": "table.style",
+      "message": "The table style {5C22544A-7EE6-4342-B048-85BDC9FD1C3A} (banding, first column) was dropped; the cells keep their own fills and borders"
+    },
+    {
+      "slideIndex": 1,
+      "status": "kept",
+      "code": "theme.layouts",
+      "message": "11 layouts of the file were not imported as custom layouts; the slides keep their positions"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Calibri",
+      "runs": 56,
+      "substituted": "Inter"
+    }
+  ],
+  "theme": {
+    "mode": "adopt",
+    "imported": false,
+    "scheme": {
+      "colors": {
+        "ink": "#000000",
+        "paper": "#ffffff",
+        "ink-2": "#1f497d",
+        "plate": "#eeece1",
+        "ok": "#4f81bd",
+        "warn": "#c0504d",
+        "no": "#9bbb59",
+        "info": "#8064a2",
+        "titanium": "#4bacc6",
+        "raised": "#f79646",
+        "link": "#0000ff"
+      },
+      "fonts": {
+        "major": "Calibri",
+        "minor": "Calibri"
+      }
+    }
+  },
+  "source": {
+    "file": "03-pictures-tables.pptx",
+    "slides": 2,
+    "page": {
+      "width": 1600,
+      "height": 900
+    },
+    "producer": "python-pptx",
+    "sections": 0,
+    "modifyVerifier": false
+  },
+  "validation": {
+    "ok": true,
+    "issues": 9
+  }
+}

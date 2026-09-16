@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "the-product",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The product",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "One screen for the whole workflow, from the first import to the report.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "",
+        "fit": "width",
+        "caption": "The product in use",
+        "captionSize": 16
+      }
+    ]
+  },
+  "title": "The product"
+}

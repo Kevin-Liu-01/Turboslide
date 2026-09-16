@@ -1,0 +1,51 @@
+{
+  "id": "lists/numbered-steps",
+  "category": "lists",
+  "label": "Numbered steps",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Steps"
+    },
+    {
+      "id": "list",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 420,
+        "group": "block"
+      },
+      "type": "plain",
+      "numbered": true,
+      "marker": "number",
+      "items": [
+        {
+          "text": "Connect the systems"
+        },
+        {
+          "text": "Configure the fields"
+        },
+        {
+          "text": "Run the pipeline"
+        },
+        {
+          "text": "Review the report"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    520
+  ]
+}

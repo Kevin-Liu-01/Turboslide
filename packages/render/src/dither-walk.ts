@@ -17,7 +17,8 @@ import { CANVAS_GROUP } from '@turboslide/schema/canvas';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { canvasObjects, slideBlocks, slideOrder } from '@turboslide/schema/deck';
 import type { Box } from '@turboslide/schema/render';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, deckPage } from '@turboslide/schema/render';
+import type { Page } from '@turboslide/schema/render';
 import type { PictureDitherLike } from './dither-key.ts';
 import {
   ditherKey,
@@ -48,12 +49,17 @@ export type DitheredPicture = {
  * narrower slot renders at the slot's width and stays in state `live`, which the export residual
  * names).
  */
-export function boxOfDithered(block: PictureBlock | ShotBlock, asset: Asset): [number, number] {
+export function boxOfDithered(
+  block: PictureBlock | ShotBlock,
+  asset: Asset,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): [number, number] {
   if (block.pos !== undefined) return [block.pos.w, block.pos.h];
-  if (block.type === 'picture') return [SHEET_WIDTH, SHEET_HEIGHT];
+  if (block.type === 'picture') return [page.width, page.height];
   const keptW = 1 - (block.trim?.left ?? 0) - (block.trim?.right ?? 0);
   const keptH = 1 - (block.trim?.top ?? 0) - (block.trim?.bottom ?? 0);
-  const w = block.width ?? 1326;
+  // the content width of the page: 1326 on the default page (R08 3c)
+  const w = block.width ?? page.width - 274;
   const h = (w * asset.size[1] * keptH) / (asset.size[0] * keptW);
   return [w, h];
 }
@@ -105,7 +111,7 @@ export function ditheredPictures(
           `Block "${block.id}" dithers asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`,
         );
       const dither = readDither(block) as PictureDitherLike;
-      const box = boxOfDithered(block, asset);
+      const box = boxOfDithered(block, asset, deckPage(document.deck));
       const resolved = resolveDither(dither);
       const source = ditherSourceOf(asset);
       const key = ditherKey({

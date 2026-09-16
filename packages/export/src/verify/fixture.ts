@@ -11,7 +11,10 @@ import { dirname } from 'node:path';
 
 import JSZip from 'jszip';
 
+import type { ThemeId } from '@turboslide/schema/deck';
 import type { Box } from '@turboslide/schema/render';
+import { tokensFor } from '@turboslide/theme/themes';
+import { PANEL, SEMANTIC } from '@turboslide/theme/tokens';
 
 import { PAGE_EMU, pxToEmu, spcOf, spcPtsOf, szOf } from '../units.ts';
 
@@ -51,7 +54,13 @@ export type FixturePage = {
   notes?: string;
 };
 
-export type FixtureOptions = { out: string; pages: FixturePage[]; title?: string };
+export type FixtureOptions = {
+  out: string;
+  pages: FixturePage[];
+  title?: string;
+  /** the theme part (SPEC-5 9.3): the GT part when absent */
+  themePart?: ThemePartInput;
+};
 
 const NS_A = 'http://schemas.openxmlformats.org/drawingml/2006/main';
 const NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
@@ -146,18 +155,85 @@ function rels(entries: { id: string; type: string; target: string }[]): string {
   );
 }
 
-const THEME_XML =
-  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n` +
-  `<a:theme xmlns:a="${NS_A}" name="Turboslide"><a:themeElements>` +
-  `<a:clrScheme name="Turboslide"><a:dk1><a:srgbClr val="070707"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="3A3D44"/></a:dk2><a:lt2><a:srgbClr val="F6F6F6"/></a:lt2>` +
-  `<a:accent1><a:srgbClr val="12A37A"/></a:accent1><a:accent2><a:srgbClr val="F0A020"/></a:accent2><a:accent3><a:srgbClr val="E5484D"/></a:accent3><a:accent4><a:srgbClr val="2F5CE0"/></a:accent4><a:accent5><a:srgbClr val="8A8F98"/></a:accent5><a:accent6><a:srgbClr val="101010"/></a:accent6>` +
-  `<a:hlink><a:srgbClr val="2F5CE0"/></a:hlink><a:folHlink><a:srgbClr val="8A8F98"/></a:folHlink></a:clrScheme>` +
-  `<a:fontScheme name="Turboslide"><a:majorFont><a:latin typeface="GT Inter Display"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="GT Inter Text 22"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme>` +
-  `<a:fmtScheme name="Turboslide"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst>` +
-  `<a:lnStyleLst><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln></a:lnStyleLst>` +
-  `<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>` +
-  `<a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>` +
-  `</a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>`;
+/**
+ * The theme part per theme (gslides-parity SPEC-5 9.1, 9.3, 9.4; R03 4.2): `clrScheme` over the
+ * twelve slots of `THEME_COLOR_SLOTS` in the API order (dk1, lt1, dk2, lt2, accent1 to accent6,
+ * hlink, folHlink) from the theme's light tokens, the four semantic hues, the raised panel and the
+ * link colour, with an edited deck's `themeEdits.colors.light` written over them; `fontScheme`
+ * from the record's faces by their catalog name, the GT fixture names when none. Both built in
+ * themes carry the same ten token values (SPEC-5 0.45), so their default parts differ in the name
+ * alone; `masters.ts` (B4) reads this function for the Editable text theme part (b6.md request R9).
+ */
+export type ThemePartInput = {
+  theme?: ThemeId;
+  /** `themeEdits.colors.light`, `#rrggbb` per slot key */
+  colors?: Readonly<Record<string, string>>;
+  /** the faces by catalog name; the GT fixture names when absent */
+  fonts?: { display?: string; text?: string };
+};
+
+const SLOT_ELEMENTS: ReadonlyArray<readonly [element: string, slot: string]> = [
+  ['dk1', 'ink'],
+  ['lt1', 'paper'],
+  ['dk2', 'ink-2'],
+  ['lt2', 'plate'],
+  ['accent1', 'ok'],
+  ['accent2', 'warn'],
+  ['accent3', 'no'],
+  ['accent4', 'info'],
+  ['accent5', 'titanium'],
+  ['accent6', 'raised'],
+  ['hlink', 'link'],
+  ['folHlink', 'titanium'],
+];
+
+/** The twelve slot values of a theme's light appearance as six upper case hex digits. */
+export function themeSchemeColors(theme: ThemeId = 'gt-ink-paper'): Record<string, string> {
+  const tokens = tokensFor(theme).light;
+  const hex = (value: string): string => value.replace('#', '').slice(0, 6).toUpperCase();
+  return {
+    ink: hex(tokens.ink),
+    paper: hex(tokens.paper),
+    'ink-2': hex(tokens['ink-2']),
+    // the plate composited on paper (R03 4.2)
+    plate: 'F6F6F6',
+    ok: hex(SEMANTIC.ok),
+    warn: hex(SEMANTIC.warn),
+    no: hex(SEMANTIC.no),
+    info: hex(SEMANTIC.info),
+    titanium: hex(tokens.titanium),
+    raised: hex(PANEL.background),
+    link: hex(SEMANTIC.info),
+  };
+}
+
+export function themePartXml(input: ThemePartInput = {}): string {
+  const theme = input.theme ?? 'gt-ink-paper';
+  const name = theme === 'ts-plate' ? 'Turboslide Plate' : 'Turboslide';
+  const scheme = themeSchemeColors(theme);
+  for (const [key, value] of Object.entries(input.colors ?? {}))
+    if (/^#[0-9a-fA-F]{6}/.test(value)) scheme[key] = value.slice(1, 7).toUpperCase();
+  const colors = SLOT_ELEMENTS.map(
+    ([element, slot]) =>
+      `<a:${element}><a:srgbClr val="${scheme[slot] ?? '000000'}"/></a:${element}>`,
+  ).join('');
+  const major = input.fonts?.display ?? 'GT Inter Display';
+  const minor = input.fonts?.text ?? 'GT Inter Text 22';
+  return (
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n` +
+    `<a:theme xmlns:a="${NS_A}" name="${escapeXml(name)}"><a:themeElements>` +
+    `<a:clrScheme name="${escapeXml(name)}">${colors}</a:clrScheme>` +
+    `<a:fontScheme name="${escapeXml(name)}"><a:majorFont><a:latin typeface="${escapeXml(major)}"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="${escapeXml(minor)}"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme>` +
+    `<a:fmtScheme name="${escapeXml(name)}"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst>` +
+    `<a:lnStyleLst><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="7620"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln></a:lnStyleLst>` +
+    `<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>` +
+    `<a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>` +
+    `</a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>`
+  );
+}
+
+/** The GT theme part as the rounds before five wrote it (the default of `themePartXml`). */
+const THEME_XML = themePartXml();
 
 const SP_TREE_EMPTY =
   `<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
@@ -277,7 +353,10 @@ export async function buildFixturePptx(options: FixtureOptions): Promise<Uint8Ar
     'ppt/slideLayouts/_rels/slideLayout1.xml.rels',
     rels([{ id: 'rId1', type: 'slideMaster', target: '../slideMasters/slideMaster1.xml' }]),
   );
-  add('ppt/theme/theme1.xml', THEME_XML);
+  add(
+    'ppt/theme/theme1.xml',
+    options.themePart === undefined ? THEME_XML : themePartXml(options.themePart),
+  );
   add(
     'docProps/core.xml',
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n` +

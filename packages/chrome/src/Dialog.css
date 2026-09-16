@@ -505,7 +505,7 @@
 }
 
 .ts-dialog-slide-frame {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   background: var(--pt-paper);
   border-bottom: 1px solid var(--pt-hair-soft);
   display: grid;

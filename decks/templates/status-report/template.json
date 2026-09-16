@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "status-report",
+  "name": "Status report",
+  "description": "Eight slides for a weekly or monthly update: the status board, progress as a column chart, wins, risks, the decisions needed and the next check in.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 8
+    }
+  ],
+  "archetypes": [],
+  "category": "work",
+  "useCases": [
+    "project reports",
+    "quarterly reviews"
+  ],
+  "cover": "title",
+  "slideCount": 8
+}

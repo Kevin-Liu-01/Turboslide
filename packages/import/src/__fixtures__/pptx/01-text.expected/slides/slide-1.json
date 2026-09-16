@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "slide-1",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h1",
+        "text": "Import fixture",
+        "pos": {
+          "x": 120,
+          "y": 279.58,
+          "w": 1360,
+          "h": 192.92,
+          "z": 1
+        },
+        "typography": {
+          "size": 73.5,
+          "align": "center"
+        },
+        "autofit": "shrink",
+        "ext": {
+          "pptxName": "Title 1",
+          "placeholder": "ctrTitle"
+        }
+      },
+      {
+        "id": "p",
+        "type": "paragraph",
+        "role": "lead",
+        "text": "Three slides of text for the reader",
+        "pos": {
+          "x": 240,
+          "y": 510,
+          "w": 1120,
+          "h": 230,
+          "z": 2
+        },
+        "typography": {
+          "size": 53.5,
+          "align": "center",
+          "spaceBefore": 10.7
+        },
+        "autofit": "shrink",
+        "ext": {
+          "pptxName": "Subtitle 2",
+          "placeholder": "subTitle"
+        }
+      }
+    ]
+  },
+  "title": "Import fixture",
+  "notes": "Speaker notes on the first slide.",
+  "ext": {
+    "pptxPart": "ppt/slides/slide1.xml",
+    "pptxSlideId": 256
+  }
+}

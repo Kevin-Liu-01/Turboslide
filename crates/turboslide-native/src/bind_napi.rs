@@ -231,3 +231,64 @@ pub fn gaussian_kernel(sigma: f64) -> Float64Array {
 pub fn bayer_thresholds() -> Uint8Array {
     Uint8Array::new(crate::bayer::bayer_thresholds().to_vec())
 }
+
+// The block level dither patterns (gslides-parity SPEC-4 7, SPEC-5 11; B6 day 7): the thresholds
+// of an ordered screen, the levels of a tone image under any pattern (the diffusions included)
+// and the plane alpha, over the strings and numbers `ResolvedDither` carries.
+
+#[napi]
+pub fn dither_thresholds(
+    pattern: String,
+    width: u32,
+    height: u32,
+    seed: i32,
+    angle: f64,
+) -> Result<Uint8Array> {
+    let pattern = crate::dither::Pattern::parse(&pattern).map_err(reason)?;
+    Ok(Uint8Array::new(crate::dither::thresholds(
+        pattern,
+        width as usize,
+        height as usize,
+        seed,
+        angle,
+    )))
+}
+
+#[napi]
+pub fn dither_levels(
+    tone: Uint8Array,
+    width: u32,
+    height: u32,
+    pattern: String,
+    levels: u32,
+    seed: i32,
+    angle: f64,
+) -> Result<Uint8Array> {
+    let (w, h) = (width as usize, height as usize);
+    if tone.len() != w * h {
+        return Err(reason(format!(
+            "tone buffer has {} bytes, {}x{} needs {}",
+            tone.len(),
+            w,
+            h,
+            w * h
+        )));
+    }
+    if !(2..=255).contains(&levels) {
+        return Err(reason(format!("levels must be 2 to 255, got {levels}")));
+    }
+    let pattern = crate::dither::Pattern::parse(&pattern).map_err(reason)?;
+    let gray = crate::image::Gray {
+        width: w,
+        height: h,
+        data: tone.to_vec(),
+    };
+    Ok(Uint8Array::new(crate::dither::levels_of(
+        &gray, pattern, levels, seed, angle,
+    )))
+}
+
+#[napi]
+pub fn plane_alpha(strength: f64) -> u32 {
+    crate::dither::plane_alpha(strength) as u32
+}

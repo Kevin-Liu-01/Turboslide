@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { isPictureAsset } from './assets.ts';
 import type { DeckDocument } from './deck.ts';
 import { describeMutation, diffDecks } from './diff.ts';
 import { workedDocument } from './fixtures.ts';
@@ -34,7 +35,7 @@ const scenarios: { name: string; b: DeckDocument }[] = [
       const mood = d.slides['mood-earth'];
       if (mood?.kind === 'mood') mood.picture.asset = 'liquid-metal-diamond';
       const site = d.deck.assets['site-home'];
-      if (site !== undefined) site.alt = 'Changed';
+      if (site !== undefined && isPictureAsset(site)) site.alt = 'Changed';
       d.deck.assets['extra'] = {
         id: 'extra',
         role: 'other',

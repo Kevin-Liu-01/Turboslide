@@ -10,12 +10,14 @@ import {
   chipTipOf,
   displayNameFor,
   flagText,
+  othersOf,
   participantsOnSlide,
   pointersDrawn,
   rosterRoleWord,
   slideNumberOf,
   slotChips,
   stackFlags,
+  withoutSelf,
 } from '../presence/presence-model';
 import {
   agentCells,
@@ -233,5 +235,55 @@ describe('the mark grid (11 6.1, 3.3)', () => {
     expect(chipName(identity)).toBe('Maya Chen, guest');
     /* a label's chip carries the label's initial alone */
     expect(markOf({ ...identity, name: undefined, trust: 'label' }).initials).toBe('T');
+  });
+});
+
+// The self filter on every presence surface (gslides-parity SPEC-5-amendments A3 item 5): this
+// tab by its client id and every id it held before, this person by the principal id, never drawn
+// as a collaborator whatever roster a caller passed.
+describe('withoutSelf and othersOf (SPEC-5-amendments A3 item 5)', () => {
+  const me = person('me', { principalId: 'anon_me' });
+  const myOtherTab = person('tab2', { principalId: 'anon_me' });
+  const myEarlierId = person('old', { principalId: 'anon_me' });
+  const maya = person('m', { principalId: 'anon_maya', name: 'Maya' });
+  const kai = person('k', { principalId: 'usr_kai', name: 'Kai' });
+
+  it('drops this tab, its earlier ids and this person’s other tabs, and keeps everyone else in order', () => {
+    const rows = [maya, me, myOtherTab, kai, myEarlierId];
+    expect(withoutSelf(rows, me, new Set(['old'])).map((row) => row.clientId)).toEqual(['m', 'k']);
+    // the client id alone when the caller knows no principal (the rule before round five)
+    expect(
+      withoutSelf(rows, { clientId: 'me' }, new Set(['old'])).map((row) => row.clientId),
+    ).toEqual(['m', 'tab2', 'k']);
+    // the principal alone for a route that knows only its account
+    expect(withoutSelf(rows, { principalId: 'anon_me' }).map((row) => row.clientId)).toEqual([
+      'm',
+      'k',
+    ]);
+    // nothing to filter by: every row stays
+    expect(withoutSelf(rows, null)).toEqual(rows);
+    expect(withoutSelf(rows, {})).toEqual(rows);
+  });
+
+  it('reads a presence record’s collaborators through the filter, and nothing without a record', () => {
+    expect(othersOf({ self: me, others: [maya, myOtherTab, me] }).map((r) => r.clientId)).toEqual([
+      'm',
+    ]);
+    expect(othersOf({ others: [maya, myOtherTab] }).map((r) => r.clientId)).toEqual(['m', 'tab2']);
+    expect(othersOf(undefined)).toEqual([]);
+    // the chips, the slide marks and the announcements read the filtered rows
+    expect(slotChips(othersOf({ self: me, others: [myOtherTab, maya] })).shown).toEqual([maya]);
+    expect(
+      participantsOnSlide(
+        othersOf({
+          self: me,
+          others: [
+            { ...myOtherTab, slideId: 's1' },
+            { ...kai, slideId: 's1' },
+          ],
+        }),
+        's1',
+      ),
+    ).toEqual([{ ...kai, slideId: 's1' }]);
   });
 });

@@ -2,14 +2,21 @@ import { describe, expect, it } from 'vitest';
 
 import type { ViewerSlide } from '../../model';
 import {
+  AUTO_PLAY_INTERVALS_MS,
+  autoPlayLabel,
   counterText,
   currentPlayIndex,
   formatElapsed,
   isNotesFont,
   isSkippedSlide,
+  motionOf,
+  nextPosition,
   NOTES_FONT,
   playList,
+  previousPosition,
   slideNumberOf,
+  stepCount,
+  stepCounterText,
   stepNotesFont,
   stepPlayIndex,
 } from '../presentModel';
@@ -85,5 +92,57 @@ describe('the presenter console numbers', () => {
     expect(isNotesFont(15)).toBe(false);
     expect(isNotesFont(30)).toBe(false);
     expect(isNotesFont('16')).toBe(false);
+  });
+});
+
+// The step model of round five (gslides-parity SPEC-5 2.2, 0.14; MILESTONES-5 B1 day 4).
+describe('the step model', () => {
+  const steps = [0, 2, 1];
+
+  it('reads a schedule a loader attached to the viewer slide, and nothing else', () => {
+    const schedule = {
+      slideId: 'a',
+      steps: [{ effects: [], durationMs: 0 }],
+      hiddenAtStart: [],
+      transition: null,
+      skipped: [],
+    };
+    expect(motionOf(slide('a', 1, { motion: schedule }))).toBe(schedule);
+    expect(motionOf(slide('a', 1))).toBeUndefined();
+    expect(motionOf(slide('a', 1, { motion: 'no' }))).toBeUndefined();
+    expect(motionOf(undefined)).toBeUndefined();
+    expect(stepCount(schedule)).toBe(0);
+    expect(
+      stepCount({ ...schedule, steps: [...schedule.steps, ...schedule.steps, ...schedule.steps] }),
+    ).toBe(2);
+    expect(stepCount(undefined)).toBe(0);
+  });
+
+  it('a next consumes the steps of a slide before it moves, then stops at the end', () => {
+    expect(nextPosition(0, 0, 3, steps)).toEqual({ index: 1, step: 0 });
+    expect(nextPosition(1, 0, 3, steps)).toEqual({ index: 1, step: 1 });
+    expect(nextPosition(1, 1, 3, steps)).toEqual({ index: 1, step: 2 });
+    expect(nextPosition(1, 2, 3, steps)).toEqual({ index: 2, step: 0 });
+    expect(nextPosition(2, 1, 3, steps)).toBeNull();
+    expect(nextPosition(0, 0, 0, steps)).toBeNull();
+    expect(nextPosition(0, 0, 3, (index) => steps[index] ?? 0)).toEqual({ index: 1, step: 0 });
+  });
+
+  it('a previous reverses a step, then lands on the previous slide at its last step', () => {
+    expect(previousPosition(1, 2, 3, steps)).toEqual({ index: 1, step: 1 });
+    expect(previousPosition(1, 0, 3, steps)).toEqual({ index: 0, step: 0 });
+    expect(previousPosition(2, 0, 3, steps)).toEqual({ index: 1, step: 2 });
+    expect(previousPosition(0, 0, 3, steps)).toBeNull();
+    expect(previousPosition(0, 0, 0, steps)).toBeNull();
+  });
+
+  it('prints the step line and the Auto-play labels', () => {
+    expect(stepCounterText(2, 4)).toBe('Step 2 of 4');
+    expect(stepCounterText(0, 4)).toBe('Step 0 of 4');
+    expect(stepCounterText(0, 0)).toBe('');
+    expect(AUTO_PLAY_INTERVALS_MS).toEqual([1000, 2000, 3000, 5000, 10000, 15000, 30000, 60000]);
+    expect(autoPlayLabel(1000)).toBe('Every second');
+    expect(autoPlayLabel(5000)).toBe('Every 5 seconds');
+    expect(autoPlayLabel(60000)).toBe('Every minute');
   });
 });

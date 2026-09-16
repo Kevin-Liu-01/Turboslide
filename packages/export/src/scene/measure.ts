@@ -157,6 +157,8 @@ export type MeasureSceneOptions = {
   slideSelector?: string;
   /** The raster tags of this page, when the caller ran tagRasterElements already. */
   tags?: RasterTag[];
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the frame, the chips and the clamps derive from it; the default page when absent. */
+  page?: { width: number; height: number };
 };
 
 export const DEFAULT_SHEET_SELECTOR = '.ts-sheet, .sheet, body';
@@ -177,10 +179,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       ...(options.slideSelector ? { slideSelector: options.slideSelector } : {}),
       ...(options.sheetSelector ? { sheetSelector: options.sheetSelector } : {}),
     }));
+  const deckPageSize = options.page ?? { width: 1600, height: 900 };
   const measured = (await page.evaluate(
-    ({ sheetSelector, slideSelector, nativeTypes, theme, tags }) => {
-      const W = 1600;
-      const H = 900;
+    ({ sheetSelector, slideSelector, nativeTypes, theme, tags, pageW, pageH }) => {
+      const W = pageW;
+      const H = pageH;
       type Box = [number, number, number, number];
       type Style = {
         family: string;
@@ -378,6 +381,30 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         }
         return style;
       };
+      // the ascent share of a face's content area (the inline box getClientRects answers): a
+      // probe span at 100 px with a zero size inline block on its baseline, once per family,
+      // weight and italic; Inter reads 0.8007 (1984 over 1984 plus 494)
+      const ascentRatios = new Map<string, number>();
+      const ascentRatioOf = (style: Style): number => {
+        const key = `${style.family}|${style.weight}|${style.italic === true ? 'i' : 'n'}|${style.mono ? 'm' : 't'}`;
+        const cached = ascentRatios.get(key);
+        if (cached !== undefined) return cached;
+        const probe = document.createElement('span');
+        probe.style.cssText = `position:absolute;left:-10000px;top:0;visibility:hidden;white-space:nowrap;line-height:normal;font-family:${style.mono ? 'ui-monospace, Menlo, monospace' : `"${style.family}"`};font-weight:${style.weight};font-style:${style.italic === true ? 'italic' : 'normal'};font-size:100px`;
+        probe.textContent = 'Hxg';
+        const mark = document.createElement('span');
+        mark.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+        probe.appendChild(mark);
+        document.body.appendChild(probe);
+        const range = document.createRange();
+        range.selectNodeContents(probe.firstChild ?? probe);
+        const rect = range.getBoundingClientRect();
+        const baselineY = mark.getBoundingClientRect().bottom;
+        probe.remove();
+        const ratio = rect.height > 0 ? (baselineY - rect.top) / rect.height : 0.8;
+        ascentRatios.set(key, ratio);
+        return ratio;
+      };
       const sameStyle = (a: Style, b: Style): boolean =>
         a.family === b.family &&
         a.weight === b.weight &&
@@ -563,8 +590,17 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             .reduce((a, b) => union(a, b));
           const lh = Math.max(...line.runs.map((r) => r.style.lineHeight));
           const top = inline.top - (lh - inline.height) / 2;
+          // the baseline (gslides-parity SPEC-5 1.4; R09 3.2): the run's inline box top plus the
+          // face's ascent share of its content area, measured once per face and weight through a
+          // zero size inline block on the baseline; the tallest run of the line sets it
+          const baseline = Math.max(
+            ...(textRuns.length > 0 ? textRuns : line.runs).map(
+              (r) => r.rect.top + ascentRatioOf(r.style) * r.rect.height,
+            ),
+          );
           return {
             box: [round(inline.left - ox), round(top - oy), round(inline.width), round(lh)] as Box,
+            baseline: round(baseline - oy),
             paragraph: line.paragraph,
             runs: line.runs.map((r) => {
               const out: SceneText['lines'][number]['runs'][number] = {
@@ -1086,10 +1122,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           role: 'plate',
         });
       });
+      // the two paper chips at `66, H - 42` and `W - 126, H - 44` (R08 3c; render geometry.ts chipsOf)
       const chips: Box[] = slide.querySelector('.ts-chips')
         ? [
-            [66, 858, 40, 30],
-            [1474, 856, 60, 28],
+            [66, H - 42, 40, 30],
+            [W - 126, H - 44, 60, 28],
           ]
         : [];
 
@@ -1228,6 +1265,8 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       nativeTypes: [...options.nativeTypes],
       theme: options.theme,
       tags,
+      pageW: deckPageSize.width,
+      pageH: deckPageSize.height,
     },
   )) as PageScene;
   const { pictureSrc, chartsDom, ...rest } = measured;

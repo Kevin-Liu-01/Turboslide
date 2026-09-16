@@ -96,6 +96,12 @@ export type EditorRoom = {
   tier: 'memory' | 'redis' | 'blob';
   /** the title row's sentence on the blob tier, else null */
   notice: string | null;
+  /**
+   * The WebSocket transport is on (gslides-parity SPEC-5 11: `TURBOSLIDE_REALTIME_WS=1`, never on
+   * a Vercel function, which does not upgrade); the editor opens the dev sidecar on 4322 on a
+   * checkout (scripts/ws-sidecar.mjs) or the node-server preset's route.
+   */
+  ws?: boolean;
 };
 
 /**
@@ -286,7 +292,14 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       versions,
       leases,
       hosting: hostingFacts(),
-      room: { seq: live.seq, tier: selection.tier, notice: selection.notice },
+      room: {
+        seq: live.seq,
+        tier: selection.tier,
+        notice: selection.notice,
+        ...(process.env.TURBOSLIDE_REALTIME_WS === '1' && process.env.VERCEL === undefined
+          ? { ws: true }
+          : {}),
+      },
       identity: {
         principalId: resolved.principalId,
         label: resolved.label,

@@ -46,6 +46,10 @@
     "./present/SlideshowLayer": "./src/present/SlideshowLayer.tsx",
     "./present/PresentShortcuts": "./src/present/PresentShortcuts.tsx",
     "./present/PresenterConsole": "./src/present/PresenterConsole.tsx",
+    "./present/motionLayer": "./src/present/motionLayer.ts",
+    "./present/pen": "./src/present/pen.ts",
+    "./present/media-controller": "./src/present/media-controller.ts",
+    "./standalone/motion-source": "./standalone/motion-source.ts",
     "./standalone/source": "./standalone/source.ts",
     "./standalone/runtime.ts": "./standalone/runtime.ts",
     "./package.json": "./package.json"

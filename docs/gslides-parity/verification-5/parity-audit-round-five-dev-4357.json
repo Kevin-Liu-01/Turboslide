@@ -1,0 +1,806 @@
+{
+  "base": "http://localhost:4357",
+  "at": "2026-09-16T00:52:02.561Z",
+  "commit": "d5a1be5",
+  "seconds": 1162,
+  "scratchDeck": "untitled-20260916-ww6y",
+  "namePromptAnswered": 0,
+  "summary": {
+    "pass": 69,
+    "fail": 21,
+    "skip": 3
+  },
+  "perSection": {
+    "firstOpen": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "defaultViewWords": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "toolbar:new": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "toolbar:scratch": {
+      "pass": 0,
+      "fail": 1,
+      "skip": 0
+    },
+    "roundFive": {
+      "pass": 53,
+      "fail": 19,
+      "skip": 3
+    },
+    "effects:scratch": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "infrastructure": {
+      "pass": 0,
+      "fail": 1,
+      "skip": 0
+    }
+  },
+  "totals": {},
+  "rows": [
+    {
+      "section": "firstOpen",
+      "id": "address /new",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "title \"Untitled presentation\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "save words \"Not saved yet\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the two prompts",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the notes prompt",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "one card in the filmstrip",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the right panel closed",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "no snackbar",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the ten menus in order",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the bottom bar: filmstrip, grid, the panel chevron",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/new",
+      "evidence": "0 text nodes, 0 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "toolbar:new",
+      "id": "toolbar.default",
+      "kind": "default",
+      "wanted": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "observed": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "evidence": "18 controls in the order of SPEC 3",
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the first write creates the deck and moves the address",
+      "evidence": "http://localhost:4357/edit/untitled-20260916-ww6y; save words \"All changes saved\"; title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "auto title from the first heading (SPEC 6.3)",
+      "evidence": "title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "toolbar:scratch",
+      "id": "toolbar.states",
+      "check": "setup",
+      "evidence": "slide.new split: Error: page.evaluate: Resulting promise was garbage collected.",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "flip slide.transition",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Motion\"} (B1)",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip toolbar.transition",
+      "evidence": "toolbar control toolbar.transition: status now, enabled \"always\" (B1)",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip view.motion",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Motion\"} (B1)",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.animation",
+      "evidence": "now; effect {\"kind\":\"action\",\"id\":\"motion.add\"} (B1)",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip block.animate",
+      "evidence": "now; effect {\"kind\":\"action\",\"id\":\"motion.add\"} (B1)",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.audio",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Insert audio\"} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.video",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Insert video\"} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.image.camera",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Camera\"} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.speakerSpotlight",
+      "evidence": "now; effect {\"kind\":\"action\",\"id\":\"block.insert\",\"input\":{\"type\":\"spotlight\"}} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip title.slideshow.presentOnAnotherScreen",
+      "evidence": "now; effect {\"kind\":\"action\",\"id\":\"view.presentOnScreen\",\"input\":{\"screen\":\"other\"}} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip title.slideshow.displayOptions",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Presentation display options\"} (B2)",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.templates",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Templates\"} (B3)",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.buildingBlocks",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Building blocks\"} (B3)",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.new.templateGallery",
+      "evidence": "now; effect {\"kind\":\"route\",\"path\":\"/decks/templates\",\"newTab\":true} (B3)",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.pageSetup",
+      "evidence": "later: \"The GT theme is 16:9 at 1600 by 900\"; effect {\"kind\":\"dialog\",\"title\":\"Page setup\"} (B4)",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.download.odp",
+      "evidence": "later: \"Only PowerPoint, PDF, text, pictures and the web page download\"; effect {\"kind\":\"dialog\",\"title\":\"Download\"} (B4)",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.download.svg",
+      "evidence": "later: \"Only PowerPoint, PDF, text, pictures and the web page download\"; effect {\"kind\":\"action\",\"id\":\"render.slide\",\"input\":{\"format\":\"svg\"}} (B4)",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.language",
+      "evidence": "now; effect {\"kind\":\"submenu\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.versionHistory.deleteOlder",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Delete versions\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip file.versionHistory.deleteHistory",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Delete versions\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip view.guides.edit",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Edit guides\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip format.alignIndent.indentationOptions",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Indentation options\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip format.bulletsNumbering.listOptions.restart",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Restart numbering\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip format.bulletsNumbering.listOptions.prefixSuffix",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Edit prefix and suffix\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.spelling.spellCheck",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Spell check\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.spelling.personalDictionary",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Personal dictionary\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.preferences",
+      "evidence": "now; effect {\"kind\":\"dialog\",\"title\":\"Preferences\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.dictionary",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Dictionary\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.dictateNotes",
+      "evidence": "now; effect {\"kind\":\"client\",\"handler\":\"dictate\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.accessibilitySettings.screenReader",
+      "evidence": "now; effect {\"kind\":\"toggle\",\"setting\":\"screenReader\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.accessibilitySettings.braille",
+      "evidence": "now; effect {\"kind\":\"toggle\",\"setting\":\"braille\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip tools.accessibilitySettings.speakAloud",
+      "evidence": "now; effect {\"kind\":\"toggle\",\"setting\":\"speakAloud\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip help.training",
+      "evidence": "now; effect {\"kind\":\"route\",\"path\":\"/help/training\",\"newTab\":true} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip help.updates",
+      "evidence": "now; effect {\"kind\":\"route\",\"path\":\"/help/updates\",\"newTab\":true} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip title.presence.joinChat",
+      "evidence": "now; effect {\"kind\":\"panel\",\"title\":\"Chat\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip title.star",
+      "evidence": "now; effect {\"kind\":\"toggle\",\"setting\":\"starred\"} (B5)",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.equation",
+      "evidence": "now; effect {\"kind\":\"action\",\"id\":\"equation.insert\"} (B6)",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip view.equationToolbar",
+      "evidence": "now; effect {\"kind\":\"toggle\",\"setting\":\"equationToolbar\"} (B6)",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip slide.editTheme",
+      "evidence": "now; effect {\"kind\":\"client\",\"handler\":\"themeMode\"} (B6)",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip view.themeBuilder",
+      "evidence": "now; effect {\"kind\":\"client\",\"handler\":\"themeMode\"} (B6)",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip insert.placeholder",
+      "evidence": "now; effect {\"kind\":\"submenu\"} (B6)",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "flip toolbar.font",
+      "evidence": "toolbar control toolbar.font: status now, enabled \"always\" (B7)",
+      "owner": "integrator",
+      "lane": "B7",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "later count (14.2)",
+      "evidence": "5 Later leaf row(s): file.email.collaborators, file.download.odp, file.download.svg, file.pageSetup, tools.activityDashboard.viewers (SPEC-5 14.2 reads 2)",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "omit rows carry a reason",
+      "evidence": "23 Omit row(s), 0 without a reason",
+      "owner": "integrator",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "unverified labels",
+      "evidence": "4 row(s) carry unverified: true: accessibility.nextFormattingChange \"Next formatting change\"; accessibility.previousFormattingChange \"Previous formatting change\"; accessibility.nextSlide \"Next slide\"; accessibility.previousSlide \"Previous slide\"",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "the Google shortcut rows of round five left OMITTED_SHORTCUTS",
+      "evidence": "18 planned Google row(s) (animations-panel, animation-preview, play-video, video-play-pause, video-rewind, video-forward, next-misspelling, previous-misspelling, open-dictionary, cell-border-selection, screen-reader-support, braille-support, accessibility-menu, verbalize-selection, announce-formatting, verbalize-from-cursor, next-formatting-change, previous-formatting-change); OMITTED_SHORTCUTS holds 22 row(s), 0 of them planned this round (none); menu rows without a key: none",
+      "owner": "integrator",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: the six entry points",
+      "evidence": "slide.transition ok; view.motion ok; toolbar.transition ok; chord \"Cmd+Option+Shift+B\" ok; insert.animation ok; block.animate ok",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: the eight transition kinds in Google's order",
+      "evidence": "select lists [\"None\",\"Dissolve\",\"Fade\",\"Slide from right\",\"Slide from left\",\"Flip\",\"Cube\",\"Gallery\"]; wanted [\"None\",\"Dissolve\",\"Fade\",\"Slide from right\",\"Slide from left\",\"Flip\",\"Cube\",\"Gallery\"]",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: the controls",
+      "evidence": "8 control(s): motion.play, panel.motion.close, motion.transition, motion.transition.kind, motion.transition.applyAll, motion.animations, motion.list, motion.add",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: Apply to all slides writes every slide",
+      "evidence": "revision 1 -> 1; title:null",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: the fifteen animation labels in Google's order",
+      "evidence": "no text block state to add an animation to",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": null
+    },
+    {
+      "section": "roundFive",
+      "id": "motion panel: the row controls (effect, trigger, By paragraph, remove)",
+      "evidence": "0 control(s) in the list: ",
+      "owner": "integrator",
+      "lane": "B1",
+      "pass": null
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.audio: the dialog's tabs",
+      "evidence": "dialog \"Insert audio\"; tabs [\"Upload\",\"By URL\"]",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.video: the dialog's tabs",
+      "evidence": "dialog \"Insert video\"; tabs [\"Search YouTube\",\"By URL\",\"Upload\"]; search tab disabled with clause \"Search needs a YouTube Data API key\"",
+      "owner": "integrator",
+      "lane": "B2",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.templates: the pane's categories",
+      "evidence": "3 heading(s): Personal, Work, Education (wanted 3)",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.buildingBlocks: the pane's categories",
+      "evidence": "9 heading(s): Agendas, Lists, Key statistics, Quotes, Headlines, Text callouts, Calls to action, People, Cards (wanted 9)",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "gallery page: Personal, Work and Education",
+      "evidence": "/decks/templates 200 with the gallery heading; h2 [\"Personal\",\"Work\",\"Education\"]",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "file.importSlides: the Upload tab accepts .pptx and Keep original theme is unchecked",
+      "evidence": "dialog \"Import slides\"; accept []; keepTheme null",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "file.open: the Upload tab accepts .pptx and the refusal sentence is gone",
+      "evidence": "dialog \"Open\"; accept []; keepTheme null",
+      "owner": "integrator",
+      "lane": "B3",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "file.pageSetup: the dialog and its four labels",
+      "evidence": "the row is later: \"The GT theme is 16:9 at 1600 by 900\"",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "file.download.odp: the row is Now",
+      "evidence": "later: \"Only PowerPoint, PDF, text, pictures and the web page download\"",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "file.download.svg: the row is Now",
+      "evidence": "later: \"Only PowerPoint, PDF, text, pictures and the web page download\"",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "print dropdown: seven rows enabled",
+      "evidence": "7 option(s), 5 disabled: 1 slide without notes, 1 slide with notes, Handout (2 slides per page) (disabled), Handout (3 slides per page) (disabled), Handout (4 slides per page) (disabled), Handout (6 slides per page) (disabled), Handout (9 slides per page) (disabled)",
+      "owner": "integrator",
+      "lane": "B4",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "tools.preferences: two tabs and the Substitutions table",
+      "evidence": "tabs [\"General\",\"Substitutions\"]; table drawn",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "file.language: the submenu of offered tags with one checked",
+      "evidence": "0 row(s) (offered 7): ",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "tools.spelling.spellCheck: the card with Change, Change all, Ignore, Ignore all",
+      "evidence": "2 control(s): panel.spellCheck.close, panel.spellCheck.card; no card within 20 s",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "tools.dictionary: the panel or the link",
+      "evidence": "3 control(s): panel.dictionary.close, panel.dictionary.search, panel.dictionary.lookUp",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "the Accessibility menu under Screen reader support",
+      "evidence": "menu before false, after the toggle true, rows [\"accessibility.verbalize\",\"accessibility.goTo\",\"accessibility.speakAloud\"], gone after the second toggle false",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.equation: the block, the toolbar and its six dropdowns",
+      "evidence": "objects 0 -> 0 (0 equation); toolbar absent; dropdowns []",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "insert.equation: the chord inserts a second equation",
+      "evidence": "chord \"Cmd+Option+Shift+E\": no block landed",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "view.equationToolbar: the toggle hides and shows the toolbar",
+      "evidence": "row now; did not toggle",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "slide.editTheme: the mode, the toolbar controls and the layout rows",
+      "evidence": "data-editor-mode theme; toolbar [\"themeMode.background\",\"themeMode.colors\",\"themeMode.fonts\",\"themeMode.placeholder\",\"themeMode.rename\",\"themeMode.exit\"]; 22 layout control(s); context rows [\"themeMode.layout.menu.new\",\"themeMode.layout.menu.duplicate\",\"themeMode.layout.menu.delete\"]; exit left the mode",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "slide.changeTheme: three groups and Import theme",
+      "evidence": "groups [\"GT\",\"Plate\",\"In this presentation\"]; Import theme drawn",
+      "owner": "integrator",
+      "lane": "B6",
+      "pass": true
+    },
+    {
+      "section": "roundFive",
+      "id": "title.presence.joinChat: the panel and its first line",
+      "evidence": "no Chat panel",
+      "owner": "integrator",
+      "lane": "B5",
+      "pass": false
+    },
+    {
+      "section": "roundFive",
+      "id": "toolbar.font: the dropdown lists the catalog",
+      "evidence": "no text block state",
+      "owner": "integrator",
+      "lane": "B7",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "effect": "action",
+      "label": "Move to trash",
+      "evidence": "http://localhost:4357/edit/untitled-20260916-ww6y -> /edit/untitled-20260916-ww6y \"Moved to trashUndo\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "trash.delete",
+      "menu": "home",
+      "label": "Delete forever",
+      "evidence": "the card of untitled-20260916-ww6y left the trash",
+      "pass": true
+    },
+    {
+      "section": "infrastructure",
+      "id": "pageerror",
+      "evidence": ["Cannot read properties of undefined (reading 'studio')"],
+      "pass": false
+    }
+  ],
+  "pageErrors": ["Cannot read properties of undefined (reading 'studio')"]
+}

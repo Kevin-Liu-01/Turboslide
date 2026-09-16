@@ -1,0 +1,53 @@
+{
+  "id": "calls-to-action/two-actions",
+  "category": "calls-to-action",
+  "label": "Two actions",
+  "blocks": [
+    {
+      "id": "primary",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "box",
+      "fill": "ink",
+      "radius": 8,
+      "padding": 20,
+      "text": "Start the pilot",
+      "typography": {
+        "size": 22,
+        "align": "center"
+      },
+      "color": "paper",
+      "valign": "middle"
+    },
+    {
+      "id": "secondary",
+      "pos": {
+        "x": 440,
+        "y": 0,
+        "w": 400,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "ink",
+      "strokeWidth": 1,
+      "radius": 8,
+      "padding": 20,
+      "text": "Read the case study",
+      "typography": {
+        "size": 22,
+        "align": "center"
+      },
+      "valign": "middle"
+    }
+  ],
+  "box": [
+    840,
+    72
+  ]
+}

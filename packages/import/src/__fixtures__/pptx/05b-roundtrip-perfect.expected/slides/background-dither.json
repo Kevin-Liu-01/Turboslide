@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "background-dither",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "big",
+        "type": "text",
+        "text": "Dithered background",
+        "pos": {
+          "x": 163,
+          "y": 531.01,
+          "w": 688,
+          "h": 76.32,
+          "z": 1,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 72,
+          "leading": 1.06
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-dither#big/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      },
+      {
+        "id": "p",
+        "type": "text",
+        "text": "A covering picture with the Photograph numbers of the Background dialog, and a plate group over it.",
+        "pos": {
+          "x": 163,
+          "y": 613,
+          "w": 688,
+          "h": 66,
+          "z": 2,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-dither#p/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      }
+    ]
+  },
+  "title": "Dithered background",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide18.xml",
+    "pptxSlideId": 273
+  }
+}

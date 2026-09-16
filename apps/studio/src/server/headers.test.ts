@@ -5,8 +5,15 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CSP_REPORT_PATH,
+  DEVICE_PERMISSIONS_POLICY,
+  IMMUTABLE_CACHE_CONTROL,
+  INLINE_TYPES,
+  PERMISSIONS_POLICY,
+  assetCacheControl,
   assetResponseHeaders,
   buildCsp,
+  isDigestNamedAsset,
+  permissionsPolicyFor,
   clientAddress,
   contentTypeRefusal,
   csrfFilter,
@@ -105,6 +112,41 @@ describe('the assets route headers (SPEC-3 0.28, 11.3; report 04 F5)', () => {
       expect(headers['content-disposition']).toBeUndefined();
       expect(headers['content-security-policy']).toBeUndefined();
     }
+  });
+
+  it('serves the five media types inline with nosniff, so the show’s elements read them (gslides-parity SPEC-5 3.3)', () => {
+    expect(INLINE_TYPES).toEqual([
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/gif',
+      'video/mp4',
+      'video/webm',
+      'audio/mpeg',
+      'audio/mp4',
+      'audio/wav',
+    ]);
+    for (const [name, type] of [
+      ['talk.0123abcd.mp4', 'video/mp4'],
+      ['clip.0123abcd.webm', 'video/webm'],
+      ['tone.0123abcd.mp3', 'audio/mpeg'],
+      ['tone.0123abcd.m4a', 'audio/mp4'],
+      ['tone.0123abcd.wav', 'audio/wav'],
+    ]) {
+      const headers = assetResponseHeaders(`assets/${name}`, type as string);
+      expect(headers['content-type']).toBe(type);
+      expect(headers['x-content-type-options']).toBe('nosniff');
+      expect(headers['cross-origin-resource-policy']).toBe('same-site');
+      expect(headers['content-disposition']).toBeUndefined();
+      expect(headers['content-security-policy']).toBeUndefined();
+    }
+    // a media type outside the five stays an attachment
+    expect(assetResponseHeaders('assets/x.ogg', 'audio/ogg')['content-disposition']).toBe(
+      'attachment; filename="x.ogg"',
+    );
+    expect(assetResponseHeaders('assets/x.mov', 'video/quicktime')['content-disposition']).toBe(
+      'attachment; filename="x.mov"',
+    );
   });
 
   it('serves svg, json and unknown types as attachments under a sandboxing policy', () => {
@@ -321,11 +363,15 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(page['x-frame-options']).toBe('DENY');
     expect(page['referrer-policy']).toBe('strict-origin-when-cross-origin');
     expect(page['cross-origin-opener-policy']).toBe('same-origin');
-    expect(page['permissions-policy']).toContain('camera=()');
+    // the editor is a device route (gslides-parity SPEC-5 3.3): the camera and the microphone open to this origin
+    expect(page['permissions-policy']).toBe(DEVICE_PERMISSIONS_POLICY);
+    expect(page['permissions-policy']).toContain('camera=(self)');
     expect(page['x-request-id']).toBe('req-1');
     expect(page['content-security-policy-report-only']).toContain("frame-ancestors 'none'");
     expect(page['content-security-policy']).toBeUndefined();
     const embed = securityHeadersFor('/embed/q4-review', base);
+    expect(embed['permissions-policy']).toBe(PERMISSIONS_POLICY);
+    expect(embed['permissions-policy']).toContain('camera=()');
     expect(embed['x-frame-options']).toBeUndefined();
     expect(embed['cross-origin-opener-policy']).toBeUndefined();
     expect(embed['content-security-policy-report-only']).toContain(
@@ -343,6 +389,69 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(securityHeadersFor('/decks/q4/assets/a.png', base)['cross-origin-resource-policy']).toBe(
       'same-site',
     );
+  });
+
+  it('opens the camera and the microphone on the four device routes alone (gslides-parity SPEC-5 3.3, 3.7)', () => {
+    for (const path of ['/new', '/edit/q4-review', '/deck/q4-review', '/present/q4-review'])
+      expect(permissionsPolicyFor(path), path).toBe(DEVICE_PERMISSIONS_POLICY);
+    for (const path of [
+      '/',
+      '/home',
+      '/decks',
+      '/embed/q4-review',
+      '/print/q4-review',
+      '/api/agent',
+      '/s/abc',
+    ])
+      expect(permissionsPolicyFor(path), path).toBe(PERMISSIONS_POLICY);
+    expect(DEVICE_PERMISSIONS_POLICY).toBe(
+      'geolocation=(), camera=(self), microphone=(self), payment=(), usb=(), interest-cohort=()',
+    );
+    // the dictionaries are immutable files keyed by the manifest's digest (b5.md request 5)
+    expect(securityHeadersFor('/dictionaries/en/index.dic.gz', base)['cache-control']).toBe(
+      IMMUTABLE_CACHE_CONTROL,
+    );
+    expect(securityHeadersFor('/home', base)['cache-control']).toBeUndefined();
+  });
+
+  it('names the media, frame and thumbnail hosts of round five in the policy (SPEC-5 3.3; R11 2, 4.2, 4.3)', () => {
+    const csp = buildCsp({
+      nonce: 'n0nce',
+      publicStoreHost: 'abc.public.blob.vercel-storage.com',
+      env: {},
+    });
+    expect(csp).toContain("media-src 'self' blob: https://abc.public.blob.vercel-storage.com");
+    expect(csp).toContain(
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
+    );
+    expect(csp).toContain('https://i.ytimg.com');
+    expect(csp).toContain(
+      "script-src 'self' 'nonce-n0nce' 'strict-dynamic' https://www.youtube.com https://s.ytimg.com",
+    );
+    // a checkout without a store: the page's own origin and blob: alone
+    expect(buildCsp({ nonce: 'x', env: {} })).toContain("media-src 'self' blob:;");
+  });
+
+  it('caches a digest named asset for a year and an unnamed twin for a minute (SPEC-5 3.3; R11 2 rule 2)', () => {
+    for (const name of [
+      'assets/talk.0123abcd.mp4',
+      'assets/tone-1s.c087187e.wav',
+      'assets/rosetta.0123abcd-light.png',
+      'assets/rosetta.0123abcd.source.jpg',
+      'assets/opener-brand.dither-abcdef123456-light.png',
+      'assets/poster-clip.0a1b2c3d.jpg',
+    ]) {
+      expect(isDigestNamedAsset(name), name).toBe(true);
+      expect(assetCacheControl(name), name).toBe(IMMUTABLE_CACHE_CONTROL);
+      expect(assetResponseHeaders(name, 'video/mp4')['cache-control']).toBe(
+        IMMUTABLE_CACHE_CONTROL,
+      );
+    }
+    for (const name of ['assets/opener-brand-light.jpg', 'assets/a.png', 'assets/logo.svg'])
+      expect(isDigestNamedAsset(name), name).toBe(false);
+    expect(
+      assetResponseHeaders('assets/opener-brand-light.jpg', 'image/jpeg')['cache-control'],
+    ).toBe('public, max-age=60');
   });
 
   it('builds the nonce based policy with worker-src blob, the store hosts and the report endpoint', () => {

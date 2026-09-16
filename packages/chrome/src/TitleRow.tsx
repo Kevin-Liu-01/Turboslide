@@ -10,7 +10,10 @@ import { tooltipKey } from './menus/keys';
 import { isPresent, itemById } from './menus/model';
 import type { MenuItem } from './menus/model';
 import { TITLE_ROW } from './menus/strings';
+import type { Preferences } from '@turboslide/schema/preferences';
+
 import { nameOf } from './presence/IdentityChip';
+import { preferencesOf, writePreference } from './text-tools';
 import { PresenceSlot } from './presence/PresenceSlot';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
@@ -423,6 +426,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
       </div>
       <div className="ts-title-r">
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
+        <StarButton />
         <PresenceSlot />
         <span className="ts-title-slot ts-title-comments-slot" data-control="title.comments.slot">
           {commentsPresent ? (
@@ -479,5 +483,56 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         ) : null}
       </div>
     </header>
+  );
+}
+
+/** The Star's words (gslides-parity SPEC-5 7.7): Google's tooltip "Star"; the rest is Turboslide's. */
+export const TITLE_STAR = {
+  star: 'Star',
+  starDoc: 'Adds this presentation to your Starred view on the home page',
+  starredDoc: 'Removes this presentation from your Starred view',
+  starred: 'Added to Starred',
+  unstarred: 'Removed from Starred',
+} as const;
+
+/**
+ * Star (gslides-parity SPEC-5 7.7, 0.42; P1 5.13): Google's tooltip "Star"; a per principal
+ * `preferences.starred` list written through `prefs.set` (`/starred/-` appends, the index deletes)
+ * and read by the home page's Starred view. The button reads the record the shell paints first
+ * (the mirror before the reconcile) and re-renders on the answered record. Drawn as a quiet tool
+ * button with the sprite's star glyph, filled while the deck is starred.
+ */
+export function StarButton() {
+  const shell = useEditorShell();
+  const { input } = shell;
+  const [prefs, setPrefs] = useState<Preferences>(() => preferencesOf(input));
+  const starred = prefs.starred.includes(input.deckId);
+  const toggle = () => {
+    const index = prefs.starred.indexOf(input.deckId);
+    const write =
+      index < 0
+        ? writePreference(input, '/starred/-', input.deckId)
+        : writePreference(input, `/starred/${index}`);
+    write
+      .then((next) => {
+        setPrefs(next);
+        shell.say(next.starred.includes(input.deckId) ? TITLE_STAR.starred : TITLE_STAR.unstarred);
+      })
+      .catch((error: unknown) => shell.say(error instanceof Error ? error.message : String(error)));
+  };
+  return (
+    <span className="ts-title-slot ts-title-star-slot" data-control="title.star.slot">
+      <ToolButton
+        icon="star"
+        title={TITLE_STAR.star}
+        doc={starred ? TITLE_STAR.starredDoc : TITLE_STAR.starDoc}
+        pressed={starred}
+        quiet
+        className={starred ? 'ts-title-star is-on' : 'ts-title-star'}
+        control="title.star"
+        menuItem="title.star"
+        onClick={toggle}
+      />
+    </span>
   );
 }

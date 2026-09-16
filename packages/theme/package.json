@@ -11,6 +11,7 @@
   },
   "exports": {
     "./theme": "./src/theme.ts",
+    "./themes": "./src/themes.ts",
     "./tokens": "./src/tokens.ts",
     "./sprite": "./src/sprite.ts",
     "./copy": "./src/copy.ts",

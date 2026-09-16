@@ -18,6 +18,8 @@ import {
   plainOf,
   spliceText,
 } from './text.ts';
+import { isMediaAsset } from './assets.ts';
+import { normalizeMotion } from './motion.ts';
 import type { Issue } from './validate.ts';
 import { validateDocument } from './validate.ts';
 
@@ -166,7 +168,20 @@ function flagRestores(
 
 const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
 const FORBIDDEN_BLOCK_PATHS = new Set(['', '/id']);
-const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides']);
+// the round five roots (gslides-parity SPEC-5 1.2): `language` through the deck.set action, and
+// the four records the theme, layout, import and page actions write with their own `deck.set`
+// mutations while the action's pointer regex stays closed to them (SPEC-5 0.30, 0.44)
+const DECK_SET_ROOTS = new Set([
+  'title',
+  'theme',
+  'defaults',
+  'guides',
+  'language',
+  'page',
+  'themeEdits',
+  'importedThemes',
+  'customLayouts',
+]);
 
 /**
  * Applies one mutation in place and returns its inverse. Throws RangeError for an unknown id or
@@ -254,7 +269,9 @@ export function applyMutation(
           `slide.replace: the slide id "${parsed.data.id}" must equal "${mutation.slideId}"`,
         );
       }
-      document.slides[mutation.slideId] = parsed.data;
+      // the animations whose block the new slide no longer holds are dropped (gslides-parity
+      // SPEC-5 0.8: a reducer normalisation, never a validator refusal)
+      document.slides[mutation.slideId] = normalizeMotion(parsed.data);
       return [{ op: 'slide.replace', slideId: mutation.slideId, slide: old }];
     }
     case 'block.insert': {
@@ -280,6 +297,13 @@ export function applyMutation(
       const located = locateBlock(slide, mutation.blockId);
       const after = located.index > 0 ? located.list[located.index - 1]?.id : undefined;
       located.list.splice(located.index, 1);
+      // the removed block's animations go with it (gslides-parity SPEC-5 0.8); the inverse's
+      // block.insert restores the block, and undo restores the list through the version's ops
+      if (slide.animations !== undefined) {
+        const normalized = normalizeMotion(slide);
+        if (normalized.animations === undefined) delete slide.animations;
+        else slide.animations = normalized.animations;
+      }
       return [
         {
           op: 'block.insert',
@@ -450,16 +474,33 @@ export function applyMutation(
       return [{ op: 'section.set', sections: old }];
     }
     case 'asset.set': {
-      const old = document.deck.assets[mutation.asset.id];
-      document.deck.assets[mutation.asset.id] = cloneJson(mutation.asset);
+      // a media record (gslides-parity SPEC-5 0.16) lives in `deck.media`, a picture in
+      // `deck.assets`; one id names one record, so a set of one kind removes the other kind's
+      const id = mutation.asset.id;
+      const old = document.deck.assets[id] ?? document.deck.media?.[id];
+      if (isMediaAsset(mutation.asset)) {
+        delete document.deck.assets[id];
+        document.deck.media ??= {};
+        document.deck.media[id] = cloneJson(mutation.asset);
+      } else {
+        if (document.deck.media !== undefined) {
+          delete document.deck.media[id];
+          if (Object.keys(document.deck.media).length === 0) delete document.deck.media;
+        }
+        document.deck.assets[id] = cloneJson(mutation.asset);
+      }
       return old === undefined
-        ? [{ op: 'asset.remove', assetId: mutation.asset.id }]
+        ? [{ op: 'asset.remove', assetId: id }]
         : [{ op: 'asset.set', asset: old }];
     }
     case 'asset.remove': {
-      const old = document.deck.assets[mutation.assetId];
+      const old = document.deck.assets[mutation.assetId] ?? document.deck.media?.[mutation.assetId];
       if (old === undefined) throw new RangeError(`No asset "${mutation.assetId}"`);
       delete document.deck.assets[mutation.assetId];
+      if (document.deck.media !== undefined) {
+        delete document.deck.media[mutation.assetId];
+        if (Object.keys(document.deck.media).length === 0) delete document.deck.media;
+      }
       return [{ op: 'asset.set', asset: old }];
     }
     case 'deck.set': {
@@ -529,7 +570,8 @@ export function applyWrite(
     return {
       ok: false,
       code: 'conflict',
-      message: `baseRevision ${write.baseRevision} is stale; the document is at revision ${document.deck.revision}`,
+      // the plain sentence of gslides-parity SPEC-5-amendments A3 item 8 (room.ts movedSentence)
+      message: `The presentation moved to revision ${document.deck.revision} while this change was on its way`,
       current: document,
       currentRevision: document.deck.revision,
     };

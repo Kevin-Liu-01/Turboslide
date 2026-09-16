@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "check-for-understanding",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Check for understanding",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {},
+          {},
+          {}
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Question",
+              "Answer",
+              "Where it lives"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "What turns water into vapour?",
+              "Heat from the sun",
+              "The surface"
+            ]
+          },
+          {
+            "cells": [
+              "Why do clouds form?",
+              "Vapour cools into droplets",
+              "The sky"
+            ]
+          },
+          {
+            "cells": [
+              "What comes down?",
+              "Rain or snow",
+              "The ground"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Check for understanding"
+}

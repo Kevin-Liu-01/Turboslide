@@ -14,7 +14,7 @@ import { PLATE_BOXES } from '@turboslide/effects/metrics';
 import { ditheredPictures } from '@turboslide/render/dither-walk';
 import type { DitheredPicture } from '@turboslide/render/dither-walk';
 import type { Asset, Finding, Slide } from '../contracts.ts';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '../contracts.ts';
+import { deckPage } from '@turboslide/schema/render';
 import type { LintContext } from '../context.ts';
 
 export type PlateSide = 'lower-left' | 'lower-right' | 'upper-left';
@@ -122,10 +122,11 @@ function checkBlockDithers(ctx: LintContext, slide: Slide, out: Finding[]): void
       );
     }
     if (row.plate === undefined) continue;
+    const page = deckPage(ctx.deck);
     const box: [number, number, number, number] =
       row.block.pos !== undefined
         ? [row.block.pos.x, row.block.pos.y, row.block.pos.w, row.block.pos.h]
-        : [0, 0, SHEET_WIDTH, SHEET_HEIGHT];
+        : [0, 0, page.width, page.height];
     if (!boxesTouch(box, row.plate)) continue;
     const clear = variant?.metrics?.plateClear;
     if (variant === undefined || clear === undefined) {

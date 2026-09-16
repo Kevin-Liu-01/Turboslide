@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "the-problem",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The problem",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Name the cost of the status quo in one line.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Teams lose a week each quarter reconciling the same numbers by hand.\nEvery handoff between tools drops context and delays the decision.\nThe people closest to the customer wait longest for an answer.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "The problem",
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "p2",
+      "effect": "appear",
+      "trigger": "click",
+      "durationMs": 500,
+      "byParagraph": true
+    }
+  ]
+}

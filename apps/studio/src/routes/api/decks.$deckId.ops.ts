@@ -92,6 +92,8 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         error: result.code,
         message: result.message,
         ...(result.head === undefined ? {} : { head: result.head }),
+        // the entries since the client's base on a blob tier 409 (SPEC-5-amendments A3 item 3)
+        ...(result.since === undefined ? {} : { since: result.since }),
       },
       result.status,
       result.retryAfterMs === undefined

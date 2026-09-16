@@ -22,6 +22,12 @@ export type PersistedOp = {
   comment?: Record<string, unknown>;
   /** the stream seq once admitted (a retained op), absent while pending */
   seq?: number;
+  /**
+   * The op was in a POST whose answer had not come back when the queue was saved (gslides-parity
+   * SPEC-5-amendments A3 item 7): it may have landed. A replay sends it under its own op id and
+   * the server answers the entry it made if it did, so it is never committed twice.
+   */
+  sent?: boolean;
 };
 
 export type PersistedQueue = {

@@ -27,6 +27,7 @@ import { renderDeck } from '@turboslide/render/deck';
 import type { FitBox } from '@turboslide/render/measure-dom';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import type { Deck, Slide } from '@turboslide/schema/deck';
+import { deckPage } from '@turboslide/schema/render';
 
 import type { MeasureCanvas, MeasureFit } from '../store-actions.ts';
 import { slideHash, themeBundle } from './render.ts';
@@ -95,7 +96,11 @@ export async function measureSlidesHeadless(
     const file = await writeTempDocument(rendered.html, 'canvas.html', tmp);
     const launched = await launchBrowser();
     try {
-      const sheetPage = await openSheetPage(launched.browser, { theme: 'light', scale: 1 });
+      const sheetPage = await openSheetPage(launched.browser, {
+        theme: 'light',
+        scale: 1,
+        viewport: deckPage(deck),
+      });
       try {
         let first = true;
         for (const id of wanted) {

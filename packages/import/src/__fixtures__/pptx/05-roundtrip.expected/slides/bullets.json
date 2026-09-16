@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "id": "bullets",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "rule-0",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 137,
+          "y": 377,
+          "w": 627,
+          "h": 1,
+          "z": 1
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/0"
+        }
+      },
+      {
+        "id": "rule-1",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 137,
+          "y": 435.59,
+          "w": 627,
+          "h": 1,
+          "z": 2,
+          "group": "bullets-item-0"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/1@bullets/item/0",
+          "pptxGroupPath": "bullets/item/0"
+        }
+      },
+      {
+        "id": "bullets-items-0-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "[Level one, a disc]{c:ink}"
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 385.8,
+          "w": 627,
+          "h": 33.6,
+          "z": 3,
+          "group": "bullets-item-0"
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/0/text@bullets/item/0",
+          "pptxGroupPath": "bullets/item/0"
+        }
+      },
+      {
+        "id": "rule-2",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 137,
+          "y": 494.19,
+          "w": 627,
+          "h": 1,
+          "z": 4,
+          "group": "bullets-item-1"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/2@bullets/item/1",
+          "pptxGroupPath": "bullets/item/1"
+        }
+      },
+      {
+        "id": "bullets-items-1-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "[Level two, a circle]{c:ink}",
+            "level": 2
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 444.39,
+          "w": 627,
+          "h": 33.6,
+          "z": 5,
+          "group": "bullets-item-1"
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/1/text@bullets/item/1",
+          "pptxGroupPath": "bullets/item/1"
+        }
+      },
+      {
+        "id": "rule-3",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 137,
+          "y": 552.78,
+          "w": 627,
+          "h": 1,
+          "z": 6,
+          "group": "bullets-item-2"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/3@bullets/item/2",
+          "pptxGroupPath": "bullets/item/2"
+        }
+      },
+      {
+        "id": "bullets-items-2-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "[Level three, a square]{c:ink}",
+            "level": 3
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 502.99,
+          "w": 627,
+          "h": 33.6,
+          "z": 7,
+          "group": "bullets-item-2"
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/2/text@bullets/item/2",
+          "pptxGroupPath": "bullets/item/2"
+        }
+      },
+      {
+        "id": "rule-4",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 137,
+          "y": 611.38,
+          "w": 627,
+          "h": 1,
+          "z": 8,
+          "group": "bullets-item-3"
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/4@bullets/item/3",
+          "pptxGroupPath": "bullets/item/3"
+        }
+      },
+      {
+        "id": "bullets-items-3-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "[Level four, the glyph cycle starts again]{c:ink}",
+            "level": 4
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 561.58,
+          "w": 627,
+          "h": 33.6,
+          "z": 9,
+          "group": "bullets-item-3"
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/3/text@bullets/item/3",
+          "pptxGroupPath": "bullets/item/3"
+        }
+      },
+      {
+        "id": "rule-5",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 262.72,
+          "w": 627,
+          "h": 1,
+          "z": 10
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/5"
+        }
+      },
+      {
+        "id": "rule-6",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 321.31,
+          "w": 627,
+          "h": 1,
+          "z": 11,
+          "group": "numbers-item-0"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/6@numbers/item/0",
+          "pptxGroupPath": "numbers/item/0"
+        }
+      },
+      {
+        "id": "numbers-items-0-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "[A digit at level one]{c:ink}"
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 271.52,
+          "w": 627,
+          "h": 33.6,
+          "z": 12,
+          "group": "numbers-item-0"
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/0/text@numbers/item/0",
+          "pptxGroupPath": "numbers/item/0"
+        }
+      },
+      {
+        "id": "rule-7",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 379.91,
+          "w": 627,
+          "h": 1,
+          "z": 13,
+          "group": "numbers-item-1"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/7@numbers/item/1",
+          "pptxGroupPath": "numbers/item/1"
+        }
+      },
+      {
+        "id": "numbers-items-1-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "[A letter at level two]{c:ink}",
+            "level": 2
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 330.11,
+          "w": 627,
+          "h": 33.6,
+          "z": 14,
+          "group": "numbers-item-1"
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/1/text@numbers/item/1",
+          "pptxGroupPath": "numbers/item/1"
+        }
+      },
+      {
+        "id": "rule-8",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 438.5,
+          "w": 627,
+          "h": 1,
+          "z": 15,
+          "group": "numbers-item-2"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/8@numbers/item/2",
+          "pptxGroupPath": "numbers/item/2"
+        }
+      },
+      {
+        "id": "numbers-items-2-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "[A roman numeral at level three]{c:ink}",
+            "level": 3
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 388.71,
+          "w": 627,
+          "h": 33.6,
+          "z": 16,
+          "group": "numbers-item-2"
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/2/text@numbers/item/2",
+          "pptxGroupPath": "numbers/item/2"
+        }
+      },
+      {
+        "id": "rule-9",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 497.09,
+          "w": 627,
+          "h": 1,
+          "z": 17,
+          "group": "numbers-item-3"
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/9@numbers/item/3",
+          "pptxGroupPath": "numbers/item/3"
+        }
+      },
+      {
+        "id": "numbers-items-3-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "[Back to a digit]{c:ink}"
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 447.3,
+          "w": 627,
+          "h": 33.6,
+          "z": 18,
+          "group": "numbers-item-3"
+        },
+        "numbered": true,
+        "start": 2,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/3/text@numbers/item/3",
+          "pptxGroupPath": "numbers/item/3"
+        }
+      },
+      {
+        "id": "rule-10",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 520.09,
+          "w": 627,
+          "h": 1,
+          "z": 19
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/10"
+        }
+      },
+      {
+        "id": "rule-11",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 578.69,
+          "w": 627,
+          "h": 1,
+          "z": 20,
+          "group": "ruled-item-0"
+        },
+        "color": "#e9e9e9",
+        "ext": {
+          "pptxName": "ts:bullets#rule/11@ruled/item/0",
+          "pptxGroupPath": "ruled/item/0"
+        }
+      },
+      {
+        "id": "ruled-items-0-num",
+        "type": "text",
+        "text": "1",
+        "pos": {
+          "x": 836,
+          "y": 528.89,
+          "w": 36,
+          "h": 33.6,
+          "z": 21,
+          "group": "ruled-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/0/num@ruled/item/0",
+          "pptxGroupPath": "ruled/item/0"
+        }
+      },
+      {
+        "id": "ruled-items-0-text",
+        "type": "text",
+        "text": "The round one form",
+        "pos": {
+          "x": 872,
+          "y": 528.89,
+          "w": 591,
+          "h": 33.6,
+          "z": 22,
+          "group": "ruled-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/0/text@ruled/item/0",
+          "pptxGroupPath": "ruled/item/0"
+        }
+      },
+      {
+        "id": "rule-12",
+        "type": "rule",
+        "orientation": "horizontal",
+        "length": 627,
+        "pos": {
+          "x": 836,
+          "y": 637.28,
+          "w": 627,
+          "h": 1,
+          "z": 23,
+          "group": "ruled-item-1"
+        },
+        "color": "#d2d2d2",
+        "ext": {
+          "pptxName": "ts:bullets#rule/12@ruled/item/1",
+          "pptxGroupPath": "ruled/item/1"
+        }
+      },
+      {
+        "id": "ruled-items-1-num",
+        "type": "text",
+        "text": "2",
+        "pos": {
+          "x": 836,
+          "y": 587.49,
+          "w": 36,
+          "h": 33.6,
+          "z": 24,
+          "group": "ruled-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/1/num@ruled/item/1",
+          "pptxGroupPath": "ruled/item/1"
+        }
+      },
+      {
+        "id": "ruled-items-1-text",
+        "type": "text",
+        "text": "A tabular numeral in the key position",
+        "pos": {
+          "x": 872,
+          "y": 587.49,
+          "w": 591,
+          "h": 33.6,
+          "z": 25,
+          "group": "ruled-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/1/text@ruled/item/1",
+          "pptxGroupPath": "ruled/item/1"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Bullets and numbering",
+        "pos": {
+          "x": 137,
+          "y": 288.41,
+          "w": 627,
+          "h": 48.4,
+          "z": 26
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#h/text"
+        }
+      }
+    ]
+  },
+  "title": "Bullets and numbering",
+  "ext": {
+    "pptxPart": "ppt/slides/slide26.xml",
+    "pptxSlideId": 281
+  }
+}

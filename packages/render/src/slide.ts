@@ -4,7 +4,8 @@ import type { BlockContext, HtmlFrameSource, RasterRef, ResolvedImage } from './
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
-import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
+import { colsTemplate, COLS_GAP, geometry } from './geometry.ts';
+import type { Geometry } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
 import { colorCss } from '@turboslide/schema/color';
 import { renderMultiline, renderTextOrPrompt } from './blocks/prompt.ts';
@@ -13,11 +14,13 @@ import type { AssetTwins } from '@turboslide/schema/assets';
 import type { Block, BlockOf } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
 import { insideContent, sortByZ } from '@turboslide/schema/freeform';
+import { isLayoutId } from '@turboslide/schema/layouts';
 import type { Position } from '@turboslide/schema/position';
 import { normalizeRotation } from '@turboslide/schema/position';
-import type { Box, Theme } from '@turboslide/schema/render';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import type { Box, Page, Theme } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, coversPage, deckPage } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
+import { slideHasMotion } from '@turboslide/schema/motion';
 
 export type RenderOptions = {
   theme: Theme;
@@ -34,7 +37,20 @@ export type RenderOptions = {
   assetBase: string;
   /** Resolves an asset twin to a URL (data URIs in the standalone build). */
   assetSrc?: (assetId: AssetId, theme: Theme, path: string) => string;
+  /**
+   * Resolves a media file's path (`assets/talk.0123abcd.mp4`) to the URL the show mounts
+   * (gslides-parity SPEC-5 3.3; VERIFICATION-5 finding 12): the deck's asset base when absent,
+   * which the assets route serves with Range requests on a checkout and hosted. The standalone
+   * build rewrites the URL the renderer wrote (`standaloneMediaSources`), so it needs no resolver.
+   */
+  mediaSrc?: (path: string) => string;
   blockAttrs: boolean;
+  /**
+   * A render for a show (gslides-parity SPEC-5 0.5; B1's request R1): every top level block root
+   * carries `data-block` whether or not `blockAttrs` is set, so the present layer and the
+   * standalone motion script address the blocks the schedule names.
+   */
+  motion?: boolean;
   gtWord: boolean;
   live?: boolean;
   /**
@@ -141,15 +157,25 @@ function assetSizeResolver(deck: Deck): (path: string) => [number, number] | und
 }
 
 export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): RenderedSlide {
+  // the deck's page (gslides-parity SPEC-5 6.1): the slot boxes, the plate box and the freeform
+  // layer derive from it; the GT sheet for a deck without one
+  const geo = geometry(deckPage(deck));
   const ctx: BlockContext = {
     slideId: slide.id,
     theme: options.theme,
+    page: geo.sheet,
     blockAttrs: options.blockAttrs,
+    ...(options.motion === true ? { motion: true } : {}),
     gtWord: options.gtWord,
     image: imageResolver(deck, options),
     assetUrl: (path) =>
       options.assetSrc ? options.assetSrc('', options.theme, path) : `${options.assetBase}${path}`,
     asset: (id) => deck.assets[id],
+    // the media records for the poster roots' `data-src`, title and duration (SPEC-5 3.5; the
+    // round five fix round: no caller passed the resolver, so every stored clip rendered with an
+    // empty `data-src` and the show's controller mounted nothing, VERIFICATION-5 finding 12)
+    media: (id) => deck.media?.[id],
+    ...(options.mediaSrc !== undefined ? { mediaUrl: options.mediaSrc } : {}),
     assetSize: assetSizeResolver(deck),
     twins: twinResolver(options),
     ...(options.htmlFrame !== undefined ? { htmlFrame: options.htmlFrame } : {}),
@@ -158,7 +184,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     ...(options.prompts === true ? { prompts: true } : {}),
     slide: {
       kind: slide.kind,
-      ...(slide.template !== undefined ? { template: slide.template } : {}),
+      // a custom layout's id (gslides-parity SPEC-5 9.2) is not a built in layout the prompts read
+      ...(slide.template !== undefined && isLayoutId(slide.template)
+        ? { template: slide.template }
+        : {}),
     },
     rasters: [],
     warnings: [],
@@ -171,10 +200,16 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     : '';
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
+  // `data-motion="1"` when the slide carries a transition or an animation (SPEC-5 0.3: the one
+  // thing renderSlide reads `animations` for), independent of the options, so the filmstrip glyph
+  // and the export report read it; `data-block` on the pseudo blocks below follows `blockAttrs`
+  // or `motion` like every block root (0.5; B1's request R1)
+  const blockIds = options.blockAttrs || options.motion === true;
   const common = {
     'data-slide': slide.id,
     'data-kind': slide.kind,
     'data-counter': options.counter,
+    'data-motion': slideHasMotion(slide) ? '1' : undefined,
   };
   const active = options.active !== false ? 'is-on' : undefined;
   const pictureKind = slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing';
@@ -236,7 +271,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         { class: classes('slide', kindClass, scopeClass, active), ...common },
         scopedCss + img + bg + el('div', { class: 'in' }, plate) + chips,
       );
-      slots = { plate: plateBox(slide.plate) };
+      slots = { plate: plateBox(slide.plate, geo) };
       break;
     }
     case 'title': {
@@ -246,9 +281,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         'h1',
         {
           style: 'margin-top:44px',
-          ...(ctx.blockAttrs
-            ? { 'data-block': 'heading', 'data-type': 'heading', 'data-run': 'heading/text' }
-            : {}),
+          ...(blockIds ? { 'data-block': 'heading' } : {}),
+          ...(ctx.blockAttrs ? { 'data-type': 'heading', 'data-run': 'heading/text' } : {}),
         },
         renderTextOrPrompt(slide.heading, ctx, undefined, '/heading'),
       );
@@ -257,9 +291,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         {
           class: 'lead muted max-p',
           style: 'margin-top:26px',
-          ...(ctx.blockAttrs
-            ? { 'data-block': 'lead', 'data-type': 'paragraph', 'data-run': 'lead/text' }
-            : {}),
+          ...(blockIds ? { 'data-block': 'lead' } : {}),
+          ...(ctx.blockAttrs ? { 'data-type': 'paragraph', 'data-run': 'lead/text' } : {}),
         },
         /* the lead takes paragraph breaks (hotfix-4 cause W4): renderMultiline writes one .para
            span per paragraph, and a one paragraph lead renders byte for byte as renderText did */
@@ -276,7 +309,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             el('div', { class: 'left-mid', 'data-slot': 'main' }, mark + h1 + lead),
           ),
       );
-      slots = slotBoxesAsRecord({ type: 'left-mid' });
+      slots = slotBoxesAsRecord({ type: 'left-mid' }, geo);
       break;
     }
     case 'statement': {
@@ -286,9 +319,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         {
           class: classes('big', measure.className),
           style: measure.style,
-          ...(ctx.blockAttrs
-            ? { 'data-block': 'big', 'data-type': 'heading', 'data-run': 'big/text' }
-            : {}),
+          ...(blockIds ? { 'data-block': 'big' } : {}),
+          ...(ctx.blockAttrs ? { 'data-type': 'heading', 'data-run': 'big/text' } : {}),
         },
         renderTextOrPrompt(slide.big, ctx, undefined, '/big'),
       );
@@ -299,31 +331,31 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
           bg +
           el('div', { class: 'in' }, el('div', { class: 'center', 'data-slot': 'main' }, big)),
       );
-      slots = slotBoxesAsRecord({ type: 'center' });
+      slots = slotBoxesAsRecord({ type: 'center' }, geo);
       break;
     }
     case 'content': {
       html = el(
         'section',
         { class: classes('slide', scopeClass, active), ...common },
-        scopedCss + bg + el('div', { class: 'in' }, renderLayout(slide, ctx)),
+        scopedCss + bg + el('div', { class: 'in' }, renderLayout(slide, ctx, geo)),
       );
-      slots = slotBoxesAsRecord(slide.layout);
+      slots = slotBoxesAsRecord(slide.layout, geo);
       break;
     }
   }
   return { html, slots, rasters: ctx.rasters, warnings: ctx.warnings };
 }
 
-function slotBoxesAsRecord(layout: Layout): Record<string, Box> {
+function slotBoxesAsRecord(layout: Layout, geo: Geometry): Record<string, Box> {
   const out: Record<string, Box> = {};
-  for (const [name, box] of Object.entries(slotBoxes(layout))) out[name] = box;
+  for (const [name, box] of Object.entries(geo.slotBoxes(layout))) out[name] = box;
   return out;
 }
 
-/** The plate rectangle in sheet pixels, at its max width; the height is unknown until measured. */
-function plateBox(plate: Plate): Box {
-  const [x, y, w, h] = [137, 129, 1326, 642];
+/** The plate rectangle in sheet pixels, at its max width in the page's content box; the height is unknown until measured. */
+function plateBox(plate: Plate, geo: Geometry): Box {
+  const [x, y, w, h] = geo.content;
   if (plate.side === 'lower-right') return [x + w - plate.maxWidth, y, plate.maxWidth, h];
   return [x, y, plate.maxWidth, h];
 }
@@ -343,13 +375,14 @@ function renderPlate(plate: Plate, ctx: BlockContext, before: string): string {
   );
 }
 
-function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
+function renderLayout(slide: ContentSlide, ctx: BlockContext, geo: Geometry): string {
   const layout = slide.layout;
   const slot = (name: SlotName): Block[] => slide.slots[name] ?? [];
+  const contentWidth = geo.content[2];
   switch (layout.type) {
     case 'cols': {
       const gap = layout.gap ?? COLS_GAP;
-      const [leftW, rightW] = colsWidths(layout.ratio, gap);
+      const [leftW, rightW] = geo.colsWidths(layout.ratio, gap);
       const template = colsTemplate(layout.ratio);
       const hasPre = [...slot('left'), ...slot('right')].some(
         (block) => block.type === 'panel' && block.pre === true,
@@ -378,10 +411,10 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
         headHtml = el(
           'div',
           { class: 'head', 'data-slot': 'head' },
-          renderBlocks(slot('head'), { ...ctx, slotWidth: 1326 }),
+          renderBlocks(slot('head'), { ...ctx, slotWidth: contentWidth }),
         );
       } else {
-        const [leftW, rightW] = colsWidths(head.cols);
+        const [leftW, rightW] = geo.colsWidths(head.cols);
         headHtml = el(
           'div',
           {
@@ -404,7 +437,7 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
           class: classes('body', align === 'end' && 'end', align === 'start' && 'start'),
           'data-slot': 'body',
         },
-        renderBlocks(slot('body'), { ...ctx, slotWidth: 1326 }),
+        renderBlocks(slot('body'), { ...ctx, slotWidth: contentWidth }),
       );
       return el(
         'div',
@@ -419,13 +452,13 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
       return el(
         'div',
         { class: 'center', 'data-slot': 'main' },
-        renderBlocks(slot('main'), { ...ctx, slotWidth: 1326 }),
+        renderBlocks(slot('main'), { ...ctx, slotWidth: contentWidth }),
       );
     case 'left-mid':
       return el(
         'div',
         { class: 'left-mid', 'data-slot': 'main' },
-        renderBlocks(slot('main'), { ...ctx, slotWidth: 1326 }),
+        renderBlocks(slot('main'), { ...ctx, slotWidth: contentWidth }),
       );
     case 'stack':
       return el(
@@ -435,10 +468,10 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
           'data-slot': 'main',
           style: layout.gap !== undefined ? `gap:${layout.gap}px` : undefined,
         },
-        renderBlocks(slot('main'), { ...ctx, slotWidth: 1326 }),
+        renderBlocks(slot('main'), { ...ctx, slotWidth: contentWidth }),
       );
     case 'freeform':
-      return renderFreeform(slot('main'), ctx);
+      return renderFreeform(slot('main'), ctx, geo);
   }
 }
 
@@ -451,14 +484,14 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
  * so its coordinates are sheet coordinates as written. The block renders with the box's width and
  * height as its slot.
  */
-function renderFreeform(blocks: Block[], ctx: BlockContext): string {
+function renderFreeform(blocks: Block[], ctx: BlockContext, geo: Geometry): string {
   const inside: string[] = [];
   const outside: string[] = [];
-  const [contentX, contentY] = CONTENT;
+  const [contentX, contentY, contentW, contentH] = geo.content;
   const ordered = sortByZ(blocks);
   ordered.forEach((block, order) => {
-    const pos = block.pos ?? { x: contentX, y: contentY, w: 1326, h: 642 };
-    const inContent = insideContent(pos);
+    const pos = block.pos ?? { x: contentX, y: contentY, w: contentW, h: contentH };
+    const inContent = insideContent(pos, geo.sheet);
     const inline = style(
       `left:${px(inContent ? pos.x - contentX : pos.x)}px`,
       `top:${px(inContent ? pos.y - contentY : pos.y)}px`,
@@ -471,7 +504,7 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
     // object that covers the sheet at the bottom of the stack, after the image, so they cover
     // the photograph and nothing else (SPEC-2 1.4, 0.75, 0.98)
     const chips =
-      ctx.chrome === true && order === 0 && block.type === 'picture' && coversSheet(pos)
+      ctx.chrome === true && order === 0 && block.type === 'picture' && coversSheet(pos, geo.sheet)
         ? '<div class="ts-chips" aria-hidden="true"></div>'
         : '';
     const html = el(
@@ -526,9 +559,12 @@ export function freeDataAttrs(pos: Position): Record<string, string | undefined>
   };
 }
 
-/** True when a box covers the whole sheet (the picture object of a converted picture kind, SPEC-2 1.4). */
-export function coversSheet(pos: Position): boolean {
-  return pos.x <= 0 && pos.y <= 0 && pos.x + pos.w >= SHEET_WIDTH && pos.y + pos.h >= SHEET_HEIGHT;
+/** True when a box covers the whole page (the picture object of a converted picture kind, SPEC-2 1.4); the GT sheet when no page is given. */
+export function coversSheet(
+  pos: Position,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): boolean {
+  return coversPage(pos, page);
 }
 
 /**

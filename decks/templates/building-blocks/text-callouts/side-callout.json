@@ -1,0 +1,49 @@
+{
+  "id": "text-callouts/side-callout",
+  "category": "text-callouts",
+  "label": "Side callout",
+  "blocks": [
+    {
+      "id": "bar",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 200,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "fill": "ink"
+    },
+    {
+      "id": "h",
+      "pos": {
+        "x": 40,
+        "y": 0,
+        "w": 1286,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Worth noting"
+    },
+    {
+      "id": "text",
+      "pos": {
+        "x": 40,
+        "y": 70,
+        "w": 1286,
+        "h": 120,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Two lines that qualify the point above without taking the slide over."
+    }
+  ],
+  "box": [
+    1326,
+    200
+  ]
+}

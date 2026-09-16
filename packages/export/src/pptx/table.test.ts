@@ -95,3 +95,20 @@ describe('a table cell', () => {
     expect(cellMargin(cell, undefined, options)[0]).toBeCloseTo(12 / 120, 6);
   });
 });
+
+describe('the per edge borders of the edge picker (gslides-parity SPEC-5 7.7)', async () => {
+  const { cellBorders, cellEdgesOf } = await import('./table.ts');
+  it('replaces the named sides and leaves the rest to the row rule', () => {
+    const edges = { top: { color: 'rgb(7, 7, 7)', width: 2 }, left: 'none' as const };
+    const edged = { ...cell, edges } as SceneTableCell;
+    const [top, right, bottom, left] = cellBorders(table, 1, 'FFFFFF', edged);
+    expect(top).toEqual({ type: 'solid', color: '070707', pt: 1.2 });
+    expect(right).toEqual({ type: 'none' });
+    expect(bottom.type).toBe('solid');
+    expect(left).toEqual({ type: 'none' });
+    expect(cellEdgesOf(cell)).toBeUndefined();
+    expect(cellEdgesOf(edged)).toEqual(edges);
+    const plain = cellBorders(table, 1, 'FFFFFF', cell);
+    expect(plain[0]).toEqual({ type: 'none' });
+  });
+});

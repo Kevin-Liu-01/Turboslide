@@ -156,7 +156,58 @@
         "picture.dither",
         "picture.materialize",
         "slide.setBackgroundPicture",
-        "slide.setBackgroundMaterial"
+        "slide.setBackgroundMaterial",
+        "motion.setTransition",
+        "motion.add",
+        "motion.update",
+        "motion.remove",
+        "motion.reorder",
+        "motion.compile",
+        "motion.play",
+        "media.insert",
+        "media.setPlayback",
+        "media.poster",
+        "media.info",
+        "media.list",
+        "camera.capture",
+        "view.presentOnScreen",
+        "template.list",
+        "template.slides",
+        "buildingBlock.list",
+        "buildingBlock.insert",
+        "import.pptx",
+        "theme.import",
+        "theme.applyImported",
+        "deck.setPageSize",
+        "prefs.get",
+        "prefs.set",
+        "text.autocorrect",
+        "spelling.check",
+        "spelling.replace",
+        "spelling.ignore",
+        "dictionary.add",
+        "dictionary.remove",
+        "dictionary.list",
+        "dictionary.lookup",
+        "accessibility.verbalize",
+        "equation.insert",
+        "equation.render",
+        "equation.symbols",
+        "theme.get",
+        "theme.set",
+        "theme.rename",
+        "theme.reset",
+        "layout.list",
+        "layout.create",
+        "layout.duplicate",
+        "layout.rename",
+        "layout.delete",
+        "layout.setPlaceholder",
+        "chat.send",
+        "chat.list",
+        "chat.clear",
+        "version.delete",
+        "font.list"
       ]
     },
     {
@@ -168,6 +219,7 @@
         "view.theme",
         "view.present",
         "view.zoom",
+        "view.presentOnScreen",
         "render.slide",
         "render.sheet"
       ]
@@ -353,7 +405,58 @@
     "picture.dither",
     "picture.materialize",
     "slide.setBackgroundPicture",
-    "slide.setBackgroundMaterial"
+    "slide.setBackgroundMaterial",
+    "motion.setTransition",
+    "motion.add",
+    "motion.update",
+    "motion.remove",
+    "motion.reorder",
+    "motion.compile",
+    "motion.play",
+    "media.insert",
+    "media.setPlayback",
+    "media.poster",
+    "media.info",
+    "media.list",
+    "camera.capture",
+    "view.presentOnScreen",
+    "template.list",
+    "template.slides",
+    "buildingBlock.list",
+    "buildingBlock.insert",
+    "import.pptx",
+    "theme.import",
+    "theme.applyImported",
+    "deck.setPageSize",
+    "prefs.get",
+    "prefs.set",
+    "text.autocorrect",
+    "spelling.check",
+    "spelling.replace",
+    "spelling.ignore",
+    "dictionary.add",
+    "dictionary.remove",
+    "dictionary.list",
+    "dictionary.lookup",
+    "accessibility.verbalize",
+    "equation.insert",
+    "equation.render",
+    "equation.symbols",
+    "theme.get",
+    "theme.set",
+    "theme.rename",
+    "theme.reset",
+    "layout.list",
+    "layout.create",
+    "layout.duplicate",
+    "layout.rename",
+    "layout.delete",
+    "layout.setPlaceholder",
+    "chat.send",
+    "chat.list",
+    "chat.clear",
+    "version.delete",
+    "font.list"
   ],
   "details": {
     "deck.info": {
@@ -379,7 +482,7 @@
     },
     "deck.set": {
       "label": "Set a deck field",
-      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.",
+      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes, /language) as one deck.set mutation, the write the Themes panel, Slide numbers and File > Language make; an absent value removes the field. The page and the theme records have their own actions.",
       "mutates": true,
       "milestone": "GS1",
       "group": "deck"
@@ -659,7 +762,7 @@
     },
     "block.adjust": {
       "label": "Adjustments",
-      "doc": "Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1); null clears one.",
+      "doc": "Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1), its reflection (transparency, distance, size) and its recolor preset; null clears one.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -694,7 +797,7 @@
     },
     "text.list": {
       "label": "List options",
-      "doc": "Writes the marker, the preset and the items’ levels of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.",
+      "doc": "Writes the marker, the preset, the items’ levels and the numbering’s start, prefix and suffix of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -715,7 +818,7 @@
     },
     "text.indent": {
       "label": "Indent",
-      "doc": "Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead.",
+      "doc": "Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead; the first line and hanging indents of Indentation options write alone or beside it.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -799,7 +902,7 @@
     },
     "table.cellStyle": {
       "label": "Cell fill and border",
-      "doc": "Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.",
+      "doc": "Writes the fill and the border of cells in one write, the border on every edge or on the edges named; null clears one; a border weight of 0 is Google’s Transparent border.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -1447,6 +1550,363 @@
       "mutates": true,
       "milestone": "GS3",
       "group": "slide"
+    },
+    "motion.setTransition": {
+      "label": "Transition",
+      "doc": "Writes the transition into a slide (the kind and its duration in ms) as one slide.set, or removes it with kind none; applyToAll writes every slide of the deck in one commit so one Undo reverts it.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.add": {
+      "label": "Add animation",
+      "doc": "Appends one animation per named block to the slide’s list (Appear on click at 500 ms unless set), or inserts them at an index, as one slide.set; a text block may take By paragraph.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.update": {
+      "label": "Update animation",
+      "doc": "Rewrites the fields of one animation of a slide (the effect, direction, trigger, duration, By paragraph) as one slide.set; null clears the direction or By paragraph.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.remove": {
+      "label": "Remove animation",
+      "doc": "Removes one animation by id, or every animation of a block, from a slide’s list as one slide.set.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.reorder": {
+      "label": "Reorder animations",
+      "doc": "Writes the whole play order of a slide’s animations (a drag produces the whole order) as one slide.set; every id of the list appears once.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.compile": {
+      "label": "Motion schedule",
+      "doc": "The click steps of a slide as the show, the web page, the PPTX timing tree and the ODP animation tree play them: the effects per step with their delays, the blocks hidden at the start, the transition and the animations skipped.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "motion.play": {
+      "label": "Play",
+      "doc": "Plays a slide’s motion in the editor over the present layer’s classes from a step, the Motion panel’s Play; answers the step reached and the step count.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "motion"
+    },
+    "media.insert": {
+      "label": "Insert media",
+      "doc": "Stores an audio or video file (a path, a URL through safeFetch, a presigned upload key) or a YouTube link and places a media block on the slide with Google’s Play (on click) default and a poster, in one write; a slide that is not a canvas converts first.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "media.setPlayback": {
+      "label": "Format options",
+      "doc": "Writes the playback fields of a media block (start, start at, end at, mute, loop, volume, hide icon, stop on slide change) as one block.set; null clears one; a Play (automatically) start takes its place among the slide’s animations.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "media.poster": {
+      "label": "Poster",
+      "doc": "Writes a media block’s poster: the frame at a time captured from the stored video, or a picture file; the poster is what every still shows.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "media.info": {
+      "label": "Media info",
+      "doc": "The stored record of a media asset (kind, mime, bytes, duration, size, codecs, poster, source) and the blocks that play it; refresh re-reads the container.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "media.list": {
+      "label": "List media",
+      "doc": "Every stored audio and video record of the deck.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "camera.capture": {
+      "label": "Camera",
+      "doc": "Takes a picture with the camera in an open studio page (the Camera dialog is the executor) and places it as a picture object on the slide in one write; the CLI and MCP ask the page named by --from.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "media"
+    },
+    "view.presentOnScreen": {
+      "label": "Present on another screen",
+      "doc": "Opens the show on another screen through the Window Management API when the browser offers it, else answers unsupported so the row shows its disabled state.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "view"
+    },
+    "template.list": {
+      "label": "Templates",
+      "doc": "The template index: every template with its category, cover, use cases, slide count and theme, the rows the gallery page and File > New read.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "deck"
+    },
+    "template.slides": {
+      "label": "Template slides",
+      "doc": "The slides of one template with their titles and render ids, the rows the Templates pane and slide.import --template read.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "deck"
+    },
+    "buildingBlock.list": {
+      "label": "Building blocks",
+      "doc": "The building block index by category: agendas, lists, key statistics, quotes, headlines, text callouts, calls to action, people and cards.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "block"
+    },
+    "buildingBlock.insert": {
+      "label": "Insert building block",
+      "doc": "Inserts a building block’s positioned blocks as one group on the slide in one write, at the content box or the point given, scaled by min(1, contentWidth / 1326) on a narrower page; a slide that is not a canvas converts first.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "block"
+    },
+    "import.pptx": {
+      "label": "Import PowerPoint",
+      "doc": "Reads a .pptx through the one reader into a new deck (or into an existing one) with every imported slide a canvas slide, the theme adopted or kept, the page matched or fit, and answers the row based report; dryRun answers the report alone.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "import"
+    },
+    "theme.import": {
+      "label": "Import theme",
+      "doc": "Appends one theme record (its name, twelve colours and two faces) from a .pptx theme part or from another deck to In this presentation, at most five; the sixth is refused with its sentence.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "import"
+    },
+    "theme.applyImported": {
+      "label": "Apply imported theme",
+      "doc": "Writes an imported record’s colours and faces into the deck’s theme edits in one commit, the click on a tile under In this presentation.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "deck.setPageSize": {
+      "label": "Page setup",
+      "doc": "Writes the deck’s page from a preset or a custom size in inches, centimeters, points or sheet pixels (120 per inch), keeps every object where it is or scales the canvas objects to fit or maximize about the centre, drops the guides beyond the page under keep, and answers the page, the previous page and the counts, in one commit.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "deck"
+    },
+    "prefs.get": {
+      "label": "Preferences",
+      "doc": "The caller’s preferences (autocorrect, substitutions, autofit, units, spelling, accessibility, dictation, SVG text, starred), the whole record or the value at a JSON pointer.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "account"
+    },
+    "prefs.set": {
+      "label": "Set preference",
+      "doc": "Writes one value of the caller’s preferences by JSON pointer on the principal record and its browser mirror; an absent value deletes the member, /- appends to a list; the record is validated after the write.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "account"
+    },
+    "text.autocorrect": {
+      "label": "Autocorrect",
+      "doc": "Applies the autocorrect rules and the substitution table of the caller’s preferences to a Text, a block or the deck as text.splice mutations in one write; dryRun lists the changes without writing.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "block"
+    },
+    "spelling.check": {
+      "label": "Spell check",
+      "doc": "Walks every Text of the named slides in reading order, then the notes and the alt texts when asked, through the deck’s language dictionary and the personal dictionary, and answers the misspellings with up to five suggestions each.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "slide"
+    },
+    "spelling.replace": {
+      "label": "Change spelling",
+      "doc": "Replaces a misspelt range in one Text, or every occurrence of the word in the deck under all, as text.splice mutations in one write (the card’s Change and Change all).",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "slide"
+    },
+    "spelling.ignore": {
+      "label": "Ignore",
+      "doc": "Ignores a misspelling for this session in the editor, or every occurrence of the word under all (the card’s Ignore and Ignore all); nothing is written.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "slide"
+    },
+    "dictionary.add": {
+      "label": "Add to dictionary",
+      "doc": "Adds a word to the caller’s personal dictionary on the principal record (and .turboslide/dictionary.txt on a checkout); the spell check skips it afterwards.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "account"
+    },
+    "dictionary.remove": {
+      "label": "Remove from dictionary",
+      "doc": "Removes a word from the caller’s personal dictionary.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "account"
+    },
+    "dictionary.list": {
+      "label": "Personal dictionary",
+      "doc": "The words of the caller’s personal dictionary.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "account"
+    },
+    "dictionary.lookup": {
+      "label": "Dictionary",
+      "doc": "Looks a word up: the Wiktionary page address, and on the hosted studio the definitions per part of speech with their attribution through /api/define; under TURBOSLIDE_DICTIONARY=link the address alone.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "view"
+    },
+    "accessibility.verbalize": {
+      "label": "Verbalize to screen reader",
+      "doc": "Writes the sentence for the selection, its formatting or the text from the cursor into the status live region (and speech under Speak selection aloud) and answers it.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "view"
+    },
+    "equation.insert": {
+      "label": "Insert equation",
+      "doc": "Places an equation block with a LaTeX source at the centre of the content box or at the box given, in one write; a slide that is not a canvas converts first.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "block"
+    },
+    "equation.render": {
+      "label": "Render equation",
+      "doc": "Renders a LaTeX source to MathML Core the way the sheet does and answers the markup, the measured box in sheet px and any parse finding; png writes the 2x raster too.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "render"
+    },
+    "equation.symbols": {
+      "label": "Equation symbols",
+      "doc": "The equation toolbar’s table: Google Docs’ five groups (Greek letters, Miscellaneous operations, Relations, Math operators, Arrows) and More, each symbol with its command, LaTeX, code point and OMML form.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "render"
+    },
+    "theme.get": {
+      "label": "Theme",
+      "doc": "The deck’s theme id, its edit record, its imported theme records and its custom layouts.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "theme.set": {
+      "label": "Set theme field",
+      "doc": "Writes one value of the theme edit record by JSON pointer (/name, /colors/light/ink, /fonts/text, /frame/rails, /mark, /counter, /chips, /type/levels/h1, /background) as one deck.set mutation, the write every Edit theme control makes; an absent value removes the field.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "theme.rename": {
+      "label": "Rename theme",
+      "doc": "Writes the edited theme’s name, the label the Themes panel shows under In this presentation.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "theme.reset": {
+      "label": "Reset theme",
+      "doc": "Removes the theme edit record, or the field at a JSON pointer, so the base theme applies again.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.list": {
+      "label": "Layouts",
+      "doc": "The built in layouts and the custom layouts of the deck with their names, whether each is hidden, and the placeholders a custom one carries.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.create": {
+      "label": "New layout",
+      "doc": "Adds a custom layout to the deck from a built in or custom layout’s blocks (blank when absent) with a name, as one deck.set; answers its id.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.duplicate": {
+      "label": "Duplicate layout",
+      "doc": "Copies a custom layout (or a built in one into a custom copy) under a new id and name.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.rename": {
+      "label": "Rename layout",
+      "doc": "Writes a custom layout’s display name.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.delete": {
+      "label": "Delete layout",
+      "doc": "Removes a custom layout, or hides a built in one from the four entry points (a built in layout is code and stays), after a confirm.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "layout.setPlaceholder": {
+      "label": "Set placeholder",
+      "doc": "Marks a block of a custom layout as one of the five placeholders (title, subtitle, body, slide number, image), or clears the mark with null.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "theme"
+    },
+    "chat.send": {
+      "label": "Send message",
+      "doc": "Posts a chat message to the deck’s room as a chat entry on the operation stream under the comment caps and the chat rate rows; never stored beyond the retained stream.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "comment"
+    },
+    "chat.list": {
+      "label": "Chat",
+      "doc": "The retained chat messages of the room since the room formed, or since a time.",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "comment"
+    },
+    "chat.clear": {
+      "label": "Clear chat",
+      "doc": "Removes the room’s chat entries, the owner’s action; the room does the same when the last participant leaves.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "comment"
+    },
+    "version.delete": {
+      "label": "Delete versions",
+      "doc": "Deletes this and older versions up to a record, or the whole history, after a confirm; named versions before the point are kept unless the whole history goes; hosted, a fresh sign in within 5 minutes or the agent bearer is required.",
+      "mutates": true,
+      "milestone": "GS5",
+      "group": "version"
+    },
+    "font.list": {
+      "label": "Fonts",
+      "doc": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5).",
+      "mutates": false,
+      "milestone": "GS5",
+      "group": "render"
     }
   },
   "methods": [

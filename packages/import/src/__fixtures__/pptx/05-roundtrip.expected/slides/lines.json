@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 1,
+  "id": "lines",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "a",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 240,
+          "h": 120,
+          "z": 1
+        },
+        "stroke": "ink",
+        "width": 1,
+        "text": "A",
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 4.5
+        },
+        "ext": {
+          "pptxName": "ts:lines#a"
+        }
+      },
+      {
+        "id": "b",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 700,
+          "y": 500,
+          "w": 240,
+          "h": 120,
+          "z": 2
+        },
+        "stroke": "ink",
+        "width": 1,
+        "text": "B",
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 4.5
+        },
+        "ext": {
+          "pptxName": "ts:lines#b"
+        }
+      },
+      {
+        "id": "decorated",
+        "type": "shape",
+        "shape": "arrow",
+        "pos": {
+          "x": 137,
+          "y": 240,
+          "w": 600,
+          "h": 1,
+          "z": 3
+        },
+        "orientation": "horizontal",
+        "stroke": "ink",
+        "width": 2,
+        "lineStart": "fillCircle",
+        "lineEnd": "stealth",
+        "ext": {
+          "pptxName": "ts:lines#decorated"
+        }
+      },
+      {
+        "id": "elbow",
+        "type": "shape",
+        "shape": "elbow",
+        "pos": {
+          "x": 377.5,
+          "y": 360.5,
+          "w": 322,
+          "h": 199,
+          "z": 4
+        },
+        "stroke": "ink",
+        "width": 1,
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "a",
+            "site": 3
+          },
+          "end": {
+            "block": "b",
+            "site": 1
+          }
+        },
+        "ext": {
+          "pptxName": "ts:lines#elbow"
+        }
+      },
+      {
+        "id": "curved",
+        "type": "shape",
+        "shape": "curved",
+        "pos": {
+          "x": 1000.5,
+          "y": 300.5,
+          "w": 319,
+          "h": 199,
+          "flip": "v",
+          "z": 5
+        },
+        "stroke": "ink",
+        "width": 1,
+        "lineStart": "openArrow",
+        "ext": {
+          "pptxName": "ts:lines#curved"
+        }
+      },
+      {
+        "id": "poly",
+        "type": "shape",
+        "shape": "polyline",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.2998,
+            1
+          ],
+          [
+            0.5997,
+            0.1983
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "pos": {
+          "x": 1000.25,
+          "y": 560.25,
+          "w": 320,
+          "h": 120,
+          "z": 6
+        },
+        "stroke": "ink",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "ts:lines#poly"
+        }
+      },
+      {
+        "id": "closed",
+        "type": "shape",
+        "shape": "polyline",
+        "points": [
+          [
+            0.0675,
+            0.867
+          ],
+          [
+            0.0483,
+            0.8041
+          ],
+          [
+            0.0326,
+            0.6931
+          ],
+          [
+            0.0349,
+            0.5782
+          ],
+          [
+            0.0511,
+            0.4783
+          ],
+          [
+            0.074,
+            0.3877
+          ],
+          [
+            0.1014,
+            0.3018
+          ],
+          [
+            0.1334,
+            0.2236
+          ],
+          [
+            0.1696,
+            0.1619
+          ],
+          [
+            0.215,
+            0.1171
+          ],
+          [
+            0.2917,
+            0.063
+          ],
+          [
+            0.3687,
+            0.0322
+          ],
+          [
+            0.4353,
+            0.0243
+          ],
+          [
+            0.4974,
+            0.0269
+          ],
+          [
+            0.5597,
+            0.0354
+          ],
+          [
+            0.6209,
+            0.0503
+          ],
+          [
+            0.6767,
+            0.0732
+          ],
+          [
+            0.7295,
+            0.1108
+          ],
+          [
+            0.8064,
+            0.1817
+          ],
+          [
+            0.8693,
+            0.26
+          ],
+          [
+            0.9111,
+            0.3327
+          ],
+          [
+            0.9417,
+            0.4023
+          ],
+          [
+            0.9655,
+            0.4718
+          ],
+          [
+            0.9808,
+            0.5398
+          ],
+          [
+            0.983,
+            0.6009
+          ],
+          [
+            0.9668,
+            0.6565
+          ],
+          [
+            0.9266,
+            0.7356
+          ],
+          [
+            0.8728,
+            0.799
+          ],
+          [
+            0.8158,
+            0.8416
+          ],
+          [
+            0.7576,
+            0.8754
+          ],
+          [
+            0.6969,
+            0.9065
+          ],
+          [
+            0.6347,
+            0.9343
+          ],
+          [
+            0.5746,
+            0.9557
+          ],
+          [
+            0.5118,
+            0.97
+          ],
+          [
+            0.414,
+            0.9852
+          ],
+          [
+            0.3257,
+            0.9892
+          ],
+          [
+            0.258,
+            0.9817
+          ],
+          [
+            0.2007,
+            0.9662
+          ],
+          [
+            0.1479,
+            0.943
+          ],
+          [
+            0.1016,
+            0.9106
+          ],
+          [
+            0.0675,
+            0.867
+          ]
+        ],
+        "pos": {
+          "x": 147.17,
+          "y": 543.5,
+          "w": 294.83,
+          "h": 226.5,
+          "z": 7
+        },
+        "closed": true,
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:lines#closed"
+        }
+      },
+      {
+        "id": "scribble",
+        "type": "shape",
+        "shape": "polyline",
+        "points": [
+          [
+            0,
+            0.5039
+          ],
+          [
+            0.1002,
+            0.126
+          ],
+          [
+            0.2005,
+            0.874
+          ],
+          [
+            0.3508,
+            0
+          ],
+          [
+            0.5011,
+            1
+          ],
+          [
+            0.6492,
+            0.252
+          ],
+          [
+            0.7995,
+            0.748
+          ],
+          [
+            1,
+            0.378
+          ]
+        ],
+        "pos": {
+          "x": 477,
+          "y": 596,
+          "w": 440,
+          "h": 128,
+          "z": 8
+        },
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:lines#scribble"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Lines and connectors",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 9
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:lines#h/text"
+        }
+      }
+    ]
+  },
+  "title": "Lines and connectors",
+  "ext": {
+    "pptxPart": "ppt/slides/slide13.xml",
+    "pptxSlideId": 268
+  }
+}

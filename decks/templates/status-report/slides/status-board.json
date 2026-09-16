@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "status-board",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 32,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "start"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Status board",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Every workstream, its state and one line.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "board",
+        "type": "board",
+        "columns": [
+          128,
+          250,
+          200,
+          "fr"
+        ],
+        "rows": [
+          {
+            "name": "Onboarding",
+            "state": {
+              "name": "check-circle",
+              "color": "ok"
+            },
+            "note": "Three of four teams live."
+          },
+          {
+            "name": "Integrations",
+            "state": {
+              "name": "exclamation-circle",
+              "color": "warn"
+            },
+            "note": "The billing connector slipped a week."
+          },
+          {
+            "name": "Reporting",
+            "state": {
+              "name": "check-circle",
+              "color": "ok"
+            },
+            "note": "Nightly runs since the ninth."
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Status board"
+}

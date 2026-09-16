@@ -117,6 +117,39 @@ export async function validatePackage(zip: Package): Promise<PackageValidation> 
     }
   }
 
+  // round five (gslides-parity SPEC-5 8.3; B6): every `r:embed`, `r:id` and `r:link` a slide
+  // part writes names a relationship of that part (the Fallback picture of an equation wrapper
+  // among them), and every `a14:m` sits inside an `mc:Choice Requires="a14"` so a consumer that
+  // does not implement the `a14` and `m` namespaces takes the Fallback instead of the element
+  for (const part of parts.filter((p) => /^ppt\/slides\/slide\d+\.xml$/.test(p))) {
+    const xml = await readPart(zip, part);
+    const rels = `ppt/slides/_rels/${part.slice('ppt/slides/'.length)}.rels`;
+    const ids = new Set<string>();
+    if (partSet.has(rels)) {
+      for (const tag of (await readPart(zip, rels)).match(/<Relationship\b[^>]*\/>/g) ?? []) {
+        const id = attribute(tag, 'Id');
+        if (id !== undefined) ids.add(id);
+      }
+    }
+    for (const match of xml.matchAll(/\sr:(embed|id|link|pict)="([^"]*)"/g)) {
+      const id = match[2] ?? '';
+      if (id === '' || ids.has(id)) continue;
+      invalidRelationships.push(`${part}: r:${match[1]} ${id} names no relationship of the part`);
+    }
+    const maths = (xml.match(/<a14:m\b/g) ?? []).length;
+    if (maths > 0) {
+      let wrapped = 0;
+      for (const choice of xml.match(
+        /<mc:Choice\b[^>]*Requires="a14"[^>]*>[\s\S]*?<\/mc:Choice>/g,
+      ) ?? [])
+        wrapped += (choice.match(/<a14:m\b/g) ?? []).length;
+      if (wrapped !== maths)
+        issues.push(
+          `${part}: ${maths} a14:m element(s), ${wrapped} inside an mc:Choice Requires="a14"`,
+        );
+    }
+  }
+
   for (const line of undeclaredParts) issues.push(`no content type for ${line}`);
   for (const line of missingOverrides)
     issues.push(`content type override for missing part ${line}`);

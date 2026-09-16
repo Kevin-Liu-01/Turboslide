@@ -10,6 +10,17 @@
 // Offline, the pending and retained ops persist to the pending store; a reconnect replays from the
 // last seq; `resync` reloads at a revision and rebases. Framework free, browser safe (no `node:`);
 // the transport is injected so the tests run it against fake-transport.ts.
+//
+// Round five (gslides-parity SPEC-5-amendments A3, B7): one client id per tab, asked for on every
+// stream open and kept across a reload (item 5); `revision` is only ever a number a write answer
+// or a stream frame carried (item 1); one POST in flight per tab and the next leaves after the
+// answer's entries are applied (item 4); a 409 that carries the entries since the base rebases the
+// pending ops onto them and posts again once, without a reload or a prompt (item 3); a record's
+// echo from another instance of the blob tier names the tab and its batch (`+<count>` op ids,
+// src/op-ids.ts) and is applied as an acknowledgement, never drawn as a remote change (items 5
+// and 6); the tab's own persisted queue replays on its own after a reload while another tab's is
+// offered (SPEC-3 0.7); the presence heartbeat is 25 s and pauses while the tab is hidden (A8
+// rows 7 and 8); an op returned to its author names who changed the same text (item 8).
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
@@ -26,13 +37,9 @@ import type {
   RoomEvent,
   RosterEntry,
 } from '../src/channel.ts';
-import {
-  OPS_POST_MAX_BYTES,
-  OPS_POST_MAX_ENTRIES,
-  PRESENCE_BATCH_MS,
-  PRESENCE_HEARTBEAT_MS,
-} from '../src/protocol.ts';
+import { OPS_POST_MAX_BYTES, OPS_POST_MAX_ENTRIES, PRESENCE_BATCH_MS } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
+import { opIdsOfBatch } from '../src/op-ids.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
 import { pendingKey, unsavedCount } from './pending-store.ts';
 
@@ -50,12 +57,20 @@ export type OpsResponse =
       message: string;
       head?: number;
       retryAfterMs?: number;
+      /** a blob tier 409's entries since the client's base (SPEC-5-amendments A3 item 3) */
+      since?: Entry[];
     };
 
 export type StreamHandle = { close: () => void };
 
 export type OpenOptions = {
   since: number;
+  /**
+   * The client id this tab holds (sessionStorage; SPEC-5-amendments A3 item 5): the stream route
+   * keeps it when its signature names this deck and this identity, so a reload or a reconnect
+   * replaces the tab's own roster row instead of adding one, and issues a fresh id otherwise.
+   */
+  clientId?: string;
   /**
    * The client ids this tab held before (an earlier page of the same tab, hotfix 2 cause B1):
    * the stream route removes their roster rows before it writes `hello`, so a reload never
@@ -86,12 +101,23 @@ export const FLUSH_MS: Readonly<Record<FlushClass, number>> = { now: 0, pos: 50,
 export const BACKOFF_MAX_MS = 8000;
 /** How many recent entries `transformSince` can reach back over. */
 export const RECENT_ENTRIES = 2000;
+/**
+ * The presence heartbeat of a visible tab (SPEC-5-amendments A8 row 7): 25 s, under the roster's
+ * 30 s stale mark (protocol.ts PRESENCE_STALE_MS), where the 5 s of SPEC-3 3.8 made 720 function
+ * invocations an hour per open editor. A hidden tab posts no heartbeat (A8 row 8) and posts once
+ * when it is shown again.
+ */
+export const HEARTBEAT_MS = 25_000;
+/** A stream down this long with nothing answered reads as offline in the save words. */
+export const OFFLINE_AFTER_MS = 3000;
+/** How many own op ids the client remembers as settled, so a late echo of one is dropped. */
+export const SETTLED_IDS_KEPT = 4000;
 
 /** How a pending op ended: in the stream at a seq, or returned to its author. */
 export type Settled = { seq: number } | { rejected: Rejected };
 
 export type PendingOp = {
-  /** the client's own id, assigned at flush; empty until then */
+  /** the client's own id, assigned at flush; empty until then; kept from a persisted queue */
   opId: string;
   kind: 'edit' | 'comment';
   mutations?: Mutation[];
@@ -109,19 +135,22 @@ export type RetainedOp = { opId: string; seq: number; mutations?: Mutation[] };
 
 export type SyncStatus = {
   seq: number;
+  /** the highest revision a write answer or a stream frame carried; never computed here (A3 item 1) */
   revision: number;
   pending: number;
   retained: number;
   tier: RealtimeTier;
   transport: 'sse' | 'poll' | 'none';
   connected: boolean;
-  /** the stream is down and the last POST failed */
+  /** a POST failed, or the stream has been down for OFFLINE_AFTER_MS */
   offline: boolean;
   clientId: string | null;
   role: Role | null;
   /** editing connections at the last hello; at 100 the tab opens in Viewing mode (SPEC-3 0.9) */
   editing: number;
   overCeiling: boolean;
+  /** how many refused writes were rebased onto the entries a 409 carried and posted again (A3 item 3) */
+  rebased: number;
 };
 
 export type ChangeReason =
@@ -139,6 +168,15 @@ export type PersistedOffer = {
   discard: () => Promise<void>;
 };
 
+/** The op counter a tab keeps across a reload, so a kept client id never reuses a counter (A3 item 5). */
+export type OpCounter = { next: () => number };
+
+/** Whether the document is hidden, and a way to hear it change; the page's `document` by default. */
+export type Visibility = {
+  hidden: () => boolean;
+  onChange: (listener: () => void) => () => void;
+};
+
 export type RoomClientOptions = {
   deckId: string;
   transport: RoomTransport;
@@ -146,9 +184,19 @@ export type RoomClientOptions = {
   document: DeckDocument;
   seq: number;
   tier?: RealtimeTier;
+  /**
+   * The client id this tab holds (sessionStorage, SPEC-5-amendments A3 item 5): asked for on
+   * every stream open; the server keeps it when it names this deck and this identity. The tab's
+   * own persisted queue is recognised by it and replayed without a prompt.
+   */
+  clientId?: string;
+  /** the op counter, persisted by the caller so a kept client id never repeats a counter; in memory by default */
+  opCounter?: OpCounter;
   /** the client ids this tab held before this page (hotfix 2 cause B1); sent as `retire` on every open */
   retire?: readonly string[];
   pendingStore?: PendingStore;
+  /** the page's visibility, for the heartbeat pause (A8 row 8); `document` when it exists */
+  visibility?: Visibility;
   now?: () => number;
   /** the schema's transform unless a test injects one */
   transform?: (mutation: Mutation, against: Mutation) => Mutation[];
@@ -166,8 +214,11 @@ export type RoomClientOptions = {
   onResync?: (revision: number) => Promise<DeckDocument | null>;
   /** a persisted queue from an earlier tab of this browser (SPEC-3 0.7) */
   onPersisted?: (offer: PersistedOffer) => void;
-  /** a pending op that no longer applies after a remote change was returned to its author */
-  onUnplaceable?: (op: PendingOp) => void;
+  /**
+   * A pending op that no longer applies after a remote change was returned to its author; the
+   * entry that rewrote its text names who did (A3 item 8: the conflict card names the other author).
+   */
+  onUnplaceable?: (op: PendingOp, against?: Entry) => void;
 };
 
 export type RoomClient = {
@@ -293,6 +344,27 @@ export function flushClassOf(mutations: readonly Mutation[]): FlushClass {
   return mutations.length === 0 ? 'now' : cls;
 }
 
+/** The page's visibility when a `document` exists; never hidden and never changing otherwise (Node, the tests). */
+export function documentVisibility(): Visibility {
+  const doc = (globalThis as { document?: Document }).document;
+  if (doc === undefined || typeof doc.addEventListener !== 'function') {
+    return { hidden: () => false, onChange: () => () => undefined };
+  }
+  return {
+    hidden: () => doc.visibilityState === 'hidden',
+    onChange: (listener) => {
+      doc.addEventListener('visibilitychange', listener);
+      return () => doc.removeEventListener('visibilitychange', listener);
+    },
+  };
+}
+
+/** An op counter that lives with the client: the default when the caller persists none. */
+export function memoryOpCounter(start = 0): OpCounter {
+  let counter = start;
+  return { next: () => (counter += 1) };
+}
+
 export function createRoomClient(options: RoomClientOptions): RoomClient {
   const { deckId, transport } = options;
   const now = options.now ?? (() => Date.now());
@@ -308,6 +380,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let pending: PendingOp[] = [];
   let retained: RetainedOp[] = [];
   const recent: Entry[] = [];
+  /** the tab's own op ids the stream or an answer settled, so a late echo repeats nothing */
+  const settledIds = new Set<string>();
+  let rebased = 0;
+  const visibility: Visibility = options.visibility ?? documentVisibility();
+  let stopVisibility: (() => void) | null = null;
+  let offlineTimer: unknown;
   /**
    * The entries buffered ahead of the position, by seq. A list per seq, because the blob tier
    * commits one ops POST as one revision and gives every entry of the batch that revision as its
@@ -318,8 +396,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /** the op ids applied at the current position, so a duplicate delivery of a sibling is dropped */
   const appliedAtSeq = new Set<string>();
   let clientId: string | null = null;
-  const myClientIds = new Set<string>();
-  let counter = 0;
+  const myClientIds = new Set<string>(options.clientId === undefined ? [] : [options.clientId]);
+  const opCounter: OpCounter = options.opCounter ?? memoryOpCounter();
   let clock = 0;
   let role: Role | null = null;
   let editing = 0;
@@ -347,12 +425,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let stopped = false;
   let roster: RosterEntry[] = [];
   let presence: Omit<PresencePost, 'clientId' | 'clock'> = { pointerOn: false, presenting: false };
-  let presenceClock = 0;
+  // the clock starts at the wall clock so a reload's first state outranks the row the earlier
+  // page left under the same client id (the roster keeps the newer clock, SPEC-3 3.8)
+  let presenceClock = Math.max(0, Math.floor(now()));
   let presenceTimer: unknown;
   let presenceDirty = false;
   let heartbeatTimer: unknown;
   const rejects: (Rejected & { mutations?: Mutation[] })[] = [];
-  const persistKey = (): string => pendingKey(deckId, clientId ?? 'unbound');
+  /** The stream seq at each local clock, so `transformSince` knows which entries came after. */
+  const recentMarkers = new Map<number, number>();
+  /** the id the queue is stored under: the tab's own, known before the hello when the tab kept one */
+  const ownId = (): string | null => clientId ?? options.clientId ?? null;
+  const persistKey = (): string => pendingKey(deckId, ownId() ?? 'unbound');
 
   const status = (): SyncStatus => ({
     seq,
@@ -367,6 +451,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     role,
     editing,
     overCeiling,
+    rebased,
   });
 
   const emitStatus = (): void => {
@@ -400,12 +485,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         ...(op.comment === undefined
           ? {}
           : { comment: op.comment as unknown as Record<string, unknown> }),
+        ...(op.inflight ? { sent: true } : {}),
       })),
     ];
     const queue: PersistedQueue = {
       key: persistKey(),
       deckId,
-      clientId: clientId ?? 'unbound',
+      clientId: ownId() ?? 'unbound',
       savedAt: new Date(now()).toISOString(),
       entries,
     };
@@ -446,17 +532,39 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (recent.length > RECENT_ENTRIES) recent.splice(0, recent.length - RECENT_ENTRIES);
   };
 
-  /** One admitted entry in stream order. */
+  /** Remembers an own op id as settled, bounded. */
+  const noteSettled = (opId: string): void => {
+    settledIds.add(opId);
+    if (settledIds.size > SETTLED_IDS_KEPT) {
+      const oldest = settledIds.values().next().value;
+      if (oldest !== undefined) settledIds.delete(oldest);
+    }
+  };
+
+  /**
+   * One admitted entry in stream order. An entry of this tab (its client id, from the POST
+   * answer, the same instance's stream or a record's echo from another instance whose op id
+   * names the batch, src/op-ids.ts) is an acknowledgement: the ops it names settle, the retained
+   * set takes them and the server document takes the mutations once; an echo whose every op this
+   * tab settled already moves the position and nothing else (A3 items 5 and 6). Another author's
+   * entry moves the pending text ops past it and re-derives the local document.
+   */
   const applyEntry = (entry: Entry): void => {
     if (entry.seq !== seq) appliedAtSeq.clear();
     seq = entry.seq;
+    // on the blob tier the seq is the revision the record made (blob.ts), so an op frame is a
+    // revision the stream delivered (A3 item 1); the checkpoint frame that follows agrees
+    if (tier === 'blob' && entry.kind === 'edit' && entry.seq > revision) revision = entry.seq;
     appliedAtSeq.add(entry.opId);
     remember(entry);
     const mine = myClientIds.has(entry.clientId);
+    const ids = mine ? opIdsOfBatch(entry.opId) : [];
+    for (const id of ids) appliedAtSeq.add(id);
     if (entry.kind === 'comment') {
       if (mine) {
         pending.find((op) => op.opId === entry.opId)?.settle?.({ seq: entry.seq });
         pending = pending.filter((op) => op.opId !== entry.opId);
+        noteSettled(entry.opId);
       }
       options.onEvent?.({ type: 'op', entry });
       persist();
@@ -467,10 +575,21 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // a store entry (the follower's copy of a record) that the document holds already is skipped
     if (entry.clientId === 'store' && entry.rev < server.deck.revision) return;
     if (mine) {
-      const own = pending.find((op) => op.opId === entry.opId);
-      pending = pending.filter((op) => op.opId !== entry.opId);
-      own?.settle?.({ seq: entry.seq });
-      retained.push({ opId: entry.opId, seq: entry.seq, mutations });
+      const named = new Set(ids.length > 0 ? ids : [entry.opId]);
+      const owns = pending.filter((op) => named.has(op.opId));
+      const known = [...named].every((id) => settledIds.has(id));
+      if (owns.length === 0 && known) {
+        // a late echo of a batch this tab settled already: the position moved, the document did
+        persist();
+        emitStatus();
+        return;
+      }
+      pending = pending.filter((op) => !named.has(op.opId));
+      for (const own of owns) own.settle?.({ seq: entry.seq });
+      for (const id of named) {
+        noteSettled(id);
+        retained.push({ opId: id, seq: entry.seq, ...(id === entry.opId ? { mutations } : {}) });
+      }
       let next: DeckDocument;
       try {
         next = applyMutations(server, mutations, { now: entry.at }).document;
@@ -479,7 +598,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       server = next;
       // the fast path: the admitted form equals the pending one and it was first in line
+      const own = owns[0];
       if (
+        owns.length === 1 &&
         own !== undefined &&
         pending.length === 0 &&
         JSON.stringify(own.mutations) === JSON.stringify(mutations)
@@ -504,7 +625,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       const moved = transformPast(op.mutations, mutations, transform);
       if (moved === null) {
-        options.onUnplaceable?.(op);
+        options.onUnplaceable?.(op, entry);
         const rejected: Rejected = { opId: op.opId, reason: 'stale' };
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
@@ -559,7 +680,31 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * echo (`clientId: 'store'`, the record's folded mutations) at the position repeats what the
    * batch's entries already carried and is dropped. Above the position it is buffered by seq.
    */
-  const take = (entry: Entry): void => {
+  const take = (entry: Entry, source: 'stream' | 'answer' = 'stream'): void => {
+    if (
+      source === 'answer' &&
+      myClientIds.has(entry.clientId) &&
+      (entry.seq < seq || (entry.seq === seq && appliedAtSeq.has(entry.opId)))
+    ) {
+      // an answer that names an op at or below the position: the op landed before (a replayed
+      // POST, a persisted queue re-sent after its entry arrived), so it settles here and is never
+      // left pending under Saving (A3 item 4)
+      const named = new Set(opIdsOfBatch(entry.opId));
+      named.add(entry.opId);
+      const owns = pending.filter((op) => named.has(op.opId));
+      if (owns.length > 0) {
+        pending = pending.filter((op) => !named.has(op.opId));
+        for (const own of owns) {
+          own.settle?.({ seq: entry.seq });
+          noteSettled(own.opId);
+        }
+        const folded = fold();
+        emitChange(folded.document, 'all', 'ack');
+        persist();
+        emitStatus();
+      }
+      return;
+    }
     if (entry.seq < seq) return;
     if (entry.seq === seq) {
       if (entry.clientId === 'store' || appliedAtSeq.has(entry.opId)) return;
@@ -607,6 +752,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       case 'hello': {
         clientId = event.clientId;
         myClientIds.add(event.clientId);
+        clearOfflineTimer();
         role = event.role;
         editing = event.editing;
         overCeiling = event.role === 'viewer' && event.editing >= 100;
@@ -700,10 +846,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   // -------------------------------------------------------------------------------------------
   // Sending
 
-  const nextOpId = (): string => {
-    counter += 1;
-    return `${clientId ?? 'unbound'}:${counter}`;
-  };
+  const nextOpId = (): string => `${clientId ?? 'unbound'}:${opCounter.next()}`;
 
   const scheduleFlush = (cls: FlushClass): void => {
     if (stopped) return;
@@ -773,7 +916,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       offline = false;
       if (response.ok) {
         backoff = 0;
-        for (const entry of response.entries) take(entry);
+        for (const entry of response.entries) take(entry, 'answer');
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
           pending = pending.filter((row) => row.opId !== rejected.opId);
@@ -803,6 +946,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       for (const op of batch) op.inflight = false;
       if (response.code === 'resync') {
+        // the rebase of A3 item 3: the 409 carries the entries since this client's base; they
+        // apply as remote entries (the pending ops move past them with the transform, an echo of
+        // this tab settles) and the pending ops post again on the new base at once. A 409 that
+        // carries nothing, or one this client cannot reach the head from, reloads as before.
+        const since = response.since ?? [];
+        if (since.length > 0 && response.head !== undefined) {
+          for (const entry of since) take(entry);
+          if (seq >= response.head) {
+            rebased += 1;
+            if (response.head > revision) revision = response.head;
+            persist();
+            emitStatus();
+            if (pending.some((op) => !op.inflight)) scheduleFlush('now');
+            return;
+          }
+        }
         await resync(response.head ?? revision);
         return;
       }
@@ -863,23 +1022,94 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }, ms);
   };
 
+  /**
+   * The heartbeat (SPEC-3 3.8; A8 rows 7 and 8): every HEARTBEAT_MS while the tab is shown; a
+   * hidden tab posts nothing (its row goes idle and then leaves the roster on its own, which is
+   * what a person not looking at the deck is) and posts once when it is shown again.
+   */
   const heartbeat = (): void => {
     heartbeatTimer = timers.setTimeout(() => {
       heartbeatTimer = undefined;
       if (stopped) return;
-      void postPresence();
+      if (!visibility.hidden()) void postPresence();
       heartbeat();
-    }, PRESENCE_HEARTBEAT_MS);
+    }, HEARTBEAT_MS);
+  };
+
+  const clearOfflineTimer = (): void => {
+    if (offlineTimer !== undefined) timers.clearTimeout(offlineTimer);
+    offlineTimer = undefined;
+  };
+
+  /** The stream dropped: connected goes off now, offline after OFFLINE_AFTER_MS without a hello. */
+  const streamDown = (): void => {
+    connected = false;
+    emitStatus();
+    if (offlineTimer !== undefined || stopped) return;
+    offlineTimer = timers.setTimeout(() => {
+      offlineTimer = undefined;
+      if (connected || stopped) return;
+      offline = true;
+      emitStatus();
+    }, OFFLINE_AFTER_MS);
   };
 
   // -------------------------------------------------------------------------------------------
   // The persisted queue of an earlier tab (SPEC-3 0.7)
 
+  /**
+   * An op of a persisted queue back in the pending set with its op id kept: the server answers a
+   * replayed id with its entry (the memory tier's tail, the blob tier's records) and appends the
+   * rest, so nothing lands twice and nothing typed is lost.
+   */
+  const restore = (op: PersistedOp): void => {
+    if (op.kind !== 'edit' || op.mutations === undefined) return;
+    let result: ReturnType<typeof applyMutations>;
+    try {
+      result = applyMutations(local, op.mutations);
+    } catch {
+      return;
+    }
+    clock += 1;
+    pending.push({
+      opId: op.opId.startsWith(`${ownId() ?? 'unbound'}:`) ? op.opId : '',
+      kind: 'edit',
+      mutations: op.mutations,
+      label: 'persisted',
+      inflight: false,
+      at: clock,
+    });
+    recentMarkers.set(clock, seq);
+    local = result.document;
+  };
+
   const offerPersisted = async (): Promise<void> => {
     const store = options.pendingStore;
-    if (store === undefined || options.onPersisted === undefined) return;
+    if (store === undefined) return;
     const queues = await store.load(deckId, now());
-    const others = queues.filter((queue) => queue.clientId !== clientId && unsavedCount(queue) > 0);
+    // this tab's own queue (the same client id after a reload, SPEC-5-amendments A3 item 5):
+    // what the earlier page had not seen acknowledged replays now, without a prompt, because it
+    // is the same person on the same tab continuing; the server dedups what did land
+    const own = queues.filter((queue) => queue.clientId === ownId() && unsavedCount(queue) > 0);
+    if (own.length > 0 && !stopped) {
+      let restored = 0;
+      for (const queue of own) {
+        for (const op of queue.entries) {
+          if (op.seq !== undefined) continue;
+          restore(op);
+          restored += 1;
+        }
+        await store.remove(queue.key);
+      }
+      if (restored > 0) {
+        emitChange(local, 'all', 'persisted');
+        persist();
+        emitStatus();
+        scheduleFlush('now');
+      }
+    }
+    if (options.onPersisted === undefined) return;
+    const others = queues.filter((queue) => queue.clientId !== ownId() && unsavedCount(queue) > 0);
     if (others.length === 0) return;
     const count = others.reduce((sum, queue) => sum + unsavedCount(queue), 0);
     options.onPersisted({
@@ -909,16 +1139,20 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (stream !== null || stopped) return;
       stream = transport.open({
         since: seq,
+        ...(options.clientId === undefined ? {} : { clientId: options.clientId }),
         ...(options.retire === undefined || options.retire.length === 0
           ? {}
           : { retire: options.retire }),
         onEvent,
-        onError: () => {
-          connected = false;
-          emitStatus();
-        },
+        onError: streamDown,
       });
       heartbeat();
+      // a tab shown again posts its presence at once, so its row stops reading idle (A8 row 8)
+      stopVisibility = visibility.onChange(() => {
+        if (stopped || visibility.hidden()) return;
+        presenceDirty = true;
+        schedulePresence(0);
+      });
       void offerPersisted();
     },
     async stop() {
@@ -926,6 +1160,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (flushTimer !== undefined) timers.clearTimeout(flushTimer);
       if (presenceTimer !== undefined) timers.clearTimeout(presenceTimer);
       if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);
+      clearOfflineTimer();
+      stopVisibility?.();
+      stopVisibility = null;
+      // the queue first (a `pagehide` may end the page before any await below returns): every
+      // pending op, sent or not, reaches the mirror so the reloaded tab replays it (A3 item 7)
+      persist();
       // the leave goes first (a `pagehide` gives it no time to wait on a POST in flight; the
       // browser transport sends it with keepalive), then the POST in flight is awaited
       const leaving =
@@ -942,7 +1182,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       persist();
     },
     apply(mutations, label, flush) {
-      const result = applyMutations(local, mutations);
+      // the op holds its own copy of the list: a caller that keeps appending to the array it
+      // passed (the editor's undo group coalesces a typing burst into the entry it made) must not
+      // grow a pending op behind its back, else an op held while offline posts every later
+      // keystroke twice (SPEC-5-amendments A3 item 7; sync.spec.ts's offline row)
+      const own = [...mutations];
+      const result = applyMutations(local, own);
       clock += 1;
       let settle: ((outcome: Settled) => void) | undefined;
       const settled = new Promise<Settled>((resolve) => {
@@ -951,13 +1196,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       pending.push({
         opId: '',
         kind: 'edit',
-        mutations,
+        mutations: own,
         label,
         inflight: false,
         at: clock,
         ...(settle === undefined ? {} : { settle }),
       });
-      emitChange(result.document, changedSlides(mutations), 'local');
+      emitChange(result.document, changedSlides(own), 'local');
       persist();
       emitStatus();
       scheduleFlush(flush ?? flushClassOf(mutations));
@@ -1007,8 +1252,6 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     },
   };
 
-  /** The stream seq at each local clock, so `transformSince` knows which entries came after. */
-  const recentMarkers = new Map<number, number>();
   const originalApply = client.apply;
   client.apply = (mutations, label, flush) => {
     const result = originalApply(mutations, label, flush);

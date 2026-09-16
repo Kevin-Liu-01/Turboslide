@@ -1,0 +1,304 @@
+{
+  "at": "2026-09-15T22:06:58.963Z",
+  "command": "node apps/cli/bin/turboslide.mjs import packages/import/src/__fixtures__/pptx/<fixture>.pptx --dry-run --json (the checkout at merge 2; the reader of packages/import/src/pptx/read.ts)",
+  "oracle": "the python-pptx oracle ran inside packages/import vitest (18 files, 201 tests passed on this tree); the fonts venv is .turboslide/venv",
+  "roundTrip": "fixture 05 round trips in packages/import/src/pptx/__tests__ (the second pass adds no report row; every position within 1 px is the suite's assertion), rerun here: 201 passed",
+  "producers": [],
+  "fixtures": [
+    {
+      "fixture": "01-text.pptx",
+      "producer": "python-pptx",
+      "slides": 3,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 8,
+      "substituted": 0,
+      "dropped": 0,
+      "rowsByStatusAndCode": {
+        "kept:slide.hidden": 1,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "Calibri",
+          "runs": 27,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 3
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    },
+    {
+      "fixture": "02-shapes.pptx",
+      "producer": "python-pptx",
+      "slides": 3,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 27,
+      "substituted": 3,
+      "dropped": 1,
+      "rowsByStatusAndCode": {
+        "kept:shape.strokeWidth": 4,
+        "substituted:shape.fill": 1,
+        "dropped:shape.hidden": 1,
+        "substituted:shape.effect": 1,
+        "substituted:shape.custom": 1,
+        "kept:group.nested": 1,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "Calibri",
+          "runs": 6,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 7
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    },
+    {
+      "fixture": "03-pictures-tables.pptx",
+      "producer": "python-pptx",
+      "slides": 2,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 10,
+      "substituted": 2,
+      "dropped": 0,
+      "rowsByStatusAndCode": {
+        "substituted:picture.format": 1,
+        "kept:background.picture": 1,
+        "kept:table.border": 1,
+        "kept:table.style": 2,
+        "substituted:table.columns": 1,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "Calibri",
+          "runs": 56,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 9
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    },
+    {
+      "fixture": "04-charts-motion-media.pptx",
+      "producer": "python-pptx",
+      "slides": 4,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 17,
+      "substituted": 5,
+      "dropped": 0,
+      "rowsByStatusAndCode": {
+        "substituted:chart.kind": 4,
+        "substituted:chart.truncated": 1,
+        "kept:transition.advance": 1,
+        "kept:equation.mathml": 1,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "Calibri",
+          "runs": 7,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 6
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    },
+    {
+      "fixture": "05-roundtrip.pptx",
+      "producer": "Microsoft Office PowerPoint",
+      "slides": 28,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 136,
+      "substituted": 10,
+      "dropped": 28,
+      "rowsByStatusAndCode": {
+        "kept:master.chrome": 399,
+        "dropped:shape.hidden": 28,
+        "kept:table.margins": 29,
+        "kept:table.border": 2,
+        "substituted:text.runSize": 1,
+        "substituted:shape.custom": 3,
+        "kept:background.picture": 2,
+        "kept:chart.slices": 1,
+        "substituted:list.glyph": 4,
+        "substituted:list.scheme": 2,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "GT Inter Text 22",
+          "runs": 56,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Display",
+          "runs": 30,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 20",
+          "runs": 21,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 24 Medium",
+          "runs": 18,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 26",
+          "runs": 12,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 20 Medium",
+          "runs": 9,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 22 Medium",
+          "runs": 4,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 14",
+          "runs": 2,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 15",
+          "runs": 1,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 40
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    },
+    {
+      "fixture": "05b-roundtrip-perfect.pptx",
+      "producer": "Microsoft Office PowerPoint",
+      "slides": 28,
+      "sourcePage": {
+        "width": 1600,
+        "height": 900
+      },
+      "imported": 113,
+      "substituted": 7,
+      "dropped": 28,
+      "rowsByStatusAndCode": {
+        "dropped:shape.hidden": 28,
+        "kept:master.chrome": 28,
+        "kept:perfect.raster": 28,
+        "substituted:text.runSize": 1,
+        "substituted:list.glyph": 4,
+        "substituted:list.scheme": 2,
+        "kept:theme.layouts": 1
+      },
+      "fonts": [
+        {
+          "family": "GT Inter Text 22",
+          "runs": 56,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Display",
+          "runs": 30,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 20",
+          "runs": 21,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 24 Medium",
+          "runs": 18,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 26",
+          "runs": 12,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 20 Medium",
+          "runs": 9,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 22 Medium",
+          "runs": 4,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 14",
+          "runs": 2,
+          "substituted": "Inter"
+        },
+        {
+          "family": "GT Inter Text 15",
+          "runs": 1,
+          "substituted": "Inter"
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "issues": 28
+      },
+      "theme": {
+        "mode": "adopt",
+        "imported": false
+      }
+    }
+  ],
+  "inboxNote": ".turboslide/inbox holds 14 notification record files (anon_*.json) from round four and no .pptx; no producer file was dropped, so the producer rows are empty",
+  "worstPositionDeltaPx": "not measured here: the round trip gate of packages/import asserts every position within 1 px on fixture 05 (201 tests passed)",
+  "reportedVisualNumber": "none: no fixture carries a visual fidelity number in its report (the reader reports counts and rows)"
+}

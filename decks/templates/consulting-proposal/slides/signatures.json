@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "signatures",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Signatures",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "For the client\n\nName\nTitle\nDate",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "For the consultancy\n\nName\nTitle\nDate",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "Signatures"
+}

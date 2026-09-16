@@ -1,0 +1,135 @@
+[
+  {
+    "id": "blank",
+    "name": "Blank",
+    "category": "personal",
+    "description": "A fresh presentation (gslides-parity SPEC 6.1): one Title slide with empty placeholders, titled Untitled presentation, and the theme starter set of four two-tone pictures from the GT brand deck (two opener materials, one mood photograph, one closing picture, with their credits) so Section header, Caption and Closing work on a new deck. deck.create copies deck.json, slides/ and assets/ into deck...",
+    "cover": "title",
+    "slides": 1,
+    "theme": "gt-ink-paper"
+  },
+  {
+    "id": "blank-plate",
+    "name": "Blank (Plate)",
+    "category": "personal",
+    "description": "The blank presentation on the Plate theme (gslides-parity SPEC-5 0.24): one Title slide with empty placeholders, the corner slot empty, and the theme starter set of four two tone pictures shared with Blank.",
+    "cover": "title",
+    "slides": 1,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "gt-brand",
+    "name": "GT brand deck",
+    "category": "personal",
+    "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents l...",
+    "cover": "opener-brand",
+    "slides": 85,
+    "theme": "gt-ink-paper"
+  },
+  {
+    "id": "sales-pitch",
+    "name": "Sales pitch",
+    "category": "work",
+    "description": "Fifteen slides a rep opens and rewrites: the problem, the product, a demo clip, results, pricing that reveals one row per click, a timeline, the team and the next steps.",
+    "cover": "title",
+    "useCases": [
+      "sales pitches",
+      "product pitches",
+      "business proposals"
+    ],
+    "slides": 15,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "book-report",
+    "name": "Book report",
+    "category": "education",
+    "description": "Six slides on one book: the title and the author, a summary, the characters, the themes, your view and a closing.",
+    "cover": "title",
+    "useCases": [
+      "book reports",
+      "project reports"
+    ],
+    "slides": 6,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "case-study",
+    "name": "Case study",
+    "category": "work",
+    "description": "Eight slides on one customer: who they are, the problem, what was done, three results, a quote and what comes next.",
+    "cover": "title",
+    "useCases": [
+      "sales pitches",
+      "marketing plans"
+    ],
+    "slides": 8,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "consulting-proposal",
+    "name": "Consulting proposal",
+    "category": "work",
+    "description": "Ten slides for an engagement proposal: the summary, the situation, the scope, the approach, the timeline, the team, the investment, the terms and the signatures.",
+    "cover": "title",
+    "useCases": [
+      "business proposals",
+      "strategic plans"
+    ],
+    "slides": 10,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "lesson-plan",
+    "name": "Lesson plan",
+    "category": "education",
+    "description": "Eight slides for one lesson: the objectives, a warm up, the lesson in two columns, an activity, a check for understanding, the homework and a closing.",
+    "cover": "title",
+    "useCases": [
+      "lesson plans",
+      "workshop facilitation"
+    ],
+    "slides": 8,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "portfolio",
+    "name": "Portfolio",
+    "category": "personal",
+    "description": "Eight slides for a portfolio: about, three work slides with captions, the process and a contact plate.",
+    "cover": "title",
+    "useCases": [
+      "team intros",
+      "milestone celebrations"
+    ],
+    "slides": 8,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "product-roadmap",
+    "name": "Product roadmap",
+    "category": "work",
+    "description": "Eight slides for a roadmap review: the themes, now, next and later, the quarters, the dependencies, the risks and the asks.",
+    "cover": "title",
+    "useCases": [
+      "product roadmaps",
+      "strategic plans",
+      "quarterly reviews"
+    ],
+    "slides": 8,
+    "theme": "ts-plate"
+  },
+  {
+    "id": "status-report",
+    "name": "Status report",
+    "category": "work",
+    "description": "Eight slides for a weekly or monthly update: the status board, progress as a column chart, wins, risks, the decisions needed and the next check in.",
+    "cover": "title",
+    "useCases": [
+      "project reports",
+      "quarterly reviews"
+    ],
+    "slides": 8,
+    "theme": "ts-plate"
+  }
+]

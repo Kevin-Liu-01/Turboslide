@@ -17,6 +17,7 @@ import { checkFreeform } from './static/freeform.ts';
 import { checkIcons } from './static/icon.ts';
 import { checkPictures } from './static/picture.ts';
 import { checkRows } from './static/rows.ts';
+import { checkSpelling } from './static/spelling.ts';
 import { checkStructure } from './static/structure.ts';
 import { checkTables } from './static/table.ts';
 import { checkType } from './static/type.ts';
@@ -62,4 +63,21 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
   const selected = options.slideIds ? new Set(options.slideIds) : null;
   const onSelection = selected ? findings.filter((f) => selected.has(f.slideId)) : findings;
   return sortFindings(filterRules(onSelection, options.rules), ctx.order);
+}
+
+/**
+ * The static layer plus the spell check (gslides-parity SPEC-5 7.2; b5.md request 11): the rule
+ * runs only when `options.spelling` carries an engine, and it is async because the engine is (a
+ * Worker in the page, nspell in Node), so `lintStatic` keeps its synchronous signature for the
+ * callers that have no dictionary at hand.
+ */
+export async function lintStaticWithSpelling(
+  input: DeckDocument,
+  options: LintOptions = {},
+): Promise<Finding[]> {
+  const findings = lintStatic(input, options);
+  if (options.spelling === undefined) return findings;
+  const ctx = createContext(input, options);
+  const spelling = await checkSpelling(input, ctx);
+  return sortFindings(filterRules([...findings, ...spelling], options.rules), ctx.order);
 }

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "background-dither",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "background",
+        "type": "picture",
+        "asset": "slide-18-image-1",
+        "alt": "Slide background",
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 1
+        },
+        "ext": {
+          "pptxBackground": true
+        }
+      },
+      {
+        "id": "plate",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 506,
+          "w": 740,
+          "h": 265,
+          "z": 2,
+          "group": "plate"
+        },
+        "fill": "paper",
+        "ext": {
+          "pptxName": "ts:background-dither#plate@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      },
+      {
+        "id": "big",
+        "type": "text",
+        "text": "Dithered background",
+        "pos": {
+          "x": 163,
+          "y": 531.01,
+          "w": 688,
+          "h": 76.32,
+          "z": 3,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 72,
+          "leading": 1.06
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-dither#big/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      },
+      {
+        "id": "p",
+        "type": "text",
+        "text": "A covering picture with the Photograph numbers of the Background dialog, and a plate group over it.",
+        "pos": {
+          "x": 163,
+          "y": 613,
+          "w": 688,
+          "h": 66,
+          "z": 4,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-dither#p/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      }
+    ]
+  },
+  "title": "Dithered background",
+  "ext": {
+    "pptxPart": "ppt/slides/slide18.xml",
+    "pptxSlideId": 273
+  }
+}

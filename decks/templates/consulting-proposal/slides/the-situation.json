@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "the-situation",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The situation",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Where the client stands today.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Growth outran the process, and the reporting no longer answers the questions the board asks.\nThree teams keep their own numbers and reconcile them the week before the meeting.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "The situation"
+}

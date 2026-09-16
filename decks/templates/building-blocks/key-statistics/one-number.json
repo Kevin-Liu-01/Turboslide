@@ -1,0 +1,37 @@
+{
+  "id": "key-statistics/one-number",
+  "category": "key-statistics",
+  "label": "One number",
+  "blocks": [
+    {
+      "id": "value",
+      "pos": {
+        "x": 0,
+        "y": 160,
+        "w": 1326,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "48 percent"
+    },
+    {
+      "id": "label",
+      "pos": {
+        "x": 0,
+        "y": 340,
+        "w": 1326,
+        "h": 48,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Faster onboarding, measured over the first quarter",
+      "role": "lead"
+    }
+  ],
+  "box": [
+    1326,
+    388
+  ]
+}

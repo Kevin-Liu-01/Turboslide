@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "blank-plate",
+  "name": "Blank (Plate)",
+  "description": "The blank presentation on the Plate theme (gslides-parity SPEC-5 0.24): one Title slide with empty placeholders, the corner slot empty, and the theme starter set of four two tone pictures shared with Blank.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 1
+    }
+  ],
+  "archetypes": [],
+  "category": "personal",
+  "cover": "title",
+  "slideCount": 1
+}

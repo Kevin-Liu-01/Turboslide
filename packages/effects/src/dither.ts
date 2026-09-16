@@ -11,9 +11,12 @@
 //      black, white and gamma, with the adjustments' brightness and contrast folded in as the CSS
 //      filter formulas on the 0 to 1 value
 //   3. the threshold against the pattern: bayer8 (the deck's table), bayer4 ((m + 0.5) / 16),
-//      blue64 (the pinned texture) or random (a 32 bit hash of x, y and seed); the two tone rule is
-//      the deck's (lit when the tone exceeds the threshold), three tones and the posterised colours
-//      quantise with the same threshold so the two tone case stays byte identical
+//      blue64 (the pinned texture), random (a 32 bit hash of x, y and seed) or a halftone screen
+//      (halftone-dot, halftone-line: a function of the cell under the screen angle, gslides-parity
+//      SPEC-5 11); the two tone rule is the deck's (lit when the tone exceeds the threshold), three
+//      tones and the posterised colours quantise with the same threshold so the two tone case stays
+//      byte identical; the two error diffusion patterns (floyd-steinberg, atkinson) walk the tone
+//      image serpentine and carry the residual instead of reading a threshold
 //   4. polarity: auto is dark ground when the positive's lit fraction is under 0.5
 //   5. paint: the theme's light and dark colours, titanium in the middle of three tones, or the
 //      posterised colours; strength under 1 is the plane's alpha over the continuous picture
@@ -28,7 +31,7 @@ import type {
   PictureDither,
   ResolvedDither,
 } from '@turboslide/schema/blocks/dither';
-import { resolveDither } from '@turboslide/schema/blocks/dither';
+import { DITHER_ANGLE, DITHER_PATTERNS_GS5, resolveDither } from '@turboslide/schema/blocks/dither';
 
 import { BAYER8_THRESHOLDS } from './bayer.ts';
 import { blue64Thresholds } from './blue64.ts';
@@ -103,8 +106,67 @@ export function hash32(x: number, y: number, seed: number): number {
   return h >>> 0;
 }
 
-/** The integer threshold of a cell for a pattern, 0 to 255. */
-export function thresholdAt(pattern: DitherPattern, x: number, y: number, seed = 0): number {
+/**
+ * The halftone screens' pitch in cells (gslides-parity SPEC-5 11; SPEC-3 17): eight cells, the
+ * period of the deck's Bayer screen, so a dot or a line repeats every 8 by `cell` sheet px and the
+ * block's `cell` scales the pitch as it scales every other pattern.
+ */
+export const HALFTONE_PITCH = 8;
+
+/** The two error diffusion patterns, which run over the whole tone image rather than a cell at a time. */
+export function isDiffusion(pattern: DitherPattern): boolean {
+  return pattern === 'floyd-steinberg' || pattern === 'atkinson';
+}
+
+/** The two halftone screens, threshold functions of the cell's position under the screen angle. */
+export function isHalftone(pattern: DitherPattern): boolean {
+  return pattern === 'halftone-dot' || pattern === 'halftone-line';
+}
+
+/**
+ * The halftone threshold of a cell (SPEC-5 11): the cell's centre rotated by the screen angle
+ * into screen space, its position inside the pitch, and the normalised distance from the nearest
+ * dot centre (`halftone-dot`, the dots grow from the centres as the tone brightens) or from the
+ * nearest line (`halftone-line`) as the threshold, `trunc(d * 255)`. The rotation's cos and sin
+ * are taken once per call from `Math.cos` and `Math.sin`; the crate's `dither.rs` takes them from
+ * libm's fdlibm ports, the same lineage as V8's, and the parity test holds the two together.
+ */
+export function halftoneThreshold(
+  pattern: 'halftone-dot' | 'halftone-line',
+  x: number,
+  y: number,
+  angle: number = DITHER_ANGLE.default,
+): number {
+  const radians = (angle * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const cx = x + 0.5;
+  const cy = y + 0.5;
+  const rx = cx * cos + cy * sin;
+  const ry = -cx * sin + cy * cos;
+  const v = ry / HALFTONE_PITCH - Math.floor(ry / HALFTONE_PITCH);
+  if (pattern === 'halftone-line') {
+    const d = Math.abs(v - 0.5) * 2;
+    return Math.min(254, Math.trunc(d * 255));
+  }
+  const u = rx / HALFTONE_PITCH - Math.floor(rx / HALFTONE_PITCH);
+  const d = Math.sqrt((u - 0.5) * (u - 0.5) + (v - 0.5) * (v - 0.5)) / 0.7071067811865476;
+  return Math.min(254, Math.trunc(d * 255));
+}
+
+/**
+ * The integer threshold of a cell for an ordered pattern, 0 to 255: the deck's Bayer 8 table,
+ * Bayer 4, the blue noise texture, the hashed random screen, or a halftone screen at the angle.
+ * The two diffusion patterns have no per cell threshold (`isDiffusion`); a caller that asks for
+ * one gets the deck's Bayer screen, the fallback the preview budget also takes.
+ */
+export function thresholdAt(
+  pattern: DitherPattern,
+  x: number,
+  y: number,
+  seed = 0,
+  angle: number = DITHER_ANGLE.default,
+): number {
   switch (pattern) {
     case 'bayer8':
       return BAYER8_THRESHOLDS[(((y % 8) + 8) % 8) * 8 + (((x % 8) + 8) % 8)] ?? 0;
@@ -114,7 +176,89 @@ export function thresholdAt(pattern: DitherPattern, x: number, y: number, seed =
       return blue64Thresholds()[(((y % 64) + 64) % 64) * 64 + (((x % 64) + 64) % 64)] ?? 0;
     case 'random':
       return hash32(x, y, seed) >>> 24;
+    case 'halftone-dot':
+    case 'halftone-line':
+      return halftoneThreshold(pattern, x, y, angle);
+    case 'floyd-steinberg':
+    case 'atkinson':
+      return BAYER8_THRESHOLDS[(((y % 8) + 8) % 8) * 8 + (((x % 8) + 8) % 8)] ?? 0;
   }
+}
+
+/** A diffusion kernel: the neighbours an error reaches as [dx, dy, weight], over `denominator`. */
+export type DiffusionKernel = {
+  taps: ReadonlyArray<readonly [dx: number, dy: number, weight: number]>;
+  denominator: number;
+};
+
+/** Floyd and Steinberg (1976): 7, 3, 5, 1 over 16. */
+export const FLOYD_STEINBERG: DiffusionKernel = {
+  taps: [
+    [1, 0, 7],
+    [-1, 1, 3],
+    [0, 1, 5],
+    [1, 1, 1],
+  ],
+  denominator: 16,
+};
+
+/** Atkinson (1984): six neighbours at 1 over 8 each, three quarters of the error carried. */
+export const ATKINSON: DiffusionKernel = {
+  taps: [
+    [1, 0, 1],
+    [2, 0, 1],
+    [-1, 1, 1],
+    [0, 1, 1],
+    [1, 1, 1],
+    [0, 2, 1],
+  ],
+  denominator: 8,
+};
+
+export function diffusionKernel(pattern: DitherPattern): DiffusionKernel {
+  return pattern === 'atkinson' ? ATKINSON : FLOYD_STEINBERG;
+}
+
+/**
+ * Serpentine error diffusion of a tone image to N levels (SPEC-5 11): the rows walk left to right
+ * and right to left in turn with the kernel mirrored on the way back, every value plus its carried
+ * error is clamped to 0 to 255 and quantised to the nearest of the N levels
+ * (`floor(v / 255 * (N - 1) + 0.5)`), and the residual travels to the neighbours by the kernel's
+ * weights. Doubles throughout in one operation order, so `dither.rs` reproduces every cell. At
+ * two levels the output is the positive (1 is lit).
+ */
+export function diffuseLevels(
+  tone: GrayImage,
+  kernel: DiffusionKernel,
+  levels: number,
+): Uint8Array {
+  const { width, height, data } = tone;
+  const out = new Uint8Array(width * height);
+  const error = new Float64Array(width * height);
+  const steps = levels - 1;
+  for (let y = 0; y < height; y += 1) {
+    const leftToRight = y % 2 === 0;
+    const row = y * width;
+    for (let i = 0; i < width; i += 1) {
+      const x = leftToRight ? i : width - 1 - i;
+      const at = row + x;
+      let value = (data[at] ?? 0) + (error[at] ?? 0);
+      if (value < 0) value = 0;
+      else if (value > 255) value = 255;
+      const level = Math.floor((value / 255) * steps + 0.5);
+      out[at] = level;
+      const target = (level * 255) / steps;
+      const residual = value - target;
+      for (const [dx, dy, weight] of kernel.taps) {
+        const nx = x + (leftToRight ? dx : -dx);
+        const ny = y + dy;
+        if (nx < 0 || nx >= width || ny >= height) continue;
+        const index = ny * width + nx;
+        error[index] = (error[index] ?? 0) + (residual * weight) / kernel.denominator;
+      }
+    }
+  }
+  return out;
 }
 
 /** The screen size in cells of a box: `w / cell` by `h / cell`, at least one cell each way (dither-key.ts ditherScreen). */
@@ -287,11 +431,14 @@ export function toneOf(base: ToneBase, lut: Uint8Array): GrayImage {
 /** Stage 3 for two tones: the deck's rule, a cell is lit when its tone exceeds the threshold. */
 export function positiveOf(tone: GrayImage, dither: ResolvedDither): BitImage {
   const { width, height, data } = tone;
+  if (isDiffusion(dither.pattern))
+    return { width, height, bits: diffuseLevels(tone, diffusionKernel(dither.pattern), 2) };
   const bits = new Uint8Array(width * height);
+  const angle = dither.angle ?? DITHER_ANGLE.default;
   for (let y = 0; y < height; y += 1) {
     const row = y * width;
     for (let x = 0; x < width; x += 1) {
-      const t = thresholdAt(dither.pattern, x, y, dither.seed);
+      const t = thresholdAt(dither.pattern, x, y, dither.seed, angle);
       bits[row + x] = (data[row + x] ?? 0) > t ? 1 : 0;
     }
   }
@@ -311,11 +458,14 @@ export function quantise(value: number, threshold: number, levels: number): numb
 /** The levels of a gray image under a pattern, one byte per cell, 0 to levels minus 1. */
 export function levelsOf(tone: GrayImage, dither: ResolvedDither, levels: number): Uint8Array {
   const { width, height, data } = tone;
+  if (isDiffusion(dither.pattern))
+    return diffuseLevels(tone, diffusionKernel(dither.pattern), levels);
   const out = new Uint8Array(width * height);
+  const angle = dither.angle ?? DITHER_ANGLE.default;
   for (let y = 0; y < height; y += 1) {
     const row = y * width;
     for (let x = 0; x < width; x += 1) {
-      const t = thresholdAt(dither.pattern, x, y, dither.seed);
+      const t = thresholdAt(dither.pattern, x, y, dither.seed, angle);
       out[row + x] = quantise(data[row + x] ?? 0, t, levels);
     }
   }
@@ -480,9 +630,56 @@ export function scaleNearestRgba(image: RgbaImage, k: number): RgbaImage {
   return { width, height, data: out };
 }
 
+/**
+ * The live preview's budget per frame in milliseconds (gslides-parity SPEC-5 11; SPEC-3 10.10):
+ * a round five family (`DITHER_PATTERNS_GS5`) whose stages 2 to 5 ran over it on this host, at
+ * this screen size or a larger one, draws as the deck's Bayer screen in later preview frames and
+ * the frame says so in `fallback`; a file (`ditherPicture` without `preview`) never falls back.
+ * `setDitherPreviewBudget` pins another number (0 forces the fallback, a test's use).
+ */
+export const DITHER_PREVIEW_BUDGET_MS = 100;
+
+let previewBudgetMs = DITHER_PREVIEW_BUDGET_MS;
+/** Per pattern, the smallest screen area (cells) a frame ran over the budget at. */
+const overBudget = new Map<DitherPattern, number>();
+
+export function setDitherPreviewBudget(ms: number): void {
+  previewBudgetMs = ms;
+  overBudget.clear();
+}
+
+export function ditherPreviewBudget(): number {
+  return previewBudgetMs;
+}
+
+/** Whether a preview of a pattern at a screen falls back to Bayer (a slower frame was measured at this size or under). */
+export function previewFallsBack(pattern: DitherPattern, screen: [number, number]): boolean {
+  if (!DITHER_PATTERNS_GS5.includes(pattern)) return false;
+  const area = overBudget.get(pattern);
+  return area !== undefined && screen[0] * screen[1] >= area;
+}
+
+function recordFrameTime(pattern: DitherPattern, screen: [number, number], ms: number): void {
+  if (!DITHER_PATTERNS_GS5.includes(pattern) || ms <= previewBudgetMs) return;
+  const area = screen[0] * screen[1];
+  const known = overBudget.get(pattern);
+  if (known === undefined || area < known) overBudget.set(pattern, area);
+}
+
+const now = (): number =>
+  typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+
 export type DitherFrame = {
   /** The screen in cells. */
   screen: [number, number];
+  /** The pattern drawn: the field's, or `bayer8` when a preview fell back to it (SPEC-5 11). */
+  pattern: DitherPattern;
+  /** Present when a preview drew the deck's Bayer screen in place of a family over the budget. */
+  fallback?: 'bayer8';
+  /** Stages 2 to 5 in milliseconds on this host. */
+  ms: number;
   cell: number;
   theme: DitherTheme;
   /** One pixel per cell, alpha the strength; drawn on the overlay canvas or upscaled for a file. */
@@ -506,16 +703,25 @@ export function ditherFrame(
   base: ToneBase,
   dither: PictureDither,
   theme: DitherTheme,
-  options: { adjust?: DitherAdjust; plate?: Box } = {},
+  options: { adjust?: DitherAdjust; plate?: Box; preview?: boolean } = {},
 ): DitherFrame {
-  const resolved = resolveDither(dither);
-  const cells = ditherCells(base, dither, options.adjust);
-  const { plane, neutral } = paintPlane(cells, dither, theme);
+  const started = now();
+  const wanted = resolveDither(dither);
+  const fallsBack = options.preview === true && previewFallsBack(wanted.pattern, base.screen);
+  const drawn: PictureDither = fallsBack ? { ...dither, pattern: 'bayer8' } : dither;
+  const resolved = fallsBack ? resolveDither(drawn) : wanted;
+  const cells = ditherCells(base, drawn, options.adjust);
+  const { plane, neutral } = paintPlane(cells, drawn, theme);
   // the metrics read the dark twin as the deck's did: the positive on a dark ground, else its inverse
   const darkBits = twinBits(cells, 'dark', resolved.polarity === 'same');
   const metrics = twoToneMetrics(darkBits, options.plate, resolved.cell);
+  const ms = now() - started;
+  if (!fallsBack) recordFrameTime(wanted.pattern, base.screen, ms);
   return {
     screen: base.screen,
+    pattern: resolved.pattern,
+    ...(fallsBack ? { fallback: 'bayer8' as const } : {}),
+    ms,
     cell: resolved.cell,
     theme,
     plane,

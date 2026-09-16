@@ -59,6 +59,10 @@ export function diffExact(a: Uint8Array, b: Uint8Array): number;
 
 export function diffPixelmatch(a: Uint8Array, b: Uint8Array, width: number, height: number, threshold: number, include_aa: boolean, want_output: boolean, checkerboard: boolean): PixelmatchResult;
 
+export function ditherLevels(tone: Uint8Array, width: number, height: number, pattern: string, levels: number, seed: number, angle: number): Uint8Array;
+
+export function ditherThresholds(pattern: string, width: number, height: number, seed: number, angle: number): Uint8Array;
+
 export function dssim(a: Uint8Array, b: Uint8Array, width: number, height: number): DssimResult;
 
 export function encodePng1(bits: Uint8Array, width: number, height: number, palette_json: string | null | undefined, level: number): Uint8Array;
@@ -66,6 +70,8 @@ export function encodePng1(bits: Uint8Array, width: number, height: number, pale
 export function gaussianKernel(sigma: number): Float64Array;
 
 export function lanczosCoeffs(in_size: number, in0: number, in1: number, out_size: number): CoeffsResult;
+
+export function planeAlpha(strength: number): number;
 
 export function toneLut(black: number, white: number, gamma: number): Uint8Array;
 
@@ -109,10 +115,13 @@ export interface InitOutput {
     readonly bayerThresholds: () => [number, number];
     readonly diffExact: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly diffPixelmatch: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number, number];
+    readonly ditherLevels: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
+    readonly ditherThresholds: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly dssim: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
     readonly encodePng1: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly gaussianKernel: (a: number) => [number, number];
     readonly lanczosCoeffs: (a: number, b: number, c: number, d: number) => number;
+    readonly planeAlpha: (a: number) => number;
     readonly toneLut: (a: number, b: number, c: number) => [number, number];
     readonly twoTone: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number];
     readonly twoToneScreen: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number];

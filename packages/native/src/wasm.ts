@@ -61,6 +61,23 @@ export type WasmGlue = {
   ) => Freeable & NativeCoeffs;
   gaussianKernel: (sigma: number) => Float64Array;
   bayerThresholds: () => Uint8Array;
+  ditherThresholds: (
+    pattern: string,
+    width: number,
+    height: number,
+    seed: number,
+    angle: number,
+  ) => Uint8Array;
+  ditherLevels: (
+    tone: Uint8Array,
+    width: number,
+    height: number,
+    pattern: string,
+    levels: number,
+    seed: number,
+    angle: number,
+  ) => Uint8Array;
+  planeAlpha: (strength: number) => number;
 };
 
 /**
@@ -145,6 +162,11 @@ export function wrapWasmModule(glue: unknown): NativeModule {
       })),
     gaussianKernel: (sigma) => g.gaussianKernel(sigma),
     bayerThresholds: () => g.bayerThresholds(),
+    ditherThresholds: (pattern, width, height, seed, angle) =>
+      g.ditherThresholds(pattern, width, height, seed, angle),
+    ditherLevels: (tone, width, height, pattern, levels, seed, angle) =>
+      g.ditherLevels(tone, width, height, pattern, levels, seed, angle),
+    planeAlpha: (strength) => g.planeAlpha(strength),
   };
 }
 

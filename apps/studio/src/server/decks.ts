@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
@@ -5,6 +7,12 @@ import { DECK_TEMPLATES } from '@turboslide/schema/actions';
 import { deckAppearance, isTrashed, slideTitle } from '@turboslide/schema/deck';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import { deckPage } from '@turboslide/schema/render';
+import { slideHasMotion } from '@turboslide/schema/motion';
+import { compileMotion, deckMediaLength } from '@turboslide/render/motion';
+import { blockParagraphCount, motionTargets } from '@turboslide/schema/motion';
+import { usedFontIds } from '@turboslide/fonts/used';
+import { readTemplateIndex } from '@turboslide/store/templates';
 import type { Author } from '@turboslide/schema/mutations';
 import type { HostingFacts } from '@turboslide/store/hosted';
 import type {
@@ -31,6 +39,7 @@ import {
   isHosted,
   openDeckStore,
   listStoredDecks,
+  repoRoot,
 } from './root';
 
 /**
@@ -203,6 +212,23 @@ function buildViewerDeck(
             ? { light: assetBase + asset.twins.neutral, dark: assetBase + asset.twins.neutral }
             : { light: assetBase + asset.twins.light, dark: assetBase + asset.twins.dark }
           : undefined;
+      /* round five (gslides-parity SPEC-5 2.2; b1.md request 6): the compiled schedule of a slide
+         that moves rides in the payload, so the audience show, Auto-play and the presenter agree */
+      const motion = slideHasMotion(slide)
+        ? (() => {
+            const targets = motionTargets(slide);
+            const byId = new Map(targets.map((block) => [block.id, block]));
+            return compileMotion(
+              slide,
+              targets,
+              (blockId) => {
+                const block = byId.get(blockId);
+                return block === undefined ? 0 : blockParagraphCount(block);
+              },
+              deckMediaLength(deck, slide),
+            );
+          })()
+        : undefined;
       out.push({
         id: slideId,
         n,
@@ -212,6 +238,7 @@ function buildViewerDeck(
         html: rendered.html,
         picture,
         ...(options.notes && slide.notes !== undefined ? { notes: slide.notes } : {}),
+        ...(motion === undefined ? {} : { motion }),
       });
     }
   }
@@ -221,6 +248,7 @@ function buildViewerDeck(
       id: requestedId,
       title: deck.title,
       revision: deck.revision,
+      page: deckPage(deck),
       sections: deck.sections
         .map((section) => ({
           id: section.id,
@@ -230,6 +258,8 @@ function buildViewerDeck(
         // a section whose every slide is skipped leaves the payload with them
         .filter((section) => section.slideIds.length > 0),
       slides: out,
+      /* the catalog faces the document uses (SPEC-5-amendments A5 item 3; b7.md request 14) */
+      fonts: usedFontIds(deck, Object.values(slides)),
       fallback: servedId === requestedId ? undefined : servedId,
     },
     skipped,
@@ -279,7 +309,14 @@ export const getHostingFacts = createServerFn({ method: 'GET' }).handler(
 export type CreateDeckInput = { name: string; from: DeckTemplateId; id?: string };
 
 function isTemplateId(value: unknown): value is DeckTemplateId {
-  return typeof value === 'string' && (DECK_TEMPLATES as ReadonlyArray<string>).includes(value);
+  if (typeof value !== 'string') return false;
+  if ((DECK_TEMPLATES as ReadonlyArray<string>).includes(value)) return true;
+  /* round five (gslides-parity SPEC-5 4.1; b3.md B3-11): any slug of decks/templates/templates.json */
+  try {
+    return readTemplateIndex(join(repoRoot(), 'decks')).some((entry) => entry.id === value);
+  } catch {
+    return false;
+  }
 }
 
 function requireSlug(value: unknown, name: string): string {

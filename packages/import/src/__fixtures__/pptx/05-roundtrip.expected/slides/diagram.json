@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "id": "diagram",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "step-1",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 320,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 1,
+          "group": "process"
+        },
+        "radius": 26.5,
+        "fill": "paper",
+        "stroke": "paper",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "ts:diagram#step-1@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "step-2",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 574.39,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 2,
+          "group": "process"
+        },
+        "radius": 26.5,
+        "fill": "paper",
+        "stroke": "paper",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "ts:diagram#step-2@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "step-3",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 828.8,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 3,
+          "group": "process"
+        },
+        "radius": 26.5,
+        "fill": "paper",
+        "stroke": "paper",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "ts:diagram#step-3@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "step-4",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 1083.19,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 4,
+          "group": "process"
+        },
+        "radius": 26.5,
+        "fill": "paper",
+        "stroke": "paper",
+        "width": 1.5,
+        "ext": {
+          "pptxName": "ts:diagram#step-4@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "link-1",
+        "type": "shape",
+        "shape": "arrow",
+        "pos": {
+          "x": 516.8,
+          "y": 450,
+          "w": 57.49,
+          "h": 1,
+          "z": 5,
+          "group": "process"
+        },
+        "orientation": "horizontal",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-1",
+            "site": 3
+          },
+          "end": {
+            "block": "step-2",
+            "site": 1
+          }
+        },
+        "ext": {
+          "pptxName": "ts:diagram#link-1@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "link-2",
+        "type": "shape",
+        "shape": "arrow",
+        "pos": {
+          "x": 771.19,
+          "y": 450,
+          "w": 57.49,
+          "h": 1,
+          "z": 6,
+          "group": "process"
+        },
+        "orientation": "horizontal",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-2",
+            "site": 3
+          },
+          "end": {
+            "block": "step-3",
+            "site": 1
+          }
+        },
+        "ext": {
+          "pptxName": "ts:diagram#link-2@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "link-3",
+        "type": "shape",
+        "shape": "arrow",
+        "pos": {
+          "x": 1025.59,
+          "y": 450,
+          "w": 57.5,
+          "h": 1,
+          "z": 7,
+          "group": "process"
+        },
+        "orientation": "horizontal",
+        "stroke": "ink",
+        "width": 1.5,
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-3",
+            "site": 3
+          },
+          "end": {
+            "block": "step-4",
+            "site": 1
+          }
+        },
+        "ext": {
+          "pptxName": "ts:diagram#link-3@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-1",
+        "type": "text",
+        "text": "Step 1",
+        "pos": {
+          "x": 320,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 8,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-1/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-2",
+        "type": "text",
+        "text": "Step 2",
+        "pos": {
+          "x": 574.39,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 9,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-2/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-3",
+        "type": "text",
+        "text": "Step 3",
+        "pos": {
+          "x": 828.8,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 10,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-3/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-4",
+        "type": "text",
+        "text": "Step 4",
+        "pos": {
+          "x": 1083.19,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 11,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-4/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A process diagram",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 12
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:diagram#h/text"
+        }
+      }
+    ]
+  },
+  "title": "A process diagram",
+  "ext": {
+    "pptxPart": "ppt/slides/slide25.xml",
+    "pptxSlideId": 280
+  }
+}

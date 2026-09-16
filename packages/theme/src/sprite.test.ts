@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { ICON_NAMES, iconSymbolId } from '@turboslide/schema/icons';
 import { describe, expect, it } from 'vitest';
 import { appendSymbol, symbolFromHeroicon } from '../scripts/add-icon.ts';
-import { parseSprite, renderSpriteModule } from '../scripts/build-sprite.ts';
+import { isGlyphSymbol, parseSprite, renderSpriteModule } from '../scripts/build-sprite.ts';
 import {
   GT_WORD_MARKUP,
   SPRITE,
@@ -10,6 +10,9 @@ import {
   iconMarkup,
   markMarkup,
   spriteMarkup,
+  GLYPHS,
+  GLYPH_NAMES,
+  glyphMarkup,
   symbolMarkup,
 } from './sprite.ts';
 
@@ -19,13 +22,23 @@ const spriteIds = JSON.parse(
 ) as string[];
 
 describe('the sprite', () => {
-  it('has 69 Heroicons plus gt-mark, in the order of the schema’s icon list', () => {
+  it('has 69 Heroicons plus gt-mark in the order of the schema’s icon list, then Turboslide’s three glyphs', () => {
     const symbols = parseSprite(spriteSvg);
-    expect(symbols).toHaveLength(70);
+    expect(symbols).toHaveLength(73);
     expect(symbols.map((symbol) => symbol.id)).toEqual(spriteIds);
-    expect(symbols.map((symbol) => symbol.id)).toEqual(ICON_NAMES.map(iconSymbolId));
-    expect(symbols.filter((symbol) => symbol.viewBox === '0 0 20 20')).toHaveLength(69);
+    const icons = symbols.filter((symbol) => !isGlyphSymbol(symbol.id));
+    expect(icons.map((symbol) => symbol.id)).toEqual(ICON_NAMES.map(iconSymbolId));
+    expect(symbols.filter((symbol) => symbol.viewBox === '0 0 20 20')).toHaveLength(72);
     expect(symbols.find((symbol) => symbol.id === 'gt-mark')?.viewBox).toBe('-8 214 1213 771');
+    // the glyphs of gslides-parity SPEC-5 3.4 and 3.7 (B2): the media poster's play and speaker, the spotlight's person
+    expect(symbols.filter((symbol) => isGlyphSymbol(symbol.id)).map((symbol) => symbol.id)).toEqual(
+      ['ts-play', 'ts-speaker', 'ts-person'],
+    );
+    expect(GLYPH_NAMES).toEqual(['ts-play', 'ts-speaker', 'ts-person']);
+    for (const name of GLYPH_NAMES) expect(GLYPHS[name].id).toBe(name);
+    expect(glyphMarkup('ts-play')).toBe(
+      '<svg class="ts-glyph" aria-hidden="true"><use href="#ts-play"/></svg>',
+    );
   });
 
   it('is what src/sprite.ts was generated from', () => {
@@ -57,7 +70,8 @@ describe('the sprite', () => {
       true,
     );
     expect(markup.match(/<symbol /g)).toHaveLength(2);
-    expect(spriteMarkup().match(/<symbol /g)).toHaveLength(70);
+    expect(spriteMarkup().match(/<symbol /g)).toHaveLength(73);
+    expect(spriteMarkup()).toContain('<symbol id="ts-speaker"');
   });
 
   it('turns a Heroicon file into a symbol and appends it before the closing tag', () => {

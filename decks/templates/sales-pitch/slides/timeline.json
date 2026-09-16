@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "timeline",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Timeline",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Workstream",
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Pilot",
+              "✓",
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "cells": [
+              "Rollout",
+              "",
+              "✓",
+              "✓",
+              ""
+            ]
+          },
+          {
+            "cells": [
+              "Review",
+              "",
+              "",
+              "",
+              "✓"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Timeline"
+}

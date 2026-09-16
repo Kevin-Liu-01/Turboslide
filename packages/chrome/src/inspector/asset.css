@@ -38,7 +38,7 @@
 .ts-asset-twin img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   object-fit: cover;
   box-sizing: border-box;
   border: 1px solid var(--pt-edge);

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Prototemplate deck HTML to the document: parse5 over slides/*.html, import-ids.json, import-report.json.",
+  "description": "Prototemplate deck HTML to the document (parse5 over slides/*.html) and the PPTX reader (gslides-parity SPEC-5 5.1): import-ids.json, import-report.json.",
   "exports": {
     "./import-deck": "./src/import-deck.ts",
     "./map": "./src/map.ts",
@@ -16,14 +16,21 @@
     "./text": "./src/text.ts",
     "./dom": "./src/dom.ts",
     "./write": "./src/write.ts",
+    "./pptx/*": "./src/pptx/*.ts",
+    "./theme-import": "./src/theme-import.ts",
+    "./lane": "./src/lane.ts",
+    "./lane-node": "./src/lane-node.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
     "import": "node src/main.ts"
   },
   "dependencies": {
+    "@turboslide/export": "workspace:*",
     "@turboslide/schema": "workspace:*",
+    "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",
+    "@xmldom/xmldom": "catalog:",
     "parse5": "catalog:"
   },
   "devDependencies": {

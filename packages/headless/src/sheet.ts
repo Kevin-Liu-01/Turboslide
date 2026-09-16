@@ -28,6 +28,8 @@ export type SheetOptions = {
   cols?: number;
   /** Thumbnail width in pixels. */
   thumb?: number;
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the cell height follows its aspect and `k` is `thumb / W`; 1600 by 900 when absent. */
+  page?: { width: number; height: number };
   numbered?: boolean;
   /** Section label rows between groups. Default true. */
   labels?: boolean;
@@ -85,7 +87,9 @@ export function contactSheetDocument(cells: SheetCell[], options: SheetOptions):
   const cols = options.cols ?? 4;
   const thumb = options.thumb ?? 480;
   const t = TOKENS[options.theme];
-  const k = thumb / 1600;
+  const page = options.page ?? { width: 1600, height: 900 };
+  const k = thumb / page.width;
+  const cellHeight = Math.round(thumb * (page.height / page.width));
   const labels = options.labels !== false;
   const parts: string[] = [];
   let lastSection: string | null = null;
@@ -120,7 +124,7 @@ export function contactSheetDocument(cells: SheetCell[], options: SheetOptions):
     parts.push(
       `<div class="cell" data-slide="${esc(cell.slideId)}" data-n="${cell.n}" data-section="${esc(cell.section)}">` +
         `<div class="meta">${meta}</div>` +
-        `<div class="frame"><img src="${esc(src)}" width="${thumb}" height="${Math.round(thumb * 0.5625)}" alt="">${overlays.join('')}</div>` +
+        `<div class="frame"><img src="${esc(src)}" width="${thumb}" height="${cellHeight}" alt="">${overlays.join('')}</div>` +
         `</div>`,
     );
   }
@@ -139,8 +143,8 @@ body { margin: 0; background: ${t.paper}; color: ${t.ink}; font-family: 'Inter',
 .cell { display: grid; row-gap: 6px; align-content: start; }
 .meta { height: ${SHEET_GUTTER.meta}px; font-size: 14px; line-height: ${SHEET_GUTTER.meta}px; color: ${t.titanium}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .meta b { color: ${t.ink}; font-weight: 500; margin-right: 6px; }
-.frame { position: relative; width: ${thumb}px; height: ${Math.round(thumb * 0.5625)}px; border: 1px solid ${t.edge}; box-sizing: content-box; background: ${t.paper}; }
-.frame img { display: block; width: ${thumb}px; height: ${Math.round(thumb * 0.5625)}px; }
+.frame { position: relative; width: ${thumb}px; height: ${cellHeight}px; border: 1px solid ${t.edge}; box-sizing: content-box; background: ${t.paper}; }
+.frame img { display: block; width: ${thumb}px; height: ${cellHeight}px; }
 .ov { position: absolute; box-sizing: border-box; border: 1px solid ${t.titanium}; pointer-events: none; }
 .ov.s3 { border-color: ${t.ink}; }
 .ov.plate { border-style: dashed; }
@@ -175,7 +179,7 @@ export async function renderContactSheet(
   await writeFile(htmlPath, html, 'utf8');
   const width = sheetWidth(cols, thumb);
   const context = await browser.newContext({
-    viewport: { width, height: 900 },
+    viewport: { width, height: options.page?.height ?? 900 },
     deviceScaleFactor: 1,
     colorScheme: options.theme,
     reducedMotion: 'reduce',

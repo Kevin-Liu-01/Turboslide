@@ -1,0 +1,31 @@
+ 1  pnpm install --frozen-lockfile
+ 2  pnpm exec tsr generate --config apps/studio/tsr.config.json
+ 3  git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts' > /dev/null && pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts'
+ 4  pnpm exec tsc -b
+ 5  pnpm test
+ 6  pnpm build && node scripts/check-client-bundle.mjs apps/studio/dist && node scripts/check.mjs --greps
+ 7  [prototemplate] pnpm exec turboslide import /Users/kevinliu/repos/Prototemplate/deck --into gt-brand --json > .turboslide/import.json
+ 8  [prototemplate] node -e "const r=require('./.turboslide/import.json'); if(r.slides!==85||r.sections!==8||r.htmlBlocks!==0) process.exit(1)"
+ 9  pnpm exec turboslide validate decks/gt-brand
+10  pnpm exec turboslide render all --theme light,dark --scale 1 --out .turboslide/render --json
+11  node -e "const r=require('./.turboslide/render/render.json'); if(r.length!==170||r.some(x=>x.pageErrors.length)) process.exit(1)"
+12  [prototemplate] node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render .turboslide/render --shoot /Users/kevinliu/repos/Prototemplate/deck --max-mismatch 0.005
+13  pnpm exec turboslide sheet all --cols 4 --thumb 480 --numbered --out .turboslide/sheet
+14  node -e "const fs=require('fs'); for (const t of ['light','dark']) { fs.statSync('.turboslide/sheet/sheet-'+t+'.png'); const m=JSON.parse(fs.readFileSync('.turboslide/sheet/sheet-'+t+'.json')); if(m.cells.length!==85) process.exit(1) }"
+15  pnpm exec turboslide lint all --json > .turboslide/lint.json
+16  pnpm exec turboslide build --out .turboslide/brand-deck.html --budget 16
+17  [server] pnpm exec playwright test apps/studio/e2e/viewer.spec.ts
+18  [server] pnpm exec turboslide lint --chrome --url http://localhost:4321/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url http://localhost:4321/edit/gt-brand --widths 1440,1280,390 --themes light,dark --states editorGrid,editorMenu,editorPanel && pnpm exec turboslide lint --chrome --url http://localhost:4321/new --widths 1440,1280,390 --themes light,dark --states editorGrid,editorMenu,editorPanel && pnpm exec turboslide lint --chrome --url http://localhost:4321/decks --widths 1440,1280,390 --themes light,dark --states '' && pnpm exec turboslide lint --chrome --url http://localhost:4321/home --widths 1440,1280,390 --themes light,dark --states '' && pnpm exec turboslide lint --chrome --url http://localhost:4321/no-such-page --widths 1440,1280,390 --themes light,dark --states ''
+19  pnpm format:check
+20  [server] node scripts/gslides-parity-audit.mjs --base http://localhost:4321 --out docs/gslides-parity/verification-3/parity-audit.json
+21  [server] pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts apps/studio/e2e/canvas.spec.ts apps/studio/e2e/objects.spec.ts apps/studio/e2e/text-styles.spec.ts apps/studio/e2e/tables.spec.ts apps/studio/e2e/charts.spec.ts apps/studio/e2e/hygiene.spec.ts apps/studio/e2e/export-batch.spec.ts
+22  pnpm exec turboslide export decks/fixture/gslides --mode native --out .turboslide/gs-native && pnpm exec turboslide export check .turboslide/gs-native && pnpm exec turboslide export decks/fixture/gslides --mode flatten --out .turboslide/gs-flatten && pnpm exec turboslide export check .turboslide/gs-flatten && node -e "const fs=require('fs'); const dir='.turboslide/gs-flatten'; const reports=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')); if(reports.length===0) process.exit(1); for (const f of reports) { const r=JSON.parse(fs.readFileSync(dir+'/'+f)); const perfect = r.perfect ?? (r.themes ?? r.reports ?? []).every(t=>t.perfect); if(perfect!==true){ console.error(f+': flatten report is not perfect'); process.exit(1) } }"
+23  [python] pnpm exec turboslide fonts build --check
+24  node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005
+25  [docker] docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker . && docker run --rm -v "$PWD/.turboslide/container:/work" turboslide-render-worker turboslide export decks/fixture/gslides --mode native --verify --out /work/gs-native
+26  [server] pnpm exec playwright test apps/studio/e2e/realtime.spec.ts apps/studio/e2e/presence.spec.ts apps/studio/e2e/comments.spec.ts apps/studio/e2e/share.spec.ts apps/studio/e2e/versions-by-author.spec.ts apps/studio/e2e/accounts.spec.ts apps/studio/e2e/dither.spec.ts apps/studio/e2e/security.spec.ts apps/studio/e2e/home-page.spec.ts
+27  [preview] node scripts/layout-shift-audit.mjs --base http://localhost:4344 --out docs/gslides-parity/verification-3/layout-shift.json
+28  node scripts/check.mjs --audit
+29  [brand] node scripts/build-brand.ts --check && node scripts/build-home-assets.ts --check && node packages/schema/scripts/build-definitions.mjs --check && node packages/native/scripts/check-record.mjs
+30  [vercel] NITRO_PRESET=vercel pnpm --filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs
+31  [node-server] node scripts/perf-budget.mjs --base http://localhost:4321 --profile local --write --runs 3 --json .turboslide/perf-budget.json && node scripts/check-client-bundle.mjs apps/studio/dist --base http://localhost:4321 --client apps/studio/.output/public

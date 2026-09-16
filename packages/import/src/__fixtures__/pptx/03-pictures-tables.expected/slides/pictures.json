@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "id": "pictures",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "png-picture",
+        "type": "picture",
+        "asset": "image1",
+        "pos": {
+          "x": 60,
+          "y": 60,
+          "w": 320,
+          "h": 180,
+          "z": 1
+        },
+        "alt": "A blue PNG with a dark bar",
+        "ext": {
+          "pptxName": "PNG picture"
+        }
+      },
+      {
+        "id": "jpeg-picture",
+        "type": "picture",
+        "asset": "image2",
+        "pos": {
+          "x": 420,
+          "y": 60,
+          "w": 320,
+          "h": 180,
+          "z": 2
+        },
+        "trim": {
+          "left": 0.1,
+          "top": 0.05,
+          "right": 0.1,
+          "bottom": 0
+        },
+        "alt": "image.jpg",
+        "ext": {
+          "pptxName": "JPEG picture"
+        }
+      },
+      {
+        "id": "gif-picture",
+        "type": "picture",
+        "asset": "image3",
+        "pos": {
+          "x": 780,
+          "y": 60,
+          "w": 320,
+          "h": 180,
+          "z": 3
+        },
+        "mask": "ellipse",
+        "alt": "image.gif",
+        "ext": {
+          "pptxName": "GIF picture"
+        }
+      },
+      {
+        "id": "bmp-picture",
+        "type": "box",
+        "stroke": "hair",
+        "strokeWidth": 1,
+        "dash": "dash",
+        "text": "image.bmp",
+        "typography": {
+          "size": 16
+        },
+        "color": "titanium",
+        "valign": "middle",
+        "padding": 12,
+        "pos": {
+          "x": 1140,
+          "y": 60,
+          "w": 320,
+          "h": 180,
+          "z": 4
+        }
+      },
+      {
+        "id": "faded-picture",
+        "type": "picture",
+        "asset": "image5",
+        "pos": {
+          "x": 60,
+          "y": 300,
+          "w": 320,
+          "h": 180,
+          "z": 5
+        },
+        "adjust": {
+          "transparency": 0.4,
+          "brightness": 0.2,
+          "contrast": -0.1
+        },
+        "alt": "image.png",
+        "ext": {
+          "pptxName": "Faded picture"
+        }
+      },
+      {
+        "id": "framed-picture",
+        "type": "picture",
+        "asset": "image6",
+        "pos": {
+          "x": 420,
+          "y": 300,
+          "w": 320,
+          "h": 180,
+          "z": 6
+        },
+        "frame": {
+          "weight": 2,
+          "color": "ink"
+        },
+        "alt": "image.png",
+        "ext": {
+          "pptxName": "Framed picture"
+        }
+      },
+      {
+        "id": "grayscale-picture",
+        "type": "picture",
+        "asset": "image7",
+        "pos": {
+          "x": 780,
+          "y": 300,
+          "w": 320,
+          "h": 180,
+          "z": 7
+        },
+        "adjust": {
+          "recolor": "grayscale"
+        },
+        "alt": "image.jpg",
+        "ext": {
+          "pptxName": "Grayscale picture"
+        }
+      },
+      {
+        "id": "same-png-again",
+        "type": "picture",
+        "asset": "image1",
+        "pos": {
+          "x": 1140,
+          "y": 300,
+          "w": 320,
+          "h": 180,
+          "z": 8
+        },
+        "alt": "image.png",
+        "ext": {
+          "pptxName": "Same PNG again"
+        }
+      }
+    ]
+  },
+  "title": "Pictures",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide1.xml",
+    "pptxSlideId": 256
+  }
+}

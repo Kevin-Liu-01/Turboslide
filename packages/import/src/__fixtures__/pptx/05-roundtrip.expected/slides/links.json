@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "links",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "box",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 241,
+          "w": 560,
+          "h": 160,
+          "z": 1
+        },
+        "stroke": "#d2d2d2",
+        "width": 1,
+        "link": "#s/title",
+        "ext": {
+          "pptxName": "ts:links#box"
+        },
+        "text": "[A box linked to the first slide.](#s/title){u}\n[Two paragraphs inside the box.](#s/title){u}",
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top"
+      },
+      {
+        "id": "shape",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 761,
+          "y": 241,
+          "w": 400,
+          "h": 160,
+          "z": 2
+        },
+        "radius": 8,
+        "fill": "paper",
+        "stroke": "#d2d2d2",
+        "width": 1,
+        "link": "https://generaltranslation.com",
+        "ext": {
+          "pptxName": "ts:links#shape"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Block links",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 800,
+          "h": 48.4,
+          "z": 3
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:links#h/text"
+        }
+      },
+      {
+        "id": "t1",
+        "type": "text",
+        "text": "[A text box linked to the table slide.](#s/table){u}",
+        "pos": {
+          "x": 137,
+          "y": 444,
+          "w": 560,
+          "h": 33,
+          "z": 5
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:links#t1/text"
+        }
+      }
+    ]
+  },
+  "title": "Block links",
+  "ext": {
+    "pptxPart": "ppt/slides/slide5.xml",
+    "pptxSlideId": 260
+  }
+}

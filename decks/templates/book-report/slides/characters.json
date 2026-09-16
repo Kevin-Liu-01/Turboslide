@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "characters",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Characters",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The three people the story turns on.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "grid",
+        "type": "details",
+        "columns": 3,
+        "rowHeights": [
+          236
+        ],
+        "items": [
+          {
+            "asset": "",
+            "caption": "The narrator"
+          },
+          {
+            "asset": "",
+            "caption": "The friend"
+          },
+          {
+            "asset": "",
+            "caption": "The stranger"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Characters"
+}

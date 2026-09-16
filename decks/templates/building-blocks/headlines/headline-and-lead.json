@@ -1,0 +1,37 @@
+{
+  "id": "headlines/headline-and-lead",
+  "category": "headlines",
+  "label": "Headline and lead",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 120,
+        "w": 1326,
+        "h": 120,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "A headline in one line"
+    },
+    {
+      "id": "lead",
+      "pos": {
+        "x": 0,
+        "y": 260,
+        "w": 1326,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "One sentence under it that says what the slide proves.",
+      "role": "lead"
+    }
+  ],
+  "box": [
+    1326,
+    320
+  ]
+}

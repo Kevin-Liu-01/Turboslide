@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-pie",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A pie chart with percent labels",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:chart-pie#h/text"
+        }
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "pie",
+        "categories": [
+          "Docs",
+          "App",
+          "Marketing",
+          "Support"
+        ],
+        "series": [
+          {
+            "name": "Share",
+            "values": [
+              42,
+              31,
+              17,
+              10
+            ],
+            "color": "#4472c4"
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 217.39,
+          "w": 1326,
+          "h": 460,
+          "z": 2
+        },
+        "legend": "right",
+        "ext": {
+          "pptxName": "ts:chart-pie#chart",
+          "pptxChartPart": "ppt/charts/chart3.xml"
+        }
+      }
+    ]
+  },
+  "title": "A pie chart with percent labels",
+  "ext": {
+    "pptxPart": "ppt/slides/slide24.xml",
+    "pptxSlideId": 279
+  }
+}

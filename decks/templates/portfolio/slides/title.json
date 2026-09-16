@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Your name",
+  "lead": "What you do and where you do it",
+  "title": "Portfolio"
+}

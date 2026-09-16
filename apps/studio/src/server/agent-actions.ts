@@ -126,9 +126,66 @@ export const SERVER_SIDE_WINDOW_ACTIONS_PENDING: ReadonlyArray<string> = (
   SERVER_SIDE_WINDOW_ACTIONS_GS3 as readonly string[]
 ).filter((id) => !isActionId(id));
 
+/**
+ * Round five (gslides-parity SPEC-5 7.1, 13; SPEC-5-amendments A5; the integrator's merge 1 for
+ * b5.md request 3 and b7.md request 3): the caller's preferences live on the principal record, so
+ * `prefs.get` and `prefs.set` run here with the request's identity (the page never holds the
+ * truth; its localStorage mirror is written from the answer); `font.list` reads the catalog
+ * module, which the page could import, but the served answer keeps the catalog's file table out
+ * of the client bundle. The list grows as each lane lands (integrator.md section 7 item 21).
+ */
+export const SERVER_SIDE_WINDOW_ACTIONS_GS5 = [
+  'prefs.get',
+  'prefs.set',
+  'font.list',
+  /* merge 2 (b2.md R3): the media intake reads a file, a URL or an upload on the server */
+  'media.insert',
+  'media.setPlayback',
+  'media.poster',
+  'media.info',
+  'media.list',
+  /* b3.md B3-9: the import bridge and the template and building block readers */
+  'import.pptx',
+  'theme.import',
+  'template.list',
+  'template.slides',
+  'buildingBlock.list',
+  'buildingBlock.insert',
+  /* b4.md: the page write over scaleCanvas */
+  'deck.setPageSize',
+  /* b5.md request 3 and 9: the text tools over the caller's record, the dictionary, chat over the room, the version log */
+  'text.autocorrect',
+  'spelling.check',
+  'spelling.replace',
+  'dictionary.add',
+  'dictionary.remove',
+  'dictionary.list',
+  'dictionary.lookup',
+  'chat.send',
+  'chat.list',
+  'chat.clear',
+  'version.delete',
+  /* b6.md R12: the equation and theme records as one deck.set each */
+  'equation.insert',
+  'equation.render',
+  'equation.symbols',
+  'theme.get',
+  'theme.set',
+  'theme.rename',
+  'theme.reset',
+  'theme.applyImported',
+  'layout.list',
+  'layout.create',
+  'layout.duplicate',
+  'layout.rename',
+  'layout.delete',
+  'layout.setPlaceholder',
+] as const satisfies readonly ActionId[];
+
 export const SERVER_SIDE_WINDOW_ACTIONS: ReadonlyArray<ActionId> = [
   ...SERVER_SIDE_WINDOW_ACTIONS_GS2,
   ...SERVER_SIDE_WINDOW_ACTIONS_GS3,
+  ...SERVER_SIDE_WINDOW_ACTIONS_GS5,
 ];
 
 export type ServerSideWindowAction = ActionId;

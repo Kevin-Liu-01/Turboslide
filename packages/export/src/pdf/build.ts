@@ -39,20 +39,31 @@ import type { LaunchedBrowser } from '@turboslide/headless/launch';
 import { pdfPageCount, pdfPageSize, printPdf } from '@turboslide/headless/pdf';
 import { waitForReady } from '@turboslide/headless/ready';
 import { renderDeck } from '@turboslide/render/deck';
-import { PRINT_PAGE_PT, PRINT_SCALE, renderPrintDocument } from '@turboslide/render/print';
+import { PRINT_SCALE, printPagePt, renderPrintDocument } from '@turboslide/render/print';
+import type { PrintDocument } from '@turboslide/render/print';
+import { PT_PER_PX, printLayout, ptToPx } from '@turboslide/render/print-layout';
+import { deckPage, pageInches } from '@turboslide/schema/render';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { deckAppearance, slideTitle } from '@turboslide/schema/deck';
-import type { ExportReport } from '@turboslide/schema/export';
+import type {
+  ExportCellEntry,
+  ExportReport,
+  Orientation,
+  Paper,
+  PrintLayout,
+  PrintOrder,
+} from '@turboslide/schema/export';
 import { PAGE_RASTER_BUDGETS, exportReportSchema } from '@turboslide/schema/export';
 import type { Box, Theme } from '@turboslide/schema/render';
 
 import { playList } from '../export-pptx.ts';
 import { fileEntry } from '../report.ts';
 import { READY_SELECTOR } from '../scene/extract.ts';
-import { diffImagesOutside, readPng, writePng } from '../verify/diff.ts';
+import { cropPng, diffImages, diffImagesOutside, readPng, writePng } from '../verify/diff.ts';
 import { resolveTools, toolVersions } from '../verify/libreoffice.ts';
 import type { ToolPaths } from '../verify/libreoffice.ts';
+import { resampleArea } from '../verify/resample.ts';
 
 const execFileAsync = promisify(execFile);
 
@@ -66,8 +77,52 @@ export const PDF_GATE = {
   fail: 0.005,
 } as const;
 
-/** The pages are compared at the 2x render's size. */
+/** The pages are compared at the 2x render's size: 240 dpi is `2W by 2H` on any page (R08 3e), 3200 by 1800 on the default page. */
 export const PDF_RASTER = { width: 3200, height: 1800, dpi: 240, scale: 2 } as const;
+
+/**
+ * The per cell gate of a paper layout (gslides-parity SPEC-5 6.2; R08 4.11): each handout cell
+ * against the slide's 2x reference shrunk to the cell by area averaging, at pixelmatch threshold
+ * 0.1; a cell over 1 percent is reported, over 5 percent fails the export.
+ */
+export const CELL_GATE = {
+  threshold: PAGE_RASTER_BUDGETS.threshold,
+  report: 0.01,
+  fail: 0.05,
+} as const;
+
+/** Raster pixels per point of a paper page: two device pixels per sheet pixel, 0.6 pt per sheet pixel. */
+export const PAPER_RASTER_PX_PER_PT = 2 / PT_PER_PX;
+
+/** The gate raster of a paper page: the paper at two device pixels per sheet pixel (Letter portrait 2040 by 2640). */
+export function paperRaster(paperPt: { width: number; height: number }): {
+  width: number;
+  height: number;
+  dpi: 240;
+  scale: 2;
+} {
+  return {
+    width: Math.round(paperPt.width * PAPER_RASTER_PX_PER_PT),
+    height: Math.round(paperPt.height * PAPER_RASTER_PX_PER_PT),
+    dpi: 240,
+    scale: 2,
+  };
+}
+
+/** An inch figure for the residual lines: three decimals at most, no trailing zeros (13.333, 7.5, 10). */
+function inchesLabel(value: number): string {
+  return String(Math.round(value * 1000) / 1000);
+}
+
+/** The gate raster of a page: 240 dpi and scale 2 with the pixels derived, `2W by 2H` (gslides-parity SPEC-5 6.1). */
+export function pdfRaster(page: { width: number; height: number }): {
+  width: number;
+  height: number;
+  dpi: 240;
+  scale: 2;
+} {
+  return { width: page.width * 2, height: page.height * 2, dpi: 240, scale: 2 };
+}
 
 export type ExportPdfOptions = {
   deckDir: string;
@@ -79,6 +134,12 @@ export type ExportPdfOptions = {
   slideIds?: string[];
   /** Carry the skipped slides too; left out by default (SPEC 7.2.1). */
   includeSkipped?: boolean;
+  /* the print layouts (gslides-parity SPEC-5 6.2): one slide per page on the slide's own paper when absent */
+  layout?: PrintLayout;
+  paper?: Paper;
+  orientation?: Orientation;
+  order?: PrintOrder;
+  hideBackground?: boolean;
   /** Run the raster gate where poppler exists; the page count gate otherwise. Default off. */
   verify?: boolean;
   /** A launched browser to run on, which the caller closes; default launchBrowser(), closed here. */
@@ -106,8 +167,11 @@ export type PdfPageVerify = {
 export type PdfPageResult = {
   slideId: string;
   n: number;
+  /** The PDF page the slide landed on, one based. */
   page: number;
-  /** The raster gate's result, when it ran. */
+  /** The cell on that page (0 on the one slide layouts; SPEC-5 6.2). */
+  cell: number;
+  /** The raster gate's result, when it ran: the page on the one slide layouts, the cell on a paper layout. */
   verify?: PdfPageVerify;
 };
 
@@ -138,23 +202,24 @@ export async function pdfRasterizer(tools: ToolPaths): Promise<'pdftoppm' | 'pdf
   return null;
 }
 
-/** `pdftoppm -png -r 240 -scale-to-x 3200 -scale-to-y 1800 <pdf> <dir>/page`: one PNG per page in order. */
+/** `pdftoppm -png -r 240 -scale-to-x <2W> -scale-to-y <2H> <pdf> <dir>/page`: one PNG per page in order (3200 by 1800 on the default page). */
 export async function rasterizePdf(
   pdf: string,
   outDir: string,
   rasterizer: 'pdftoppm' | 'pdftocairo',
   tools: ToolPaths,
   log?: (line: string) => void,
+  raster: { width: number; height: number; dpi: number } = PDF_RASTER,
 ): Promise<string[]> {
   await mkdir(outDir, { recursive: true });
   const args = [
     '-png',
     '-r',
-    String(PDF_RASTER.dpi),
+    String(raster.dpi),
     '-scale-to-x',
-    String(PDF_RASTER.width),
+    String(raster.width),
     '-scale-to-y',
-    String(PDF_RASTER.height),
+    String(raster.height),
     pdf,
     join(outDir, 'page'),
   ];
@@ -173,6 +238,12 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
   const log = options.log ?? (() => {});
   const { deck, slides } = options.document;
   const theme = options.theme ?? deckAppearance(deck);
+  // the deck's page (gslides-parity SPEC-5 6.1): the print page in points, the gate raster and
+  // the reference clip derive from it
+  const page = deckPage(deck);
+  const pagePt = printPagePt(page);
+  const raster = pdfRaster(page);
+  const inches = pageInches(page);
   await mkdir(options.outDir, { recursive: true });
   const bundle = loadThemeBundle();
   const assetBase = fileUrl(options.deckDir, true);
@@ -185,14 +256,26 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     includeSkipped: options.includeSkipped,
     assetBase,
     title: `${deck.title} (${theme})`,
+    ...(options.layout !== undefined ? { layout: options.layout } : {}),
+    ...(options.paper !== undefined ? { paper: options.paper } : {}),
+    ...(options.orientation !== undefined ? { orientation: options.orientation } : {}),
+    ...(options.order !== undefined ? { order: options.order } : {}),
+    ...(options.hideBackground === true ? { hideBackground: true } : {}),
   });
+  // Hide background prints the light appearance whatever the caller named (SPEC-5 6.2)
+  const printedTheme = printed.theme;
+  const paperLayout = printed.paper !== 'slide';
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-pdf-'));
-  const path = join(options.outDir, `${deck.id}-${theme}.pdf`);
-  const pages: PdfPageResult[] = printed.slides.map((entry, index) => ({
-    slideId: entry.slideId,
-    n: entry.n,
-    page: index + 1,
-  }));
+  const path = join(options.outDir, `${deck.id}-${printedTheme}.pdf`);
+  const pages: PdfPageResult[] = printed.slides.map((entry, index) => {
+    const cell = printed.cells.find((c) => c.slideId === entry.slideId);
+    return {
+      slideId: entry.slideId,
+      n: entry.n,
+      page: cell?.page ?? index + 1,
+      cell: cell?.cell ?? 0,
+    };
+  });
   const residual: string[] = [];
   let gate: ExportPdfResult['gate'] = 'pages';
   let rasterizer: ExportPdfResult['rasterizer'] = null;
@@ -201,18 +284,29 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
   let count = 0;
   let pageSize: ExportPdfResult['pageSize'] = null;
   try {
-    const doc = await writeTempDocument(printed.html, `print-${theme}.html`, tmp);
+    const doc = await writeTempDocument(printed.html, `print-${printedTheme}.html`, tmp);
     const launched = options.browser ?? (await launchBrowser());
     renderer = launched.renderer;
     try {
-      // the print page: 1x, the sheet's own grid; the printer scales the page (PRINT_SCALE)
-      const printPage = await openSheetPage(launched.browser, { theme, scale: 1 });
+      // the print page: 1x, the sheet's own grid; the printer scales the page (PRINT_SCALE); a
+      // paper layout's viewport is the paper's box so nothing reflows
+      const viewport = paperLayout
+        ? {
+            width: Math.ceil(ptToPx(printed.paperPt.width)),
+            height: Math.ceil(ptToPx(printed.paperPt.height)),
+          }
+        : page;
+      const printPage = await openSheetPage(launched.browser, {
+        theme: printedTheme,
+        scale: 1,
+        viewport,
+      });
       try {
         const result = await printPdf(printPage.page, {
           url: doc.url,
           path,
           bayerTable: BAYER8.flat(),
-          theme,
+          theme: printedTheme,
           scale: PRINT_SCALE,
         });
         bytes = result.bytes;
@@ -233,13 +327,14 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
           );
         } else {
           gate = 'raster';
-          await gatePages({
+          const gateInput: GateInput = {
             pdf: path,
             pages,
             document: options.document,
+            page,
             play,
             ids,
-            theme,
+            theme: printedTheme,
             bundle,
             assetBase,
             launched,
@@ -249,7 +344,10 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
             tools,
             log,
             onPage: options.onPage,
-          });
+            printed,
+          };
+          if (paperLayout) await gateCells(gateInput);
+          else await gatePages(gateInput);
         }
       }
     } finally {
@@ -278,15 +376,41 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     undefined,
   );
   const pagesMatch = count === printed.pages;
-  const passed = pagesMatch && overFail.length === 0;
+  // the per cell gate (SPEC-5 6.2; R08 4.11): a paper layout's cells against the fail line; the
+  // one slide layouts keep the page rule above
+  const cellEntries: ExportCellEntry[] = pages.map((p) => ({
+    page: p.page,
+    cell: p.cell,
+    slideId: p.slideId,
+    ...(paperLayout && p.verify !== undefined ? { fraction: p.verify.fraction } : {}),
+    ok: !paperLayout || p.verify === undefined || p.verify.fraction <= CELL_GATE.fail,
+  }));
+  const cellsFailed = cellEntries.filter((c) => !c.ok);
+  const cellsReported = paperLayout
+    ? pages.filter((p) => (p.verify?.fraction ?? 0) > CELL_GATE.report)
+    : [];
+  const passed = pagesMatch && (paperLayout ? cellsFailed.length === 0 : overFail.length === 0);
   residual.push(`renderer: ${renderer}`);
+  if (paperLayout)
+    residual.push(
+      `pdf: ${printed.pages} page(s) of ${printed.layout} on ${printed.paper} ${printed.orientation} (${printed.paperPt.width} by ${printed.paperPt.height} pt), ${printed.cells.length} cell(s) for ${printed.slides.length} slide(s), ${bytes} bytes, ${printedTheme}${printed.hideBackground ? ', background hidden' : ''}; the text is vector and searchable${printed.layout === 'notes' ? '; the notes travel under each slide' : '; notes never travel'}`,
+    );
+  else
+    residual.push(
+      `pdf: ${printed.pages} page(s) at ${pagePt.width} by ${pagePt.height} pt (${inchesLabel(inches.width)} by ${inchesLabel(inches.height)} in), ${bytes} bytes, ${printedTheme}${printed.hideBackground ? ', background hidden' : ''}; the text is vector and searchable; notes never travel`,
+    );
+  if (printed.truncatedNotes.length > 0)
+    residual.push(
+      `notes clipped: ${printed.truncatedNotes.join(', ')} (the notes page holds ${printed.layout === 'notes' ? 'the lines the box has' : 'no notes'}; the rest is in the document)`,
+    );
   residual.push(
-    `pdf: ${printed.pages} page(s) at ${PRINT_PAGE_PT.width} by ${PRINT_PAGE_PT.height} pt (13.333 by 7.5 in), ${bytes} bytes, ${theme}; the text is vector and searchable; notes never travel`,
-  );
-  residual.push(
-    pagesMatch
-      ? `pdf gate: the file holds ${count} page(s) for ${printed.pages} slide(s)`
-      : `pdf gate: the file holds ${count} page(s) for ${printed.pages} slide(s); the counts differ`,
+    paperLayout
+      ? pagesMatch
+        ? `pdf gate: the file holds ${count} page(s) for ${printed.slides.length} slide(s) at ${printed.cells.length > 0 ? Math.ceil(printed.slides.length / Math.max(1, printed.pages)) : 1} or fewer per page (ceil(slides / perPage) is ${printed.pages})`
+        : `pdf gate: the file holds ${count} page(s) for ${printed.slides.length} slide(s), expected ${printed.pages}; the counts differ`
+      : pagesMatch
+        ? `pdf gate: the file holds ${count} page(s) for ${printed.pages} slide(s)`
+        : `pdf gate: the file holds ${count} page(s) for ${printed.pages} slide(s); the counts differ`,
   );
   if (pageSize)
     residual.push(`pdf: the first page measures ${pageSize.width} by ${pageSize.height} pt`);
@@ -295,9 +419,21 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
       ? `skipped: ${omitted.length} slide(s) left out (${omitted.join(', ')}); pass includeSkipped to carry them`
       : 'skipped: none; every slide of the deck is in the file',
   );
-  if (gate === 'raster' && rasterizer) {
+  if (gate === 'raster' && rasterizer && paperLayout) {
+    const worstCell = measured.reduce<PdfPageResult | undefined>(
+      (best, p) => (best === undefined || fractionOf(p) > fractionOf(best) ? p : best),
+      undefined,
+    );
     residual.push(
-      `pdf gate: ${rasterizer} at ${PDF_RASTER.width} by ${PDF_RASTER.height} against the 2x web render, pixelmatch threshold ${PDF_GATE.threshold}, the picture regions (img, canvas, raster elements) compared separately; target ${PDF_GATE.target * 100} percent per page, fail over ${PDF_GATE.fail * 100}; ${measured.length} page(s) measured, ${overTarget.length} over the target, ${overFail.length} over the fail line`,
+      `pdf gate: ${rasterizer} at two device pixels per sheet pixel, each cell against the slide's 2x web render shrunk to the cell by area averaging, pixelmatch threshold ${CELL_GATE.threshold}; reported over ${CELL_GATE.report * 100} percent, failed over ${CELL_GATE.fail * 100}; ${measured.length} cell(s) measured, ${cellsReported.length} reported, ${cellsFailed.length} failed`,
+    );
+    if (worstCell?.verify)
+      residual.push(
+        `pdf gate: worst cell page ${worstCell.page} cell ${worstCell.cell} (${worstCell.slideId}) at ${(worstCell.verify.fraction * 100).toFixed(3)} percent`,
+      );
+  } else if (gate === 'raster' && rasterizer) {
+    residual.push(
+      `pdf gate: ${rasterizer} at ${raster.width} by ${raster.height} against the 2x web render, pixelmatch threshold ${PDF_GATE.threshold}, the picture regions (img, canvas, raster elements) compared separately; target ${PDF_GATE.target * 100} percent per page, fail over ${PDF_GATE.fail * 100}; ${measured.length} page(s) measured, ${overTarget.length} over the target, ${overFail.length} over the fail line`,
     );
     if (worst?.verify)
       residual.push(
@@ -313,14 +449,14 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     revision: deck.revision,
     format: 'pdf',
     mode: 'flatten',
-    theme,
+    theme: printedTheme,
     fontSet: 'exact',
     fontSetVersion: 'inter-variable',
     files: [fileEntry(path)],
     fonts: { embedded: ['Inter'], requiredOnViewer: [], substitutedIn: [] },
     slides: pages.map((page) => ({
       slideId: page.slideId,
-      theme,
+      theme: printedTheme,
       native: [],
       raster: [],
       ...(page.verify
@@ -344,9 +480,20 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
         : {}),
     })),
     geometryInBounds: true,
-    perfect: gate === 'raster' && measured.length === pages.length && overTarget.length === 0,
+    perfect:
+      gate === 'raster' &&
+      measured.length === pages.length &&
+      (paperLayout ? cellsReported.length === 0 : overTarget.length === 0),
     passed,
     residual,
+    // the page and the layout facts (SPEC-5 6.1, 6.2)
+    page: { width: page.width, height: page.height },
+    layout: printed.layout,
+    paper: printed.paper,
+    orientation: printed.orientation,
+    pages: count,
+    cells: cellEntries,
+    ...(printed.truncatedNotes.length > 0 ? { truncatedNotes: printed.truncatedNotes } : {}),
   } satisfies ExportReport);
   const reportPath = join(options.outDir, 'export-report.json');
   await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
@@ -355,7 +502,7 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     bytes,
     pages: count,
     pageSize,
-    theme,
+    theme: printedTheme,
     slides: pages,
     omitted,
     report,
@@ -372,6 +519,8 @@ type GateInput = {
   pdf: string;
   pages: PdfPageResult[];
   document: DeckDocument;
+  /** The deck's page: the gate raster is 2x its size and the reference clip is the page (gslides-parity SPEC-5 6.1). */
+  page: { width: number; height: number };
   play: string[];
   ids: string[];
   theme: Theme;
@@ -384,6 +533,8 @@ type GateInput = {
   tools: ToolPaths;
   log: (line: string) => void;
   onPage?: (page: PdfPageResult) => void;
+  /** The print document the file was printed from: the paper, the layout and the cells (SPEC-5 6.2). */
+  printed: PrintDocument;
 };
 
 /**
@@ -402,6 +553,7 @@ async function gatePages(input: GateInput): Promise<void> {
     input.rasterizer,
     input.tools,
     input.log,
+    pdfRaster(input.page),
   );
   // the reference: the render surface at 2x, one slide at a time by hash
   const surface = renderDeck(deck, Object.values(slides), {
@@ -420,6 +572,7 @@ async function gatePages(input: GateInput): Promise<void> {
   const shotPage = await openSheetPage(input.launched.browser, {
     theme: input.theme,
     scale: PDF_RASTER.scale,
+    viewport: input.page,
   });
   const refDir = join(input.outDir, 'reference');
   await mkdir(refDir, { recursive: true });
@@ -463,7 +616,7 @@ async function gatePages(input: GateInput): Promise<void> {
       await shotPage.page.screenshot({
         path: refPath,
         type: 'png',
-        clip: { x: 0, y: 0, width: 1600, height: 900 },
+        clip: { x: 0, y: 0, width: input.page.width, height: input.page.height },
         animations: 'disabled',
         caret: 'hide',
       });
@@ -490,6 +643,126 @@ async function gatePages(input: GateInput): Promise<void> {
   } finally {
     await shotPage.close();
   }
+}
+
+/**
+ * The per cell gate of a paper layout (SPEC-5 6.2; R08 4.11): every PDF page through poppler at
+ * two device pixels per sheet pixel, every slide shot at 2x from the render surface, the slide's
+ * shot shrunk to its cell's pixel box by area averaging and diffed against the cell cut out of
+ * the page raster at the flatten threshold; the fraction lands on the slide's entry and the
+ * report's `cells`. The hairline around the slide box sits outside the box and stays out of the
+ * cut; a picture inside the slide is compared like everything else, since the shrink is the same
+ * resampling a viewer applies.
+ */
+async function gateCells(input: GateInput): Promise<void> {
+  const { deck, slides } = input.document;
+  const layout = printLayoutOfDocument(input.printed);
+  await mkdir(input.outDir, { recursive: true });
+  const rasterDir = join(input.outDir, 'pages');
+  await rm(rasterDir, { recursive: true, force: true });
+  const raster = paperRaster(input.printed.paperPt);
+  const rendered = await rasterizePdf(
+    input.pdf,
+    rasterDir,
+    input.rasterizer,
+    input.tools,
+    input.log,
+    raster,
+  );
+  const surface = renderDeck(deck, Object.values(slides), {
+    theme: input.theme,
+    bundle: input.bundle,
+    chrome: true,
+    assetBase: input.assetBase,
+    blockAttrs: false,
+    gtWord: true,
+    present: true,
+    slideIds: input.ids,
+    numbering: input.play,
+    title: `${deck.title} (${input.theme})`,
+  });
+  const doc = await writeTempDocument(surface.html, `surface-${input.theme}.html`, input.tmp);
+  const shotPage = await openSheetPage(input.launched.browser, {
+    theme: input.theme,
+    scale: PDF_RASTER.scale,
+    viewport: input.page,
+  });
+  const refDir = join(input.outDir, 'reference');
+  await mkdir(refDir, { recursive: true });
+  const pageImages = new Map<number, Awaited<ReturnType<typeof readPng>>>();
+  try {
+    for (const entry of input.pages) {
+      const got = rendered[entry.page - 1];
+      const cell = layout.cells[entry.cell];
+      if (!got || cell === undefined) continue;
+      const hash = `s/${encodeURIComponent(entry.slideId)}`;
+      if (shotPage.page.url().split('#')[0] === doc.url) {
+        await shotPage.page.evaluate((h) => {
+          document.documentElement.removeAttribute('data-ts-ready');
+          location.hash = h;
+        }, hash);
+      } else {
+        await shotPage.page.goto(`${doc.url}#${hash}`, { waitUntil: 'load' });
+      }
+      await shotPage.page.waitForSelector(READY_SELECTOR, { state: 'attached', timeout: 20_000 });
+      await waitForReady(shotPage.page);
+      const nn = String(entry.page).padStart(2, '0');
+      const refPath = join(refDir, `${nn}-${entry.cell}-${entry.slideId}@2x.png`);
+      await shotPage.page.screenshot({
+        path: refPath,
+        type: 'png',
+        clip: { x: 0, y: 0, width: input.page.width, height: input.page.height },
+        animations: 'disabled',
+        caret: 'hide',
+      });
+      const ref = await readPng(refPath);
+      let pageImage = pageImages.get(entry.page);
+      if (pageImage === undefined) {
+        pageImage = await readPng(got);
+        pageImages.set(entry.page, pageImage);
+      }
+      // the cell's slide box in raster pixels, rounded inward so the hairline outside stays out
+      const box: Box = [
+        Math.ceil(cell.slide.x * PAPER_RASTER_PX_PER_PT),
+        Math.ceil(cell.slide.y * PAPER_RASTER_PX_PER_PT),
+        Math.floor(cell.slide.w * PAPER_RASTER_PX_PER_PT) - 1,
+        Math.floor(cell.slide.h * PAPER_RASTER_PX_PER_PT) - 1,
+      ];
+      const cut = cropPng(pageImage, box);
+      if (cut === null) continue;
+      const small = resampleArea(ref, cut.width, cut.height);
+      const diff = diffImages(small, cut, CELL_GATE.threshold);
+      const diffPath = join(input.outDir, `${nn}-${entry.cell}-${entry.slideId}.diff.png`);
+      await writePng(diffPath, diff.diff);
+      entry.verify = {
+        mismatch: diff.mismatch,
+        fraction: diff.fraction,
+        pictureMismatch: 0,
+        pictureFraction: 0,
+        pictures: [],
+        ref: relative(input.outDir, refPath),
+        got: relative(input.outDir, got),
+        diff: relative(input.outDir, diffPath),
+      };
+      input.log(
+        `  page ${nn} cell ${entry.cell} ${entry.slideId} ${(diff.fraction * 100).toFixed(3)} percent${diff.fraction > CELL_GATE.fail ? ' FAIL' : diff.fraction > CELL_GATE.report ? ' reported' : ''}`,
+      );
+      input.onPage?.(entry);
+    }
+  } finally {
+    await shotPage.close();
+  }
+}
+
+/** The layout geometry the document was printed with, recomputed from its facts. */
+function printLayoutOfDocument(printed: PrintDocument) {
+  return printLayout({
+    page: printed.page,
+    layout: printed.layout,
+    paper: printed.paper === 'slide' ? 'letter' : printed.paper,
+    orientation: printed.orientation,
+    order: printed.order,
+  });
 }
 
 /** True when poppler can rasterize on this machine (the gate of SPEC 7.6 can run). */

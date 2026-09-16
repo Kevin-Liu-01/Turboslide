@@ -6,37 +6,37 @@
   "wasmBindgen": "0.2.128",
   "outputs": {
     "wasm/turboslide_native.js": {
-      "bytes": 23001,
-      "sha256": "d228dbe8d6da1ae72ac4aebd9df08ebf109cb2e450bb34bfbcade6e119085f9a",
+      "bytes": 24615,
+      "sha256": "4c72b8fda66c9516bc5d33db6b6d74031b5b84f13544e02908902a6ea3598eae",
       "builtBy": "local",
-      "built": "2026-09-14",
+      "built": "2026-09-15",
       "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
       "runId": null,
       "runUrl": null
     },
     "wasm/turboslide_native_bg.wasm": {
-      "bytes": 273863,
-      "sha256": "6286f96a8c67b8c6d2bbc1ba8903340f4a086347cbcf6d8d9fb43c1e0c11f450",
+      "bytes": 284776,
+      "sha256": "893b58c446e8806314f2361320c057570a1a1fede708a72c34350f675f8a325c",
       "builtBy": "local",
-      "built": "2026-09-14",
+      "built": "2026-09-15",
       "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
       "runId": null,
       "runUrl": null
     },
     "wasm/turboslide_native.d.ts": {
-      "bytes": 6924,
-      "sha256": "671ee877c08c899627134cc79bfc07a0234fdc85cb7d47cc09af51de813210b9",
+      "bytes": 7604,
+      "sha256": "6d3c125ef35e70d76e3b07f531d767f00c4fcf30462c5c471fcbf9e182207ca3",
       "builtBy": "local",
-      "built": "2026-09-14",
+      "built": "2026-09-15",
       "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
       "runId": null,
       "runUrl": null
     },
     "wasm/turboslide_native_bg.wasm.d.ts": {
-      "bytes": 3559,
-      "sha256": "950fb740c59e7302d41ee15ad8f118fc3493397cc09a20a1814c1cd1ef31da20",
+      "bytes": 3906,
+      "sha256": "5c3e1e1b5862cc1d4b19ec5613b01aef8b1e7fdd04abfd414a58952a37cd87e2",
       "builtBy": "local",
-      "built": "2026-09-14",
+      "built": "2026-09-15",
       "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
       "runId": null,
       "runUrl": null

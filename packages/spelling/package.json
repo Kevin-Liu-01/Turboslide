@@ -1,0 +1,37 @@
+{
+  "name": "@turboslide/spelling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The spell check (gslides-parity SPEC-5 7.2): nspell wrapped once for the Worker and for Node, the walk over every Text in reading order, the personal dictionary; the dictionaries as packages in Node and as static files under apps/studio/public/dictionaries/ in the browser.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./index": "./src/index.ts",
+    "./port": "./src/port.ts",
+    "./walk": "./src/walk.ts",
+    "./engine": "./src/engine.ts",
+    "./node": "./src/node.ts",
+    "./worker": "./src/worker.ts",
+    "./client": "./src/client.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*",
+    "dictionary-en": "catalog:",
+    "dictionary-en-gb": "catalog:",
+    "dictionary-es": "catalog:",
+    "dictionary-fr": "catalog:",
+    "dictionary-nl": "catalog:",
+    "dictionary-pt": "catalog:",
+    "dictionary-pt-pt": "catalog:",
+    "nspell": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/nspell": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

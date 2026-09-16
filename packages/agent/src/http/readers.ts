@@ -247,6 +247,8 @@ export type DeckInfo = {
   guides?: Deck['guides'];
   /** the trash stamp (gslides-parity SPEC 7.2.5); absent unless the deck is in the trash */
   trashedAt?: string;
+  /** the deck's language tag (gslides-parity SPEC-5 7.1); en-US when the deck names none */
+  language?: string;
 };
 
 /** The canvas counts of deck.info (gslides-parity SPEC-2 0.93): the CLI's canvasCounts over the same document. */
@@ -281,6 +283,8 @@ export function deckInfo(document: DeckDocument, extra: { snapshots?: number } =
     ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
     ...(document.deck.guides !== undefined ? { guides: document.deck.guides } : {}),
     ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
+    // the deck's language tag (gslides-parity SPEC-5 7.1; b5.md request 23); en-US when none
+    language: document.deck.language ?? 'en-US',
   };
 }
 

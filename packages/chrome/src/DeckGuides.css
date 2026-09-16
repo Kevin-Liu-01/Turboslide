@@ -29,14 +29,14 @@
   left: 3px;
   top: 0;
   bottom: 0;
-  border-left: 1px dashed var(--pt-titanium);
+  border-left: 1px dashed var(--ts-guide-color, var(--pt-titanium));
 }
 
 .ts-deck-guide[data-axis='y']::before {
   top: 3px;
   left: 0;
   right: 0;
-  border-top: 1px dashed var(--pt-titanium);
+  border-top: 1px dashed var(--ts-guide-color, var(--pt-titanium));
 }
 
 .ts-deck-guide.is-new {

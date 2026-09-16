@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-opener",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "big",
+        "type": "text",
+        "text": "Canvas",
+        "pos": {
+          "x": 167,
+          "y": 531.01,
+          "w": 688,
+          "h": 76.32,
+          "rotate": 3,
+          "z": 1,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 72,
+          "leading": 1.06
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:canvas-opener#big/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      },
+      {
+        "id": "p",
+        "type": "text",
+        "text": "A section header as a canvas: the photograph is the picture object at the bottom of the stack, moved and trimmed; the plate group is rotated 3 degrees.",
+        "pos": {
+          "x": 161.5,
+          "y": 613,
+          "w": 688,
+          "h": 99,
+          "rotate": 3,
+          "z": 2,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:canvas-opener#p/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      },
+      {
+        "id": "credit",
+        "type": "text",
+        "text": "Picture: fixture geometry, drawn for this deck",
+        "pos": {
+          "x": 157.5,
+          "y": 726.63,
+          "w": 688,
+          "h": 21.75,
+          "rotate": 3,
+          "z": 3,
+          "group": "plate"
+        },
+        "typography": {
+          "size": 15,
+          "leading": 1.45
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:canvas-opener#credit/text@g:plate",
+          "pptxGroupPath": "g:plate"
+        }
+      }
+    ]
+  },
+  "title": "Canvas",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide9.xml",
+    "pptxSlideId": 264
+  }
+}

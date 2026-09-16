@@ -126,11 +126,13 @@ afterEach(async () => {
 });
 
 describe('the title row slots', () => {
-  it('exist from the first paint with nobody present: the presence slot, the comments glyph, the inbox plate at zero, Slideshow, Share', () => {
+  it('exist from the first paint with nobody present: the Star, the presence slot, the comments glyph, the inbox plate at zero, Slideshow, Share', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const right = container.querySelector('.ts-title-r')!;
     const controls = Array.from(right.children).map((el) => el.getAttribute('data-control'));
     expect(controls).toEqual([
+      /* the Star slot (gslides-parity SPEC-5 7.7) sits first, before the presence slot */
+      'title.star.slot',
       'title.presence',
       'title.comments.slot',
       'title.inbox.slot',

@@ -10,6 +10,7 @@
 // packages/chrome/src/slide-templates.ts, whose fifteen templates are the entries below with
 // their placeholder copy removed.
 import type { Asset, AssetRole } from './assets.ts';
+import { isPictureAsset } from './assets.ts';
 import type { Block, TableBlock } from './blocks.ts';
 import { EMPTY_ASSET_REF } from './blocks.ts';
 import type {
@@ -117,7 +118,8 @@ function isClosingPicture(asset: Asset): boolean {
 
 /** The first asset with one of the roles, in order of preference, else any asset. */
 export function pickAsset(deck: Deck, roles: ReadonlyArray<AssetRole>): Asset | undefined {
-  const assets = Object.values(deck.assets);
+  // the picture layouts read pictures alone; a media asset is never a background (SPEC-5 0.16)
+  const assets = Object.values(deck.assets).filter(isPictureAsset);
   for (const role of roles) {
     const found = assets.find((asset) => asset.role === role);
     if (found) return found;
@@ -132,7 +134,7 @@ export function pickAsset(deck: Deck, roles: ReadonlyArray<AssetRole>): Asset | 
  * "Add a picture first".
  */
 export function pickPicture(deck: Deck, kind: 'opener' | 'mood' | 'closing'): Asset | undefined {
-  const assets = Object.values(deck.assets);
+  const assets = Object.values(deck.assets).filter(isPictureAsset);
   const pictures = assets.filter((asset) => asset.role === 'opener' || asset.role === 'mood');
   if (pictures.length === 0) return undefined;
   if (kind === 'closing') {
@@ -773,7 +775,8 @@ const KIND_LAYOUT: Readonly<Record<Exclude<SlideKind, 'content'>, LayoutId>> = {
  * Apply layout runs.
  */
 export function derivedLayout(slide: Slide): LayoutId {
-  if (slide.template !== undefined) return slide.template;
+  // a custom layout's id (gslides-parity SPEC-5 9.2) is a canvas slide's; the built in reading is blank
+  if (slide.template !== undefined) return isLayoutId(slide.template) ? slide.template : 'blank';
   if (slide.kind !== 'content') return KIND_LAYOUT[slide.kind];
   if (slide.layout.type === 'freeform') return 'blank';
   return layoutSignatures().get(signature(slide)) ?? 'split';

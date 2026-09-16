@@ -1,0 +1,5 @@
+render: 3 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max
+   1 title light ready 3 ms, shot 21 ms
+   2 columns light ready 13 ms, shot 24 ms
+   3 canvas light ready 16 ms, shot 23 ms
+render: 3 record(s) in 1.1 s -> /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/v5/fonts-deck/render/render.json

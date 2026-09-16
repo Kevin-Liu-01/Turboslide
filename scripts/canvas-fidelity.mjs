@@ -43,7 +43,15 @@ import { measureCanvas } from '../packages/headless/src/measure.ts';
 import { waitForReady } from '../packages/headless/src/ready.ts';
 import { screenshotSheet } from '../packages/headless/src/screenshot.ts';
 
-const SHEET = { width: 1600, height: 900 };
+/** The default page; each deck's own `page` field replaces it (gslides-parity SPEC-5 6.1; R08 3i: `--deck decks/fixture/page-4-3` shoots at 1200 by 900). */
+const DEFAULT_SHEET = { width: 1600, height: 900 };
+
+/** The page a deck draws on (schema render.ts deckPage). */
+function pageOf(deck) {
+  return deck.page && Number.isFinite(deck.page.width) && Number.isFinite(deck.page.height)
+    ? { width: deck.page.width, height: deck.page.height }
+    : DEFAULT_SHEET;
+}
 const READY = 'html[data-ts-ready="1"]';
 
 function parseArgs(argv) {
@@ -130,6 +138,7 @@ try {
     const dir = resolve(deckArg);
     if (!existsSync(join(dir, 'deck.json'))) fail(`no deck.json in ${dir}`);
     const { deck, slides } = loadDeck(dir);
+    const SHEET = pageOf(deck);
     const order = slideOrder(deck);
     const candidates = order.filter((id) => {
       const slide = slides[id];
@@ -166,7 +175,7 @@ try {
         `${basename(dir)}-${theme}-measure.html`,
         tmp,
       );
-      const sheetPage = await openSheetPage(launched.browser, { theme, scale: 1 });
+      const sheetPage = await openSheetPage(launched.browser, { theme, scale: 1, viewport: SHEET });
       const renderDir = join(outDir, basename(dir), theme);
       mkdirSync(renderDir, { recursive: true });
       try {
@@ -179,7 +188,7 @@ try {
         const canvasSlides = { ...slides };
         const unplaced = [];
         for (const id of candidates) {
-          const result = toCanvas(slides[id], boxes.get(id));
+          const result = toCanvas(slides[id], boxes.get(id), SHEET);
           if (!result) continue;
           if (exact) {
             // the conversion rounds to the pixel; put the measured boxes back on the objects

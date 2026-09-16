@@ -16,8 +16,16 @@ import { join } from 'node:path';
 import PptxGenJS from 'pptxgenjs';
 
 import { decodeImage } from '@turboslide/effects/io';
-import type { ExportMode, PageRasterEntry } from '@turboslide/schema/export';
+import type {
+  ExportMode,
+  ExportMotionSummary,
+  ExportReportRow,
+  MediaExportMode,
+  MotionExportMode,
+  PageRasterEntry,
+} from '@turboslide/schema/export';
 import { PAGE_RASTER_BUDGETS, isContinuousToneBlockType } from '@turboslide/schema/export';
+import { EXIT_EFFECTS, effectiveTransition } from '@turboslide/schema/motion';
 import type { Theme } from '@turboslide/schema/render';
 
 import { shapeGuides } from '@turboslide/schema/shapes';
@@ -30,14 +38,28 @@ import type { EmbedFont } from '../ooxml/fonts.ts';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
+import { renumberShapeIds } from '../ooxml/ids.ts';
+import { rewriteEquations } from '../ooxml/math.ts';
+import { rewriteMedia } from '../ooxml/media.ts';
 import { toConnector, writeAdjustValues, writeAltText, writeColumns } from '../ooxml/shapes.ts';
+import { targetResolver, textShapeNames, writeTiming } from '../ooxml/timing.ts';
 import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
 import type { HiddenTitle } from '../ooxml/titles.ts';
+import { P14_KINDS, writeTransition } from '../ooxml/transition.ts';
 import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
 import type { Scene, SceneText } from '../scene/types.ts';
-import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
+import {
+  compositeHex,
+  pageEmu,
+  pageIn,
+  parseCssColor,
+  pxToEmu,
+  scenePage,
+  szOf,
+} from '../units.ts';
+import type { PageSize } from '../units.ts';
 import { addSceneChart } from './chart.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
 import { entryFor, pickFamily } from './fonts-map.ts';
@@ -90,6 +112,13 @@ export type BuildOptions = {
   tableMode?: TableMode;
   /** `<slideId>#<blockId>` of the tables that missed the per cell budget and fall back to ruled rows. */
   tableFallback?: ReadonlySet<string>;
+  /**
+   * Editable text keeps the transitions and the timing tree (the default) or drops them
+   * (gslides-parity SPEC-5 2.4, `export.run --motion drop`); Perfect mode writes neither (0.3).
+   */
+  motion?: MotionExportMode;
+  /** How the media files travel (SPEC-5 3.6): embedded under the cap, posters alone, or linked. */
+  media?: MediaExportMode;
   onPage?: (scene: Scene, raster: PageRaster) => void;
 };
 
@@ -138,8 +167,13 @@ export type BuildSlideReport = {
  */
 export const COVER_OFFSET_IN = 360 / 914_400;
 
-/** The content box a slide with no measured text takes for its hidden title, in sheet px (SPEC 2.1 content origin). */
+/** The box a slide with no measured text takes for its hidden title on the default page, in sheet px (SPEC 2.1 content origin). */
 export const DEFAULT_TITLE_BOX: [number, number, number, number] = [137, 137, 1326, 60];
+
+/** The hidden title's box on a page: the content width at the content origin, 60 px tall (gslides-parity SPEC-5 6.1). */
+export function defaultTitleBox(page: PageSize): [number, number, number, number] {
+  return [137, 137, page.width - 274, 60];
+}
 
 export type BuildResult = {
   bytes: Uint8Array;
@@ -162,6 +196,8 @@ export type BuildResult = {
   counts?: RoundTwoCounts;
   /** Block and run links written (SPEC 7.2.7, 7.2.8), and the slide links with no target in the file. */
   links: { written: number; unresolved: string[] };
+  /** The motion summary of an Editable text build (SPEC-5 2.4): the transitions, effect nodes, media nodes, equations and rows. */
+  motion?: ExportMotionSummary;
   residual: string[];
   warnings: string[];
 };
@@ -170,13 +206,14 @@ function readPictureSource(scene: Scene): PictureSource | undefined {
   if (!scene.pictureFile || !existsSync(scene.pictureFile)) return undefined;
   const bytes = readFileSync(scene.pictureFile);
   const mime = mimeOf(scene.pictureFile);
-  // the dimensions come from the measured element for the twin, and are 2x for a regenerated PNG
+  const page = scenePage(scene);
+  // the dimensions come from the measured element for the twin, and are 2x the page for a regenerated PNG
   const width = scene.pictureFile.endsWith('@2x.png')
-    ? 3200
-    : (scene.picture?.naturalWidth ?? 1600);
+    ? page.width * 2
+    : (scene.picture?.naturalWidth ?? page.width);
   const height = scene.pictureFile.endsWith('@2x.png')
-    ? 1800
-    : (scene.picture?.naturalHeight ?? 900);
+    ? page.height * 2
+    : (scene.picture?.naturalHeight ?? page.height);
   return { bytes, mime, width, height };
 }
 
@@ -204,11 +241,13 @@ export function isContinuousTone(scene: Scene): boolean {
 export function hiddenTitleFor(scene: Scene, fontSet: FontSet): HiddenTitle {
   const headings = new Set(scene.blocks.filter((b) => b.type === 'heading').map((b) => b.blockId));
   const text = scene.texts.find((t) => headings.has(t.blockId)) ?? scene.texts[0];
-  const box = text?.textBox ?? DEFAULT_TITLE_BOX;
+  const page = scenePage(scene);
+  const emu = pageEmu(page);
+  const box = text?.textBox ?? defaultTitleBox(page);
   const x = Math.max(0, pxToEmu(box[0]));
   const y = Math.max(0, pxToEmu(box[1]));
-  const cx = Math.max(1, Math.min(pxToEmu(box[2]), PAGE_EMU.width - x));
-  const cy = Math.max(1, Math.min(pxToEmu(box[3]), PAGE_EMU.height - y));
+  const cx = Math.max(1, Math.min(pxToEmu(box[2]), emu.width - x));
+  const cy = Math.max(1, Math.min(pxToEmu(box[3]), emu.height - y));
   return {
     title: scene.title ?? scene.slideId,
     name: `ts:${scene.slideId}#title`,
@@ -226,8 +265,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   pptx.subject = `Turboslide export, revision ${options.revision}, ${options.mode} mode`;
   pptx.author = 'Turboslide';
   pptx.company = 'General Translation';
-  defineLayout(pptx);
   const first = scenes[0];
+  // the deck's page from the first scene (every scene of one deck carries the same page, SPEC-5 6.1)
+  defineLayout(pptx, first !== undefined ? scenePage(first) : undefined);
   if (!first) throw new RangeError('buildPptx: no scenes');
   defineMasters(pptx, { theme: options.theme, scene: first, wordmarkPng: options.wordmarkPng });
 
@@ -312,6 +352,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       residual,
       links: linkOf,
       paperHex,
+      page: scenePage(scene),
     };
     // a text box with columns is rewritten with numCol after pptxgenjs wrote it (SPEC-2 2.2.10)
     const noteColumns = (text: SceneText): void => {
@@ -353,13 +394,14 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           residual.add(
             `${scene.slideId}: the ${raster.format} page raster mismatches its shot by ${(raster.fraction * 100).toFixed(3)} percent, over the perfect budget of ${PAGE_RASTER_BUDGETS.perfect * 100}`,
           );
+        const pageInches = pageIn(scenePage(scene));
         slide.addImage({
           data: dataUri(raster.bytes, raster.mime),
           x: 0,
           y: COVER_OFFSET_IN,
-          w: PAGE_IN.width,
+          w: pageInches.width,
           // shortened by the offset so the shape ends on the page edge; measured equally exact
-          h: PAGE_IN.height - COVER_OFFSET_IN,
+          h: pageInches.height - COVER_OFFSET_IN,
           altText: `${scene.title ?? scene.slideId} (${scene.theme}), the sheet at 2x`,
           objectName: `${namePrefix}#sheet`,
         });
@@ -604,6 +646,18 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   const zip = await openPackage(new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength));
   let groups = 0;
   const stripped = { kern: 0, extLst: 0, custGeom: 0 };
+  // the motion summary of an Editable text build (gslides-parity SPEC-5 2.4, 0.20)
+  const keepMotion = options.mode === 'native' && (options.motion ?? 'keep') === 'keep';
+  const motion: ExportMotionSummary = {
+    transitions: 0,
+    animations: 0,
+    media: 0,
+    equations: { native: 0, raster: 0 },
+    rows: [],
+  };
+  const motionRow = (row: ExportReportRow): void => {
+    motion.rows.push(row);
+  };
   // pptxgenjs numbers the slide parts in insertion order, so part i is scene i
   for (const [i, part] of slideParts(zip).entries()) {
     const scene = scenes[i];
@@ -636,12 +690,128 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         if (out.written) counts.altTexts += 1;
       }
     }
+    // the round five order of gslides-parity SPEC-5 2.4: strip, adjust values, columns,
+    // connectors, alt text, media, equations, grouping, slide name, hidden title, renumber,
+    // transition, timing. The media rewrite is B2's ooxml/media.ts and the equation rewrite B6's
+    // ooxml/math.ts, both identity functions on day 0; B1 adds the renumber, the transition and
+    // the timing after the hidden title in Editable text mode (ooxml/{ids,transition,timing}.ts).
+    let mediaNodes: Awaited<ReturnType<typeof rewriteMedia>>['nodes'] = [];
+    if (scene && options.mode === 'native') {
+      const media = await rewriteMedia(xml, scene, zip, {
+        ...(options.media !== undefined ? { media: options.media } : {}),
+        slidePart: part,
+      });
+      xml = media.xml;
+      mediaNodes = media.nodes;
+      motion.media += media.written;
+      for (const row of media.posterOnly)
+        motionRow({
+          slideId: scene.slideId,
+          blockId: row.blockId,
+          code: 'media.poster-only',
+          message: row.reason,
+        });
+      const equations = await rewriteEquations(xml, scene, zip);
+      xml = equations.xml;
+      motion.equations.native += equations.native;
+      motion.equations.raster += equations.raster.length;
+      for (const row of equations.raster)
+        motionRow({
+          slideId: scene.slideId,
+          blockId: row.blockId,
+          code: 'equation.raster',
+          message: row.reason,
+        });
+    }
     const grouped = groupShapes(xml);
     groups += grouped.groups.length;
     xml = grouped.xml;
     if (scene) {
       xml = setSlideName(xml, scene.title ?? scene.slideId);
       xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet));
+    }
+    // the round five tail of the order (SPEC-5 2.4): renumber, transition, timing; Editable text
+    // alone, and only while the motion travels
+    if (scene && options.mode === 'native') {
+      const renumbered = renumberShapeIds(xml);
+      xml = renumbered.xml;
+      if (renumbered.duplicates > 0)
+        residual.add(
+          `ids: ${renumbered.duplicates} repeated cNvPr id(s) renumbered on ${scene.slideId} (R05 6.4)`,
+        );
+      const transition = keepMotion ? effectiveTransition(scene.transition) : null;
+      const transitioned = writeTransition(xml, transition);
+      xml = transitioned.xml;
+      if (transitioned.written && transition !== null) {
+        motion.transitions += 1;
+        if (P14_KINDS.has(transition.kind))
+          motionRow({
+            slideId: scene.slideId,
+            code: 'transition.fallback',
+            message: `${transition.kind} needs PowerPoint 2010 or later (p14); an older reader plays a fade`,
+          });
+      }
+      if (keepMotion && scene.schedule !== undefined) {
+        // the shapes the builder named by index rather than by block: a rule block's hairline
+        // (`rule/<i>`) and the plates and chips, which no animation names
+        const aliases = new Map<string, string[]>();
+        scene.rules.forEach((rule, i) => {
+          if (rule.blockId === undefined) return;
+          const list = aliases.get(rule.blockId) ?? [];
+          list.push(`ts:${scene.slideId}#rule/${i}`);
+          aliases.set(rule.blockId, list);
+        });
+        const timed = writeTiming(
+          xml,
+          scene.schedule,
+          targetResolver(scene.slideId, renumbered.ids, textShapeNames(xml), aliases),
+          mediaNodes,
+        );
+        xml = timed.xml;
+        motion.animations += timed.effects;
+        for (const row of timed.skipped)
+          motionRow({
+            slideId: scene.slideId,
+            code: 'motion.skipped',
+            message: `animation ${row.animationId}: ${row.reason}`,
+          });
+        // the still rule (SPEC-5 0.20): the objects whose still differs from their state after the last step
+        const hiddenAtEnd = new Set<string>();
+        for (const step of scene.schedule.steps)
+          for (const effect of step.effects) {
+            if (effect.paragraph !== undefined) continue;
+            if (EXIT_EFFECTS.has(effect.animation.effect))
+              hiddenAtEnd.add(effect.animation.blockId);
+            else if (effect.animation.effect !== 'spin' && effect.animation.effect !== 'playMedia')
+              hiddenAtEnd.delete(effect.animation.blockId);
+          }
+        for (const blockId of hiddenAtEnd)
+          motionRow({
+            slideId: scene.slideId,
+            blockId,
+            code: 'motion.still',
+            message: 'shown in the still, hidden after the last step in the show',
+          });
+        for (const node of mediaNodes)
+          if (node.playback.hideIcon === true && node.kind === 'audio')
+            motionRow({
+              slideId: scene.slideId,
+              blockId: node.blockId,
+              code: 'motion.still',
+              message: 'the audio glyph shows in the still and hides when presenting',
+            });
+      } else if (
+        !keepMotion &&
+        scene.schedule !== undefined &&
+        (scene.schedule.steps.some((s) => s.effects.length > 0) ||
+          scene.schedule.transition !== null)
+      ) {
+        motionRow({
+          slideId: scene.slideId,
+          code: 'motion.dropped',
+          message: 'the transition and the animations were dropped (--motion drop)',
+        });
+      }
     }
     counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
     counts.rotated += (xml.match(/<a:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
@@ -714,6 +884,17 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       ? 'notes: the speaker notes travel as notes parts (includeNotes)'
       : 'notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)',
   );
+  if (options.mode === 'native') {
+    residual.add(
+      keepMotion
+        ? `motion: ${motion.transitions} transition(s) and ${motion.animations} effect node(s) written as the transition element and the timing tree, ${motion.media} media picture(s) (gslides-parity SPEC-5 2.4); the still shows every object at rest (0.3)`
+        : 'motion: the transitions and the timing tree were dropped (--motion drop); every object at rest',
+    );
+    for (const row of motion.rows)
+      residual.add(
+        `motion: ${row.code} ${row.slideId ?? ''}${row.blockId !== undefined ? `#${row.blockId}` : ''}: ${row.message}`,
+      );
+  }
   const geometry = await readGeometry(zip);
   const perfect =
     options.mode === 'flatten' &&
@@ -736,6 +917,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     tables,
     counts,
     links,
+    ...(options.mode === 'native' ? { motion } : {}),
     residual: [...residual],
     warnings,
   };

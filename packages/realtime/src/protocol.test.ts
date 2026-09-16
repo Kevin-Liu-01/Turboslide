@@ -147,11 +147,19 @@ describe('presencePostSchema', () => {
     expect(JSON.stringify(unknown)).toContain('displayName');
   });
 
-  it('keeps the pointer on the sheet, the selection under 64 blocks and the state under 2 KB', () => {
+  it('keeps the pointer inside the page cap, the selection under 64 blocks and the state under 2 KB', () => {
     expect(presencePostSchema.safeParse({ ...minimal, pointer: { x: 1600, y: 900 } }).success).toBe(
       true,
     );
+    // a deck may have any page up to the cap (gslides-parity SPEC-5 6.1; b4.md R5): 1601 is inside
+    // it and 6721 is not; the client clamps to the deck's own page
     expect(presencePostSchema.safeParse({ ...minimal, pointer: { x: 1601, y: 0 } }).success).toBe(
+      true,
+    );
+    expect(presencePostSchema.safeParse({ ...minimal, pointer: { x: 6721, y: 0 } }).success).toBe(
+      false,
+    );
+    expect(presencePostSchema.safeParse({ ...minimal, pointer: { x: 0, y: 6721 } }).success).toBe(
       false,
     );
     expect(presencePostSchema.safeParse({ ...minimal, pointer: { x: 0, y: -1 } }).success).toBe(

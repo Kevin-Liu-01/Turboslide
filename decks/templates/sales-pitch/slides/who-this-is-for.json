@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "who-this-is-for",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Who this is for",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The buyer owns the budget and the outcome.\nThe user lives in the tool every day and needs it to stay out of the way.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Operations and finance teams of twenty to two hundred people, in companies that run three or more systems the numbers cross.\nThe first customers were the teams that lost a week each quarter to reconciling.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "Who this is for"
+}

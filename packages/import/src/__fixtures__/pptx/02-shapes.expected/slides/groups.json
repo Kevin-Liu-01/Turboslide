@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "id": "groups",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "trio-one",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 143.62,
+          "y": 89.5,
+          "w": 151,
+          "h": 121,
+          "z": 1,
+          "rotate": 30,
+          "group": "trio"
+        },
+        "fill": "blue",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "1",
+        "typography": {
+          "size": 26.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Trio one",
+          "pptxGroupPath": "Trio"
+        }
+      },
+      {
+        "id": "trio-two",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 299.5,
+          "y": 179.5,
+          "w": 151,
+          "h": 121,
+          "z": 2,
+          "rotate": 30,
+          "group": "trio"
+        },
+        "fill": "green",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "2",
+        "typography": {
+          "size": 26.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Trio two",
+          "pptxGroupPath": "Trio"
+        }
+      },
+      {
+        "id": "trio-three",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 455.38,
+          "y": 269.5,
+          "w": 151,
+          "h": 121,
+          "z": 3,
+          "rotate": 30,
+          "group": "trio"
+        },
+        "fill": "amber",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "3",
+        "typography": {
+          "size": 26.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Trio three",
+          "pptxGroupPath": "Trio"
+        }
+      },
+      {
+        "id": "outer-box",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 839.5,
+          "y": 179.5,
+          "w": 181,
+          "h": 181,
+          "z": 4,
+          "group": "outer"
+        },
+        "fill": "ink-2",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Outer box",
+          "pptxGroupPath": "Outer"
+        }
+      },
+      {
+        "id": "inner-one",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 1079.5,
+          "y": 179.5,
+          "w": 121,
+          "h": 121,
+          "z": 5,
+          "group": "outer/inner"
+        },
+        "fill": "red",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Inner one",
+          "pptxGroupPath": "Outer/Inner"
+        }
+      },
+      {
+        "id": "inner-two",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 1229.5,
+          "y": 179.5,
+          "w": 121,
+          "h": 121,
+          "z": 6,
+          "group": "outer/inner"
+        },
+        "fill": "red",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Inner two",
+          "pptxGroupPath": "Outer/Inner"
+        }
+      },
+      {
+        "id": "lone-member",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 119.25,
+          "y": 539.25,
+          "w": 301.5,
+          "h": 121.5,
+          "z": 7
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "alt": "The only member of its group",
+        "ext": {
+          "pptxName": "Lone member",
+          "pptxGroupPath": ""
+        }
+      }
+    ]
+  },
+  "title": "Groups",
+  "ext": {
+    "pptxPart": "ppt/slides/slide3.xml",
+    "pptxSlideId": 258
+  }
+}

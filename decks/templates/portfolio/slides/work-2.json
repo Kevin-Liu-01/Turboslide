@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "work-2",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Work two",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The brief, the constraint and what shipped, in three lines.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "",
+        "fit": "width",
+        "caption": "The reporting surface, 2025",
+        "captionSize": 16
+      }
+    ]
+  },
+  "title": "Work two"
+}

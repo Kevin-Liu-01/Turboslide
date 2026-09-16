@@ -9,10 +9,13 @@ import { readFile } from 'node:fs/promises';
 import { readGeometry, readPageSize } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { listParts, openPackage, readPart, slideParts } from '../ooxml/zip.ts';
-import { PAGE_EMU } from '../units.ts';
+import { PAGE_EMU, pageEmu } from '../units.ts';
+import type { PageSize } from '../units.ts';
 
 export type GeometryCheck = {
   pageSize: { cx: number; cy: number };
+  /** The page the check expected, in EMU: the deck's page, else the default (gslides-parity SPEC-5 6.1). */
+  expected?: { width: number; height: number };
   pageSizeOk: boolean;
   slideParts: number;
   shapes: number;
@@ -30,12 +33,16 @@ export type GeometryCheck = {
   mediaParts: number;
 };
 
-/** Reads the package (a path or bytes) and runs every geometry and checklist count. */
-export async function checkGeometry(pptx: string | Uint8Array): Promise<GeometryCheck> {
+/** Reads the package (a path or bytes) and runs every geometry and checklist count against the page (the default when none is given; gslides-parity SPEC-5 6.1). */
+export async function checkGeometry(
+  pptx: string | Uint8Array,
+  page?: PageSize,
+): Promise<GeometryCheck> {
   const bytes = typeof pptx === 'string' ? new Uint8Array(await readFile(pptx)) : pptx;
   const zip = await openPackage(bytes);
   const pageSize = await readPageSize(zip);
-  const shapes = await readGeometry(zip);
+  const shapes = await readGeometry(zip, page);
+  const expected = page ? pageEmu(page) : PAGE_EMU;
   const parts = slideParts(zip);
   let custGeomCount = 0;
   let normAutofitCount = 0;
@@ -51,11 +58,12 @@ export async function checkGeometry(pptx: string | Uint8Array): Promise<Geometry
     (m) => m[1] ?? '',
   );
   const all = listParts(zip);
-  const pageSizeOk = pageSize.cx === PAGE_EMU.width && pageSize.cy === PAGE_EMU.height;
+  const pageSizeOk = pageSize.cx === expected.width && pageSize.cy === expected.height;
   const outOfBounds = shapes.filter((s) => !s.inBounds);
   const crossing = shapes.filter((s) => s.crossing === true);
   return {
     pageSize,
+    expected,
     pageSizeOk,
     slideParts: parts.length,
     shapes: shapes.length,
@@ -75,8 +83,9 @@ export async function checkGeometry(pptx: string | Uint8Array): Promise<Geometry
 export function geometryResidual(check: GeometryCheck): string[] {
   const out: string[] = [];
   if (!check.pageSizeOk) {
+    const expected = check.expected ?? PAGE_EMU;
     out.push(
-      `page size is ${check.pageSize.cx} by ${check.pageSize.cy} EMU, expected ${PAGE_EMU.width} by ${PAGE_EMU.height}`,
+      `page size is ${check.pageSize.cx} by ${check.pageSize.cy} EMU, expected ${expected.width} by ${expected.height}`,
     );
   }
   for (const shape of check.outOfBounds) {

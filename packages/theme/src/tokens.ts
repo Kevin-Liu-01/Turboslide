@@ -124,8 +124,15 @@ export function compositeOnPaper(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The grid (SPEC 2.1; report 03 section 1)
+// The grid (SPEC 2.1; report 03 section 1). Since round five the sheet is the deck's page
+// (gslides-parity SPEC-5 6.1; R08 3c): the constants below are the default page's values and
+// `grid(page)` derives the same values for any page; tokens.test.ts asserts `grid(SHEET)` equals
+// the constants and that SHEET is the schema's DEFAULT_PAGE.
 
+/** A page size in sheet pixels (the schema's `Page` without its preset). */
+export type PageSize = { width: number; height: number };
+
+/** The default page: the GT sheet, 1600 by 900 (the schema's DEFAULT_PAGE, repeated by value). */
 export const SHEET = { width: 1600, height: 900 } as const;
 /** Rails and rules at 56 px from the sheet edges (head:39-43). */
 export const RAIL = 56;
@@ -157,9 +164,17 @@ export const COLUMNS: Readonly<Record<'5/7' | '4/8' | '1/1', readonly [number, n
   '1/1': [627, 627],
 };
 
-/** The two pixel widths of a cols layout on the 1326 px content box (SPEC 5.2 slot geometry). */
-export function columnWidths(ratio: ColsRatio, gap: number = COLUMN_GAP): [number, number] {
-  const total = CONTENT[0] - gap;
+/**
+ * The two pixel widths of a cols layout on a content width (SPEC 5.2 slot geometry): the default
+ * page's 1326 px unless a page's content width is given (R08 3c: the widths derive from
+ * `content - gap`).
+ */
+export function columnWidths(
+  ratio: ColsRatio,
+  gap: number = COLUMN_GAP,
+  contentWidth: number = CONTENT[0],
+): [number, number] {
+  const total = contentWidth - gap;
   if (typeof ratio === 'string') {
     const [a, b] = ratio.split('/').map(Number);
     if (a === undefined || b === undefined) throw new TypeError(`Bad ratio ${ratio}`);
@@ -168,6 +183,60 @@ export function columnWidths(ratio: ColsRatio, gap: number = COLUMN_GAP): [numbe
   }
   if ('left' in ratio) return [ratio.left, total - ratio.left];
   return [total - ratio.right, ratio.right];
+}
+
+/** The chip rectangles a full-picture slide paints, as `CHIPS` reads them. */
+export type Chip = { x: number; y: number; w: number; h: number };
+
+/** The derived grid of one page (R08 3c): what `SHEET`, `CONTENT`, `CONTENT_ORIGIN`, `CHIPS` and `COLUMNS` state for the default page. */
+export type Grid = {
+  sheet: PageSize;
+  /** the content box's size, `W - 274` by `H - 258` */
+  content: readonly [number, number];
+  /** the content box's origin, 137, 129 on every page */
+  contentOrigin: readonly [number, number];
+  /** the content box as x, y, w, h */
+  contentBox: readonly [number, number, number, number];
+  /** the two paper chips at `66, H - 42` and `W - 126, H - 44` */
+  chips: readonly [Chip, Chip];
+  /** the column widths of the three named ratios on this content width */
+  columns: Readonly<Record<'5/7' | '4/8' | '1/1', readonly [number, number]>>;
+  /** the page's centre */
+  centre: { x: number; y: number };
+};
+
+/**
+ * The grid of a page (gslides-parity SPEC-5 6.1; R08 3c): the content box `W - 274` by `H - 258`
+ * at 137, 129, the chips at `66, H - 42` and `W - 126, H - 44`, the column widths from the content
+ * width. `grid(SHEET)` equals the legacy constants; `grid({ width: 1200, height: 900 })` gives a
+ * 926 by 642 content box with the chips at 66, 858 and 1074, 856. Every inch valued constant
+ * (rails, inset, padding, cross, wordmark, counter, plates, marks, the type ladder) stays.
+ */
+export function grid(page: PageSize): Grid {
+  const contentW = page.width - 2 * (INSET + PAD[1]);
+  const contentH = page.height - 2 * (INSET + PAD[0]);
+  const origin = [INSET + PAD[1], INSET + PAD[0]] as const;
+  return {
+    sheet: { width: page.width, height: page.height },
+    content: [contentW, contentH],
+    contentOrigin: origin,
+    contentBox: [origin[0], origin[1], contentW, contentH],
+    chips: [
+      { x: CHIPS[0].x, y: page.height - (SHEET.height - CHIPS[0].y), w: CHIPS[0].w, h: CHIPS[0].h },
+      {
+        x: page.width - (SHEET.width - CHIPS[1].x),
+        y: page.height - (SHEET.height - CHIPS[1].y),
+        w: CHIPS[1].w,
+        h: CHIPS[1].h,
+      },
+    ],
+    columns: {
+      '5/7': columnWidths('5/7', COLUMN_GAP, contentW),
+      '4/8': columnWidths('4/8', COLUMN_GAP, contentW),
+      '1/1': columnWidths('1/1', COLUMN_GAP, contentW),
+    },
+    centre: { x: page.width / 2, y: page.height / 2 },
+  };
 }
 
 // ---------------------------------------------------------------------------------------------

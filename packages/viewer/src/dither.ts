@@ -103,6 +103,9 @@ export type DitherWorkerReply =
       width: number;
       height: number;
       litFraction: number;
+      /** the pattern drawn; `fallback` when the preview budget drew the deck's Bayer screen instead (SPEC-5 11) */
+      pattern?: string;
+      fallback?: 'bayer8';
       ms: number;
     }
   | { kind: 'stale'; id: number; key: string; ok: false }

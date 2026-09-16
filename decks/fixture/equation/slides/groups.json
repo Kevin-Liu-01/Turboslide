@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "groups",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "title": "One equation per toolbar group",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "One equation per toolbar group",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "g-greek",
+        "type": "equation",
+        "tex": "\\alpha + \\beta = \\gamma \\Delta \\Omega",
+        "pos": {
+          "x": 137,
+          "y": 220,
+          "w": 420,
+          "h": 200,
+          "z": 1
+        },
+        "alt": "The Greek letters group",
+        "size": 34
+      },
+      {
+        "id": "g-operations",
+        "type": "equation",
+        "tex": "a \\times b \\pm c \\cdot d \\oplus \\infty",
+        "pos": {
+          "x": 590,
+          "y": 220,
+          "w": 420,
+          "h": 200,
+          "z": 2
+        },
+        "alt": "The Miscellaneous operations group",
+        "size": 34
+      },
+      {
+        "id": "g-relations",
+        "type": "equation",
+        "tex": "a \\leq b \\approx c \\ne d \\in S \\subseteq T",
+        "pos": {
+          "x": 1043,
+          "y": 220,
+          "w": 420,
+          "h": 200,
+          "z": 3
+        },
+        "alt": "The Relations group",
+        "size": 34
+      },
+      {
+        "id": "g-math-operators",
+        "type": "equation",
+        "tex": "\\frac{a}{b} + \\sqrt{x} + \\sum_{i=1}^{n} i",
+        "pos": {
+          "x": 137,
+          "y": 460,
+          "w": 420,
+          "h": 200,
+          "z": 4
+        },
+        "alt": "The Math operators group",
+        "size": 34
+      },
+      {
+        "id": "g-arrows",
+        "type": "equation",
+        "tex": "a \\rightarrow b \\Leftrightarrow c \\uparrow d \\Updownarrow e",
+        "pos": {
+          "x": 590,
+          "y": 460,
+          "w": 420,
+          "h": 200,
+          "z": 5
+        },
+        "alt": "The Arrows group",
+        "size": 34
+      },
+      {
+        "id": "g-more",
+        "type": "equation",
+        "tex": "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\cdots \\nabla \\hbar",
+        "pos": {
+          "x": 1043,
+          "y": 460,
+          "w": 420,
+          "h": 200,
+          "z": 6
+        },
+        "alt": "The More group",
+        "size": 34
+      }
+    ]
+  }
+}

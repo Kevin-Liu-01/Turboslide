@@ -1,0 +1,66 @@
+/* The equation section of Format options (inspector/equation.tsx; gslides-parity SPEC-5 8.2): the
+   source field is a mono textarea in the field grammar of fields.css (a --pt-hair frame, the ink
+   on paper, radius 0), the parse error a 12 px line in ink-2 under an ink frame, the notes in
+   titanium; colours are tokens only (the chrome lint). */
+.ts-eq-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-eq-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-eq-source {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 84px;
+  padding: 6px 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1.5 var(--pt-mono, ui-monospace, monospace);
+  resize: vertical;
+  outline: none;
+}
+
+.ts-eq-source:focus-visible {
+  border-color: var(--pt-ink);
+}
+
+.ts-eq-source[aria-invalid='true'] {
+  border-color: var(--pt-ink);
+  border-style: dashed;
+}
+
+.ts-eq-source[data-placeholder='true'] {
+  color: var(--pt-ink-2);
+}
+
+.ts-eq-error {
+  margin: 0;
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.ts-eq-alt {
+  box-sizing: border-box;
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  outline: none;
+}
+
+.ts-eq-alt:focus-visible {
+  border-color: var(--pt-ink);
+}

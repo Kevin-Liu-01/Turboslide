@@ -103,6 +103,8 @@ export function ShellBridge({
   const theme = useTheme();
   controller.attachShell(shell);
   api.current = editorShell;
+  /* round five (SPEC-5 3.7): the window rows that end in a dialog open it through the chrome */
+  controller.attachChrome({ openDialog: (id) => editorShell.openDialog(id as never) });
   const [editorEl, setEditorEl] = useState<HTMLElement | null>(null);
   const [viewerEl, setViewerEl] = useState<HTMLElement | null>(null);
   useStudioOwner(controller.editorAdapter(), editorEl);

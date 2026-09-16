@@ -2,15 +2,62 @@
 // 13.333333 by 7.5 inch widescreen page, so one sheet pixel is 1/120 inch, 0.6 pt and 7,620 EMU.
 // The layout is defined at 13.333333 inches: 13.3333 produced a page 30 EMU short of PowerPoint's
 // 12,192,000 (pptx report section 6 item 7).
-import type { Box } from '@turboslide/schema/render';
+import type { Box, Page } from '@turboslide/schema/render';
+import { DEFAULT_PAGE } from '@turboslide/schema/render';
 
-/** The page in inches, the value handed to pptxgenjs defineLayout. */
+/** A page size in sheet pixels (the schema's `Page` without its preset). */
+export type PageSize = Pick<Page, 'width' | 'height'>;
+
+/** The default page in inches, the value handed to pptxgenjs defineLayout for a 16:9 deck. */
 export const PAGE_IN = { width: 13.333333, height: 7.5 } as const;
 
-/** The page in EMU, what the geometry read-back asserts against (SPEC 8.5 step 4). */
+/** The default page in EMU, what the geometry read-back asserts against for a 16:9 deck (SPEC 8.5 step 4). */
 export const PAGE_EMU = { width: 12_192_000, height: 6_858_000 } as const;
 
+/** The default page in sheet pixels (the schema's DEFAULT_PAGE, repeated by value). */
 export const SHEET_PX = { width: 1600, height: 900 } as const;
+
+/**
+ * A page in inches (gslides-parity SPEC-5 6.1; R08 3e): the sheet width over 120, written at six
+ * decimals for the 16:9 default so pptxgenjs writes PowerPoint's 12,192,000 EMU exactly (13.3333
+ * produced a page 30 EMU short, pptx report section 6 item 7). `pageIn(DEFAULT_PAGE)` equals
+ * `PAGE_IN`.
+ */
+export function pageIn(page: PageSize = DEFAULT_PAGE): { width: number; height: number } {
+  if (page.width === SHEET_PX.width && page.height === SHEET_PX.height)
+    return { width: PAGE_IN.width, height: PAGE_IN.height };
+  return {
+    width: Math.round((page.width / PX_PER_IN) * 1e6) / 1e6,
+    height: Math.round((page.height / PX_PER_IN) * 1e6) / 1e6,
+  };
+}
+
+/** A page in EMU: `W by 7,620` by `H by 7,620` (gslides-parity SPEC-5 6.1); `pageEmu(DEFAULT_PAGE)` equals `PAGE_EMU`. */
+export function pageEmu(page: PageSize = DEFAULT_PAGE): { width: number; height: number } {
+  return { width: page.width * EMU_PER_PX, height: page.height * EMU_PER_PX };
+}
+
+/** The pptxgenjs layout name of a page: `TS_SHEET_<W>x<H>`; `TS_SHEET_16x9` for the default page (the name every file so far carries). */
+export function layoutName(page: PageSize = DEFAULT_PAGE): string {
+  if (page.width === SHEET_PX.width && page.height === SHEET_PX.height) return 'TS_SHEET_16x9';
+  return `TS_SHEET_${page.width}x${page.height}`;
+}
+
+/** True when a picture's pixels have the page's aspect within half a percent (pptx/images.ts). */
+export function isPageAspect(
+  width: number,
+  height: number,
+  page: PageSize = DEFAULT_PAGE,
+): boolean {
+  if (width <= 0 || height <= 0) return false;
+  const aspect = page.width / page.height;
+  return Math.abs(width / height - aspect) / aspect < 0.005;
+}
+
+/** The page a scene was extracted on: its `page` field, else the default page (the scenes of a 16:9 deck at BASE carry none). */
+export function scenePage(scene: { page?: PageSize | undefined }): PageSize {
+  return scene.page ?? DEFAULT_PAGE;
+}
 
 /** Sheet pixels per inch. */
 export const PX_PER_IN = 120;

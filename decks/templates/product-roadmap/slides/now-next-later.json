@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "now-next-later",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Now, next, later",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Now: the billing connector and the report forecast.\n\nNext: single sign on and the audit log.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Later: the second workflow and the partner API.\n\nEvery item names an owner and a quarter on the next slide.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "Now, next, later"
+}

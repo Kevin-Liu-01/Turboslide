@@ -15,7 +15,9 @@ import { GridView } from '@turboslide/viewer/GridView';
 import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
 import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
+import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
 import { Stage } from '@turboslide/viewer/Stage';
+import { fontsStylesheetHref } from '@turboslide/chrome/font-picker-model';
 import {
   applyTheme,
   installThemeBridge,
@@ -274,12 +276,22 @@ function StageBridge({
   };
   return (
     <>
+      {/* the catalog faces the document uses (SPEC-5-amendments A5 item 3; b7.md request 14): React hoists the link into the head */}
+      {deck.fonts !== undefined && deck.fonts.length > 0 ? (
+        <link
+          rel="stylesheet"
+          href={fontsStylesheetHref([...deck.fonts])}
+          precedence="default"
+          data-control="fonts.faces"
+        />
+      ) : null}
       <Stage
         slide={slide}
         index={Math.max(0, shell.index)}
         total={shell.total}
         stageSize={stageSize}
         mode={shell.mode}
+        page={deck.page}
         present={shell.present}
         narrow={shell.narrow}
         theme={themeNow}
@@ -292,6 +304,7 @@ function StageBridge({
           slides={play}
           activeId={shell.active}
           theme={themeNow}
+          page={deck.page}
           onGoto={shell.select}
           onExit={() => shell.setPresent(false)}
           say={shell.say}
@@ -384,24 +397,46 @@ function viewerAdapter(
     return { slideId, n, mode: shell.mode, theme: readTheme(), present: shell.present };
   };
   /* describe().state: the view state plus, while presenting, the show's facts (gslides-parity
-     SPEC 9.2): the blank slide up, the laser pointer and full screen */
+     SPEC 9.2; SPEC-5 2.2): the blank slide up, the laser pointer, full screen, the step and the
+     step count, Auto-play and the pen */
   const showFacts = () => {
     const showing = shellRef.current.present ? show.current : null;
     return showing
-      ? { blank: showing.blank, laser: showing.laser, fullscreen: showing.fullscreen }
+      ? {
+          blank: showing.blank,
+          laser: showing.laser,
+          fullscreen: showing.fullscreen,
+          step: showing.step,
+          steps: showing.steps,
+          autoPlay: showing.autoPlay,
+          pen: showing.pen,
+        }
       : {};
   };
-  on<{ slideId: string }>('view.goto', (input) => {
+  /**
+   * A step asked of the show (SPEC-5 2.2): the viewer owner tells the show over the deck's own
+   * channel, the message the presenter window would send, so one path lands on a step whether the
+   * ask came from the console or from `deck_goto_slide`.
+   */
+  const tellShow = (slideId: string, step: number | undefined) => {
+    if (step === undefined || !shellRef.current.present) return;
+    const channel = openPresentChannel(deck.id, 'presenter', () => undefined);
+    channel.post({ type: 'goto', slideId, step });
+    channel.close();
+  };
+  on<{ slideId: string; step?: number }>('view.goto', (input) => {
     if (!deck.slides.some((slide) => slide.id === input.slideId)) {
       throw new RangeError(`No slide "${input.slideId}"`);
     }
     const shell = shellRef.current;
     if (shell.mode === 'grid') shell.setMode('slide');
     shell.select(input.slideId);
+    tellShow(input.slideId, input.step);
     return {
       ...viewState(),
       slideId: input.slideId,
       n: deck.slides.find((slide) => slide.id === input.slideId)?.n ?? 1,
+      ...(input.step !== undefined ? { step: input.step } : {}),
     };
   });
   on<{ mode: ShellMode }>('view.mode', (input) => {
@@ -412,9 +447,18 @@ function viewerAdapter(
     applyTheme(input.theme);
     return { ...viewState(), theme: input.theme };
   });
-  on<{ on: boolean }>('view.present', (input) => {
+  on<{ on: boolean; step?: number }>('view.present', (input) => {
     shellRef.current.setPresent(input.on);
-    return { ...viewState(), present: input.on };
+    if (input.on && input.step !== undefined) {
+      const slideId = shellRef.current.active || deck.slides[0]?.id || '';
+      // the show mounts a frame later; the channel's message waits for it
+      window.setTimeout(() => tellShow(slideId, input.step), 50);
+    }
+    return {
+      ...viewState(),
+      present: input.on,
+      ...(input.step !== undefined ? { step: input.step } : {}),
+    };
   });
   on<{ slideIds: 'all' | string[]; themes?: Theme[]; scale?: 1 | 2 }>('render.slide', (input) =>
     renderSlideImages({

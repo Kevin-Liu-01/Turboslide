@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "id": "table-merge",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {
+            "width": 331.5
+          },
+          {
+            "width": 331.5,
+            "align": "right"
+          },
+          {
+            "width": 331.5,
+            "align": "right"
+          },
+          {
+            "width": 331.5,
+            "align": "right"
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Region",
+              "Q1",
+              "Q2",
+              "Q3"
+            ],
+            "height": 56
+          },
+          {
+            "cells": [
+              "North",
+              "One merged cell over four",
+              "",
+              "1,200"
+            ],
+            "height": 56
+          },
+          {
+            "cells": [
+              "South",
+              "",
+              "",
+              "980"
+            ],
+            "height": 56
+          },
+          {
+            "cells": [
+              "West",
+              "410",
+              "460",
+              "520"
+            ],
+            "height": 56
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 389.69,
+          "w": 1326,
+          "h": 224,
+          "z": 1
+        },
+        "spans": [
+          {
+            "row": 1,
+            "column": 1,
+            "rows": 2,
+            "columns": 2
+          }
+        ],
+        "cells": [
+          {
+            "row": 0,
+            "column": 0,
+            "fill": "paper",
+            "border": {
+              "top": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "ink",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "border": {
+              "top": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "ink",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "border": {
+              "top": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "ink",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 0,
+            "column": 3,
+            "border": {
+              "top": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "ink",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 1,
+            "column": 3,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 2,
+            "column": 3,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 1,
+                "color": "#d2d2d2",
+                "dash": "dash"
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          },
+          {
+            "row": 3,
+            "column": 3,
+            "border": {
+              "top": {
+                "weight": 0
+              },
+              "bottom": {
+                "weight": 0
+              },
+              "left": {
+                "weight": 0
+              },
+              "right": {
+                "weight": 0
+              }
+            }
+          }
+        ],
+        "size": 20,
+        "ext": {
+          "pptxName": "ts:table-merge#table"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Merged cells",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 418,
+          "h": 48.4,
+          "z": 2
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:table-merge#h/text"
+        }
+      }
+    ]
+  },
+  "title": "Merged cells",
+  "ext": {
+    "pptxPart": "ppt/slides/slide21.xml",
+    "pptxSlideId": 276
+  }
+}

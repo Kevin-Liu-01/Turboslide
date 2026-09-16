@@ -47,7 +47,16 @@ const urls = values('url');
 const pages =
   urls.length > 0
     ? urls
-    : [`${BASE}/edit/gt-brand`, `${BASE}/deck/gt-brand`, `${BASE}/decks`, `${BASE}/home`];
+    : [
+        `${BASE}/edit/gt-brand`,
+        `${BASE}/deck/gt-brand`,
+        `${BASE}/decks`,
+        `${BASE}/home`,
+        /* round five (gslides-parity SPEC-5 4.3, 7.6): the template gallery and the two help pages */
+        `${BASE}/decks/templates`,
+        `${BASE}/help/training`,
+        `${BASE}/help/updates`,
+      ];
 const width = Number(values('width')[0] ?? 1440);
 const theme = values('theme')[0] ?? 'light';
 const edit = flag('edit') || urls.length === 0;

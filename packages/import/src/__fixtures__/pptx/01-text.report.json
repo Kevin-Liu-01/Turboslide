@@ -1,0 +1,68 @@
+{
+  "summary": {
+    "imported": 8,
+    "substituted": 0,
+    "dropped": 0,
+    "slides": 3
+  },
+  "rows": [
+    {
+      "slideIndex": 3,
+      "slideId": "slide-3",
+      "status": "kept",
+      "code": "slide.hidden",
+      "message": "A hidden slide was imported as skipped"
+    },
+    {
+      "slideIndex": 1,
+      "status": "kept",
+      "code": "theme.layouts",
+      "message": "11 layouts of the file were not imported as custom layouts; the slides keep their positions"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Calibri",
+      "runs": 27,
+      "substituted": "Inter"
+    }
+  ],
+  "theme": {
+    "mode": "adopt",
+    "imported": false,
+    "scheme": {
+      "colors": {
+        "ink": "#000000",
+        "paper": "#ffffff",
+        "ink-2": "#1f497d",
+        "plate": "#eeece1",
+        "ok": "#4f81bd",
+        "warn": "#c0504d",
+        "no": "#9bbb59",
+        "info": "#8064a2",
+        "titanium": "#4bacc6",
+        "raised": "#f79646",
+        "link": "#0000ff"
+      },
+      "fonts": {
+        "major": "Calibri",
+        "minor": "Calibri"
+      }
+    }
+  },
+  "source": {
+    "file": "01-text.pptx",
+    "slides": 3,
+    "page": {
+      "width": 1600,
+      "height": 900
+    },
+    "producer": "python-pptx",
+    "sections": 2,
+    "modifyVerifier": false
+  },
+  "validation": {
+    "ok": true,
+    "issues": 3
+  }
+}

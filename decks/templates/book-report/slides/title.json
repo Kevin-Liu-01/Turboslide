@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "The book’s title",
+  "lead": "By the author; a report by you",
+  "title": "Book report"
+}

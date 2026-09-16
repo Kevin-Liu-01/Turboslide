@@ -234,9 +234,14 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
     'More',
     'Exit',
   ]);
-  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).toHaveAttribute(
+  // round five (gslides-parity SPEC-5 0.14, 0.15): Auto-play is a submenu with Google's intervals, Play and Loop
+  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).not.toHaveAttribute(
     'aria-disabled',
     'true',
+  );
+  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).toHaveAttribute(
+    'aria-haspopup',
+    /menu|true/,
   );
   await menu.locator('[data-menu-item="present.options.laser"]').click();
   await expect(menu).toBeHidden();
@@ -254,6 +259,8 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
   await menu.locator('[data-menu-item="present.options.more"]').click();
   const more = page.getByRole('menu', { name: 'More' });
   await expect(more).toBeVisible();
+  // the viewer route has no Download dialog: the download rows stay disabled here with their
+  // sentence, and open the dialog in the editor's show (SPEC-5 0.15)
   await expect(more.locator('[data-menu-item="present.options.more.pdf"]')).toHaveAttribute(
     'aria-disabled',
     'true',

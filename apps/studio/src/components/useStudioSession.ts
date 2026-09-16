@@ -20,7 +20,9 @@ import {
  * owner's view state goes back as the answer. The page re-attaches under the same id when its
  * owner changes (the Edit | View seg fires the ready event), so the registry always knows which
  * actions the page answers; it detaches on unmount, and a page that stops polling is swept by the
- * server after 45 s.
+ * server after 45 s. A hidden tab detaches and stops polling until it is shown again, and a poll
+ * that throws is retried with a capped backoff (gslides-parity SPEC-5-amendments A8 rows 7 and 8;
+ * docs/sessions-polling.md 1.5, 2.4).
  */
 
 /**
@@ -29,7 +31,46 @@ import {
  * round raised it from 20 s to the cap so the cycle below clears 30 s.
  */
 export const POLL_MS = 25_000;
-const RETRY_MS = 2_000;
+/**
+ * The retry after a poll that threw (a 5xx during a deploy, a rate limit): 2 s doubling to
+ * RETRY_MAX_MS (gslides-parity SPEC-5-amendments A8 row 7; docs/sessions-polling.md 1.5). Without
+ * the cap a persistent error cost 1,800 invocations an hour per tab.
+ */
+export const RETRY_MS = 2_000;
+export const RETRY_MAX_MS = 60_000;
+
+/** The retry delay after `failures` consecutive poll errors: 2 s, 4 s, 8 s, ..., capped. */
+export function retryDelayMs(failures: number): number {
+  return Math.min(RETRY_MAX_MS, RETRY_MS * 2 ** Math.max(0, failures - 1));
+}
+
+/**
+ * The visibility gate (SPEC-5-amendments A8 row 8; docs/sessions-polling.md 2.4): a hidden tab
+ * does not poll the session bus. The loop detaches its session when the document goes hidden,
+ * waits for it to be shown again, attaches once and polls on. Pure over a document-like object,
+ * so the test drives it with a fake.
+ */
+export type VisibilityDocument = Pick<
+  Document,
+  'visibilityState' | 'addEventListener' | 'removeEventListener'
+>;
+
+export function isHidden(doc: VisibilityDocument | undefined): boolean {
+  return doc !== undefined && doc.visibilityState === 'hidden';
+}
+
+/** Resolves once the document is shown; at once when it is shown already. */
+export function whenVisible(doc: VisibilityDocument | undefined): Promise<void> {
+  if (!isHidden(doc) || doc === undefined) return Promise.resolve();
+  return new Promise((resolve) => {
+    const onChange = () => {
+      if (isHidden(doc)) return;
+      doc.removeEventListener('visibilitychange', onChange);
+      resolve();
+    };
+    doc.addEventListener('visibilitychange', onChange);
+  });
+}
 /**
  * The pause after an empty answer (gslides-parity SPEC-4 0.37, PP 3.8's interim): the registry is
  * per instance, so a poll that lands on an instance that does not hold the session used to answer
@@ -100,12 +141,27 @@ export function useStudioSession({ deckId, author, enabled = true }: StudioSessi
       if (!studio || !isAlive()) return;
       await attach(studio);
       window.addEventListener(READY_EVENT, onReady);
+      let failures = 0;
       while (isAlive() && sessionId !== undefined) {
+        // a hidden tab polls nothing (A8 row 8): its session detaches, the loop waits for the
+        // tab to be shown, then attaches once under the same id and polls on
+        if (isHidden(document)) {
+          const detached = sessionId;
+          await detachStudioSession({ id: detached }).catch(() => undefined);
+          await whenVisible(document);
+          if (!isAlive()) break;
+          const shown = activeStudio();
+          if (!shown) break;
+          await attach(shown).catch(() => undefined);
+          continue;
+        }
         let commands;
         try {
           commands = await pollStudioSession({ id: sessionId, timeoutMs: POLL_MS });
+          failures = 0;
         } catch {
-          await sleep(RETRY_MS);
+          failures += 1;
+          await sleep(retryDelayMs(failures));
           continue;
         }
         if (!isAlive()) break;

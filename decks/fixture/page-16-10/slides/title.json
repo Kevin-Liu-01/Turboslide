@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Widescreen (16:10)",
+  "lead": "A deck on a 1440 by 900 page: 12 by 7.5 inches, the rulers count 0 to 12 across.",
+  "template": "title"
+}

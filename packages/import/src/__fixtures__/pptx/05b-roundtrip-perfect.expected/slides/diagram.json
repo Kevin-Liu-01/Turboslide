@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "id": "diagram",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A process diagram",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:diagram#h/text"
+        }
+      },
+      {
+        "id": "label-1",
+        "type": "text",
+        "text": "Step 1",
+        "pos": {
+          "x": 320,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 2,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-1/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-2",
+        "type": "text",
+        "text": "Step 2",
+        "pos": {
+          "x": 574.39,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 3,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-2/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-3",
+        "type": "text",
+        "text": "Step 3",
+        "pos": {
+          "x": 828.8,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 4,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-3/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      },
+      {
+        "id": "label-4",
+        "type": "text",
+        "text": "Step 4",
+        "pos": {
+          "x": 1083.19,
+          "y": 365.5,
+          "w": 196.8,
+          "h": 160,
+          "z": 5,
+          "group": "process"
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:diagram#label-4/text@g:process",
+          "pptxGroupPath": "g:process"
+        }
+      }
+    ]
+  },
+  "title": "A process diagram",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide25.xml",
+    "pptxSlideId": 280
+  }
+}

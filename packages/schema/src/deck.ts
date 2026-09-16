@@ -5,24 +5,54 @@
 // fixed compositions, and content slides carry typed blocks in the slots of one layout.
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
-import type { Asset } from './assets.ts';
-import { assetSchema } from './assets.ts';
+import type { Asset, MediaAsset } from './assets.ts';
+import { assetSchema, mediaAssetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
 import { blockSchema, extSchema } from './blocks.ts';
-import type { Color } from './color.ts';
-import { colorSchema } from './color.ts';
+import type { Color, HexColor } from './color.ts';
+import { colorSchema, hexColorSchema } from './color.ts';
+import type { FontId } from './fonts.ts';
+import { FONT_IDS } from './fonts.ts';
 import type { AssetId, SectionId, SlideId } from './ids.ts';
 import { slugSchema } from './ids.ts';
+import type { Animation, SlideTransition } from './motion.ts';
+import { animationsSchema, transitionSchema } from './motion.ts';
 import type { Position } from './position.ts';
 import { positionObjectSchema } from './position.ts';
+import { languageTagSchema } from './preferences.ts';
+import type { Page } from './render.ts';
+import { PAGE_MAX_PX, pageSchema } from './render.ts';
 import type { Text } from './text.ts';
 import { multilineTextSchema, plainText, textSchema } from './text.ts';
 
 export const SCHEMA_VERSION = 1;
 
-/** The one theme; a second theme is additive (SPEC 2.1, open question 6). */
-export const THEMES = ['gt-ink-paper'] as const;
+/**
+ * The themes (SPEC 2.1, open question 6): the GT theme, and since round five the second built in
+ * theme `ts-plate` (gslides-parity SPEC-5 0.45, 9.3; the working label is "Plate", the label is
+ * Kevin's). The stylesheets and the per theme tokens live in `packages/theme` (B6's `themes.ts`).
+ */
+export const THEMES = ['gt-ink-paper', 'ts-plate'] as const;
 export type ThemeId = (typeof THEMES)[number];
+
+/** The language every deck without a `language` field reads in (SPEC-5 1.2 "Absent"). */
+export const DEFAULT_LANGUAGE = 'en-US';
+
+/**
+ * A custom layout's id (gslides-parity SPEC-5 9.2; R03 4.1): `custom-<slug>`, so a slide's
+ * `template` tells a built in layout from a custom one by its prefix and `isLayoutId` stays the
+ * guard every built in reader uses.
+ */
+export type CustomLayoutId = `custom-${string}`;
+export const CUSTOM_LAYOUT_ID_PATTERN = /^custom-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const customLayoutIdSchema = z.templateLiteral([
+  'custom-',
+  z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'a slug after custom-'),
+]) satisfies z.ZodType<CustomLayoutId>;
+
+export function isCustomLayoutId(value: string): value is CustomLayoutId {
+  return CUSTOM_LAYOUT_ID_PATTERN.test(value);
+}
 
 /**
  * The layout ids of the layout list (gslides-parity SPEC 5.2): Google's eleven names first, in
@@ -77,6 +107,15 @@ export type Deck = {
   theme: ThemeId;
   sections: Section[];
   assets: Record<AssetId, Asset>;
+  /**
+   * The stored audio and video files (gslides-parity SPEC-5 0.16; R11 1.4), keyed by asset id like
+   * the pictures. SPEC-5 0.16 puts them in `assets` as a union; the integrator's day 0 note records
+   * why they sit in their own map: 96 picture readers in 40 files across every lane read
+   * `assets[id].twins`, and a union there would have moved every one of them on day 0. A media
+   * block's `source.asset` and a `MediaAsset.poster` still name ids; `asset.set` and `asset.remove`
+   * carry both records and the reducer routes by `kind`, so the operation stream sees one map.
+   */
+  media?: Record<AssetId, MediaAsset>;
   defaults?: {
     notes?: string;
     /** the theme appearance every surface defaults to; dark when absent (gslides-parity SPEC 7.2.3) */
@@ -93,6 +132,20 @@ export type Deck = {
    * duplicates, inside the sheet.
    */
   guides?: DeckGuides;
+  /**
+   * The slide size in sheet pixels (gslides-parity SPEC-5 0.30, 6.1): the GT sheet, 1600 by 900,
+   * when absent. Written by `deck.setPageSize` alone (the `deck.set` pointer regex stays closed to
+   * it); read through `deckPage()` by every grid, geometry, export and ruler.
+   */
+  page?: Page;
+  /** A BCP 47 tag, `ll` or `ll-RR` (SPEC-5 7.1); `en-US` when absent. Written by `deck.set /language`. */
+  language?: string;
+  /** Edit theme's override record (SPEC-5 0.44, 9.1; R03 4.1); the base theme when absent. */
+  themeEdits?: ThemeEdits;
+  /** The records Import theme appended, at most five (SPEC-5 0.28); none when absent. */
+  importedThemes?: ThemeRecord[];
+  /** The layouts made in the theme mode by id (SPEC-5 9.2); none when absent. */
+  customLayouts?: Record<string, CustomLayout>;
   /** increments on every committed write */
   revision: number;
   createdAt: string;
@@ -119,8 +172,24 @@ export type SlideBase = {
    * print, thumbnails' play list, PDF and PPTX omit the slide unless asked; the filmstrip dims it.
    */
   skip?: true;
-  /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
-  template?: LayoutId;
+  /**
+   * The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide
+   * until New slide or Apply layout runs. Since round five a custom layout's id too (SPEC-5 9.2);
+   * `isLayoutId` tells the built in ones.
+   */
+  template?: LayoutId | CustomLayoutId;
+  /**
+   * The slide's transition (gslides-parity SPEC-5 0.8, 0.12): stored on the incoming slide,
+   * PowerPoint's rule; none when absent. Written by `slide.set /transition` through
+   * `motion.setTransition`.
+   */
+  transition?: SlideTransition;
+  /**
+   * The Motion panel's list in play order (SPEC-5 0.8, 1.3), one entry per animation with the
+   * block it targets; no animations when absent. Written by `slide.set /animations` through the
+   * `motion.*` actions; the reducer drops entries whose block is gone.
+   */
+  animations?: Animation[];
   /**
    * The slide's own background colour (gslides-parity SPEC-2 2.6.1, 0.74): a fill under the
    * layout on every slide kind. Absent, the deck default applies. A background picture is not a
@@ -141,8 +210,86 @@ export type SlideBase = {
 /** A slide or deck background: a palette colour (SPEC-2 2.6.1, 0.74). */
 export type SlideBackground = { color: Color };
 
-/** The deck's guide lines in sheet pixels (SPEC-2 2.10). */
-export type DeckGuides = { x: number[]; y: number[] };
+/**
+ * The deck's guide lines in sheet pixels (SPEC-2 2.10). Since round five a guide may carry a
+ * colour (gslides-parity SPEC-5 7.7, Edit guides): `colors` is keyed by the guide's axis and
+ * position, `x:800` or `y:450`, so a removed guide takes its colour with it; the guide colour
+ * token draws every guide without one.
+ */
+export type DeckGuides = { x: number[]; y: number[]; colors?: Record<string, Color> };
+
+// ---------------------------------------------------------------------------------------------
+// Edit theme (gslides-parity SPEC-5 0.44, 9.1; R03 4.1)
+
+/** The corner slot's kinds (SPEC-5 0.45): the GT mark, a picture asset, the Turboslide mark (in the schema, not drawn), or empty. */
+export const THEME_MARK_KINDS = ['gt', 'picture', 'turboslide', 'none'] as const;
+export type ThemeMarkKind = (typeof THEME_MARK_KINDS)[number];
+
+/** The two faces a theme names (SPEC-5-amendments A5 item 1) plus the mono stack the code panel uses. */
+export const THEME_FONT_ROLES = ['display', 'text', 'mono'] as const;
+export type ThemeFontRole = (typeof THEME_FONT_ROLES)[number];
+
+/** The type levels the theme's ladder edits (R03 4.4: Google's nine levels reduce to Turboslide's ladder). */
+export const THEME_TYPE_LEVELS = ['h1', 'h2', 'big', 'lead', 'body', 'small', 'caption'] as const;
+export type ThemeTypeLevel = (typeof THEME_TYPE_LEVELS)[number];
+
+/** A box on the page in sheet pixels: x, y, w, h. */
+export type ThemeBox = [number, number, number, number];
+
+/**
+ * Edit theme's override record (R03 4.1): only what a deck changed; `themeCss(deck)` turns it
+ * into one stylesheet and the Editable text export writes the theme part from it. The colour
+ * maps are keyed by token name (the theme package's token list; the `theme` validator names an
+ * unknown one) and hold `#rrggbb` values.
+ */
+export type ThemeEdits = {
+  /** Rename; the Themes panel shows it under "In this presentation" */
+  name?: string;
+  colors?: {
+    light?: Record<string, HexColor>;
+    dark?: Record<string, HexColor>;
+  };
+  fonts?: Partial<Record<ThemeFontRole, FontId>>;
+  frame?: { rails?: boolean; rules?: boolean; crosses?: boolean; inset?: number };
+  mark?: { kind: ThemeMarkKind; assetId?: AssetId; box?: ThemeBox };
+  counter?: {
+    show?: boolean;
+    side?: 'left' | 'right';
+    format?: 'n' | 'n-of-total';
+    box?: ThemeBox;
+  };
+  chips?: { show?: boolean };
+  type?: {
+    levels?: Partial<Record<ThemeTypeLevel, { size?: number; weight?: number; tracking?: number }>>;
+  };
+  /** already `defaults.background`; Edit theme's Background button writes it here too */
+  background?: SlideBackground;
+};
+
+/** The most records "In this presentation" holds (SPEC-5 0.28; R02 b.1 "5 themes per presentation"). */
+export const IMPORTED_THEMES_MAX = 5;
+
+/** One imported theme (SPEC-5 0.28): its name, twelve colours, two faces and where it came from. */
+export type ThemeRecord = {
+  name: string;
+  colors: Record<string, HexColor>;
+  fonts: { display?: string; text?: string };
+  source: { file: string; themeIndex: number } | { deckId: string };
+};
+
+/**
+ * A layout made in the theme mode (SPEC-5 9.2; R03 4.1): a canvas slide's positioned blocks
+ * whose `placeholder` fields say what Apply layout fills, or, for a built in layout the builder
+ * deleted, `hidden` alone (a built in layout is code and cannot be removed).
+ */
+export type CustomLayout = {
+  name?: string;
+  displayName?: string;
+  /** the built in layout it was made from, for its thumbnail's slot signature */
+  from?: LayoutId;
+  blocks?: Block[];
+  hidden?: boolean;
+};
 
 /**
  * What a slide was before it became a canvas (SPEC-2 1.2): the round one `GrammarRecord` of the
@@ -271,12 +418,107 @@ export const slideBackgroundSchema = z.strictObject({
 }) satisfies z.ZodType<SlideBackground>;
 
 /** The sheet the guides lie inside (render.ts SHEET_WIDTH and SHEET_HEIGHT, repeated by value). */
-const GUIDE_MAX = { x: 1600, y: 900 } as const;
+/**
+ * The guide bounds the schema admits: the page cap on both axes since round five (gslides-parity
+ * SPEC-5 6.1: "`GUIDE_MAX` becomes the page"); the deck's own page bounds them in
+ * `validate/page.ts`, so a 16:9 deck still refuses a guide past 1600 or 900 as a `page` issue.
+ */
+const GUIDE_MAX = { x: PAGE_MAX_PX, y: PAGE_MAX_PX } as const;
+
+/** A guide colour key: the axis and the position, `x:800` or `y:450` (SPEC-5 7.7). */
+export const GUIDE_COLOR_KEY = /^[xy]:-?\d+(?:\.\d+)?$/;
 
 export const deckGuidesSchema = z.strictObject({
   x: z.array(z.number().min(0).max(GUIDE_MAX.x)),
   y: z.array(z.number().min(0).max(GUIDE_MAX.y)),
+  colors: z
+    .record(
+      z.string().regex(GUIDE_COLOR_KEY, 'an axis and a position, x:800 or y:450'),
+      colorSchema,
+    )
+    .optional(),
 }) satisfies z.ZodType<DeckGuides>;
+
+const themeBoxSchema = z.tuple([
+  z.number(),
+  z.number(),
+  z.number().positive(),
+  z.number().positive(),
+]);
+
+const hexMap = z.record(z.string().min(1).max(64), hexColorSchema);
+
+export const themeEditsSchema = z.strictObject({
+  name: z.string().min(1).max(120).optional(),
+  colors: z.strictObject({ light: hexMap.optional(), dark: hexMap.optional() }).optional(),
+  fonts: z
+    .strictObject({
+      display: z.enum(FONT_IDS).optional(),
+      text: z.enum(FONT_IDS).optional(),
+      mono: z.enum(FONT_IDS).optional(),
+    })
+    .optional(),
+  frame: z
+    .strictObject({
+      rails: z.boolean().optional(),
+      rules: z.boolean().optional(),
+      crosses: z.boolean().optional(),
+      inset: z.number().min(0).max(400).optional(),
+    })
+    .optional(),
+  mark: z
+    .strictObject({
+      kind: z.enum(THEME_MARK_KINDS),
+      assetId: slugSchema.optional(),
+      box: themeBoxSchema.optional(),
+    })
+    .optional(),
+  counter: z
+    .strictObject({
+      show: z.boolean().optional(),
+      side: z.enum(['left', 'right']).optional(),
+      format: z.enum(['n', 'n-of-total']).optional(),
+      box: themeBoxSchema.optional(),
+    })
+    .optional(),
+  chips: z.strictObject({ show: z.boolean().optional() }).optional(),
+  type: z
+    .strictObject({
+      levels: z
+        .partialRecord(
+          z.enum(THEME_TYPE_LEVELS),
+          z.strictObject({
+            size: z.number().positive().optional(),
+            weight: z.number().int().min(100).max(900).optional(),
+            tracking: z.number().optional(),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
+  background: slideBackgroundSchema.optional(),
+}) satisfies z.ZodType<ThemeEdits>;
+
+export const themeRecordSchema = z.strictObject({
+  name: z.string().min(1).max(120),
+  colors: hexMap,
+  fonts: z.strictObject({
+    display: z.string().min(1).max(120).optional(),
+    text: z.string().min(1).max(120).optional(),
+  }),
+  source: z.union([
+    z.strictObject({ file: z.string().min(1), themeIndex: z.number().int().nonnegative() }),
+    z.strictObject({ deckId: slugSchema }),
+  ]),
+}) satisfies z.ZodType<ThemeRecord>;
+
+export const customLayoutSchema = z.strictObject({
+  name: z.string().min(1).max(120).optional(),
+  displayName: z.string().min(1).max(120).optional(),
+  from: z.enum(LAYOUT_IDS).optional(),
+  blocks: z.array(blockSchema).optional(),
+  hidden: z.boolean().optional(),
+}) satisfies z.ZodType<CustomLayout>;
 
 export const sectionSchema = z.strictObject({
   id: slugSchema,
@@ -439,12 +681,24 @@ const slideBase = {
     group: 'Slide',
     help: 'A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).',
   }),
-  template: annotate(z.enum(LAYOUT_IDS).optional(), {
+  template: annotate(z.union([z.enum(LAYOUT_IDS), customLayoutIdSchema]).optional(), {
     label: 'Layout',
     control: 'select',
     snap: LAYOUT_IDS,
     group: 'Slide',
-    help: 'The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).',
+    help: 'The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2). A custom layout of the theme mode is custom-<slug> (gslides-parity SPEC-5 9.2).',
+  }),
+  transition: annotate(transitionSchema.optional(), {
+    label: 'Transition',
+    control: 'json',
+    group: 'Slide',
+    help: 'The transition into this slide, kind and duration in ms; none when absent (gslides-parity SPEC-5 0.12). Slide > Transition writes it.',
+  }),
+  animations: annotate(animationsSchema.optional(), {
+    label: 'Animations',
+    control: 'json',
+    group: 'Slide',
+    help: 'The Motion panel’s list in play order, one entry per animation with its block, effect, trigger and duration (gslides-parity SPEC-5 1.3); none when absent.',
   }),
   background: annotate(slideBackgroundSchema.optional(), {
     label: 'Background',
@@ -551,6 +805,12 @@ export const deckSchema = z.strictObject({
   }),
   sections: z.array(sectionSchema),
   assets: z.record(slugSchema, assetSchema),
+  media: annotate(z.record(slugSchema, mediaAssetSchema).optional(), {
+    label: 'Media',
+    control: 'json',
+    group: 'Asset',
+    help: 'The stored audio and video files by asset id (gslides-parity SPEC-5 0.16); media.insert writes them.',
+  }),
   defaults: z
     .strictObject({
       notes: z.string().optional(),
@@ -581,6 +841,36 @@ export const deckSchema = z.strictObject({
     control: 'json',
     group: 'Slide',
     help: 'Vertical (x) and horizontal (y) guide lines in sheet px, the same on every slide; drawn in the editor only (gslides-parity SPEC-2 2.10).',
+  }),
+  page: annotate(pageSchema.optional(), {
+    label: 'Page size',
+    control: 'json',
+    group: 'Slide',
+    help: 'The slide size in sheet px with the Page setup row it came from; 1600 by 900, Widescreen (16:9), when absent (gslides-parity SPEC-5 6.1). Page setup writes it.',
+  }),
+  language: annotate(languageTagSchema.optional(), {
+    label: 'Language',
+    control: 'text',
+    group: 'Slide',
+    help: 'A BCP 47 tag the spell check, the sheet’s lang attribute and the exports read; en-US when absent (gslides-parity SPEC-5 7.1). File > Language writes it.',
+  }),
+  themeEdits: annotate(themeEditsSchema.optional(), {
+    label: 'Theme edits',
+    control: 'json',
+    group: 'Slide',
+    help: 'Edit theme’s override record: the name, colours, fonts, frame, corner mark, counter, chips and type levels the deck changed; the base theme when absent (gslides-parity SPEC-5 9.1).',
+  }),
+  importedThemes: annotate(z.array(themeRecordSchema).max(IMPORTED_THEMES_MAX).optional(), {
+    label: 'Imported themes',
+    control: 'json',
+    group: 'Slide',
+    help: 'The records Import theme appended, at most five, shown under "In this presentation" (gslides-parity SPEC-5 0.28).',
+  }),
+  customLayouts: annotate(z.record(customLayoutIdSchema, customLayoutSchema).optional(), {
+    label: 'Custom layouts',
+    control: 'json',
+    group: 'Slide',
+    help: 'The layouts made in the theme mode by id, and the built in layouts it hid (gslides-parity SPEC-5 9.2).',
   }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,

@@ -47,6 +47,7 @@ import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
 import { CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
+import type { PageSize } from '@turboslide/theme/tokens';
 
 import { CANVAS_SELECTORS, canvasBoxesFromMeasured, virtualObjectIds } from './canvas-measure';
 import type { MeasuredBoxes } from './Gestures';
@@ -270,10 +271,10 @@ function roundBox(box: Box): Box {
  * `plate`, `mark`; canvas-measure.ts CANVAS_SELECTORS) unless a block of that id exists, and the
  * ids whose element holds a prompt are listed in `prompted`. Null before the stage has a size.
  */
-export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
+export function measureBoxes(body: HTMLElement, page: PageSize = SHEET): MeasuredBoxes | null {
   const stage = body.parentElement;
   if (!stage) return null;
-  const k = stage.getBoundingClientRect().width / SHEET.width;
+  const k = stage.getBoundingClientRect().width / page.width;
   if (!(k > 0)) return null;
   /* the origin is the body's own box, not the stage's: the sheet's slide change animates the body
      from translateY(6px) (Sheet.css pt-slide-up) and the layout effect measures on its first
@@ -334,9 +335,12 @@ export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
  * elements under that root too, and the first of them in DOM order is another slide (measured
  * 2026-09-11 on the dev server, where the switch would have read a clone's boxes).
  */
-export function readStageBoxes(root: ParentNode = document): MeasuredBoxes | null {
+export function readStageBoxes(
+  root: ParentNode = document,
+  page: PageSize = SHEET,
+): MeasuredBoxes | null {
   const body = root.querySelector<HTMLElement>('.ts-stagewrap.ts-editor .pt-slide');
-  return body ? measureBoxes(body) : null;
+  return body ? measureBoxes(body, page) : null;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -357,9 +361,10 @@ function isCanvasBoxes(boxes: MeasuredBoxes | CanvasBoxes): boxes is CanvasBoxes
 export function toFreeform(
   slide: Slide,
   boxes: MeasuredBoxes | CanvasBoxes,
+  page: PageSize = SHEET,
 ): { slide: FreeformSlide; unplaced: string[]; record: GrammarRecord } | null {
   const canvasBoxes = isCanvasBoxes(boxes) ? boxes : canvasBoxesFromMeasured(boxes, slide);
-  const converted = toCanvas(slide, canvasBoxes);
+  const converted = toCanvas(slide, canvasBoxes, page);
   if (converted === null) return null;
   return {
     slide: converted.slide as FreeformSlide,
@@ -372,8 +377,9 @@ export function toFreeform(
 export function conversionMutation(
   slide: Slide,
   boxes: MeasuredBoxes | CanvasBoxes,
+  page: PageSize = SHEET,
 ): Mutation | null {
-  const converted = toFreeform(slide, boxes);
+  const converted = toFreeform(slide, boxes, page);
   return converted ? { op: 'slide.replace', slideId: slide.id, slide: converted.slide } : null;
 }
 
@@ -471,9 +477,10 @@ function stripPos(block: Block): Block {
  */
 export function toGrammar(
   slide: Slide,
+  page: PageSize = SHEET,
 ): { slide: Slide; lossless: boolean; reason?: string } | null {
   if (!isFreeformSlide(slide)) return null;
-  const restored = fromCanvas(slide);
+  const restored = fromCanvas(slide, page);
   if (restored !== null) {
     return restored.lossless
       ? { slide: restored.slide, lossless: true }
@@ -492,6 +499,7 @@ export function toGrammar(
     const converted = convertLayout(
       { ...rest, layout: slide.layout, slots: slide.slots },
       fit.layout,
+      page,
     );
     return { slide: withExt(converted), lossless: false, reason: fit.reason };
   }
@@ -515,9 +523,10 @@ export function layoutSwitchMutation(
   slide: Slide,
   boxes: MeasuredBoxes | CanvasBoxes,
   target: 'freeform' | 'grammar',
+  page: PageSize = SHEET,
 ): Mutation | null {
-  if (target === 'freeform') return conversionMutation(slide, boxes);
-  const converted = toGrammar(slide);
+  if (target === 'freeform') return conversionMutation(slide, boxes, page);
+  const converted = toGrammar(slide, page);
   return converted ? { op: 'slide.replace', slideId: slide.id, slide: converted.slide } : null;
 }
 
@@ -576,6 +585,7 @@ export function alignMutations(
   boxes: MeasuredBoxes,
   edge: AlignEdge,
   to?: AlignTarget,
+  page: PageSize = SHEET,
 ): Mutation[] {
   const rows = placedOf(slide, ids, boxes);
   if (rows.length === 0) return [];
@@ -584,6 +594,7 @@ export function alignMutations(
     edge,
     to,
     true,
+    page,
   );
   return positionMutations(slide, rows, next);
 }

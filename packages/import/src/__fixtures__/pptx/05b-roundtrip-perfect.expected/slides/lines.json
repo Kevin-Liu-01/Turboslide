@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "lines",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Lines and connectors",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:lines#h/text"
+        }
+      },
+      {
+        "id": "a",
+        "type": "text",
+        "text": "A",
+        "pos": {
+          "x": 137,
+          "y": 295.5,
+          "w": 240,
+          "h": 120,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:lines#a/text"
+        }
+      },
+      {
+        "id": "b",
+        "type": "text",
+        "text": "B",
+        "pos": {
+          "x": 700,
+          "y": 495.5,
+          "w": 240,
+          "h": 120,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "valign": "middle",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:lines#b/text"
+        }
+      }
+    ]
+  },
+  "title": "Lines and connectors",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide13.xml",
+    "pptxSlideId": 268
+  }
+}

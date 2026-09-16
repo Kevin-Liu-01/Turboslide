@@ -1,0 +1,36 @@
+{
+  "id": "text-callouts/note-with-icon",
+  "category": "text-callouts",
+  "label": "Note with an icon",
+  "blocks": [
+    {
+      "id": "icon",
+      "pos": {
+        "x": 0,
+        "y": 8,
+        "w": 32,
+        "h": 32,
+        "group": "block"
+      },
+      "type": "icon",
+      "name": "sparkles",
+      "size": 32
+    },
+    {
+      "id": "note",
+      "pos": {
+        "x": 56,
+        "y": 0,
+        "w": 1270,
+        "h": 80,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A note beside an icon: the detail that explains the number above."
+    }
+  ],
+  "box": [
+    1326,
+    80
+  ]
+}

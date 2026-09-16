@@ -403,7 +403,7 @@ a.pt-sb-mark:focus-visible {
   display: block;
   box-sizing: border-box;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
   overflow: hidden;

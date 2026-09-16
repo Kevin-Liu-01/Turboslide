@@ -1,0 +1,54 @@
+{
+  "id": "agendas/timed",
+  "category": "agendas",
+  "label": "Timed agenda",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 600,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Agenda"
+    },
+    {
+      "id": "rows",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 480,
+        "group": "block"
+      },
+      "type": "rows",
+      "key": 120,
+      "items": [
+        {
+          "key": "9:00",
+          "value": "Welcome and goals"
+        },
+        {
+          "key": "9:15",
+          "value": "The problem and the product"
+        },
+        {
+          "key": "10:00",
+          "value": "Results and pricing"
+        },
+        {
+          "key": "10:30",
+          "value": "Next steps"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    580
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 1,
+  "id": "effects",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The fifteen effects in a mixed trigger order",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "b1",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "text": "Appear",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "fill": "plate",
+        "pos": {
+          "x": 137,
+          "y": 220,
+          "w": 240,
+          "h": 180,
+          "z": 1
+        }
+      },
+      {
+        "id": "b2",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "text": "Disappear",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 406,
+          "y": 220,
+          "w": 240,
+          "h": 180,
+          "z": 2
+        }
+      },
+      {
+        "id": "b3",
+        "type": "text",
+        "text": "Fade in",
+        "padding": 16,
+        "pos": {
+          "x": 675,
+          "y": 220,
+          "w": 240,
+          "h": 180,
+          "z": 3
+        }
+      },
+      {
+        "id": "b4",
+        "type": "box",
+        "stroke": "hair",
+        "padding": 16,
+        "text": "Fade out",
+        "pos": {
+          "x": 944,
+          "y": 220,
+          "w": 240,
+          "h": 180,
+          "z": 4
+        }
+      },
+      {
+        "id": "b5",
+        "type": "shape",
+        "shape": "triangle",
+        "stroke": "ink",
+        "text": "Fly in from left",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 1213,
+          "y": 220,
+          "w": 240,
+          "h": 180,
+          "z": 5
+        }
+      },
+      {
+        "id": "b6",
+        "type": "shape",
+        "shape": "diamond",
+        "stroke": "ink",
+        "text": "Fly in from right",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 137,
+          "y": 430,
+          "w": 240,
+          "h": 180,
+          "z": 6
+        }
+      },
+      {
+        "id": "b7",
+        "type": "shape",
+        "shape": "star5",
+        "stroke": "ink",
+        "text": "Fly in from top",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "fill": "plate",
+        "pos": {
+          "x": 406,
+          "y": 430,
+          "w": 240,
+          "h": 180,
+          "z": 7
+        }
+      },
+      {
+        "id": "b8",
+        "type": "shape",
+        "shape": "hexagon",
+        "stroke": "ink",
+        "text": "Fly in from bottom",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 675,
+          "y": 430,
+          "w": 240,
+          "h": 180,
+          "z": 8
+        }
+      },
+      {
+        "id": "b9",
+        "type": "text",
+        "text": "Fly out to left",
+        "padding": 16,
+        "pos": {
+          "x": 944,
+          "y": 430,
+          "w": 240,
+          "h": 180,
+          "z": 9
+        }
+      },
+      {
+        "id": "b10",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "text": "Fly out to right",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 1213,
+          "y": 430,
+          "w": 240,
+          "h": 180,
+          "z": 10
+        }
+      },
+      {
+        "id": "b11",
+        "type": "icon",
+        "name": "sparkles",
+        "size": 96,
+        "pos": {
+          "x": 137,
+          "y": 640,
+          "w": 240,
+          "h": 180,
+          "z": 11
+        }
+      },
+      {
+        "id": "b12",
+        "type": "rule",
+        "orientation": "horizontal",
+        "pos": {
+          "x": 406,
+          "y": 640,
+          "w": 240,
+          "h": 8,
+          "z": 12
+        }
+      },
+      {
+        "id": "b13",
+        "type": "table",
+        "columns": [
+          {
+            "align": "left"
+          },
+          {
+            "align": "right"
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Plan",
+              "Seats"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Team",
+              "25"
+            ]
+          }
+        ],
+        "border": {
+          "weight": 1
+        },
+        "pos": {
+          "x": 675,
+          "y": 640,
+          "w": 240,
+          "h": 180,
+          "z": 13
+        }
+      },
+      {
+        "id": "b14",
+        "type": "chart",
+        "kind": "bar",
+        "categories": [
+          "Q1",
+          "Q2",
+          "Q3"
+        ],
+        "series": [
+          {
+            "name": "Seats",
+            "values": [
+              4,
+              8,
+              12
+            ]
+          }
+        ],
+        "pos": {
+          "x": 944,
+          "y": 640,
+          "w": 240,
+          "h": 180,
+          "z": 14
+        }
+      },
+      {
+        "id": "b15",
+        "type": "shape",
+        "shape": "rightArrow",
+        "stroke": "ink",
+        "text": "Spin",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "fill": "ink",
+        "color": "paper",
+        "pos": {
+          "x": 1213,
+          "y": 640,
+          "w": 240,
+          "h": 180,
+          "z": 15
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "b1",
+      "effect": "appear",
+      "trigger": "click",
+      "durationMs": 500
+    },
+    {
+      "id": "a2",
+      "blockId": "b2",
+      "effect": "disappear",
+      "trigger": "withPrevious",
+      "durationMs": 500
+    },
+    {
+      "id": "a3",
+      "blockId": "b3",
+      "effect": "fadeIn",
+      "trigger": "afterPrevious",
+      "durationMs": 1000
+    },
+    {
+      "id": "a4",
+      "blockId": "b4",
+      "effect": "fadeOut",
+      "trigger": "click",
+      "durationMs": 1000
+    },
+    {
+      "id": "a5",
+      "blockId": "b5",
+      "effect": "flyIn",
+      "trigger": "withPrevious",
+      "durationMs": 800,
+      "direction": "left"
+    },
+    {
+      "id": "a6",
+      "blockId": "b6",
+      "effect": "flyIn",
+      "trigger": "afterPrevious",
+      "durationMs": 800,
+      "direction": "right"
+    },
+    {
+      "id": "a7",
+      "blockId": "b7",
+      "effect": "flyIn",
+      "trigger": "click",
+      "durationMs": 800,
+      "direction": "top"
+    },
+    {
+      "id": "a8",
+      "blockId": "b8",
+      "effect": "flyIn",
+      "trigger": "afterPrevious",
+      "durationMs": 800,
+      "direction": "bottom"
+    },
+    {
+      "id": "a9",
+      "blockId": "b9",
+      "effect": "flyOut",
+      "trigger": "click",
+      "durationMs": 800,
+      "direction": "left"
+    },
+    {
+      "id": "a10",
+      "blockId": "b10",
+      "effect": "flyOut",
+      "trigger": "withPrevious",
+      "durationMs": 800,
+      "direction": "right"
+    },
+    {
+      "id": "a11",
+      "blockId": "b11",
+      "effect": "flyOut",
+      "trigger": "afterPrevious",
+      "durationMs": 800,
+      "direction": "top"
+    },
+    {
+      "id": "a12",
+      "blockId": "b12",
+      "effect": "flyOut",
+      "trigger": "click",
+      "durationMs": 800,
+      "direction": "bottom"
+    },
+    {
+      "id": "a13",
+      "blockId": "b13",
+      "effect": "zoomIn",
+      "trigger": "withPrevious",
+      "durationMs": 600
+    },
+    {
+      "id": "a14",
+      "blockId": "b14",
+      "effect": "zoomOut",
+      "trigger": "afterPrevious",
+      "durationMs": 600
+    },
+    {
+      "id": "a15",
+      "blockId": "b15",
+      "effect": "spin",
+      "trigger": "click",
+      "durationMs": 2000
+    }
+  ]
+}

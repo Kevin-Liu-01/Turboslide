@@ -89,7 +89,7 @@
 .pt-thumb-frame {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   border: 1px solid var(--pt-edge);
   overflow: hidden;
   background: var(--pt-paper);
@@ -179,6 +179,25 @@
 }
 
 .pt-thumb-skip svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* the slide moves (gslides-parity SPEC-5 2.1): the sparkles glyph at the top left, the skip glyph's twin */
+.pt-thumb-motion {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  border: 1px solid var(--pt-hair);
+}
+
+.pt-thumb-motion svg {
   width: 14px;
   height: 14px;
 }

@@ -2,7 +2,8 @@
 // part, asserted against the 12,192,000 by 6,858,000 EMU page; plus the run and line attributes
 // the acceptance reads back (`sz`, `spc`, `spcPts`, `<a:ln w>`), so a test can check the XML
 // carries the expected values without a renderer.
-import { PAGE_EMU } from '../units.ts';
+import { PAGE_EMU, pageEmu } from '../units.ts';
+import type { PageSize } from '../units.ts';
 import { listShapes } from './groups.ts';
 import { readPart, slideParts } from './zip.ts';
 import type { Package } from './zip.ts';
@@ -19,13 +20,19 @@ export type ShapeBounds = {
   crossing?: boolean;
 };
 
-/** A shape is in bounds when its box lies inside the page with a one-pixel (7,620 EMU) tolerance. */
-export function inPage(off: [number, number], ext: [number, number], tolerance = 7620): boolean {
+/** A shape is in bounds when its box lies inside the page with a one-pixel (7,620 EMU) tolerance; the default page when none is given (gslides-parity SPEC-5 6.1). */
+export function inPage(
+  off: [number, number],
+  ext: [number, number],
+  tolerance = 7620,
+  page?: PageSize,
+): boolean {
+  const emu = page ? pageEmu(page) : PAGE_EMU;
   return (
     off[0] >= -tolerance &&
     off[1] >= -tolerance &&
-    off[0] + ext[0] <= PAGE_EMU.width + tolerance &&
-    off[1] + ext[1] <= PAGE_EMU.height + tolerance
+    off[0] + ext[0] <= emu.width + tolerance &&
+    off[1] + ext[1] <= emu.height + tolerance
   );
 }
 
@@ -38,23 +45,25 @@ export function showsOnPage(
   off: [number, number],
   ext: [number, number],
   tolerance = 7620,
+  page?: PageSize,
 ): boolean {
+  const emu = page ? pageEmu(page) : PAGE_EMU;
   return (
     off[0] + ext[0] > -tolerance &&
     off[1] + ext[1] > -tolerance &&
-    off[0] < PAGE_EMU.width + tolerance &&
-    off[1] < PAGE_EMU.height + tolerance
+    off[0] < emu.width + tolerance &&
+    off[1] < emu.height + tolerance
   );
 }
 
-/** Every shape of every slide part. Group children are read through their own xfrm. */
-export async function readGeometry(zip: Package): Promise<ShapeBounds[]> {
+/** Every shape of every slide part, bounded by the page (the default when none is given). Group children are read through their own xfrm. */
+export async function readGeometry(zip: Package, page?: PageSize): Promise<ShapeBounds[]> {
   const out: ShapeBounds[] = [];
   for (const part of slideParts(zip)) {
     const xml = await readPart(zip, part);
     for (const shape of listShapes(xml)) {
-      const inside = inPage(shape.off, shape.ext);
-      const shows = showsOnPage(shape.off, shape.ext);
+      const inside = inPage(shape.off, shape.ext, 7620, page);
+      const shows = showsOnPage(shape.off, shape.ext, 7620, page);
       out.push({
         part,
         id: shape.id,

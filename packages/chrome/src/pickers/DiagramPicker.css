@@ -52,7 +52,7 @@
 .ts-diagram-preview {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   border: 1px solid var(--pt-hair);
   border-radius: 3px;
   background: var(--pt-paper);

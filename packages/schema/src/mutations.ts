@@ -2,8 +2,8 @@
 // agent's call both become a Write: a list of mutations applied atomically against a
 // baseRevision. Restore is a mutation, so it is undoable and visible in History (SPEC 6.7).
 import { z } from 'zod';
-import type { Asset } from './assets.ts';
-import { assetSchema } from './assets.ts';
+import type { DeckAsset } from './assets.ts';
+import { deckAssetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
 import { blockSchema } from './blocks.ts';
 import type { Section, Slide, SlotName } from './deck.ts';
@@ -88,7 +88,7 @@ export type Mutation =
       edit: TextMarkEdit;
     }
   | { op: 'section.set'; sections: Section[] }
-  | { op: 'asset.set'; asset: Asset }
+  | { op: 'asset.set'; asset: DeckAsset }
   | { op: 'asset.remove'; assetId: AssetId }
   /** JSON pointer into the manifest; title, theme and defaults only (trashedAt is deck.trash's, gslides-parity SPEC 7.2.5) */
   | { op: 'deck.set'; path: string; value?: unknown }
@@ -238,7 +238,7 @@ export const mutationSchema = z.discriminatedUnion('op', [
     ]),
   }),
   z.strictObject({ op: z.literal('section.set'), sections: z.array(sectionSchema) }),
-  z.strictObject({ op: z.literal('asset.set'), asset: assetSchema }),
+  z.strictObject({ op: z.literal('asset.set'), asset: deckAssetSchema }),
   z.strictObject({ op: z.literal('asset.remove'), assetId: slugSchema }),
   z.strictObject({ op: z.literal('deck.set'), path: pointer, value: z.unknown().optional() }),
   z.strictObject({ op: z.literal('version.restore'), n: z.number().int().positive() }),

@@ -328,6 +328,10 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           mutations: result.entry.mutations,
           inverse: result.inverse,
           ...(writeOptions.ops !== undefined ? { ops: writeOptions.ops } : {}),
+          // the writing tab and its batch (gslides-parity SPEC-5-amendments A3 items 5 and 6)
+          ...(writeOptions.origin !== undefined
+            ? { clientId: writeOptions.origin.clientId, opIds: [...writeOptions.origin.opIds] }
+            : {}),
         };
         writeVersion(dir, entry);
         writeManifest(dir, result.document.deck);

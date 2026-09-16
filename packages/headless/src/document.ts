@@ -24,6 +24,8 @@ export type SheetDocument = {
   sprite?: string;
   /** Extra head markup, for example a <script> that a live block needs. */
   head?: string;
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the viewport and the sheet fill it; 1600 by 900 when absent. */
+  page?: { width: number; height: number };
 };
 
 function escapeAttr(value: string): string {
@@ -34,19 +36,21 @@ function escapeAttr(value: string): string {
 export function sheetDocument(doc: SheetDocument): string {
   const styles = doc.styles.map((css) => `<style>\n${css}\n</style>`).join('\n');
   const base = doc.base ? `<base href="${escapeAttr(doc.base)}">` : '';
+  const w = doc.page?.width ?? 1600;
+  const h = doc.page?.height ?? 900;
   return `<!doctype html>
 <html lang="en" data-theme="${doc.theme}">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=1600,initial-scale=1">
+<meta name="viewport" content="width=${w},initial-scale=1">
 <title>${escapeAttr(doc.title ?? 'Turboslide render')}</title>
 ${base}
 <style>
 /* headless skeleton: the sheet fills the viewport, as the deck's present mode does (shoot-slide.mjs line 39) */
 html { color-scheme: ${doc.theme}; }
-html, body { margin: 0; padding: 0; width: 1600px; height: 900px; overflow: hidden; }
+html, body { margin: 0; padding: 0; width: ${w}px; height: ${h}px; overflow: hidden; }
 body { position: relative; background: ${doc.theme === 'dark' ? '#070707' : '#ffffff'}; }
-.ts-sheet { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; overflow: hidden; }
+.ts-sheet { position: absolute; left: 0; top: 0; width: ${w}px; height: ${h}px; overflow: hidden; }
 </style>
 ${styles}
 ${doc.head ?? ''}

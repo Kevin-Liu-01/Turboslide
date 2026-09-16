@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "presets-and-outlines",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "rounded-plate",
+        "type": "shape",
+        "shape": "roundRect",
+        "pos": {
+          "x": 59,
+          "y": 59,
+          "w": 302,
+          "h": 182,
+          "z": 1
+        },
+        "radius": 54,
+        "fill": "blue",
+        "stroke": "ink",
+        "width": 2,
+        "text": "Rounded",
+        "typography": {
+          "size": 33.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Rounded plate"
+        }
+      },
+      {
+        "id": "ellipse",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 398.5,
+          "y": 58.5,
+          "w": 243,
+          "h": 183,
+          "z": 2
+        },
+        "fill": "green",
+        "stroke": "ink",
+        "width": 3,
+        "dash": "dot",
+        "ext": {
+          "pptxName": "Ellipse"
+        }
+      },
+      {
+        "id": "triangle",
+        "type": "shape",
+        "shape": "triangle",
+        "pos": {
+          "x": 679.25,
+          "y": 59.25,
+          "w": 241.5,
+          "h": 181.5,
+          "rotate": 15,
+          "z": 3
+        },
+        "fill": "amber",
+        "stroke": "ink-2",
+        "width": 1.5,
+        "dash": "dash",
+        "ext": {
+          "pptxName": "Triangle"
+        }
+      },
+      {
+        "id": "chevron",
+        "type": "shape",
+        "shape": "chevron",
+        "pos": {
+          "x": 959.25,
+          "y": 59.25,
+          "w": 241.5,
+          "h": 181.5,
+          "rotate": 345,
+          "z": 4
+        },
+        "fill": "red",
+        "stroke": "ink",
+        "width": 1.5,
+        "dash": "dashDot",
+        "ext": {
+          "pptxName": "Chevron"
+        }
+      },
+      {
+        "id": "shape",
+        "type": "shape",
+        "shape": "wedgeRectCallout",
+        "pos": {
+          "x": 1239.25,
+          "y": 59.25,
+          "w": 301.5,
+          "h": 181.5,
+          "z": 5
+        },
+        "adjust": [
+          -40000,
+          90000
+        ],
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "dash": "longDash",
+        "text": "A callout",
+        "typography": {
+          "size": 26.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Callout"
+        }
+      },
+      {
+        "id": "decision",
+        "type": "shape",
+        "shape": "flowChartDecision",
+        "pos": {
+          "x": 58,
+          "y": 298,
+          "w": 304,
+          "h": 184,
+          "z": 6
+        },
+        "fill": "paper",
+        "stroke": "titanium",
+        "width": 4,
+        "dash": "longDashDot",
+        "text": "Yes or no",
+        "typography": {
+          "size": 26.5
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Decision"
+        }
+      },
+      {
+        "id": "flipped-arrow",
+        "type": "shape",
+        "shape": "rightArrow",
+        "pos": {
+          "x": 399.5,
+          "y": 299.5,
+          "w": 241,
+          "h": 121,
+          "flip": "h",
+          "z": 7
+        },
+        "fill": "ink",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Flipped arrow"
+        }
+      },
+      {
+        "id": "flipped-both",
+        "type": "shape",
+        "shape": "rtTriangle",
+        "pos": {
+          "x": 679.5,
+          "y": 299.5,
+          "w": 241,
+          "h": 121,
+          "flip": "hv",
+          "z": 8
+        },
+        "fill": "ink-2",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Flipped both"
+        }
+      },
+      {
+        "id": "shadowed",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 959.25,
+          "y": 299.25,
+          "w": 301.5,
+          "h": 121.5,
+          "z": 9
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1.5,
+        "dash": "dot",
+        "shadow": {
+          "blur": 10,
+          "distance": 5,
+          "angle": 45,
+          "color": "ink",
+          "opacity": 0.4
+        },
+        "ext": {
+          "pptxName": "Shadowed"
+        }
+      },
+      {
+        "id": "outline-only",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 1298,
+          "y": 298,
+          "w": 244,
+          "h": 124,
+          "z": 10
+        },
+        "stroke": "ink",
+        "width": 4,
+        "dash": "dash",
+        "ext": {
+          "pptxName": "Outline only"
+        }
+      },
+      {
+        "id": "gradient",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 59.5,
+          "y": 539.5,
+          "w": 301,
+          "h": 121,
+          "z": 11
+        },
+        "fill": "blue",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "alt": "A blue to white gradient",
+        "ext": {
+          "pptxName": "Gradient"
+        }
+      },
+      {
+        "id": "three-d",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 559.5,
+          "y": 539.5,
+          "w": 241,
+          "h": 121,
+          "z": 12
+        },
+        "fill": "titanium",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "ext": {
+          "pptxName": "Three D"
+        }
+      }
+    ]
+  },
+  "title": "Presets and outlines",
+  "ext": {
+    "pptxPart": "ppt/slides/slide1.xml",
+    "pptxSlideId": 256
+  }
+}

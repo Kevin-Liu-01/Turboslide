@@ -20,6 +20,8 @@ export const JPEG_QUALITY = 92;
 export type ScreenshotOptions = {
   /** PNG (default) or a JPEG at JPEG_QUALITY. */
   format?: ScreenshotFormat;
+  /** The deck's page in sheet pixels, the fallback clip when the sheet box is degenerate (gslides-parity SPEC-5 6.1); 1600 by 900 when absent. */
+  page?: { width: number; height: number };
 };
 
 /**
@@ -34,8 +36,11 @@ export async function screenshotSheet(
 ): Promise<ScreenshotResult> {
   await mkdir(dirname(path), { recursive: true });
   const t = performance.now();
-  // a degenerate box (an unsized sheet wrapper) falls back to the 1600 by 900 viewport
-  const [x, y, width, height] = sheet[2] >= 1 && sheet[3] >= 1 ? sheet : [0, 0, 1600, 900];
+  // a degenerate box (an unsized sheet wrapper) falls back to the page's viewport, 1600 by 900 for the default page
+  const [x, y, width, height] =
+    sheet[2] >= 1 && sheet[3] >= 1
+      ? sheet
+      : [0, 0, options.page?.width ?? 1600, options.page?.height ?? 900];
   const jpeg = options.format === 'jpg';
   await page.screenshot({
     path,

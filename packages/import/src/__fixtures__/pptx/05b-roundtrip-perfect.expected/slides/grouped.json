@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "grouped",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A group of four objects",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:grouped#h/text"
+        }
+      },
+      {
+        "id": "label",
+        "type": "text",
+        "text": "One group tag on three shapes and this text box",
+        "pos": {
+          "x": 240,
+          "y": 495.5,
+          "w": 800,
+          "h": 48,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 16,
+        "ext": {
+          "pptxName": "ts:grouped#label/text@g:four"
+        }
+      }
+    ]
+  },
+  "title": "A group of four objects",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide11.xml",
+    "pptxSlideId": 266
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "shadow",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "box",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 400,
+          "h": 200,
+          "z": 1
+        },
+        "fill": "paper",
+        "stroke": "#d2d2d2",
+        "width": 1,
+        "shadow": {
+          "blur": 12,
+          "distance": 8,
+          "angle": 45,
+          "color": "ink",
+          "opacity": 0.3
+        },
+        "ext": {
+          "pptxName": "ts:shadow#box"
+        },
+        "text": "A box with the default shadow",
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top"
+      },
+      {
+        "id": "shape",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 600,
+          "y": 300,
+          "w": 400,
+          "h": 200,
+          "z": 2
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1,
+        "shadow": {
+          "blur": 20,
+          "distance": 12,
+          "angle": 90,
+          "color": "ink",
+          "opacity": 0.3
+        },
+        "ext": {
+          "pptxName": "ts:shadow#shape"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Drop shadows",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 3
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shadow#h/text"
+        }
+      },
+      {
+        "id": "photo",
+        "type": "picture",
+        "asset": "image-15-1",
+        "pos": {
+          "x": 1063,
+          "y": 300,
+          "w": 400,
+          "h": 225,
+          "z": 5
+        },
+        "shadow": {
+          "blur": 12,
+          "distance": 8,
+          "angle": 45,
+          "color": "ink",
+          "opacity": 0.5
+        },
+        "alt": "photo (block)",
+        "ext": {
+          "pptxName": "ts:shadow#photo:1"
+        }
+      }
+    ]
+  },
+  "title": "Drop shadows",
+  "ext": {
+    "pptxPart": "ppt/slides/slide15.xml",
+    "pptxSlideId": 270
+  }
+}

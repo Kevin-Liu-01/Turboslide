@@ -8,7 +8,19 @@
 // rectangle: the box as the path, the whole box as the text inset, the eight sites of a rectangle.
 // The line kinds (SPEC-2 2.4), the ten line decorations and the six dashes live here too, and the
 // picker draws every glyph from `shapePath(48, 36)`; nothing is copied from Google. Imports only
-// the definitions module, so blocks.ts and the chrome can import it without a cycle.
+// the definitions module and its geometry seam, so blocks.ts and the chrome can import it without
+// a cycle. Since round five the three functions delegate to shapes/geometry.ts (gslides-parity
+// SPEC-5 6.5), the interpreter that evaluates each preset's guide formulas and path list, so the
+// 135 presets draw as ECMA-376 defines them; `shapePathParts` hands the renderer one path per
+// definition path with its fill mode and stroke flag (a can's shaded lid, a cube's inner edges).
+import {
+  pathData,
+  shapePath as shapePathCommands,
+  shapePaths as shapePathList,
+  sites as sitesOf,
+  textInset as textInsetBox,
+} from './shapes/geometry.ts';
+import type { ShapeFillMode } from './shapes/geometry.ts';
 import { PRESET_DEFINITIONS } from './shapes/definitions.ts';
 
 export const SHAPE_CATEGORIES = ['shapes', 'arrows', 'callouts', 'equation'] as const;
@@ -373,34 +385,57 @@ export type Box = { x: number; y: number; w: number; h: number };
 /** A connection site on a shape: a point on the outline and the angle a connector leaves at, in degrees. */
 export type ConnectionSite = { x: number; y: number; angle: number };
 
+/** A coordinate on the half pixel grid (the line decorations below; the presets go through shapes/geometry.ts pathData). */
 function fmt(n: number): string {
   return String(Math.round(n * 2) / 2);
 }
 
 /**
- * The SVG path data of a shape at a size, on the half pixel grid, with the adjust values applied.
- * Until shapes/geometry.ts lands (merge 1b) every preset draws its box; the interpreter then
- * evaluates the preset's path list exactly (SPEC-2 0.57).
+ * The SVG path data of a shape at a size, on the half pixel grid, with the adjust values applied:
+ * the string form of `shapes/geometry.ts` `shapePath` (gslides-parity SPEC-5 6.5), every path of
+ * the preset's definition in order, evaluated by the interpreter (SPEC-2 0.57).
  */
 export function shapePath(
   kind: string,
   w: number,
   h: number,
-  _adjust: ReadonlyArray<number> = [],
+  adjust: ReadonlyArray<number> = [],
 ): string {
   void presetOf(kind);
-  return `M0,0 H${fmt(w)} V${fmt(h)} H0 Z`;
+  return pathData(shapePathCommands(kind, { x: 0, y: 0, w, h }, adjust));
 }
 
-/** The text rectangle of a shape at a size (SPEC-2 2.2.17); the whole box until the interpreter lands. */
+/** One drawable path of a preset: its data, how it is filled and whether it is stroked (ECMA-376 ST_PathFillMode). */
+export type ShapePathPart = { d: string; fill: ShapeFillMode; stroke: boolean };
+
+/**
+ * The paths of a shape at a size as the renderer draws them (SPEC-5 6.5): one part per path of the
+ * definition, so a preset with shaded faces or inner edges (`can`, `cube`, `arc`, the flowchart
+ * storage shapes) draws each with its own fill and stroke; a one path preset answers one part
+ * whose `d` equals `shapePath`.
+ */
+export function shapePathParts(
+  kind: string,
+  w: number,
+  h: number,
+  adjust: ReadonlyArray<number> = [],
+): ShapePathPart[] {
+  return shapePathList(kind, { x: 0, y: 0, w, h }, adjust).map((part) => ({
+    d: pathData(part.commands),
+    fill: part.fill,
+    stroke: part.stroke,
+  }));
+}
+
+/** The text rectangle of a shape at a size (SPEC-2 2.2.17): the preset's `rect` guides evaluated at the origin (`shapes/geometry.ts` `textInset`). */
 export function textInset(
   kind: string,
   w: number,
   h: number,
-  _adjust: ReadonlyArray<number> = [],
+  adjust: ReadonlyArray<number> = [],
 ): Box {
   void presetOf(kind);
-  return { x: 0, y: 0, w, h };
+  return textInsetBox(kind, { x: 0, y: 0, w, h }, adjust);
 }
 
 /** The eight sites of a rectangle: the four side midpoints, then the four corners (SPEC-2 2.4.7). */
@@ -420,16 +455,16 @@ export function rectSites(w: number, h: number): ConnectionSite[] {
 /**
  * The connection sites of a shape at a size, in the order the definitions file lists them, which
  * `connect.site` indexes (SPEC-2 2.4.7). A box, a picture, a chart, a table or a text box uses
- * the eight sites of a rectangle; until the interpreter lands every preset does too.
+ * the eight sites of a rectangle, and so does the rectangle preset (its four are the first four).
  */
 export function sites(
   kind: string,
   w: number,
   h: number,
-  _adjust: ReadonlyArray<number> = [],
+  adjust: ReadonlyArray<number> = [],
 ): ConnectionSite[] {
   void presetOf(kind);
-  return rectSites(w, h);
+  return sitesOf(kind, { x: 0, y: 0, w, h }, adjust);
 }
 
 /**

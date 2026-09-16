@@ -26,6 +26,7 @@
     "./static/structure": "./src/static/structure.ts",
     "./static/export-non-native": "./src/static/export-non-native.ts",
     "./static/freeform": "./src/static/freeform.ts",
+    "./static/spelling": "./src/static/spelling.ts",
     "./rendered/rules": "./src/rendered/rules.ts",
     "./fixtures/deck": "./src/fixtures/deck.ts",
     "./package.json": "./package.json"

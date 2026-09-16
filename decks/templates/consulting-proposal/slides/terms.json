@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "terms",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Terms",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Fees are invoiced at the start of each phase and due in thirty days.\nEither side may end the engagement with two weeks of notice; work done is invoiced.\nThe deliverables belong to the client on payment.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "Terms"
+}

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "id": "dependencies",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "title": "Dependencies",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Dependencies",
+        "pos": {
+          "x": 137,
+          "y": 92,
+          "w": 1000,
+          "h": 72,
+          "z": 1
+        }
+      },
+      {
+        "id": "item-1",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 137,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 0,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "label-1",
+        "type": "text",
+        "text": "Item 1",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 1,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "item-2",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 449,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 2,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "label-2",
+        "type": "text",
+        "text": "Item 2",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 449,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 3,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "item-3",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 761,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 4,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "label-3",
+        "type": "text",
+        "text": "Item 3",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 761,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 5,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "item-4",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "width": 1.5,
+        "pos": {
+          "x": 1073,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 6,
+          "group": "dependencies"
+        }
+      },
+      {
+        "id": "label-4",
+        "type": "text",
+        "text": "Item 4",
+        "typography": {
+          "align": "center",
+          "weight": 500
+        },
+        "valign": "middle",
+        "padding": 16,
+        "pos": {
+          "x": 1073,
+          "y": 235,
+          "w": 390,
+          "h": 390,
+          "z": 7,
+          "group": "dependencies"
+        }
+      }
+    ]
+  }
+}

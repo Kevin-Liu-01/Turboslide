@@ -152,3 +152,98 @@ describe('admission', () => {
     expect(drawn).toBeLessThanOrEqual(290_000);
   });
 });
+
+describe('chat admission (gslides-parity SPEC-5 0.46, 10)', async () => {
+  const { CHAT_CAPS, chatBudget, chatEntry, chatMentions, chatMessagesOf, checkChatMessage } =
+    await import('./admission.ts');
+  it('names the rate rows and the two caps', () => {
+    expect(CHAT_CAPS.messagesPerMinutePerDeck).toEqual({ anonymous: 30, signedIn: 60, agent: 120 });
+    expect(CHAT_CAPS.textMaxCodePoints).toBe(4000);
+    expect(CHAT_CAPS.mentionsMax).toBe(20);
+    expect(chatBudget('d1', 'agent', 120_000)).toEqual({
+      key: 'q:deck:d1:chat:2',
+      cap: 120,
+      windowMs: 60_000,
+    });
+  });
+  it('admits a commenter, refuses a viewer, an empty text, a long text and too many mentions', () => {
+    expect(checkChatMessage('  Pricing slide is ready @maya ', 'commenter')).toEqual({
+      ok: true,
+      text: 'Pricing slide is ready @maya',
+      mentions: ['maya'],
+    });
+    expect(checkChatMessage('hello', 'viewer')).toMatchObject({
+      ok: false,
+      status: 403,
+      code: 'forbidden',
+    });
+    expect(checkChatMessage('   ', 'editor')).toMatchObject({
+      ok: false,
+      status: 400,
+      code: 'empty',
+    });
+    expect(checkChatMessage('x'.repeat(4001), 'owner')).toMatchObject({
+      ok: false,
+      code: 'too-long',
+    });
+    expect(checkChatMessage('é'.repeat(4000), 'owner').ok).toBe(true);
+    const mentions = Array.from({ length: 21 }, (_v, i) => `@p${i}`).join(' ');
+    expect(checkChatMessage(mentions, 'owner')).toMatchObject({
+      ok: false,
+      code: 'too-many-mentions',
+    });
+  });
+  it('reads the mentions once each and builds a chat entry the stream carries', () => {
+    expect(chatMentions('@kai and @maya, then @kai again; not an email a@b.c')).toEqual([
+      'kai',
+      'maya',
+    ]);
+    const entry = chatEntry({
+      rev: 4,
+      author: { kind: 'human', name: 'Kai' },
+      clientId: 'c1',
+      principalId: 'anon_1',
+      text: 'hi',
+      at: '2026-09-15T10:00:00.000Z',
+      id: 'chat_fixed',
+    });
+    expect(entry).toEqual({
+      rev: 4,
+      kind: 'chat',
+      author: { kind: 'human', name: 'Kai' },
+      clientId: 'c1',
+      opId: 'chat_fixed',
+      at: '2026-09-15T10:00:00.000Z',
+      chat: { id: 'chat_fixed', principalId: 'anon_1', text: 'hi', at: '2026-09-15T10:00:00.000Z' },
+    });
+    const minted = chatEntry({ ...entry, principalId: 'anon_1', text: 'hi', at: entry.at });
+    expect(minted.opId).toMatch(/^chat_[0-9a-z]+_[0-9a-f]{8}$/u);
+  });
+  it('lists the chat messages of a slice since a time, oldest first', () => {
+    const at = (n: number) => `2026-09-15T10:0${n}:00.000Z`;
+    const entries = [1, 2, 3].map((n) => ({
+      ...chatEntry({
+        rev: 1,
+        author: { kind: 'human' as const, name: 'K' },
+        clientId: 'c',
+        principalId: 'p',
+        text: `m${n}`,
+        at: at(n),
+        id: `id${n}`,
+      }),
+      seq: n,
+    }));
+    const edit = {
+      rev: 1,
+      kind: 'edit' as const,
+      author: { kind: 'human' as const, name: 'K' },
+      clientId: 'c',
+      opId: 'e',
+      at: at(2),
+      mutations: [],
+      seq: 4,
+    };
+    expect(chatMessagesOf([...entries, edit]).map((m) => m.text)).toEqual(['m1', 'm2', 'm3']);
+    expect(chatMessagesOf(entries, at(2)).map((m) => m.text)).toEqual(['m3']);
+  });
+});

@@ -1,0 +1,50 @@
+{
+  "id": "quotes/quote-on-plate",
+  "category": "quotes",
+  "label": "Quote on a plate",
+  "blocks": [
+    {
+      "id": "plate",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 1326,
+        "h": 400,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "fill": "plate"
+    },
+    {
+      "id": "quote",
+      "pos": {
+        "x": 60,
+        "y": 60,
+        "w": 1206,
+        "h": 220,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "The report lands before the meeting now, every week."
+    },
+    {
+      "id": "credit",
+      "pos": {
+        "x": 60,
+        "y": 300,
+        "w": 1206,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "A customer, finance lead",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    400
+  ]
+}

@@ -1,6 +1,11 @@
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import type { Correction, Preferences } from '@turboslide/schema/preferences';
+import { applyCorrection, autocorrect, isTriggerKey } from '@turboslide/schema/preferences';
+
+import { DictateBox } from './DictateBox';
+import type { RecognitionCtor } from './DictateBox';
 import { PROMPTS } from './menus/strings.ts';
 import { hideTooltip, tipProps } from './Tooltip';
 
@@ -29,7 +34,69 @@ export type NotesPaneProps = {
   bindKey?: boolean;
   /** a disabled pane (Viewing mode) shows the notes and takes no input */
   readOnly?: boolean;
+  /** the deck's language (gslides-parity SPEC-5 7.1): the field's `lang`, the quote style, the dictation default */
+  language?: string;
+  /** the caller's preferences: the autocorrect rules run on the trigger keys (SPEC-5 7.1; R10 1.4) */
+  preferences?: Preferences;
+  /** Tools > Dictate speaker notes (SPEC-5 7.3): the box floats over the pane while open */
+  dictate?: {
+    open: boolean;
+    onClose: () => void;
+    /** `preferences.dictation.lang` */
+    preferred?: string;
+    onLanguage?: (lang: string) => void;
+    /** the recognition constructor; the page's when absent (the tests inject a fake) */
+    ctor?: RecognitionCtor | null;
+  };
 };
+
+/** How long after a correction a Backspace reverts it alone (R10 1.4; G11). */
+export const NOTES_REVERT_MS = 2000;
+
+export type NotesCorrection = {
+  value: string;
+  caret: number;
+  correction: Correction;
+  /** the plain text the correction replaced, for the Backspace revert */
+  from: string;
+  /** the offset in the whole value */
+  at: number;
+};
+
+/**
+ * The autocorrect engine over the notes textarea (pure): the paragraph around the caret, the
+ * trigger key about to land, the record's rules; the corrected value with the caret moved, or
+ * null. A list correction never applies to the notes (plain text has no list marker).
+ */
+export function notesCorrection(
+  value: string,
+  caret: number,
+  key: string,
+  preferences: Preferences,
+  language: string,
+): NotesCorrection | null {
+  if (!isTriggerKey(key)) return null;
+  const start = value.lastIndexOf('\n', caret - 1) + 1;
+  const end = value.indexOf('\n', caret);
+  const paragraph = value.slice(start, end < 0 ? value.length : end);
+  const correction = autocorrect(paragraph, caret - start, key, preferences, language, {
+    listable: false,
+    exceptions: preferences.spelling.dictionary,
+  });
+  if (correction === null || correction.link !== undefined || correction.list !== undefined)
+    return null;
+  const next = applyCorrection(paragraph, correction);
+  const at = start + correction.at;
+  const from = paragraph.slice(correction.at, correction.at + correction.remove);
+  const shift = correction.insert.length - correction.remove;
+  return {
+    value: value.slice(0, start) + next + value.slice(end < 0 ? value.length : end),
+    caret: caret + shift,
+    correction,
+    from,
+    at,
+  };
+}
 
 /** The height a drag lands on: clamped to the window's share, or 0 when dragged to the bottom (pure; NotesPane.test.tsx pins it). */
 export function clampNotesHeight(height: number, windowHeight: number): number {
@@ -58,6 +125,9 @@ export function NotesPane({
   windowHeight,
   bindKey = true,
   readOnly = false,
+  language = 'en-US',
+  preferences,
+  dictate,
 }: NotesPaneProps) {
   const [draft, setDraft] = useState(notes);
   const field = useRef<HTMLTextAreaElement>(null);
@@ -66,6 +136,8 @@ export function NotesPane({
   const callbacks = useRef({ onCommit, onHeightChange });
   callbacks.current = { onCommit, onHeightChange };
   const shownSlide = useRef(slideId);
+  /* the last autocorrection, for the Backspace revert within 2 s (R10 1.4) */
+  const lastCorrection = useRef<(NotesCorrection & { time: number }) | null>(null);
 
   /* a slide change: whatever was typed on the slide before is written now, and the new slide's
      notes fill the field */
@@ -111,6 +183,18 @@ export function NotesPane({
     timer.current = window.setTimeout(flush, NOTES_BURST_MS);
   };
 
+  /** Writes a value into the field and the draft with the caret placed, then schedules the write. */
+  const setValue = (value: string, caret: number) => {
+    const element = field.current;
+    setDraft(value);
+    if (element !== null) {
+      element.value = value;
+      element.setSelectionRange(caret, caret);
+    }
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(flush, NOTES_BURST_MS);
+  };
+
   const onKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -120,6 +204,52 @@ export function NotesPane({
     /* the page's undo must not fire on the field's own text; the browser's undo runs here */
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z')
       event.stopPropagation();
+    if (readOnly || event.metaKey || event.ctrlKey || event.altKey) return;
+    const element = event.currentTarget;
+    /* Backspace right after a correction reverts the correction alone (G11) */
+    if (event.key === 'Backspace' && lastCorrection.current !== null) {
+      const last = lastCorrection.current;
+      lastCorrection.current = null;
+      if (Date.now() - last.time <= NOTES_REVERT_MS && element.value === last.value) {
+        event.preventDefault();
+        const restored =
+          last.value.slice(0, last.at) +
+          last.from +
+          last.value.slice(last.at + last.correction.insert.length);
+        flush();
+        setValue(restored, last.at + last.from.length);
+        flush();
+        return;
+      }
+    }
+    if (preferences === undefined || !isTriggerKey(event.key)) return;
+    if (element.selectionStart !== element.selectionEnd) return;
+    const caret = element.selectionStart;
+    const result = notesCorrection(
+      element.value,
+      caret,
+      event.key === 'Enter' ? '\n' : event.key,
+      preferences,
+      language,
+    );
+    if (result === null) return;
+    /* the typed word travels as its own write, then the correction as its own, so undo reverts
+       the correction alone (R10 1.4) */
+    flush();
+    if (result.correction.consumesTrigger === true) event.preventDefault();
+    setValue(result.value, result.caret);
+    flush();
+    lastCorrection.current = { ...result, time: Date.now() };
+  };
+
+  /** A dictated result lands at the caret with a leading space and travels as typing does (SPEC-5 7.3). */
+  const appendDictated = (text: string) => {
+    const element = field.current;
+    const current = element?.value ?? draft;
+    const caret = element?.selectionStart ?? current.length;
+    const lead = caret > 0 && !/\s$/u.test(current.slice(0, caret)) ? ' ' : '';
+    const insert = `${lead}${text.trim()}`;
+    setValue(current.slice(0, caret) + insert + current.slice(caret), caret + insert.length);
   };
 
   /* the handle: drag resizes between 0 and 40 percent of the window; double click toggles */
@@ -201,6 +331,7 @@ export function NotesPane({
           aria-label="Speaker notes"
           data-control="notes.text"
           spellCheck
+          lang={language}
           readOnly={readOnly}
           {...fieldTip}
           onChange={(event) => onChange(event.target.value)}
@@ -217,6 +348,16 @@ export function NotesPane({
           }}
         />
       )}
+      {dictate?.open === true && !hidden && !readOnly ? (
+        <DictateBox
+          language={language}
+          preferred={dictate.preferred}
+          onLanguage={dictate.onLanguage}
+          onFinal={appendDictated}
+          onClose={dictate.onClose}
+          ctor={dictate.ctor}
+        />
+      ) : null}
     </div>
   );
 }

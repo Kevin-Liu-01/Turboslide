@@ -1,0 +1,125 @@
+{
+  "id": "cards/three-cards",
+  "category": "cards",
+  "label": "Three cards",
+  "blocks": [
+    {
+      "id": "card-1",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 320,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "fill": "plate"
+    },
+    {
+      "id": "title-1",
+      "pos": {
+        "x": 32,
+        "y": 32,
+        "w": 336,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Card 1"
+    },
+    {
+      "id": "text-1",
+      "pos": {
+        "x": 32,
+        "y": 100,
+        "w": 336,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Two lines on what the card holds and why it matters."
+    },
+    {
+      "id": "card-2",
+      "pos": {
+        "x": 463,
+        "y": 0,
+        "w": 400,
+        "h": 320,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "fill": "plate"
+    },
+    {
+      "id": "title-2",
+      "pos": {
+        "x": 495,
+        "y": 32,
+        "w": 336,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Card 2"
+    },
+    {
+      "id": "text-2",
+      "pos": {
+        "x": 495,
+        "y": 100,
+        "w": 336,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Two lines on what the card holds and why it matters."
+    },
+    {
+      "id": "card-3",
+      "pos": {
+        "x": 926,
+        "y": 0,
+        "w": 400,
+        "h": 320,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "fill": "plate"
+    },
+    {
+      "id": "title-3",
+      "pos": {
+        "x": 958,
+        "y": 32,
+        "w": 336,
+        "h": 60,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Card 3"
+    },
+    {
+      "id": "text-3",
+      "pos": {
+        "x": 958,
+        "y": 100,
+        "w": 336,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Two lines on what the card holds and why it matters."
+    }
+  ],
+  "box": [
+    1326,
+    320
+  ]
+}

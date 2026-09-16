@@ -12,7 +12,7 @@ import { resolvePrincipal } from '@turboslide/identity/resolve';
 import type { ResolvedIdentity, Trust } from '@turboslide/identity/resolve';
 import { appendWithRetry, CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admission';
 import type { IdentityKind } from '@turboslide/realtime/admission';
-import { blobChannel } from '@turboslide/realtime/blob';
+import { blobChannel, entryOfRecord } from '@turboslide/realtime/blob';
 import type {
   Entry,
   NewEntry,
@@ -31,6 +31,7 @@ import {
   CLIENT_BINDING_TTL_MS,
   EDITING_TABS_MAX,
   LIVE_POINTERS_MAX,
+  OPS_POST_MAX_ENTRIES,
   PRESENCE_EXPIRY_MS,
   PRESENCE_PER_SECOND,
   REPLAY_MAX_BYTES,
@@ -366,6 +367,19 @@ async function createRoom(deckId: string): Promise<Room> {
   /** Advances the live document to the channel's head, or reloads it from the store when the stream was trimmed past it. */
   const syncLive = async (): Promise<LiveDocument> => {
     if (selection.tier === 'blob') {
+      // the head, every time (gslides-parity SPEC-5-amendments A3 item 2; A8 row 2): until round
+      // five the mirror inside its 750 ms window admitted a write against a document another
+      // instance had moved past, so a fast pair of writes was refused as stale or an op rejected
+      // against a block the other instance had just committed (build-4/hotfix-4.md 3.6, 3.7).
+      // The mirror at the head is then the delivered revision for the reads that follow it.
+      const mirror = store as DeckStore & {
+        sync?: (force?: boolean) => Promise<{ revision: number | null }>;
+        noteDelivered?: (revision: number) => void;
+      };
+      if (typeof mirror.sync === 'function') {
+        const synced = await mirror.sync(true);
+        if (synced.revision !== null) mirror.noteDelivered?.(synced.revision);
+      }
       const current = await store.read();
       live.document = current.document;
       live.seq = current.document.deck.revision;
@@ -700,7 +714,18 @@ export type AdmissionResult =
       message: string;
       head?: number;
       retryAfterMs?: number;
+      /**
+       * A 409 `resync` on the blob tier carries the entries since the client's base (gslides-parity
+       * SPEC-5-amendments A3 item 3), so the tab rebases its pending operations onto them and
+       * retries once without reloading the document or asking anyone.
+       */
+      since?: Entry[];
     };
+
+/** The plain sentence of a refused base (A3 item 8: no "stale", no "baseRevision" in front of a person). */
+export function movedSentence(revision: number): string {
+  return `The presentation moved to revision ${revision} while this change was on its way`;
+}
 
 /** A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). */
 function slideBytes(slide: Slide): number {
@@ -1084,15 +1109,37 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   };
 }
 
-/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. */
+/** How many of the newest records the blob admission reads for a replayed op id (A3 items 3 and 5). */
+export const BLOB_REPLAY_RECORDS = 200;
+
+/**
+ * The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Round five
+ * (gslides-parity SPEC-5-amendments A3 items 2, 3 and 5): the live document is read at the
+ * store's head (`syncLive`), an op id a record of this tab already commits is answered with that
+ * record's entry and never appended twice (a persisted queue, a POST whose answer was lost), and a
+ * lost race answers the entries since the client's base so the tab rebases without a reload.
+ */
 async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
   const live = await room.live();
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
   const rejected: Rejected[] = [];
   const candidates: NewEntry[] = [];
+  const replayed: Entry[] = [];
+  const known = new Map<string, Entry>();
+  const records = await room.store.records();
+  for (const record of records.slice(-BLOB_REPLAY_RECORDS)) {
+    if (record.clientId !== post.clientId || record.opIds === undefined) continue;
+    const echo = entryOfRecord(record);
+    for (const opId of record.opIds) known.set(opId, { ...echo, opId });
+  }
   let running = live.document;
   for (const entry of post.entries) {
+    const already = known.get(entry.opId);
+    if (already !== undefined) {
+      replayed.push(already);
+      continue;
+    }
     if (entry.kind === 'comment') {
       if (entry.comment !== undefined)
         candidates.push({
@@ -1130,23 +1177,37 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
   if (candidates.length === 0)
     return {
       ok: true,
-      entries: [],
+      entries: replayed,
       rejected,
       head: live.seq,
       revision: live.document.deck.revision,
     };
   const result = await room.channel.append(room.deckId, live.document.deck.revision, candidates);
   if (!result.ok) {
+    // the entries since the client's base (A3 item 3): the tab moves its pending operations past
+    // them with the transform and posts again on the new base, once, without a prompt
+    const behind = Math.max(0, result.head - post.base.seq);
+    const since =
+      behind > 0 && behind <= OPS_POST_MAX_ENTRIES
+        ? await room.channel.since(room.deckId, post.base.seq, behind).catch(() => [])
+        : [];
     return {
       ok: false,
       status: 409,
       code: 'resync',
-      message: `The deck moved to revision ${result.head}; reload and rebase`,
+      message: movedSentence(result.head),
       head: result.head,
+      since,
     };
   }
   const revision = result.entries[0]?.seq ?? live.document.deck.revision;
-  return { ok: true, entries: result.entries, rejected, head: revision, revision };
+  return {
+    ok: true,
+    entries: [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq),
+    rejected,
+    head: revision,
+    revision,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1447,8 +1508,25 @@ export async function retireClients(
   return retired;
 }
 
-export async function bindClient(room: Room, identity: RequestIdentity): Promise<string> {
-  const clientId = mintClientId(room.deckId, identity.identity);
+/**
+ * Issues the stream's client id and binds it to the session (report 10 F26). Round five
+ * (gslides-parity SPEC-5-amendments A3 item 5): one client id per tab. The tab asks for the id it
+ * holds in its sessionStorage (`?client=`); it is reused when its MAC names this deck and this
+ * identity, so a reload or a reconnect keeps the tab's id, its roster row is replaced in place
+ * and nothing of the tab's earlier life is drawn as a collaborator. A stranger's id, another
+ * deck's id or a malformed one is never reused: the tab gets a fresh id and retires the old one.
+ */
+export async function bindClient(
+  room: Room,
+  identity: RequestIdentity,
+  requested?: string | null,
+): Promise<string> {
+  const clientId =
+    requested !== undefined &&
+    requested !== null &&
+    clientIdMatches(room.deckId, requested, identity.identity)
+      ? requested
+      : mintClientId(room.deckId, identity.identity);
   await room.channel.presence.bind(room.deckId, clientId, identity.identity, CLIENT_BINDING_TTL_MS);
   return clientId;
 }
@@ -1495,11 +1573,27 @@ export type StreamCounters = {
     address: string | null,
   ) => { ok: true; release: () => void } | { ok: false; cap: 'identity' | 'ip' | 'instance' };
   counts: () => { total: number; identities: number };
+  /**
+   * One stream per tab per instance (gslides-parity SPEC-5-amendments A3 item 5; the fix round of
+   * VERIFICATION-5 finding 14): a tab holds one EventSource, so a second stream opening under a
+   * client id this instance already streams supersedes the first, whose connection is dead or
+   * about to be (a reload, a reconnect after the network came back, the browser's own retry).
+   * The earlier stream's `close` runs at once, which releases its slot before the new stream
+   * takes one; without it a reconnect met the identity cap on dropped streams the runtime never
+   * reported as aborted, the browser's EventSource closed for good on the 503 and the tab never
+   * converged again. Answers whether an earlier stream was closed.
+   */
+  claim: (deckId: string, clientId: string, close: () => void) => boolean;
+  /** forgets a claim, only when it is still this stream's */
+  unclaim: (deckId: string, clientId: string, close: () => void) => void;
+  /** how many streams this instance holds by client id */
+  claimed: () => number;
 };
 
 export function createStreamCounters(): StreamCounters {
   const byIdentity = new Map<string, number>();
   const byAddress = new Map<string, number>();
+  const claims = new Map<string, () => void>();
   let total = 0;
   const bump = (map: Map<string, number>, key: string, by: number): void => {
     const next = (map.get(key) ?? 0) + by;
@@ -1529,6 +1623,23 @@ export function createStreamCounters(): StreamCounters {
       };
     },
     counts: () => ({ total, identities: byIdentity.size }),
+    claim(deckId, clientId, close) {
+      const key = `${deckId}/${clientId}`;
+      const earlier = claims.get(key);
+      claims.set(key, close);
+      if (earlier === undefined) return false;
+      try {
+        earlier();
+      } catch {
+        // the earlier stream was closing already
+      }
+      return true;
+    },
+    unclaim(deckId, clientId, close) {
+      const key = `${deckId}/${clientId}`;
+      if (claims.get(key) === close) claims.delete(key);
+    },
+    claimed: () => claims.size,
   };
 }
 
@@ -1765,8 +1876,8 @@ export async function admitServerWrite(
         code: 'conflict',
         message:
           input.strict === true
-            ? `baseRevision ${input.baseRevision} is stale; the document is at revision ${current}`
-            : `a slide this write touches changed since revision ${input.baseRevision}; the document is at revision ${current}`,
+            ? movedSentence(current)
+            : `A slide this change touches moved since revision ${input.baseRevision}; the presentation is at revision ${current}`,
         currentRevision: current,
         current: live.document,
         since,

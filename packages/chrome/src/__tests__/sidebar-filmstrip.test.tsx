@@ -206,6 +206,61 @@ describe('the filmstrip', () => {
     expect(container.querySelectorAll('.is-skipped')).toHaveLength(1);
   });
 
+  it('draws the motion glyph on a card whose slide carries a transition or an animation (SPEC-5 2.1)', () => {
+    const moving = {
+      ...worked,
+      slides: {
+        ...worked.slides,
+        thesis: {
+          ...worked.slides['thesis']!,
+          transition: { kind: 'fade' as const, durationMs: 500 },
+        },
+        title: {
+          ...worked.slides['title']!,
+          animations: [
+            {
+              id: 'a1',
+              blockId: 'heading',
+              effect: 'appear' as const,
+              trigger: 'click' as const,
+              durationMs: 500,
+            },
+          ],
+        },
+      },
+    };
+    const { container } = harness({ edit: { document: moving } });
+    expect(card('thesis').querySelector('.ts-card-motion use')?.getAttribute('href')).toBe(
+      '#i-sparkles',
+    );
+    expect(card('title').querySelector('.ts-card-motion')).not.toBeNull();
+    expect(card('content-rule').querySelector('.ts-card-motion')).toBeNull();
+    expect(container.querySelectorAll('.ts-card-motion')).toHaveLength(2);
+    /* a None transition is no motion */
+    const none = {
+      ...worked,
+      slides: {
+        ...worked.slides,
+        thesis: {
+          ...worked.slides['thesis']!,
+          transition: { kind: 'none' as const, durationMs: 500 },
+        },
+      },
+    };
+    cleanup();
+    harness({ edit: { document: none } });
+    expect(card('thesis').querySelector('.ts-card-motion')).toBeNull();
+  });
+
+  it("reads the renderer's data-motion mark when the page passes no document", () => {
+    const sections = sectionsOf([{ id: 'brand', label: 'Brand', slideIds: ['thesis', 'title'] }]);
+    sections[0]!.items[0]!.html =
+      '<section class="slide is-on" data-slide="thesis" data-motion="1"><div class="in"><h2>t</h2></div></section>';
+    harness({ sections, edit: { document: undefined } });
+    expect(card('thesis').querySelector('.ts-card-motion')).not.toBeNull();
+    expect(card('title').querySelector('.ts-card-motion')).toBeNull();
+  });
+
   it('selects one on click, a range with Shift, a toggle with Cmd, and all with Cmd A', () => {
     const { select, edit } = harness({ edit: { onSelectionChange: vi.fn() } });
     fireEvent.click(card('thesis'), { button: 0 });

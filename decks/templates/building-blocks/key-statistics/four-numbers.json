@@ -1,0 +1,115 @@
+{
+  "id": "key-statistics/four-numbers",
+  "category": "key-statistics",
+  "label": "Four numbers",
+  "blocks": [
+    {
+      "id": "one-value",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 300,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "2"
+    },
+    {
+      "id": "one-label",
+      "pos": {
+        "x": 0,
+        "y": 120,
+        "w": 300,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Days saved a week",
+      "role": "cap"
+    },
+    {
+      "id": "two-value",
+      "pos": {
+        "x": 342,
+        "y": 0,
+        "w": 300,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "0"
+    },
+    {
+      "id": "two-label",
+      "pos": {
+        "x": 342,
+        "y": 120,
+        "w": 300,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Numbers by hand",
+      "role": "cap"
+    },
+    {
+      "id": "three-value",
+      "pos": {
+        "x": 684,
+        "y": 0,
+        "w": 300,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "9 of 10"
+    },
+    {
+      "id": "three-label",
+      "pos": {
+        "x": 684,
+        "y": 120,
+        "w": 300,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Would recommend",
+      "role": "cap"
+    },
+    {
+      "id": "four-value",
+      "pos": {
+        "x": 1026,
+        "y": 0,
+        "w": 300,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "4"
+    },
+    {
+      "id": "four-label",
+      "pos": {
+        "x": 1026,
+        "y": 120,
+        "w": 300,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Teams live",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    160
+  ]
+}

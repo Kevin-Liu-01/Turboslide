@@ -35,6 +35,8 @@ import {
 } from '@turboslide/schema/text';
 import type { Run, RunMarks, Text as Markup } from '@turboslide/schema/text';
 
+import { inlineCorrection, revertCorrection, shouldRevert } from './inline-autocorrect';
+import type { InlineAutocorrectContext, InlineCorrection } from './inline-autocorrect';
 import { colorFromCss, colorRange, marksOf, toggleMark, wordRangeAt } from './marks';
 import type { ToggleMark } from './marks';
 import { blockById, cellPointer, listItemPointer } from './Selection';
@@ -964,7 +966,12 @@ export type InlineTextEndReason =
   | 'list-backspace'
   /** Enter on an empty list item: the item leaves the list (SPEC-2 6.2 Lists) */
   | 'list-leave'
+  /** a typed list prefix then a space: the Editor converts the block to a list (gslides-parity SPEC-5 7.1) */
+  | 'autocorrect-list'
   | 'unmount';
+
+/** Why a burst was flushed: an autocorrection carries its rule so the route closes an undo group around it (R10 1.4). */
+export type BurstMeta = { autocorrect?: string };
 
 /** What the toolbar reads about the caret: the plain range and the marks of the run it sits in (SPEC-2 6.2). */
 export type CaretInfo = { range: [number, number]; marks: RunMarks & { b?: true } };
@@ -982,8 +989,15 @@ export type InlineTextProps = {
   caret?: CaretPlacement;
   /** open the link popover once the session is up (Cmd K on a selected block) */
   autoLink?: boolean;
-  /** one burst: the canonical markup after a 400 ms pause since the last keystroke, when it changed */
-  onBurst?: (text: Markup) => void;
+  /** one burst: the canonical markup after a 400 ms pause since the last keystroke, when it changed; an autocorrection names its rule */
+  onBurst?: (text: Markup, meta?: BurstMeta) => void;
+  /** the autocorrect rules run on a trigger key (gslides-parity SPEC-5 7.1; R10 1.4); off when absent */
+  autocorrect?: InlineAutocorrectContext;
+  /** a typed list prefix then a space: true when the Editor converts the block to a list and takes over */
+  onList?: (
+    list: { marker: 'bullet' | 'number'; preset?: string },
+    prefixLength: number,
+  ) => boolean;
   /** the session ended with the final markup (unchanged included) and the key that ended it */
   onEnd: (text: Markup, reason: InlineTextEndReason) => void;
   /** Enter at the end of a one line list item: true when the Editor appends an item and takes over */
@@ -1048,6 +1062,8 @@ export function InlineText({
   onListLevel,
   onIndent,
   onListLeave,
+  autocorrect: autocorrectContext,
+  onList,
   handle: onHandle,
 }: InlineTextProps) {
   const originalHtml = useRef('');
@@ -1073,6 +1089,8 @@ export function InlineText({
     onIndent,
     onListLeave,
     onHandle,
+    autocorrectContext,
+    onList,
   });
   callbacks.current = {
     onBurst,
@@ -1087,7 +1105,11 @@ export function InlineText({
     onIndent,
     onListLeave,
     onHandle,
+    autocorrectContext,
+    onList,
   };
+  /* the last autocorrection of this session, for the Backspace revert within 2 s (R10 1.4) */
+  const lastCorrection = useRef<(InlineCorrection & { time: number }) | null>(null);
   const options = useRef({ multiline, caret, autoLink });
   options.current = { multiline, caret, autoLink };
 
@@ -1117,7 +1139,7 @@ export function InlineText({
     if (range !== null) restoreSelection(element, options.current.multiline, range);
   };
 
-  const flushBurst = () => {
+  const flushBurst = (meta?: BurstMeta) => {
     window.clearTimeout(burstTimer.current);
     burstTimer.current = 0;
     if (done.current) return;
@@ -1133,7 +1155,72 @@ export function InlineText({
       rewriteEditable(rewrite);
     if (text === lastBurst.current) return;
     lastBurst.current = text;
-    callbacks.current.onBurst?.(text);
+    callbacks.current.onBurst?.(text, meta);
+  };
+
+  /**
+   * The autocorrect step on a trigger key (gslides-parity SPEC-5 7.1; R10 1.4): the typed text up
+   * to the key travels as its own burst, the engine answers for the caret's paragraph, the answer
+   * is written into the editable and flushed as its own burst tagged with the rule, so the first
+   * Cmd Z and a Backspace within 2 s revert the correction alone. True when the key was consumed
+   * (a smart quote replaced the straight one, or the Editor converted the block to a list).
+   */
+  const autocorrectOnKey = (e: KeyboardEvent): boolean => {
+    const context = callbacks.current.autocorrectContext;
+    if (context === undefined || done.current) return false;
+    const selected = selectionOffsets(element, options.current.multiline);
+    if (selected === null || selected[0] !== selected[1]) return false;
+    flushBurst();
+    const text = readText();
+    const result = inlineCorrection(text, selected[0], e.key, {
+      ...context,
+      inLink: context.inLink ?? linkAtCaret(element) !== null,
+      listable: context.listable ?? options.current.multiline,
+    });
+    if (result === null) return false;
+    if (result.correction.list !== undefined) {
+      if (callbacks.current.onList?.(result.correction.list, result.correction.remove) !== true)
+        return false;
+      e.preventDefault();
+      e.stopPropagation();
+      finish('autocorrect-list');
+      return true;
+    }
+    element.innerHTML = editableHtml(result.next, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+      mark.contentEditable = 'false';
+    });
+    restoreSelection(element, options.current.multiline, [result.caret, result.caret]);
+    callbacks.current.onInput?.();
+    flushBurst({ autocorrect: result.correction.rule });
+    lastCorrection.current = { ...result, time: Date.now() };
+    reportCaret();
+    if (result.correction.consumesTrigger === true) {
+      e.preventDefault();
+      return true;
+    }
+    return false;
+  };
+
+  /** Backspace right after a correction reverts the correction alone and leaves the typed word (G11). */
+  const revertOnBackspace = (e: KeyboardEvent): boolean => {
+    const last = lastCorrection.current;
+    lastCorrection.current = null;
+    if (!shouldRevert(last, readText(), Date.now())) return false;
+    const restored = revertCorrection(last.next, last);
+    if (restored === null) return false;
+    e.preventDefault();
+    e.stopPropagation();
+    flushBurst();
+    element.innerHTML = editableHtml(restored.text, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+      mark.contentEditable = 'false';
+    });
+    restoreSelection(element, options.current.multiline, [restored.caret, restored.caret]);
+    callbacks.current.onInput?.();
+    flushBurst({ autocorrect: 'revert' });
+    reportCaret();
+    return true;
   };
 
   /** One mark toggled over the selection, or the word at the caret (SPEC-2 6.2 "Text marks"). */
@@ -1291,6 +1378,13 @@ export function InlineText({
     if (options.current.autoLink) openLink();
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
+      /* the autocorrect step runs first on a trigger key with no modifier (SPEC-5 7.1): the
+         correction lands as its own burst and the key then does what it did before */
+      if (!meta && !e.altKey) {
+        if (e.key === 'Backspace' && lastCorrection.current !== null && revertOnBackspace(e))
+          return;
+        if (e.key !== 'Backspace' && autocorrectOnKey(e)) return;
+      }
       if (e.key === 'Enter') {
         e.preventDefault();
         if (meta) return;
@@ -1453,7 +1547,13 @@ export function InlineText({
     element.addEventListener('paste', onPaste);
     document.addEventListener('mousedown', onDocMouseDown, true);
     window.addEventListener(TEXT_CHANGED_EVENT, onTextChanged);
+    /* the open typing burst flushes before the page leaves (gslides-parity SPEC-5-amendments A3
+       item 7; b7.md R19): a reload in the middle of a burst hands the room client the text before
+       its own pagehide handler persists the pending queue (EditorRoot registers after this) */
+    const onPageHide = (): void => flushBurst();
+    window.addEventListener('pagehide', onPageHide);
     listeners.current = () => {
+      window.removeEventListener('pagehide', onPageHide);
       element.removeEventListener('keydown', onKey);
       element.removeEventListener('input', onInputEvent);
       element.removeEventListener('blur', onBlur);

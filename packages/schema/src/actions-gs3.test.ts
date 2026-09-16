@@ -165,9 +165,9 @@ const GROUP_COUNTS: Partial<Record<ActionGroup, number>> = {
 };
 
 describe('the round three action table (SPEC-3 12)', () => {
-  it('grows the table from 105 to 169, counted once from ACTION_IDS', () => {
-    expect(ACTION_IDS).toHaveLength(169);
-    expect(new Set(ACTION_IDS).size).toBe(169);
+  it('grows the table from 105 to 169, counted once from ACTION_IDS (220 since round five added its 51, actions-gs5.test.ts)', () => {
+    expect(ACTION_IDS).toHaveLength(220);
+    expect(new Set(ACTION_IDS).size).toBe(220);
     expect([...GS3_ACTION_IDS]).toEqual(IDS);
     expect(GS3_ACTION_IDS).toHaveLength(64);
     expect(MILESTONES).toContain('GS3');

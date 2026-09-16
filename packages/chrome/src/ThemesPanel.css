@@ -40,7 +40,7 @@
   display: block;
   box-sizing: border-box;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
   overflow: hidden;
@@ -105,4 +105,46 @@
 
 .ts-themes-import {
   border-color: var(--pt-hair-soft);
+}
+
+/* round five (gslides-parity SPEC-5 0.28, 9.2): the edited theme under its name and the imported
+   records under In this presentation; a record tile is a row of its scheme's colours */
+.ts-themes-edited {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-themes-edited-name {
+  margin: 0;
+  font: 12px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-themes-pair {
+  gap: 12px;
+}
+
+.ts-themes-scheme {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  aspect-ratio: auto;
+  height: 28px;
+}
+
+.ts-themes-chip {
+  flex: 1 1 auto;
+  display: block;
+}
+
+.ts-themes-record .ts-themes-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-themes-import.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
 }

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "columns",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Two columns"
+      },
+      {
+        "id": "p",
+        "type": "paragraph",
+        "text": "The 5/7 ratio splits the 854 usable pixels into 355.8 and 498.2, the widths grid(page) derives.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 180,
+        "items": [
+          {
+            "key": "Page",
+            "value": "1200 by 900 sheet px"
+          },
+          {
+            "key": "Inches",
+            "value": "10 by 7.5"
+          },
+          {
+            "key": "EMU",
+            "value": "9,144,000 by 6,858,000"
+          }
+        ]
+      }
+    ]
+  },
+  "template": "cols"
+}

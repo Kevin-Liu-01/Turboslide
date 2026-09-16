@@ -107,8 +107,8 @@
       "kind": "built"
     },
     "packages/theme/brand/facts.json": {
-      "bytes": 37322,
-      "sha256": "326f1a94ab2724e7aff788ed436151e74fba2c45ad0a51011ab83d30f8d8f380",
+      "bytes": 37268,
+      "sha256": "d69ca7dcc8b587a6d1bcb19aa68b24b955c158aa1b9b22ffa21e697d547824cf",
       "kind": "facts"
     },
     "packages/theme/brand/hero.recipe.json": {

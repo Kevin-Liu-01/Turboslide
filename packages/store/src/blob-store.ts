@@ -22,6 +22,7 @@ import {
 } from 'node:fs';
 import { dirname, extname, join, posix } from 'node:path';
 
+import { MEDIA_MIME_BY_EXTENSION } from '@turboslide/schema/blocks/media';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson } from '@turboslide/schema/json';
 import { ConflictError } from '@turboslide/schema/errors';
@@ -67,7 +68,7 @@ import type {
   WriteOptions,
   WriteOutcome,
 } from './store.ts';
-import { AssetExistsError } from './store.ts';
+import { AssetExistsError, assetRelative } from './store.ts';
 import { byNewest, copyDeck, createDeck, deckIdFor, restoreDeck, trashDeck } from './templates.ts';
 import type { DeckHead, TrashState } from './templates.ts';
 import { createOverlay } from './tmp-store.ts';
@@ -133,6 +134,34 @@ export class BlobPreconditionError extends Error {
   }
 }
 
+/**
+ * The two conflict classes by name as well as by class (gslides-parity VERIFICATION-5 finding 11,
+ * the round five fix round): the deployed server bundle carries more than one copy of this module
+ * (the store is reached from the route chunks and from the CLI child's graph), so an error thrown
+ * by one copy fails `instanceof` in another and a catch written for it rethrows. Production's
+ * `seedOnce` did that on 2026-09-15 and its cached `readyPromise` answered 500 to every route.
+ * Every catch in this package tests these guards, never the class alone; `name` is set by the
+ * constructors above and survives the copy.
+ */
+export function isBlobExistsError(error: unknown): boolean {
+  return (
+    error instanceof BlobExistsError || (error instanceof Error && error.name === 'BlobExistsError')
+  );
+}
+
+export function isBlobPreconditionError(error: unknown): boolean {
+  return (
+    error instanceof BlobPreconditionError ||
+    (error instanceof Error && error.name === 'BlobPreconditionError')
+  );
+}
+
+/**
+ * The content type per extension of a stored object. The media rows (gslides-parity SPEC-5 3.3;
+ * R11 1.5) come from the schema's one table (`MEDIA_MIME_BY_EXTENSION`), which the assets route,
+ * the inline list and the bundle scan read too, so a `.m4v` is `video/mp4` everywhere; B2 owns
+ * this table and the media functions of this file, B7 the document read path (A6).
+ */
 const CONTENT_TYPES: Record<string, string> = {
   '.json': 'application/json',
   '.png': 'image/png',
@@ -143,6 +172,9 @@ const CONTENT_TYPES: Record<string, string> = {
   '.gif': 'image/gif',
   '.md': 'text/markdown; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
+  ...Object.fromEntries(
+    Object.entries(MEDIA_MIME_BY_EXTENSION).map(([extension, mime]) => [`.${extension}`, mime]),
+  ),
 };
 
 export function blobContentType(pathname: string): string {
@@ -152,6 +184,115 @@ export function blobContentType(pathname: string): string {
 /** `decks/<id>/`: where a deck's files live in the store. */
 export function deckPrefix(deckId: string): string {
   return `decks/${deckId}/`;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The keyed prefix of media files on a restricted deck (gslides-parity SPEC-5 0.19, 3.3; R11 2
+// rule 6; B2 day 5): a media file of a deck whose access mode is `restricted` is written under
+// `d/<deckId>/<assetKey>/<file>` on the public store, where `assetKey` is the 128 bit segment
+// the deck's access record carries (`AccessRecord.assetKey`, 22 base64url characters). The page
+// receives the key after `authorize(read)` and the renderer's `mediaUrl` names the keyed Blob URL;
+// a collaborator removed or a link revoked rotates the key (`rotateAssetKey`), so the URLs they
+// saw stop answering. Pictures keep the `decks/<id>/assets/` precedent (0.19: moving them is
+// Kevin's). `isPublicPath` (migrate.ts) already routes `d/` to the public store.
+
+/** The prefix keyed media files live under on the public store. */
+export const KEYED_PREFIX = 'd/';
+
+/** The 22 base64url characters of an asset key (the share token grammar, packages/schema access.ts). */
+export const ASSET_KEY_PATTERN = /^[A-Za-z0-9_-]{22}$/;
+
+/** `d/<deckId>/<assetKey>/`: every keyed file of one deck under one key. */
+export function keyedPrefix(deckId: string, assetKey: string): string {
+  if (!ASSET_KEY_PATTERN.test(assetKey))
+    throw new TypeError('an asset key is 22 base64url characters');
+  return `${KEYED_PREFIX}${deckId}/${assetKey}/`;
+}
+
+/** `assets/<file>` of a deck under a key: `d/<deckId>/<assetKey>/<file>` (the `assets/` segment drops; the name keeps its digest). */
+export function keyedAssetPathname(deckId: string, assetKey: string, relative: string): string {
+  const rel = assetRelative(relative);
+  return `${keyedPrefix(deckId, assetKey)}${rel.slice('assets/'.length)}`;
+}
+
+/**
+ * A year, the `cacheControlMaxAge` of every asset file the intake puts (SPEC-5 3.3; R11 2 rule
+ * 4): an asset name carries its content digest and the store refuses an overwrite (SPEC-3 0.26),
+ * so the CDN and the browser may keep the body for as long as they like.
+ */
+export const ASSET_CACHE_MAX_AGE_S = 31_536_000;
+
+// The deck index on the blob tier (SPEC-5 11 "The deck index"; SPEC-4 7; B2 day 7): one object,
+// `decks/index.json`, holding every deck's list row, written with `ifMatch` by `deck.create`,
+// `copy`, `trash`, `restore`, `remove` and every commit that changes a row (the title, the slide
+// count, the sections, the revision), coalesced per instance over `INDEX_COALESCE_MS`. `/decks`
+// reads one `get` past `INDEX_READ_THRESHOLD` decks and falls back to the manifest walk when the
+// index is missing or disagrees with the store's folder listing; `reindex()` rebuilds it from the
+// walk. Titles are public on a link already, so the index lives on the public store beside the
+// manifests it summarises.
+
+/** The index object's pathname. */
+export const INDEX_PATHNAME = 'decks/index.json';
+/** Past this many decks the list reads the index instead of every manifest. */
+export const INDEX_READ_THRESHOLD = 50;
+/** How long an instance holds index writes before one `put` carries them all. */
+export const INDEX_COALESCE_MS = 2000;
+
+export type DeckIndexFile = {
+  schemaVersion: 1;
+  updatedAt: string;
+  decks: DeckHead[];
+};
+
+/** The index bytes: canonical, so two instances writing the same rows write the same etag. */
+export function deckIndexBytes(index: DeckIndexFile): Uint8Array {
+  const decks = [...index.decks].sort((a, b) => a.id.localeCompare(b.id));
+  return new TextEncoder().encode(
+    `${canonicalJson({ schemaVersion: 1, updatedAt: index.updatedAt, decks })}\n`,
+  );
+}
+
+/** The index a stored object holds, or null when the bytes are not an index. */
+export function parseDeckIndex(bytes: Uint8Array): DeckIndexFile | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const file = raw as Record<string, unknown>;
+  if (file.schemaVersion !== 1 || !Array.isArray(file.decks)) return null;
+  const decks = file.decks.filter(
+    (row): row is DeckHead =>
+      typeof row === 'object' &&
+      row !== null &&
+      typeof (row as DeckHead).id === 'string' &&
+      typeof (row as DeckHead).title === 'string' &&
+      typeof (row as DeckHead).revision === 'number',
+  );
+  return {
+    schemaVersion: 1,
+    updatedAt: typeof file.updatedAt === 'string' ? file.updatedAt : '',
+    decks,
+  };
+}
+
+/** A deck's list row from its document (the same row `deckHeadOf` reads from the manifest bytes). */
+export function deckHeadOfDocument(document: DeckDocument): DeckHead {
+  const { deck } = document;
+  const head: DeckHead = {
+    id: deck.id,
+    title: deck.title,
+    slides: deck.sections.reduce((sum, section) => sum + section.slideIds.length, 0),
+    sections: deck.sections.length,
+    revision: deck.revision,
+    updatedAt: deck.updatedAt,
+    createdAt: deck.createdAt,
+  };
+  const trashedAt = (deck as { trashedAt?: unknown }).trashedAt;
+  if (typeof trashedAt === 'string' && trashedAt !== '') head.trashedAt = trashedAt;
+  return head;
 }
 
 export const LEASES_FILE = 'leases.json';
@@ -350,6 +491,22 @@ function quotedMd5(body: Uint8Array | string): string {
   return `"${createHash('md5').update(body).digest('hex')}"`;
 }
 
+/** A short pause between two reads of a body the CDN has not caught up on. */
+function pause(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * The pathname of a state file inside a deck's prefix: `name` is relative to the state folder,
+ * every segment a safe key, so a caller names `presence.json` or `chat/12.json` and never a
+ * document of the deck.
+ */
+function stateFilePathname(prefix: string, name: string): string {
+  if (!isSafeKey(name) || name.endsWith('/') || name.startsWith(`${STATE_DIR}/`))
+    throw new RangeError(`not a state file name: ${JSON.stringify(name)}`);
+  return `${prefix}${STATE_DIR}/${name}`;
+}
+
 /** The mirror could not prove it holds the store's current document; the caller retries. */
 export class StaleMirrorError extends Error {
   constructor(deckId: string) {
@@ -416,7 +573,14 @@ export type BlobStoreOptions = {
   leases?: LeasePolicy;
   /** how often watch() asks the store for the manifest's version; default 3000 ms */
   pollMs?: number;
-  /** how long a sync result is trusted before the next head call; default 750 ms */
+  /**
+   * No effect since round five (gslides-parity SPEC-5-amendments A3 item 2; B7). Until then a
+   * sync result was trusted for this long (750 ms) before the next head call, so a write admitted
+   * against the mirror inside the window met a store one revision ahead (build-4/hotfix-4.md 3.6,
+   * 3.7). A read now serves the mirror without a head call only while the mirror's revision is
+   * the one the room last delivered to this instance (`noteDelivered`); a write always reads the
+   * head. Kept so the callers' option objects still typecheck.
+   */
   syncTtlMs?: number;
   /**
    * test hooks, to stage a race: `beforeCommit` runs between the local write and the push,
@@ -427,23 +591,108 @@ export type BlobStoreOptions = {
   snapshotGraceMs?: number;
 };
 
+/**
+ * A small document under the deck's state folder in the Blob store (`decks/<id>/.turboslide/
+ * <name>`) that the realtime package shares between the instances of the blob tier: the roster
+ * (gslides-parity SPEC-5-amendments A3 item 6, A8 row 4) and the chat messages (SPEC-5 10; B7,
+ * the fix round of VERIFICATION-5 findings 3 and 14). The mirror never pulls the folder and the
+ * deck's removal deletes it. The store holds bytes and versions and reads nothing into them.
+ * `proven` says the body hashes to the etag `head()` answered; a body the CDN served stale for an
+ * overwritten name is answered unproven after the retries, so a writer never builds a compare
+ * and swap on it.
+ */
+export type StateFile = { name: string; version: string; bytes: Uint8Array; proven: boolean };
+
+/** A copy read before: when the store's version is still this one, the copy is answered without a body read. */
+export type StateFileKnown = { version: string; bytes: Uint8Array };
+
+export type PutStateFileOptions = {
+  /** the version the file must still have (compare and swap); a BlobPreconditionError otherwise */
+  ifMatch?: string;
+  /** the file must not exist yet (an append under a numbered name); a BlobExistsError otherwise */
+  create?: boolean;
+};
+
+/** How many times a state file's body is read again when it does not hash to the head's etag. */
+export const STATE_FILE_READ_RETRIES = 3;
+
 export type BlobStore = DeckStore & {
   readonly dir: string;
-  /** pulls the deck's documents when the store's manifest moved; `force` skips the time window */
+  /**
+   * Pulls the deck's documents when the store's manifest moved. Without `force` the mirror is
+   * served as it stands only while its revision equals the one the room last delivered to this
+   * instance (`noteDelivered`), otherwise the store's head is read (gslides-parity
+   * SPEC-5-amendments A3 item 2); `force` always reads the head.
+   */
   sync: (force?: boolean) => Promise<SyncState>;
+  /**
+   * The room delivered this revision to this instance (the blob channel's own commit, or a record
+   * its poll announced): reads of the mirror at that revision need no head call until a frame
+   * with a higher revision or a forced sync moves it. Instance memory is never the truth (fluid
+   * compute runs several instances), so the rule keys on what the room delivered, not on time.
+   */
+  noteDelivered: (revision: number) => void;
+  /** the revision `noteDelivered` last named, null before the room delivered anything */
+  deliveredRevision: () => number | null;
+  /**
+   * Reads a state file (`StateFile`) from the store, never the mirror: one `head()` for the
+   * current version, and the body only when `known` is not at that version; the body is read
+   * again up to STATE_FILE_READ_RETRIES times while it does not hash to the etag (the CDN serving
+   * an overwritten name stale), and answered `proven: false` when it never does. Null when the
+   * file is not stored. `name` is relative to the state folder (`presence.json`, `chat/12.json`).
+   */
+  readStateFile: (name: string, known?: StateFileKnown) => Promise<StateFile | null>;
+  /**
+   * Writes a state file: in place with `ifMatch` (a compare and swap; the store's precondition is
+   * the arbiter across instances), or created under a new name with `create` (an append that two
+   * instances cannot both make). No cache on the object, so a fresh read follows a write.
+   */
+  putStateFile: (
+    name: string,
+    bytes: Uint8Array,
+    options?: PutStateFileOptions,
+  ) => Promise<{ version: string }>;
+  /** Removes a state file; a missing one is not an error. */
+  deleteStateFile: (name: string) => Promise<void>;
+  /**
+   * The state files under a folder of the state folder (`chat`), by name with their versions.
+   * The listing of Vercel Blob lags a write by up to a minute (measured 2026-09-11), so a reader
+   * treats it as a lower bound and reads past it by name.
+   */
+  listStateFiles: (folder: string) => Promise<{ name: string; version: string }[]>;
   /** pulls the deck's twins that are missing locally; returns how many were written */
   pullAssets: () => Promise<number>;
   /** how many immutable documents the store holds under snapshots/ (deck.info's `snapshots`, SPEC-2 8.2) */
   snapshots: () => Promise<number>;
   /** removes every snapshot no retained record names; returns how many went (write() runs this after a commit) */
   pruneSnapshots: () => Promise<number>;
+  /**
+   * A media file of a restricted deck under the keyed prefix (gslides-parity SPEC-5 0.19, 3.3):
+   * the local mirror file first (this instance's renderer and exporter read `assets/<file>`), then
+   * `d/<deckId>/<assetKey>/<file>` on the store with overwrite refused and a year's cache age; the
+   * answer's `url` is the keyed Blob URL the page mounts.
+   */
+  putKeyedAsset: (
+    relative: string,
+    bytes: Uint8Array,
+    assetKey: string,
+    contentType?: string,
+  ) => Promise<AssetPut>;
+  /** the keyed URL of a stored file, or null when the store does not hold it under that key */
+  keyedAssetUrl: (relative: string, assetKey: string) => Promise<string | null>;
+  /**
+   * Moves every keyed file from one key to another (a collaborator removed, a link revoked, SPEC-5
+   * 0.19): each object is read and put under the new prefix, then the old prefix is deleted;
+   * answers the file names moved. Idempotent: a file already under the new key is left as it is.
+   */
+  rotateAssetKey: (from: string, to: string) => Promise<{ moved: string[] }>;
 };
 
 export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const { client, deckId, dir } = options;
   const prefix = deckPrefix(deckId);
   const pollMs = options.pollMs ?? 3000;
-  const syncTtlMs = options.syncTtlMs ?? 750;
+  const statePathname = (name: string): string => stateFilePathname(prefix, name);
   const snapshotGraceMs = options.snapshotGraceMs ?? SNAPSHOT_GRACE_MS;
   const serial = serialQueue();
   // the text anchors of the comments follow the text a write moved, inside the lock (SPEC-3
@@ -460,8 +709,9 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       (change) => shifted.push(change),
     ),
   });
-  let syncedAt = 0;
   let lastState: SyncState = { present: false, pulled: false, revision: null };
+  /** the revision the room last delivered to this instance (A3 item 2); null before any frame */
+  let delivered: number | null = null;
 
   const pathOf = (relative: string): string => join(dir, ...relative.split('/'));
 
@@ -657,9 +907,22 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     writeManifestFile(dir, next);
   };
 
-  /** The sync step itself; callers already inside the queue use this, everyone else `sync`. */
+  /**
+   * The sync step itself; callers already inside the queue use this, everyone else `sync`. The
+   * cache rule of gslides-parity SPEC-5-amendments A3 item 2: the mirror is served without a head
+   * call only when the room delivered its revision to this instance and nothing higher since; a
+   * time window (750 ms until round five) let an admission read a mirror another instance had
+   * already moved past (build-4/hotfix-4.md 3.6, 3.7).
+   */
   const syncNow = async (force: boolean): Promise<SyncState> => {
-    if (!force && Date.now() - syncedAt < syncTtlMs) return lastState;
+    if (
+      !force &&
+      delivered !== null &&
+      lastState.present &&
+      existsSync(pathOf('deck.json')) &&
+      readRevision(dir) === delivered
+    )
+      return lastState;
     const head = await client.head(`${prefix}deck.json`);
     let pulled = false;
     if (head === null) {
@@ -672,7 +935,6 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       }
       lastState = { present: true, pulled, revision: readRevision(dir) };
     }
-    syncedAt = Date.now();
     return lastState;
   };
 
@@ -733,7 +995,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         contentType: blobContentType(relative),
       });
     } catch (error) {
-      if (!(error instanceof BlobExistsError)) throw error;
+      if (!isBlobExistsError(error)) throw error;
       const existing = await client.head(`${prefix}${relative}`);
       if (existing !== null && existing.version === quotedMd5(body)) return;
       throw new SnapshotContestedError(deckId, key);
@@ -761,7 +1023,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   /** Forgets the mirror's versions so the next sync pulls everything the store has. */
   const invalidate = (): void => {
     writeManifestFile(dir, { files: {} });
-    syncedAt = 0;
+    delivered = null;
   };
 
   /**
@@ -792,6 +1054,56 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     id: deckId,
     dir,
     sync,
+    noteDelivered(revision) {
+      // a lower revision than the one delivered is a late frame and moves nothing
+      if (delivered === null || revision > delivered) delivered = revision;
+    },
+    deliveredRevision: () => delivered,
+
+    // the state files the blob tier's roster and chat share between instances (SPEC-5-amendments
+    // A3 item 6, A8 row 4; SPEC-5 10; B7): the store holds bytes and versions under the state
+    // folder; the blob channel reads and merges what is in them
+    async readStateFile(name, known) {
+      const pathname = statePathname(name);
+      const head = await client.head(pathname);
+      if (head === null) return null;
+      if (known !== undefined && known.version === head.version)
+        return { name, version: head.version, bytes: known.bytes, proven: true };
+      let bytes: Uint8Array | null = null;
+      for (let attempt = 0; attempt <= STATE_FILE_READ_RETRIES; attempt++) {
+        const fetched = await client.get(pathname);
+        if (fetched === null) return null;
+        bytes = fetched.bytes;
+        if (quotedMd5(fetched.bytes) === head.version)
+          return { name, version: head.version, bytes, proven: true };
+        if (attempt < STATE_FILE_READ_RETRIES) await pause(40 * (attempt + 1));
+      }
+      return { name, version: head.version, bytes: bytes ?? new Uint8Array(), proven: false };
+    },
+    async putStateFile(name, bytes, putOptions = {}) {
+      const pathname = statePathname(name);
+      const entry = await client.put(pathname, bytes, {
+        overwrite: putOptions.create !== true,
+        contentType: 'application/json',
+        cacheControlMaxAge: 0,
+        ...(putOptions.ifMatch === undefined ? {} : { ifMatch: putOptions.ifMatch }),
+      });
+      return { version: entry.version };
+    },
+    async deleteStateFile(name) {
+      await client.del([statePathname(name)]);
+    },
+    async listStateFiles(folder) {
+      const base = `${statePathname(folder)}/`;
+      const entries = await client.list(base);
+      return entries
+        .filter((entry) => entry.pathname.startsWith(base))
+        .map((entry) => ({
+          name: `${folder}/${entry.pathname.slice(base.length)}`,
+          version: entry.version,
+        }))
+        .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+    },
 
     async read(): Promise<ReadResult> {
       await requirePresent();
@@ -886,13 +1198,12 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
               () => undefined,
             );
           }
-          syncedAt = Date.now();
           lastState = { present: true, pulled: false, revision: outcome.revision };
           // retention runs after the commit and never blocks the answer (SPEC-2 8.2)
           void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
         } catch (error) {
-          if (error instanceof BlobPreconditionError) return conflictFromStore();
+          if (isBlobPreconditionError(error)) return conflictFromStore();
           if (error instanceof SnapshotContestedError) {
             // the other writer may have committed already (the round one sentence holds) or may
             // still be between its snapshot and its manifest push (the contention alone)
@@ -941,7 +1252,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           return version;
         } catch (error) {
           rmSync(pathOf(relative), { force: true });
-          if (error instanceof BlobExistsError) {
+          if (isBlobExistsError(error)) {
             invalidate();
             await pull();
             const current = loadDeckDir(dir).document;
@@ -1016,7 +1327,9 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       // mirror's revision (a pull, or a write on this instance) is one event
       let last = readRevision(dir);
       const timer = setInterval(() => {
-        void sync()
+        // the poll reads the head every time: it is what invalidates the delivered revision
+        // when another instance committed (A3 item 2), so it never serves the mirror as it stands
+        void sync(true)
           .catch(() => undefined)
           .then(() => {
             const revision = readRevision(dir);
@@ -1053,10 +1366,13 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         const entry = await client.put(pathname, bytes, {
           overwrite: false,
           contentType: contentType ?? blobContentType(local.relative),
+          // a digest named file is never overwritten (SPEC-3 0.26), so the CDN and the browser
+          // keep it for a year (gslides-parity SPEC-5 3.3; R11 2 rule 4)
+          cacheControlMaxAge: ASSET_CACHE_MAX_AGE_S,
         });
         return { ...local, url: entry.url };
       } catch (error) {
-        if (!(error instanceof BlobExistsError)) throw error;
+        if (!isBlobExistsError(error)) throw error;
         const existing = await client.head(pathname);
         if (existing !== null && existing.version === quotedMd5(bytes)) {
           return { ...local, url: existing.url, existed: true };
@@ -1064,6 +1380,65 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         if (!local.existed) rmSync(local.path, { force: true });
         throw new AssetExistsError(local.relative);
       }
+    },
+
+    async putKeyedAsset(
+      relative: string,
+      bytes: Uint8Array,
+      assetKey: string,
+      contentType?: string,
+    ): Promise<AssetPut> {
+      await requirePresent();
+      const local = putAssetFile(dir, relative, bytes);
+      const pathname = keyedAssetPathname(deckId, assetKey, local.relative);
+      try {
+        const entry = await client.put(pathname, bytes, {
+          overwrite: false,
+          contentType: contentType ?? blobContentType(local.relative),
+          cacheControlMaxAge: ASSET_CACHE_MAX_AGE_S,
+        });
+        return { ...local, url: entry.url };
+      } catch (error) {
+        if (!isBlobExistsError(error)) throw error;
+        const existing = await client.head(pathname);
+        if (existing !== null && existing.version === quotedMd5(bytes)) {
+          return { ...local, url: existing.url, existed: true };
+        }
+        if (!local.existed) rmSync(local.path, { force: true });
+        throw new AssetExistsError(local.relative);
+      }
+    },
+
+    async keyedAssetUrl(relative: string, assetKey: string): Promise<string | null> {
+      const entry = await client.head(keyedAssetPathname(deckId, assetKey, relative));
+      return entry === null ? null : entry.url;
+    },
+
+    async rotateAssetKey(from: string, to: string): Promise<{ moved: string[] }> {
+      const source = keyedPrefix(deckId, from);
+      const target = keyedPrefix(deckId, to);
+      if (source === target) return { moved: [] };
+      const entries = await client.list(source);
+      const moved: string[] = [];
+      await eachLimit(entries, 4, async (entry) => {
+        const name = entry.pathname.slice(source.length);
+        if (name === '' || !isSafeKey(name)) return;
+        const fetched = await client.get(entry.pathname);
+        if (fetched === null) return;
+        try {
+          await client.put(`${target}${name}`, fetched.bytes, {
+            overwrite: false,
+            contentType: blobContentType(name),
+            cacheControlMaxAge: ASSET_CACHE_MAX_AGE_S,
+          });
+        } catch (error) {
+          // the same bytes already under the new key: a retry after a failed delete
+          if (!isBlobExistsError(error)) throw error;
+        }
+        moved.push(name);
+      });
+      if (entries.length > 0) await client.del(entries.map((entry) => entry.pathname));
+      return { moved: moved.sort() };
     },
 
     async removeAsset(relative: string): Promise<void> {
@@ -1130,7 +1505,7 @@ export async function pushDeckDir(
       });
     } catch (error) {
       // the seed of two cold instances at once: the file is there, which is what was wanted
-      if (error instanceof BlobExistsError) return;
+      if (isBlobExistsError(error)) return;
       throw error;
     }
     if (isMirroredDocument(relative)) manifest.files[relative] = entry.version;
@@ -1208,16 +1583,130 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   const stores = new Map<string, BlobStore>();
   const urls = new Map<string, string | null>();
   let readyPromise: Promise<void> | undefined;
+  const nowIso = options.now ?? (() => new Date().toISOString());
+  const indexReadThreshold = options.indexReadThreshold ?? INDEX_READ_THRESHOLD;
+
+  // The deck index (SPEC-5 11; B2 day 7). Rows change through `noteHead` (a row, or null for a
+  // removed deck) and leave in one conditional `put` after INDEX_COALESCE_MS; a precondition
+  // failure (another instance wrote first) re-reads the index and applies the pending rows again,
+  // once. `flushIndex` is awaited by the tests and by `reindex`; the timer path never throws into
+  // a caller, it logs.
+  const pendingRows = new Map<string, DeckHead | null>();
+  let indexTimer: ReturnType<typeof setTimeout> | null = null;
+  let indexFlush: Promise<void> | null = null;
+
+  const readIndex = async (
+    c: BlobClient,
+  ): Promise<{ index: DeckIndexFile | null; version: string | null }> => {
+    const fetched = await c.get(INDEX_PATHNAME);
+    if (fetched === null) return { index: null, version: null };
+    return { index: parseDeckIndex(fetched.bytes), version: fetched.entry.version };
+  };
+
+  const putIndex = async (
+    c: BlobClient,
+    index: DeckIndexFile,
+    version: string | null,
+  ): Promise<void> => {
+    await c.put(INDEX_PATHNAME, deckIndexBytes(index), {
+      overwrite: true,
+      contentType: 'application/json',
+      ...(version === null ? {} : { ifMatch: version }),
+    });
+  };
+
+  const applyRows = (
+    index: DeckIndexFile | null,
+    rows: Map<string, DeckHead | null>,
+  ): DeckIndexFile => {
+    const byId = new Map((index?.decks ?? []).map((row) => [row.id, row] as const));
+    for (const [deckId, row] of rows) {
+      if (row === null) byId.delete(deckId);
+      else byId.set(deckId, row);
+    }
+    return { schemaVersion: 1, updatedAt: nowIso(), decks: [...byId.values()] };
+  };
+
+  const flushIndex = async (): Promise<void> => {
+    if (indexTimer !== null) {
+      clearTimeout(indexTimer);
+      indexTimer = null;
+    }
+    if (indexFlush !== null) return indexFlush;
+    if (pendingRows.size === 0) return;
+    indexFlush = (async () => {
+      const rows = new Map(pendingRows);
+      pendingRows.clear();
+      const c = await client();
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const { index, version } = await readIndex(c);
+        try {
+          await putIndex(c, applyRows(index, rows), version);
+          return;
+        } catch (error) {
+          if (!isBlobPreconditionError(error) || attempt === 1) {
+            // the rows are not lost: they wait for the next write or the next reindex
+            for (const [deckId, row] of rows)
+              if (!pendingRows.has(deckId)) pendingRows.set(deckId, row);
+            log(
+              `blob: the deck index write did not land (${error instanceof Error ? error.message : 'error'})`,
+            );
+            return;
+          }
+        }
+      }
+    })().finally(() => {
+      indexFlush = null;
+    });
+    return indexFlush;
+  };
+
+  const noteHead = (deckId: string, row: DeckHead | null): void => {
+    pendingRows.set(deckId, row);
+    if (indexTimer === null) {
+      indexTimer = setTimeout(() => {
+        indexTimer = null;
+        void flushIndex().catch((error: unknown) =>
+          log(
+            `blob: the deck index write failed (${error instanceof Error ? error.message : 'error'})`,
+          ),
+        );
+      }, INDEX_COALESCE_MS);
+      // a timer never keeps a function alive for the index
+      (indexTimer as { unref?: () => void }).unref?.();
+    }
+  };
+
+  /** The row of a deck read from its mirror, or null when the mirror holds no manifest. */
+  const headFromMirror = (deckId: string): DeckHead | null => {
+    const dir = join(decksDir, deckId);
+    if (!existsSync(join(dir, 'deck.json'))) return null;
+    try {
+      return deckHeadOfDocument(loadDeckDir(dir).document);
+    } catch {
+      return null;
+    }
+  };
 
   const storeFor = async (deckId: string): Promise<BlobStore> => {
     let store = stores.get(deckId);
     if (store === undefined) {
-      store = openBlobStore({
+      const inner = openBlobStore({
         client: await client(),
         deckId,
         dir: join(decksDir, deckId),
         ...(options.now === undefined ? {} : { now: options.now }),
       });
+      // every commit through this collection's stores notes its row for the index (the title,
+      // the slide count, the sections and the revision are what a commit can change)
+      store = {
+        ...inner,
+        write: async (write, writeOptions) => {
+          const outcome = await inner.write(write, writeOptions);
+          if (outcome.ok) noteHead(deckId, deckHeadOfDocument(outcome.document));
+          return outcome;
+        },
+      };
       stores.set(deckId, store);
     }
     return store;
@@ -1268,7 +1757,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
           contentType: blobContentType(relative),
         });
       } catch (error) {
-        if (!(error instanceof BlobExistsError)) throw error;
+        if (!isBlobExistsError(error)) throw error;
       }
     });
     if (written > 0)
@@ -1289,14 +1778,27 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       await overlay.ensureAssets(deckId);
       await fetchMissingTwins(deckId, false);
       await pushDeckDir(c, deckId, join(decksDir, deckId), { overwrite: false, log });
+      // the seed's row joins the index on the first boot of a fresh store (SPEC-5 11)
+      const row = headFromMirror(deckId);
+      if (row !== null) noteHead(deckId, row);
     }
   };
 
+  // A rejected ready is never cached (VERIFICATION-5 finding 11): the instance that met an error
+  // while seeding (a transient Blob failure, a duplicated error class before the guards above)
+  // used to answer 500 to every route for its whole life. The promise is dropped on rejection so
+  // the next request tries the seed again; the error still reaches the caller that saw it.
   const ready = (): Promise<void> => {
     readyPromise ??= (async () => {
       await overlay.ready();
       await seedOnce();
-    })();
+    })().catch((error: unknown) => {
+      readyPromise = undefined;
+      log(
+        `blob: ready failed and will be retried on the next call (${error instanceof Error ? error.message : String(error)})`,
+      );
+      throw error;
+    });
     return readyPromise;
   };
 
@@ -1335,7 +1837,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     } catch (error) {
       // the store moved under us: forget the mirror's manifest so the next sync pulls the truth
       writeManifestFile(store.dir, { files: {} });
-      if (error instanceof BlobPreconditionError) {
+      if (isBlobPreconditionError(error)) {
         await store.sync(true);
         const current = loadDeckDir(store.dir).document;
         throw new ConflictError(
@@ -1357,17 +1859,36 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     async list(listOptions) {
       await ready();
       const ids = await deckIds();
+      const c = await client();
+      // past the threshold one `get` of the index answers the page (SPEC-5 11): the folder listing
+      // is the agreement check (a deck the index lacks or lists without a folder means another
+      // instance's write has not landed yet), and a disagreement falls back to the walk below and
+      // schedules the rebuild of the rows that differ
+      if (ids.length > indexReadThreshold) {
+        const { index } = await readIndex(c);
+        if (index !== null) {
+          const listed = new Set(index.decks.map((row) => row.id));
+          const agree = ids.length === listed.size && ids.every((id) => listed.has(id));
+          if (agree) {
+            return index.decks
+              .filter(
+                (head) => head.trashedAt === undefined || listOptions?.includeTrashed === true,
+              )
+              .sort(byNewest);
+          }
+        }
+      }
       // the listing reads every manifest through the SDK's origin read, in parallel, and writes
       // no mirror (gslides-parity SPEC-4 0.29, 3.1; PP 3.1): a trash stamp or a title written on
       // another instance shows on the next home page load (SPEC 6.2), and a deck store opens only
       // when a deck is opened. The mirrors on this instance are left as they are; open() syncs.
-      const c = await client();
       const heads: DeckHead[] = [];
       await eachLimit(ids, 8, async (deckId) => {
         const fetched = await c.get(`${deckPrefix(deckId)}deck.json`);
         if (fetched === null) return;
         const head = deckHeadOf(deckId, fetched.bytes);
         if (head === null) return;
+        if (ids.length > indexReadThreshold) noteHead(deckId, head);
         if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
         heads.push(head);
       });
@@ -1413,11 +1934,13 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await pushDeckDir(c, deckId, dir, { overwrite: false, log });
       } catch (error) {
         rmSync(dir, { recursive: true, force: true });
-        if (error instanceof BlobExistsError) {
+        if (isBlobExistsError(error)) {
           throw new TypeError(`decks/${deckId} exists already; pick another name`);
         }
         throw error;
       }
+      const row = headFromMirror(deckId);
+      if (row !== null) noteHead(deckId, row);
       return result;
     },
     async copy(input, baseRevision) {
@@ -1449,25 +1972,33 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await pushDeckDir(c, deckId, dir, { overwrite: false, log });
       } catch (error) {
         rmSync(dir, { recursive: true, force: true });
-        if (error instanceof BlobExistsError) {
+        if (isBlobExistsError(error)) {
           throw new TypeError(`decks/${deckId} exists already; pick another name`);
         }
         throw error;
       }
+      const row = headFromMirror(deckId);
+      if (row !== null) noteHead(deckId, row);
       return result;
     },
     async trash(deckId, baseRevision) {
-      return stamp(deckId, () =>
+      const result = await stamp(deckId, () =>
         trashDeck(decksDir, deckId, {
           ...(options.now === undefined ? {} : { now: options.now }),
           ...(baseRevision !== undefined ? { baseRevision } : {}),
         }),
       );
+      const row = headFromMirror(deckId);
+      if (row !== null) noteHead(deckId, row);
+      return result;
     },
     async restore(deckId, baseRevision) {
-      return stamp(deckId, () =>
+      const result = await stamp(deckId, () =>
         restoreDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {}),
       );
+      const row = headFromMirror(deckId);
+      if (row !== null) noteHead(deckId, row);
+      return result;
     },
     async remove(deckId, baseRevision) {
       await ready();
@@ -1488,6 +2019,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       for (const pathname of [...urls.keys()])
         if (pathname.startsWith(prefix)) urls.delete(pathname);
       rmSync(join(decksDir, deckId), { recursive: true, force: true });
+      noteHead(deckId, null);
       return { id: deckId, removed: true as const };
     },
     async ensureAssets(deckId) {
@@ -1504,19 +2036,55 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       const file = assetPathWithin(decksDir, deckId, relative);
       return file !== null && existsSync(file) ? file : null;
     },
-    async assetUrl(deckId, relative) {
+    async assetUrl(deckId, relative, assetKey) {
       await ready();
       if (!isSafeKey(relative) || !isAssetKey(`${deckId}/assets/${relative}`)) return null;
-      const pathname = `${deckPrefix(deckId)}assets/${relative}`;
-      const cached = urls.get(pathname);
-      if (cached !== undefined) return cached;
-      const entry = await (await client()).head(pathname);
-      const url = entry === null ? null : entry.url;
-      // a miss is not cached: a twin another instance puts after this instance asked for it
-      // (SPEC-3 0.39) must be found on the next request, and asset names never change bytes
-      if (url !== null) urls.set(pathname, url);
-      return url;
+      // a keyed media file first when the caller holds the deck's key (SPEC-5 0.19), the plain
+      // prefix otherwise; both answers are cached by pathname, a miss never is
+      const pathnames = [
+        ...(assetKey !== undefined && ASSET_KEY_PATTERN.test(assetKey)
+          ? [`${keyedPrefix(deckId, assetKey)}${relative}`]
+          : []),
+        `${deckPrefix(deckId)}assets/${relative}`,
+      ];
+      for (const pathname of pathnames) {
+        const cached = urls.get(pathname);
+        if (cached !== undefined && cached !== null) return cached;
+        const entry = await (await client()).head(pathname);
+        const url = entry === null ? null : entry.url;
+        // a miss is not cached: a twin another instance puts after this instance asked for it
+        // (SPEC-3 0.39) must be found on the next request, and asset names never change bytes
+        if (url !== null) {
+          urls.set(pathname, url);
+          return url;
+        }
+      }
+      return null;
     },
+    async rotateAssetKey(deckId, from, to) {
+      await ready();
+      const result = await (await storeFor(deckId)).rotateAssetKey(from, to);
+      for (const pathname of [...urls.keys()])
+        if (pathname.startsWith(keyedPrefix(deckId, from))) urls.delete(pathname);
+      return result;
+    },
+    async reindex() {
+      await ready();
+      const ids = await deckIds();
+      const c = await client();
+      const rows: DeckHead[] = [];
+      await eachLimit(ids, 8, async (deckId) => {
+        const fetched = await c.get(`${deckPrefix(deckId)}deck.json`);
+        if (fetched === null) return;
+        const head = deckHeadOf(deckId, fetched.bytes);
+        if (head !== null) rows.push(head);
+      });
+      const { version } = await readIndex(c);
+      pendingRows.clear();
+      await putIndex(c, { schemaVersion: 1, updatedAt: nowIso(), decks: rows }, version);
+      return { decks: rows.length };
+    },
+    flushIndex,
     facts() {
       return factsFor(options.selection, decksDir, options.seed);
     },

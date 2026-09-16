@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "thank-you",
+  "kind": "closing",
+  "picture": {
+    "asset": "opener-closing",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "upper-left",
+    "maxWidth": 720,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "big",
+        "text": "Thank you"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "name@company.com\n+1 555 0100\ncompany.com",
+        "marginTop": 14,
+        "measure": 56
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Material: Singularity, a Prototemplate direction"
+      }
+    ]
+  },
+  "mark": {
+    "w": 138,
+    "h": 88
+  },
+  "title": "Thank you"
+}

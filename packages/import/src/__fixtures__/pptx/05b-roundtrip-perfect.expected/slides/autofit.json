@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "autofit",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A heading long enough that shrink text on overflow steps its size down the ladder before it wraps a third time",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 96.79,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:autofit#h/text"
+        }
+      },
+      {
+        "id": "p1",
+        "type": "text",
+        "text": "The heading above carries autofit shrink without a position box: the fit runs in the flow layout.",
+        "pos": {
+          "x": 137,
+          "y": 260.78,
+          "w": 767.58,
+          "h": 66,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:autofit#p1/text"
+        }
+      }
+    ]
+  },
+  "title": "A heading long enough that shrink text on overflow steps its size...",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide28.xml",
+    "pptxSlideId": 283
+  }
+}

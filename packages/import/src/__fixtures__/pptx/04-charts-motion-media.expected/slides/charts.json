@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "id": "charts",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "column",
+        "categories": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        "series": [
+          {
+            "name": "Revenue",
+            "values": [
+              1200,
+              1450,
+              1600,
+              2100
+            ]
+          },
+          {
+            "name": "Cost",
+            "values": [
+              800,
+              900,
+              950,
+              1100
+            ]
+          }
+        ],
+        "pos": {
+          "x": 60,
+          "y": 60,
+          "w": 720,
+          "h": 420,
+          "z": 1
+        },
+        "title": "Revenue and cost",
+        "legend": "bottom",
+        "labels": true,
+        "numberFormat": "thousands",
+        "ext": {
+          "pptxName": "Chart 1",
+          "pptxChartPart": "ppt/charts/chart1.xml"
+        }
+      },
+      {
+        "id": "chart-2",
+        "type": "chart",
+        "kind": "bar",
+        "categories": [
+          "North",
+          "South",
+          "East",
+          "West"
+        ],
+        "series": [
+          {
+            "name": "Share",
+            "values": [
+              0.41,
+              0.24,
+              0.2,
+              0.15
+            ]
+          }
+        ],
+        "pos": {
+          "x": 840,
+          "y": 60,
+          "w": 700,
+          "h": 420,
+          "z": 2
+        },
+        "title": "Share by region",
+        "legend": "right",
+        "labels": true,
+        "numberFormat": "percent",
+        "ext": {
+          "pptxName": "Chart 2",
+          "pptxChartPart": "ppt/charts/chart2.xml"
+        }
+      },
+      {
+        "id": "chart-3",
+        "type": "chart",
+        "kind": "line",
+        "categories": [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun"
+        ],
+        "series": [
+          {
+            "name": "Users",
+            "values": [
+              120,
+              150,
+              180,
+              210,
+              260,
+              300
+            ]
+          }
+        ],
+        "pos": {
+          "x": 60,
+          "y": 510,
+          "w": 720,
+          "h": 360,
+          "z": 3
+        },
+        "title": "Users",
+        "legend": "top",
+        "ext": {
+          "pptxName": "Chart 3",
+          "pptxChartPart": "ppt/charts/chart3.xml"
+        }
+      },
+      {
+        "id": "chart-4",
+        "type": "chart",
+        "kind": "pie",
+        "categories": [
+          "Starter",
+          "Team",
+          "Enterprise"
+        ],
+        "series": [
+          {
+            "name": "Plans",
+            "values": [
+              55,
+              30,
+              15
+            ]
+          }
+        ],
+        "pos": {
+          "x": 840,
+          "y": 510,
+          "w": 700,
+          "h": 360,
+          "z": 4
+        },
+        "title": "Plans",
+        "legend": "left",
+        "labels": true,
+        "numberFormat": "percent",
+        "ext": {
+          "pptxName": "Chart 4",
+          "pptxChartPart": "ppt/charts/chart4.xml"
+        }
+      }
+    ]
+  },
+  "title": "Charts",
+  "transition": {
+    "kind": "fade",
+    "durationMs": 750
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide1.xml",
+    "pptxSlideId": 256
+  }
+}

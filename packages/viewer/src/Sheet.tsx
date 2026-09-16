@@ -1,7 +1,8 @@
 import type { MouseEvent, ReactNode, RefObject, TouchEvent, UIEvent } from 'react';
 import { useRef } from 'react';
 
-import { SHEET_H, SHEET_W } from './model';
+import { SHEET_H, SHEET_W, sheetSizeVars } from './model';
+import type { PageSize } from './model';
 
 import './Sheet.css';
 
@@ -92,6 +93,8 @@ export type SheetProps = {
   edges?: boolean;
   /** hidden while another mode is up */
   hidden?: boolean;
+  /** the deck's page in sheet pixels (gslides-parity SPEC-5 6.1); 1600 by 900 when absent */
+  page?: PageSize;
   /** the scrolling stage box, for the editor's zoom and pan (gslides-parity SPEC-2 6.1 rows 27, 28) */
   scrollerRef?: RefObject<HTMLDivElement | null>;
   /** the stage scrolled while zoomed: the overlay follows */
@@ -118,6 +121,7 @@ export function Sheet({
   onStep,
   edges = true,
   hidden = false,
+  page,
   scrollerRef,
   onScroll,
   children,
@@ -125,7 +129,9 @@ export function Sheet({
   const sheet = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
   const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
-  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, pad, zoom });
+  const w = page?.width ?? SHEET_W;
+  const h = page?.height ?? SHEET_H;
+  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, w, h, pad, zoom });
   /* on a narrow viewport the sheet sits under the toolbar instead of centered, so the plate below it can hold the title */
   const fit: SheetFit = narrow && !present && zoom === 'fit' ? { ...fitted, top: pad } : fitted;
   /* a zoomed sheet larger than the stage: the stage scrolls to the rest (Editor.css [data-zoom]) */
@@ -179,7 +185,11 @@ export function Sheet({
       <div
         ref={sheet}
         className={present ? 'sheet is-present' : 'sheet'}
+        /* the page as `data-page` (gslides-parity SPEC-5 6.1), the attribute the render path's stage root carries */
+        data-page={`${w}x${h}`}
         style={{
+          /* the page for stage.css's `.stage` box (gslides-parity SPEC-5 6.1) */
+          ...sheetSizeVars({ width: w, height: h }),
           left: fit.left,
           top: fit.top,
           width: fit.width,

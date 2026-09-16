@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "quarters",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Q1 to Q4",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Workstream",
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Onboarding",
+              "Ship",
+              "Measure",
+              "",
+              ""
+            ]
+          },
+          {
+            "cells": [
+              "Reporting",
+              "Forecast",
+              "Ship",
+              "Measure",
+              ""
+            ]
+          },
+          {
+            "cells": [
+              "Integrations",
+              "",
+              "Connector",
+              "Sign on",
+              "Audit log"
+            ]
+          },
+          {
+            "cells": [
+              "Scale",
+              "",
+              "",
+              "Second workflow",
+              "Partner API"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Q1 to Q4"
+}

@@ -21,7 +21,12 @@ import JSZip from 'jszip';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder, unskippedSlideOrder } from '@turboslide/schema/deck';
-import type { ExportMode, ExportReport } from '@turboslide/schema/export';
+import type {
+  ExportMode,
+  ExportReport,
+  MediaExportMode,
+  MotionExportMode,
+} from '@turboslide/schema/export';
 import { exportReportSchema, NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 
 import { materializeForExport } from './dither-variants.ts';
@@ -96,6 +101,10 @@ export type ExportPptxOptions = {
   verify?: ExportVerifyOptions;
   /** Write `scene-<theme>.json` beside the files for inspection. */
   writeScenes?: boolean;
+  /** Editable text (gslides-parity SPEC-5 2.4): keep the transitions and the timing tree, or drop them; keep by default. */
+  motion?: MotionExportMode;
+  /** Editable text (SPEC-5 3.6): how a media file travels; embed by default. */
+  media?: MediaExportMode;
   /**
    * Materialize the missing dither variants before the shoot (gslides-parity SPEC-3 10.4), on by
    * default so every dithered picture is shot in state `variant`; false leaves the deck's files
@@ -229,6 +238,8 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
           wordmarkPath && existsSync(wordmarkPath) ? readFileSync(wordmarkPath) : undefined,
         defaultNotes: deck.defaults?.notes,
         onPage: options.onPage,
+        ...(options.motion !== undefined ? { motion: options.motion } : {}),
+        ...(options.media !== undefined ? { media: options.media } : {}),
       });
       await writeFile(path, built.bytes);
       options.onFile?.(path, built.bytes.byteLength);
@@ -344,6 +355,35 @@ type ThemeReportInput = {
 /** The per theme report of one built file. */
 function themeReport(built: BuildResult, input: ThemeReportInput): ExportReport {
   const { options, scenes, mode, theme, fontSet, catalog, path } = input;
+  const report = themeReportBody(built, input, {
+    options,
+    scenes,
+    mode,
+    theme,
+    fontSet,
+    catalog,
+    path,
+  });
+  /* round five (SPEC-5 2.4; b1.md request 8): the timing tree's summary rides on the report */
+  return built.motion === undefined ? report : { ...report, motion: built.motion };
+}
+
+function themeReportBody(
+  built: BuildResult,
+  input: ThemeReportInput,
+  {
+    options,
+    scenes,
+    mode,
+    theme,
+    fontSet,
+    catalog,
+    path,
+  }: Pick<
+    ThemeReportInput,
+    'options' | 'scenes' | 'mode' | 'theme' | 'fontSet' | 'catalog' | 'path'
+  >,
+): ExportReport {
   // The verify loop reads the sheet shot and the picture region per slide (SPEC 8.5 step 3).
   const slidesWithScene = built.slides.map(({ title: _title, ...entry }) => {
     const scene = scenes.find((s) => s.slideId === entry.slideId);

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "id": "links",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Block links",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 800,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:links#h/text"
+        }
+      },
+      {
+        "id": "box",
+        "type": "text",
+        "text": "[A box linked to the first slide.](#s/title){u}\n[Two paragraphs inside the box.](#s/title){u}",
+        "pos": {
+          "x": 154,
+          "y": 253,
+          "w": 526,
+          "h": 66,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:links#box/text"
+        }
+      },
+      {
+        "id": "t1",
+        "type": "text",
+        "text": "[A text box linked to the table slide.](#s/table){u}",
+        "pos": {
+          "x": 137,
+          "y": 444,
+          "w": 560,
+          "h": 33,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:links#t1/text"
+        }
+      },
+      {
+        "id": "box-link",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 241,
+          "w": 560,
+          "h": 160,
+          "z": 4
+        },
+        "fill": "paper",
+        "link": "#s/title",
+        "ext": {
+          "pptxName": "ts:links#box/link"
+        }
+      },
+      {
+        "id": "shape-link",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 761,
+          "y": 241,
+          "w": 400,
+          "h": 160,
+          "z": 5
+        },
+        "fill": "paper",
+        "link": "https://generaltranslation.com",
+        "ext": {
+          "pptxName": "ts:links#shape/link"
+        }
+      },
+      {
+        "id": "t1-link",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 137,
+          "y": 449,
+          "w": 560,
+          "h": 33,
+          "z": 6
+        },
+        "fill": "paper",
+        "link": "#s/table",
+        "ext": {
+          "pptxName": "ts:links#t1/link"
+        }
+      }
+    ]
+  },
+  "title": "Block links",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide5.xml",
+    "pptxSlideId": 260
+  }
+}

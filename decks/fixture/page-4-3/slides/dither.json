@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "dither",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 500,
+          "h": 56,
+          "z": 0
+        },
+        "type": "heading",
+        "level": "h2",
+        "text": "A dithered picture on 4:3"
+      },
+      {
+        "id": "photo",
+        "pos": {
+          "x": 603,
+          "y": 300,
+          "w": 460,
+          "h": 259,
+          "z": 1
+        },
+        "type": "picture",
+        "asset": "fixture-photo",
+        "dither": {
+          "pattern": "bayer8",
+          "strength": 0.6
+        }
+      },
+      {
+        "id": "p",
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 400,
+          "h": 160,
+          "z": 2
+        },
+        "type": "paragraph",
+        "text": "The picture object sits in the right half of the 926 px content box with a Bayer screen at 60 percent.",
+        "measure": 56
+      }
+    ]
+  }
+}

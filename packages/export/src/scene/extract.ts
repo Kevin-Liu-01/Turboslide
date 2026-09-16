@@ -20,12 +20,13 @@ import { join } from 'node:path';
 import type { Page } from 'playwright-core';
 
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { slideOrder, slideTitle } from '@turboslide/schema/deck';
+import { slideBlocks, slideOrder, slideTitle } from '@turboslide/schema/deck';
 import { isShareAlike } from '@turboslide/schema/assets';
 import type { Asset } from '@turboslide/schema/assets';
 import { NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { ExportMode } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
+import { usedFontIds } from '@turboslide/fonts/used';
 import { renderDeck } from '@turboslide/render/deck';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
 import { openSheetPage, SHEET } from '@turboslide/headless/context';
@@ -37,8 +38,15 @@ import { waitForReady } from '@turboslide/headless/ready';
 
 import { MEASURE_CLASS } from '@turboslide/render/measure-dom';
 
+import { deckPage } from '@turboslide/schema/render';
+import { DEFAULT_LANGUAGE } from '@turboslide/schema/deck';
+import { compileMotion, deckMediaLength } from '@turboslide/render/motion';
+import { themeCss } from '@turboslide/render/theme-css';
+
 import { enrichScene } from './enrich.ts';
+import { sceneEquations } from './equations.ts';
 import { measureScene, tagRasterElements } from './measure.ts';
+import { sceneMedia } from './media.ts';
 import { twoToneTwinAt2x } from './two-tone.ts';
 import type { PictureScale } from './two-tone.ts';
 import type { Scene, SceneRaster } from './types.ts';
@@ -119,12 +127,13 @@ export type ExtractResult = {
  */
 export function snapRasterBox(
   box: [number, number, number, number],
+  page: { width: number; height: number } = SHEET,
 ): [number, number, number, number] {
   const [x, y, w, h] = box;
   const x0 = Math.max(0, Math.floor(x + 0.001));
   const y0 = Math.max(0, Math.floor(y + 0.001));
-  const x1 = Math.min(SHEET.width, Math.ceil(x + w - 0.001));
-  const y1 = Math.min(SHEET.height, Math.ceil(y + h - 0.001));
+  const x1 = Math.min(page.width, Math.ceil(x + w - 0.001));
+  const y1 = Math.min(page.height, Math.ceil(y + h - 0.001));
   return [x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0)];
 }
 
@@ -209,6 +218,27 @@ async function setTransparentGround(page: Page, on: boolean): Promise<void> {
   }, on);
 }
 
+/**
+ * The paragraph count of a block as the exporter measures it (SPEC-5 1.3): the distinct
+ * `SceneLine.paragraph` values over the block's texts, at least one for a block with any text;
+ * a list block's items count one each (a text id `<block>/items/<i>/...` names the item, so a
+ * ruled row's key and value are one paragraph), the count the show reads from the rendered item
+ * nodes (`paragraphNodes`) and the schema from the document (`blockParagraphCount`).
+ */
+export function paragraphCountOf(scene: Scene, blockId: string): number {
+  const paragraphs = new Set<string>();
+  for (const text of scene.texts) {
+    if (text.blockId !== blockId) continue;
+    const item = /^[^/]+\/items\/(\d+)(?:\/|$)/.exec(text.id);
+    if (item !== null) {
+      paragraphs.add(`item:${item[1]}`);
+      continue;
+    }
+    for (const line of text.lines) paragraphs.add(`para:${line.paragraph ?? 0}`);
+  }
+  return paragraphs.size;
+}
+
 export async function extractScenes(options: ExtractOptions): Promise<ExtractResult> {
   const { deck, slides } = options.document;
   const order = slideOrder(deck);
@@ -218,7 +248,12 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
   // carries the text and the render surface's runtime shows it, so nothing is written by hand
   const play = options.numbering ?? order;
   const total = play.length;
-  const bundle = loadThemeBundle();
+  // the capture's stylesheet carries one @font-face group per catalog family the deck uses and
+  // the `--ts-font-<id>` rule they resolve through, so a heading set in Roboto measures and shoots
+  // in Roboto and the scene's computed family is the face the Editable text writer names
+  // (gslides-parity SPEC-5-amendments A5 item 5; b7.md request 16); the GT deck uses Inter alone,
+  // so its list is empty and the bundle is the one it always was (the Perfect bytes hold)
+  const bundle = loadThemeBundle({ fonts: usedFontIds(deck, Object.values(slides)) });
   const assetBase = fileUrl(options.deckDir, true);
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-export-'));
   const scenes: Scene[] = [];
@@ -258,10 +293,17 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
         // icons and marks under `auto`, at 3x.
         const shotScales: (2 | 3)[] =
           options.mode === 'flatten' ? [2] : policy === 'auto' ? [2, 3] : [policy];
-        const measurePage = await openSheetPage(launched.browser, { theme, scale: 1 });
+        const measurePage = await openSheetPage(launched.browser, {
+          theme,
+          scale: 1,
+          viewport: deckPage(deck),
+        });
         const shotPages = new Map<2 | 3, SheetPage<2 | 3>>();
         for (const scale of shotScales)
-          shotPages.set(scale, await openSheetPage(launched.browser, { theme, scale }));
+          shotPages.set(
+            scale,
+            await openSheetPage(launched.browser, { theme, scale, viewport: deckPage(deck) }),
+          );
         const pictureDir = join(options.workDir, 'pictures', theme);
         const rasterDir = join(options.workDir, 'rasters', theme);
         const sheetDir = join(options.workDir, 'sheets', theme);
@@ -349,11 +391,28 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                 pictureAssetId: asset?.id,
                 notes: slide.notes,
                 tags,
+                page: deckPage(deck),
               }),
               slide,
               { deck, deckDir: options.deckDir },
             );
             scene.title = slideTitle(slide, scene.n);
+            // the round five fields (gslides-parity SPEC-5 1.4, 0.6): each from its owner's
+            // module, set here once so the three writers read one scene; the paragraph counts
+            // are the distinct SceneLine.paragraph values per block, the count the writer emits
+            // as a:p and indexes in p:pRg (SPEC-5 1.3)
+            scene.page = deckPage(deck);
+            scene.language = deck.language ?? DEFAULT_LANGUAGE;
+            if (slide.transition !== undefined) scene.transition = slide.transition;
+            scene.schedule = compileMotion(
+              slide,
+              slideBlocks(slide).map(({ block }) => block),
+              (blockId) => paragraphCountOf(scene, blockId),
+              deckMediaLength(deck, slide),
+            );
+            scene.media = sceneMedia(scene, slide, deck, { deckDir: options.deckDir });
+            scene.equations = sceneEquations(scene, slide);
+            scene.themeCss = themeCss(deck);
             if (pictureFile) scene.pictureFile = pictureFile;
             if (pictureExcluded) scene.pictureExcluded = true;
             if (pictureRegenerated) scene.pictureRegenerated = true;
@@ -405,7 +464,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                   // no half-pixel phase. Measured in M2 and the M5 baseline: the same raster placed
                   // at its fractional box (the mark at x 190.5, a diagram at 731.5) landed 1 px
                   // right and 2 px narrower in the page.
-                  const snapped = snapRasterBox(raster.box);
+                  const snapped = snapRasterBox(raster.box, deckPage(deck));
                   raster.box = snapped;
                   const [x, y, cw, ch] = snapped;
                   await sheetPage.page.screenshot({

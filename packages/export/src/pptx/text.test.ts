@@ -304,3 +304,67 @@ describe('the run marks of gslides-parity SPEC-2 7.2', () => {
     expect(invisible.rotate).toBe(37);
   });
 });
+
+describe('the deck language and the catalog faces (gslides-parity SPEC-5 7.1; A5 item 5)', async () => {
+  const { DEFAULT_RUN_LANGUAGE, catalogFace, catalogFaceResidual, familyFor, numberSchemeFor } =
+    await import('./text.ts');
+  const text: SceneText = {
+    id: 't',
+    blockId: 't',
+    box: [0, 0, 100, 20],
+    textBox: [0, 0, 100, 20],
+    style,
+    native: true,
+    lines: [{ box: [0, 0, 100, 20], paragraph: 0, runs: [run('Hello'), run(' world')] }],
+  };
+  it('writes lang on every run: the scene language, else en-US', () => {
+    const defaults = textRuns(text, { ...options, families: new Set() });
+    expect(defaults.map((row) => row.options?.lang)).toEqual([
+      DEFAULT_RUN_LANGUAGE,
+      DEFAULT_RUN_LANGUAGE,
+    ]);
+    const french = textRuns(text, { ...options, families: new Set(), language: 'fr' });
+    expect(french.every((row) => row.options?.lang === 'fr')).toBe(true);
+  });
+  it('names a catalog face as is with a residual line and keeps the set pick for the sheet families', () => {
+    expect(catalogFace(style)).toBeNull();
+    expect(catalogFace({ ...style, family: 'GT Inter' })).toBeNull();
+    expect(catalogFace({ ...style, family: 'Roboto' })).toBe('Roboto');
+    expect(catalogFace({ ...style, family: 'Roboto', mono: true })).toBeNull();
+    expect(familyFor({ ...style, family: 'Playfair Display' }, 'exact')).toBe('Playfair Display');
+    const residual = new Set<string>();
+    const runs = textRuns(
+      {
+        ...text,
+        lines: [
+          {
+            box: [0, 0, 100, 20],
+            paragraph: 0,
+            runs: [run('Hi', { style: { ...style, family: 'Roboto', weight: 700 } })],
+          },
+        ],
+      },
+      { ...options, families: new Set(), residual },
+    );
+    expect(runs[0]?.options?.fontFace).toBe('Roboto');
+    expect(runs[0]?.options?.bold).toBeUndefined();
+    expect([...residual]).toEqual([catalogFaceResidual('Roboto')]);
+  });
+  it('maps a prefix and suffix pair to the OOXML numbering scheme, the nearest one flagged', () => {
+    expect(numberSchemeFor('arabic', '', '.')).toEqual({ numberType: 'arabicPeriod', exact: true });
+    expect(numberSchemeFor('arabic', '', ')')).toEqual({ numberType: 'arabicParenR', exact: true });
+    expect(numberSchemeFor('alphaLc', '(', ')')).toEqual({
+      numberType: 'alphaLcParenBoth',
+      exact: true,
+    });
+    expect(numberSchemeFor('arabic', '', '')).toEqual({ numberType: 'arabicPlain', exact: true });
+    expect(numberSchemeFor('romanUc', '', '')).toEqual({
+      numberType: 'romanUcPeriod',
+      exact: false,
+    });
+    expect(numberSchemeFor('arabic', 'Step ', ':')).toEqual({
+      numberType: 'arabicPeriod',
+      exact: false,
+    });
+  });
+});

@@ -334,7 +334,7 @@ body {
 .ts-skeleton .ts-skeleton-frame {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
   background: var(--pt-plate);
   border: 1px solid var(--pt-hair);
   box-sizing: border-box;

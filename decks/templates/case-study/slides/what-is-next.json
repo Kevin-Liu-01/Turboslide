@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "what-is-next",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "What is next",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Where the work goes from here.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "The second team joins in the next quarter"
+          },
+          {
+            "text": "The report gains the forecast"
+          },
+          {
+            "text": "A quarterly review with the board"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "What is next"
+}

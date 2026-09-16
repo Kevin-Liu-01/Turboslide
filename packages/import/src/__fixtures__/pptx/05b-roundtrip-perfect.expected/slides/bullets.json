@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "id": "bullets",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Bullets and numbering",
+        "pos": {
+          "x": 137,
+          "y": 288.41,
+          "w": 627,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#h/text"
+        }
+      },
+      {
+        "id": "bullets-items-0-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Level one, a disc"
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 385.8,
+          "w": 627,
+          "h": 33.6,
+          "z": 2
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/0/text@bullets/item/0"
+        }
+      },
+      {
+        "id": "bullets-items-1-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Level two, a circle",
+            "level": 2
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 444.39,
+          "w": 627,
+          "h": 33.6,
+          "z": 3
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/1/text@bullets/item/1"
+        }
+      },
+      {
+        "id": "bullets-items-2-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Level three, a square",
+            "level": 3
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 502.99,
+          "w": 627,
+          "h": 33.6,
+          "z": 4
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/2/text@bullets/item/2"
+        }
+      },
+      {
+        "id": "bullets-items-3-text",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Level four, the glyph cycle starts again",
+            "level": 4
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 561.58,
+          "w": 627,
+          "h": 33.6,
+          "z": 5
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#bullets/items/3/text@bullets/item/3"
+        }
+      },
+      {
+        "id": "numbers-items-0-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "A digit at level one"
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 271.52,
+          "w": 627,
+          "h": 33.6,
+          "z": 6
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/0/text@numbers/item/0"
+        }
+      },
+      {
+        "id": "numbers-items-1-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "A letter at level two",
+            "level": 2
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 330.11,
+          "w": 627,
+          "h": 33.6,
+          "z": 7
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/1/text@numbers/item/1"
+        }
+      },
+      {
+        "id": "numbers-items-2-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "A roman numeral at level three",
+            "level": 3
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 388.71,
+          "w": 627,
+          "h": 33.6,
+          "z": 8
+        },
+        "numbered": true,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/2/text@numbers/item/2"
+        }
+      },
+      {
+        "id": "numbers-items-3-text",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "Back to a digit"
+          }
+        ],
+        "pos": {
+          "x": 836,
+          "y": 447.3,
+          "w": 627,
+          "h": 33.6,
+          "z": 9
+        },
+        "numbered": true,
+        "start": 2,
+        "size": 24,
+        "ext": {
+          "pptxName": "ts:bullets#numbers/items/3/text@numbers/item/3"
+        }
+      },
+      {
+        "id": "ruled-items-0-num",
+        "type": "text",
+        "text": "1",
+        "pos": {
+          "x": 836,
+          "y": 528.89,
+          "w": 36,
+          "h": 33.6,
+          "z": 10,
+          "group": "ruled-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/0/num@ruled/item/0",
+          "pptxGroupPath": "ruled/item/0"
+        }
+      },
+      {
+        "id": "ruled-items-0-text",
+        "type": "text",
+        "text": "The round one form",
+        "pos": {
+          "x": 872,
+          "y": 528.89,
+          "w": 591,
+          "h": 33.6,
+          "z": 11,
+          "group": "ruled-item-0"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/0/text@ruled/item/0",
+          "pptxGroupPath": "ruled/item/0"
+        }
+      },
+      {
+        "id": "ruled-items-1-num",
+        "type": "text",
+        "text": "2",
+        "pos": {
+          "x": 836,
+          "y": 587.49,
+          "w": 36,
+          "h": 33.6,
+          "z": 12,
+          "group": "ruled-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/1/num@ruled/item/1",
+          "pptxGroupPath": "ruled/item/1"
+        }
+      },
+      {
+        "id": "ruled-items-1-text",
+        "type": "text",
+        "text": "A tabular numeral in the key position",
+        "pos": {
+          "x": 872,
+          "y": 587.49,
+          "w": 591,
+          "h": 33.6,
+          "z": 13,
+          "group": "ruled-item-1"
+        },
+        "typography": {
+          "size": 24,
+          "leading": 1.4
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:bullets#ruled/items/1/text@ruled/item/1",
+          "pptxGroupPath": "ruled/item/1"
+        }
+      }
+    ]
+  },
+  "title": "Bullets and numbering",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide26.xml",
+    "pptxSlideId": 281
+  }
+}

@@ -7,7 +7,7 @@ import {
   rulerTicks,
   tickLength,
 } from '@turboslide/viewer/rulers-model';
-import type { RulerAxis } from '@turboslide/viewer/rulers-model';
+import type { RulerAxis, RulerUnit } from '@turboslide/viewer/rulers-model';
 
 import { tipProps } from './Tooltip';
 
@@ -27,6 +27,10 @@ import './Rulers.css';
 export type RulersProps = {
   /** the stage scale: sheet pixels times k are CSS pixels */
   k: number;
+  /** the deck's page in sheet pixels, the rulers' length (gslides-parity SPEC-5 6.1); the default page when absent */
+  page?: { width: number; height: number };
+  /** the unit the numerals count in (the Preferences' units row, SPEC-5 6.1); inches when absent */
+  unit?: RulerUnit;
   /** the pointer over the stage in sheet pixels, or null */
   pointer: { x: number; y: number } | null;
   /** the selection's bounding box in sheet pixels, or null */
@@ -40,12 +44,27 @@ function tickStyle(axis: RulerAxis, at: number, k: number, length: number): CSSP
     : { top: at * k, right: 0, width: length };
 }
 
-function Ruler({ axis, k, pointer, selection, onRulerDown }: RulersProps & { axis: RulerAxis }) {
-  const ticks = rulerTicks(axis);
+/** The unit's words for the ruler tooltip (EDGE is the axis's edge). */
+const UNIT_WORDS: Readonly<Record<RulerUnit, string>> = {
+  in: `Inches from the slide's EDGE edge, ${PX_PER_INCH} px per inch.`,
+  cm: `Centimetres from the slide's EDGE edge, ${Math.round((PX_PER_INCH / 2.54) * 100) / 100} px per centimetre.`,
+  px: "Sheet pixels from the slide's EDGE edge, a numeral every hundred.",
+};
+
+function Ruler({
+  axis,
+  k,
+  page,
+  unit = 'in',
+  pointer,
+  selection,
+  onRulerDown,
+}: RulersProps & { axis: RulerAxis }) {
+  const ticks = rulerTicks(axis, page, unit);
   const name = axis === 'x' ? 'Horizontal ruler' : 'Vertical ruler';
   const tip = tipProps({
     name,
-    doc: `Inches from the slide's ${axis === 'x' ? 'left' : 'top'} edge, ${PX_PER_INCH} px per inch. Drag out of the ruler to add a guide.`,
+    doc: `${UNIT_WORDS[unit].replace('EDGE', axis === 'x' ? 'left' : 'top')} Drag out of the ruler to add a guide.`,
   });
   const extent =
     selection === null
@@ -61,6 +80,7 @@ function Ruler({ axis, k, pointer, selection, onRulerDown }: RulersProps & { axi
       aria-label={name}
       tabIndex={-1}
       data-axis={axis}
+      data-unit={unit}
       data-control={`ruler.${axis}`}
       {...tip}
       onPointerDown={(e: ReactPointerEvent<HTMLDivElement>) => {

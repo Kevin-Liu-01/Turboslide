@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "t-slide-right",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Slide from right, the diamond zooms in on entry",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "diamond",
+        "stroke": "ink",
+        "text": "Zoom in",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 1000,
+          "y": 260,
+          "w": 400,
+          "h": 300,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "slideRight",
+    "durationMs": 1000
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "zoomIn",
+      "trigger": "withPrevious",
+      "durationMs": 600
+    }
+  ]
+}

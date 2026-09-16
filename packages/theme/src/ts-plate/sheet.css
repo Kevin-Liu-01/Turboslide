@@ -1,0 +1,66 @@
+/* ts-plate sheet (gslides-parity SPEC-5 0.45, 9.3; R03 5.2; R08 3c). The second built in theme is
+   round four's construction on the sheet: the GT content box and the 21 layouts unchanged, so
+   Change theme never moves an object; the frame reduced to the mark's rail, one 1 px --hair rule
+   at 56 px from the left edge (the frame's ::before, which the GT sheet draws at var(--rail)) and
+   one at 56 px from the bottom edge (the .rule.bottom of PLATE_FRAME_HTML); no right rail, no top
+   rule, no registration crosses; the corner slot empty by default (Edit theme offers a picture);
+   no paper chips; the counter bottom right as the GT theme draws it; Inter 500 with cv11 and
+   ss01 for display text, which the GT sheet already states; the same ten token values in both
+   appearances. This file holds the rules that differ, every one keyed on the theme id the sheet
+   root stamps as data-sheet (../themes.ts sheetRootAttributes), and is loaded after
+   ../gt-ink-paper/sheet.css (theme.ts sheetCss('ts-plate')). tokens.test.ts asserts the keying
+   and the plate geometry against themes.ts plateBoxes. */
+
+/* the frame: the left rail stays (the GT ::before at var(--rail)); the right rail, a top rule and
+   the crosses are absent, so a GT frame rendered under this id draws the same as PLATE_FRAME_HTML */
+.ts-sheet[data-sheet='ts-plate'] .frame::after {
+  display: none;
+}
+.ts-sheet[data-sheet='ts-plate'] .frame .rule.top {
+  display: none;
+}
+.ts-sheet[data-sheet='ts-plate'] .frame .cross {
+  display: none;
+}
+
+/* the corner slot is empty by default (SPEC-5 0.45): the stage's wordmark is not drawn; Edit
+   theme's mark.kind picture turns it back on through the override stylesheet (render theme-css.ts) */
+.ts-sheet[data-sheet='ts-plate'] .wordmark {
+  display: none;
+}
+
+/* no paper chips under the corner slot and the counter on a full picture slide */
+.ts-sheet[data-sheet='ts-plate'] .ts-chips {
+  display: none;
+}
+
+/* the plates as fractions of the page (R08 3c): the opener and the closing plate at x = W/8,
+   y = H/2, w = W/2, h = 3H/8 (800 by 338 at 200, 450 on 16:9), the mood plate mirrored to
+   x = 3W/8; the slide box is inset 57 px, so the offsets subtract it (stage.css .slide) */
+.ts-sheet[data-sheet='ts-plate'] .slide.opener .opener-plate,
+.ts-sheet[data-sheet='ts-plate'] .slide.mood .mood-plate {
+  left: calc(var(--ts-sheet-w, 1600px) / 8 - 57px);
+  right: auto;
+  top: calc(var(--ts-sheet-h, 900px) / 2 - 57px);
+  bottom: auto;
+  width: calc(var(--ts-sheet-w, 1600px) / 2);
+  max-width: none;
+  min-height: calc(var(--ts-sheet-h, 900px) * 3 / 8);
+  box-sizing: border-box;
+}
+.ts-sheet[data-sheet='ts-plate'] .slide.mood .mood-plate {
+  left: calc(var(--ts-sheet-w, 1600px) * 3 / 8 - 57px);
+}
+.ts-sheet[data-sheet='ts-plate'] .s-closing .opener-plate {
+  top: calc(var(--ts-sheet-h, 900px) / 8 - 57px);
+}
+
+/* the wordmark's tracking rule for display text between 16 and 27 px (SPEC-4 1.2): the plate's
+   credit and caption lines; 28 px and above keep the GT sheet's -0.025em */
+.ts-sheet[data-sheet='ts-plate'] .opener-plate .credit,
+.ts-sheet[data-sheet='ts-plate'] .mood-plate .credit {
+  font-family: var(--display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv11', 'ss01';
+}

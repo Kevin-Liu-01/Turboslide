@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "t-fade",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Fade, the text box flies in from the left on entry",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "text",
+        "text": "Fly in from left after previous joins the entry step",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 520,
+          "h": 80,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "fade",
+    "durationMs": 500
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "flyIn",
+      "trigger": "afterPrevious",
+      "durationMs": 800,
+      "direction": "left"
+    }
+  ]
+}

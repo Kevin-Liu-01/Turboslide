@@ -20,7 +20,8 @@
 import type PptxGenJS from 'pptxgenjs';
 
 import type { SceneRect, SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
-import { PAGE_IN, PX_PER_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
+import { PX_PER_IN, pageIn, parseCssColor, pxToIn, pxToPt } from '../units.ts';
+import type { PageSize } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { faceAdvanceExcess } from './face-advance.ts';
@@ -58,12 +59,74 @@ export type TextEmitOptions = {
   links?: LinkResolver;
   /** The paper hex a shape's translucent fill composites on (a shape with text, SPEC-2 2.2.17). */
   paperHex?: string;
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1): the width clamps read it; the default page when absent. */
+  page?: PageSize;
+  /** The deck's language (gslides-parity SPEC-5 7.1; R10 5.2): `a:rPr lang` on every run; `en-US` when absent. */
+  language?: string;
 };
 
-/** The family for a style: the mono stack for the code panel, else the set's pick. */
+/** The default language of a run's `lang` attribute when the scene carries none (SPEC-5 1.2 "Absent"). */
+export const DEFAULT_RUN_LANGUAGE = 'en-US';
+
+/** The families the sheet's own theme draws, whose export names come from the font set (fonts-map.ts). */
+const SHEET_FAMILIES = new Set(['Inter', 'GT Inter', 'DejaVu Sans Mono', 'Menlo', 'monospace']);
+
+/**
+ * A catalog face (gslides-parity SPEC-5-amendments A5 item 5; b7.md R8): the computed family of a
+ * run whose typography names a `FONT_IDS` face is that face's name (the renderer's
+ * `--ts-font-<id>` variable resolves to it), so the file names it in `a:latin typeface` as is and
+ * the residual line says PowerPoint may substitute it on a machine without the face. The sheet's
+ * own families (Inter and the mono stack) keep the set's pick.
+ */
+export function catalogFace(style: SceneStyle): string | null {
+  if (style.mono) return null;
+  const family = style.family.trim();
+  if (family === '' || SHEET_FAMILIES.has(family)) return null;
+  /* the export set's own instances (`GT Inter Text 22`, `Inter Medium`, `GT Inter Display`) are
+     the sheet's faces too: they take the set's pick with its weight rule, never a catalog name
+     (merge 2; report.test.ts pins the Medium plus bold rule for weight 700) */
+  if (family.startsWith('GT Inter') || family.startsWith('Inter ')) return null;
+  return family;
+}
+
+/** The family for a style: the mono stack for the code panel, a catalog face by name, else the set's pick. */
 export function familyFor(style: SceneStyle, set: FontSet): string {
   if (style.mono) return MONO_FAMILY;
+  const face = catalogFace(style);
+  if (face !== null) return face;
   return pickFamily(style.size, style.weight, set).family;
+}
+
+/** The residual line a catalog face adds once per family (A5 item 5). */
+export function catalogFaceResidual(family: string): string {
+  return `font: ${family} travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)`;
+}
+
+/** The OOXML numbering schemes a prefix and suffix pair maps to (ST_TextAutonumberScheme). */
+export type NumberScheme = {
+  numberType: string;
+  /** false when OOXML has no scheme for the pair and the file writes the nearest one */
+  exact: boolean;
+};
+
+/**
+ * The autonumber scheme of a numeral form with the block's prefix and suffix (gslides-parity
+ * SPEC-5 7.7 "Edit prefix and suffix"): `(1)` is ParenBoth, `1)` ParenR, `1.` Period, a bare
+ * arabic numeral Plain; alpha and roman forms have no Plain scheme, and any other pair has none,
+ * so the nearest scheme is written with `exact: false` for the report.
+ */
+export function numberSchemeFor(
+  form: 'arabic' | 'alphaLc' | 'alphaUc' | 'romanLc' | 'romanUc',
+  prefix = '',
+  suffix = '.',
+): NumberScheme {
+  if (prefix === '(' && suffix === ')') return { numberType: `${form}ParenBoth`, exact: true };
+  if (prefix === '' && suffix === ')') return { numberType: `${form}ParenR`, exact: true };
+  if (prefix === '' && suffix === '.') return { numberType: `${form}Period`, exact: true };
+  if (prefix === '' && suffix === '' && form === 'arabic')
+    return { numberType: 'arabicPlain', exact: true };
+  const nearest = suffix === ')' ? `${form}ParenR` : `${form}Period`;
+  return { numberType: nearest, exact: false };
 }
 
 /** The Unicode code point of a bullet glyph as pptxgenjs `characterCode` wants it: four hex digits. */
@@ -111,8 +174,12 @@ function runOptions(
     fontFace: family,
     fontSize: pxToPt(run.style.size),
     color: color.hex,
+    // the deck's language on every run (gslides-parity SPEC-5 7.1: `a:rPr lang`; R10 5.2)
+    lang: options.language ?? DEFAULT_RUN_LANGUAGE,
   };
-  if (!run.style.mono) {
+  const face = catalogFace(run.style);
+  if (face !== null) options.residual?.add(catalogFaceResidual(face));
+  if (!run.style.mono && face === null) {
     // a weight the set has no cut for: 600 and 700 travel as Medium plus bold, 300 as Regular
     const pick = pickFamily(run.style.size, run.style.weight, options.fontSet);
     if (pick.bold) out.bold = true;
@@ -122,7 +189,7 @@ function runOptions(
   if (run.style.letterSpacing !== 0) out.charSpacing = pxToPt(run.style.letterSpacing);
   // A text face used off its cut size renders wider in LibreOffice (calibration.json faceAdvance):
   // the measured excess of the run's width is taken back across its characters.
-  const excess = run.style.mono ? 0 : faceAdvanceExcess(family, run.style.size);
+  const excess = run.style.mono || face !== null ? 0 : faceAdvanceExcess(family, run.style.size);
   if (excess > 0 && run.text.length > 0 && !run.gt) {
     const perChar = (excess * run.box[2]) / run.text.length;
     out.charSpacing = Math.round(pxToPt(run.style.letterSpacing - perChar) * 100) / 100;
@@ -202,6 +269,7 @@ export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.Te
       fontFace: family,
       fontSize: pxToPt(run.style.size),
       color: parseCssColor(run.style.color).hex,
+      lang: options.language ?? DEFAULT_RUN_LANGUAGE,
       transparency: 100,
       charSpacing: Math.round(pxToPt(run.gapAfter - run.spaceWidth) * 100) / 100,
     },
@@ -282,7 +350,8 @@ export function textBoxOptions(
   options: TextEmitOptions,
 ): PptxGenJS.TextPropsOptions {
   const [x, y, w, h] = text.textBox;
-  const maxW = PAGE_IN.width - pxToIn(x);
+  const pageInches = pageIn(options.page);
+  const maxW = pageInches.width - pxToIn(x);
   const wIn = Math.min(pxToIn(w) + WIDTH_SLACK_IN, maxW);
   const lineHeight = Math.max(...text.lines.map((l) => l.box[3]));
   // the mono face has its own anchor (M5: the dark code panels measured 6 px low with none)
@@ -302,7 +371,7 @@ export function textBoxOptions(
     ? {
         x: pxToIn(text.box[0]),
         y: pxToIn(Math.max(0, text.box[1] - shift)),
-        w: Math.min(pxToIn(text.box[2]) + WIDTH_SLACK_IN, PAGE_IN.width - pxToIn(text.box[0])),
+        w: Math.min(pxToIn(text.box[2]) + WIDTH_SLACK_IN, pageInches.width - pxToIn(text.box[0])),
         h: Math.max(pxToIn(text.box[3]), lineHeight / PX_PER_IN),
         margin: marginPt(text.padding ?? [0, 0, 0, 0]),
         valign: text.valign ?? 'top',
@@ -335,7 +404,7 @@ export function textBoxOptions(
     const hanging = BULLET_INDENT_PX * (1 + levels);
     const left = Math.max(0, pxToIn(x - hanging));
     opts.x = left;
-    opts.w = Math.min(wIn + pxToIn(hanging), PAGE_IN.width - left);
+    opts.w = Math.min(wIn + pxToIn(hanging), pageInches.width - left);
   }
   if (text.outline !== undefined && !options.invisible)
     opts.outline = { color: text.outline.colorHex, size: pxToPt(text.outline.width) };
@@ -354,9 +423,63 @@ export function addSceneText(
   options: TextEmitOptions,
 ): boolean {
   if (text.lines.length === 0) return false;
-  slide.addText(textRuns(text, options), textBoxOptions(text, options));
+  const opts = textBoxOptions(text, options);
+  if (opts.hyperlink !== undefined && !registerBoxLink(slide, opts.hyperlink)) {
+    delete opts.hyperlink;
+    options.residual?.add(
+      `${options.namePrefix}#${text.id}: the block link stays off the text box (no relationship table on the slide)`,
+    );
+  }
+  slide.addText(textRuns(text, options), opts);
   return true;
 }
+
+/** The slide's relationship tables as pptxgenjs 4.0.1 keeps them (`getNewRelId` counts the three). */
+type SlideRelationshipTables = {
+  _rels: Array<{ type: string; data: string; rId: number; Target: string }>;
+  _relsChart: unknown[];
+  _relsMedia: unknown[];
+};
+
+/**
+ * Registers the relationship of a link on the text box itself (gslides-parity SPEC 7.2.7).
+ * pptxgenjs writes the box's `a:hlinkClick` from `options.hyperlink._rId` but creates hyperlink
+ * relationships for the runs alone (`createHyperlinkRels` walks the text array), so a box link
+ * left the file with `r:id="rIdundefined"`, which SPEC-5 8.3's validator names (merge 2). The
+ * row follows `createHyperlinkRels` exactly: the next id over the three tables, a `slide` row
+ * for a slide jump and a `dummy` row for a URL, the id written back on the props.
+ */
+function registerBoxLink(slide: PptxGenJS.Slide, hyperlink: PptxGenJS.HyperlinkProps): boolean {
+  const tables = slide as unknown as Partial<SlideRelationshipTables>;
+  if (
+    !Array.isArray(tables._rels) ||
+    !Array.isArray(tables._relsChart) ||
+    !Array.isArray(tables._relsMedia)
+  )
+    return false;
+  if (hyperlink.url === undefined && hyperlink.slide === undefined) return false;
+  const rId = tables._rels.length + tables._relsChart.length + tables._relsMedia.length + 1;
+  const target =
+    hyperlink.slide !== undefined
+      ? String(hyperlink.slide)
+      : (hyperlink.url ?? '').replace(/[&<>"']/g, (c) => XML_ENTITIES[c] ?? c);
+  tables._rels.push({
+    type: 'hyperlink',
+    data: hyperlink.slide !== undefined ? 'slide' : 'dummy',
+    rId,
+    Target: target,
+  });
+  (hyperlink as { _rId?: number })._rId = rId;
+  return true;
+}
+
+const XML_ENTITIES: Readonly<Record<string, string>> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&apos;',
+};
 
 /**
  * A shape with text (SPEC-2 2.2.17) as one `addText` with `shape`: the shape's geometry, fill and

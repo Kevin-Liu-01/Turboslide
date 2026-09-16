@@ -20,7 +20,7 @@ import { boundingBox } from '@turboslide/schema/freeform';
 import type { NumberPreset } from '@turboslide/schema/text';
 import { NUMBER_PRESETS, NUMBER_PRESET_FORMS, presetSlot } from '@turboslide/schema/text';
 import type { Theme } from '@turboslide/schema/render';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, coversPage } from '@turboslide/schema/render';
 import { TOKENS } from '@turboslide/theme/tokens';
 
 import { parseCssColor } from '../units.ts';
@@ -135,9 +135,12 @@ function completeBullet(bullet: SceneBullet): SceneBullet {
   };
 }
 
-/** True when a box covers the whole sheet (the picture object of a converted picture kind). */
-function coversSheet(pos: { x: number; y: number; w: number; h: number }): boolean {
-  return pos.x <= 0 && pos.y <= 0 && pos.x + pos.w >= SHEET_WIDTH && pos.y + pos.h >= SHEET_HEIGHT;
+/** True when a box covers the whole page (the picture object of a converted picture kind); the scene's page, else the default (gslides-parity SPEC-5 6.1). */
+function coversSheet(
+  pos: { x: number; y: number; w: number; h: number },
+  page: { width: number; height: number } = DEFAULT_PAGE,
+): boolean {
+  return coversPage(pos, page);
 }
 
 /**
@@ -263,7 +266,7 @@ export function enrichScene(scene: Scene, slide: Slide, context: EnrichContext =
       lowest &&
       lowest.type === 'picture' &&
       lowest.pos !== undefined &&
-      coversSheet(boundingBox(lowest.pos)) &&
+      coversSheet(boundingBox(lowest.pos), scene.page ?? DEFAULT_PAGE) &&
       (lowest.pos.rotate ?? 0) === 0
     ) {
       const raster = scene.rasters.find((r) => r.blockId === lowest.id);

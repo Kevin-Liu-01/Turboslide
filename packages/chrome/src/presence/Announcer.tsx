@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
 
 import type { EditorPresence } from '../editor-shell';
-import { Announcer as AnnouncerModel } from './presence-model';
+import { Announcer as AnnouncerModel, withoutSelf } from './presence-model';
 import type { ViewerFacts } from './presence-model';
 
 /**
@@ -23,9 +23,13 @@ export type AnnouncerProps = {
 export function AnnouncerRegion({ on, presence, document, viewer }: AnnouncerProps) {
   const model = useRef(new AnnouncerModel());
   const [lines, setLines] = useState<string[]>([]);
-  const others = presence?.others;
+  // the self filter by client id and by principal id (SPEC-5-amendments A3 item 5): this tab
+  // and this person's other tabs are never announced
+  const rows = presence?.others;
+  const self = presence?.self;
+  const others = useMemo(() => withoutSelf(rows ?? [], self ?? null), [rows, self]);
   useEffect(() => {
-    const spoken = model.current.update(others ?? [], viewer, document, Date.now());
+    const spoken = model.current.update(others, viewer, document, Date.now());
     if (on && spoken.length > 0) setLines(spoken);
   }, [others, on, viewer, document]);
   return (

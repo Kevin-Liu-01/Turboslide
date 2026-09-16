@@ -13,9 +13,12 @@
 // `slide.setBackgroundPicture` and `slide.setBackgroundMaterial` place a covering picture object
 // at the back of a slide with its dither in one write; `asset.add --replace-source` attaches a
 // continuous source to an existing asset so its committed twins can be re-toned.
+import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { renderVariant } from '@turboslide/effects/io';
+import { decodeImage, encodePngRgba, renderVariant } from '@turboslide/effects/io';
+import type { RgbaImage } from '@turboslide/effects/image';
 import { addAsset, scaleSource } from '@turboslide/headless/capture/intake';
 import type { AssetIntakeRequest } from '@turboslide/headless/capture/intake';
 import { capturePage } from '@turboslide/headless/capture/page';
@@ -35,7 +38,8 @@ import { boxOfDithered, ditheredPictures, plateBoxOf } from '@turboslide/render/
 import type { DitheredPicture } from '@turboslide/render/dither-walk';
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset, AssetTreatment, AssetVariant } from '@turboslide/schema/assets';
-import { hasContinuousSource } from '@turboslide/schema/assets';
+import { TWIN_VARIANT_SIZE, hasContinuousSource, isPictureAsset } from '@turboslide/schema/assets';
+import { twinVariantFileNames, twinVariantOf } from '@turboslide/schema/blocks/media';
 import type { Block, PictureBlock } from '@turboslide/schema/blocks';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
 import { DITHER_NO_SOURCE_MESSAGE } from '@turboslide/schema/blocks/dither';
@@ -181,8 +185,153 @@ export async function assetAdd(
     return assetReplaceSource(deps, ctx, baseRevision, replaceSource, request);
   const result = await addAsset(request, intakeOptions(deps));
   for (const line of result.warnings) deps.log?.(line);
-  const committed = await commitAssets(deps, ctx, baseRevision, [result.asset]);
-  return committed.assets[0] ?? result.asset;
+  // the 320 px twin variant beside the twins (SPEC-5 11), in the same commit; a failure to write
+  // it never refuses the picture (`--clone` writes it later)
+  let asset = result.asset;
+  try {
+    const twin = await writeTwinVariant(deps, asset);
+    if (twin !== null) asset = twin.asset;
+  } catch (error) {
+    deps.log?.(`twin variant: not written (${error instanceof Error ? error.message : 'error'})`);
+  }
+  const committed = await commitAssets(deps, ctx, baseRevision, [asset]);
+  return committed.assets[0] ?? asset;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The 320 px twin variant (gslides-parity SPEC-5 11 "The 320 px twin variant"; SPEC-4 7; B2 day
+// 7): every twin of a picture asset downsampled to `TWIN_VARIANT_SIZE[0]` wide with its aspect
+// kept, a box filter for a continuous picture and nearest neighbour for a two tone one (so the
+// two colours stay two colours), written as PNG through the effects encoder beside the twins and
+// recorded as an `AssetVariant` whose files carry the `-320` suffix (the schema's
+// `twinVariantFileNames`). The renderer emits `srcset` when the record carries it and the
+// filmstrip clone fetches the small file. JPEG for the continuous case is a request to the
+// effects package (`encodeJpegRgba`; b2.md); until it lands the file is an RGBA PNG.
+
+/** The variant key: the sha256 over the twin files' names and the digest of their bytes, so a re-run writes the same files. */
+export function twinVariantKey(
+  asset: Pick<Asset, 'id' | 'twins'>,
+  digests: ReadonlyArray<string>,
+): string {
+  const files =
+    'neutral' in asset.twins ? [asset.twins.neutral] : [asset.twins.light, asset.twins.dark];
+  return createHash('sha256')
+    .update(`twin-320:${asset.id}:${files.join(',')}:${digests.join(',')}`)
+    .digest('hex');
+}
+
+/** A box filter downsample to `width` wide with the aspect kept (a continuous picture). */
+export function downsampleRgba(image: RgbaImage, width: number): RgbaImage {
+  const w = Math.max(1, Math.min(width, image.width));
+  const h = Math.max(1, Math.round((image.height * w) / image.width));
+  const out = new Uint8Array(w * h * 4);
+  const sx = image.width / w;
+  const sy = image.height / h;
+  for (let y = 0; y < h; y += 1) {
+    const y0 = Math.floor(y * sy);
+    const y1 = Math.max(y0 + 1, Math.floor((y + 1) * sy));
+    for (let x = 0; x < w; x += 1) {
+      const x0 = Math.floor(x * sx);
+      const x1 = Math.max(x0 + 1, Math.floor((x + 1) * sx));
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let a = 0;
+      let n = 0;
+      for (let yy = y0; yy < y1 && yy < image.height; yy += 1) {
+        for (let xx = x0; xx < x1 && xx < image.width; xx += 1) {
+          const i = (yy * image.width + xx) * 4;
+          r += image.data[i] ?? 0;
+          g += image.data[i + 1] ?? 0;
+          b += image.data[i + 2] ?? 0;
+          a += image.data[i + 3] ?? 0;
+          n += 1;
+        }
+      }
+      const o = (y * w + x) * 4;
+      out[o] = Math.round(r / n);
+      out[o + 1] = Math.round(g / n);
+      out[o + 2] = Math.round(b / n);
+      out[o + 3] = Math.round(a / n);
+    }
+  }
+  return { width: w, height: h, data: out };
+}
+
+/** A nearest neighbour downsample to `width` wide (a two tone picture keeps its two colours). */
+export function nearestRgba(image: RgbaImage, width: number): RgbaImage {
+  const w = Math.max(1, Math.min(width, image.width));
+  const h = Math.max(1, Math.round((image.height * w) / image.width));
+  const out = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y += 1) {
+    const sy = Math.min(image.height - 1, Math.floor(((y + 0.5) * image.height) / h));
+    for (let x = 0; x < w; x += 1) {
+      const sx = Math.min(image.width - 1, Math.floor(((x + 0.5) * image.width) / w));
+      const i = (sy * image.width + sx) * 4;
+      const o = (y * w + x) * 4;
+      out[o] = image.data[i] ?? 0;
+      out[o + 1] = image.data[i + 1] ?? 0;
+      out[o + 2] = image.data[i + 2] ?? 0;
+      out[o + 3] = image.data[i + 3] ?? 0;
+    }
+  }
+  return { width: w, height: h, data: out };
+}
+
+export type TwinVariantWritten = { asset: Asset; key: string; files: string[]; existed: boolean };
+
+/**
+ * Writes the 320 px twin variant of one picture asset from its twins on disk and answers the
+ * asset with the variant recorded; null when the asset already carries one or a twin file is not
+ * on this instance (the record is committed by the caller).
+ */
+export async function writeTwinVariant(
+  deps: AssetActionDeps,
+  asset: Asset,
+  options: { now?: () => string } = {},
+): Promise<TwinVariantWritten | null> {
+  if (twinVariantOf(asset) !== undefined) return null;
+  const twinFiles =
+    'neutral' in asset.twins ? [asset.twins.neutral] : [asset.twins.light, asset.twins.dark];
+  const paths = twinFiles.map((relative) => join(deps.store.dir, relative));
+  if (!paths.every((path) => existsSync(path))) return null;
+  const decoded = await Promise.all(paths.map((path) => decodeImage(path)));
+  const digests = decoded.map((image) =>
+    createHash('sha256').update(image.data).digest('hex').slice(0, 16),
+  );
+  const key = twinVariantKey(asset, digests);
+  const twoTone = asset.treatment?.kind === 'two-tone';
+  const small = decoded.map((image) =>
+    twoTone
+      ? nearestRgba(image, TWIN_VARIANT_SIZE[0])
+      : downsampleRgba(image, TWIN_VARIANT_SIZE[0]),
+  );
+  const twins = twinVariantFileNames(asset.id, key, 'neutral' in asset.twins);
+  const files = 'neutral' in twins ? [twins.neutral] : [twins.light, twins.dark];
+  let existed = true;
+  for (const [index, relative] of files.entries()) {
+    const image = small[index];
+    if (image === undefined) continue;
+    const put = await deps.store.putAsset(relative, await encodePngRgba(image), 'image/png');
+    if (!put.existed) existed = false;
+    deps.log?.(
+      `twin variant: ${put.relative} ${image.width} by ${image.height}${put.existed ? ' (existed)' : ''}`,
+    );
+  }
+  const first = small[0];
+  const variant: AssetVariant = {
+    key,
+    twins,
+    size: [TWIN_VARIANT_SIZE[0], first === undefined ? TWIN_VARIANT_SIZE[1] : first.height],
+    scale: 1,
+    producedAt: (options.now ?? (() => new Date().toISOString()))(),
+  };
+  return {
+    asset: { ...asset, variants: { ...(asset.variants ?? {}), [key]: variant } },
+    key,
+    files,
+    existed,
+  };
 }
 
 /**
@@ -351,6 +500,8 @@ export type MaterializeInput = Rev & {
   prune?: boolean;
   scale?: 1 | 2;
   dryRun?: boolean;
+  /** writes the 320 px twin variant of every picture asset that lacks one (SPEC-5 11; `picture.materialize --clone`) */
+  clone?: boolean;
 };
 
 export type MaterializeWritten = {
@@ -401,6 +552,16 @@ export async function pictureMaterialize(
   const assetOf = (id: string): Asset => nextAssets.get(id) ?? (current.deck.assets[id] as Asset);
   const rendered = new Set<string>();
   const removals: string[] = [];
+  if (input.clone === true) {
+    // the 320 px twin variant for every picture asset of the deck that lacks one (SPEC-5 11)
+    for (const asset of Object.values(current.deck.assets)) {
+      if (!isPictureAsset(asset)) continue;
+      const twin = await writeTwinVariant(deps, assetOf(asset.id), options);
+      if (twin === null) continue;
+      nextAssets.set(asset.id, twin.asset);
+      output.written.push({ assetId: asset.id, key: twin.key, files: twin.files });
+    }
+  }
   for (const target of missing) {
     const stamp = `${target.asset.id}:${target.key}`;
     if (rendered.has(stamp)) continue;

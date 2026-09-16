@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "quote",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Quote",
+        "autofit": "shrink"
+      },
+      {
+        "id": "say",
+        "type": "say",
+        "items": [
+          {
+            "quote": "We replaced three tools and a spreadsheet the first month.",
+            "note": "A customer, head of operations"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Quote"
+}

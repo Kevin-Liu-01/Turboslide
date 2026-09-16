@@ -1,0 +1,47 @@
+{
+  "id": "lists/three-bullets",
+  "category": "lists",
+  "label": "Three bullets",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Heading"
+    },
+    {
+      "id": "list",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 300,
+        "group": "block"
+      },
+      "type": "plain",
+      "marker": "bullet",
+      "items": [
+        {
+          "text": "The first point in one line"
+        },
+        {
+          "text": "The second point in one line"
+        },
+        {
+          "text": "The third point in one line"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    400
+  ]
+}

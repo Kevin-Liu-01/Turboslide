@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "the-team",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The team",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The three people your team will work with.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "grid",
+        "type": "details",
+        "columns": 3,
+        "rowHeights": [
+          236
+        ],
+        "items": [
+          {
+            "asset": "",
+            "caption": "Name, account lead"
+          },
+          {
+            "asset": "",
+            "caption": "Name, solutions"
+          },
+          {
+            "asset": "",
+            "caption": "Name, support"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "The team"
+}

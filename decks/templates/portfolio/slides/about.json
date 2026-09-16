@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "about",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "About",
+        "autofit": "shrink"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Who you are in one line.",
+        "autofit": "shrink"
+      }
+    ],
+    "body": [
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Ten years of product design across three companies, the last four leading a team of six.\nThe work below is the part that shipped.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "About"
+}

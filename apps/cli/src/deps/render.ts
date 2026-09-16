@@ -8,6 +8,11 @@ import type { RenderedDeck, ThemeBundle } from '@turboslide/render/deck';
 import { renderStandalone } from '@turboslide/render/standalone';
 import type { StandaloneResult } from '@turboslide/render/standalone';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
+import { deckFontsCss } from '@turboslide/render/fonts';
+import { fontFileDataUri } from '@turboslide/fonts/catalog-node';
+import type { MediaExportMode, MotionExportMode } from '@turboslide/schema/export';
+import { standaloneMotionSource } from '@turboslide/viewer/standalone/motion-source';
+import { standaloneRuntimeSource } from '@turboslide/viewer/standalone/source';
 
 import type { LoadedDeck } from '../deck-files.ts';
 
@@ -48,6 +53,10 @@ export function renderThemeDocument(
     gtWord: true,
     present: true,
     title: `${loaded.deck.title} (${theme})`,
+    /* the catalog faces the document uses, as extra CSS beside the theme bundle (SPEC-5-amendments A5 item 3; b7.md request 15) */
+    extraCss: deckFontsCss(loaded.deck, Object.values(loaded.slides), (id, file) =>
+      fontFileDataUri(id, file.file),
+    ),
   });
   return { html: rendered.html, slides: rendered.slides, warnings: rendered.warnings };
 }
@@ -56,12 +65,29 @@ export function renderThemeDocument(
 export function renderStandaloneFile(
   loaded: LoadedDeck,
   assetUris: Record<string, string>,
-  options: { budgetMB: number; title?: string },
+  options: {
+    budgetMB: number;
+    title?: string;
+    /* round five (gslides-parity SPEC-5 2.3, 3.6; b1.md request 9): the schedules, the autoplay setting and the media mode */
+    motion?: MotionExportMode;
+    autoplay?: { intervalMs: number; loop?: boolean };
+    media?: MediaExportMode;
+    mediaUris?: Record<string, string>;
+  },
 ): StandaloneResult {
   return renderStandalone(loaded.deck, Object.values(loaded.slides), {
     bundle: themeBundle(),
     assetUris,
     budgetMB: options.budgetMB,
     title: options.title,
+    /* the viewer's own runtime with the motion hook at the top of show(n), and the motion script (B1) */
+    runtime: standaloneRuntimeSource(loaded.deck.title),
+    motionScript: standaloneMotionSource(),
+    ...(options.motion !== undefined ? { motion: options.motion } : {}),
+    ...(options.autoplay !== undefined ? { autoplay: options.autoplay } : {}),
+    ...(options.media !== undefined ? { media: options.media } : {}),
+    ...(options.mediaUris !== undefined ? { mediaUris: options.mediaUris } : {}),
+    /* the used faces as data URIs (A5 item 5; b7.md request 15) */
+    fontSrc: (id, file) => fontFileDataUri(id, file.file),
   });
 }

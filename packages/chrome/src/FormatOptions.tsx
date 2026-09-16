@@ -21,6 +21,9 @@ import type { IconName } from './icons';
 import { AltTextSection } from './inspector/alt';
 import type { SectionWrite } from './inspector/fields';
 import { TextFittingSection } from './inspector/fitting';
+/* round five (gslides-parity SPEC-5 3.2, 8.2; merge 2): B2's media sections and B6's equation section */
+import { MediaPlaybackSection, hasMediaPlayback, mediaSectionTitle } from './inspector/media';
+import { EquationSection, isEquationBlock } from './inspector/equation';
 import {
   FORMAT_SECTIONS,
   FORMAT_SECTION_BY_ID,
@@ -461,8 +464,13 @@ export function FormatOptions({
         return selected === undefined || !freeform;
       case 'textFitting':
         return (
-          selected !== undefined && !many && (hasTextFitting(selected) || selected.type === 'table')
+          selected !== undefined &&
+          !many &&
+          (hasTextFitting(selected) || selected.type === 'table' || hasMediaPlayback(selected))
         );
+      /* gslides-parity SPEC-5 8.2: the equation's source and display */
+      case 'equation':
+        return selected !== undefined && !many && isEquationBlock(selected);
       case 'text':
         return (
           textish ||
@@ -611,9 +619,21 @@ export function FormatOptions({
                 </Section>
               );
             case 'textFitting':
-              return selected === undefined ? null : (
+              /* gslides-parity SPEC-5 3.2 (b2.md R6): a media block's Format options are the two
+                 media sections in the text fitting slot, under Google's section name */
+              return selected === undefined ? null : hasMediaPlayback(selected) ? (
+                <Section {...common} title={mediaSectionTitle(selected)}>
+                  <MediaPlaybackSection block={selected} write={write} media={deck.media} />
+                </Section>
+              ) : (
                 <Section {...common}>
                   <TextFittingSection block={selected} write={write} />
+                </Section>
+              );
+            case 'equation':
+              return selected === undefined || !isEquationBlock(selected) ? null : (
+                <Section {...common}>
+                  <EquationSection block={selected} write={write} />
                 </Section>
               );
             case 'text':

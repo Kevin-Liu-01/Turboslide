@@ -178,8 +178,15 @@ scroll; `/decks` under 1,500 KB with 20 cards; the other routes reported); the i
 the LCP element of `/home` (asserted: the LCP entry's URL under `/brand/` or its element one of
 `H1`, `H2`, `P`, `SPAN`, `A`, `STRONG`, `EM`); each function directory's size against the 250 MB
 cap and `peakMb` of the batched merge from `hosted-smoke.mjs --export-batch` (reported);
-`/api/vitals` reserved for field INP with no ceiling. The per deck card row waits for round five
-with its route.
+`/api/vitals` carries the field sample from round five on (SPEC-5 11): one page load in ten posts
+INP, LCP and CLS with their attribution (`apps/studio/src/components/VitalsReporter.tsx`; `?vitals=1`
+forces a sample, `?vitals=0` opts a probe out), the route keeps a jsonl per day under the instance's
+state folder with a per address limit of 60 samples a minute and mirrors the day file to the blob
+store, `GET /api/vitals?report=1` and `node scripts/vitals-report.mjs --base <origin>` answer the p75
+per route family and metric, and the deployment profile's `vitals` row reads that report against an
+INP ceiling of 200 ms (the local profile has no ceiling; an instance with no samples yet reports the
+row without a number). The per deck card row still waits for its route (B4's card, not landed at
+merge 2 of round five).
 
 ## 4. Running the check
 
@@ -327,13 +334,17 @@ MISS`.
 
 ## 8. What stays for round five
 
-In the order of SPEC-4 section 7, recorded here without naming a round on any product surface:
+In the order of SPEC-4 section 7, recorded here without naming a round on any product surface
+(the state at merge 2 of the round that followed, 2026-09-15, in parentheses):
 the live monochrome hero after the shader split and a second measurement under the 600 KB
-ceiling; the per deck card with `s-maxage` per revision and a budget row; the 320 px twin variant
+ceiling (the gate is in `HomeHero.tsx` behind `HERO_LIVE`, off until the second measurement is
+read against the preview); the per deck card with `s-maxage` per revision and a budget row; the 320 px twin variant
 for the filmstrip's clones (a 200 px clone decodes 1600 px twins today); the deck index
 `decks/index.json` on the `blob` tier past about 50 decks; a long lived render worker on a host
 over `TURBOSLIDE_WORKER_URL`, and Chromium out of the secret holding function; field INP through
-`web-vitals/attribution` posted to `/api/vitals`, and Lighthouse CI; the gate on the cold first
+`web-vitals/attribution` posted to `/api/vitals` (landed, section 3.7), and Lighthouse CI
+(`.github/workflows/lighthouse.yml` written against the node-server build, untracked until Kevin
+adds it with a workflow scoped token); the gate on the cold first
 byte and the function directory sizes (reported this round); the round three `ditherPicture`
 patterns (`bayer4`, `blue64`, `random`, strength) in the crate so the wasm worker covers them;
 splitting the base function's Chromium package (Nitro's `traceDeps` is one list per deployment);

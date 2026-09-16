@@ -59,6 +59,10 @@ export const versionRecordSchema = versionSchema.extend({
   // the operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1): optional, so
   // every record written outside the room and before the round still parses
   ops: opsRangeSchema,
+  // the writing tab and its batch (gslides-parity SPEC-5-amendments A3 items 5 and 6; B7):
+  // optional, so every record written outside the room and before round five still parses
+  clientId: versionSchema.shape.note.min(1).max(64).optional(),
+  opIds: versionSchema.shape.note.min(1).max(64).array().max(64).optional(),
 });
 
 /** A parsed record with `ops` narrowed to the range the schema's refinement proved. */

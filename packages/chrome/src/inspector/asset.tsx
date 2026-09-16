@@ -249,6 +249,7 @@ const ROLE_LABEL: Record<AssetRole, string> = {
   logo: 'logo',
   frame: 'material frame',
   other: 'other',
+  media: 'media file',
 };
 
 const SHARE_ALIKE = /BY-SA|share[- ]?alike/i;

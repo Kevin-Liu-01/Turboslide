@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "t-none",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "No transition, the rectangle appears on click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "text": "Appear on click",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "fill": "plate",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 400,
+          "h": 240,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "none",
+    "durationMs": 500
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "appear",
+      "trigger": "click",
+      "durationMs": 500
+    }
+  ]
+}

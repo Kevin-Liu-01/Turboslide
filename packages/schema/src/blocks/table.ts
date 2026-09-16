@@ -42,8 +42,34 @@ export type TableRow = { cells: Text[]; header?: true; height?: number };
 /** A merged cell: the anchor at (row, column) spanning `rows` by `columns` cells (SPEC-2 2.7.1). */
 export type TableSpan = { row: number; column: number; rows: number; columns: number };
 
-/** The border of one cell or of the table (SPEC-2 2.7.2, 2.7.3). */
-export type CellBorder = { color?: Color; weight?: TableBorderWeight; dash?: Dash };
+/** The rule of one edge of a cell (gslides-parity SPEC-5 7.7, the cell border edge picker). */
+export type CellEdgeBorder = { color?: Color; weight?: TableBorderWeight; dash?: Dash };
+
+/** Google's nine edge selections of the border picker (SPEC-5 7.7), the `edges` a `table.cellStyle` write names. */
+export const CELL_BORDER_EDGES = [
+  'all',
+  'outer',
+  'inner',
+  'top',
+  'bottom',
+  'left',
+  'right',
+  'horizontal',
+  'vertical',
+] as const;
+export type CellBorderEdge = (typeof CELL_BORDER_EDGES)[number];
+
+/**
+ * The border of one cell or of the table (SPEC-2 2.7.2, 2.7.3). Since round five per edge
+ * (SPEC-5 1.2): `top`, `bottom`, `left` and `right` override the one border for that edge; absent,
+ * the one border draws on every edge, as before.
+ */
+export type CellBorder = CellEdgeBorder & {
+  top?: CellEdgeBorder;
+  bottom?: CellEdgeBorder;
+  left?: CellEdgeBorder;
+  right?: CellEdgeBorder;
+};
 
 /** One styled cell (SPEC-2 2.7.2). */
 export type TableCellStyle = { row: number; column: number; fill?: Color; border?: CellBorder };
@@ -109,7 +135,7 @@ export const tableSpanSchema = z.strictObject({
   columns: z.number().int().positive(),
 }) satisfies z.ZodType<TableSpan>;
 
-export const cellBorderSchema = z.strictObject({
+const cellEdgeBorderShape = {
   color: colorField('Border color', 'The rule color; the hairline token unless set.'),
   weight: annotate(z.literal(TABLE_BORDER_WEIGHTS).optional(), {
     label: 'Border weight',
@@ -124,6 +150,26 @@ export const cellBorderSchema = z.strictObject({
     snap: DASHES,
     group: 'Block',
   }),
+};
+
+export const cellEdgeBorderSchema = z.strictObject(
+  cellEdgeBorderShape,
+) satisfies z.ZodType<CellEdgeBorder>;
+
+const edgeField = (label: string) =>
+  annotate(cellEdgeBorderSchema.optional(), {
+    label,
+    control: 'json',
+    group: 'Block',
+    help: 'Overrides the cell border on this edge alone (gslides-parity SPEC-5 7.7); the one border draws there when absent.',
+  });
+
+export const cellBorderSchema = z.strictObject({
+  ...cellEdgeBorderShape,
+  top: edgeField('Top border'),
+  bottom: edgeField('Bottom border'),
+  left: edgeField('Left border'),
+  right: edgeField('Right border'),
 }) satisfies z.ZodType<CellBorder>;
 
 export const tableCellStyleSchema = z.strictObject({

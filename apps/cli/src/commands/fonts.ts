@@ -5,14 +5,24 @@
 // scripts/requirements.txt when it is missing; nothing is installed globally. `--python <bin>`
 // (or TURBOSLIDE_PYTHON) names another interpreter that already has the requirements.
 // Exit 0 on a build; with --check, exit 1 when the committed set differs from a fresh build.
+//
+// fonts.list (gslides-parity SPEC-5-amendments A5 item 6; B7): `turboslide fonts list [--json]`
+// answers the font catalog through the font.list action, on the checkout's deck when one
+// resolves, on the studio `--to` names, and straight from the one handler (apps/cli/src/actions/
+// font.ts) when the command runs outside a deck folder, since the catalog needs no store.
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { ACTIONS } from '@turboslide/schema/actions';
+
+import { fontList } from '../actions/font.ts';
 import { flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
+import { remoteOf, runDeckAction } from '../dispatch.ts';
 import { EXIT, UsageError } from '../exit.ts';
 import { repoRoot } from '../repo.ts';
+import { openStore } from '../write.ts';
 
 export type FontsBuildResult = {
   out: string;
@@ -71,11 +81,39 @@ export async function ensurePython(
   return python;
 }
 
+/** The rows `fonts list` prints, one per face: id, name, category, weights, italic, licence. */
+export type FontListResult = ReturnType<typeof fontList>;
+
+/** A deck folder resolves from the cwd or --deck; the catalog needs none, so a miss is not an error. */
+function deckResolves(ctx: CommandContext): boolean {
+  try {
+    openStore(ctx);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function fontsList(ctx: CommandContext): Promise<number> {
+  const result =
+    remoteOf(ctx) !== undefined || deckResolves(ctx)
+      ? await runDeckAction<FontListResult>(ctx, 'font.list', {})
+      : (ACTIONS['font.list'].output.parse(fontList()) as FontListResult);
+  ctx.out.result(result);
+  for (const font of result.fonts)
+    ctx.out.human(
+      `  ${font.id.padEnd(18)} ${font.name.padEnd(18)} ${font.category.padEnd(8)} ${font.weights.join(',').padEnd(36)} ${font.italic ? 'italic' : '      '} ${font.licence}`,
+    );
+  ctx.out.human(`fonts list: ${result.fonts.length} faces`);
+  return EXIT.ok;
+}
+
 export async function fonts(ctx: CommandContext): Promise<number> {
   const [sub] = ctx.rest;
+  if (sub === 'list') return fontsList(ctx);
   if (sub !== 'build')
     throw new UsageError(
-      `unknown subcommand "fonts ${sub ?? ''}"; use: turboslide fonts build [--check]`,
+      `unknown subcommand "fonts ${sub ?? ''}"; use: turboslide fonts build [--check] | turboslide fonts list [--json]`,
     );
   const root = repoRoot();
   const script = join(root, 'scripts', 'build-fonts.py');

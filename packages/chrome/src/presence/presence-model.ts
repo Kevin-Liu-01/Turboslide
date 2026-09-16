@@ -39,6 +39,36 @@ export function slideNumberOf(document: DeckDocument, slideId: string | undefine
   return index < 0 ? null : index + 1;
 }
 
+/**
+ * The self filter on every presence surface (gslides-parity SPEC-5-amendments A3 item 5): a row
+ * is this tab when its client id is the self row's or any id this tab held before, and this
+ * person when its principal id is the self row's, and neither is ever drawn as a collaborator (a
+ * chip, a roster row, a filmstrip mark, an outline, a caret, a flag, a pointer, a follow target,
+ * an announcement). The editor partitions its roster before the surfaces read it
+ * (client-ids.ts `partitionRoster`); the surfaces apply the rule again here so it holds whatever
+ * roster a caller passed, and a route that knows only its account passes it as `self`.
+ */
+export function withoutSelf<T extends { clientId: string; principalId?: string }>(
+  others: readonly T[],
+  self: { clientId?: string | null; principalId?: string | null } | null | undefined,
+  ownClientIds: ReadonlySet<string> = new Set(),
+): T[] {
+  const clientId = self?.clientId ?? null;
+  const principalId = self?.principalId ?? null;
+  return others.filter(
+    (row) =>
+      row.clientId !== clientId &&
+      !ownClientIds.has(row.clientId) &&
+      (principalId === null || row.principalId !== principalId),
+  );
+}
+
+/** The collaborators of a presence record: `others` without this tab and this person (`withoutSelf`). */
+export function othersOf(presence: EditorPresence | undefined): PresenceParticipant[] {
+  if (presence === undefined) return [];
+  return withoutSelf(presence.others, presence.self ?? null);
+}
+
 /** The chips of the four slots in roster order and the count the `+N` chip shows (0 draws it empty). */
 export function slotChips(others: readonly PresenceParticipant[]): {
   shown: PresenceParticipant[];

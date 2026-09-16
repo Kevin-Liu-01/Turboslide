@@ -54,6 +54,16 @@
 // TURBOSLIDE_CHECK_PERF opt in of days 0 to 5 was removed at merge 2 (build-4/integrator.md).
 // Step 18's URL list gains /home and the Not found page (/no-such-page) and step 26's list gains
 // home-page.spec.ts (6.1).
+//
+// Round five (gslides-parity SPEC-5 16.7, 0.51; SPEC-5-amendments A7): six steps join, 32 to 37,
+// so `--list` prints 37. Each is the literal command of SPEC-5 16.7 (37 is A7's: the sync stress
+// probe on the node-server build and the fonts tests), gated on the files its lane lands: until
+// every file a step needs is in the tree the step is `pending`, the runner prints one "not yet"
+// line naming the missing files and the command, and exits 0 (never a silent pass, never a
+// failure on another lane's day; the integrator's day 0 seam, build-5/integrator.md). 32 page
+// size and print layouts (B4; `resize.spec.ts` joins it per A4), 33 motion and media (B1, B2), 34
+// import, templates and building blocks (B3; the oracle skips without the venv), 35 text tools
+// and chat (B5), 36 theme, equation, ODP and SVG (B6, B4), 37 the sync engine and the fonts (B7).
 import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -118,6 +128,76 @@ const ROUND_THREE_SPECS = [
 // Step 27 (SPEC-3 9.4, 16.5): the layout shift audit against `vite preview` of the production
 // build on its own port (AGENTS.md port table: 4344 is B5's preview); the script is B5's.
 const LAYOUT_SHIFT_AUDIT = 'scripts/layout-shift-audit.mjs';
+// Round five (SPEC-5 16.7; A7): the files each of steps 32 to 37 waits for, by lane. A step runs
+// its command once every file exists; `gated` below marks it pending otherwise.
+const STEP_32_FILES = [
+  'decks/fixture/page-4-3/deck.json',
+  'decks/fixture/page-16-10/deck.json',
+  'packages/render/src/print-layout.ts',
+  'apps/studio/e2e/page-setup.spec.ts',
+  'apps/studio/e2e/resize.spec.ts',
+];
+const STEP_33_FILES = [
+  'decks/fixture/motion/deck.json',
+  'fixtures/media/README.md',
+  'packages/export/src/ooxml/timing.ts',
+  'packages/viewer/src/present/media-controller.ts',
+  'apps/studio/e2e/motion.spec.ts',
+  'apps/studio/e2e/media.spec.ts',
+];
+const STEP_34_FILES = [
+  'packages/import/src/pptx/package.ts',
+  'packages/import/src/__fixtures__/pptx/01-text.pptx',
+  'decks/templates/templates.json',
+  'decks/templates/sales-pitch/deck.json',
+  'apps/studio/e2e/templates.spec.ts',
+  'apps/studio/e2e/import.spec.ts',
+];
+const STEP_35_FILES = [
+  'packages/spelling/src/engine.ts',
+  'packages/schema/src/autocorrect.ts',
+  'scripts/check-dictionaries.mjs',
+  'docs/training.md',
+  'docs/updates.md',
+  'apps/studio/e2e/text-tools.spec.ts',
+  'apps/studio/e2e/chat.spec.ts',
+];
+const STEP_36_FILES = [
+  'decks/fixture/equation/deck.json',
+  'packages/render/src/theme-css.test.ts',
+  'packages/export/src/ooxml/math.test.ts',
+  'packages/export/src/export-odp.ts',
+  'packages/export/src/svg/write.ts',
+  'apps/studio/e2e/theme.spec.ts',
+  'apps/studio/e2e/equation.spec.ts',
+];
+const STEP_37_FILES = [
+  'scripts/probes/sync-stress-probe.mjs',
+  'packages/fonts/src/catalog.ts',
+  'packages/render/src/fonts.ts',
+];
+// the flatten report perfect, step 22's assertion reused by 33 and 36 on their fixtures
+const perfectReport = (dir) =>
+  `node -e "const fs=require('fs'); const dir='${dir}'; const reports=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')); if(reports.length===0) process.exit(1); for (const f of reports) { const r=JSON.parse(fs.readFileSync(dir+'/'+f)); const perfect = r.perfect ?? (r.themes ?? r.reports ?? []).every(t=>t.perfect); if(perfect!==true){ console.error(f+': flatten report is not perfect'); process.exit(1) } }"`;
+// every template of the round validates and lints with no finding above severity 1 on the static
+// layer (SPEC-5 4.6; b3.md B3-20): `lint` takes `--deck` and the rendered layer reads the
+// repository's one render folder, so the static layer alone is the gate; the two round one folders
+// (`gt-brand`, its 27 pre-existing static findings, and `blank`) are not the round's templates
+// and stay out of the loop (BUILD-STATUS-5.md "B3", deviation)
+const TEMPLATES_GATE =
+  "for d in $(node -e \"const j=require('./decks/templates/templates.json'); console.log((j.templates??j).map(t=>t.id).filter(id=>id!=='gt-brand'&&id!=='blank').join(' '))\"); do dir=decks/templates/$d; [ -f \"$dir/deck.json\" ] || continue; pnpm exec turboslide validate \"$dir\" || exit 1; pnpm exec turboslide lint --deck \"$dir\" --layers static --json > .turboslide/template-lint.json || true; node -e \"const r=require('./.turboslide/template-lint.json'); const rows=Array.isArray(r)?r:(r.findings??[]); const bad=rows.filter(f=>f.severity>1); if(bad.length){console.error(process.argv[1]+': '+bad.length+' finding(s) above severity 1'); process.exit(1)}\" \"$dir\" || exit 1; done";
+/**
+ * A round five step (SPEC-5 16.7): the literal command with the files it waits for. While a file
+ * is missing the step is pending: the runner prints the files and the command and exits 0.
+ */
+function gated(cmd, files, needs) {
+  const missing = files.filter((file) => !existsSync(resolve(ROOT, file)));
+  return {
+    cmd,
+    ...(needs !== undefined ? { needs } : {}),
+    ...(missing.length > 0 ? { pending: missing } : {}),
+  };
+}
 const PREVIEW_PORT = '4344';
 // Round four (SPEC-4 6.1, steps 29 to 31): B1's brand build with the other generated file checks
 // behind it, the Vercel output check gated on the project link and the icon set, the perf budget
@@ -181,6 +261,11 @@ const INNER_HTML_ALLOW = [
   'packages/viewer/standalone/runtime.ts',
   'packages/identity/src/names.ts',
   'apps/studio/src/server/decks.ts',
+  // the equation block's MathML (gslides-parity SPEC-5 9.4; B6): Temml's output for the block's
+  // own TeX source, set on the block element in the page after the engine loads (the server writes
+  // the pending span and this call replaces it), never a string from outside the deck (the
+  // integrator, round five merge 2)
+  'packages/render/src/blocks/equation.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',
@@ -201,6 +286,11 @@ const OVERWRITE_ALLOW = [
   // VERIFICATION-3 finding 34 F2): a record naming the deck a link hash belongs to, written with
   // an overwriting put so two instances indexing one link never conflict; never a public asset
   'packages/store/src/access-store.ts',
+  // the field vitals mirror `vitals/<day>/<instance>.jsonl` (gslides-parity SPEC-5 11, SPEC-4 4.7;
+  // routes/api/vitals.ts): one instance rewrites its own day file with the samples it holds after
+  // each accepted POST; derived telemetry under its own prefix on the export client, never a user
+  // asset the assets route serves (the integrator, round five merge 2)
+  'apps/studio/src/routes/api/vitals.ts',
 ];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
@@ -333,6 +423,43 @@ const steps = [
     cmd: `node ${PERF_BUDGET} --base ${STUDIO_URL} --profile local --write --runs 3 --json .turboslide/perf-budget.json${process.env.CI ? ' --report' : ''} && node ${CLIENT_BUNDLE_CHECK} apps/studio/dist --base ${STUDIO_URL} --client ${NODE_SERVER_CLIENT}`,
     needs: 'node-server',
   },
+  // gslides-parity SPEC-5 16.7, steps 32 to 37 (0.51; A7): each gated on its lane's files
+  // 32: the page and the print layouts (B4), resize.spec.ts beside page-setup.spec.ts (A4)
+  gated(
+    `pnpm exec turboslide export decks/fixture/page-4-3 --mode flatten --out .turboslide/p43-flatten && pnpm exec turboslide export check .turboslide/p43-flatten --page 1200x900 && pnpm exec turboslide export decks/fixture/page-4-3 --mode native --verify --out .turboslide/p43-native && pnpm exec turboslide export pdf decks/fixture/page-4-3 --verify --out .turboslide/p43-pdf && pnpm exec turboslide export pdf decks/fixture/gslides --layout handout-6 --paper letter --orientation portrait --out .turboslide/handout && node -e "const fs=require('fs'); const dir='.turboslide/handout'; const report=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')).map(f=>JSON.parse(fs.readFileSync(dir+'/'+f))).find(r=>r.pages!==undefined); if(!report) { console.error('no PDF report with pages'); process.exit(1) } const deck=JSON.parse(fs.readFileSync('decks/fixture/gslides/deck.json')); const slides=deck.sections.flatMap(s=>s.slideIds).length; if(report.pages!==Math.ceil(slides/6)) { console.error('pages '+report.pages+', expected '+Math.ceil(slides/6)); process.exit(1) } if((report.cells??[]).some(c=>c.ok===false)) { console.error('a handout cell failed its gate'); process.exit(1) }" && pnpm exec vitest run --dir packages/render print-layout geometry && pnpm exec vitest run --dir packages/theme tokens && pnpm exec vitest run --dir packages/schema canvas shapes && pnpm exec playwright test apps/studio/e2e/page-setup.spec.ts apps/studio/e2e/resize.spec.ts`,
+    STEP_32_FILES,
+    'server',
+  ),
+  // 33: motion and media (B1, B2)
+  gated(
+    `pnpm exec vitest run --dir packages/render motion && pnpm exec vitest run --dir packages/export ooxml/timing ooxml/transition ooxml/media ooxml/ids && pnpm exec vitest run --dir packages/store media && pnpm exec vitest run --dir packages/viewer present && pnpm exec turboslide export decks/fixture/motion --mode native --out .turboslide/motion-native && pnpm exec turboslide export check .turboslide/motion-native && pnpm exec turboslide export decks/fixture/motion --mode flatten --out .turboslide/motion-flatten && ${perfectReport('.turboslide/motion-flatten')} && pnpm exec playwright test apps/studio/e2e/motion.spec.ts apps/studio/e2e/media.spec.ts`,
+    STEP_33_FILES,
+    'server',
+  ),
+  // 34: import, templates and building blocks (B3); the python oracle runs inside the vitest when the venv exists and skips otherwise
+  gated(
+    `pnpm exec vitest run --dir packages/import pptx && pnpm exec vitest run --dir packages/store templates seed && ${TEMPLATES_GATE} && pnpm exec turboslide export decks/templates/sales-pitch --mode native --out .turboslide/sp-native && pnpm exec turboslide export check .turboslide/sp-native && pnpm exec turboslide export decks/templates/sales-pitch --mode flatten --out .turboslide/sp-flatten && pnpm exec turboslide export check .turboslide/sp-flatten && pnpm exec playwright test apps/studio/e2e/templates.spec.ts apps/studio/e2e/import.spec.ts`,
+    STEP_34_FILES,
+    'server',
+  ),
+  // 35: the text tools and chat (B5); the help routes answer 200 on the runner's server
+  gated(
+    `pnpm exec vitest run --dir packages/spelling && pnpm exec vitest run --dir packages/schema autocorrect preferences && node scripts/check-dictionaries.mjs && pnpm exec playwright test apps/studio/e2e/text-tools.spec.ts apps/studio/e2e/chat.spec.ts && curl -sf -o /dev/null ${STUDIO_URL}/help/training && curl -sf -o /dev/null ${STUDIO_URL}/help/updates`,
+    STEP_35_FILES,
+    'server',
+  ),
+  // 36: the theme, the equation, ODP and SVG (B6, B4)
+  gated(
+    `pnpm exec vitest run --dir packages/theme && pnpm exec vitest run --dir packages/render theme-css equation && pnpm exec vitest run --dir packages/export ooxml/math odp svg && pnpm exec vitest run --dir packages/effects dither && pnpm exec turboslide export decks/fixture/equation --mode native --out .turboslide/eq-native && pnpm exec turboslide export check .turboslide/eq-native && pnpm exec turboslide export decks/fixture/equation --mode flatten --out .turboslide/eq-flatten && ${perfectReport('.turboslide/eq-flatten')} && pnpm exec turboslide export odp decks/fixture/gslides --mode native --out .turboslide/gs-odp-native && pnpm exec turboslide export check .turboslide/gs-odp-native && pnpm exec turboslide export odp decks/fixture/gslides --mode flatten --out .turboslide/gs-odp-flatten && pnpm exec turboslide export check .turboslide/gs-odp-flatten && for m in embed outline link; do pnpm exec turboslide render title --deck decks/gt-brand --format svg --text $m --out .turboslide/svg-$m --json > /dev/null || exit 1; done && for f in .turboslide/svg-embed/*.svg; do pnpm exec turboslide export check "$f" || exit 1; done && pnpm exec playwright test apps/studio/e2e/theme.spec.ts apps/studio/e2e/equation.spec.ts`,
+    STEP_36_FILES,
+    'server',
+  ),
+  // 37 (A7): the sync stress probe on the node-server build and the fonts tests (B7)
+  gated(
+    `node scripts/probes/sync-stress-probe.mjs --base ${STUDIO_URL} && pnpm exec vitest run --dir packages/fonts && pnpm exec vitest run --dir packages/render fonts`,
+    STEP_37_FILES,
+    'node-server',
+  ),
 ];
 
 const argv = process.argv.slice(2);
@@ -344,7 +471,9 @@ const value = (name) => {
 
 if (flag('list')) {
   steps.forEach((step, i) =>
-    console.log(`${String(i + 1).padStart(2)}  ${step.needs ? `[${step.needs}] ` : ''}${step.cmd}`),
+    console.log(
+      `${String(i + 1).padStart(2)}  ${step.needs ? `[${step.needs}] ` : ''}${step.pending ? `[not yet: ${step.pending.length} file(s) pending] ` : ''}${step.cmd}`,
+    ),
   );
   process.exit(0);
 }
@@ -783,6 +912,13 @@ for (const step of selected) {
       break;
     }
     console.log(`${label}: skip (${missing})\n    ${step.cmd}`);
+    continue;
+  }
+  // a round five step whose lane has not landed its files yet (SPEC-5 16.7): one line, exit 0
+  if (step.pending !== undefined) {
+    console.log(
+      `${label}: not yet; waiting for ${step.pending.join(', ')}\n    the command is: ${step.cmd}`,
+    );
     continue;
   }
   if (step.needs === 'server') {

@@ -11,6 +11,7 @@ import { finderRows } from './menus/finder';
 import type { MenuContext, MenuItem } from './menus/model';
 import { Palette } from './Palette';
 import type { PaletteEntry } from './palette-data';
+import { deckTextEntries } from './palette-data';
 
 /**
  * Search the menus (gslides-parity SPEC 2.10, 3.1 row 1; Option+/): the command palette in menu
@@ -85,7 +86,8 @@ export function toolFinderEntries(
     terms: `layout ${entry.id} ${entry.kind}`,
     run: { kind: 'call', call: () => pickLayout(entry.id) },
   }));
-  return [...menus, ...slides, ...layouts];
+  /* gslides-parity SPEC-5 7.4 (b5.md request 4): the presentation's own text, capped by the group */
+  return [...menus, ...deckTextEntries(document), ...slides, ...layouts];
 }
 
 export function ToolFinder({
@@ -112,7 +114,7 @@ export function ToolFinder({
       onNotice={onNotice}
       placeholder="Search the menus"
       label="Search the menus"
-      groups={['menus', 'slides', 'layouts']}
+      groups={['menus', 'deckText', 'slides', 'layouts']}
       shortcutKey="Option /"
       className="ts-toolfinder"
     />

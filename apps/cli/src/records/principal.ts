@@ -12,6 +12,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { join } from 'node:path';
 
 import type { Author } from '@turboslide/schema/mutations';
+import type { Preferences, PreferencesStore } from '@turboslide/schema/preferences';
+import { defaultPreferences, normalizePreferences } from '@turboslide/schema/preferences';
 
 export const PRINCIPALS_DIR = 'principals';
 
@@ -28,6 +30,8 @@ export type LocalPrincipalRecord = {
   linkGrants: unknown[];
   notificationSettings: NotificationLevel;
   livePointers: { collaborators: boolean; mine: Record<string, boolean> };
+  /** the caller's preferences (gslides-parity SPEC-5 7.1); absent until the first `prefs.set` */
+  preferences?: Preferences;
   createdAt: string;
   lastSeenAt: string;
 };
@@ -86,9 +90,16 @@ export function readLocalPrincipal(
       return newLocalPrincipalRecord(principalId, now);
     }
     const fresh = newLocalPrincipalRecord(principalId, now);
+    // the stored preferences travel with the record (b5.md request 1): every write of this module
+    // reads the record and writes it whole, so an account name or pointer write after `prefs.set`
+    // keeps them; an older record fills its absent members with the defaults through
+    // normalizePreferences, and a malformed member drops the preferences alone (the next load
+    // answers the defaults) rather than the whole record
+    const preferences = normalizePreferences(raw.preferences);
     return {
       ...fresh,
       ...(typeof raw.name === 'string' ? { name: raw.name } : {}),
+      ...(preferences !== null ? { preferences } : {}),
       avatar: isRecord(raw.avatar) ? (raw.avatar as AvatarChoice) : fresh.avatar,
       notificationSettings:
         raw.notificationSettings === 'all' ||
@@ -122,6 +133,35 @@ export function writeLocalPrincipal(stateDir: string, record: LocalPrincipalReco
   writeFileSync(partial, `${JSON.stringify(record, null, 2)}\n`);
   renameSync(partial, path);
   return path;
+}
+
+/**
+ * The `PreferencesStore` of `@turboslide/schema/preferences` over a checkout principal's file
+ * (gslides-parity SPEC-5 7.1; R10 3.2; b5.md request 1): the home of `prefs.get` and `prefs.set`
+ * on the CLI's dispatcher, so `turboslide prefs set /units cm` on a laptop and the editor on
+ * localhost read one file. `load` answers the stored preferences normalised (an older record
+ * fills its absent members) or the defaults for a principal that never set one; `save` writes
+ * the whole record back with `lastSeenAt` stamped, the way identity's `principalPreferencesStore`
+ * does hosted. The CLI's `local:<name>` id is not a principal id of the identity package, so
+ * that store cannot serve the checkout and this adapter stands beside it.
+ */
+export function localPreferencesStore(
+  stateDir: string,
+  principalId: string,
+  now: () => string = () => new Date().toISOString(),
+): PreferencesStore {
+  return {
+    async load() {
+      const record = readLocalPrincipal(stateDir, principalId, now());
+      return normalizePreferences(record.preferences) ?? defaultPreferences();
+    },
+    async save(preferences) {
+      const stamp = now();
+      const record = readLocalPrincipal(stateDir, principalId, stamp);
+      writeLocalPrincipal(stateDir, { ...record, preferences, lastSeenAt: stamp });
+      return preferences;
+    },
+  };
 }
 
 /** The display name a record shows: the chosen name, else the label. */

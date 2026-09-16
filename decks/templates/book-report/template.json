@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "book-report",
+  "name": "Book report",
+  "description": "Six slides on one book: the title and the author, a summary, the characters, the themes, your view and a closing.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 6
+    }
+  ],
+  "archetypes": [],
+  "category": "education",
+  "useCases": [
+    "book reports",
+    "project reports"
+  ],
+  "cover": "title",
+  "slideCount": 6
+}

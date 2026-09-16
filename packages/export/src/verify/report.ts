@@ -25,7 +25,7 @@ import type { Box, RenderRecord, Theme } from '@turboslide/schema/render';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { openPackage } from '../ooxml/zip.ts';
-import { emuToPx } from '../units.ts';
+import { SHEET_PX, emuToPx } from '../units.ts';
 import {
   CELL_RULE_INSET_PX,
   DEFAULT_BUDGETS,
@@ -316,6 +316,9 @@ export async function verifyPptx(
   const deckDir = options.deckDir ?? defaultDeckDir(report.deckId, env);
   const tools = options.tools ?? resolveTools(env);
   const scale: ReferenceScale = report.mode === 'flatten' ? FLATTEN_REFERENCE_SCALE : 1;
+  // the deck's page (gslides-parity SPEC-5 6.1): the report carries it since round five; a report
+  // written before reads the default page
+  const page = report.page ?? SHEET_PX;
   const renderPages =
     options.renderPages ??
     ((pptx: string, dir: string) =>
@@ -323,8 +326,8 @@ export async function verifyPptx(
         tools,
         timeoutMs: options.timeoutMs,
         log,
-        width: 1600 * scale,
-        height: 900 * scale,
+        width: page.width * scale,
+        height: page.height * scale,
       }));
 
   const pptxFiles = report.files
@@ -351,7 +354,7 @@ export async function verifyPptx(
       continue;
     }
     log(`verify: ${basename(pptx)} (${theme})`);
-    const geometry = await checkGeometry(pptx);
+    const geometry = await checkGeometry(pptx, page);
     if (!geometry.inBounds) geometryInBounds = false;
     for (const line of geometryResidual(geometry))
       residual.push(`verify: ${basename(pptx)}: ${line}`);
@@ -550,7 +553,7 @@ export async function verifyPptx(
         const thumb = await quickLookThumbnail(pptx, join(fileOut, 'quicklook'), {
           bin: qlBin,
           env,
-          size: 1600 * scale,
+          size: page.width * scale,
           log,
         });
         const record = referenceRecord(reference, firstSlide.slideId, theme, scale);

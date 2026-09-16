@@ -32,7 +32,9 @@ import type { Box } from '@turboslide/schema/render';
 
 import type { MeasuredBoxes } from './Gestures';
 import { drawAllDither } from './dither';
-import { SHEET_H, SHEET_W } from './model';
+import { DEFAULT_PAGE_SIZE, sheetSizeVars } from './model';
+import type { PageSize } from './model';
+import { deckPage } from '@turboslide/schema/render';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
 
@@ -114,14 +116,21 @@ export const MEASURE_ROOT_RESET =
   'word-spacing:normal;text-transform:none;text-indent:0;white-space:normal;text-rendering:auto;' +
   'direction:ltr;';
 
-export function mountHiddenSheet(theme: Theme, host: HTMLElement = document.body): HiddenSheet {
+export function mountHiddenSheet(
+  theme: Theme,
+  host: HTMLElement = document.body,
+  page: PageSize = DEFAULT_PAGE_SIZE,
+): HiddenSheet {
   const root = document.createElement('div');
   root.className = `ts-sheet ${MEASURE_ROOT_CLASS}`;
   root.dataset['theme'] = theme;
   root.setAttribute('aria-hidden', 'true');
+  const vars = Object.entries(sheetSizeVars(page))
+    .map(([name, value]) => `${name}:${value};`)
+    .join('');
   root.setAttribute(
     'style',
-    `position:fixed;left:-${SHEET_W * 2}px;top:0;width:${SHEET_W}px;height:${SHEET_H}px;overflow:hidden;pointer-events:none;` +
+    `position:fixed;left:-${page.width * 2}px;top:0;width:${page.width}px;height:${page.height}px;overflow:hidden;pointer-events:none;${vars}` +
       MEASURE_ROOT_RESET,
   );
   const sheet = document.createElement('div');
@@ -169,7 +178,7 @@ async function withHiddenSheet<T>(
   read: (root: HTMLElement, stage: HTMLElement) => T,
 ): Promise<T> {
   const assetBase = options.assetBase ?? `/decks/${document.deck.id}/`;
-  const mounted = mountHiddenSheet(theme, options.host);
+  const mounted = mountHiddenSheet(theme, options.host, deckPage(document.deck));
   try {
     mounted.body.innerHTML = renderForMeasure(document, slide, theme, assetBase);
     applyThemeToTree(mounted.body, theme);

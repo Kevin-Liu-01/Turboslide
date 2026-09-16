@@ -21,6 +21,15 @@ export function iconNameOf(symbolId: string): string {
   return symbolId === 'gt-mark' ? symbolId : symbolId.replace(/^i-/, '');
 }
 
+/**
+ * True for one of Turboslide's own glyph symbols (gslides-parity SPEC-5 3.4, 3.7): `ts-play`,
+ * `ts-speaker` and `ts-person`, drawn by the media and spotlight renderers and never named by an
+ * `icon` block, so they sit under `GLYPHS` beside `SPRITE` and outside `ICON_NAMES`.
+ */
+export function isGlyphSymbol(symbolId: string): boolean {
+  return symbolId.startsWith('ts-');
+}
+
 /** A single-quoted TypeScript string literal, the form prettier writes for these values. */
 export function quote(value: string): string {
   return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
@@ -32,7 +41,16 @@ function key(name: string): string {
 }
 
 export function renderSpriteModule(symbols: ReadonlyArray<ParsedSymbol>): string {
+  const glyphs = symbols.filter((symbol) => isGlyphSymbol(symbol.id));
+  const glyphEntries = glyphs
+    .map(
+      (symbol) =>
+        `  ${quote(symbol.id)}: {\n    id: ${quote(symbol.id)},\n    viewBox: ${quote(symbol.viewBox)},\n    body: ${quote(symbol.body)},\n  },`,
+    )
+    .join('\n');
+  const glyphNames = glyphs.map((symbol) => quote(symbol.id)).join(', ');
   const entries = symbols
+    .filter((symbol) => !isGlyphSymbol(symbol.id))
     .map(
       (symbol) =>
         `  ${key(iconNameOf(symbol.id))}: {\n    id: ${quote(symbol.id)},\n    viewBox: ${quote(symbol.viewBox)},\n    body: ${quote(symbol.body)},\n  },`,
@@ -54,16 +72,38 @@ ${entries}
 
 export const SPRITE_NAMES = Object.keys(SPRITE) as ReadonlyArray<IconName>;
 
+/**
+ * Turboslide's own glyphs (gslides-parity SPEC-5 3.4, 3.7): the play and speaker glyphs of a
+ * media poster and the person glyph of the speaker spotlight, drawn by the renderers and never
+ * named by an icon block, so they are not IconNames; \`spriteMarkup()\` carries them by default.
+ */
+export type GlyphName = ${glyphNames === '' ? 'never' : glyphNames.split(', ').join(' | ')};
+
+export const GLYPHS: Readonly<Record<GlyphName, SpriteSymbol>> = {
+${glyphEntries}
+};
+
+export const GLYPH_NAMES = Object.keys(GLYPHS) as ReadonlyArray<GlyphName>;
+
 /** One <symbol> element. */
-export function symbolMarkup(name: IconName): string {
-  const symbol = SPRITE[name];
+export function symbolMarkup(name: IconName | GlyphName): string {
+  const symbol = (
+    name in GLYPHS ? GLYPHS[name as GlyphName] : SPRITE[name as IconName]
+  ) as SpriteSymbol;
   return \`<symbol id="\${symbol.id}" viewBox="\${symbol.viewBox}">\${symbol.body}</symbol>\`;
 }
 
-/** The hidden sprite the stage carries once; all symbols by default, or the named subset. */
-export function spriteMarkup(names: Iterable<IconName> = SPRITE_NAMES): string {
+/** The hidden sprite the stage carries once; every icon and glyph by default, or the named subset. */
+export function spriteMarkup(
+  names: Iterable<IconName | GlyphName> = [...SPRITE_NAMES, ...GLYPH_NAMES],
+): string {
   const symbols = [...names].map(symbolMarkup).join('');
   return \`<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">\${symbols}</svg>\`;
+}
+
+/** A glyph's markup at the class the caller names: <svg class="ts-glyph" aria-hidden="true"><use href="#ts-play"/></svg>. */
+export function glyphMarkup(name: GlyphName, className = 'ts-glyph'): string {
+  return \`<svg class="\${className}" aria-hidden="true"><use href="#\${name}"/></svg>\`;
 }
 
 export type IconMarkupOptions = {

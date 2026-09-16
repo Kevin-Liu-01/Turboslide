@@ -18,8 +18,14 @@ import type { SlideId } from './ids.ts';
 import { isRecord, migrate } from './migrations.ts';
 import { getAt, joinPointer, setAt } from './pointer.ts';
 import { DITHER_NO_SOURCE_MESSAGE } from './blocks/dither.ts';
-import { hasContinuousSource } from './assets.ts';
+import { hasContinuousSource, isPictureAsset } from './assets.ts';
 import { SLIDE_LINK_KEYWORDS, canonicalText, refusedLinksOf, slideLinksOf } from './text.ts';
+import { validateEquations } from './validate/equation.ts';
+import { validateLayouts } from './validate/layout.ts';
+import { validateMedia } from './validate/media.ts';
+import { validateMotion } from './validate/motion.ts';
+import { validatePage } from './validate/page.ts';
+import { validateTheme } from './validate/theme.ts';
 
 export type IssueCode =
   | 'not_object'
@@ -47,7 +53,34 @@ export type IssueCode =
   /** a connector attached to a block that is missing, unpositioned or a line, a site out of range, or an end off its site (SPEC-2 2.4.7) */
   | 'connect'
   /** the deck's guides unsorted or repeated (SPEC-2 2.10) */
-  | 'guides';
+  | 'guides'
+  /* round five (gslides-parity SPEC-5 1.2, 0.7): one code per family, each in its own module under
+     validate/, aggregated below; `equation/parse` is the severity 2 parse report of 8.1 */
+  /** a transition or animation rule of SPEC-5 1.2 (validate/motion.ts) */
+  | 'motion'
+  /** a media block or media asset rule of SPEC-5 1.2 (validate/media.ts) */
+  | 'media'
+  /** an equation block rule (validate/equation.ts) */
+  | 'equation'
+  /** a LaTeX source Temml cannot parse, severity 2, never a refusal (SPEC-5 8.1) */
+  | 'equation/parse'
+  /** the page outside its bounds, or a guide outside the page (validate/page.ts) */
+  | 'page'
+  /** a theme record rule: an unknown token, a bad hex, a missing face, over five imported themes (validate/theme.ts) */
+  | 'theme'
+  /** a custom layout rule: a placeholder kind outside the five, a hidden id that is no built in layout (validate/layout.ts) */
+  | 'layout';
+
+/** The round five validator codes (SPEC-5 1.2), one module each under validate/. */
+export const GS5_ISSUE_CODES = [
+  'motion',
+  'media',
+  'equation',
+  'equation/parse',
+  'page',
+  'theme',
+  'layout',
+] as const satisfies ReadonlyArray<IssueCode>;
 
 export type Issue = {
   code: IssueCode;
@@ -837,7 +870,7 @@ export function validateDeck(input: unknown): ValidationResult {
           // re-toned (gslides-parity SPEC-3 10.1); asset.add --replace-source attaches one
           if ((block.type === 'picture' || block.type === 'shot') && block.dither !== undefined) {
             const asset = deck.assets[block.asset];
-            if (asset !== undefined && !hasContinuousSource(asset)) {
+            if (asset !== undefined && isPictureAsset(asset) && !hasContinuousSource(asset)) {
               issues.push(
                 issue(
                   'dither',
@@ -867,6 +900,20 @@ export function validateDeck(input: unknown): ValidationResult {
         }
       }
     }
+  }
+
+  // the round five families (gslides-parity SPEC-5 1.2, 0.7): each module answers its own rows
+  // over the parsed document; landed by the integrator on day 0, filled by their owners
+  if (deck !== null) {
+    const document: DeckDocument = { deck, slides };
+    issues.push(
+      ...validateMotion(document),
+      ...validateMedia(document),
+      ...validateEquations(document),
+      ...validatePage(document),
+      ...validateTheme(document),
+      ...validateLayouts(document),
+    );
   }
 
   issues.sort(compareIssues);

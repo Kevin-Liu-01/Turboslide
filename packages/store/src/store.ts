@@ -26,6 +26,15 @@ export type WriteOptions = {
    * carries them as `ops`. Absent on every write made outside the room.
    */
   ops?: { fromSeq: number; toSeq: number };
+  /**
+   * The room client whose operations this write commits (gslides-parity SPEC-5-amendments A3
+   * items 5 and 6; B7): the tab's client id and the op ids of the batch, so the record's echo on
+   * another instance of the blob tier names its author's tab and the tab applies the echo as an
+   * acknowledgement instead of a remote change, and so a replayed op (a persisted queue, a POST
+   * whose answer was lost) is answered with its record and never committed twice. Absent on a
+   * write made outside the room and on the memory and redis tiers, whose stream carries the ids.
+   */
+  origin?: { clientId: string; opIds: readonly string[] };
 };
 
 /**
@@ -50,6 +59,14 @@ export type VersionRecord = Version & {
    * (a CLI write, an agent's strict write, a record from before the round).
    */
   ops?: { fromSeq: number; toSeq: number };
+  /**
+   * The tab that wrote this record through the blob tier's room (gslides-parity SPEC-5-amendments
+   * A3 items 5 and 6): its client id and the op ids of the batch the record commits, from
+   * `WriteOptions.origin`. Absent on a record written outside the room, on the memory and redis
+   * tiers and on every record from before round five.
+   */
+  clientId?: string;
+  opIds?: string[];
 };
 
 /** What `putAsset` answers: where the file is on this instance and where a browser can fetch it. */

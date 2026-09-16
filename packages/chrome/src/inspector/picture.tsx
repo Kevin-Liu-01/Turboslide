@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import type { Block, ShotFrame } from '@turboslide/schema/blocks';
+import type { Block, RecolorPreset, ShotFrame, ShotReflection } from '@turboslide/schema/blocks';
+import { RECOLOR_PRESETS } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { DASHES, DASH_LABELS, presetOf } from '@turboslide/schema/shapes';
 import type { Dash } from '@turboslide/schema/shapes';
@@ -8,8 +9,56 @@ import type { Dash } from '@turboslide/schema/shapes';
 import type { PictureTarget } from '../editor-shell';
 import { FORMAT } from '../menus/strings';
 import { ShapePicker } from '../pickers/ShapePicker';
-import { ColorRow, Note, PanelButton, SelectField, SliderField, ToggleRow } from './fields';
+import {
+  CheckField,
+  ColorRow,
+  Note,
+  PanelButton,
+  SelectField,
+  SliderField,
+  ToggleRow,
+} from './fields';
 import type { SectionWrite } from './fields';
+
+/**
+ * The words of the two Adjustments rows of round five (gslides-parity SPEC-5 0.47; SPEC-2 12):
+ * Google's Reflection has three sliders (Transparency, Distance, Size) and Recolor is a dropdown
+ * whose first entry is "No recolor"; the preset names below the three colour maps are Turboslide's
+ * own over the theme's colours (Google builds its list from the theme's colours; the list is
+ * `unverified: true` in the menu model), each spelt "Colour, light" or "Colour, dark".
+ */
+export const PICTURE_EFFECTS = {
+  reflection: 'Reflection',
+  reflectionOn: 'Add reflection',
+  transparency: 'Transparency',
+  distance: 'Distance',
+  size: 'Size',
+  recolor: 'Recolor',
+} as const;
+
+/** Google's default when Reflection is switched on (unverified; a visible, moderate reflection). */
+export const DEFAULT_REFLECTION: ShotReflection = { transparency: 0.5, distance: 8, size: 0.4 };
+
+export const RECOLOR_LABELS: Readonly<Record<RecolorPreset, string>> = {
+  none: 'No recolor',
+  grayscale: 'Grayscale',
+  sepia: 'Sepia',
+  negative: 'Negative',
+  'ink-light': 'Ink, light',
+  'ink-dark': 'Ink, dark',
+  'ink-2-light': 'Ink 2, light',
+  'ink-2-dark': 'Ink 2, dark',
+  'titanium-light': 'Titanium, light',
+  'titanium-dark': 'Titanium, dark',
+  'green-light': 'Green, light',
+  'green-dark': 'Green, dark',
+  'amber-light': 'Amber, light',
+  'amber-dark': 'Amber, dark',
+  'red-light': 'Red, light',
+  'red-dark': 'Red, dark',
+  'blue-light': 'GT blue, light',
+  'blue-dark': 'GT blue, dark',
+};
 
 /**
  * Picture and Adjustments (gslides-parity SPEC-2 0.17, 2.5, section 5; R05 B11): Replace image,
@@ -216,7 +265,7 @@ export function AdjustmentsSection({ block, write }: { block: Block; write: Sect
       ? block.adjust
       : {};
   const transparencyOnly = block.type === 'icon';
-  const dispatchAdjust = (fields: Record<string, number | null>) =>
+  const dispatchAdjust = (fields: Record<string, number | null | ShotReflection | RecolorPreset>) =>
     write.report(
       write.dispatch('block.adjust', {
         slideId: write.slideId,
@@ -226,6 +275,10 @@ export function AdjustmentsSection({ block, write }: { block: Block; write: Sect
       }),
     );
   const percent = (value: number | undefined) => Math.round((value ?? 0) * 100);
+  const reflection = adjust.reflection;
+  const recolor: RecolorPreset = adjust.recolor ?? 'none';
+  const setReflection = (patch: Partial<ShotReflection>) =>
+    dispatchAdjust({ reflection: { ...(reflection ?? DEFAULT_REFLECTION), ...patch } });
   return (
     <>
       <SliderField
@@ -264,11 +317,80 @@ export function AdjustmentsSection({ block, write }: { block: Block; write: Sect
           />
         </>
       )}
+      {transparencyOnly ? null : (
+        <>
+          {/* Reflection (gslides-parity SPEC-5 0.47): on or off, then Google's three sliders */}
+          <div className="ts-fo-row" data-control="formatOptions.adjustments.reflection">
+            <CheckField
+              label={PICTURE_EFFECTS.reflectionOn}
+              checked={reflection !== undefined}
+              control="formatOptions.adjustments.reflection.on"
+              onChange={(on) => dispatchAdjust({ reflection: on ? DEFAULT_REFLECTION : null })}
+              disabled={write.busy}
+              doc="A mirrored copy of the picture below it"
+            />
+            {reflection !== undefined ? (
+              <>
+                <SliderField
+                  label={`${PICTURE_EFFECTS.reflection} ${PICTURE_EFFECTS.transparency.toLowerCase()}`}
+                  value={percent(reflection.transparency)}
+                  min={0}
+                  max={100}
+                  control="formatOptions.adjustments.reflection.transparency"
+                  onCommit={(value) => setReflection({ transparency: value / 100 })}
+                  disabled={write.busy}
+                  unit="%"
+                />
+                <SliderField
+                  label={`${PICTURE_EFFECTS.reflection} ${PICTURE_EFFECTS.distance.toLowerCase()}`}
+                  value={Math.round(reflection.distance)}
+                  min={0}
+                  max={200}
+                  control="formatOptions.adjustments.reflection.distance"
+                  onCommit={(value) => setReflection({ distance: value })}
+                  disabled={write.busy}
+                  unit=" px"
+                />
+                <SliderField
+                  label={`${PICTURE_EFFECTS.reflection} ${PICTURE_EFFECTS.size.toLowerCase()}`}
+                  value={percent(reflection.size)}
+                  min={0}
+                  max={100}
+                  control="formatOptions.adjustments.reflection.size"
+                  onCommit={(value) => setReflection({ size: value / 100 })}
+                  disabled={write.busy}
+                  unit="%"
+                />
+              </>
+            ) : null}
+          </div>
+          {/* Recolor: No recolor, the three colour maps, the duotones over the theme's colours */}
+          <SelectField<RecolorPreset>
+            label={PICTURE_EFFECTS.recolor}
+            value={recolor}
+            control="formatOptions.adjustments.recolor"
+            options={RECOLOR_PRESETS.map((preset) => ({
+              value: preset,
+              label: RECOLOR_LABELS[preset],
+            }))}
+            onChange={(value) => dispatchAdjust({ recolor: value === 'none' ? null : value })}
+            disabled={write.busy}
+            doc="Grayscale and the duotones are written as PowerPoint's own colour maps; the rest are baked into the picture"
+          />
+        </>
+      )}
       <div className="ts-fo-buttons">
         <PanelButton
           label={words.reset}
           control="formatOptions.adjustments.reset"
-          onClick={() => dispatchAdjust({ transparency: null, brightness: null, contrast: null })}
+          onClick={() =>
+            dispatchAdjust({
+              transparency: null,
+              brightness: null,
+              contrast: null,
+              ...(transparencyOnly ? {} : { reflection: null, recolor: null }),
+            })
+          }
           disabled={write.busy || Object.keys(adjust).length === 0}
           doc="Back to the picture as it was taken"
         />

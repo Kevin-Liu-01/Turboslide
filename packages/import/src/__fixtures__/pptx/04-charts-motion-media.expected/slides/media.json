@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "media",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "demo-clip",
+        "type": "media",
+        "kind": "video",
+        "source": {
+          "asset": "media1"
+        },
+        "playback": {
+          "start": "click",
+          "volume": 80
+        },
+        "pos": {
+          "x": 60,
+          "y": 60,
+          "w": 640,
+          "h": 360,
+          "z": 1
+        },
+        "alt": "Demo clip",
+        "poster": "image1",
+        "ext": {
+          "pptxName": "Demo clip"
+        }
+      },
+      {
+        "id": "tone",
+        "type": "media",
+        "kind": "audio",
+        "source": {
+          "asset": "media2"
+        },
+        "playback": {
+          "start": "click",
+          "volume": 80
+        },
+        "pos": {
+          "x": 760,
+          "y": 60,
+          "w": 80,
+          "h": 80,
+          "z": 2
+        },
+        "alt": "Tone",
+        "poster": "image2",
+        "ext": {
+          "pptxName": "Tone"
+        }
+      },
+      {
+        "id": "equation",
+        "type": "equation",
+        "tex": "",
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><mrow><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac><mo>+</mo><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup><mo>=</mo><msqrt><mrow><mi>y</mi></mrow></msqrt></mrow></math>",
+        "pos": {
+          "x": 960,
+          "y": 540,
+          "w": 360,
+          "h": 120,
+          "z": 3
+        },
+        "ext": {
+          "pptxName": "Equation"
+        }
+      }
+    ]
+  },
+  "title": "Media",
+  "transition": {
+    "kind": "flip",
+    "durationMs": 1250
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide4.xml",
+    "pptxSlideId": 259
+  }
+}

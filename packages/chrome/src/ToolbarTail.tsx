@@ -49,6 +49,7 @@ import { DashList } from './pickers/DashList';
 import { LineEndPicker } from './pickers/LineEndPicker';
 import { ShapePicker } from './pickers/ShapePicker';
 import { tablePlan, tableWriteInput } from './table-tools';
+import { FontField } from './FontPicker';
 import { ToolbarButton, ToolbarDivider, controlTip } from './ToolbarHead';
 import { tipProps } from './Tooltip';
 
@@ -728,6 +729,8 @@ export function ToolbarTail() {
           const key = `${control.control}-${index}`;
           if (control.op === 'fontSize')
             return <FontSizeField key={key} control={control} block={block} />;
+          // the Font dropdown in Google's position (SPEC-5-amendments A5 item 4; B7's FontPicker.tsx)
+          if (control.op === 'font') return <FontField key={key} control={control} block={block} />;
           const divider =
             control.dividerBefore === true && index > 0 ? (
               <ToolbarDivider key={`${key}-sep`} />

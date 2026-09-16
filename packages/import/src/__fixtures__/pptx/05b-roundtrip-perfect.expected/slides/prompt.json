@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "prompt",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": []
+  },
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide6.xml",
+    "pptxSlideId": 261
+  }
+}

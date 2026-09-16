@@ -1,0 +1,227 @@
+{
+  "recordedAt": "2026-09-15T10:59:19Z",
+  "production": {
+    "url": "https://turboslide.vercel.app",
+    "deploymentId": "dpl_3CBG3zfZW7CfewaCaGa2JoWG2imN",
+    "deploymentUrl": "https://turboslide-knoksgnju-kl01s-projects.vercel.app",
+    "target": "production",
+    "readyState": "READY",
+    "createdAt": "2026-09-15T10:55:45.069Z",
+    "createdAtLocal": "2026-09-15 03:55:45 PDT",
+    "source": "vercel inspect https://turboslide.vercel.app (read only); the git deploy of main, created seven seconds after the commit",
+    "commit": "d5a1be5f9c0e81201f0d85be14c99c2e5eb458d8",
+    "commitShort": "d5a1be5",
+    "commitSubject": "Turboslide round five: the handoffs from the hotfix afternoon",
+    "committedAt": "2026-09-15T10:55:38Z",
+    "githubMainSha": "d5a1be5f9c0e81201f0d85be14c99c2e5eb458d8",
+    "entryChunk": "/assets/index-CYGrLim1.js",
+    "newShellModulepreload": [
+      "/assets/index-CYGrLim1.js",
+      "/assets/new-CsXFdKXe.js",
+      "/assets/Frame-Di5h-sQ0.js",
+      "/assets/EditorRoot-CaFtyhvz.js"
+    ],
+    "newShellBytes": 73216,
+    "tiers": "TURBOSLIDE_REALTIME=blob, TURBOSLIDE_AUTHORIZE=shadow, TURBOSLIDE_MAIL=off, no DATABASE_URL, anonymous principals, one public Blob store, fluid compute (the orchestrator's statement; not re-read from the Vercel env)",
+    "functions": "__server, _serverFn/[...], api/decks/[...]/bundle, api/decks/bundle, api/export/[...] at 87.24 MB each in iad1 (vercel inspect)"
+  },
+  "localBuild": {
+    "note": "No build of d5a1be5 exists on the tree and none was made (the rules forbid a build outside scripts/check.mjs). apps/studio/.output (2026-09-14 22:49) carries index-zmcb2DMX.js, a pre ship build; apps/studio/dist (2026-09-11) holds no assets."
+  },
+  "machine": {
+    "hardware": "Apple M5 Max",
+    "os": "macOS 26.4 (25E246)",
+    "node": "v24.13.0",
+    "playwrightCore": "1.62.1",
+    "chromium": "chromium-1217 (Chrome for Testing 147.0.7727.15) through packages/headless launch with --use-gl=angle --use-angle=metal --ignore-gpu-blocklist, headless, 1440 by 900; the layout shift audit records the version it launched",
+    "loadAverageAtStart": "3.05 3.25 4.04 (uptime at 04:03 PDT)"
+  },
+  "network": {
+    "tool": "networkQuality -s at 11:00Z",
+    "uplinkMbps": 752.711,
+    "downlinkMbps": 846.914,
+    "uplinkResponsivenessMs": 33.893,
+    "downlinkResponsivenessMs": 33.089,
+    "idleLatencyMs": 15.539
+  },
+  "routeProbe": {
+    "at": "2026-09-15T10:59:13Z",
+    "method": "node fetch, redirect manual, one request per path, before any browser run; ttfb is the time to the response headers from the process",
+    "rows": [
+      {
+        "path": "/",
+        "status": 307,
+        "location": "/new",
+        "ttfbMs": 182,
+        "bytes": 15,
+        "cache": null,
+        "edgeOnly": true
+      },
+      {
+        "path": "/new",
+        "status": 200,
+        "ttfbMs": 1581,
+        "bytes": 73218,
+        "cache": "MISS",
+        "note": "the first request of the four minute old deployment; a cold function"
+      },
+      {
+        "path": "/home",
+        "status": 200,
+        "ttfbMs": 211,
+        "bytes": 95423,
+        "cache": "MISS"
+      },
+      {
+        "path": "/decks",
+        "status": 200,
+        "ttfbMs": 434,
+        "bytes": 66045,
+        "cache": "MISS"
+      },
+      {
+        "path": "/decks/trash",
+        "status": 200,
+        "ttfbMs": 250,
+        "bytes": 37833,
+        "cache": "MISS"
+      },
+      {
+        "path": "/deck/gt-brand",
+        "status": 200,
+        "ttfbMs": 977,
+        "bytes": 180469,
+        "cache": "MISS"
+      },
+      {
+        "path": "/edit/gt-brand",
+        "status": 200,
+        "ttfbMs": 384,
+        "bytes": 295599,
+        "cache": "MISS"
+      },
+      {
+        "path": "/present/gt-brand",
+        "status": 200,
+        "ttfbMs": 238,
+        "bytes": 294395,
+        "cache": "MISS"
+      },
+      {
+        "path": "/print/gt-brand",
+        "status": 200,
+        "ttfbMs": 230,
+        "bytes": 591510,
+        "cache": "MISS"
+      },
+      {
+        "path": "/favicon.ico",
+        "status": 200,
+        "ttfbMs": 109,
+        "bytes": 15086,
+        "cache": "MISS"
+      },
+      {
+        "path": "/help/training",
+        "status": 404,
+        "ttfbMs": 92,
+        "bytes": 41801,
+        "cache": "MISS",
+        "note": "a round five route (SPEC-5 7); not built yet"
+      },
+      {
+        "path": "/help/updates",
+        "status": 404,
+        "ttfbMs": 84,
+        "bytes": 41801,
+        "cache": "MISS",
+        "note": "a round five route (SPEC-5 7); not built yet"
+      },
+      {
+        "path": "/decks/templates",
+        "status": 404,
+        "ttfbMs": 118,
+        "bytes": 41849,
+        "cache": "MISS",
+        "note": "a round five route (SPEC-5 4); not built yet"
+      },
+      {
+        "path": "/openapi.json",
+        "status": 200,
+        "ttfbMs": 84,
+        "bytes": 2072829,
+        "cache": "MISS"
+      },
+      {
+        "path": "/llms.txt",
+        "status": 200,
+        "ttfbMs": 80,
+        "bytes": 6417,
+        "cache": "MISS"
+      },
+      {
+        "path": "/api/agent",
+        "status": 401,
+        "ttfbMs": 80,
+        "bytes": 156,
+        "cache": "MISS",
+        "note": "the bearer rule"
+      },
+      {
+        "path": "/og/turboslide.png",
+        "status": 200,
+        "ttfbMs": 128,
+        "bytes": 29818,
+        "cache": "MISS"
+      }
+    ],
+    "headersOfNew": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "present with worker-src self blob, img-src and connect-src naming the public Blob host, report-uri /api/x/csp/report",
+      "permissions-policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-vercel-id": "sfo1::iad1::… (every function answer)"
+    }
+  },
+  "deckInventory": {
+    "at": "2026-09-15T11:03Z",
+    "method": "the data-control=home.open.<id> attributes of GET /decks and the untitled ids in GET /decks/trash, anonymous",
+    "cards": 26,
+    "ids": [
+      "untitled-20260914-y0mk",
+      "untitled-20260915-vgz6",
+      "untitled-20260915-tsv1",
+      "untitled-20260915-1g7z",
+      "untitled-20260915-fatr",
+      "untitled-20260915-blw3",
+      "untitled-20260915-0o93",
+      "untitled-20260915-qfnh",
+      "untitled-20260915-15hi",
+      "untitled-20260914-qbha",
+      "gt-brand",
+      "editor-depth-09120307",
+      "untitled-20260913-tii2",
+      "gt-brand-mu05h5vq",
+      "editor-depth-09120413",
+      "editor-depth-09120252",
+      "editor-depth-09120230",
+      "fixture-p8-193001",
+      "editor-depth-09120205",
+      "fixture-p7-190558",
+      "fixture-pushed-181201",
+      "editor-depth-09120131",
+      "editor-depth-09120057",
+      "bundle-round-trip",
+      "editor-depth-09120035",
+      "fixture-verifier-0912"
+    ],
+    "trashUntitledIds": [
+      "untitled-20260915-7ki1",
+      "untitled-20260915-xmu5",
+      "untitled-20260914-ah39"
+    ]
+  }
+}

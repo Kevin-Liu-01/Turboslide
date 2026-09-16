@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "customer-quote",
+  "kind": "content",
+  "layout": {
+    "type": "center"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "big",
+        "text": "We replaced three tools and a spreadsheet the first month",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A customer, head of operations",
+        "role": "cap",
+        "marginTop": 14,
+        "autofit": "shrink"
+      }
+    ]
+  },
+  "title": "Customer quote"
+}

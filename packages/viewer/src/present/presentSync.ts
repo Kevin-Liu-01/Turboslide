@@ -10,14 +10,42 @@ import type { BlankSlide } from './presentModel';
  * The environment is injectable so the protocol is unit tested without a browser.
  */
 
-export const PRESENT_PROTOCOL = 1;
+/**
+ * Version 2 (gslides-parity SPEC-5 2.2): `state` gains `step` and `steps`, `goto` gains `step`,
+ * and the `media`, `mediaControl`, `stroke` and `strokesClear` messages join. A round four window
+ * on version 1 drops every frame of this version, so two builds never half understand each other.
+ */
+export const PRESENT_PROTOCOL = 2;
 
 export type PresentRole = 'audience' | 'presenter';
+
+/** A playing medium's facts (gslides-parity SPEC-5 2.2; R11 5.6), the audience's `media` message. */
+export type PresentMediaState = {
+  blockId: string;
+  state: 'playing' | 'paused' | 'ended';
+  positionMs: number;
+  durationMs: number | null;
+  title?: string;
+};
+
+/** One pen stroke in sheet pixels (SPEC-5 0.15, 2.2): the points as they were drawn. */
+export type PresentStroke = {
+  slideId: string;
+  /** flat pairs, x0, y0, x1, y1, in sheet px of the deck's page */
+  points: number[];
+  /** the stroke is finished; a partial stroke grows with more messages of the same id */
+  done: boolean;
+  id: string;
+};
 
 export type PresentMessageBody =
   /** a window arrived; the audience answers with its state */
   | { type: 'hello' }
-  /** the audience window's facts, sent on hello and on every change */
+  /**
+   * The audience window's facts, sent on hello and on every change. Round five adds the step
+   * reached on the slide and the slide's step count (SPEC-5 2.2), so the presenter's counter
+   * reads "Step 2 of 4" and its next preview knows what the next click shows.
+   */
   | {
       type: 'state';
       slideId: string;
@@ -25,11 +53,21 @@ export type PresentMessageBody =
       total: number;
       blank: BlankSlide | null;
       laser: boolean;
+      step?: number;
+      steps?: number;
     }
-  /** move to a slide; both roles send it, each follows the other's */
-  | { type: 'goto'; slideId: string }
+  /** move to a slide, and to a step of it (SPEC-5 2.2); both roles send it, each follows the other's */
+  | { type: 'goto'; slideId: string; step?: number }
   /** the presenter asks the audience window to leave (or enter) the show: view.present */
   | { type: 'present'; on: boolean }
+  /** a medium changed state in the audience window (R11 5.6) */
+  | { type: 'media'; media: PresentMediaState }
+  /** the presenter drives a medium of the audience window (R11 5.6) */
+  | { type: 'mediaControl'; blockId: string; action: 'play' | 'pause' | 'restart' }
+  /** the pen drew on the show; every other window mirrors the stroke (SPEC-5 0.15) */
+  | { type: 'stroke'; stroke: PresentStroke }
+  /** the pen was cleared (Esc, a slide change) */
+  | { type: 'strokesClear'; slideId: string }
   /** a window is closing */
   | { type: 'bye' };
 
@@ -82,7 +120,45 @@ export type PresentChannel = {
 };
 
 const ROLES: ReadonlySet<string> = new Set(['audience', 'presenter']);
-const TYPES: ReadonlySet<string> = new Set(['hello', 'state', 'goto', 'present', 'bye']);
+const TYPES: ReadonlySet<string> = new Set([
+  'hello',
+  'state',
+  'goto',
+  'present',
+  'media',
+  'mediaControl',
+  'stroke',
+  'strokesClear',
+  'bye',
+]);
+const MEDIA_STATES: ReadonlySet<string> = new Set(['playing', 'paused', 'ended']);
+const MEDIA_ACTIONS: ReadonlySet<string> = new Set(['play', 'pause', 'restart']);
+
+function isMediaState(value: unknown): value is PresentMediaState {
+  if (typeof value !== 'object' || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.blockId === 'string' &&
+    typeof record.state === 'string' &&
+    MEDIA_STATES.has(record.state) &&
+    typeof record.positionMs === 'number' &&
+    (record.durationMs === null || typeof record.durationMs === 'number') &&
+    (record.title === undefined || typeof record.title === 'string')
+  );
+}
+
+function isStroke(value: unknown): value is PresentStroke {
+  if (typeof value !== 'object' || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.slideId === 'string' &&
+    typeof record.id === 'string' &&
+    typeof record.done === 'boolean' &&
+    Array.isArray(record.points) &&
+    record.points.length % 2 === 0 &&
+    record.points.every((n) => typeof n === 'number' && Number.isFinite(n))
+  );
+}
 
 /** The envelope a received value is, or null for anything else (another key, another version, noise). */
 export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
@@ -97,6 +173,7 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
   switch (record.type) {
     case 'goto':
       if (typeof record.slideId !== 'string') return null;
+      if (record.step !== undefined && typeof record.step !== 'number') return null;
       break;
     case 'state':
       if (
@@ -107,9 +184,24 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
         !(record.blank === null || record.blank === 'black' || record.blank === 'white')
       )
         return null;
+      if (record.step !== undefined && typeof record.step !== 'number') return null;
+      if (record.steps !== undefined && typeof record.steps !== 'number') return null;
       break;
     case 'present':
       if (typeof record.on !== 'boolean') return null;
+      break;
+    case 'media':
+      if (!isMediaState(record.media)) return null;
+      break;
+    case 'mediaControl':
+      if (typeof record.blockId !== 'string') return null;
+      if (typeof record.action !== 'string' || !MEDIA_ACTIONS.has(record.action)) return null;
+      break;
+    case 'stroke':
+      if (!isStroke(record.stroke)) return null;
+      break;
+    case 'strokesClear':
+      if (typeof record.slideId !== 'string') return null;
       break;
     default:
       break;

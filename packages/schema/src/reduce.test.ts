@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import type { DeckDocument } from './deck.ts';
-import { workedDocument } from './fixtures.ts';
+import type { ContentSlide, DeckDocument } from './deck.ts';
+import { freeformDocument, workedDocument } from './fixtures.ts';
 import type { Mutation, Write } from './mutations.ts';
 import { applyMutation, applyMutations, applyWrite } from './reduce.ts';
 import { canonicalText } from './text.ts';
@@ -960,5 +960,86 @@ describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
       ),
     );
     expect(blockLink.ok).toBe(false);
+  });
+});
+
+describe('the motion normalisation (gslides-parity SPEC-5 0.8; MILESTONES-5 B1 day 1)', () => {
+  /** The worked deck with the freeform slide carrying three rows on p1, box and arrow. */
+  function withMotion(): DeckDocument {
+    const document = freeformDocument();
+    const free = document.slides['free'];
+    if (free === undefined) throw new Error('fixture');
+    free.animations = [
+      { id: 'a1', blockId: 'p1', effect: 'fadeIn', trigger: 'click', durationMs: 500 },
+      { id: 'a2', blockId: 'box', effect: 'appear', trigger: 'withPrevious', durationMs: 500 },
+      { id: 'a3', blockId: 'arrow', effect: 'spin', trigger: 'click', durationMs: 1000 },
+    ];
+    return document;
+  }
+
+  const ids = (document: DeckDocument): string[] | undefined =>
+    document.slides['free']?.animations?.map((animation) => animation.id);
+
+  it('drops the removed block’s rows on block.remove and keeps the others in order', () => {
+    const document = withMotion();
+    const inverse = applyMutation(document, {
+      op: 'block.remove',
+      slideId: 'free',
+      blockId: 'box',
+    });
+    expect(ids(document)).toEqual(['a1', 'a3']);
+    expect(inverse[0]?.op).toBe('block.insert');
+  });
+
+  it('removes an emptied list on block.remove rather than leaving []', () => {
+    const document = withMotion();
+    const free = document.slides['free'];
+    if (free === undefined) throw new Error('fixture');
+    free.animations = [free.animations?.[0]].filter((row) => row !== undefined);
+    applyMutation(document, { op: 'block.remove', slideId: 'free', blockId: 'p1' });
+    expect(document.slides['free']?.animations).toBeUndefined();
+    expect('animations' in (document.slides['free'] ?? {})).toBe(false);
+  });
+
+  it('drops the rows whose block the replacement lacks on slide.replace', () => {
+    const document = withMotion();
+    const replacement = JSON.parse(JSON.stringify(document.slides['free'])) as ContentSlide;
+    replacement.slots.main = (replacement.slots.main ?? []).filter((block) => block.id !== 'arrow');
+    applyMutation(document, { op: 'slide.replace', slideId: 'free', slide: replacement });
+    expect(ids(document)).toEqual(['a1', 'a2']);
+  });
+
+  it('keeps a list written through slide.set and normalises it through a write', () => {
+    const document = withMotion();
+    delete document.slides['free']?.animations;
+    const set = applyWrite(
+      document,
+      write([
+        {
+          op: 'slide.set',
+          slideId: 'free',
+          path: '/animations',
+          value: [
+            { id: 'a1', blockId: 'p1', effect: 'fadeIn', trigger: 'click', durationMs: 500 },
+            {
+              id: 'a2',
+              blockId: 'ic',
+              effect: 'zoomIn',
+              trigger: 'afterPrevious',
+              durationMs: 500,
+            },
+          ],
+        },
+      ]),
+    );
+    if (!set.ok) throw new Error(set.message);
+    expect(ids(set.document)).toEqual(['a1', 'a2']);
+    const removed = applyWrite(
+      set.document,
+      write([{ op: 'block.remove', slideId: 'free', blockId: 'ic' }], 413),
+    );
+    if (!removed.ok) throw new Error(removed.message);
+    expect(ids(removed.document)).toEqual(['a1']);
+    expect(validateDocument(removed.document).ok).toBe(true);
   });
 });

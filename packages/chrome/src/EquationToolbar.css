@@ -1,0 +1,68 @@
+/* The equation toolbar (EquationToolbar.tsx; gslides-parity SPEC-5 8.2): in the toolbar row's
+   grammar (EditorToolbar.css, 32 px controls, 4 px gaps), New equation as an icon and word
+   button, then six text buttons with a chevron whose plate opens under the button: a
+   .ts-picker grid (Pickers.css) eight tiles wide, each tile the symbol's glyph in the ink at
+   18 px. Radius 0; colors are tokens only. */
+.ts-eq-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ts-eq-drop {
+  position: relative;
+  display: inline-flex;
+}
+
+.ts-eq-drop-btn {
+  gap: 2px;
+}
+
+.ts-eq-drop-btn .pt-lb {
+  white-space: nowrap;
+}
+
+.ts-eq-chevron {
+  font-size: 10px;
+  line-height: 1;
+  color: var(--pt-ink-2);
+}
+
+.ts-eq-drop-btn.is-on .ts-eq-chevron {
+  color: var(--pt-ink);
+}
+
+.ts-eq-plate {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  padding: 8px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  box-shadow: 0 8px 24px var(--pt-hair-soft);
+}
+
+.ts-eq-grid .ts-picker-grid {
+  grid-template-columns: repeat(8, 40px);
+}
+
+.ts-eq-tile {
+  appearance: none;
+  padding: 0;
+}
+
+.ts-eq-glyph {
+  font: 18px/1 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-eq-tile .pt-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

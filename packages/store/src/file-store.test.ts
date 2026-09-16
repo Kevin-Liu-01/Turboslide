@@ -156,7 +156,8 @@ describe('FileStore', () => {
     if (stale.ok || stale.code !== 'conflict') throw new Error('expected a conflict');
     expect(stale.currentRevision).toBe(413);
     expect(stale.current.deck.revision).toBe(413);
-    expect(stale.message).toMatch(/stale/);
+    /* the plain sentence of gslides-parity SPEC-5-amendments A3 item 8 (reduce.ts) */
+    expect(stale.message).toMatch(/moved to revision/);
     expect(readVersions(dir)).toHaveLength(1);
     expect(await store.revision()).toBe(413);
   });

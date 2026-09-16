@@ -53,6 +53,20 @@
 
 /* the stage: a fixed 1600 x 900 sheet, scaled to the window */
 
+/* the frame, the corner mark and the counter as variables (gslides-parity SPEC-5 9.1; R03 4.6):
+   today's values as the defaults, declared on the root so the override stylesheet of an edited
+   deck (packages/render theme-css.ts) moves a rail or the corner slot by redefining one variable;
+   ../themes.ts frameVariables() states the same numbers and tokens.test.ts asserts the two agree */
+.ts-sheet {
+  --rail: 56px;
+  --cross-offset: 51px;
+  --mark-left: 72px;
+  --mark-bottom: 18px;
+  --mark-height: 18px;
+  --counter-inset: 72px;
+  --counter-bottom: 22px;
+}
+
 /* edge grid: two rails and two rules that run to the edge of the sheet, crosses where they meet */
 .ts-sheet .frame {
   position: absolute;
@@ -70,10 +84,10 @@
   background: var(--hair);
 }
 .ts-sheet .frame::before {
-  left: 56px;
+  left: var(--rail);
 }
 .ts-sheet .frame::after {
-  right: 56px;
+  right: var(--rail);
 }
 .ts-sheet .frame .rule {
   position: absolute;
@@ -83,10 +97,10 @@
   background: var(--hair);
 }
 .ts-sheet .frame .rule.top {
-  top: 56px;
+  top: var(--rail);
 }
 .ts-sheet .frame .rule.bottom {
-  bottom: 56px;
+  bottom: var(--rail);
 }
 .ts-sheet .frame .cross {
   position: absolute;
@@ -97,26 +111,26 @@
     linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat;
 }
 .ts-sheet .frame .cross.tl {
-  left: 51px;
-  top: 51px;
+  left: var(--cross-offset);
+  top: var(--cross-offset);
 }
 .ts-sheet .frame .cross.tr {
-  right: 51px;
-  top: 51px;
+  right: var(--cross-offset);
+  top: var(--cross-offset);
 }
 .ts-sheet .frame .cross.bl {
-  left: 51px;
-  bottom: 51px;
+  left: var(--cross-offset);
+  bottom: var(--cross-offset);
 }
 .ts-sheet .frame .cross.br {
-  right: 51px;
-  bottom: 51px;
+  right: var(--cross-offset);
+  bottom: var(--cross-offset);
 }
 
 .ts-sheet .counter {
   position: absolute;
-  right: 72px;
-  bottom: 22px;
+  right: var(--counter-inset);
+  bottom: var(--counter-bottom);
   font-family: var(--display);
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -125,9 +139,9 @@
 }
 .ts-sheet .wordmark {
   position: absolute;
-  left: 72px;
-  bottom: 18px;
-  height: 18px;
+  left: var(--mark-left);
+  bottom: var(--mark-bottom);
+  height: var(--mark-height);
   color: var(--titanium);
 }
 .ts-sheet .wordmark svg {

@@ -235,6 +235,18 @@ html:has(.ts-product) {
   background-image: var(--ts-product-hero-dark);
 }
 
+/* the live hero over the still twin (gslides-parity SPEC-5 11): mounted behind its gate, faded in over the enter duration; the twin stays under it */
+.ts-product-hero-live {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--pt-dur-enter, 240ms) ease-out;
+}
+
+.ts-product-hero-live[data-live] {
+  opacity: 1;
+}
+
 .ts-product-hero-rail {
   position: relative;
   height: 100%;

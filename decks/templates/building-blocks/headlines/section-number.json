@@ -1,0 +1,50 @@
+{
+  "id": "headlines/section-number",
+  "category": "headlines",
+  "label": "Section number",
+  "blocks": [
+    {
+      "id": "number",
+      "pos": {
+        "x": 0,
+        "y": 60,
+        "w": 300,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "01"
+    },
+    {
+      "id": "h",
+      "pos": {
+        "x": 340,
+        "y": 100,
+        "w": 986,
+        "h": 120,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h1",
+      "text": "The section title"
+    },
+    {
+      "id": "sub",
+      "pos": {
+        "x": 340,
+        "y": 230,
+        "w": 986,
+        "h": 48,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "What the section covers.",
+      "role": "lead"
+    }
+  ],
+  "box": [
+    1326,
+    278
+  ]
+}

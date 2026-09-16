@@ -102,6 +102,15 @@ describe('every action', () => {
           'admin.bootstrap',
           'admin.flag',
           'admin.migrateStorage',
+          // round five (gslides-parity SPEC-5 13): the principal record (`record`), the room's
+          // chat entries (`room`), the version log and a new deck from a file
+          'prefs.set',
+          'dictionary.add',
+          'dictionary.remove',
+          'chat.send',
+          'chat.clear',
+          'version.delete',
+          'import.pptx',
         ];
         if (!noBase.includes(spec.id))
           expect(JSON.stringify(spec.example), `${spec.id} baseRevision`).toContain('baseRevision');
@@ -116,9 +125,19 @@ describe('every action', () => {
 
   it('is named in at least one test or spec file once its milestone has landed', () => {
     const files = testFiles();
-    // GS3 is the round in progress (gslides-parity MILESTONES-3): its 64 ids are named by
-    // packages/schema/src/actions-gs3.test.ts from day one and by their own tests as they land
-    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1', 'GS2', 'GS3']);
+    // GS3's 64 ids are named by packages/schema/src/actions-gs3.test.ts from its day one; GS5's
+    // 51 (gslides-parity MILESTONES-5, the integrator's day 0 seam) by actions-gs5.test.ts and by
+    // their own tests as the lanes land them
+    const landed: ReadonlySet<string> = new Set([
+      'M1',
+      'M2',
+      'M3',
+      'M4',
+      'GS1',
+      'GS2',
+      'GS3',
+      'GS5',
+    ]);
     const named = (spec: (typeof rows)[number][1]): string[] => [
       `'${spec.id}'`,
       `"${spec.id}"`,

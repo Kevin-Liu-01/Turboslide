@@ -1,0 +1,54 @@
+{
+  "id": "agendas/five-items",
+  "category": "agendas",
+  "label": "Five item agenda",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 600,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Agenda"
+    },
+    {
+      "id": "list",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 520,
+        "group": "block"
+      },
+      "type": "plain",
+      "numbered": true,
+      "marker": "number",
+      "items": [
+        {
+          "text": "The problem"
+        },
+        {
+          "text": "What we built"
+        },
+        {
+          "text": "How it works"
+        },
+        {
+          "text": "Results"
+        },
+        {
+          "text": "Next steps"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    620
+  ]
+}

@@ -10,7 +10,7 @@ import { UsageError } from '../exit.ts';
 import type { PictureMaterializeResult } from '../store-actions.ts';
 import { baseRevision, openStore } from '../write.ts';
 
-export const PICTURE_USAGE = `usage: turboslide picture materialize [<slideIds>|all] [--prune] [--scale 1|2] [--dry-run] [--blocks <id,id>]
+export const PICTURE_USAGE = `usage: turboslide picture materialize [<slideIds>|all] [--prune] [--scale 1|2] [--dry-run] [--clone] [--blocks <id,id>]
   writes the dither variants every export reads (picture.materialize); --dry-run names the missing ones`;
 
 export async function picture(ctx: CommandContext): Promise<number> {
@@ -34,6 +34,8 @@ export async function picture(ctx: CommandContext): Promise<number> {
     ...(flagBoolean(ctx.args, 'prune') ? { prune: true } : {}),
     ...(scale !== undefined ? { scale } : {}),
     ...(flagBoolean(ctx.args, 'dry-run') ? { dryRun: true } : {}),
+    // the 320 px twin variant of every picture that lacks one (gslides-parity SPEC-5 11; b2.md R17)
+    ...(flagBoolean(ctx.args, 'clone') ? { clone: true } : {}),
     baseRevision: await baseRevision(ctx, store),
   });
   ctx.out.result(result);

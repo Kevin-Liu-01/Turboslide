@@ -1,0 +1,3863 @@
+{
+  "summary": {
+    "imported": 136,
+    "substituted": 10,
+    "dropped": 28,
+    "slides": 28
+  },
+  "rows": [
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:title#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:title#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "slideId": "title",
+      "object": "ts:title#mark:1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:breaks#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 2,
+      "slideId": "breaks",
+      "object": "ts:breaks#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#table",
+      "status": "kept",
+      "code": "table.border",
+      "message": "32 left or right cell borders landed as per edge borders"
+    },
+    {
+      "slideIndex": 3,
+      "slideId": "table",
+      "object": "ts:table#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:numbered#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 4,
+      "slideId": "numbered",
+      "object": "ts:numbered#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:links#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 5,
+      "slideId": "links",
+      "object": "ts:links#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:prompt#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 6,
+      "slideId": "prompt",
+      "object": "ts:prompt#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:styles#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:styles#p1/text",
+      "status": "substituted",
+      "code": "text.runSize",
+      "message": "Runs of different sizes in one body took the first run’s size"
+    },
+    {
+      "slideIndex": 7,
+      "slideId": "styles",
+      "object": "ts:styles#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:canvas-title#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:canvas-title#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 8,
+      "slideId": "canvas-title",
+      "object": "ts:canvas-title#mark:1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:canvas-opener#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 9,
+      "slideId": "canvas-opener",
+      "object": "ts:canvas-opener#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:rotated#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 10,
+      "slideId": "rotated",
+      "object": "ts:rotated#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:grouped#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 11,
+      "slideId": "grouped",
+      "object": "ts:grouped#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:shapes#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 12,
+      "slideId": "shapes",
+      "object": "ts:shapes#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:lines#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:lines#poly",
+      "status": "substituted",
+      "code": "shape.custom",
+      "message": "A custom geometry was sampled into a polyline"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:lines#closed",
+      "status": "substituted",
+      "code": "shape.custom",
+      "message": "A custom geometry was sampled into a polyline"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:lines#scribble",
+      "status": "substituted",
+      "code": "shape.custom",
+      "message": "A custom geometry was sampled into a polyline"
+    },
+    {
+      "slideIndex": 13,
+      "slideId": "lines",
+      "object": "ts:lines#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:word-art#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 14,
+      "slideId": "word-art",
+      "object": "ts:word-art#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:shadow#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 15,
+      "slideId": "shadow",
+      "object": "ts:shadow#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:background-color#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 16,
+      "slideId": "background-color",
+      "object": "ts:background-color#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "background",
+      "status": "kept",
+      "code": "background.picture",
+      "message": "The background picture is the bottom of the stack"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#chip/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#chip/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 17,
+      "slideId": "background-picture",
+      "object": "ts:background-picture#mark:1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "background",
+      "status": "kept",
+      "code": "background.picture",
+      "message": "The background picture is the bottom of the stack"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#chip/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#chip/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 18,
+      "slideId": "background-dither",
+      "object": "ts:background-dither#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:picture-dither-strength#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 19,
+      "slideId": "picture-dither-strength",
+      "object": "ts:picture-dither-strength#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:image-tools#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 20,
+      "slideId": "image-tools",
+      "object": "ts:image-tools#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.margins",
+      "message": "Cell margins differ from the renderer’s padding by more than 4 px"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#table",
+      "status": "kept",
+      "code": "table.border",
+      "message": "26 left or right cell borders landed as per edge borders"
+    },
+    {
+      "slideIndex": 21,
+      "slideId": "table-merge",
+      "object": "ts:table-merge#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:chart-bar#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 22,
+      "slideId": "chart-bar",
+      "object": "ts:chart-bar#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:chart-line#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 23,
+      "slideId": "chart-line",
+      "object": "ts:chart-line#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:chart-pie#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:chart-pie#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 24,
+      "slideId": "chart-pie",
+      "object": "ts:chart-pie#chart",
+      "status": "kept",
+      "code": "chart.slices",
+      "message": "Per slice colours were dropped; the pie takes the palette"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:diagram#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 25,
+      "slideId": "diagram",
+      "object": "ts:diagram#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:bullets#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.glyph",
+      "message": "The bullet glyph \"●\" became the nearest preset, disc-circle-square"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.glyph",
+      "message": "The bullet glyph \"○\" became the nearest preset, disc-circle-square"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.glyph",
+      "message": "The bullet glyph \"■\" became the nearest preset, disc-circle-square"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.glyph",
+      "message": "The bullet glyph \"●\" became the nearest preset, disc-circle-square"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.scheme",
+      "message": "The numbering scheme alphaLcPeriod became the nearest preset, digit-alpha-roman"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "status": "substituted",
+      "code": "list.scheme",
+      "message": "The numbering scheme romanLcPeriod became the nearest preset, digit-alpha-roman"
+    },
+    {
+      "slideIndex": 26,
+      "slideId": "bullets",
+      "object": "ts:bullets#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:spacing#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 27,
+      "slideId": "spacing",
+      "object": "ts:spacing#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#frame/0",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#frame/1",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#frame/2",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#frame/3",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/0/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/0/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/1/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/1/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/2/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/2/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/3/v",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#cross/3/h",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:master#wordmark",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide master chrome skipped"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:autofit#title",
+      "status": "dropped",
+      "code": "shape.hidden",
+      "message": "A hidden shape was left out"
+    },
+    {
+      "slideIndex": 28,
+      "slideId": "autofit",
+      "object": "ts:autofit#counter",
+      "status": "kept",
+      "code": "master.chrome",
+      "message": "Turboslide slide chrome skipped"
+    },
+    {
+      "slideIndex": 1,
+      "status": "kept",
+      "code": "theme.layouts",
+      "message": "3 layouts of the file were not imported as custom layouts; the slides keep their positions"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "GT Inter Text 22",
+      "runs": 56,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Display",
+      "runs": 30,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 20",
+      "runs": 21,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 24 Medium",
+      "runs": 18,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 26",
+      "runs": 12,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 20 Medium",
+      "runs": 9,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 22 Medium",
+      "runs": 4,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 14",
+      "runs": 2,
+      "substituted": "Inter"
+    },
+    {
+      "family": "GT Inter Text 15",
+      "runs": 1,
+      "substituted": "Inter"
+    }
+  ],
+  "theme": {
+    "mode": "adopt",
+    "imported": false,
+    "scheme": {
+      "colors": {
+        "ink": "#000000",
+        "paper": "#ffffff",
+        "ink-2": "#44546a",
+        "plate": "#e7e6e6",
+        "ok": "#4472c4",
+        "warn": "#ed7d31",
+        "no": "#a5a5a5",
+        "info": "#ffc000",
+        "titanium": "#5b9bd5",
+        "raised": "#70ad47",
+        "link": "#0563c1"
+      },
+      "fonts": {
+        "major": "Calibri Light",
+        "minor": "Calibri"
+      }
+    }
+  },
+  "source": {
+    "file": "05-roundtrip.pptx",
+    "slides": 28,
+    "page": {
+      "width": 1600,
+      "height": 900
+    },
+    "producer": "Microsoft Office PowerPoint",
+    "sections": 0,
+    "modifyVerifier": false
+  },
+  "validation": {
+    "ok": true,
+    "issues": 40
+  }
+}

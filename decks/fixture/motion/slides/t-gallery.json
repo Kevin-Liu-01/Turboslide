@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "t-gallery",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Gallery at 5 s, the rounded rectangle zooms out on entry",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "text": "Zoom out",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 900,
+          "y": 260,
+          "w": 500,
+          "h": 300,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "gallery",
+    "durationMs": 5000
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "zoomOut",
+      "trigger": "afterPrevious",
+      "durationMs": 700
+    }
+  ]
+}

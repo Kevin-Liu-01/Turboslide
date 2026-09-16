@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "id": "motion",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "appears",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 59.5,
+          "y": 119.5,
+          "w": 361,
+          "h": 181,
+          "z": 1
+        },
+        "fill": "blue",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "Appear on click",
+        "typography": {
+          "size": 30
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Appears"
+        }
+      },
+      {
+        "id": "fades-in",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 479.5,
+          "y": 119.5,
+          "w": 361,
+          "h": 181,
+          "z": 2
+        },
+        "fill": "green",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "Fade with previous",
+        "typography": {
+          "size": 30
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Fades in"
+        }
+      },
+      {
+        "id": "flies-in",
+        "type": "shape",
+        "shape": "chevron",
+        "pos": {
+          "x": 899.5,
+          "y": 119.5,
+          "w": 361,
+          "h": 181,
+          "z": 3
+        },
+        "fill": "amber",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "Fly in after previous",
+        "typography": {
+          "size": 30
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Flies in"
+        }
+      },
+      {
+        "id": "fades-out",
+        "type": "shape",
+        "shape": "rect",
+        "pos": {
+          "x": 59.5,
+          "y": 419.5,
+          "w": 361,
+          "h": 181,
+          "z": 4
+        },
+        "fill": "red",
+        "stroke": "#4f81bd",
+        "width": 1,
+        "text": "Fade out on click",
+        "typography": {
+          "size": 30
+        },
+        "valign": "middle",
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "ext": {
+          "pptxName": "Fades out"
+        }
+      },
+      {
+        "id": "pricing-rows",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Starter, $49 a month"
+          },
+          {
+            "text": "Team, $199 a month"
+          },
+          {
+            "text": "Enterprise, call us"
+          }
+        ],
+        "pos": {
+          "x": 480,
+          "y": 420,
+          "w": 840,
+          "h": 300,
+          "z": 5
+        },
+        "size": 24,
+        "ext": {
+          "pptxName": "Pricing rows"
+        }
+      }
+    ]
+  },
+  "title": "Motion",
+  "transition": {
+    "kind": "dissolve",
+    "durationMs": 1000
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "appears",
+      "effect": "appear",
+      "trigger": "click",
+      "durationMs": 500
+    },
+    {
+      "id": "a2",
+      "blockId": "fades-in",
+      "effect": "fadeIn",
+      "trigger": "withPrevious",
+      "durationMs": 500
+    },
+    {
+      "id": "a3",
+      "blockId": "flies-in",
+      "effect": "flyIn",
+      "trigger": "afterPrevious",
+      "durationMs": 750,
+      "direction": "bottom"
+    },
+    {
+      "id": "a4",
+      "blockId": "fades-out",
+      "effect": "fadeOut",
+      "trigger": "click",
+      "durationMs": 500
+    },
+    {
+      "id": "a5",
+      "blockId": "pricing-rows",
+      "effect": "appear",
+      "trigger": "click",
+      "durationMs": 500,
+      "byParagraph": true
+    }
+  ],
+  "ext": {
+    "pptxPart": "ppt/slides/slide3.xml",
+    "pptxSlideId": 258
+  }
+}

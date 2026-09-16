@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "id": "objects",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "title": "One equation per OMML object",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "One equation per OMML object",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "o-fraction",
+        "type": "equation",
+        "tex": "\\frac{a + b}{c}",
+        "pos": {
+          "x": 137,
+          "y": 210,
+          "w": 420,
+          "h": 190,
+          "z": 1
+        },
+        "alt": "A fraction",
+        "size": 40
+      },
+      {
+        "id": "o-scripts",
+        "type": "equation",
+        "tex": "x_{i}^{2} + y_{j}",
+        "pos": {
+          "x": 590,
+          "y": 210,
+          "w": 420,
+          "h": 190,
+          "z": 2
+        },
+        "alt": "Scripts",
+        "size": 40
+      },
+      {
+        "id": "o-radical",
+        "type": "equation",
+        "tex": "\\sqrt[3]{x + 1}",
+        "pos": {
+          "x": 1043,
+          "y": 210,
+          "w": 420,
+          "h": 190,
+          "z": 3
+        },
+        "alt": "A radical with a degree",
+        "size": 40
+      },
+      {
+        "id": "o-nary",
+        "type": "equation",
+        "tex": "\\sum_{i=1}^{n} i^2 = \\int_{0}^{1} f(x)\\,dx",
+        "pos": {
+          "x": 137,
+          "y": 430,
+          "w": 420,
+          "h": 190,
+          "z": 4
+        },
+        "alt": "An n-ary operator with limits",
+        "size": 34
+      },
+      {
+        "id": "o-delimiters",
+        "type": "equation",
+        "tex": "\\left( \\frac{a}{b} \\right) + \\left[ x \\right] + \\left\\{ y \\right\\}",
+        "pos": {
+          "x": 590,
+          "y": 430,
+          "w": 420,
+          "h": 190,
+          "z": 5
+        },
+        "alt": "Delimiters",
+        "size": 34
+      },
+      {
+        "id": "o-function",
+        "type": "equation",
+        "tex": "\\sin \\theta + \\cos^{2} \\phi = \\lim_{x \\to 0} f(x)",
+        "pos": {
+          "x": 1043,
+          "y": 430,
+          "w": 420,
+          "h": 190,
+          "z": 6
+        },
+        "alt": "Functions and a limit",
+        "size": 34
+      },
+      {
+        "id": "o-accent",
+        "type": "equation",
+        "tex": "\\hat{x} + \\bar{y} + \\vec{v} + \\overline{AB}",
+        "pos": {
+          "x": 137,
+          "y": 650,
+          "w": 420,
+          "h": 190,
+          "z": 7
+        },
+        "alt": "Accents and a bar",
+        "size": 34
+      },
+      {
+        "id": "o-matrix",
+        "type": "equation",
+        "tex": "\\begin{bmatrix} 1 & 0 \\\\ 0 & 1 \\end{bmatrix}",
+        "pos": {
+          "x": 590,
+          "y": 650,
+          "w": 420,
+          "h": 190,
+          "z": 8
+        },
+        "alt": "A matrix",
+        "size": 34,
+        "color": "ink-2"
+      },
+      {
+        "id": "o-cases",
+        "type": "equation",
+        "tex": "|x| = \\begin{cases} x & x \\ge 0 \\\\ -x & x < 0 \\end{cases}",
+        "pos": {
+          "x": 1043,
+          "y": 650,
+          "w": 420,
+          "h": 190,
+          "z": 9
+        },
+        "alt": "An equation array",
+        "size": 30
+      }
+    ]
+  }
+}

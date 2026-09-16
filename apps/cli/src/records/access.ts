@@ -287,6 +287,8 @@ export async function shareSetGeneralAccess(
       const role = input.role ?? 'viewer';
       if (input.mode === 'restricted') {
         next.generalAccess = { mode: 'restricted', role };
+        /* the media key rotates when a deck closes (gslides-parity SPEC-5 0.19; b2.md R12) */
+        next.assetKey = shareToken();
         return { url: undefined as string | undefined, token: undefined as string | undefined };
       }
       next.generalAccess = { mode: 'link', role };
@@ -397,6 +399,8 @@ export async function shareRevokeLink(
       ) {
         next.generalAccess = { ...next.generalAccess, mode: 'restricted' };
       }
+      /* a revoked link rotates the media key (SPEC-5 0.19; b2.md R12) */
+      next.assetKey = shareToken();
     },
     () => ({ kind: 'share', summary: 'A link was revoked' }),
   );
@@ -414,6 +418,8 @@ export async function shareRotateLink(
       require(next, deps.caller, now, 'share', 'share.rotateLink');
       const old = findLink(next, input.linkId);
       old.revokedAt = old.revokedAt ?? now;
+      /* a rotated link rotates the media key with it (SPEC-5 0.19; b2.md R12) */
+      next.assetKey = shareToken();
       const token = shareToken();
       const link: ShareLink = {
         ...old,
@@ -545,6 +551,8 @@ export async function shareRemove(
       const before = next.grants.length;
       next.grants = next.grants.filter((row) => !sameWho(row, input.who));
       if (next.grants.length === before) throw new RangeError('no such grant on this presentation');
+      /* a removed collaborator rotates the media key (SPEC-5 0.19; b2.md R12) */
+      next.assetKey = shareToken();
     },
     () => ({ kind: 'share', summary: 'Access was removed' }),
   );

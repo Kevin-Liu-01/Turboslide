@@ -143,15 +143,12 @@ import {
 import type { PendingStore } from '@turboslide/realtime/client/pending-store';
 import { createRoomClient } from '@turboslide/realtime/client/room-client';
 import type {
-  OpsResponse,
   PersistedOffer,
   Rejected,
   RoomClient,
-  RoomTransport,
   SyncStatus,
 } from '@turboslide/realtime/client/room-client';
-import { roomEventOf } from '@turboslide/realtime/protocol';
-import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
+import type { PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
@@ -171,13 +168,22 @@ import type { Finding } from '@turboslide/schema/findings';
 import { ICON_NAMES } from '@turboslide/schema/icons';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
+import { preferencesMirror } from '@turboslide/schema/preferences';
+import type { Preferences } from '@turboslide/schema/preferences';
 import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
+import { deckPage } from '@turboslide/schema/render';
 import type { Issue } from '@turboslide/schema/validate';
 import { authorLabel, sameAuthor, touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
 import { measureForCanvas, measureForFit } from '@turboslide/viewer/canvas-measure';
+import { beginCameraCapture } from '@turboslide/chrome/dialogs/Camera';
+import { presentOnScreen } from '@turboslide/chrome/dialogs/DisplayOptions';
+import type { PresentOnScreenInput } from '@turboslide/chrome/dialogs/DisplayOptions';
+import { announceVerbalize, verbalizeSentence } from '@turboslide/chrome/accessibility/verbalize';
+import type { VerbalizeWhat } from '@turboslide/chrome/accessibility/verbalize';
+import { slideBlocks as blocksOfSlide, slideOrder as orderOfDeck } from '@turboslide/schema/deck';
 import {
   TEXT_UNDO_GROUP_MS,
   announceTextChanged,
@@ -188,7 +194,11 @@ import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
-import { SERVER_SIDE_WINDOW_ACTIONS_GS3, runDeckAction } from '../server/agent-actions';
+import {
+  SERVER_SIDE_WINDOW_ACTIONS_GS3,
+  SERVER_SIDE_WINDOW_ACTIONS_GS5,
+  runDeckAction,
+} from '../server/agent-actions';
 import type { ServerSideWindowAction } from '../server/agent-actions';
 import { createNewDeck } from '../server/decks';
 import {
@@ -214,7 +224,25 @@ import {
   writeDeck,
 } from '../server/write';
 import type { EditorDeck, EditorIdentity } from '../server/write';
-import { partitionRoster, readClientIds, rememberClientId } from './client-ids';
+import {
+  motionPlay,
+  presenterPath,
+  presenterWindowName,
+  startSlideshow,
+  withMotion,
+} from '../components/presentActions';
+import type { MotionPlayInput } from '../components/presentActions';
+import type { SlideshowState } from '../components/Slideshow';
+import {
+  heldClientId,
+  idsToRetire,
+  opCounterFor,
+  partitionRoster,
+  readClientIds,
+  rememberClientId,
+} from './client-ids';
+import { sseTransport } from './sync/transport';
+import { WS_SIDECAR_PORT, wsTransport } from '@turboslide/realtime/client/ws';
 
 /**
  * The editor, /edit/:deckId with ssr: false (SPEC 3.4, 6; MILESTONES M3). The chrome's
@@ -295,69 +323,6 @@ export function participantOf(entry: RosterEntry, now: string): PresenceParticip
   };
 }
 
-/** The browser's transport of the room (SPEC-3 3.3): EventSource down, fetch up, same origin. */
-function sseTransport(deckId: string): RoomTransport {
-  const base = `/api/decks/${encodeURIComponent(deckId)}`;
-  const EVENTS = [
-    'hello',
-    'ops',
-    'op',
-    'checkpoint',
-    'presence',
-    'leave',
-    'reject',
-    'inbox',
-    'access',
-    'resync',
-  ];
-  return {
-    open({ since, retire, onEvent, onError }) {
-      // the tab's earlier ids ride every open (a reconnect too), so the instance the stream lands
-      // on drops their roster rows before hello (hotfix 2 cause B1)
-      const retiring =
-        retire === undefined || retire.length === 0
-          ? ''
-          : `&retire=${retire.map((id) => encodeURIComponent(id)).join(',')}`;
-      const source = new EventSource(`${base}/stream?since=${since}${retiring}`);
-      for (const type of EVENTS) {
-        source.addEventListener(type, (raw) => {
-          const event = roomEventOf({ data: (raw as MessageEvent<string>).data });
-          if (event !== null) onEvent(event);
-        });
-      }
-      source.onerror = () => onError(new Error('the stream closed'));
-      return { close: () => source.close() };
-    },
-    async postOps(body: OpsPost): Promise<OpsResponse> {
-      const response = await fetch(`${base}/ops`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-      if (response.ok && json.ok === true) return json as unknown as OpsResponse;
-      const retry = response.headers.get('retry-after');
-      return {
-        ok: false,
-        status: response.status,
-        code: typeof json.error === 'string' ? json.error : 'error',
-        message:
-          typeof json.message === 'string' ? json.message : `The room answered ${response.status}`,
-        ...(typeof json.head === 'number' ? { head: json.head } : {}),
-        ...(retry !== null ? { retryAfterMs: Number(retry) * 1000 } : {}),
-      };
-    },
-    async postPresence(body: PresencePost, options = {}) {
-      await fetch(`${base}/presence${options.leave === true ? '?leave=1' : ''}`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-        keepalive: options.leave === true,
-      });
-    },
-  };
-}
-
 /** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
 function pendingStoreFor(): PendingStore {
   return typeof indexedDB === 'undefined' ? memoryPendingStore() : indexedDbPendingStore();
@@ -371,11 +336,15 @@ function pendingStoreFor(): PendingStore {
  */
 class StaleBaseError extends ConflictError {
   constructor(baseRevision: number, current: number, document: DeckDocument) {
-    super(`baseRevision ${baseRevision} is stale; the document is at revision ${current}`, {
+    /* the plain sentence of A3 item 8 (server/room.ts movedSentence, one spelling); the base the
+       caller sent stays in the error's record for the rebase */
+    super(`The presentation moved to revision ${current} while this change was on its way`, {
       currentRevision: current,
       current: document,
     });
+    this.baseRevision = baseRevision;
   }
+  readonly baseRevision: number;
 }
 
 /** The Text a typing burst names, for the 400 ms undo grouping (SPEC 7.2.15). */
@@ -565,6 +534,87 @@ export type Selection = { slideId: string; blockId: string; pointer?: string };
 export type EditorView = { mode: ShellMode; present: boolean };
 
 /**
+ * The editor's own mode beside the shell's view (gslides-parity SPEC-5 0.44, 9.2): `edit` is the
+ * slide editor; `theme` is Edit theme, an editor mode and not a route, entered by Slide > Edit
+ * theme and View > Theme builder and left by the X or by picking a slide. The integrator landed
+ * the state on day 0 (SPEC-5 1.6); B6's `editor/theme-mode.tsx` draws the mode's filmstrip,
+ * toolbar and canvas from it (MILESTONES-5 B6 day 5) and wires `client('themeMode')` through
+ * `setEditorMode`.
+ */
+export type EditorMode = 'edit' | 'theme';
+
+/**
+ * The window action table's round five slots (SPEC-5 1.6, 13; MILESTONES-5 "The seams every
+ * builder types against"): the window transport ids each lane wires into `on(...)` below as it
+ * lands, through a request naming the handler. Every id already appears in `describe().actions`
+ * (the table's window transport) and answers NotImplementedError until its row is registered
+ * here; the checkout and hosted transports take the lane modules of apps/cli/src/actions/.
+ */
+export const GS5_WINDOW_SLOTS: Readonly<Record<string, ReadonlyArray<ActionId>>> = {
+  B1: [
+    'motion.setTransition',
+    'motion.add',
+    'motion.update',
+    'motion.remove',
+    'motion.reorder',
+    'motion.compile',
+    'motion.play',
+  ],
+  B2: [
+    'media.insert',
+    'media.setPlayback',
+    'media.poster',
+    'media.info',
+    'media.list',
+    'camera.capture',
+    'view.presentOnScreen',
+  ],
+  B3: [
+    'template.list',
+    'template.slides',
+    'buildingBlock.list',
+    'buildingBlock.insert',
+    'import.pptx',
+    'theme.import',
+  ],
+  B4: ['deck.setPageSize'],
+  B5: [
+    'prefs.get',
+    'prefs.set',
+    'text.autocorrect',
+    'spelling.check',
+    'spelling.replace',
+    'spelling.ignore',
+    'dictionary.add',
+    'dictionary.remove',
+    'dictionary.list',
+    'dictionary.lookup',
+    'accessibility.verbalize',
+    'chat.send',
+    'chat.list',
+    'chat.clear',
+    'version.delete',
+  ],
+  B6: [
+    'equation.insert',
+    'equation.render',
+    'equation.symbols',
+    'theme.get',
+    'theme.set',
+    'theme.rename',
+    'theme.reset',
+    'theme.applyImported',
+    'layout.list',
+    'layout.create',
+    'layout.duplicate',
+    'layout.rename',
+    'layout.delete',
+    'layout.setPlaceholder',
+  ],
+  B7: ['font.list'],
+};
+
+/**
  * The comments sidecar as this tab holds it (SPEC-3 5.3, 3.10): the threads as the server
  * stores them (anchors resolved against the live document at render time, so an orphan and its
  * revival show at once), the sidecar's counter, the View > Comments display and the open card.
@@ -648,6 +698,8 @@ export type EditorSnapshot = {
   };
   activeSlide: string;
   view: EditorView;
+  /** Edit theme's mode beside the slide editor (gslides-parity SPEC-5 9.2); `edit` until B6's mode lands */
+  editorMode: EditorMode;
   /** the stage scale view.zoom set, or 'fit' (gslides-parity SPEC 7.2.16); the Sheet draws it (B4) */
   zoom: number | 'fit';
   /** the sheet point view.zoom keeps under the stage centre, the sheet centre when null (gslides-parity SPEC-2 0.81) */
@@ -667,6 +719,13 @@ export type EditorController = {
   start: () => void;
   stop: () => void;
   attachShell: (shell: ShellState) => void;
+  /**
+   * Round five (gslides-parity SPEC-5 2.2, 3.7): the chrome's dialog opener for the window rows
+   * that end in a dialog (camera.capture), and the show's step facts for `view.*` and
+   * describe().state (`step`, `steps`)
+   */
+  attachChrome: (chrome: { openDialog: (id: string) => void } | null) => void;
+  setShowState: (state: SlideshowState | null) => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
   /** one Write: applied locally now, sent through the room; resolves when the room admitted it */
@@ -722,6 +781,8 @@ export type EditorController = {
   setExportSync: (enabled: boolean, batchSize?: number) => void;
   /** what the shell shows, from ShellBridge */
   setView: (view: EditorView) => void;
+  /** Edit theme in and out (SPEC-5 9.2); the theme mode's X and a slide pick call it with `edit` */
+  setEditorMode: (mode: EditorMode) => void;
   /** the shell's toast */
   say: (message: string) => void;
   /** the validator behind every applySource: the slide, or a RangeError (unknown slide) or TypeError */
@@ -896,6 +957,10 @@ export function createEditorController(init: {
   const listeners = new Set<() => void>();
   let alive = false;
   let shell: ShellState | null = null;
+  let chrome: { openDialog: (id: string) => void } | null = null;
+  let showState: SlideshowState | null = null;
+  /* the words Ignore all keeps out of the spell check for this session (SPEC-5 7.2; window only) */
+  const ignoredWords = new Set<string>();
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
   let room: RoomClient | null = null;
   let draftChain: Promise<unknown> = Promise.resolve();
@@ -950,6 +1015,7 @@ export function createEditorController(init: {
     history: { entries: [], log: [], versions: [], canUndo: false, canRedo: false },
     activeSlide: initialOrder[0] ?? '',
     view: { mode: 'slide', present: false },
+    editorMode: 'edit',
     zoom: 'fit',
     zoomCenter: null,
     selection: null,
@@ -1344,14 +1410,32 @@ export function createEditorController(init: {
   const attachRoom = (document: DeckDocument, seq: number, tier: SyncStatus['tier']): void => {
     if (room !== null) return;
     const now = (): string => new Date().toISOString();
+    /* the WebSocket transport behind its flag (gslides-parity SPEC-5 11): the same envelope over
+       one socket to the dev sidecar on 4322 (a checkout) with the SSE pair as the fallback while
+       the socket is down; SSE otherwise */
+    const sse = sseTransport(deckId);
+    const transport =
+      init.payload.room?.ws === true && typeof window !== 'undefined'
+        ? wsTransport(deckId, {
+            base: `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:${WS_SIDECAR_PORT}`,
+            fallback: sse,
+          })
+        : sse;
     const client = createRoomClient({
       deckId,
-      transport: sseTransport(deckId),
+      transport,
       document,
       seq,
       tier,
-      // the tab's earlier ids leave the roster before hello lists it (hotfix 2 cause B1)
-      retire: latest().ownClientIds,
+      // one client id per tab (SPEC-5-amendments A3 item 5): the id the stream last issued is
+      // asked for on every open and kept when it names this deck and this identity; the op
+      // counter lives beside it so a kept id never repeats a counter; the ids the tab held before
+      // and did not keep leave the roster before hello lists them (hotfix 2 cause B1)
+      ...(heldClientId(idStorage(), deckId) === null
+        ? {}
+        : { clientId: heldClientId(idStorage(), deckId) as string }),
+      opCounter: opCounterFor(idStorage(), deckId),
+      retire: idsToRetire(idStorage(), deckId, heldClientId(idStorage(), deckId)),
       pendingStore,
       onChange: ({ document: next, changed, reason }) => {
         if (reason === 'local') return;
@@ -1452,13 +1536,20 @@ export function createEditorController(init: {
         const notice = rejectNoticeOf(rejected);
         publish({ rejects: [...latest().rejects, notice], error: notice.message ?? null });
       },
-      onUnplaceable: (op) => {
+      onUnplaceable: (op, against) => {
+        // the card names who changed the same text (SPEC-5-amendments A3 items 3 and 8): plain
+        // words, never the room's reason
+        const who = against === undefined ? null : authorLabel(against.author);
         publish({
           rejects: [
             ...latest().rejects,
             rejectNoticeOf({
               opId: op.opId,
               reason: 'stale',
+              message:
+                who === null
+                  ? 'Someone changed this text first; your words are kept here'
+                  : `${who} changed this text first; your words are kept here`,
               ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
             }),
           ],
@@ -2037,6 +2128,9 @@ export function createEditorController(init: {
       present: shell?.present ?? false,
       edit: editingRef.current,
       zoom: snapshot.zoom,
+      /* round five (SPEC-5 2.2): the step within the slide while presenting, 0 and 0 otherwise */
+      step: shell?.present === true ? (showState?.step ?? 0) : 0,
+      steps: shell?.present === true ? (showState?.steps ?? 0) : 0,
     };
   };
 
@@ -2543,7 +2637,13 @@ export function createEditorController(init: {
     const now = new Date().toISOString();
     const rows = latest().roster.map((entry) => participantOf(entry, now));
     // every id this tab held is this tab (hotfix 2 cause B3), not only the current one
-    return partitionRoster(rows, new Set(latest().ownClientIds), room?.clientId() ?? null);
+    // and every row of this person (A3 item 5: the self filter by client id and by principal id)
+    return partitionRoster(
+      rows,
+      new Set(latest().ownClientIds),
+      room?.clientId() ?? null,
+      identity?.principalId ?? null,
+    );
   };
   const participantOut = (row: PresenceParticipant) => ({
     clientId: row.clientId,
@@ -2674,6 +2774,95 @@ export function createEditorController(init: {
     }
     serverSide(id as ServerSideWindowAction);
   }
+  /* Round five, the server side window rows landed so far (gslides-parity SPEC-5 7.1, 13; A5;
+     b5.md request 3, b7.md request 3): prefs.get and font.list answer from the server as they
+     are; prefs.set writes the answered record into this browser's localStorage mirror
+     (@turboslide/schema/preferences PREFERENCES_STORAGE, read by the shell's first paint) so the
+     rulers, the toggles and the Preferences dialog re-render on the returned value once B5's
+     shell state lands (day 3, b5.md request 4). */
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_GS5) {
+    if (id === 'prefs.set') {
+      on<unknown>(id, async (input) => {
+        const output = (await runDeckAction({ deckId, action: id, input, author })) as {
+          preferences: Preferences;
+        };
+        if (typeof window !== 'undefined') {
+          preferencesMirror(window.localStorage).write(output.preferences);
+          /* the notes pane and the shell re-read the mirror (SPEC-5 7.1; EditorRoot.tsx useMirroredPreferences) */
+          window.dispatchEvent(new Event('ts-preferences'));
+        }
+        return output;
+      });
+      continue;
+    }
+    serverSide(id);
+  }
+  /* Round five, the window only rows (gslides-parity SPEC-5 2.1, 3.7, 7.2, 7.5; merge 2; b1.md
+     request 5, b2.md R3, b5.md request 3): motion.play runs on the editor's canvas; camera.capture
+     opens the Camera dialog and answers when its photo lands; view.presentOnScreen asks the
+     Window Management API; spelling.ignore keeps a session set; accessibility.verbalize speaks
+     the selection into the live region. */
+  on<MotionPlayInput>('motion.play', (input) =>
+    motionPlay(input, { document: () => latest().document }),
+  );
+  on<{
+    slideId: string;
+    alt?: string;
+    pos?: { x: number; y: number; w: number; h: number };
+    baseRevision: number;
+  }>('camera.capture', (input) => {
+    const pending = beginCameraCapture(input);
+    if (chrome === null)
+      throw new Error('Needs the editor open: the Camera dialog takes the photo');
+    chrome.openDialog('camera');
+    return pending;
+  });
+  on<PresentOnScreenInput>('view.presentOnScreen', (input) =>
+    presentOnScreen(
+      {
+        deckId,
+        presenterPath: presenterPath(deckId),
+        presenterWindowName: presenterWindowName(deckId),
+        present: () => {
+          const host = {
+            deckId,
+            firstSlideId: () => orderOfDeck(latest().document.deck)[0],
+            goto: (slideId: string) => shell?.select(slideId),
+            present: (on: boolean) => shell?.setPresent(on),
+          };
+          startSlideshow(host, { fullscreen: false });
+        },
+      },
+      input,
+    ),
+  );
+  on<{ word: string; all?: boolean }>('spelling.ignore', (input) => {
+    const word = input.word.trim();
+    if (word !== '') ignoredWords.add(word.toLowerCase());
+    return { word, ignored: [...ignoredWords] };
+  });
+  on<{ what: VerbalizeWhat }>('accessibility.verbalize', (input) => {
+    const document = latest().document;
+    const order = orderOfDeck(document.deck);
+    const slideId = snapshot.activeSlide;
+    const slide = document.slides[slideId];
+    const blockId = snapshot.selection?.blockId;
+    const block =
+      slide === undefined || blockId === undefined
+        ? undefined
+        : blocksOfSlide(slide).find((row) => row.block.id === blockId)?.block;
+    const selectedText =
+      typeof window === 'undefined' ? undefined : window.getSelection()?.toString();
+    const sentence = verbalizeSentence(input.what, {
+      slide,
+      n: Math.max(1, order.indexOf(slideId) + 1),
+      of: order.length,
+      ...(block === undefined ? {} : { block }),
+      ...(selectedText === undefined || selectedText === '' ? {} : { selectedText }),
+    });
+    announceVerbalize(sentence);
+    return { what: input.what, sentence };
+  });
   /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
      anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
      this page clears the localStorage and IndexedDB mirrors together and reloads as the new
@@ -2941,6 +3130,10 @@ export function createEditorController(init: {
     return output;
   });
 
+  /* the round five window slots (SPEC-5 1.6): each lane registers its handlers here through
+     `on(...)` as it lands, in the order of GS5_WINDOW_SLOTS; a window only id (motion.play,
+     spelling.ignore, accessibility.verbalize) has no lane module and lives here alone */
+
   const invoke = (action: string, input?: unknown): Promise<unknown> =>
     dispatcher.dispatch(action, input ?? {}, context);
 
@@ -2992,6 +3185,8 @@ export function createEditorController(init: {
       blockId: snapshot.selection?.blockId ?? null,
       mode: shell?.mode ?? 'slide',
       theme: readTheme(),
+      /* round five (SPEC-5 7.1): the deck's language tag beside the theme */
+      language: snapshot.document.deck.language ?? 'en-US',
       zoom: snapshot.zoom,
       author: authorLabel(author),
       // round three (SPEC-3 3.10): the room's facts beside the document's
@@ -3003,6 +3198,10 @@ export function createEditorController(init: {
         tier: snapshot.sync?.tier ?? init.payload.room?.tier ?? 'memory',
         transport: snapshot.sync === null ? 'poll' : 'sse',
         connected: snapshot.sync?.connected ?? false,
+        // round five (SPEC-5-amendments A3 items 3 and 7): the wire is down, and how many refused
+        // writes were rebased onto the entries a 409 carried and posted again
+        offline: snapshot.sync?.offline ?? false,
+        rebased: snapshot.sync?.rebased ?? 0,
       },
       // the room as presence.list answers it (SPEC-3 3.10; presence.spec.ts reads self.clientId
       // and others[]) beside the count the round two readers had
@@ -3145,6 +3344,12 @@ export function createEditorController(init: {
     attachShell(next) {
       shell = next;
     },
+    attachChrome(next) {
+      chrome = next;
+    },
+    setShowState(next) {
+      showState = next;
+    },
     setActiveSlide(slideId) {
       if (slideId === snapshot.activeSlide) return;
       const selection =
@@ -3245,6 +3450,10 @@ export function createEditorController(init: {
     setView(view) {
       if (view.mode === snapshot.view.mode && view.present === snapshot.view.present) return;
       publish({ view });
+    },
+    setEditorMode(mode) {
+      if (mode === snapshot.editorMode) return;
+      publish({ editorMode: mode });
     },
     say,
     assertSource,
@@ -3367,28 +3576,37 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
             ? { light: assetBase + asset.twins.neutral, dark: assetBase + asset.twins.neutral }
             : { light: assetBase + asset.twins.light, dark: assetBase + asset.twins.dark }
           : undefined;
-      out.push({
-        id: slideId,
-        n,
-        title: slideTitle(slide, n),
-        kind: slide.kind,
-        sectionId: section.id,
-        html: snap.html.get(slideId) ?? '',
-        // no `shot` since round four (gslides-parity SPEC-4 0.30, 3.2): the editor's filmstrip
-        // and grid are clone first and capture never, so no card asks the render route for a
-        // picture; the viewer's grid, the home cards and the presenter keep their captures
-        ...(picture ? { picture } : {}),
-        ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
-        // the parity facts (gslides-parity SPEC 7.2.1, 7.2.2): the show and the grid read skip, the grid the layout
-        ...(slide.skip === true ? { skip: true } : {}),
-        ...(slide.template !== undefined ? { template: slide.template } : {}),
-      });
+      out.push(
+        withMotion(
+          {
+            id: slideId,
+            n,
+            title: slideTitle(slide, n),
+            kind: slide.kind,
+            sectionId: section.id,
+            html: snap.html.get(slideId) ?? '',
+            // no `shot` since round four (gslides-parity SPEC-4 0.30, 3.2): the editor's filmstrip
+            // and grid are clone first and capture never, so no card asks the render route for a
+            // picture; the viewer's grid, the home cards and the presenter keep their captures
+            ...(picture ? { picture } : {}),
+            ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
+            // the parity facts (gslides-parity SPEC 7.2.1, 7.2.2): the show and the grid read skip, the grid the layout
+            ...(slide.skip === true ? { skip: true } : {}),
+            ...(slide.template !== undefined ? { template: slide.template } : {}),
+          },
+          snap.document,
+          slide,
+        ),
+      );
     }
   }
   return {
     id: deck.id,
     title: deck.title,
     revision: deck.revision,
+    /* round five (gslides-parity SPEC-5 6.1, 2.2): the deck's page for the clones and the show,
+       and the compiled schedule of every slide that moves (b1.md request 5, b4.md R1) */
+    page: deckPage(deck),
     sections: deck.sections.map((section) => ({
       id: section.id,
       name: section.name,

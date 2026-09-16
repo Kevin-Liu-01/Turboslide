@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "shadow",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Drop shadows",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shadow#h/text"
+        }
+      },
+      {
+        "id": "box",
+        "type": "text",
+        "text": "A box with the default shadow",
+        "pos": {
+          "x": 154,
+          "y": 312,
+          "w": 366,
+          "h": 33,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shadow#box/text"
+        }
+      }
+    ]
+  },
+  "title": "Drop shadows",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide15.xml",
+    "pptxSlideId": 270
+  }
+}

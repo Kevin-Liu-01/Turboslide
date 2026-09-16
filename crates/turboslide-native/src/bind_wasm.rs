@@ -254,3 +254,63 @@ pub fn gaussian_kernel(sigma: f64) -> Vec<f64> {
 pub fn bayer_thresholds() -> Vec<u8> {
     crate::bayer::bayer_thresholds().to_vec()
 }
+
+// The block level dither patterns (gslides-parity SPEC-4 7, SPEC-5 11; B6 day 7), the surface the
+// editor's dither preview worker and the parity test call.
+
+#[wasm_bindgen(js_name = ditherThresholds)]
+pub fn dither_thresholds(
+    pattern: &str,
+    width: u32,
+    height: u32,
+    seed: i32,
+    angle: f64,
+) -> Result<Vec<u8>, JsError> {
+    let pattern = crate::dither::Pattern::parse(pattern).map_err(js_error)?;
+    Ok(crate::dither::thresholds(
+        pattern,
+        width as usize,
+        height as usize,
+        seed,
+        angle,
+    ))
+}
+
+#[wasm_bindgen(js_name = ditherLevels)]
+pub fn dither_levels(
+    tone: &[u8],
+    width: u32,
+    height: u32,
+    pattern: &str,
+    levels: u32,
+    seed: i32,
+    angle: f64,
+) -> Result<Vec<u8>, JsError> {
+    let (w, h) = (width as usize, height as usize);
+    if tone.len() != w * h {
+        return Err(js_error(format!(
+            "tone buffer has {} bytes, {}x{} needs {}",
+            tone.len(),
+            w,
+            h,
+            w * h
+        )));
+    }
+    if !(2..=255).contains(&levels) {
+        return Err(js_error(format!("levels must be 2 to 255, got {levels}")));
+    }
+    let pattern = crate::dither::Pattern::parse(pattern).map_err(js_error)?;
+    let gray = crate::image::Gray {
+        width: w,
+        height: h,
+        data: tone.to_vec(),
+    };
+    Ok(crate::dither::levels_of(
+        &gray, pattern, levels, seed, angle,
+    ))
+}
+
+#[wasm_bindgen(js_name = planeAlpha)]
+pub fn plane_alpha(strength: f64) -> u32 {
+    crate::dither::plane_alpha(strength) as u32
+}

@@ -159,6 +159,19 @@ const BUDGETS = {
         cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000, images: 1_500_000 },
         warm: { ttfb: 100, lcp: 300, ready: 300, jsDecoded: 600_000, images: 1_500_000 },
       },
+      /* round five (gslides-parity SPEC-5 4.3, 7.6, 16.6): the gallery reads the files page's numbers, the two static help pages the product page's */
+      '/decks/templates': {
+        cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000, images: 1_500_000 },
+        warm: { ttfb: 100, lcp: 300, ready: 300, jsDecoded: 600_000, images: 1_500_000 },
+      },
+      '/help/training': {
+        cold: { ttfb: 60, lcp: 400, ready: 400, jsDecoded: 600_000 },
+        warm: { ttfb: 40, lcp: 200, ready: 200, jsDecoded: 600_000 },
+      },
+      '/help/updates': {
+        cold: { ttfb: 60, lcp: 400, ready: 400, jsDecoded: 600_000 },
+        warm: { ttfb: 40, lcp: 200, ready: 200, jsDecoded: 600_000 },
+      },
       '/decks/trash': {
         cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000 },
         warm: { ttfb: 100, lcp: 300, ready: 300, jsDecoded: 600_000 },
@@ -194,6 +207,7 @@ const BUDGETS = {
     idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
     twins: { refetched: 0 },
     cdn: null,
+    /* the field INP ceiling is the deployment profile's (SPEC-5 11); nothing local posts a sample */
     vitals: { inp: null },
     write: {
       textKeyToCommit: 450,
@@ -239,6 +253,19 @@ const BUDGETS = {
         cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000, images: 1_500_000 },
         warm: { ttfb: 300, lcp: 600, ready: 600, jsDecoded: 600_000, images: 1_500_000 },
       },
+      /* round five (SPEC-5 16.6): the gallery and the two help pages on the deployment */
+      '/decks/templates': {
+        cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000, images: 1_500_000 },
+        warm: { ttfb: 300, lcp: 600, ready: 600, jsDecoded: 600_000, images: 1_500_000 },
+      },
+      '/help/training': {
+        cold: { ttfb: 150, lcp: 700, ready: 700, jsDecoded: 600_000 },
+        warm: { ttfb: 100, lcp: 400, ready: 400, jsDecoded: 600_000 },
+      },
+      '/help/updates': {
+        cold: { ttfb: 150, lcp: 700, ready: 700, jsDecoded: 600_000 },
+        warm: { ttfb: 100, lcp: 400, ready: 400, jsDecoded: 600_000 },
+      },
       '/decks/trash': {
         cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000 },
         warm: { ttfb: 300, lcp: 600, ready: 600, jsDecoded: 600_000 },
@@ -274,7 +301,7 @@ const BUDGETS = {
     idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
     twins: { refetched: 0 },
     cdn: { hit: true },
-    vitals: { inp: null },
+    vitals: { inp: 200 },
     // the capture after a save is reported, not asserted, on a deployment: a cold instance renders in seconds
     write: {
       textKeyToCommit: 450,
@@ -719,6 +746,10 @@ async function routeLoads() {
     `/deck/${args.deck}`,
     `/edit/${args.deck}`,
     `/present/${args.deck}`,
+    /* round five (gslides-parity SPEC-5 4.3, 7.6, 16.6): the gallery and the two help pages */
+    '/decks/templates',
+    '/help/training',
+    '/help/updates',
   ];
   for (const route of routes) {
     const samples = { cold: [], warm: [] };
@@ -890,11 +921,18 @@ async function routeLoads() {
       }
       if ((route === '/new' || route === '/decks') && kind === 'cold') {
         const worst = Math.max(...list.map((s) => s.ttfb ?? 0));
+        // gslides-parity SPEC-5 16.7 (SPEC-4 4.1, 7): the 1,200 ms cold first byte row gates on the
+        // deployment profile; the node-server build reports it (a fresh instance is not forced there)
+        const firstByteLimit = args.profile === 'deployment' ? 1200 : null;
         assert(
           'routes',
-          label('first byte, worst cold sample (a fresh instance is not forced; reported)'),
+          label(
+            firstByteLimit === null
+              ? 'first byte, worst cold sample (a fresh instance is not forced; reported)'
+              : 'first byte, worst cold sample (the fresh instance gate)',
+          ),
           worst > 0 ? worst : null,
-          null,
+          firstByteLimit,
         );
       }
       for (const e of row.errors) console.log(`     routes      ${route} ${kind}: ${e}`);
@@ -1297,13 +1335,31 @@ async function cdnHits() {
 // Check 7: field INP (SPEC-4 4.7): the row is reserved with the endpoint name and no ceiling; the
 // collection through web-vitals/attribution posted to /api/vitals is round five's.
 
-function vitals() {
-  results.vitals = { endpoint: '/api/vitals', collected: false };
+async function vitals() {
+  /* round five (gslides-parity SPEC-5 11): the endpoint's report, the p75 per route family; the
+     row asserts against the ceiling where at least one sample of the /edit family exists and
+     reports the count otherwise (a fresh deployment has none) */
+  results.vitals = { endpoint: '/api/vitals', collected: false, report: null };
+  let report = null;
+  try {
+    const response = await fetch(`${args.base}/api/vitals?report=1`, {
+      headers: process.env.VERCEL_OIDC_TOKEN
+        ? { 'x-vercel-trusted-oidc-idp-token': process.env.VERCEL_OIDC_TOKEN }
+        : {},
+    });
+    if (response.ok) report = await response.json();
+  } catch {
+    report = null;
+  }
+  results.vitals.report = report;
+  results.vitals.collected = report !== null && report.samples > 0;
+  const inp = report?.routes?.['/edit']?.INP ?? null;
+  const ceiling = budget.vitals?.inp ?? null;
   assert(
     'vitals',
-    'field INP p75 from /api/vitals (reserved; no ceiling this round)',
-    null,
-    budget.vitals?.inp ?? null,
+    `field INP p75 on /edit from /api/vitals (${inp === null ? 'no samples yet' : `${inp.count} sample(s)`})`,
+    inp === null ? null : inp.p75,
+    inp === null ? null : ceiling,
   );
 }
 
@@ -1519,7 +1575,7 @@ try {
   if (wants('idle')) await idle();
   if (wants('twins')) await twins();
   if (wants('cdn')) await cdnHits();
-  if (wants('vitals')) vitals();
+  if (wants('vitals')) await vitals();
   if (wants('write') && args.write) await writePath();
 } finally {
   await browser.close();

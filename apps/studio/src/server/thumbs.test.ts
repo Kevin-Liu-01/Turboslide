@@ -14,8 +14,13 @@ import {
 } from '@turboslide/store/blob-store';
 
 import {
+  CARD_INK_HEX,
+  CARD_MARGIN_PX,
+  CARD_SIZE,
   IMMUTABLE_CACHE_CONTROL,
   REVALIDATE_CACHE_CONTROL,
+  cardSlideBox,
+  composeCard,
   isThumbStamp,
   slideStamp,
   thumbCacheControl,
@@ -180,5 +185,52 @@ describe('the store layout and the retention (SPEC-4 0.31)', () => {
     });
     expect(await pruneThumbs(fake, 'gt-brand', 'title', 'light', THUMB_KEEP)).toEqual([]);
     expect(fake.blobs.has(thumbPathname('gt-brand', 's1', 'light', 320, 'title'))).toBe(true);
+  });
+});
+
+describe('the per deck card (gslides-parity SPEC-5 11)', () => {
+  it('contains the slide in the 1200 by 630 frame at its own aspect, centred', () => {
+    // both aspects are height limited inside the 40 px margin: 550 tall, the width from the aspect
+    const inner = CARD_SIZE.height - 2 * CARD_MARGIN_PX;
+    const wide = cardSlideBox(16 / 9);
+    expect(wide.height).toBe(inner);
+    expect(wide.width).toBe(Math.round(inner * (16 / 9)));
+    expect(wide.y).toBe(CARD_MARGIN_PX);
+    expect(wide.x).toBe(Math.round((CARD_SIZE.width - wide.width) / 2));
+    const standard = cardSlideBox(4 / 3);
+    expect(standard.height).toBe(inner);
+    expect(standard.width).toBe(Math.round(inner * (4 / 3)));
+    expect(standard.x).toBe(Math.round((CARD_SIZE.width - standard.width) / 2));
+    // a very wide slide is width limited
+    const banner = cardSlideBox(4);
+    expect(banner.width).toBe(CARD_SIZE.width - 2 * CARD_MARGIN_PX);
+    expect(banner.height).toBe(Math.round(banner.width / 4));
+  });
+
+  it('composes the downsampled slide on the ink ground', () => {
+    // a 160 by 90 white slide with a black left half
+    const data = new Uint8Array(160 * 90 * 4);
+    for (let y = 0; y < 90; y += 1)
+      for (let x = 0; x < 160; x += 1) {
+        const i = (y * 160 + x) * 4;
+        const v = x < 80 ? 0 : 255;
+        data[i] = v;
+        data[i + 1] = v;
+        data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+    const card = composeCard({ width: 160, height: 90, data });
+    expect(card.width).toBe(CARD_SIZE.width);
+    expect(card.height).toBe(CARD_SIZE.height);
+    const at = (x: number, y: number): [number, number, number] => {
+      const i = (y * CARD_SIZE.width + x) * 4;
+      return [card.data[i] ?? -1, card.data[i + 1] ?? -1, card.data[i + 2] ?? -1];
+    };
+    // the margin is the ink; the slide's left half black and right half white
+    expect(at(10, 10)).toEqual([16, 16, 16]);
+    expect(CARD_INK_HEX).toBe('#101010');
+    const box = cardSlideBox(16 / 9);
+    expect(at(box.x + 20, box.y + 20)).toEqual([0, 0, 0]);
+    expect(at(box.x + box.width - 20, box.y + 20)).toEqual([255, 255, 255]);
   });
 });

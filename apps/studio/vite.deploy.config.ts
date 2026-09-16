@@ -113,8 +113,17 @@ const SEED_IGNORE = [
 // function and `new URL('../calibration/calibration.json', import.meta.url)` names a file that
 // is not in the bundle.
 const PACKAGES_DIR = `${REPO}packages`;
+// round five (SPEC-5-amendments A5; b7.md request 23): the catalog faces travel too, so a hosted
+// function reads a face's bytes for the /fonts/<version>/<id>/<file> route and the inlined captures;
+// the Plate theme's stylesheets ride beside the GT theme's (SPEC-5 9.3). The equation fonts of
+// packages/render/assets (SPEC-5 8.1: the 9 KB Temml supplement every document's sheet names and
+// the 380 KB Latin Modern Math face inlined for a deck with an equation block) ride as
+// `render/assets/*` with their licence files: `equationCssNode` (render/theme-node.ts) reads the
+// supplement inside `loadThemeBundle` for every render, so without the folder every hosted export
+// and every fresh thumbnail failed with ENOENT on the merge 2 preview (VERIFICATION-5 finding 2;
+// scripts/check-vercel-output.mjs asserts the folder is in the function).
 const PACKAGES_PATTERN =
-  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/export/*,export/src/calibration/calibration.json}';
+  '{theme/src/gt-ink-paper/*.css,theme/src/ts-plate/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/assets/*/*,fonts/export/*,export/src/calibration/calibration.json,render/assets/*}';
 
 // Vercel Functions (docs/hosting.md, section limits): the base function keeps the project's
 // duration default written out; the routes that render or export (and the server functions, which
@@ -175,7 +184,14 @@ const ROUTE_RULES = {
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }],
+      pages: [
+        { path: '/home' },
+        /* round five (gslides-parity SPEC-5 7.6, 4.3; b5.md request 13, b3.md B3-19): the two help
+           pages and the template gallery are static too */
+        { path: '/help/training' },
+        { path: '/help/updates' },
+        { path: '/decks/templates' },
+      ],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,

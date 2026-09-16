@@ -3,7 +3,10 @@
 // theme's document is rendered first (renderDeck's render surface with every slide, the runtime
 // showing the hashed slide and stamping data-ts-ready), so a renderer error stops the run before
 // a browser starts; then one browser with one page per theme shows each slide by hash and shoots. Exit 1 on any page error.
-// The overflow list prints as `slideId#blockId x,y wxh`.
+// The overflow list prints as `slideId#blockId x,y wxh`. `--format svg [--text embed|outline|link]`
+// (gslides-parity SPEC-5 6.4) measures the selected slides' scenes in one theme and writes
+// <nn>-<slideId>-<theme>.svg through the SVG writer with `export check`'s SVG section folded in;
+// a leading `slide` word (`render slide <id>`) is the action's own spelling and is dropped.
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,6 +18,11 @@ import { fileUrl, writeTempDocument } from '@turboslide/headless/document';
 import { launchBrowser } from '@turboslide/headless/launch';
 import { formatOverflow } from '@turboslide/headless/measure';
 import { relativeImageRef, renderImageName, renderSlideRecord } from '@turboslide/headless/record';
+import { checkSvg } from '@turboslide/export/check/svg';
+import { renderSvg } from '@turboslide/export/svg/render';
+import { SVG_TEXT_MODES } from '@turboslide/schema/preferences';
+import type { SvgTextMode } from '@turboslide/schema/preferences';
+import { deckPage } from '@turboslide/schema/render';
 
 import { flagBoolean, flagList, flagNumber, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
@@ -35,10 +43,75 @@ type Job = {
 /** The render surface stamps this when fonts, images and dither canvases are in place (render/runtime.ts). */
 export const READY_SELECTOR = 'html[data-ts-ready="1"]';
 
+/**
+ * `turboslide render [slide] <ids|all> --deck <dir> --format svg [--text embed|outline|link]
+ * [--theme light|dark] --out <dir>` (gslides-parity SPEC-5 6.4): the SVG of each selected slide
+ * in one theme; `--text` defaults to embed (the preference's SVG text row is the studio's). Exit 1
+ * when a file fails the SVG section of `export check`.
+ */
+async function renderSvgCommand(
+  ctx: CommandContext,
+  dir: string,
+  loaded: ReturnType<typeof loadDeck>,
+  ids: string[],
+  themes: ('light' | 'dark')[],
+  outDir: string,
+): Promise<number> {
+  const textFlag = flagString(ctx.args, 'text') ?? 'embed';
+  if (!(SVG_TEXT_MODES as readonly string[]).includes(textFlag))
+    throw new UsageError(`--text wants ${SVG_TEXT_MODES.join(', ')} (gslides-parity SPEC-5 6.4)`);
+  const text = textFlag as SvgTextMode;
+  const theme = themes[0] ?? 'light';
+  if (themes.length > 1)
+    ctx.out.warn(
+      `render: an SVG is written in one theme; ${theme} taken, pass --theme for the other`,
+    );
+  const startedAt = Date.now();
+  ctx.out.human(`render: ${ids.length} slide(s) as SVG, ${theme}, text ${text} -> ${outDir}`);
+  const rendered = await renderSvg({
+    deckDir: dir,
+    document: { deck: loaded.deck, slides: loaded.slides },
+    slideIds: ids,
+    theme,
+    text,
+    outDir,
+    onSlide: (scene, ms) =>
+      ctx.out.human(
+        `  ${String(scene.n).padStart(2)} ${scene.slideId} ${theme} measured in ${ms} ms`,
+      ),
+  });
+  const rows = rendered.map((entry) => {
+    const check = checkSvg(entry.result.svg);
+    ctx.out.human(
+      `  ${String(entry.n).padStart(2)} ${entry.slideId} ${entry.path} (${entry.result.bytes} bytes, ${entry.result.counts.texts} text(s), ${entry.result.counts.paths} path(s), ${entry.result.counts.images} image(s), ${entry.result.counts.symbols} symbol(s)) ${check.ok ? 'valid' : 'INVALID'}`,
+    );
+    for (const line of check.ok ? [] : check.lines) ctx.out.human(`    ${line}`);
+    return {
+      slideId: entry.slideId,
+      n: entry.n,
+      theme,
+      image: entry.path,
+      bytes: entry.result.bytes,
+      text,
+      counts: entry.result.counts,
+      residual: entry.result.residual,
+      valid: check.ok,
+    };
+  });
+  await writeJson(join(outDir, 'render.json'), rows);
+  ctx.out.result({ records: rows, images: rows.map((row) => row.image) });
+  ctx.out.human(
+    `render: ${rows.length} SVG(s) in ${((Date.now() - startedAt) / 1000).toFixed(1)} s -> ${outDir}/render.json`,
+  );
+  return rows.every((row) => row.valid) ? EXIT.ok : EXIT.findings;
+}
+
 export async function render(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
   const loaded = loadDeck(dir);
-  const ids = selectSlides(loaded, ctx.rest);
+  // `render slide <id>` is the action's spelling (render.slide); the word is not a slide
+  const rest = ctx.rest[0] === 'slide' && ctx.rest.length > 1 ? ctx.rest.slice(1) : ctx.rest;
+  const ids = selectSlides(loaded, rest);
   const themes = flagList(ctx.args, 'theme', ['light', 'dark']).filter(
     (t): t is 'light' | 'dark' => t === 'light' || t === 'dark',
   );
@@ -46,16 +119,17 @@ export async function render(ctx: CommandContext): Promise<number> {
   const scaleN = flagNumber(ctx.args, 'scale', 1);
   if (scaleN !== 1 && scaleN !== 2) throw new UsageError('--scale wants 1 or 2');
   const scale = scaleN;
-  /* JPEG at quality 92 (render.slide format, gslides-parity SPEC 7.6) */
+  /* JPEG at quality 92 (render.slide format, gslides-parity SPEC 7.6); SVG from the scene (SPEC-5 6.4) */
   const formatFlag = flagString(ctx.args, 'format') ?? 'png';
-  if (formatFlag !== 'png' && formatFlag !== 'jpg')
-    throw new UsageError('--format wants png or jpg');
-  const format = formatFlag;
+  if (formatFlag !== 'png' && formatFlag !== 'jpg' && formatFlag !== 'svg')
+    throw new UsageError('--format wants png, jpg or svg');
   const outDir = resolveOut(
     ctx.cwd,
     flagString(ctx.args, 'out'),
     join(derivedDir(dir, ctx.cwd), 'render'),
   );
+  if (formatFlag === 'svg') return renderSvgCommand(ctx, dir, loaded, ids, themes, outDir);
+  const format = formatFlag;
   const rasterDir = flagBoolean(ctx.args, 'rasters') ? join(outDir, 'rasters') : undefined;
 
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-render-'));
@@ -90,7 +164,11 @@ export async function render(ctx: CommandContext): Promise<number> {
         `render: ${ids.length} slide(s) x ${themes.join(',')} at ${scale}x with ${launched.renderer}`,
       );
       for (const t of themes) {
-        const sheetPage = await openSheetPage(launched.browser, { theme: t, scale });
+        const sheetPage = await openSheetPage(launched.browser, {
+          theme: t,
+          scale,
+          viewport: deckPage(loaded.deck),
+        });
         try {
           for (const job of jobs.filter((j) => j.theme === t)) {
             const { record } = await renderSlideRecord(sheetPage, {

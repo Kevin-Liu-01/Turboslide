@@ -344,6 +344,50 @@ export function diffPixelmatch(a, b, width, height, threshold, include_aa, want_
 }
 
 /**
+ * @param {Uint8Array} tone
+ * @param {number} width
+ * @param {number} height
+ * @param {string} pattern
+ * @param {number} levels
+ * @param {number} seed
+ * @param {number} angle
+ * @returns {Uint8Array}
+ */
+export function ditherLevels(tone, width, height, pattern, levels, seed, angle) {
+    const ptr0 = passArray8ToWasm0(tone, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(pattern, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.ditherLevels(ptr0, len0, width, height, ptr1, len1, levels, seed, angle);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v3;
+}
+
+/**
+ * @param {string} pattern
+ * @param {number} width
+ * @param {number} height
+ * @param {number} seed
+ * @param {number} angle
+ * @returns {Uint8Array}
+ */
+export function ditherThresholds(pattern, width, height, seed, angle) {
+    const ptr0 = passStringToWasm0(pattern, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.ditherThresholds(ptr0, len0, width, height, seed, angle);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
  * @param {Uint8Array} a
  * @param {Uint8Array} b
  * @param {number} width
@@ -405,6 +449,15 @@ export function gaussianKernel(sigma) {
 export function lanczosCoeffs(in_size, in0, in1, out_size) {
     const ret = wasm.lanczosCoeffs(in_size, in0, in1, out_size);
     return CoeffsResult.__wrap(ret);
+}
+
+/**
+ * @param {number} strength
+ * @returns {number}
+ */
+export function planeAlpha(strength) {
+    const ret = wasm.planeAlpha(strength);
+    return ret >>> 0;
 }
 
 /**

@@ -48,11 +48,12 @@ import type {
 import { isCanvasSlide, slotsForLayout } from './deck.ts';
 import { convertLayout } from './freeform.ts';
 import type { BlockId } from './ids.ts';
-import { derivedLayout } from './layouts.ts';
+import { derivedLayout, isLayoutId } from './layouts.ts';
 import type { Position } from './position.ts';
 import { normalizeRotation } from './position.ts';
-import type { Box } from './render.ts';
-import { CONTENT_BOX, SHEET_HEIGHT, SHEET_WIDTH } from './render.ts';
+import type { Box, Page } from './render.ts';
+import { DEFAULT_PAGE, SHEET_HEIGHT, SHEET_WIDTH, contentBox, pageCentre } from './render.ts';
+import type { TableBlock } from './blocks/table.ts';
 
 /** The group tag the plate box and the plate's blocks share after a picture kind converts (1.2). */
 export const CANVAS_GROUP = 'plate';
@@ -60,8 +61,16 @@ export const CANVAS_GROUP = 'plate';
 /** The plate's padding, the kinds' `padding: 22px 26px 20px` (block-css.ts `.opener-plate`). */
 export const PLATE_PADDING = { top: 22, right: 26, bottom: 20, left: 26 } as const;
 
-/** The box the picture object takes: the whole sheet (the kinds draw the photograph at inset -57). */
+/** A page size in sheet pixels; the canvas arithmetic below takes one and reads the GT sheet when it is absent (gslides-parity SPEC-5 6.1). */
+export type PageSize = Pick<Page, 'width' | 'height'>;
+
+/** The box the picture object takes on the default page: the whole sheet (the kinds draw the photograph at inset -57). */
 export const PICTURE_POS: Position = { x: 0, y: 0, w: SHEET_WIDTH, h: SHEET_HEIGHT, z: 0 };
+
+/** The box the picture object takes on a page: the whole page at the bottom of the stack. */
+export function picturePos(page: PageSize = DEFAULT_PAGE): Position {
+  return { x: 0, y: 0, w: page.width, h: page.height, z: 0 };
+}
 
 /** The closing's mark size when the slide carries none (layouts.ts `make` for Closing). */
 const CLOSING_MARK = { w: 138, h: 88 } as const;
@@ -209,8 +218,9 @@ type Placer = {
   place: (block: Block, box: Box | undefined, extra?: Partial<Position>) => Block;
 };
 
-function placer(measured: CanvasBoxes): Placer {
+function placer(measured: CanvasBoxes, page: PageSize): Placer {
   const prompted = new Set(measured.prompted);
+  const content = contentBox(page);
   const state: Placer = {
     blocks: [],
     unplaced: [],
@@ -224,9 +234,9 @@ function placer(measured: CanvasBoxes): Placer {
       } else {
         state.unplaced.push(block.id);
         pos = {
-          x: CONTENT_BOX[0],
-          y: CONTENT_BOX[1] + state.unplaced.length * 80 - 80,
-          w: CONTENT_BOX[2],
+          x: content[0],
+          y: content[1] + state.unplaced.length * 80 - 80,
+          w: content[2],
           h: 64,
           z: state.blocks.length,
         };
@@ -252,13 +262,21 @@ function shrinkFit(block: Block, state: Placer): Block {
  * every object with `pos` from the measured boxes, `template` naming the layout the slide came
  * from and `grammar` recording what it was. Null for a slide that is a canvas already.
  */
-export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | null {
+export function toCanvas(
+  slide: Slide,
+  boxes: CanvasBoxes,
+  page: PageSize = DEFAULT_PAGE,
+): ToCanvasResult | null {
   if (isCanvasSlide(slide)) return null;
-  const template: LayoutId = slide.template ?? derivedLayout(slide);
-  const state = placer(boxes);
+  // a custom layout's id (SPEC-5 9.2) is not a built in layout: the derived one stands in
+  const template: LayoutId =
+    slide.template !== undefined && isLayoutId(slide.template)
+      ? slide.template
+      : derivedLayout(slide);
+  const state = placer(boxes, page);
   const record: GrammarRecord = { kind: slide.kind, boxes: state.boxes };
   const fields: NonNullable<GrammarRecord['fields']> = {};
-  if (slide.template !== undefined) fields.template = slide.template;
+  if (slide.template !== undefined && isLayoutId(slide.template)) fields.template = slide.template;
 
   switch (slide.kind) {
     case 'content': {
@@ -339,7 +357,8 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
         ...(slide.picture.position !== undefined ? { position: slide.picture.position } : {}),
         side: slide.plate.side,
       };
-      state.place(picture, [PICTURE_POS.x, PICTURE_POS.y, PICTURE_POS.w, PICTURE_POS.h]);
+      const cover = picturePos(page);
+      state.place(picture, [cover.x, cover.y, cover.w, cover.h]);
       const plate: BoxBlock = {
         id: plateId,
         type: 'box',
@@ -347,7 +366,7 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
         strokeWidth: 0,
         padding: { ...PLATE_PADDING },
       };
-      const plateBox = boxes.plate ?? plateFallback(slide.plate.side, slide.plate.maxWidth);
+      const plateBox = boxes.plate ?? plateFallback(slide.plate.side, slide.plate.maxWidth, page);
       state.place(plate, plateBox, { group: CANVAS_GROUP });
       if (slide.kind === 'closing') {
         const markId = freeId('mark', taken);
@@ -380,9 +399,13 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
   return { slide: converted, record, unplaced: state.unplaced };
 }
 
-/** The plate's box when the measurer gave none: the plate's corner of the content box at its max width. */
-function plateFallback(side: 'lower-left' | 'lower-right' | 'upper-left', maxWidth: number): Box {
-  const [x, y, w, h] = CONTENT_BOX;
+/** The plate's box when the measurer gave none: the plate's corner of the page's content box at its max width. */
+function plateFallback(
+  side: 'lower-left' | 'lower-right' | 'upper-left',
+  maxWidth: number,
+  page: PageSize,
+): Box {
+  const [x, y, w, h] = contentBox(page);
   const height = 240;
   if (side === 'lower-right') return [x + w - maxWidth, y + h - height, maxWidth, height];
   if (side === 'upper-left') return [x, y, maxWidth, height];
@@ -495,7 +518,7 @@ function restoredFields(slide: ContentSlide, record: GrammarRecord) {
  * or a stack, and `layout` names what Apply layout re-flows a fixed kind into. Null for a slide
  * that is not a canvas or carries no record.
  */
-export function fromCanvas(slide: Slide): FromCanvasResult | null {
+export function fromCanvas(slide: Slide, page: PageSize = DEFAULT_PAGE): FromCanvasResult | null {
   if (!isCanvasSlide(slide)) return null;
   const record = grammarRecordOf(slide);
   if (record === null) return null;
@@ -505,9 +528,13 @@ export function fromCanvas(slide: Slide): FromCanvasResult | null {
   const kept = restoredFields(slide, record);
   if (!canvasUnmoved(slide, record)) {
     const layout: LayoutId =
-      record.kind === 'content' ? (slide.template ?? derivedLayout(slide)) : record.kind;
+      record.kind === 'content'
+        ? slide.template !== undefined && isLayoutId(slide.template)
+          ? slide.template
+          : derivedLayout(slide)
+        : record.kind;
     const { grammar: _grammar, ...rest } = slide;
-    const refiled = convertLayout(rest, record.layout ?? { type: 'stack', gap: 22 });
+    const refiled = convertLayout(rest, record.layout ?? { type: 'stack', gap: 22 }, page);
     return {
       lossless: false,
       slide: refiled,
@@ -630,14 +657,18 @@ export type GuidesInput = {
   clear?: true;
 };
 
-/** The sheet extent a guide on an axis lies inside. */
-function extent(axis: GuideAxis): number {
-  return axis === 'x' ? SHEET_WIDTH : SHEET_HEIGHT;
+/** The page extent a guide on an axis lies inside. */
+function extent(axis: GuideAxis, page: PageSize): number {
+  return axis === 'x' ? page.width : page.height;
 }
 
-/** A guide list sorted, deduplicated and clamped inside the sheet, rounded to the pixel. */
-export function normalizeGuideList(values: ReadonlyArray<number>, axis: GuideAxis): number[] {
-  const max = extent(axis);
+/** A guide list sorted, deduplicated and clamped inside the page, rounded to the pixel. */
+export function normalizeGuideList(
+  values: ReadonlyArray<number>,
+  axis: GuideAxis,
+  page: PageSize = DEFAULT_PAGE,
+): number[] {
+  const max = extent(axis, page);
   const clamped = values.map((value) => Math.min(max, Math.max(0, Math.round(value))));
   return [...new Set(clamped)].sort((a, b) => a - b);
 }
@@ -650,6 +681,7 @@ export function normalizeGuideList(values: ReadonlyArray<number>, axis: GuideAxi
 export function applyGuides(
   current: DeckGuides | undefined,
   input: GuidesInput,
+  page: PageSize = DEFAULT_PAGE,
 ): DeckGuides | undefined {
   if (input.clear === true) return undefined;
   const next: DeckGuides = input.set
@@ -670,17 +702,195 @@ export function applyGuides(
   }
   for (const step of input.add ?? []) next[step.axis].push(step.at);
   const out: DeckGuides = {
-    x: normalizeGuideList(next.x, 'x'),
-    y: normalizeGuideList(next.y, 'y'),
+    x: normalizeGuideList(next.x, 'x', page),
+    y: normalizeGuideList(next.y, 'y', page),
   };
   return out.x.length === 0 && out.y.length === 0 ? undefined : out;
 }
 
-/** The centre lines a new guide lands on (Google puts a new guide at the slide centre, R05 C7). */
+/** The centre lines a new guide lands on, on the default page (Google puts a new guide at the slide centre, R05 C7). */
 export const GUIDE_CENTRE: Readonly<Record<GuideAxis, number>> = {
   x: SHEET_WIDTH / 2,
   y: SHEET_HEIGHT / 2,
 };
+
+/** The centre lines of a page, where a new guide lands (gslides-parity SPEC-5 6.1). */
+export function guideCentre(page: PageSize = DEFAULT_PAGE): Record<GuideAxis, number> {
+  const centre = pageCentre(page);
+  return { x: centre.x, y: centre.y };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Page setup (gslides-parity SPEC-5 6.1; R08 3d): the objects of a canvas slide under a new page
+
+/** How `deck.setPageSize` treats the objects of a canvas slide (R08 3d): Google keeps coordinates; PowerPoint's Ensure Fit and Maximize scale them. */
+export const SCALE_CANVAS_MODES = ['keep', 'fit', 'maximize'] as const;
+export type ScaleCanvasMode = (typeof SCALE_CANVAS_MODES)[number];
+
+export type ScaleCanvasResult = {
+  slide: Slide;
+  /** the uniform factor applied; 1 under `keep` */
+  k: number;
+  /** the objects whose `pos` moved */
+  objectsScaled: number;
+};
+
+/**
+ * The uniform factor of a page change (R08 3d): `fit` is PowerPoint's Ensure Fit, the smaller
+ * ratio, so nothing leaves the new page; `maximize` is PowerPoint's Maximize, the larger; `keep`
+ * is 1.
+ */
+export function scaleFactor(from: PageSize, to: PageSize, mode: ScaleCanvasMode): number {
+  if (mode === 'keep') return 1;
+  const kx = to.width / from.width;
+  const ky = to.height / from.height;
+  return mode === 'fit' ? Math.min(kx, ky) : Math.max(kx, ky);
+}
+
+/** A value at the canvas precision, 1/64 px (the measurer's LayoutUnit), never snapped to the grid. */
+function scaled(value: number, k: number): number {
+  return Math.round(value * k * 64) / 64;
+}
+
+/** A pixel field of the typography or a table scaled by `k`, kept when absent. */
+function scaledField<T extends Record<string, unknown>, K extends keyof T>(
+  record: T,
+  key: K,
+  k: number,
+): T {
+  const value = record[key];
+  if (typeof value !== 'number') return record;
+  return { ...record, [key]: scaled(value, k) };
+}
+
+/**
+ * A position scaled about the centre of the source page onto the target page (R08 3d):
+ * `x' = (x - W/2) k + W'/2`, `w' = w k`; `z`, `rotate`, `flip` and `group` are kept, so a rotated
+ * object's bounding box stays uniform because `k` is one number.
+ */
+export function scalePosition(pos: Position, from: PageSize, to: PageSize, k: number): Position {
+  const fromCentre = pageCentre(from);
+  const toCentre = pageCentre(to);
+  return {
+    ...pos,
+    x: Math.round(((pos.x - fromCentre.x) * k + toCentre.x) * 64) / 64,
+    y: Math.round(((pos.y - fromCentre.y) * k + toCentre.y) * 64) / 64,
+    w: Math.max(1, scaled(pos.w, k)),
+    h: Math.max(1, scaled(pos.h, k)),
+  };
+}
+
+/** One block scaled by `k`: its box, its typography's pixel sizes, its padding, a table's column widths and row heights, a mark's or shot's own size. */
+function scaleBlock(block: Block, from: PageSize, to: PageSize, k: number): Block {
+  let next: Block = block;
+  if (block.pos !== undefined) next = { ...next, pos: scalePosition(block.pos, from, to, k) };
+  if ('typography' in next && next.typography !== undefined) {
+    let typography = next.typography;
+    for (const key of [
+      'size',
+      'spaceBefore',
+      'spaceAfter',
+      'indent',
+      'firstLine',
+      'hanging',
+    ] as const)
+      typography = scaledField(typography, key, k);
+    next = { ...next, typography } as Block;
+  }
+  if ('padding' in next && next.padding !== undefined) {
+    const padding = next.padding;
+    next = {
+      ...next,
+      padding:
+        typeof padding === 'number'
+          ? scaled(padding, k)
+          : {
+              top: scaled(padding.top, k),
+              right: scaled(padding.right, k),
+              bottom: scaled(padding.bottom, k),
+              left: scaled(padding.left, k),
+            },
+    } as Block;
+  }
+  if (next.type === 'table') {
+    const table = next as TableBlock;
+    next = {
+      ...table,
+      columns: table.columns.map((column) => scaledField(column, 'width', k)),
+      rows: table.rows.map((row) => scaledField(row, 'height', k)),
+      ...(table.size !== undefined ? { size: scaled(table.size, k) } : {}),
+    } as Block;
+  }
+  if (next.type === 'mark') next = { ...next, w: scaled(next.w, k), h: scaled(next.h, k) };
+  if (next.type === 'shot' && next.width !== undefined)
+    next = { ...next, width: scaled(next.width, k) };
+  return next;
+}
+
+/**
+ * A canvas slide's objects under a new page (gslides-parity SPEC-5 6.1; R08 3d): under `keep`
+ * every `pos` is unchanged (Google's behaviour; `freeform/off-sheet` names what fell off); under
+ * `fit` and `maximize` every positioned block's box is scaled about the sheet centre by one
+ * factor, with its typography's pixel sizes, its padding and a table's column widths and row
+ * heights, at the measurer's precision and never snapped (snapping would break the alignment the
+ * scale preserved). A grammar slide is returned as it is: its slots derive from the new content
+ * box. Pure; the `deck.setPageSize` handler writes the result as one `slide.replace` per touched
+ * slide.
+ */
+export function scaleCanvas(
+  slide: Slide,
+  from: PageSize,
+  to: PageSize,
+  mode: ScaleCanvasMode,
+): ScaleCanvasResult {
+  const k = scaleFactor(from, to, mode);
+  if (k === 1 || !isCanvasSlide(slide)) return { slide, k, objectsScaled: 0 };
+  let objectsScaled = 0;
+  const slots: ContentSlide['slots'] = {};
+  for (const [slot, blocks] of Object.entries(slide.slots) as [SlotName, Block[]][]) {
+    slots[slot] = blocks.map((block) => {
+      if (block.pos === undefined) return block;
+      objectsScaled += 1;
+      return scaleBlock(block, from, to, k);
+    });
+  }
+  return { slide: { ...slide, slots }, k, objectsScaled };
+}
+
+/** The deck's guides under a new page: scaled by `k` under `fit` and `maximize`, dropped beyond the new edge under `keep` (R08 3f). */
+export function scaleGuides(
+  guides: DeckGuides | undefined,
+  from: PageSize,
+  to: PageSize,
+  mode: ScaleCanvasMode,
+): { guides: DeckGuides | undefined; dropped: number } {
+  if (guides === undefined) return { guides: undefined, dropped: 0 };
+  const k = scaleFactor(from, to, mode);
+  const fromCentre = pageCentre(from);
+  const toCentre = pageCentre(to);
+  if (mode === 'keep') {
+    const x = guides.x.filter((at) => at >= 0 && at <= to.width);
+    const y = guides.y.filter((at) => at >= 0 && at <= to.height);
+    const dropped = guides.x.length - x.length + (guides.y.length - y.length);
+    const out: DeckGuides = {
+      x: normalizeGuideList(x, 'x', to),
+      y: normalizeGuideList(y, 'y', to),
+    };
+    return { guides: out.x.length === 0 && out.y.length === 0 ? undefined : out, dropped };
+  }
+  const x = guides.x.map((at) => (at - fromCentre.x) * k + toCentre.x);
+  const y = guides.y.map((at) => (at - fromCentre.y) * k + toCentre.y);
+  const inX = x.filter((at) => at >= 0 && at <= to.width);
+  const inY = y.filter((at) => at >= 0 && at <= to.height);
+  const out: DeckGuides = {
+    x: normalizeGuideList(inX, 'x', to),
+    y: normalizeGuideList(inY, 'y', to),
+  };
+  return {
+    guides: out.x.length === 0 && out.y.length === 0 ? undefined : out,
+    dropped: x.length - inX.length + (y.length - inY.length),
+  };
+}
 
 // ---------------------------------------------------------------------------------------------
 // The resize model (gslides-parity SPEC-5-amendments A4; build-4/hotfix-3.md section 2)

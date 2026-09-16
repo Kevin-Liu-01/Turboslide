@@ -242,6 +242,10 @@ export const BLOCK_ICONS: Readonly<Record<BlockType, IconName>> = {
   rule: 'minus',
   text: 'pencil',
   icon: 'sparkles',
+  /* round five (gslides-parity SPEC-5 1.2): the three new block types; the glyphs are placeholders until B2 and B6 name theirs */
+  media: 'play',
+  spotlight: 'user-group',
+  equation: 'code',
   html: 'code',
 };
 

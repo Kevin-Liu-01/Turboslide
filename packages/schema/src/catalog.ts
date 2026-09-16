@@ -6,6 +6,7 @@
 import type { z } from 'zod';
 import type { Block, BlockType } from './blocks.ts';
 import { BLOCK_SCHEMAS, EMPTY_ASSET_REF } from './blocks.ts';
+import { EQUATION_PLACEHOLDER_TEX } from './blocks/equation.ts';
 import type { LayoutType, PlateSide, SlideKind, SlotName } from './deck.ts';
 import { SLIDE_SCHEMAS } from './deck.ts';
 import type { BlockId } from './ids.ts';
@@ -570,6 +571,56 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     export: 'raster',
     make: (id) => ({ id, type: 'picture', asset: EMPTY_ASSET_REF }),
   }),
+  /* round five (gslides-parity SPEC-5 1.2, 12.1): media, the speaker spotlight and the equation;
+     `mixed` because Editable text writes a native media picture or native OMML over a raster
+     poster or fallback (SPEC-5 0.20, 0.43). The renderers are B2's and B6's; the entries landed on
+     day 0 so every catalog reader knows the three types. */
+  media: entry({
+    type: 'media',
+    label: 'Media',
+    group: 'figure',
+    doc: 'Audio or video as a positioned object drawn as its poster: the show and the standalone file mount the player over it, every still shows the poster (gslides-parity SPEC-5 0.16, 0.17).',
+    source: 'gslides-parity SPEC-5 3.1',
+    allowedIn: ['content'],
+    textPaths: [],
+    /* `/source/asset` names a record of `deck.media`, which validate/media.ts checks; the poster is a picture */
+    assetPaths: ['/poster'],
+    iconPaths: [],
+    export: 'mixed',
+    make: (id) => ({
+      id,
+      type: 'media',
+      kind: 'video',
+      source: { asset: EMPTY_ASSET_REF },
+      playback: { start: 'click' },
+    }),
+  }),
+  spotlight: entry({
+    type: 'spotlight',
+    label: 'Speaker spotlight',
+    group: 'figure',
+    doc: 'A placeholder the show fills with the presenter’s camera, clipped to its shape; a still shows the placeholder picture or the person glyph (gslides-parity SPEC-5 3.7).',
+    source: 'gslides-parity SPEC-5 3.7',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: ['/picture'],
+    iconPaths: [],
+    export: 'mixed',
+    make: (id) => ({ id, type: 'spotlight', shape: 'ellipse' }),
+  }),
+  equation: entry({
+    type: 'equation',
+    label: 'Equation',
+    group: 'figure',
+    doc: 'LaTeX source rendered as MathML on every surface and exported as native OMML with a raster fallback (gslides-parity SPEC-5 0.43).',
+    source: 'gslides-parity SPEC-5 8.1',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'mixed',
+    make: (id) => ({ id, type: 'equation', tex: EQUATION_PLACEHOLDER_TEX }),
+  }),
   html: entry({
     type: 'html',
     label: 'HTML escape',
@@ -715,7 +766,7 @@ export const LAYOUT_CATALOG: Readonly<Record<LayoutType, LayoutCatalogEntry>> = 
   freeform: {
     type: 'freeform',
     label: 'Freeform',
-    doc: 'Every block carries pos, its box on the 1600 by 900 sheet, snapped to the 8 px grid, the rails, the plate edges and the column seams; flagged by layout/freeform at severity 1.',
+    doc: 'Every block carries pos, its box on the sheet (the deck’s page, 1600 by 900 by default), snapped to the 8 px grid, the rails, the plate edges and the column seams; flagged by layout/freeform at severity 1.',
     source: 'Kevin, 2026-09-11; docs/freeform.md',
     slots: ['main'],
   },

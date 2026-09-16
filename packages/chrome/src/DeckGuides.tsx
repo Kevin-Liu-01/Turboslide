@@ -51,6 +51,10 @@ export function DeckGuides({
     ...guides.x.map((at) => ({ axis: 'x' as const, at })),
     ...guides.y.map((at) => ({ axis: 'y' as const, at })),
   ];
+  /* the guide's colour (gslides-parity SPEC-5 7.7 Edit guides): `guides.colors` keyed `x:800`,
+     the titanium dash when none is stored; the CSS reads the custom property */
+  const colorOf = (axis: 'x' | 'y', at: number): string | undefined =>
+    guides.colors?.[`${axis}:${Math.round(at)}`];
   return (
     <>
       {lines.map((line) => {
@@ -73,7 +77,13 @@ export function DeckGuides({
             data-axis={line.axis}
             data-at={line.at}
             data-control={`guide.${line.axis}.${line.at}`}
-            style={lineStyle(line.axis, live, k)}
+            data-color={colorOf(line.axis, line.at)}
+            style={{
+              ...lineStyle(line.axis, live, k),
+              ...(colorOf(line.axis, line.at) === undefined
+                ? {}
+                : { ['--ts-guide-color' as string]: `var(--pt-${colorOf(line.axis, line.at)})` }),
+            }}
             {...tip}
             onPointerDown={(e: ReactPointerEvent<HTMLDivElement>) => {
               if (e.button === 0) onGuideDown(line.axis, line.at, e.nativeEvent);

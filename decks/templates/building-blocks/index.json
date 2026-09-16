@@ -1,0 +1,272 @@
+[
+  {
+    "id": "agendas/five-items",
+    "category": "agendas",
+    "label": "Five item agenda",
+    "box": [
+      1326,
+      620
+    ]
+  },
+  {
+    "id": "agendas/two-columns",
+    "category": "agendas",
+    "label": "Two column agenda",
+    "box": [
+      1326,
+      500
+    ]
+  },
+  {
+    "id": "agendas/timed",
+    "category": "agendas",
+    "label": "Timed agenda",
+    "box": [
+      1326,
+      580
+    ]
+  },
+  {
+    "id": "lists/three-bullets",
+    "category": "lists",
+    "label": "Three bullets",
+    "box": [
+      1326,
+      400
+    ]
+  },
+  {
+    "id": "lists/numbered-steps",
+    "category": "lists",
+    "label": "Numbered steps",
+    "box": [
+      1326,
+      520
+    ]
+  },
+  {
+    "id": "lists/checklist",
+    "category": "lists",
+    "label": "Checklist",
+    "box": [
+      1326,
+      520
+    ]
+  },
+  {
+    "id": "lists/two-column-list",
+    "category": "lists",
+    "label": "Two column list",
+    "box": [
+      1326,
+      400
+    ]
+  },
+  {
+    "id": "key-statistics/one-number",
+    "category": "key-statistics",
+    "label": "One number",
+    "box": [
+      1326,
+      388
+    ]
+  },
+  {
+    "id": "key-statistics/three-numbers",
+    "category": "key-statistics",
+    "label": "Three numbers",
+    "box": [
+      1326,
+      160
+    ]
+  },
+  {
+    "id": "key-statistics/number-with-bar",
+    "category": "key-statistics",
+    "label": "Number with a bar",
+    "box": [
+      1326,
+      224
+    ]
+  },
+  {
+    "id": "key-statistics/four-numbers",
+    "category": "key-statistics",
+    "label": "Four numbers",
+    "box": [
+      1326,
+      160
+    ]
+  },
+  {
+    "id": "quotes/pull-quote",
+    "category": "quotes",
+    "label": "Pull quote with a credit",
+    "box": [
+      1326,
+      400
+    ]
+  },
+  {
+    "id": "quotes/quote-on-plate",
+    "category": "quotes",
+    "label": "Quote on a plate",
+    "box": [
+      1326,
+      400
+    ]
+  },
+  {
+    "id": "quotes/two-quotes",
+    "category": "quotes",
+    "label": "Two quotes side by side",
+    "box": [
+      1326,
+      260
+    ]
+  },
+  {
+    "id": "headlines/headline-and-lead",
+    "category": "headlines",
+    "label": "Headline and lead",
+    "box": [
+      1326,
+      320
+    ]
+  },
+  {
+    "id": "headlines/headline-with-rule",
+    "category": "headlines",
+    "label": "Headline with a rule",
+    "box": [
+      1326,
+      312
+    ]
+  },
+  {
+    "id": "headlines/section-number",
+    "category": "headlines",
+    "label": "Section number",
+    "box": [
+      1326,
+      278
+    ]
+  },
+  {
+    "id": "text-callouts/callout-box",
+    "category": "text-callouts",
+    "label": "Callout box",
+    "box": [
+      1326,
+      160
+    ]
+  },
+  {
+    "id": "text-callouts/note-with-icon",
+    "category": "text-callouts",
+    "label": "Note with an icon",
+    "box": [
+      1326,
+      80
+    ]
+  },
+  {
+    "id": "text-callouts/side-callout",
+    "category": "text-callouts",
+    "label": "Side callout",
+    "box": [
+      1326,
+      200
+    ]
+  },
+  {
+    "id": "calls-to-action/next-step-button",
+    "category": "calls-to-action",
+    "label": "Next step",
+    "box": [
+      1326,
+      242
+    ]
+  },
+  {
+    "id": "calls-to-action/contact-line",
+    "category": "calls-to-action",
+    "label": "Contact line",
+    "box": [
+      1326,
+      400
+    ]
+  },
+  {
+    "id": "calls-to-action/two-actions",
+    "category": "calls-to-action",
+    "label": "Two actions",
+    "box": [
+      840,
+      72
+    ]
+  },
+  {
+    "id": "people/one-person",
+    "category": "people",
+    "label": "One person",
+    "box": [
+      1080,
+      240
+    ]
+  },
+  {
+    "id": "people/three-people",
+    "category": "people",
+    "label": "Three people",
+    "box": [
+      1326,
+      360
+    ]
+  },
+  {
+    "id": "people/six-people",
+    "category": "people",
+    "label": "Six people",
+    "box": [
+      1305,
+      216
+    ]
+  },
+  {
+    "id": "cards/three-cards",
+    "category": "cards",
+    "label": "Three cards",
+    "box": [
+      1326,
+      320
+    ]
+  },
+  {
+    "id": "cards/card-with-picture",
+    "category": "cards",
+    "label": "Card with a picture",
+    "box": [
+      640,
+      480
+    ]
+  },
+  {
+    "id": "cards/two-cards",
+    "category": "cards",
+    "label": "Two cards",
+    "box": [
+      1326,
+      360
+    ]
+  },
+  {
+    "id": "cards/pricing-card",
+    "category": "cards",
+    "label": "Pricing card",
+    "box": [
+      420,
+      520
+    ]
+  }
+]

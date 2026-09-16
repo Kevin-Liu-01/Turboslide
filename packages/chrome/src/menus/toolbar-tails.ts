@@ -58,7 +58,8 @@ export type TailControl = ToolbarControl & {
   dropdown?: true;
 };
 
-const FONT_DOC = 'The GT theme sets Inter';
+/** The Font dropdown's sentence (gslides-parity SPEC-5-amendments A5 item 4; B7): the catalog behind the control. */
+const FONT_DOC = 'The face of the selected text; More fonts lists every face with its licence';
 const NO_FILL_DOC = 'Headings, paragraphs and text boxes have no fill';
 const NO_BORDER_DOC = 'Headings, paragraphs and text boxes have no border; word art has an outline';
 const SELECT_CELLS_DOC = 'Select two or more cells first';
@@ -152,8 +153,8 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       text: true,
       status: 'now',
       op: 'font',
-      enabled: 'never',
-      disabledReason: FONT_DOC,
+      dropdown: true,
+      doc: FONT_DOC,
       dividerBefore: true,
     },
     {

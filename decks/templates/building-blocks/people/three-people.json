@@ -1,0 +1,149 @@
+{
+  "id": "people/three-people",
+  "category": "people",
+  "label": "Three people",
+  "blocks": [
+    {
+      "id": "picture-1",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-1",
+      "pos": {
+        "x": 0,
+        "y": 260,
+        "w": 400,
+        "h": 56,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Name"
+    },
+    {
+      "id": "role-1",
+      "pos": {
+        "x": 0,
+        "y": 320,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Role, team",
+      "role": "cap"
+    },
+    {
+      "id": "picture-2",
+      "pos": {
+        "x": 463,
+        "y": 0,
+        "w": 240,
+        "h": 240,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-2",
+      "pos": {
+        "x": 463,
+        "y": 260,
+        "w": 400,
+        "h": 56,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Name"
+    },
+    {
+      "id": "role-2",
+      "pos": {
+        "x": 463,
+        "y": 320,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Role, team",
+      "role": "cap"
+    },
+    {
+      "id": "picture-3",
+      "pos": {
+        "x": 926,
+        "y": 0,
+        "w": 240,
+        "h": 240,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-3",
+      "pos": {
+        "x": 926,
+        "y": 260,
+        "w": 400,
+        "h": 56,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Name"
+    },
+    {
+      "id": "role-3",
+      "pos": {
+        "x": 926,
+        "y": 320,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Role, team",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    360
+  ]
+}

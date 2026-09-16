@@ -122,6 +122,22 @@ const ROUTES = {
     hydrated: '.pt-viewer[data-settled]',
     anchors: VIEWER_ANCHORS(),
   },
+  /* round five (gslides-parity SPEC-5 4.3, 7.6, 16.5): the template gallery and the two help pages */
+  templates: {
+    path: '/decks/templates',
+    hydrated: '[data-hydrated]',
+    anchors: ['.ts-gallery-page', '.ts-appbar', '.ts-gallery'],
+  },
+  training: {
+    path: '/help/training',
+    hydrated: 'load',
+    anchors: ['.ts-help', '.ts-help-article'],
+  },
+  updates: {
+    path: '/help/updates',
+    hydrated: 'load',
+    anchors: ['.ts-help', '.ts-help-article'],
+  },
 };
 function EDITOR_ANCHORS() {
   return [

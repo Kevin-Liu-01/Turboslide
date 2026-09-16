@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "id": "product-roadmap",
+  "title": "Product roadmap",
+  "theme": "ts-plate",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slideIds": [
+        "title",
+        "themes",
+        "now-next-later",
+        "quarters",
+        "dependencies",
+        "risks",
+        "asks",
+        "closing"
+      ]
+    }
+  ],
+  "assets": {
+    "opener-brand": {
+      "id": "opener-brand",
+      "role": "opener",
+      "alt": "The top arc of the event horizon ring from the careers page horizon field shader, dithered",
+      "twins": {
+        "light": "assets/opener-brand-light.jpg",
+        "dark": "assets/opener-brand-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          640,
+          128,
+          960,
+          308
+        ],
+        "autocontrast": 0.5,
+        "gamma": 0.85,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Event Horizon, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.2038,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 1237,
+          "litInBand": 564
+        }
+      }
+    },
+    "opener-prototemplate": {
+      "id": "opener-prototemplate",
+      "role": "opener",
+      "alt": "A liquid metal diamond with two contour bands, rendered in Glyphfield, dithered",
+      "twins": {
+        "light": "assets/opener-prototemplate-light.jpg",
+        "dark": "assets/opener-prototemplate-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:liquid-metal",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#ffffff",
+          "u_softness": 0.05,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_contour": 0.6,
+          "u_repetition": 3,
+          "u_distortion": 0.07,
+          "u_offsetX": 0,
+          "u_offsetY": 0,
+          "u_scale": 0.5,
+          "u_shape": 1
+        },
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 0,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
+        "recipeKey": "sha256:c170779e628d74d29e18c8cd31541b45715cbbd3ee285f5e3552b246a00824d7"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          -1325,
+          105,
+          2709,
+          2374
+        ],
+        "autocontrast": 0.5,
+        "black": 20,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: liquid metal, Paper Shaders, rendered in Glyphfield",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.083,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 108,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      }
+    },
+    "mood-earth": {
+      "id": "mood-earth",
+      "role": "mood",
+      "alt": "NASA's Blue Marble, the Earth with the Western Hemisphere in daylight, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-earth-light.jpg",
+        "dark": "assets/mood-earth-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Blue Marble Western Hemisphere.jpg (local copy `scratchpad/photo/earth-night.jpg`, 1800 by 1800).",
+        "artist": "NASA Earth Observatory, images by Reto Stöckli, based on data from NASA and NOAA; the Commons file is dated October 2, 2007",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          49,
+          -7,
+          3279,
+          1809
+        ],
+        "channel": "r",
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 80,
+        "white": 210,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Image: NASA, Reto Stöckli, 2007, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0916,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 111,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      }
+    },
+    "opener-closing": {
+      "id": "opener-closing",
+      "role": "opener",
+      "alt": "The lower arc of the Singularity ring, dithered, rising from the lower left to the upper right",
+      "twins": {
+        "light": "assets/opener-closing-light.jpg",
+        "dark": "assets/opener-closing-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "two-color",
+      "credit": "Material: Singularity, a Prototemplate direction"
+    }
+  },
+  "revision": 0,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

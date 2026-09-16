@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "image-tools",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Image tools",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:image-tools#h/text"
+        }
+      },
+      {
+        "id": "trimmed",
+        "type": "picture",
+        "asset": "image-20-1",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 2
+        },
+        "alt": "trimmed (block)",
+        "ext": {
+          "pptxName": "ts:image-tools#trimmed:1"
+        }
+      },
+      {
+        "id": "masked",
+        "type": "picture",
+        "asset": "image-20-2",
+        "pos": {
+          "x": 600,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 3
+        },
+        "alt": "masked (block)",
+        "ext": {
+          "pptxName": "ts:image-tools#masked:2"
+        }
+      },
+      {
+        "id": "adjusted",
+        "type": "picture",
+        "asset": "image-20-3",
+        "pos": {
+          "x": 1063,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 4
+        },
+        "alt": "adjusted (block)",
+        "ext": {
+          "pptxName": "ts:image-tools#adjusted:3"
+        }
+      }
+    ]
+  },
+  "title": "Image tools",
+  "ext": {
+    "pptxPart": "ppt/slides/slide20.xml",
+    "pptxSlideId": 275
+  }
+}

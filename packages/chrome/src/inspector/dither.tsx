@@ -7,6 +7,7 @@ import type { Asset, TwoToneTreatment } from '@turboslide/schema/assets';
 import { twoToneTreatmentSchema } from '@turboslide/schema/assets';
 import type { Block, PictureDither } from '@turboslide/schema/blocks';
 import {
+  DITHER_ANGLE,
   DITHER_DEFAULTS,
   DITHER_PHOTOGRAPH_PRESET,
   DITHER_TOGGLE_VALUE,
@@ -706,6 +707,27 @@ export function DitherFormatSection({ block, write, assets }: DitherFormatSectio
               label: 'Random',
               doc: 'A hashed screen; the seed is under Advanced',
             },
+            /* the round five families (gslides-parity SPEC-5 11): two error diffusions and two halftone screens */
+            {
+              value: 'floyd-steinberg',
+              label: 'Floyd Steinberg',
+              doc: 'Error diffusion, serpentine; no screen pattern at all',
+            },
+            {
+              value: 'atkinson',
+              label: 'Atkinson',
+              doc: 'Error diffusion carrying three quarters of the error; lighter, more contrast',
+            },
+            {
+              value: 'halftone-dot',
+              label: 'Halftone dots',
+              doc: 'A printer’s dot screen at the angle below; the pitch is 8 cells',
+            },
+            {
+              value: 'halftone-line',
+              label: 'Halftone lines',
+              doc: 'A line screen at the angle below; the pitch is 8 cells',
+            },
           ]}
           pressed={resolved.pattern}
           onToggle={(value) => patch({ pattern: value })}
@@ -713,6 +735,24 @@ export function DitherFormatSection({ block, write, assets }: DitherFormatSectio
           disabled={disabled}
         />
       </TipRow>
+      {resolved.pattern === 'halftone-dot' || resolved.pattern === 'halftone-line' ? (
+        <div className="ts-fo-row ts-dither-row">
+          <span className="ts-fo-field-label">Angle</span>
+          <NumberField
+            label="Angle"
+            value={resolved.angle ?? DITHER_ANGLE.default}
+            min={DITHER_ANGLE.min}
+            max={DITHER_ANGLE.max}
+            unit="°"
+            doc="The screen's angle in degrees; 45 is the printer's default"
+            control="formatOptions.dither.angle"
+            disabled={disabled}
+            onCommit={(value) =>
+              patch({ angle: value === DITHER_ANGLE.default ? undefined : Math.round(value) })
+            }
+          />
+        </div>
+      ) : null}
       <TipRow name={words.tone} doc="How many tones the picture keeps">
         <ToggleRow<NonNullable<PictureDither['tone']>>
           label={words.tone}

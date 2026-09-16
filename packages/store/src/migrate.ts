@@ -14,7 +14,7 @@
 // before it. The assetKey copy of the twins to `d/<id>/<assetKey>/` is not part of this module
 // (b2.md records why); the twins stay where the assets route serves them from.
 import type { BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
-import { BlobExistsError, deckPrefix } from './blob-store.ts';
+import { deckPrefix, isBlobExistsError } from './blob-store.ts';
 
 export const MIGRATION_META = 'meta.json';
 export const MIGRATION_STEPS = ['plan', 'copy', 'verify', 'cutover', 'delete', 'rollback'] as const;
@@ -260,7 +260,7 @@ async function copyDeck(clients: MigrationClients, deckId: string): Promise<stri
       if (put.version !== fetched.entry.version)
         return `${deckId}: ${entry.pathname} stored with etag ${put.version}, expected ${fetched.entry.version}`;
     } catch (error) {
-      if (!(error instanceof BlobExistsError)) throw error;
+      if (!isBlobExistsError(error)) throw error;
     }
   }
   return null;

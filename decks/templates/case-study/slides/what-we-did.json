@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "what-we-did",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "What we did",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The work in three steps.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Listened",
+            "value": "Two weeks with the team that owns the numbers."
+          },
+          {
+            "key": "Built",
+            "value": "One model, one owner per field."
+          },
+          {
+            "key": "Shipped",
+            "value": "The report every Monday since March."
+          }
+        ]
+      }
+    ]
+  },
+  "title": "What we did"
+}

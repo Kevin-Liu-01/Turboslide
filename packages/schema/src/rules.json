@@ -54,5 +54,6 @@
   "html/sanitize",
   "export/non-native",
   "numbers/contradiction",
-  "count/hard-coded"
+  "count/hard-coded",
+  "text/spelling"
 ]

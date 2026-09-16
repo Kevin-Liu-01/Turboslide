@@ -6,9 +6,11 @@ import { z } from 'zod';
 
 import { commentOpSchema as schemaCommentOpSchema } from '@turboslide/schema/comments';
 import { blockIdSchema, slugSchema } from '@turboslide/schema/ids';
+import { PAGE_CAP } from '@turboslide/schema/render';
 import { authorSchema, mutationSchema } from '@turboslide/schema/mutations';
 
 import type {
+  ChatMessage,
   Entry,
   NewEntry,
   PresenceState,
@@ -94,20 +96,51 @@ export const commentOpSchema = schemaCommentOpSchema;
 // ---------------------------------------------------------------------------------------------
 // Entries
 
-const entryKindSchema = z.enum(['edit', 'comment']);
+/**
+ * The entry kinds: an edit, a comment op and, since round five, a chat message (gslides-parity
+ * SPEC-5 0.46, 10): `{ kind: 'chat', chat: { id, principalId, text, at } }` on the deck's
+ * operation stream beside the other two, admitted with the comment caps, never checkpointed and
+ * never written to the deck. The integrator landed the kind and its payload on day 0 (SPEC-5
+ * 1.6); B5 lands the admission rule and the room's clearing (MILESTONES-5 B5 day 6).
+ */
+export const ENTRY_KINDS = ['edit', 'comment', 'chat'] as const;
+const entryKindSchema = z.enum(ENTRY_KINDS);
 
-/** an entry carries mutations when it is an edit and a comment op when it is a comment */
+/** The chat caps of SPEC-5 0.46: the comment body's 4,000 code points. */
+export const CHAT_TEXT_MAX_CODE_POINTS = 4000;
+
+/** A chat message as the stream carries it (SPEC-5 10). */
+export const chatMessageSchema = z.strictObject({
+  id: z.string().min(1).max(64),
+  principalId: z.string().min(1).max(200),
+  text: z
+    .string()
+    .min(1)
+    .refine((text) => [...text].length <= CHAT_TEXT_MAX_CODE_POINTS, 'at most 4,000 code points'),
+  at: z.string().min(1),
+}) satisfies z.ZodType<ChatMessage>;
+
+/** an entry carries mutations when it is an edit, a comment op when it is a comment, a message when it is a chat */
 function hasPayload(entry: {
-  kind: 'edit' | 'comment';
+  kind: 'edit' | 'comment' | 'chat';
   mutations?: unknown[] | undefined;
   comment?: unknown;
+  chat?: unknown;
 }): boolean {
-  return entry.kind === 'edit'
-    ? entry.mutations !== undefined && entry.mutations.length > 0 && entry.comment === undefined
-    : entry.comment !== undefined && entry.mutations === undefined;
+  if (entry.kind === 'edit')
+    return (
+      entry.mutations !== undefined &&
+      entry.mutations.length > 0 &&
+      entry.comment === undefined &&
+      entry.chat === undefined
+    );
+  if (entry.kind === 'comment')
+    return entry.comment !== undefined && entry.mutations === undefined && entry.chat === undefined;
+  return entry.chat !== undefined && entry.mutations === undefined && entry.comment === undefined;
 }
 
-const PAYLOAD_RULE = 'an edit carries mutations and a comment carries one comment op';
+const PAYLOAD_RULE =
+  'an edit carries mutations, a comment carries one comment op and a chat carries one message';
 
 export const newEntrySchema = z
   .strictObject({
@@ -118,6 +151,7 @@ export const newEntrySchema = z
     opId: z.string().min(1).max(64),
     mutations: z.array(roomMutationSchema).optional(),
     comment: commentOpSchema.optional(),
+    chat: chatMessageSchema.optional(),
     at: z.string().min(1),
   })
   .refine(hasPayload, PAYLOAD_RULE) satisfies z.ZodType<NewEntry>;
@@ -132,6 +166,7 @@ export const entrySchema = z
     opId: z.string().min(1).max(64),
     mutations: z.array(roomMutationSchema).optional(),
     comment: commentOpSchema.optional(),
+    chat: chatMessageSchema.optional(),
     at: z.string().min(1),
   })
   .refine(hasPayload, PAYLOAD_RULE) satisfies z.ZodType<Entry>;
@@ -152,6 +187,7 @@ export const opsPostSchema = z
             kind: entryKindSchema,
             mutations: z.array(roomMutationSchema).optional(),
             comment: commentOpSchema.optional(),
+            chat: chatMessageSchema.optional(),
           })
           .refine(hasPayload, PAYLOAD_RULE),
       )
@@ -187,10 +223,12 @@ const presenceFields = {
       caret: caretSchema.optional(),
     })
     .optional(),
+  // the pointer is clamped to the page cap (gslides-parity SPEC-5 6.1; R08 1.7; b4.md R5): the
+  // server admits any page a deck may have, the client clamps to the deck's page
   pointer: z
     .strictObject({
-      x: z.number().min(0).max(SHEET_WIDTH),
-      y: z.number().min(0).max(SHEET_HEIGHT),
+      x: z.number().min(0).max(PAGE_CAP.width),
+      y: z.number().min(0).max(PAGE_CAP.height),
     })
     .optional(),
   follow: clientIdSchema.optional(),

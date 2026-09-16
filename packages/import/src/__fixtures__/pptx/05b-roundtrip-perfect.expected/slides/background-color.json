@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "background-color",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A plate background",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-color#h/text"
+        }
+      },
+      {
+        "id": "p1",
+        "type": "text",
+        "text": "This slide carries background.color plate; the Editable text export writes the colour as the slide background.",
+        "pos": {
+          "x": 137,
+          "y": 212.39,
+          "w": 767.58,
+          "h": 66,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:background-color#p1/text"
+        }
+      }
+    ]
+  },
+  "title": "A plate background",
+  "background": {
+    "color": "paper"
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide16.xml",
+    "pptxSlideId": 271
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "t-cube",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Cube at 999 ms, the hexagon disappears on click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "hexagon",
+        "stroke": "ink",
+        "text": "Disappear",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 400,
+          "h": 300,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "cube",
+    "durationMs": 999
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "disappear",
+      "trigger": "click",
+      "durationMs": 500
+    }
+  ]
+}

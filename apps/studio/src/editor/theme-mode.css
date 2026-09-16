@@ -1,0 +1,262 @@
+/* Edit theme (theme-mode.tsx; gslides-parity SPEC-5 9.2): the mode fills the editor's shell area
+   as a grid, the toolbar row over a left column of tiles, the canvas on the --pt-panel-ink ground
+   present mode uses, and a right column of rows. Tiles are the filmstrip's grammar (a 16:9
+   --pt-edge frame around a live clone, the current one ringed in ink at 2 px offset, the name in
+   12 px under it); the slot boxes on the canvas are dashed ink outlines that fill the page's
+   fraction and drag. Radius 0; colours are tokens only. */
+.ts-theme-mode {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 260px;
+  grid-template-rows: var(--pt-tool-h, 40px) minmax(0, 1fr);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+  z-index: 5;
+}
+
+.ts-tm-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  overflow: visible;
+}
+
+.ts-tm-strip,
+.ts-tm-side {
+  overflow: auto;
+  padding: 12px;
+  background: var(--pt-paper);
+}
+
+.ts-tm-strip {
+  border-right: 1px solid var(--pt-hair);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-tm-side {
+  border-left: 1px solid var(--pt-hair);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-tm-head {
+  margin: 8px 0 4px;
+  font: 12px/1 var(--pt-text);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--pt-titanium);
+}
+
+.ts-tm-layouts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-tm-tile {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12px/1.3 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.ts-tm-frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+}
+
+.ts-tm-frame .ts-sheet.is-clone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-tm-tile:hover .ts-tm-frame,
+.ts-tm-tile.is-current .ts-tm-frame {
+  border-color: var(--pt-ink);
+}
+
+.ts-tm-tile.is-current .ts-tm-frame {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-tm-tile:focus-visible {
+  outline: none;
+}
+
+.ts-tm-tile:focus-visible .ts-tm-frame {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-tm-tile.is-current .ts-tm-name {
+  color: var(--pt-ink);
+}
+
+.ts-tm-plate {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--pt-titanium);
+  font: 500 12px/1 var(--pt-display);
+}
+
+.ts-tm-canvas {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--pt-panel-ink);
+  overflow: hidden;
+}
+
+.ts-tm-sheet {
+  position: relative;
+  width: min(100%, calc((100vh - 200px) * 16 / 9));
+  aspect-ratio: var(--ts-page-aspect, 16 / 9);
+  background: var(--pt-paper);
+  touch-action: none;
+}
+
+.ts-tm-sheet .ts-sheet.is-clone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-tm-slot {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px dashed var(--pt-ink);
+  outline: 1px solid var(--pt-paper);
+  cursor: move;
+  z-index: 3;
+}
+
+.ts-tm-slot:hover,
+.ts-tm-slot.is-dragging,
+.ts-tm-slot:focus-visible {
+  border-style: solid;
+  background: var(--pt-plate);
+}
+
+.ts-tm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.ts-tm-label {
+  color: var(--pt-ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-tm-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  cursor: pointer;
+}
+
+.ts-tm-check input {
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-tm-select,
+.ts-tm-number {
+  height: 28px;
+  max-width: 140px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-tm-number {
+  width: 72px;
+  text-align: right;
+}
+
+.ts-tm-empty {
+  margin: 0;
+  color: var(--pt-titanium);
+}
+
+.ts-tm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ts-tm-new,
+.ts-tm-reset {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.ts-tm-menu {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  box-shadow: 0 8px 24px var(--pt-hair-soft);
+}
+
+.ts-tm-menu-row {
+  appearance: none;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-tm-menu-row:hover,
+.ts-tm-menu-row:focus-visible {
+  background: var(--pt-plate);
+  outline: none;
+}

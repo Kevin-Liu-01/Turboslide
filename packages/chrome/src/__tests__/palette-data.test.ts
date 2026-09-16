@@ -57,9 +57,12 @@ const ctx: PaletteContext = {
 describe('buildPaletteEntries', () => {
   const entries = buildPaletteEntries(ctx);
 
-  it('has the groups in order: the five of the full palette plus the two of Search the menus', () => {
+  it('has the groups in order: the five of the full palette plus the three of Search the menus', () => {
+    /* the deck text group is the tool finder's third (gslides-parity SPEC-5 7.4): it draws rows
+       only with a query, so it stays empty in the full palette like the menus and layouts groups */
     expect(PALETTE_GROUPS.map((group) => group.id)).toEqual([
       'menus',
+      'deckText',
       'slides',
       'insert',
       'actions',
@@ -69,8 +72,9 @@ describe('buildPaletteEntries', () => {
     ]);
     const present = new Set(entries.map((entry) => entry.group));
     for (const group of PALETTE_GROUPS) {
-      /* the menus and layouts groups belong to Search the menus (ToolFinder.tsx) and stay empty here */
-      if (group.id === 'menus' || group.id === 'layouts') expect(present.has(group.id)).toBe(false);
+      /* the menus, deck text and layouts groups belong to Search the menus (ToolFinder.tsx) and stay empty here */
+      if (group.id === 'menus' || group.id === 'layouts' || group.id === 'deckText')
+        expect(present.has(group.id)).toBe(false);
       else expect(present.has(group.id)).toBe(true);
     }
   });

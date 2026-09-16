@@ -4,6 +4,7 @@ import { renderChart } from './chart.ts';
 import { renderComposite } from './composite.ts';
 import type { BlockContext } from './context.ts';
 import { renderDia } from './dia.ts';
+import { renderEquation } from './equation.ts';
 import {
   renderBoard,
   renderDetails,
@@ -17,6 +18,7 @@ import { renderHtmlFrame } from './html-frame.ts';
 import { withImageSizes } from './img-size.ts';
 import { renderPlain, renderRefs, renderRows, renderSay } from './lists.ts';
 import { renderMaterial } from './material.ts';
+import { renderMedia, renderSpotlight } from './media.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
 import { renderPanel } from './panel.ts';
 import { renderPicture } from './picture.ts';
@@ -111,6 +113,15 @@ function renderBlockBody(block: Block, ctx: BlockContext): string {
       return renderChart(block, ctx);
     case 'picture':
       return renderPicture(block, ctx);
+    // the round five blocks (gslides-parity SPEC-5 1.2; merge 2): the media block's poster root
+    // and the spotlight's placeholder are B2's `blocks/media.ts` (b2.md R2), the equation's MathML
+    // B6's `blocks/equation.ts` (b6.md R17); each landed as the one line request on this switch
+    case 'media':
+      return renderMedia(block, ctx);
+    case 'spotlight':
+      return renderSpotlight(block, ctx);
+    case 'equation':
+      return renderEquation(block, ctx);
   }
 }
 

@@ -1,0 +1,818 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles effects to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "b1",
+    "b3",
+    "b5",
+    "b6",
+    "b7",
+    "b8",
+    "b13",
+  ],
+  "skipped": [],
+  "slideId": "effects",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 1001,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b1",
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            137,
+            220,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 1,
+        },
+        {
+          "animation": {
+            "blockId": "b2",
+            "durationMs": 500,
+            "effect": "disappear",
+            "id": "a2",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            406,
+            220,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 1,
+        },
+        {
+          "animation": {
+            "blockId": "b3",
+            "durationMs": 1000,
+            "effect": "fadeIn",
+            "id": "a3",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            675,
+            220,
+            240,
+            180,
+          ],
+          "delayMs": 1,
+          "durationMs": 1000,
+        },
+      ],
+    },
+    {
+      "durationMs": 1800,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b4",
+            "durationMs": 1000,
+            "effect": "fadeOut",
+            "id": "a4",
+            "trigger": "click",
+          },
+          "box": [
+            944,
+            220,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 1000,
+        },
+        {
+          "animation": {
+            "blockId": "b5",
+            "direction": "left",
+            "durationMs": 800,
+            "effect": "flyIn",
+            "id": "a5",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            1213,
+            220,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+        {
+          "animation": {
+            "blockId": "b6",
+            "direction": "right",
+            "durationMs": 800,
+            "effect": "flyIn",
+            "id": "a6",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            137,
+            430,
+            240,
+            180,
+          ],
+          "delayMs": 1000,
+          "durationMs": 800,
+        },
+      ],
+    },
+    {
+      "durationMs": 1600,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b7",
+            "direction": "top",
+            "durationMs": 800,
+            "effect": "flyIn",
+            "id": "a7",
+            "trigger": "click",
+          },
+          "box": [
+            406,
+            430,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+        {
+          "animation": {
+            "blockId": "b8",
+            "direction": "bottom",
+            "durationMs": 800,
+            "effect": "flyIn",
+            "id": "a8",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            675,
+            430,
+            240,
+            180,
+          ],
+          "delayMs": 800,
+          "durationMs": 800,
+        },
+      ],
+    },
+    {
+      "durationMs": 1600,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b9",
+            "direction": "left",
+            "durationMs": 800,
+            "effect": "flyOut",
+            "id": "a9",
+            "trigger": "click",
+          },
+          "box": [
+            944,
+            430,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+        {
+          "animation": {
+            "blockId": "b10",
+            "direction": "right",
+            "durationMs": 800,
+            "effect": "flyOut",
+            "id": "a10",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            1213,
+            430,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+        {
+          "animation": {
+            "blockId": "b11",
+            "direction": "top",
+            "durationMs": 800,
+            "effect": "flyOut",
+            "id": "a11",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            137,
+            640,
+            240,
+            180,
+          ],
+          "delayMs": 800,
+          "durationMs": 800,
+        },
+      ],
+    },
+    {
+      "durationMs": 1400,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b12",
+            "direction": "bottom",
+            "durationMs": 800,
+            "effect": "flyOut",
+            "id": "a12",
+            "trigger": "click",
+          },
+          "box": [
+            406,
+            640,
+            240,
+            8,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+        {
+          "animation": {
+            "blockId": "b13",
+            "durationMs": 600,
+            "effect": "zoomIn",
+            "id": "a13",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            675,
+            640,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 600,
+        },
+        {
+          "animation": {
+            "blockId": "b14",
+            "durationMs": 600,
+            "effect": "zoomOut",
+            "id": "a14",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            944,
+            640,
+            240,
+            180,
+          ],
+          "delayMs": 800,
+          "durationMs": 600,
+        },
+      ],
+    },
+    {
+      "durationMs": 2000,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "b15",
+            "durationMs": 2000,
+            "effect": "spin",
+            "id": "a15",
+            "trigger": "click",
+          },
+          "box": [
+            1213,
+            640,
+            240,
+            180,
+          ],
+          "delayMs": 0,
+          "durationMs": 2000,
+        },
+      ],
+    },
+  ],
+  "transition": null,
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles media to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [],
+  "skipped": [],
+  "slideId": "media",
+  "steps": [
+    {
+      "durationMs": 1000,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "clip",
+            "durationMs": 500,
+            "effect": "playMedia",
+            "id": "a1",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            137,
+            220,
+            640,
+            360,
+          ],
+          "delayMs": 0,
+          "durationMs": 1000,
+        },
+      ],
+    },
+  ],
+  "transition": null,
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles paragraphs to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "h",
+    "para",
+    "list",
+  ],
+  "skipped": [],
+  "slideId": "paragraphs",
+  "steps": [
+    {
+      "durationMs": 600,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "h",
+            "direction": "top",
+            "durationMs": 600,
+            "effect": "flyIn",
+            "id": "a0",
+            "trigger": "withPrevious",
+          },
+          "delayMs": 0,
+          "durationMs": 600,
+        },
+      ],
+    },
+    {
+      "durationMs": 500,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "para",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "fadeIn",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "delayMs": 0,
+          "durationMs": 500,
+          "paragraph": 0,
+        },
+      ],
+    },
+    {
+      "durationMs": 500,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "para",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "fadeIn",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "delayMs": 0,
+          "durationMs": 500,
+          "paragraph": 1,
+        },
+      ],
+    },
+    {
+      "durationMs": 504,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "para",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "fadeIn",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "delayMs": 0,
+          "durationMs": 500,
+          "paragraph": 2,
+        },
+        {
+          "animation": {
+            "blockId": "list",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a2",
+            "trigger": "afterPrevious",
+          },
+          "delayMs": 500,
+          "durationMs": 1,
+          "paragraph": 0,
+        },
+        {
+          "animation": {
+            "blockId": "list",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a2",
+            "trigger": "afterPrevious",
+          },
+          "delayMs": 501,
+          "durationMs": 1,
+          "paragraph": 1,
+        },
+        {
+          "animation": {
+            "blockId": "list",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a2",
+            "trigger": "afterPrevious",
+          },
+          "delayMs": 502,
+          "durationMs": 1,
+          "paragraph": 2,
+        },
+        {
+          "animation": {
+            "blockId": "list",
+            "byParagraph": true,
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a2",
+            "trigger": "afterPrevious",
+          },
+          "delayMs": 503,
+          "durationMs": 1,
+          "paragraph": 3,
+        },
+      ],
+    },
+    {
+      "durationMs": 1,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "list",
+            "durationMs": 500,
+            "effect": "disappear",
+            "id": "a3",
+            "trigger": "click",
+          },
+          "delayMs": 0,
+          "durationMs": 1,
+        },
+      ],
+    },
+  ],
+  "transition": null,
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-cube to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [],
+  "skipped": [],
+  "slideId": "t-cube",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 1,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 500,
+            "effect": "disappear",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            137,
+            260,
+            400,
+            300,
+          ],
+          "delayMs": 0,
+          "durationMs": 1,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 999,
+    "kind": "cube",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-dissolve to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "obj",
+  ],
+  "skipped": [],
+  "slideId": "t-dissolve",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 1000,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 1000,
+            "effect": "fadeIn",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            600,
+            260,
+            400,
+            240,
+          ],
+          "delayMs": 0,
+          "durationMs": 1000,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 500,
+    "kind": "dissolve",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-fade to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "obj",
+  ],
+  "skipped": [],
+  "slideId": "t-fade",
+  "steps": [
+    {
+      "durationMs": 800,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "direction": "left",
+            "durationMs": 800,
+            "effect": "flyIn",
+            "id": "a1",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            137,
+            300,
+            520,
+            80,
+          ],
+          "delayMs": 0,
+          "durationMs": 800,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 500,
+    "kind": "fade",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-flip to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [],
+  "skipped": [],
+  "slideId": "t-flip",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 1000,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 1000,
+            "effect": "fadeOut",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            137,
+            260,
+            600,
+            200,
+          ],
+          "delayMs": 0,
+          "durationMs": 1000,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 2000,
+    "kind": "flip",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-gallery to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [],
+  "skipped": [],
+  "slideId": "t-gallery",
+  "steps": [
+    {
+      "durationMs": 700,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 700,
+            "effect": "zoomOut",
+            "id": "a1",
+            "trigger": "afterPrevious",
+          },
+          "box": [
+            900,
+            260,
+            500,
+            300,
+          ],
+          "delayMs": 0,
+          "durationMs": 700,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 5000,
+    "kind": "gallery",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-none to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "obj",
+  ],
+  "skipped": [],
+  "slideId": "t-none",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 1,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 500,
+            "effect": "appear",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            137,
+            260,
+            400,
+            240,
+          ],
+          "delayMs": 0,
+          "durationMs": 1,
+        },
+      ],
+    },
+  ],
+  "transition": null,
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-slide-left to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [],
+  "skipped": [],
+  "slideId": "t-slide-left",
+  "steps": [
+    {
+      "durationMs": 0,
+      "effects": [],
+    },
+    {
+      "durationMs": 2000,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 2000,
+            "effect": "spin",
+            "id": "a1",
+            "trigger": "click",
+          },
+          "box": [
+            700,
+            300,
+            300,
+            300,
+          ],
+          "delayMs": 0,
+          "durationMs": 2000,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 1000,
+    "kind": "slideLeft",
+  },
+}
+`;
+
+exports[`compileMotion over decks/fixture/motion (SPEC-5 2.6) > compiles t-slide-right to the pinned schedule 1`] = `
+{
+  "hiddenAtStart": [
+    "obj",
+  ],
+  "skipped": [],
+  "slideId": "t-slide-right",
+  "steps": [
+    {
+      "durationMs": 600,
+      "effects": [
+        {
+          "animation": {
+            "blockId": "obj",
+            "durationMs": 600,
+            "effect": "zoomIn",
+            "id": "a1",
+            "trigger": "withPrevious",
+          },
+          "box": [
+            1000,
+            260,
+            400,
+            300,
+          ],
+          "delayMs": 0,
+          "durationMs": 600,
+        },
+      ],
+    },
+  ],
+  "transition": {
+    "durationMs": 1000,
+    "kind": "slideRight",
+  },
+}
+`;

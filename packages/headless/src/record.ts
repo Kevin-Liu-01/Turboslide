@@ -40,6 +40,8 @@ export type RenderSlideInput = {
   /** Anchors of material frames present on the slide (M5); empty in M1. */
   anchors?: RenderRecord['anchors'];
   waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+  /** The deck's page in sheet pixels (gslides-parity SPEC-5 6.1); the measurer's bound and the screenshot's fallback clip; 1600 by 900 when absent. */
+  page?: { width: number; height: number };
 };
 
 export type RenderSlideResult = { record: RenderRecord; readyMs: number; screenshotMs: number };
@@ -71,10 +73,14 @@ export async function renderSlideRecord(
   step('dither drawn');
   const ready = await waitForReady(page);
   step(`ready (fonts ${ready.fonts.status}, frames ${ready.frames})`);
-  const measured = await measureSlide(page, input.measure);
+  const measured = await measureSlide(page, {
+    ...input.measure,
+    ...(input.page !== undefined && input.measure?.page === undefined ? { page: input.page } : {}),
+  });
   step('measured');
   const shot = await screenshotSheet(page, input.imagePath, measured.sheet, {
     ...(input.format !== undefined ? { format: input.format } : {}),
+    ...(input.page !== undefined ? { page: input.page } : {}),
   });
   step('shot');
   const rasterFiles = input.rasterDir

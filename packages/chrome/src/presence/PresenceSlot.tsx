@@ -11,7 +11,14 @@ import { tipProps } from '../Tooltip';
 import { AccountMenu } from './AccountMenu';
 import { IdentityChip } from './IdentityChip';
 import { RosterMenu } from './RosterMenu';
-import { canFollow, chipTipOf, slideNumberOf, slotChips, viewerFactsOf } from './presence-model';
+import {
+  canFollow,
+  chipTipOf,
+  slideNumberOf,
+  slotChips,
+  viewerFactsOf,
+  withoutSelf,
+} from './presence-model';
 
 /**
  * The presence slot of the title row (gslides-parity SPEC-3 4.2, 9.3; research 11 6.2, 8 P1):
@@ -39,8 +46,16 @@ export function PresenceSlot() {
   const { input } = shell;
   const presence = input.presence ?? EMPTY;
   const viewer = viewerFactsOf(input.access, presence);
-  const { shown, more } = slotChips(presence.others);
   const self = selfIdentity(presence, input.account);
+  /* the self filter by client id and by principal id (SPEC-5-amendments A3 item 5): this tab's
+     row and this person's other tabs are never chips, whatever roster the route passed */
+  const others = withoutSelf(presence.others, {
+    clientId: presence.self?.clientId ?? null,
+    // the room's own row names the person; the route's account stands in before it arrives (a
+    // page that began as a draft carries a label there until its first write)
+    principalId: presence.self?.principalId ?? self?.principalId ?? null,
+  });
+  const { shown, more } = slotChips(others);
   const [roster, setRoster] = useState<HTMLElement | null>(null);
   const [account, setAccount] = useState<HTMLElement | null>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -64,7 +79,7 @@ export function PresenceSlot() {
       className={cn(COLLAB_CLASSES.presence, 'ts-presence')}
       data-control="title.presence"
       data-menu-item={item.id}
-      data-count={presence.others.length}
+      data-count={others.length}
       role="group"
       aria-label={PRESENCE.collaborators}
     >

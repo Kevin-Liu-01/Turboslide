@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "asks",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Asks",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "What the team needs from this group.",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Approve the two hires for the second quarter"
+          },
+          {
+            "text": "Hold the second workflow until the connector ships"
+          },
+          {
+            "text": "Name an owner for the partner API"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Asks"
+}

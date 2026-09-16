@@ -1,0 +1,89 @@
+{
+  "id": "key-statistics/three-numbers",
+  "category": "key-statistics",
+  "label": "Three numbers",
+  "blocks": [
+    {
+      "id": "one-value",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "48 percent"
+    },
+    {
+      "id": "one-label",
+      "pos": {
+        "x": 0,
+        "y": 120,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Faster onboarding",
+      "role": "cap"
+    },
+    {
+      "id": "two-value",
+      "pos": {
+        "x": 463,
+        "y": 0,
+        "w": 400,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "3 days"
+    },
+    {
+      "id": "two-label",
+      "pos": {
+        "x": 463,
+        "y": 120,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "From signature to first report",
+      "role": "cap"
+    },
+    {
+      "id": "three-value",
+      "pos": {
+        "x": 926,
+        "y": 0,
+        "w": 400,
+        "h": 110,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "12 hours"
+    },
+    {
+      "id": "three-label",
+      "pos": {
+        "x": 926,
+        "y": 120,
+        "w": 400,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Saved per team each week",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1326,
+    160
+  ]
+}

@@ -3,8 +3,11 @@
 // rewraps it; rules, rects, plates and chips carry their measured boxes and computed colors; every
 // raster names the element the extractor screenshotted at 2x. The scene is JSON so it can be
 // written beside the export for inspection.
-import type { Box, RasterKind, Theme } from '@turboslide/schema/render';
+import type { ScenePictureEffect } from './media.ts';
+import type { Box, Page, RasterKind, Theme } from '@turboslide/schema/render';
 import type { SlideKind } from '@turboslide/schema/deck';
+import type { MediaPlayback } from '@turboslide/schema/blocks/media';
+import type { MotionSchedule, SlideTransition } from '@turboslide/schema/motion';
 
 export type SceneStyle = {
   /** The first family of the computed font-family, quotes removed. */
@@ -118,6 +121,44 @@ export type SceneLine = {
    * starts a new paragraph in the file (`breakLine`), else a soft break.
    */
   paragraph?: number;
+  /** The baseline's y in sheet px (gslides-parity SPEC-5 1.4; R09 3.2), what the SVG writer's `<text>` sits on; B4's `scene/measure.ts`. */
+  baseline?: number;
+};
+
+/**
+ * A media block as the writers read it (gslides-parity SPEC-5 1.4, 3.6): the stored file, its
+ * facts, the poster raster and the playback; `sceneMedia` in scene/media.ts (B2) fills the list.
+ */
+export type SceneMedia = {
+  blockId: string;
+  kind: 'audio' | 'video';
+  box: Box;
+  /** the asset's local path under the deck folder; absent for YouTube */
+  file?: string;
+  mime?: string;
+  bytes?: number;
+  durationMs?: number | null;
+  /** the poster's raster id in `rasters`, or the poster asset's path */
+  poster?: string;
+  playback: MediaPlayback;
+  youtube?: string;
+};
+
+/**
+ * An equation block as the writers read it (SPEC-5 1.4, 8.3): the source, the MathML the renderer
+ * emitted, the OMML the transform produced and the 2x raster fallback; `sceneEquations` in
+ * scene/equations.ts (B6) fills the list.
+ */
+export type SceneEquation = {
+  blockId: string;
+  box: Box;
+  tex: string;
+  mathml: string;
+  /** the OMML of `ooxml/math.ts`, absent when the transform could not carry the construct */
+  omml?: string;
+  alt?: string;
+  /** the 2x PNG raster id in `rasters` */
+  raster?: string;
 };
 
 export type SceneText = SceneObject & {
@@ -286,6 +327,13 @@ export type SceneTableCell = {
   colspan?: number;
   /** The cell's own rule under it (SPEC-2 2.7.2): none at weight 0, else the colour, width and dash. */
   border?: { color: string; width: number; dash?: SceneDash } | 'none';
+  /** The per edge rules of a cell whose border names an edge (gslides-parity SPEC-5 7.7; b5.md request 12), as the measurer records them. */
+  edges?: Partial<
+    Record<
+      'top' | 'right' | 'bottom' | 'left',
+      { color: string; width: number; dash?: SceneDash } | 'none'
+    >
+  >;
 };
 
 export type SceneTableRow = {
@@ -415,4 +463,23 @@ export type Scene = {
   /** True when the page showed the regenerated 2x twin instead of the deck's twin file. */
   pictureRegenerated?: boolean;
   warnings: string[];
+  /* round five (gslides-parity SPEC-5 1.4, 0.6): the fields the three writers read from the one
+     scene, each computed by a function in its owner's module and set by extractScenes; optional
+     so a scene measured before the round still reads */
+  /** the deck's page in sheet px (SPEC-5 6.1); `deckPage(deck)` */
+  page?: Page;
+  /** the deck's BCP 47 tag; en-US when the deck names none (SPEC-5 7.1) */
+  language?: string;
+  /** the slide's transition, stored on the incoming slide (SPEC-5 0.12) */
+  transition?: SlideTransition;
+  /** the click steps `compileMotion` produced with the scene's paragraph counts (SPEC-5 0.4) */
+  schedule?: MotionSchedule;
+  /** the media blocks (SPEC-5 3.6); `sceneMedia` */
+  media?: SceneMedia[];
+  /** the equation blocks (SPEC-5 8.3); `sceneEquations` */
+  equations?: SceneEquation[];
+  /** the deck's theme override stylesheet, empty for a base theme (SPEC-5 9.1); `themeCss(deck)` */
+  themeCss?: string;
+  /** the pictures with a Reflection or a Recolor (SPEC-5 0.47; b2.md R9); `scenePictureEffects(slide)` */
+  pictureEffects?: ScenePictureEffect[];
 };

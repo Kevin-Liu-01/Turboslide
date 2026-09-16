@@ -9,6 +9,8 @@
 // zod and annotate (blocks.ts imports this).
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
+import type { FontId } from './fonts.ts';
+import { FONT_IDS } from './fonts.ts';
 
 /** The sheet's type ladder in px (head:59-65 and the block rules; 15 is the floor). */
 export const TYPE_LADDER = [88, 72, 58, 44, 34, 26, 24, 22, 20, 18, 17, 16, 15] as const;
@@ -73,6 +75,12 @@ export type Typography = {
   columns?: TypeColumns;
   /** The paragraphs' left indent in px (SPEC-2 2.2.11). */
   indent?: number;
+  /** The first line's extra indent in px (gslides-parity SPEC-5 7.7, Indentation options); 0 when absent. */
+  firstLine?: number;
+  /** The hanging indent of every line but the first in px (SPEC-5 7.7); 0 when absent. */
+  hanging?: number;
+  /** The face by catalog id (SPEC-5-amendments A5); the theme's face when absent. */
+  family?: FontId;
 };
 
 export const typographyObjectSchema = z.strictObject({
@@ -138,6 +146,27 @@ export const typographyObjectSchema = z.strictObject({
     group: 'Text',
     help: 'The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).',
   }),
+  firstLine: annotate(z.number().nonnegative().optional(), {
+    label: 'First line indent',
+    control: 'number',
+    snap: [0, 32, 64],
+    group: 'Text',
+    help: 'The first line’s extra indent in px, Google’s Indentation options (gslides-parity SPEC-5 7.7); 0 when absent.',
+  }),
+  hanging: annotate(z.number().nonnegative().optional(), {
+    label: 'Hanging indent',
+    control: 'number',
+    snap: [0, 32, 64],
+    group: 'Text',
+    help: 'The indent of every line but the first in px (gslides-parity SPEC-5 7.7); 0 when absent.',
+  }),
+  family: annotate(z.enum(FONT_IDS).optional(), {
+    label: 'Font',
+    control: 'select',
+    snap: FONT_IDS,
+    group: 'Text',
+    help: 'A face from the font catalog by id (gslides-parity SPEC-5-amendments A5); the theme’s face when absent.',
+  }),
 }) satisfies z.ZodType<Typography>;
 
 /** The typography group as one inspector control (control `typography`, SPEC 6.5). */
@@ -182,5 +211,11 @@ export function typographyDeclarations(typography: Typography | undefined): stri
     out.push(`column-count:${typography.columns}`, `column-gap:${COLUMN_GAP_PX}px`);
   if (typography.indent !== undefined && typography.indent > 0)
     out.push(`padding-left:${typography.indent}px`);
+  // the catalog face by id (gslides-parity SPEC-5-amendments A5; B7's request at merge 1): the
+  // block reads the custom property `@turboslide/fonts/catalog` fontFamilyVariable names, which
+  // `@turboslide/render/fonts` defines on the sheet root beside the family's @font-face rules; a
+  // family whose faces are not loaded inherits the sheet's Inter
+  if (typography.family !== undefined)
+    out.push(`font-family:var(--ts-font-${typography.family}, inherit)`);
   return out;
 }

@@ -1,0 +1,209 @@
+{
+  "id": "people/six-people",
+  "category": "people",
+  "label": "Six people",
+  "blocks": [
+    {
+      "id": "picture-1",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-1",
+      "pos": {
+        "x": 0,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    },
+    {
+      "id": "picture-2",
+      "pos": {
+        "x": 221,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-2",
+      "pos": {
+        "x": 221,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    },
+    {
+      "id": "picture-3",
+      "pos": {
+        "x": 442,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-3",
+      "pos": {
+        "x": 442,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    },
+    {
+      "id": "picture-4",
+      "pos": {
+        "x": 663,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-4",
+      "pos": {
+        "x": 663,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    },
+    {
+      "id": "picture-5",
+      "pos": {
+        "x": 884,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-5",
+      "pos": {
+        "x": 884,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    },
+    {
+      "id": "picture-6",
+      "pos": {
+        "x": 1105,
+        "y": 0,
+        "w": 160,
+        "h": 160,
+        "group": "block"
+      },
+      "type": "box",
+      "stroke": "hair",
+      "strokeWidth": 1,
+      "text": "Add a picture",
+      "typography": {
+        "size": 16
+      },
+      "color": "titanium",
+      "dash": "dash",
+      "valign": "middle"
+    },
+    {
+      "id": "name-6",
+      "pos": {
+        "x": 1105,
+        "y": 176,
+        "w": 200,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "Name",
+      "role": "cap"
+    }
+  ],
+  "box": [
+    1305,
+    216
+  ]
+}

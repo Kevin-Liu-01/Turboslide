@@ -3,6 +3,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { LiveClone } from './LiveClone';
 import { pad2, trimTitle } from './model';
+import { motionOf } from './present/presentModel';
 import type { ViewerDeck, ViewerSlide } from './model';
 import type { Theme } from './theme';
 
@@ -385,6 +386,18 @@ export function GridView({
                         <span className="pt-thumb-skip" aria-hidden="true">
                           <svg viewBox="0 0 20 20" fill="currentColor">
                             <use href="#i-eye-slash" />
+                          </svg>
+                        </span>
+                      ) : null}
+                      {motionOf(slide) !== undefined ? (
+                        /* the slide moves (gslides-parity SPEC-5 2.1; b1.md request 15): the same fact the filmstrip's glyph reads */
+                        <span
+                          className="pt-thumb-motion"
+                          aria-hidden="true"
+                          data-control={`grid.motion.${slide.id}`}
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor">
+                            <use href="#i-sparkles" />
                           </svg>
                         </span>
                       ) : null}

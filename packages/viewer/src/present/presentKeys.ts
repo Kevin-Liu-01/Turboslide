@@ -7,11 +7,17 @@ import type { BlankSlide } from './presentModel';
  * Presenter view; A is inert with a snackbar; L toggles the laser pointer; Cmd+P prints;
  * Cmd+Shift+C is inert (captions are omitted); Cmd+Shift+F or F11 toggles full screen; B or .
  * shows a black slide and W or , a white one, and any key returns. Space, Enter, Page Down and
- * Page Up also advance and Backspace goes back (the PowerPoint convention SPEC 9.2 adopts). Every
- * other bare key is swallowed, so the reading surface's letters (G, D, S as the list) never act
- * while presenting. The studio's Slideshow component owns the listener; `presentKeyAction` is what
- * it and the vitest agree on.
+ * Page Up also advance and Backspace goes back (the PowerPoint convention SPEC 9.2 adopts); P
+ * toggles the pen (gslides-parity SPEC-5 0.15, a Turboslide key); K, U and O are Google's Video
+ * player table (gslides-parity SPEC-5 3.5, 15; VERIFICATION-5 finding 7): play or pause, rewind
+ * and fast forward by `MEDIA_SEEK_MS` on the media of the current slide. Every other bare key is
+ * swallowed, so the reading surface's letters (G, D, S as the list) never act while presenting.
+ * The studio's Slideshow component owns the listener; `presentKeyAction` is what it and the vitest
+ * agree on.
  */
+
+/** Google's rewind and fast forward step, 10 seconds (the Video player table's U and O). */
+export const MEDIA_SEEK_MS = 10_000;
 
 export type PresentKeyAction =
   | { type: 'exit' }
@@ -29,6 +35,12 @@ export type PresentKeyAction =
   | { type: 'fullscreen' }
   | { type: 'blank'; blank: BlankSlide }
   | { type: 'unblank' }
+  /** P toggles the pen (gslides-parity SPEC-5 0.15, 15; a Turboslide key, Google's pen has none) */
+  | { type: 'pen' }
+  /** K, U and O of Google's Video player table (SPEC-5 3.5, 15): the media of the current slide */
+  | { type: 'mediaToggle' }
+  | { type: 'mediaRewind' }
+  | { type: 'mediaForward' }
   /** consumed and inert: a bare key Google's table does not list */
   | { type: 'swallow' };
 
@@ -110,6 +122,10 @@ export function presentKeyAction(
   if (low === 's') return { type: 'notes' };
   if (low === 'a') return { type: 'audience' };
   if (low === 'l') return { type: 'laser' };
+  if (low === 'p') return { type: 'pen' };
+  if (low === 'k') return { type: 'mediaToggle' };
+  if (low === 'u') return { type: 'mediaRewind' };
+  if (low === 'o') return { type: 'mediaForward' };
   if (low === 'b' || key === '.') return { type: 'blank', blank: 'black' };
   if (low === 'w' || key === ',') return { type: 'blank', blank: 'white' };
   return { type: 'swallow' };
@@ -139,6 +155,10 @@ export function presentKeyRows(platform: PresentPlatform): readonly PresentKeyRo
       note: 'Not available in Turboslide yet',
     },
     { keys: 'L', action: 'Toggle laser pointer' },
+    { keys: 'P', action: 'Turn on the pen', note: 'Esc clears the drawing' },
+    { keys: 'K', action: 'Play or pause the media' },
+    { keys: 'U', action: 'Rewind 10 seconds' },
+    { keys: 'O', action: 'Fast forward 10 seconds' },
     { keys: `${mod} P`, action: 'Print' },
     {
       keys: `${mod} Shift C`,

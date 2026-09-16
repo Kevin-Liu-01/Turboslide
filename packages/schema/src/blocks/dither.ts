@@ -8,8 +8,35 @@
 import { z } from 'zod';
 import { annotate } from '../annotate.ts';
 
-export const DITHER_PATTERNS = ['bayer8', 'bayer4', 'blue64', 'random'] as const;
+/**
+ * The threshold textures and, since round five (gslides-parity SPEC-5 1.2, 11), the two error
+ * diffusion families (`floyd-steinberg`, `atkinson`: serpentine diffusion over the tone image at
+ * the chosen `cell`) and the two halftone screens (`halftone-dot`, `halftone-line`: a screen
+ * function of `angle` and `cell` as the pitch). The four new ids are admitted by the schema from
+ * day 0; `effects/dither.ts` draws them as Bayer 8 by 8 until B6 lands the stages (day 6).
+ */
+export const DITHER_PATTERNS = [
+  'bayer8',
+  'bayer4',
+  'blue64',
+  'random',
+  'floyd-steinberg',
+  'atkinson',
+  'halftone-dot',
+  'halftone-line',
+] as const;
 export type DitherPattern = (typeof DITHER_PATTERNS)[number];
+
+/** The round five families, the ids B6's stages and the crate patterns answer (SPEC-5 11). */
+export const DITHER_PATTERNS_GS5: ReadonlyArray<DitherPattern> = [
+  'floyd-steinberg',
+  'atkinson',
+  'halftone-dot',
+  'halftone-line',
+];
+
+/** The screen angle bounds of the halftone patterns in degrees; 45 when absent. */
+export const DITHER_ANGLE = { min: 0, max: 180, default: 45 } as const;
 
 export const DITHER_TONES = ['two', 'three', 'original'] as const;
 export type DitherTone = (typeof DITHER_TONES)[number];
@@ -53,10 +80,16 @@ export type PictureDither = {
   channel?: DitherChannel;
   /** Advanced: the hash seed of pattern 'random', a 32 bit integer; 0 so two writers agree. */
   seed?: number;
+  /** The halftone screen's angle in degrees, 0 to 180; 45 when absent (gslides-parity SPEC-5 11). */
+  angle?: number;
 };
 
-/** Every field resolved; what the pipeline, the variant key and the Format options section read. */
-export type ResolvedDither = Required<PictureDither>;
+/**
+ * Every field resolved; what the pipeline, the variant key and the Format options section read.
+ * `angle` stays optional here and is copied only when written, so the variant keys of every
+ * existing dither (the digest of this object) are unchanged by round five (SPEC-5 0.7).
+ */
+export type ResolvedDither = Required<Omit<PictureDither, 'angle'>> & { angle?: number };
 
 /** The defaults when a field is absent (SPEC-3 10.1); the identity of the Format options section (0.37). */
 export const DITHER_DEFAULTS: Readonly<Omit<ResolvedDither, 'pattern'>> = {
@@ -196,6 +229,13 @@ export const pictureDitherSchema = z.strictObject({
       help: 'The hash seed of the random pattern, a 32 bit integer; 0 unless set so two writers agree.',
     },
   ),
+  angle: annotate(z.number().min(DITHER_ANGLE.min).max(DITHER_ANGLE.max).optional(), {
+    label: 'Angle',
+    control: 'number',
+    snap: [0, 15, 45, 75, 90],
+    group: 'Advanced',
+    help: 'The halftone screen’s angle in degrees, 0 to 180; 45 unless set (gslides-parity SPEC-5 11). The Bayer, blue noise, random and error diffusion patterns ignore it.',
+  }),
 }) satisfies z.ZodType<PictureDither>;
 
 /** The inspector field: the dither, or none. */
@@ -223,6 +263,7 @@ export function resolveDither(dither: PictureDither): ResolvedDither {
     minFilter: dither.minFilter ?? DITHER_DEFAULTS.minFilter,
     channel: dither.channel ?? DITHER_DEFAULTS.channel,
     seed: dither.seed ?? DITHER_DEFAULTS.seed,
+    ...(dither.angle !== undefined ? { angle: dither.angle } : {}),
   };
 }
 

@@ -26,7 +26,12 @@ import { canonicalJson } from '@turboslide/schema/json';
 import { z } from 'zod';
 
 import type { BlobClient } from './blob-store.ts';
-import { ACCESS_FILE, BlobExistsError, BlobPreconditionError, deckPrefix } from './blob-store.ts';
+import {
+  ACCESS_FILE,
+  deckPrefix,
+  isBlobExistsError,
+  isBlobPreconditionError,
+} from './blob-store.ts';
 import { STATE_DIR } from './file-store.ts';
 import type { DeckHead } from './templates.ts';
 
@@ -71,14 +76,11 @@ export class AccessPreconditionError extends Error {
 
 /**
  * True for the store's two conflict classes, whichever module copy threw them (a bundle that
- * carries two copies of blob-store.ts defeats `instanceof`; the name survives).
+ * carries two copies of blob-store.ts defeats `instanceof`; the name survives). The two guards
+ * of blob-store.ts are the one place that rule is written since the round five fix round.
  */
 export function isBlobConflict(error: unknown): boolean {
-  if (error instanceof BlobPreconditionError || error instanceof BlobExistsError) return true;
-  return (
-    error instanceof Error &&
-    (error.name === 'BlobPreconditionError' || error.name === 'BlobExistsError')
-  );
+  return isBlobPreconditionError(error) || isBlobExistsError(error);
 }
 
 /** True for an AccessPreconditionError from any copy of this module. */

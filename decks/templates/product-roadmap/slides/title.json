@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Product name",
+  "lead": "The roadmap for the year, reviewed each quarter",
+  "title": "Product roadmap"
+}

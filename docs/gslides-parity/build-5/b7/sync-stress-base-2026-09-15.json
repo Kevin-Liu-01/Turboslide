@@ -1,0 +1,244 @@
+{
+  "base": "http://localhost:4358",
+  "startedAt": "2026-09-15T13:37:53.397Z",
+  "seconds": 216,
+  "steps": 16,
+  "ok": 13,
+  "failed": 3,
+  "notDriven": 0,
+  "numbers": {
+    "tier": "memory",
+    "deckId": "untitled-20260915-me6k",
+    "edits": {
+      "count": 50,
+      "exactNextRevision": 50,
+      "overshoot": 0,
+      "stale": 0,
+      "ackMs": {
+        "n": 50,
+        "mean": 2133,
+        "p50": 2142,
+        "p95": 2151,
+        "max": 2155
+      },
+      "finalRevision": 51,
+      "serverRevision": 51
+    },
+    "burst": {
+      "chars": 40,
+      "ms": 3155,
+      "revisions": 1
+    },
+    "twoTabs": {
+      "rounds": 10,
+      "propagateMs": {
+        "n": 20,
+        "mean": 2078,
+        "p50": 2078,
+        "p95": 2093,
+        "max": 2093
+      },
+      "missed": 0,
+      "stale": 0,
+      "a": {
+        "revision": 72,
+        "serverRevision": 72,
+        "document": 72,
+        "pending": 0,
+        "retained": 0,
+        "tier": "memory"
+      },
+      "b": {
+        "revision": 72,
+        "serverRevision": 72,
+        "document": 72,
+        "pending": 0,
+        "retained": 0,
+        "tier": "memory"
+      },
+      "equalText": true,
+      "expectedText": true
+    },
+    "presence": {
+      "a": ["185bc0e67547cc65440c6cad8d9c3aa9"],
+      "b": ["33fa193ca44380451af902eb26b32409"],
+      "selfA": "33fa193ca44380451af902eb26b32409",
+      "selfB": "185bc0e67547cc65440c6cad8d9c3aa9",
+      "domA": {
+        "chips": 1,
+        "count": "1",
+        "outlines": 0,
+        "carets": 0,
+        "pointers": 0,
+        "flags": 1
+      },
+      "domB": {
+        "chips": 1,
+        "count": "1",
+        "outlines": 0,
+        "carets": 0,
+        "pointers": 0,
+        "flags": 1
+      },
+      "rosterA": {
+        "total": 2,
+        "self": 1
+      },
+      "rosterB": {
+        "total": 2,
+        "self": 1
+      }
+    },
+    "reload": {
+      "pendingAtReload": "unread (the reload left at once)",
+      "replayed": "nothing to replay",
+      "ms": 15565,
+      "complete": false,
+      "bSees": false
+    },
+    "offline": {
+      "typed": 33,
+      "pendingWhileOffline": 24,
+      "connectedWhileOffline": true,
+      "convergeMs": 4040,
+      "complete": false,
+      "bSees": true,
+      "stale": null
+    },
+    "final": {
+      "a": {
+        "revision": 73,
+        "serverRevision": 73,
+        "document": 73,
+        "pending": 0,
+        "retained": 0,
+        "tier": "memory"
+      },
+      "b": {
+        "revision": 73,
+        "serverRevision": 73,
+        "document": 73,
+        "pending": 0,
+        "retained": 0,
+        "tier": "memory"
+      },
+      "equalText": true,
+      "complete": false,
+      "titleLength": 335
+    }
+  },
+  "rows": [
+    {
+      "n": 1,
+      "step": "the first write created the deck and attached the room",
+      "expected": "/edit/<id>, connected, revision 1",
+      "observed": "/edit/untitled-20260915-me6k, connected true, revision 1, tier memory",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "50 rapid edits were each acknowledged at exactly the next revision (A3 item 1, 4)",
+      "expected": "50 of 50 exact, revision 51",
+      "observed": "50 exact, 0 overshot, revision 51, ack ms {\"n\":50,\"mean\":2133,\"p50\":2142,\"p95\":2151,\"max\":2155}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "no stale message in the state, the snackbar, a toast or the chip across the edits (A3 item 8)",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "no character was lost across the edits",
+      "expected": "\" e45 e46 e47 e48 e49 e50\"",
+      "observed": "the document holds every token",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the revision the tab reports equals the server revision and nothing is pending",
+      "expected": "equal, 0 pending",
+      "observed": "{\"revision\":51,\"serverRevision\":51,\"document\":51,\"pending\":0,\"retained\":0,\"tier\":\"memory\"}",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "a fast burst of 40 characters landed whole and settled",
+      "expected": "every character, pending 0",
+      "observed": "1 write(s) in 3155 ms, pending 0, whole",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "two tabs alternating 10 rounds converged to one document (A3 item 3)",
+      "expected": "same text in both tabs, every token present",
+      "observed": "0 propagation miss(es), propagate ms {\"n\":20,\"mean\":2078,\"p50\":2078,\"p95\":2093,\"max\":2093}, texts equal, A whole",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "two tabs converged to one revision",
+      "expected": "A revision = B revision = server revision",
+      "observed": "A {\"revision\":72,\"serverRevision\":72,\"document\":72,\"pending\":0,\"retained\":0,\"tier\":\"memory\"}, B {\"revision\":72,\"serverRevision\":72,\"document\":72,\"pending\":0,\"retained\":0,\"tier\":\"memory\"}",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "no stale message in either tab while alternating",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "each tab lists exactly the other tab once and never itself (A3 item 5)",
+      "expected": "A others = [B], B others = [A], one chip each",
+      "observed": "{\"a\":[\"185bc0e67547cc65440c6cad8d9c3aa9\"],\"b\":[\"33fa193ca44380451af902eb26b32409\"],\"selfA\":\"33fa193ca44380451af902eb26b32409\",\"selfB\":\"185bc0e67547cc65440c6cad8d9c3aa9\",\"domA\":{\"chips\":1,\"count\":\"1\",\"outlines\":0,\"carets\":0,\"pointers\":0,\"flags\":1},\"domB\":{\"chips\":1,\"count\":\"1\",\"outlines\":0,\"carets\":0,\"pointers\":0,\"flags\":1},\"rosterA\":{\"total\":2,\"self\":1},\"rosterB\":{\"total\":2,\"self\":1}}",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "the roster menu shows two rows with one self row in each tab",
+      "expected": "2 rows, 1 self",
+      "observed": "A {\"total\":2,\"self\":1}, B {\"total\":2,\"self\":1}",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "a reload in the middle of a burst lost nothing (A3 item 7)",
+      "expected": "the document holds the whole burst after the reload",
+      "observed": "pending at reload unread (the reload left at once), nothing to replay, LOST 1 token(s): \" reload-0123456789abcdefghijklmnop\", B did not converge, 15565 ms",
+      "ok": false
+    },
+    {
+      "n": 13,
+      "step": "after the reload the tab draws nobody but the other tab",
+      "expected": "A others = [B], no ghost of the earlier id",
+      "observed": "others [\"185bc0e6\"], earlier self 33fa193c, now 39aea2e7, dom {\"chips\":1,\"count\":\"1\",\"outlines\":1,\"carets\":0,\"pointers\":0,\"flags\":1}",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "a five second offline window replayed every pending op and converged (A3 item 7)",
+      "expected": "pending 0 after reconnect, every character in both tabs, no stale message",
+      "observed": "33 chars typed offline (pending 24, connected true), converged in 4040 ms, pending 0, LOST 1 token(s): \" reload-0123456789abcdefghijklmnop\", B converged",
+      "ok": false
+    },
+    {
+      "n": 15,
+      "step": "both tabs end on one document and one revision (A3 item 3)",
+      "expected": "equal revisions, equal text, nothing pending",
+      "observed": "A {\"revision\":73,\"serverRevision\":73,\"document\":73,\"pending\":0,\"retained\":0,\"tier\":\"memory\"}, B {\"revision\":73,\"serverRevision\":73,\"document\":73,\"pending\":0,\"retained\":0,\"tier\":\"memory\"}, text equal, A LOST 1 token(s): \" reload-0123456789abcdefghijklmnop\" (335 chars)",
+      "ok": false
+    },
+    {
+      "n": 16,
+      "step": "the deck was trashed and deleted forever",
+      "expected": "File > Move to trash, Delete forever",
+      "observed": "untitled-20260915-me6k",
+      "ok": true
+    }
+  ]
+}

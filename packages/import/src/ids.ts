@@ -58,6 +58,9 @@ const STEMS: Record<BlockType, string> = {
   text: 'text',
   icon: 'icon',
   html: 'html',
+  media: 'media',
+  spotlight: 'spotlight',
+  equation: 'eq',
   // the Google Slides parity round two's blocks (gslides-parity SPEC-2 2.6.4, 2.8); the importer never emits them
   chart: 'chart',
   picture: 'picture',

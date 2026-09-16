@@ -218,6 +218,38 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   The dev server measures nothing: every number of SPEC-4 section 4 comes from the node-server
   build (check step 31) or a preview deployment, and a builder's run on a dev server is a smoke.
 
+- The written exception for the Google Slides parity round five (`docs/gslides-parity/SPEC-5.md`,
+  `docs/gslides-parity/SPEC-5-amendments.md`, `docs/gslides-parity/MILESTONES-5.md`; the
+  orchestrator's rulings above them where they differ): the round four form stands. Seven builders
+  and the verifier each run their own server on their own port with the tmp store, the memory
+  realtime tier and both fake secrets, stopped before returning; nobody touches 4321 or another
+  builder's port; nobody runs `pnpm build` or `vite build` outside `scripts/check.mjs`; Playwright
+  runs only while the builder holds `.turboslide/e2e.lock` (`until mkdir .turboslide/e2e.lock; do
+sleep 5; done`, released with `rmdir`; a lock older than two hours with no Playwright or probe
+  process alive is orphaned and may be removed). `scripts/probes/editor-walk-probe.mjs --base
+http://localhost:<port> --quick` stays green for the surfaces a lane changes (a step it cannot
+  drive is recorded as not driven, never as passed). From `apps/studio`:
+
+  `TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> node_modules/.bin/vite dev --port <port> --strictPort`
+
+  | Port | Who                                                                | Notes                                                                                                               |
+  | ---- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+  | 4321 | the integrator, the verifier, `scripts/check.mjs`                  | the file store; the `/new` boot probe at every merge; steps 31 and 37 build and serve the node-server output here   |
+  | 4351 | B1 (motion and the show)                                           | `motion.spec.ts`                                                                                                    |
+  | 4352 | B2 (media, camera, screens, pictures, the store engineering)       | `media.spec.ts`, the `Range` and header rows                                                                        |
+  | 4353 | B3 (import, templates, building blocks, nested groups)             | `import.spec.ts`, `templates.spec.ts`, the parity audit's Upload, Import slides, gallery and pane rows              |
+  | 4354 | B4 (the page, print, ODP, SVG, the shape interpreter, the card)    | `page-setup.spec.ts`, `resize.spec.ts`                                                                              |
+  | 4355 | B5 (text tools, chat, help, accessibility, the remaining rows)     | `text-tools.spec.ts`, `chat.spec.ts`, `lint --chrome` and the tooltip audit on `/help/training` and `/help/updates` |
+  | 4356 | B6 (equation, theme, the second theme, dither families, the crate) | `theme.spec.ts`, `equation.spec.ts`, the parity audit's Insert > Equation, Edit theme and Themes panel rows         |
+  | 4357 | the verifier                                                       | the parity audit, the perf budget's rows on a preview or production, `resize.spec.ts` against the preview           |
+  | 4358 | B7 (the sync engine and the font catalog; SPEC-5-amendments A6)    | `sync.spec.ts`, `fonts.spec.ts`, `scripts/probes/sync-stress-probe.mjs`                                             |
+
+  The dev server measures nothing: every number of SPEC-5 16.6 comes from the node-server build
+  (check steps 31 and 37) or a preview deployment. A fixture that needs `ffmpeg`, the fonts venv,
+  `cargo` or `soffice` is generated once on the builder's machine and committed; the check chain
+  never runs those tools, and a builder without one records the exact commands for Kevin in
+  `docs/gslides-parity/build-5/<key>.md` and ships the fallback without weakening a gate.
+
 ## Hosting
 
 The studio is deployed to Vercel from `apps/studio` (the project `turboslide` in Kevin's team,
@@ -311,6 +343,18 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   `@turboslide/theme` (`TurboslideMark.tsx` imports the geometry module); both point down the one
   way direction. A builder names a package and its version in
   `docs/gslides-parity/build-4/<key>.md` and the integrator installs once.
+- Round five catalog entries (SPEC-5 1.6, 16.6; day 0, `pnpm audit --prod --audit-level=high`
+  clean with all of them, `build-5/integrator.md` section 5): `@xmldom/xmldom` 0.9.12
+  (`packages/import`, B3's reader), `temml` 0.13.5 (`packages/render`, B6's equation block),
+  `nspell` 2.1.5 with `@types/nspell` 2.1.6 and the seven dictionaries `dictionary-en` 4.0.0,
+  `dictionary-en-gb` 3.0.0, `dictionary-fr` 3.0.0, `dictionary-es` 4.0.0, `dictionary-pt` 4.0.0,
+  `dictionary-pt-pt` 2.0.0, `dictionary-nl` 2.0.0 (the new `packages/spelling`, B5's, scaffolded on
+  day 0 so the install attaches them), `fontkit` 2.0.4 (`packages/export`, B4's SVG outline mode)
+  and `web-vitals` 6.2.2 (`apps/studio`, the integrator's field INP sample). SPEC-5 names no
+  version for the dictionaries or `web-vitals`, so the newest release on the registry on
+  2026-09-15 is pinned; pnpm appended `web-vitals@6.2.2` to `minimumReleaseAgeExclude`. `pnpm
+install` ran once on day 0 and never in a builder's session; a builder names a package and its
+  version in `docs/gslides-parity/build-5/<key>.md` and the integrator installs once.
 
 ## Ownership and git
 
@@ -342,6 +386,26 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   `-access-page.tsx` and `apps/studio/src/components/PresenterPage.tsx` beside the route files.
   Nothing is committed until the ship step; the untracked `packages/native/wasm/` files of a local
   build are never committed before B4 replaces them with CI's outputs and `BUILD-RECORD.json`.
+- Round five: ownership is the "Owns" lists of `docs/gslides-parity/MILESTONES-5.md`, B7's row
+  in `SPEC-5-amendments.md` A6, and the day 0 amendments of `docs/gslides-parity/build-5/integrator.md`
+  section 3 (a file round four renamed, split or created is owned under the name round four gave
+  it; a file round four did not land is reassigned there without changing which lane owns the
+  behaviour). One shared checkout, no `gs5/integration` branch, no per builder commits: nobody but
+  the ship step runs a git write command, and the ship step commits on `main` by an explicit path
+  list. The shared files are the integrator's for the whole round (SPEC-5 0.53): the schema files
+  of 1.2, `packages/schema/src/actions.ts`, `packages/export/src/scene/types.ts`,
+  `packages/export/src/check.ts`, the dispatch tables (`apps/cli/src/store-actions.ts`'s
+  `registerLaneActions` and `apps/studio/src/server/actions.ts`), `apps/studio/src/editor/controller.tsx`,
+  `packages/chrome/src/menus/{model,strings,keys}.ts` and `packages/render/src/blocks/render-block.ts`'s
+  switch; every row landed on day 0 and a later change is a request in `build-5/<key>.md` answered
+  the same day. A lane's handlers live in its module under `apps/cli/src/actions/` (`motion`,
+  `media`, `import`, `templates`, `page`, `print`, `prefs`, `spelling`, `equation`, `theme`, `chat`,
+  `font`), which stays free of `node:` imports because the editor page imports that graph; the
+  window transport rows land in the controller's `on(...)` table through a request naming the
+  handler (`GS5_WINDOW_SLOTS` lists each lane's ids). Nothing this round changes
+  `packages/chrome/src/tokens.css`, the Perfect export's bytes for the GT deck, or round four's
+  budgets and identity; every builder re-baselines a number on the current tree before claiming a
+  gain, against the verifier's day 0 baseline under `verification-5/`.
 
 ## Acceptance
 
@@ -477,6 +541,36 @@ runtime's glibc) and, with `--template-copy`, one deck created from the GT templ
 forever again. On the merge 1 tree (2026-09-14, `BUILD-STATUS-4.md` "Merge 1") steps 1, 2, 4, 5,
 6 and 29 passed and the probe answered 17 of 17; the merge 2 run is recorded in
 `BUILD-STATUS-4.md` "Merge 2".
+
+Round five's lines (`docs/gslides-parity/SPEC-5.md` 16.7 and 0.51; `SPEC-5-amendments.md` A7;
+`docs/gslides-parity/BUILD-STATUS-5.md`): `pnpm check` is 37 steps. Steps 32 to 37 are the
+round's, each the literal command of SPEC-5 16.7 (37 is A7's: `scripts/probes/sync-stress-probe.mjs`
+on the node-server build and the fonts tests), gated on the files its lane lands: while a file is
+missing the step prints one "not yet" line naming the files and the command and exits 0, never a
+silent pass and never a failure on another lane's day (`--list` marks a pending step). 32 is the
+page and the print layouts with `resize.spec.ts` beside `page-setup.spec.ts` (A4); 33 motion and
+media; 34 import, templates and building blocks (the python oracle runs inside the vitest when
+`.turboslide/venv` exists); 35 the text tools and chat with the two help routes answering 200; 36
+the theme, the equation, ODP and SVG; 37 the sync engine and the fonts. Steps 3, 5, 6, 18, 20, 21,
+22, 25, 26 and 27 grow as SPEC-5 16.7 names. Beyond `pnpm check`: the per builder acceptance
+lines of MILESTONES-5 and A6, `node scripts/probes/new-write-probe.mjs --base http://localhost:4321`
+against a dev server on the file store at every merge, `scripts/probes/editor-walk-probe.mjs`
+against every preview and production, the verifier's VERIFICATION-5 rows and the hosted smoke
+rows of SPEC-5 16.8. On the day 0 tree (2026-09-15, `BUILD-STATUS-5.md` "Day 0") steps 1, 2, 4, 5
+and 6 passed, steps 32 to 37 answered their "not yet" lines, `tsc -b` was clean, and step 3 fails
+as written on the uncommitted regenerated contracts until the ship step commits them; step 29's
+`facts.json` was refreshed at merge 2 through `build-brand.ts --facts` (220 actions, 194 MCP tools,
+201 HTTP paths, 37 check steps; no count is typed by hand). On the merge 2 tree (2026-09-15,
+`BUILD-STATUS-5.md` "Merge 2") steps 32 and 36 still answer their "not yet" lines because B4's
+`apps/studio/e2e/page-setup.spec.ts`, `packages/export/src/export-odp.ts` and
+`packages/export/src/svg/write.ts` do not exist, and step 5 carries B4's in-progress failures
+(`packages/schema/src/shapes.test.ts`, `shapes/geometry.test.ts`, `diagrams.test.ts`,
+`packages/render/src/__tests__/canvas.test.ts`, the padded shape row of
+`packages/export/src/gslides-fixture.test.ts`), each named with its owner in BUILD-STATUS-5.
+Two rows joined the step 6 grep allowlists at merge 2 (`packages/render/src/blocks/equation.ts`
+for Temml's MathML, `apps/studio/src/routes/api/vitals.ts` for the vitals mirror), and
+`.prettierignore` covers the import's `*.expected/` documents, which `fixtures.test.ts` compares
+byte for byte as `canonicalJson` output.
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -754,6 +848,91 @@ stale-while-revalidate=3600` only for the public shape of an open or published d
     48, `apple-touch-icon.png`, `manifest.webmanifest`, `robots.txt`, `icons/*.png`) is written by
     `node scripts/build-brand.ts` and checked byte for byte against `brand-manifest.json` by
     check step 29; edit the generator, never a generated file.
+
+- The round five seams (gslides-parity SPEC-5 1.6, 12, 13; SPEC-5-amendments A3 to A6;
+  MILESTONES-5 "The seams every builder types against"), as the integrator installed them on day 0
+  (`docs/gslides-parity/build-5/integrator.md`):
+  - The schema fields of SPEC-5 1.2, every one optional with the meaning of an absent field in its
+    doc comment: `SlideBase.transition` and `.animations` (`@turboslide/schema/motion`: the eight
+    transitions, the ten effects, the three triggers, `DURATION_MS`, `Animation`, `MOTION_LABELS`,
+    `normalizeMotion`, the `MotionSchedule` type and schema), `Deck.page` (`@turboslide/schema/render`
+    `deckPage`, `DEFAULT_PAGE`, `PAGE_PRESETS`, the 120 to 6720 px bounds), `Deck.language`
+    (`DEFAULT_LANGUAGE` en-US), `Deck.themeEdits`, `Deck.importedThemes` (at most five) and
+    `Deck.customLayouts` (`custom-<slug>` ids; `SlideBase.template` widens to them and `isLayoutId`
+    guards every built in reader), `THEMES` with `ts-plate`, `BlockBase.placeholder` (not
+    annotated: the theme mode offers it, never an ordinary block's inspector), `PlainBlock.start`,
+    `.prefix`, `.suffix`, `Typography.firstLine`, `.hanging` and `.family` (`@turboslide/schema/fonts`
+    `FONT_IDS`, the 26 ids of A5), `ShotAdjust.reflection` and `.recolor` (`RECOLOR_PRESETS`),
+    `TableCell.border` per edge (`CellEdgeBorder`, `CELL_BORDER_EDGES`), `DeckGuides.colors` (keyed
+    `x:800` or `y:450`), `Position.group` as a path (`groupPathSchema`, `groupSegments`,
+    `outerGroup`), `DITHER_PATTERNS` with the four families and `angle` (the resolved record keeps
+    `angle` optional so every existing variant key is unchanged), the three block types `media`,
+    `spotlight` and `equation` (`@turboslide/schema/blocks/media`, `blocks/equation`; the catalog
+    entries with `export: 'mixed'`; the renderer's switch draws each as a plain box with its
+    description until B2's and B6's renderers land), `MediaAsset` (`@turboslide/schema/assets`)
+    in its own map `Deck.media` (a recorded deviation from 0.16's union in `assets`, `build-5/integrator.md`
+    section 7: 96 picture readers in 40 files; `asset.set` and `asset.remove` carry both records
+    and the reducer routes by `kind`, so the operation stream sees one map), `Preferences`
+    (`@turboslide/schema/preferences`, the defaults of 7.1 and the twelve substitutions) on
+    `PrincipalRecord.preferences`, the `chat` entry kind with `chatMessageSchema` on the realtime
+    protocol, the export options, report rows and check sections of `@turboslide/schema/export`
+    (`EXPORT_FORMATS` with `odp`, `PRINT_LAYOUTS`, `PAPERS`, `MOTION_EXPORT_MODES`,
+    `MEDIA_EXPORT_MODES`), `ImportReport` (`@turboslide/schema/import-report`) and the template
+    and building block indexes (`@turboslide/schema/building-blocks`).
+  - The validator families: `IssueCode` gains `motion`, `media`, `equation`, `equation/parse`,
+    `page`, `theme` and `layout`, one module each under `packages/schema/src/validate/` aggregated
+    by `validateDeck`; every module answers `[]` on day 0 except `validate/page.ts`, which bounds
+    the guides by the deck's page because the zod maximum moved from the sheet to the page cap.
+    The `text/spelling` lint rule is B5's with its fixture (the generator refuses a rule with
+    neither a planted slide nor a test).
+  - The action table: `Milestone` gains `GS5`, `ACTION_GROUPS` gains `motion`, `media`, `theme`
+    and `import`, `ACTION_IDS` the 51 ids of SPEC-5 13 and A5 (`GS5_ACTION_IDS`, 220 in all), each
+    with its full `ActionSpec` (input, output, CLI usage, MCP name, example) and no handler, so
+    every transport answers `NotImplementedError` with `GS5` until its lane registers one
+    (`packages/schema/src/actions-gs5.test.ts`, `packages/agent/src/__tests__/gs5-seam.test.ts`);
+    the widened inputs of 13 on `export.run`, `build.run`, `render.slide`, `view.present`,
+    `view.goto`, `slide.import`, `deck.create`, `deck.set` (`/language`), `deck.info`, `deck.guides`,
+    `text.indent`, `text.list`, `table.cellStyle`, `block.adjust` and `export.check`; the
+    reducer's `DECK_SET_ROOTS` admits `language`, `page`, `themeEdits`, `importedThemes` and
+    `customLayouts` for the actions that write them while the `deck.set` action's regex stays
+    closed to the four records. `NO_REVISION_WRITES` carries the record, room and log writes.
+  - The dispatchers: `registerLaneActions(dispatcher, deps)` in `apps/cli/src/store-actions.ts`
+    spreads the twelve lane modules of `apps/cli/src/actions/` (`LaneDeps` in `deps.ts`), for the
+    CLI, the MCP server and the window transport, and the hosted `deckDispatcher` spreads them
+    again with `deps.hosted` (the deck id, the request, the origin) so a hosted form can win.
+  - The scene (`packages/export/src/scene/types.ts`): `page`, `language`, `transition`, `schedule`,
+    `media` (`SceneMedia`), `equations` (`SceneEquation`) and `themeCss`, all optional, plus
+    `SceneLine.baseline`; `extractScenes` sets them from `deckPage`, `compileMotion`
+    (`@turboslide/render/motion`, the empty schedule until B1's merge 1; `paragraphCountOf` counts
+    the distinct `SceneLine.paragraph` values per block), `sceneMedia` (`scene/media.ts`, B2),
+    `sceneEquations` (`scene/equations.ts`, B6) and `themeCss` (`@turboslide/render/theme-css`,
+    B6), each an identity on day 0. `pptx/build.ts` calls `rewriteMedia` (`ooxml/media.ts`, B2)
+    and `rewriteEquations` (`ooxml/math.ts`, B6) after the alt text and before the grouping in
+    Editable text mode, both identities on day 0; B1 adds the renumber, the transition and the
+    timing after the hidden title. `check.ts` calls `checkMotion`, `checkMedia` and
+    `checkEquations` (`packages/export/src/check/`) on every PPTX and carries their sections;
+    `checkOdf`, `checkOdfContainer` and `checkSvg` wait for B4's writers.
+  - The menu model: `MenuSetting` gains `screenReader`, `braille`, `speakAloud`, `equationToolbar`
+    and `starred`, `MenuClientHandler` gains `themeMode`, `dictate` and `fontPicker`, `Menu` gains
+    `setting?` (the Accessibility menu draws under `screenReader`), and `GS5_PLANNED_EFFECTS`,
+    `GS5_DIALOG_TITLES` and `GS5_PANEL_TITLES` record the effect and title every row of 14.1 takes
+    while the rows stand as they did (a Later row carries no effect, `menu-model.test.ts`); the
+    flip is one edit per row by its lane, with the clause of 14.2 retiring and the count tables
+    moving. `keys.ts` `GS5_KEY_ROWS` records the key rows of 15 the same way (the Google rows stay
+    in `OMITTED_SHORTCUTS` until their lane moves them). `strings.ts` `ROUND_FIVE` holds the
+    sentences of 15. The toolbar's Font row exists as `toolbar.font` (disabled with its sentence);
+    B7 flips `enabled` and wires the picker.
+  - The controller: `EditorSnapshot.editorMode` (`edit` or `theme`) with `setEditorMode`, and
+    `GS5_WINDOW_SLOTS`, the window transport ids each lane wires into `on(...)` by request.
+  - `menu-model.test.ts` counts the `file.email` container: `allItems()` walks containers, so the
+    Later count reads 22 at `BASE` (21 leaf rows plus the container) and 3 at the end of the round
+    over `allItems()` (`file.email`, `file.email.collaborators`, `tools.activityDashboard.viewers`),
+    2 over leaf rows; SPEC-5 14.2's "Later count at 2" is the leaf count and the round's assertion
+    names both numbers. At merge 2 the assertion reads 5 leaf rows and 6 over `allItems()`: the
+    two of 14.2 plus `file.download.odp`, `file.download.svg` and `file.pageSetup`, whose surfaces
+    (B4's ODP and SVG writers and the Page setup dialog) had not landed, so `DOWNLOAD_FORMATS`
+    keeps its clause and the three rows flip with their files (`menu-model.test.ts`
+    `RETIRED_ROUND_FIVE_CLAUSES` lists the clauses that did retire).
 
 ## Deviations from the spec, recorded
 
@@ -1074,6 +1253,34 @@ noindex` on every answer, static and function alike, while production carries it
   The render route's answers carry the anonymous principal cookie (`set-cookie: __Host-ts_id`),
   which keeps the CDN from caching thumbnails (`x-vercel-cache: MISS` on the second stamped
   request); a finding for B4 and the verifier, not a merge edit.
+
+- Round five, merge 2 (gslides-parity SPEC-5; `docs/gslides-parity/BUILD-STATUS-5.md` "Merge 2",
+  `build-5/integrator.md` section 10). B4's days 3 to 7 (Page setup and the print layouts' dialog,
+  the ODP and SVG writers, the card render path, the `og:image` line) were not delivered to the
+  merge, so the three menu rows that need them stay Later and check steps 32 and 36 stay gated;
+  the shape interpreter B4 did land changes the text rectangle of the roundRect preset, which the
+  fixture export's padded shape row and the render snapshots still pin at the day one seam (B4's to
+  update, named in the status file). The Nitro upgrade route `api/decks.$deckId.ws.ts` is not
+  written: the flag, the client transport with its SSE fallback and the dev sidecar on 4322 are,
+  so a checkout runs the socket path end to end and a node-server deployment falls back to SSE.
+  The hero gate is in place with `HERO_LIVE` false until the second `perf-budget.mjs` measurement
+  against the preview is read, and the two-tone screen pass is not applied to the live frame. The
+  hosted `version.delete` refuses (no store level version removal exists; the checkout removes the
+  file); the chat port is composed in the hosted dispatcher over the room channel because B7's
+  `admitChat` never landed. Two merge fixes sit in other lanes' areas with a note in the file:
+  `packages/schema/src/assets.ts` (the duplicate `camera` discriminator of `MediaAssetSource`,
+  which broke every zod parse of a deck with media) and `packages/export/src/pptx/text.ts`
+  (`catalogFace` skips the export set's own instances; `registerBoxLink` gives a block link on a
+  text box its relationship, a `BASE` defect SPEC-5 8.3's validator exposed). Step 19 was met by
+  `prettier --write` over 84 unformatted files of the lanes (formatting only; the import's expected
+  documents were then restored to `canonicalJson` bytes and ignored by the formatter) and over three
+  committed round four records (`build-4/hotfix-4/walk-preview.json`, `walk-production.json`,
+  `verification-4/production-ship/production-selection-record.json`), which had been committed
+  unformatted. `packages/agent/src/__tests__/fixtures.test.ts` waives the planted slide requirement
+  for `text/spelling`, a static rule that runs over an injected checker and so has its test as its
+  fixture. The preview of merge 2 runs behind Vercel Authentication; every probe carries
+  `VERCEL_OIDC_TOKEN` from `vercel env pull` as the trusted sources header, and the bearer rows of
+  the smoke are skipped because the pulled development environment holds no `TURBOSLIDE_TOKEN`.
 
 ## License
 

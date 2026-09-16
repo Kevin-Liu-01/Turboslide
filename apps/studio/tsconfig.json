@@ -51,6 +51,12 @@
     },
     {
       "path": "../render-worker"
+    },
+    {
+      "path": "../../packages/spelling"
+    },
+    {
+      "path": "../../packages/import"
     }
   ]
 }

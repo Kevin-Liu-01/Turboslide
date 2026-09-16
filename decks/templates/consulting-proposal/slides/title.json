@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Engagement name",
+  "lead": "A proposal for the client, dated",
+  "title": "Consulting proposal"
+}

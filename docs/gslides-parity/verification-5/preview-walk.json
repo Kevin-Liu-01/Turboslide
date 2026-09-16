@@ -1,0 +1,555 @@
+{
+  "summary": {
+    "base": "https://turboslide-ho9rltx7u-kl01s-projects.vercel.app",
+    "at": "2026-09-15T23:01:26.752Z",
+    "ms": 923856,
+    "passed": 16,
+    "failed": 39,
+    "notDriven": 3,
+    "consoleErrors": [
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "B: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "B: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "B: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "A: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "created": [
+      "gt-brand",
+      "v5-sales-pi-op4ij"
+    ]
+  },
+  "rows": [
+    {
+      "n": 1,
+      "id": "S1",
+      "name": "a .pptx opens from File > Open in one step with the report sentence",
+      "expected": "the Upload tab accepts .pptx, the editor moves to the new deck, the Import report says what changed",
+      "observed": "accept \".zip,.pptx,application/zip,application/vnd.openxmlformats-officedocument.presentationml.presentation\"; address https://turboslide-ho9rltx7u-kl01s-projects.vercel.app/edit/gt-brand; report sentence null; deck page null; title \"GT brand deck\"",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/01-S1-open-dialog-upload-tab.png, docs/gslides-parity/verification-5/preview-walk-shots/02-S1-import-report.png"
+    },
+    {
+      "n": 2,
+      "id": "S0",
+      "name": "deck.create --from sales-pitch",
+      "expected": "a fifteen slide copy",
+      "observed": "created v5-sales-pi-op4ij",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 3,
+      "id": "S2r",
+      "name": "a Range request on the demo clip answers 206 with Content-Range; the media grant answers its form",
+      "expected": "206 bytes 0-99/<size>; the grant JSON",
+      "observed": "GET Range: 206 content-range bytes 0-99/2840 accept-ranges bytes type video/webm cache public, max-age=31536000, immutable; HEAD 200 length 2840; grant 403 {\"error\":\"forbidden\"}",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 4,
+      "id": "S2a",
+      "name": "Insert > Video has three tabs; the demo clip is a poster root with Play on click",
+      "expected": "poster root with data-start=click; three tabs",
+      "observed": "poster drawn [\"data-block=demo\",\"data-type=media\",\"data-media=demo\",\"data-kind=video\",\"data-src=\",\"data-youtube=\",\"data-title=The product demo clip\",\"data-duration=\"]; tabs [\"Search YouTube\",\"By URL\",\"Upload\"]",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/03-S2-demo-slide-poster.png, docs/gslides-parity/verification-5/preview-walk-shots/04-S2-insert-video-dialog.png"
+    },
+    {
+      "n": 5,
+      "id": "S2b",
+      "name": "the show plays the clip on the next click and the presenter console shows what is playing",
+      "expected": "a media element mounted after ArrowRight; a presenter.media row",
+      "observed": "steps on the slide 0; after the click null; presenter media rows 0; null",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/05-S2-show-before-click.png, docs/gslides-parity/verification-5/preview-walk-shots/06-S2-show-after-click.png, docs/gslides-parity/verification-5/preview-walk-shots/07-S2-presenter-console.png"
+    },
+    {
+      "n": 6,
+      "id": "S3a",
+      "name": "the pricing rows carry By paragraph; Fade applied to all slides writes every slide",
+      "expected": "By paragraph ticked on the rows animation; 15 slides at fade",
+      "observed": "panel opened; By paragraph []; kinds [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/08-S3-motion-panel-pricing.png, docs/gslides-parity/verification-5/preview-walk-shots/09-S3-apply-to-all.png"
+    },
+    {
+      "n": 7,
+      "id": "S3b",
+      "name": "the show advances one pricing row per click",
+      "expected": "three steps, the hidden count falling by one per click",
+      "observed": "data-steps 3; [{\"step\":\"0\",\"hidden\":0},{\"step\":\"1\",\"hidden\":0},{\"step\":\"2\",\"hidden\":0},{\"step\":\"3\",\"hidden\":0}]",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/10-S3-show-step0.png, docs/gslides-parity/verification-5/preview-walk-shots/11-S3-show-step1.png, docs/gslides-parity/verification-5/preview-walk-shots/12-S3-show-step2.png, docs/gslides-parity/verification-5/preview-walk-shots/13-S3-show-step3.png"
+    },
+    {
+      "n": 8,
+      "id": "S3c",
+      "name": "Left arrow reverses one step",
+      "expected": "step 2",
+      "observed": "{\"step\":\"2\",\"hidden\":0}",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/14-S3-show-left.png"
+    },
+    {
+      "n": 9,
+      "id": "M1",
+      "name": "the presenter and the audience share the steps through the channel",
+      "expected": "connected; Next in the console advances the audience; the audience click reaches the console",
+      "observed": "connected false; audience data-steps 3; console [null,null,null]; audience step after Next 0; next preview data-step -1",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/15-M1-audience-step0.png, docs/gslides-parity/verification-5/preview-walk-shots/16-M1-presenter-step0.png, docs/gslides-parity/verification-5/preview-walk-shots/17-M1-audience-step1.png, docs/gslides-parity/verification-5/preview-walk-shots/18-M1-presenter-step1.png, docs/gslides-parity/verification-5/preview-walk-shots/19-M1-presenter-step2.png"
+    },
+    {
+      "n": 10,
+      "id": "M1b",
+      "name": "the pen stroke reaches the console",
+      "expected": "data-strokes 1",
+      "observed": "data-strokes undefined",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/20-M1-presenter-stroke.png"
+    },
+    {
+      "n": 11,
+      "id": "S4",
+      "name": "Edit theme: the mode, Text and background 1 and Accent 1 set, renamed, every slide follows, the panel lists it",
+      "expected": "the mode with its toolbar; theme.set and theme.rename answer; the panel names the edited theme",
+      "observed": "mode entered toolbar [\"themeMode.background\",\"themeMode.colors\",\"themeMode.fonts\",\"themeMode.placeholder\",\"themeMode.rename\",\"themeMode.exit\"]; theme.set {\"path\":\"/colors/light/ink\",\"value\":\"#1a3d8f\",\"themeEdits\":{\"colors\":{\"light\":{\"ink\":\"#1a3d8f\"}}},\"revision\":1}; accent {\"error\":\"Error: page.evaluate: Error: theme.set: Unknown colour slot \\\"accent\\\"; rename {\"error\":\"Error: page.evaluate: Error: The presentation moved to revision 1 while this change was on; heading colour title rgb(242, 242, 240), pricing rgb(242, 242, 240); panel edited row null",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/21-S4-theme-mode.png, docs/gslides-parity/verification-5/preview-walk-shots/22-S4-title-after-theme-set.png, docs/gslides-parity/verification-5/preview-walk-shots/23-S4-pricing-after-theme-set.png, docs/gslides-parity/verification-5/preview-walk-shots/24-S4-themes-panel.png"
+    },
+    {
+      "n": 12,
+      "id": "S4b",
+      "name": "a picture in the corner slot and the deck saved as a template of the organisation",
+      "expected": "the mark slot takes a picture; a template save",
+      "observed": "not driven: no template save action exists in SPEC-5 13; the corner picture needs an asset in the copy (the walk plants none)",
+      "ok": null,
+      "shot": null
+    },
+    {
+      "n": 13,
+      "id": "S5a",
+      "name": "File > Print settings and preview offers 3 slides per page with note lines on Letter",
+      "expected": "a \"3 slides per page\" row enabled and a paper dropdown",
+      "observed": "layout rows [{\"label\":\"1 slide without notes\",\"disabled\":false,\"value\":\"slides\"},{\"label\":\"1 slide with notes\",\"disabled\":false,\"value\":\"notes\"},{\"label\":\"Handout (2 slides per page)\",\"disabled\":true,\"value\":\"handout-2\"},{\"label\":\"Handout (3 slides per page)\",\"disabled\":true,\"value\":\"handout-3\"},{\"label\":\"Handout (4 slides per page)\",\"disabled\":true,\"value\":\"handout-4\"},{\"label\":\"Handout (6 slides per page)\",\"disabled\":true,\"value\":\"handout-6\"},{\"label\":\"Handout (9 slides per page)\",\"disabled\":true,\"value\":\"handout-9\"}]; paper dropdown absent",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/25-S5-print-layout-dropdown.png"
+    },
+    {
+      "n": 14,
+      "id": "S5b",
+      "name": "Download as PowerPoint offers Editable text and Perfect",
+      "expected": "two mode rows",
+      "observed": "modes [\"dialog.download.mode.flatten\",\"dialog.download.mode.native\"]",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/26-S5-download-dialog.png"
+    },
+    {
+      "n": 15,
+      "id": "S5c",
+      "name": "the Editable text file keeps the animations and the embedded video; the Perfect file shows every object at rest",
+      "expected": "bldP and a:videoFile in the native file; perfect: true",
+      "observed": "not driven: read on the checkout with the CLI (VERIFICATION-5.md section 6, the sales-pitch export of check step 34); the preview export writes a download the walk does not fetch",
+      "ok": null,
+      "shot": null
+    },
+    {
+      "n": 16,
+      "id": "S6",
+      "name": "chat",
+      "expected": "the message reaches B",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" role=\"menuitem\" data-focusable=\"\" data-status=\"later\" aria-disabled=\"true\" data-tip=\"Join chat\" class",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/27-S6-error.png"
+    },
+    {
+      "n": 17,
+      "id": "S7a",
+      "name": "deck.setPageSize standard-4-3 keeps every object and the stage turns 4:3",
+      "expected": "data-page 1200x900, the sheet at 4:3, the title slide's blocks unchanged",
+      "observed": "deck.setPageSize {\"error\":\"Error: page.evaluate: TypeError: deck.setPageSize: invalid input at /mode: Unrecognized key: \\\"mode\\\"\\n    at Object.dispatch (https://turboslide-ho9r; data-page undefined -> undefined; sheet aspect 1.778; blocks unchanged true; deck.info page undefined",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/28-S7-editor-4-3.png"
+    },
+    {
+      "n": 18,
+      "id": "S7b",
+      "name": "File > Page setup opens the dialog",
+      "expected": "a Page setup dialog",
+      "observed": "row {\"disabled\":\"true\",\"tip\":\"Page setup\"}; dialog none",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/29-S7-file-menu-page-setup.png"
+    },
+    {
+      "n": 19,
+      "id": "S7c",
+      "name": "an imported 4:3 .pptx is 4:3 in the editor and in every export",
+      "expected": "a 4:3 source page",
+      "observed": "not driven: none of the five fixtures is 4:3 (every source page is 1600 by 900); the export of the 4:3 fixture deck is read on the checkout (VERIFICATION-5.md section 6)",
+      "ok": null,
+      "shot": null
+    },
+    {
+      "n": 20,
+      "id": "K1",
+      "name": "Kevin's report 1",
+      "expected": "no stale revision",
+      "observed": "threw: TimeoutError: locator.dblclick: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.ts-stagewrap.ts-editor [data-prompt]').first()\n    - locator resolved to <span class=\"prompt\" data-prompt=\"\" aria-hidden=\"true\">Click to add title</span>\n  - attempting dblclick action\n    2 × waiting for e",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/30-K1-error.png"
+    },
+    {
+      "n": 21,
+      "id": "T1 motion 1440 light",
+      "name": "Motion panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 6 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/31-T1-motion-1440-light.png"
+    },
+    {
+      "n": 22,
+      "id": "T1 spellCheck 1440 light",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 23,
+      "id": "T1 chat 1440 light",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 24,
+      "id": "T1 dictionary 1440 light",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/32-T1-dictionary-1440-light.png"
+    },
+    {
+      "n": 25,
+      "id": "T1 equation 1440 light",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/33-T1-equation-1440-light.png"
+    },
+    {
+      "n": 26,
+      "id": "T1 themeMode 1440 light",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/34-T1-themeMode-1440-light.png"
+    },
+    {
+      "n": 27,
+      "id": "T1 motion 1440 dark",
+      "name": "Motion panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 6 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/35-T1-motion-1440-dark.png"
+    },
+    {
+      "n": 28,
+      "id": "T1 spellCheck 1440 dark",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 29,
+      "id": "T1 chat 1440 dark",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 30,
+      "id": "T1 dictionary 1440 dark",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/36-T1-dictionary-1440-dark.png"
+    },
+    {
+      "n": 31,
+      "id": "T1 equation 1440 dark",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/37-T1-equation-1440-dark.png"
+    },
+    {
+      "n": 32,
+      "id": "T1 themeMode 1440 dark",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": "docs/gslides-parity/verification-5/preview-walk-shots/38-T1-themeMode-1440-dark.png"
+    },
+    {
+      "n": 33,
+      "id": "T1 motion 1280 light",
+      "name": "Motion panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 6 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 34,
+      "id": "T1 spellCheck 1280 light",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 35,
+      "id": "T1 chat 1280 light",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 36,
+      "id": "T1 dictionary 1280 light",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 37,
+      "id": "T1 equation 1280 light",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 38,
+      "id": "T1 themeMode 1280 light",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 39,
+      "id": "T1 motion 1280 dark",
+      "name": "Motion panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 6 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 40,
+      "id": "T1 spellCheck 1280 dark",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 41,
+      "id": "T1 chat 1280 dark",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 42,
+      "id": "T1 dictionary 1280 dark",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 43,
+      "id": "T1 equation 1280 dark",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 44,
+      "id": "T1 themeMode 1280 dark",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 45,
+      "id": "T1 motion 390 light",
+      "name": "Motion panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"toolbar.transition\"]')\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 46,
+      "id": "T1 spellCheck 390 light",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 47,
+      "id": "T1 chat 390 light",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 48,
+      "id": "T1 dictionary 390 light",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 49,
+      "id": "T1 equation 390 light",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 50,
+      "id": "T1 themeMode 390 light",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 51,
+      "id": "T1 motion 390 dark",
+      "name": "Motion panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"toolbar.transition\"]')\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 52,
+      "id": "T1 spellCheck 390 dark",
+      "name": "Spell check card",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"] [data-menu-item=\"tools.spelling.spellCheck\"]').first() to be visible\n",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 53,
+      "id": "T1 chat 390 dark",
+      "name": "Chat panel",
+      "expected": "the cell",
+      "observed": "threw: TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.joinChat\"]')\n    - locator resolved to <button type=\"button\" r",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 54,
+      "id": "T1 dictionary 390 dark",
+      "name": "Dictionary panel open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 3 interactive, 0 without a tooltip [], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 55,
+      "id": "T1 equation 390 dark",
+      "name": "equation toolbar open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "DID NOT OPEN; 0 interactive, 0 without a tooltip [], 0 title only; layout shift entries 1 (value 0.0001) [\"ts-chip is-live\"]",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 56,
+      "id": "T1 themeMode 390 dark",
+      "name": "theme mode open: every control has a tooltip and the opening shifts nothing",
+      "expected": "0 controls without data-tip; 0 layout shift entries",
+      "observed": "opened; 40 interactive, 7 without a tooltip [\"themeMode.frame.rails\",\"themeMode.frame.rules\",\"themeMode.frame.crosses\",\"themeMode.counter.show\",\"themeMode.counter.side\",\"themeMode.counter.format\",\"themeMode.chips.show\"], 0 title only; layout shift entries 0 (value 0) []",
+      "ok": false,
+      "shot": null
+    },
+    {
+      "n": 57,
+      "id": "cleanup",
+      "name": "gt-brand",
+      "expected": "trashed and deleted forever",
+      "observed": "deck.info 200 (revision 32); deck.trash 200; deck.remove 200",
+      "ok": true,
+      "shot": null
+    },
+    {
+      "n": 58,
+      "id": "cleanup",
+      "name": "v5-sales-pi-op4ij",
+      "expected": "trashed and deleted forever",
+      "observed": "deck.info 200 (revision 1); deck.trash 200; deck.remove 200",
+      "ok": true,
+      "shot": null
+    }
+  ]
+}

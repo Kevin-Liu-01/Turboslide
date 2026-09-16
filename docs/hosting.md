@@ -871,3 +871,27 @@ of the round on a preview: `/home` (200, the hero sentence, a CDN `HIT` on the s
 icon paths and `/og/turboslide.png` with the CDN hit, the thumbnail 302 or body, the backend
 assertion with the glibc record, one render and one template copy of the GT deck (200 and 202
 twins).
+
+## 13. Round five: the WebSocket flag, the dictionary switch, the vitals route
+
+The Google Slides parity round five (`docs/gslides-parity/SPEC-5.md` sections 7.4, 11 and 17;
+`docs/gslides-parity/BUILD-STATUS-5.md` "Merge 2") adds three switches and one route. Written on
+2026-09-15 at merge 2 of that round; each row names the file that reads it.
+
+| Variable                 | Set by          | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_REALTIME_WS` | you, a checkout | `1` tells the editor's room client to open one WebSocket per deck (`apps/studio/src/server/write.ts` `room.ws`; `packages/realtime/src/client/ws.ts`) at `ws://<host>:4322/api/decks/<id>/ws` with the SSE transport as the fallback for a write while the socket is down; ignored on Vercel, where a function never upgrades a request. On a checkout `node scripts/ws-sidecar.mjs --studio http://localhost:4321 --port 4322` stands in for the node-server preset's upgrade route, which is not written yet (BUILD-STATUS-5, merge 2 deviations) |
+| `TURBOSLIDE_DICTIONARY`  | you             | `panel` proxies Wiktionary definitions through `GET /api/define` (`safeFetch`, a `User-Agent`, the HTML stripped) for Tools > Dictionary; `link` answers the address alone and the panel shows a link; unset, a Vercel instance proxies and a checkout links (`apps/studio/src/routes/api/define.ts`, B5)                                                                                                                                                                                                                                           |
+| the YouTube Data API key | reserved        | the Search YouTube tab of Insert > Video stays drawn and disabled until Kevin adds the key and its quota (SPEC-5 17 row 3); no variable is read yet, so the name is chosen with the key                                                                                                                                                                                                                                                                                                                                                             |
+
+`POST /api/vitals` (`apps/studio/src/routes/api/vitals.ts`) takes the field sample of one page load
+in ten (`components/VitalsReporter.tsx`: INP, LCP, CLS with attribution, at most 1 KB, no identity),
+answers 204, and appends the sample to `vitals/<date>.jsonl` under the instance's state folder
+behind the response; on the blob backend the day file is mirrored to the export client under
+`vitals/<date>/<instance>.jsonl`. The route limits each address to 60 samples a minute in memory,
+so the count holds per instance the way the other memory limiters do (section 11). `GET
+/api/vitals?report=1` answers the p75 per route family and metric over the samples this instance
+holds; `node scripts/vitals-report.mjs --base <origin>` prints the same table, and
+`scripts/perf-budget.mjs --profile deployment` reads the INP row against its 200 ms ceiling
+(`docs/performance.md` section 3.7). The route needs no bearer: the body names no deck and no
+principal, and a flood is bounded by the limiter and the WAF rules.

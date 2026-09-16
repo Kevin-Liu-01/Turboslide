@@ -38,11 +38,12 @@ import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import type { GuidesInput } from '@turboslide/schema/canvas';
-import { GUIDE_CENTRE } from '@turboslide/schema/canvas';
+import { guideCentre } from '@turboslide/schema/canvas';
 import { isMultilinePath, isMultilineType } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
 import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
 import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
+import { canvasObjects, slideBlocks } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type {
   AlignEdge,
@@ -50,12 +51,17 @@ import type {
   DistributeAxis,
   OrderMove,
 } from '@turboslide/schema/freeform';
-import { sortByZ } from '@turboslide/schema/freeform';
+import type { SelectionLevel } from '@turboslide/schema/freeform';
+import { selectionAtLevel, selectionLevelOnClick, sortByZ } from '@turboslide/schema/freeform';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
+import { groupDepth } from '@turboslide/schema/position';
+import type { Preferences } from '@turboslide/schema/preferences';
+import { PRODUCT_TOKENS } from '@turboslide/theme/copy';
 import { applyMutations } from '@turboslide/schema/reduce';
-import type { Box } from '@turboslide/schema/render';
+import type { Box, Page } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, deckPage, pageBox, pageCentre } from '@turboslide/schema/render';
 import { isClosedShapeKind } from '@turboslide/schema/shapes';
 import type { Text as Markup } from '@turboslide/schema/text';
 import { canonicalText, parseText, plainLength } from '@turboslide/schema/text';
@@ -245,6 +251,8 @@ export type RulersView = {
   pointer: Point | null;
   /** the selection's bounding box in sheet pixels, shaded on both rulers */
   selection: Box | null;
+  /** the deck's page in sheet pixels, the rulers' length (gslides-parity SPEC-5 6.1); the default page when absent */
+  page?: Pick<Page, 'width' | 'height'>;
 };
 
 /**
@@ -579,6 +587,16 @@ export type EditorProps = {
    * the route passes nothing.
    */
   mode?: 'editing' | 'commenting' | 'viewing';
+  /* round five (gslides-parity SPEC-5 3.2, 7.1; b2.md R7, b5.md R15) */
+  /**
+   * An audio or video file dropped or pasted on the stage (SPEC-5 3.2): the shell inserts it
+   * through the media intake at the drop point; without the prop a media file is ignored.
+   */
+  onMediaFile?: (file: File, point?: Point) => void;
+  /** The caller's preferences (SPEC-5 7.1): the autocorrect rules of an inline session run when present. */
+  preferences?: Preferences;
+  /** The deck's language tag; en-US when absent. */
+  language?: string;
 };
 
 type Editing = {
@@ -621,6 +639,14 @@ type CropState = {
 
 /** A body drag starts once the pointer has moved this many CSS pixels from the press. */
 const DRAG_START_PX = 4;
+/** The audio and video files the media intake reads (gslides-parity SPEC-5 3.2), by extension or declared type. */
+const MEDIA_FILE = /\.(mp4|m4v|webm|mp3|m4a|wav)$/i;
+/** The first audio or video file of a transfer, or undefined. */
+function mediaFileOf(transfer: DataTransfer | null | undefined): File | undefined {
+  return Array.from(transfer?.files ?? []).find(
+    (file) => MEDIA_FILE.test(file.name) || /^(audio|video)\//.test(file.type),
+  );
+}
 /** How long the stage waits for a server write (an asset) to reach the document before it gives up. */
 const ASSET_WAIT_MS = 20_000;
 /** The default box of a dropped picture (palette-data.ts DEFAULT_SIZE shot). */
@@ -734,15 +760,19 @@ function isCroppable(
   return block !== undefined && (block.type === 'picture' || block.type === 'shot');
 }
 
-/** True when the object covers the sheet at the bottom of the stack (the background photograph, SPEC-2 0.100). */
-function coversSheet(slide: Slide, blockId: string): boolean {
+/** True when the object covers the page at the bottom of the stack (the background photograph, SPEC-2 0.100). */
+function coversSheet(
+  slide: Slide,
+  blockId: string,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): boolean {
   const blocks = freeformBlocks(slide);
   const block = blocks.find((each) => each.id === blockId);
   if (!block || block.type !== 'picture' || !block.pos) return false;
   const stack = sortByZ(blocks);
   if (stack[0]?.id !== blockId) return false;
   const b = boundingBoxOf(block.pos);
-  return b[0] <= 0 && b[1] <= 0 && b[0] + b[2] >= 1600 && b[1] + b[3] >= 900;
+  return b[0] <= 0 && b[1] <= 0 && b[0] + b[2] >= page.width && b[1] + b[3] >= page.height;
 }
 
 export function Editor({
@@ -786,6 +816,9 @@ export function Editor({
   onCanvasConvert,
   onCaret,
   mode: modeProp,
+  onMediaFile,
+  preferences,
+  language,
 }: EditorProps) {
   const slide = doc.slides[slideId];
   const [draft, setDraft] = useState<DeckDocument | null>(null);
@@ -866,6 +899,11 @@ export function Editor({
   /* the listeners bound once read the latest values through these refs */
   const docRef = useRef(doc);
   docRef.current = doc;
+  /* the deck's page (gslides-parity SPEC-5 6.1): the sheet's size, the stage scale, the snap
+     lines, the guide clamps and every default box derive from it; 1600 by 900 for a deck without one */
+  const page = deckPage(doc.deck);
+  const pageRef = useRef(page);
+  pageRef.current = page;
   /* the revision the next write is based on: the document's, bumped once per write this tick
      issues, because the page's reducer applies a write before React re-renders this ref */
   const revisionRef = useRef(doc.deck.revision);
@@ -891,6 +929,8 @@ export function Editor({
   const cropRef = useRef(crop);
   cropRef.current = crop;
   const groupEnteredRef = useRef(groupEntered);
+  /** the nesting level the selection stands at inside a nested group (SPEC-5 0.48); null when none */
+  const groupLevelRef = useRef<SelectionLevel | null>(null);
   groupEnteredRef.current = groupEntered;
   const themeRef = useRef(theme);
   themeRef.current = theme;
@@ -946,6 +986,8 @@ export function Editor({
   const onNoticeRef = useRef(onNotice);
   onNoticeRef.current = onNotice;
   const onUndoRef = useRef(onUndo);
+  const onMediaFileRef = useRef(onMediaFile);
+  onMediaFileRef.current = onMediaFile;
   onUndoRef.current = onUndo;
   const onRedoRef = useRef(onRedo);
   onRedoRef.current = onRedo;
@@ -1037,7 +1079,7 @@ export function Editor({
   const measure = () => {
     const el = body.current;
     if (!el) return;
-    const next = measureBoxes(el);
+    const next = measureBoxes(el, pageRef.current);
     if (!next) return;
     setBoxes((prev) => (jsonEqual(prev, next) ? prev : next));
   };
@@ -1108,7 +1150,7 @@ export function Editor({
     boxesNow: MeasuredBoxes,
   ): { slide: FreeformSlide; replace: Mutation } | null => {
     if (isFreeformSlide(slideNow)) return null;
-    const converted = toFreeform(slideNow, boxesNow);
+    const converted = toFreeform(slideNow, boxesNow, pageRef.current);
     if (!converted) return null;
     return {
       slide: converted.slide,
@@ -1130,11 +1172,11 @@ export function Editor({
       const measured = await measureForCanvas(docRef.current, slideNow, themeRef.current, {
         assetBase: assetBaseRef.current,
       });
-      converted = toFreeform(slideNow, measured);
+      converted = toFreeform(slideNow, measured, pageRef.current);
     } catch (error) {
       onErrorRef.current?.(error);
     }
-    if (!converted) converted = toFreeform(slideNow, boxesRef.current);
+    if (!converted) converted = toFreeform(slideNow, boxesRef.current, pageRef.current);
     if (!converted) return null;
     return {
       slide: converted.slide,
@@ -1526,6 +1568,87 @@ export function Editor({
     return block !== undefined && listAppendMutation(slideNow, block, current.pointer) !== null;
   };
 
+  /**
+   * A typed list prefix then a space (gslides-parity SPEC-5 7.1; R10 1.4; b5.md R15): the block
+   * converts to a list in place (a paragraph or text box becomes a `plain` block with one item
+   * per paragraph, the way `text.list` converts it) with the typed prefix removed from the first
+   * item, in one commit; a block that is a list already takes the marker. True when the Editor
+   * took the keystroke over.
+   */
+  const onList = (
+    list: { marker: 'bullet' | 'number'; preset?: string },
+    prefixLength: number,
+  ): boolean => {
+    const current = editingRef.current;
+    const slideNow = slideRef.current;
+    if (!current || !slideNow) return false;
+    const block = blockById(slideNow, current.blockId);
+    if (!block) return false;
+    const strip = (text: string): string =>
+      text.slice(Math.max(0, prefixLength)).replace(/^\s/, '');
+    if (block.type === 'plain') {
+      const items = block.items.map((item, index) =>
+        index === 0 ? { ...item, text: strip(item.text) } : item,
+      );
+      commit([
+        { op: 'block.set', slideId: slideNow.id, blockId: block.id, path: '/items', value: items },
+        {
+          op: 'block.set',
+          slideId: slideNow.id,
+          blockId: block.id,
+          path: '/marker',
+          value: list.marker,
+        },
+        ...(list.preset !== undefined
+          ? [
+              {
+                op: 'block.set' as const,
+                slideId: slideNow.id,
+                blockId: block.id,
+                path: '/preset',
+                value: list.preset,
+              },
+            ]
+          : []),
+      ]);
+      return true;
+    }
+    if (block.type !== 'paragraph' && block.type !== 'text' && block.type !== 'box') return false;
+    const paragraphs = (block.text ?? '')
+      .split(/\n{2,}|\r\n\r\n/)
+      .filter((paragraph) => paragraph.trim() !== '');
+    const items = (paragraphs.length > 0 ? paragraphs : ['']).map((text, index) => ({
+      text: index === 0 ? strip(text) : text,
+    }));
+    const placed = slideBlocks(slideNow);
+    const index = placed.findIndex((row) => row.block.id === block.id);
+    const row = placed[index];
+    if (row === undefined) return false;
+    const before = placed
+      .slice(0, index)
+      .filter((candidate) => candidate.slot === row.slot)
+      .at(-1);
+    const converted = {
+      id: block.id,
+      type: 'plain',
+      marker: list.marker,
+      ...(list.preset !== undefined ? { preset: list.preset } : {}),
+      items,
+      ...(block.pos !== undefined ? { pos: block.pos } : {}),
+    } as Block;
+    commit([
+      { op: 'block.remove', slideId: slideNow.id, blockId: block.id },
+      {
+        op: 'block.insert',
+        slideId: slideNow.id,
+        slot: row.slot,
+        ...(before !== undefined ? { after: before.block.id } : {}),
+        block: converted,
+      },
+    ]);
+    return true;
+  };
+
   /** True when the run being edited is an item of a list with more than one item: Backspace on an empty one removes it (SPEC 7.4). */
   const onListBackspace = (): boolean => {
     const current = editingRef.current;
@@ -1674,14 +1797,21 @@ export function Editor({
 
   /* the zoom centre: the stage scrolls the named sheet point under its centre (SPEC-2 0.81) */
   const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
-  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, pad, zoom });
+  const fitted = fitSheetAt({
+    aw: stageSize.width,
+    ah: stageSize.height,
+    w: page.width,
+    h: page.height,
+    pad,
+    zoom,
+  });
   /* the same placement Sheet makes: under the toolbar on a narrow viewport */
   const fit = narrow && !present && zoom === 'fit' ? { ...fitted, top: pad } : fitted;
   const k = fit.scale;
   useLayoutEffect(() => {
     const el = scroller.current;
     if (!el || zoom === 'fit') return;
-    const center = zoomCenter ?? { x: 800, y: 450 };
+    const center = zoomCenter ?? pageCentre(page);
     const target = scrollForCenter(center, fit, stageSize);
     el.scrollLeft = target.left;
     el.scrollTop = target.top;
@@ -1703,9 +1833,9 @@ export function Editor({
     const spacing: Box[] = [];
     if (settings.snapGuides) {
       lines.push(
-        ...sheetEdgeLines(),
-        ...sheetSnapLines(),
-        ...deckGuideLines(deckGuidesRef.current),
+        ...sheetEdgeLines(pageRef.current),
+        ...sheetSnapLines(pageRef.current),
+        ...deckGuideLines(deckGuidesRef.current, pageRef.current),
       );
       for (const block of freeformBlocks(canvas)) {
         if (ids.includes(block.id)) continue;
@@ -1827,20 +1957,24 @@ export function Editor({
     const slideNow = slideRef.current;
     const rect = stageRect();
     if (!slideNow || !rect || editingRef.current || gesture.current) return;
-    const start = sheetPoint(rect, clientX, clientY);
+    const start = sheetPoint(rect, clientX, clientY, pageRef.current);
     const boxesNow = boxesRef.current;
     const canvasKind =
       handle.kind === 'free-move' ||
       handle.kind === 'free-resize' ||
       handle.kind === 'free-rotate' ||
       handle.kind === 'line-end';
-    let ctx: GestureContext = { slide: slideNow, boxes: boxesNow };
+    let ctx: GestureContext = { slide: slideNow, boxes: boxesNow, page: pageRef.current };
     let convert: Mutation | null = null;
     if (canvasKind && !isFreeformSlide(slideNow)) {
       const provisional = provisionalCanvas(slideNow, boxesNow);
       if (!provisional) return;
       convert = provisional.replace;
-      ctx = { slide: provisional.slide, boxes: boxesFromPositions(provisional.slide, boxesNow) };
+      ctx = {
+        slide: provisional.slide,
+        boxes: boxesFromPositions(provisional.slide, boxesNow),
+        page: pageRef.current,
+      };
     }
     if (handle.blockId !== undefined && canvasKind) {
       const selected = selectedIds(selectionRef.current, extraRef.current);
@@ -1886,7 +2020,7 @@ export function Editor({
       const g = gesture.current;
       const r = stageRect();
       if (!g || !r) return;
-      const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const now = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
       const mods = modsOf(ev);
       g.mods = mods;
       if (g.handle.kind === 'block-move' && g.handle.blockId !== undefined) {
@@ -1928,7 +2062,7 @@ export function Editor({
         setDraft(null);
         return;
       }
-      const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const now = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
       if (!g.convert) {
         const { mutations } = gestureAt(g, now, mods);
         void finishCanvasGesture(g, mutations);
@@ -1948,6 +2082,7 @@ export function Editor({
           ctx: {
             slide: measured.slide,
             boxes: boxesFromPositions(measured.slide, boxesNow),
+            page: pageRef.current,
             ...(g.ctx.free
               ? {
                   free: freeContextFor(
@@ -2119,13 +2254,13 @@ export function Editor({
     const state = cropRef.current;
     const rect = stageRect();
     if (!state || !rect) return;
-    const start = sheetPoint(rect, clientX, clientY);
+    const start = sheetPoint(rect, clientX, clientY, pageRef.current);
     const origin = { frame: state.frame, trim: state.trim };
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       const current = cropRef.current;
       if (!r || !current) return;
-      const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const now = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
       const dx = now.x - start.x;
       const dy = now.y - start.y;
       if (dir === 'pan' || dir === undefined) {
@@ -2223,7 +2358,7 @@ export function Editor({
   const insertTextBlock = (text: string, point?: Point) => {
     const markup = canonicalText(text.replace(/\r\n?/g, '\n').trim());
     const [w, h] = TOOL_DEFAULT_SIZE.text;
-    const box: Box = point ? [point.x, point.y, w, h] : centredBox([w, h]);
+    const box: Box = point ? [point.x, point.y, w, h] : centredBox([w, h], pageRef.current);
     insertObject({ id: 'text', type: 'text', text: markup, autofit: 'grow' } as Block, { box });
   };
 
@@ -2534,7 +2669,8 @@ export function Editor({
         const stack = freeformBlocks(canvas);
         const size = TOOL_DEFAULT_SIZE[block.type as keyof typeof TOOL_DEFAULT_SIZE] ?? [320, 160];
         const box =
-          options.box ?? (block.type === 'picture' ? [0, 0, 1600, 900] : centredBox(size));
+          options.box ??
+          (block.type === 'picture' ? pageBox(pageRef.current) : centredBox(size, pageRef.current));
         const bottom = options.bottom === true || block.type === 'picture';
         const z = bottom ? -1 : Math.max(0, ...stack.map((b) => b.pos?.z ?? 0)) + 1;
         const pos: Position = {
@@ -2748,7 +2884,9 @@ export function Editor({
   const alignSelection = (edge: AlignEdge, to?: AlignTarget) => {
     const ids = selectedObjectIds();
     if (ids.length === 0) return;
-    void commitCanvas((canvas, boxesNow) => alignMutations(canvas, ids, boxesNow, edge, to));
+    void commitCanvas((canvas, boxesNow) =>
+      alignMutations(canvas, ids, boxesNow, edge, to, pageRef.current),
+    );
   };
 
   const distributeSelection = (axis: DistributeAxis) => {
@@ -2823,7 +2961,7 @@ export function Editor({
   };
 
   const addGuide = (axis: 'x' | 'y', at?: number) => {
-    onGuidesRef.current?.({ add: [{ axis, at: at ?? GUIDE_CENTRE[axis] }] });
+    onGuidesRef.current?.({ add: [{ axis, at: at ?? guideCentre(pageRef.current)[axis] }] });
   };
 
   const clearGuides = () => {
@@ -2843,7 +2981,7 @@ export function Editor({
         typography: { size: 88, weight: 500, align: 'center' },
         outline: { color: 'ink', width: 1.5 },
       } as Block,
-      { box: centredBox([w, h]) },
+      { box: centredBox([w, h], pageRef.current) },
     );
   };
 
@@ -2857,7 +2995,7 @@ export function Editor({
     insertObject(
       { id: 'text', type: 'text', text: canonicalText(text), autofit: 'grow' } as Block,
       {
-        box: centredBox([w, h]),
+        box: centredBox([w, h], pageRef.current),
       },
     );
   };
@@ -2938,7 +3076,10 @@ export function Editor({
       canvas: free,
       ...(group !== null ? { group } : {}),
       regroup: canRegroup(),
-      coversSheet: slideNow !== undefined && anchor !== undefined && coversSheet(slideNow, anchor),
+      coversSheet:
+        slideNow !== undefined &&
+        anchor !== undefined &&
+        coversSheet(slideNow, anchor, pageRef.current),
       ...(caretRef.current ? { marks: caretRef.current.marks, range: caretRef.current.range } : {}),
       imageEdited,
       ...(listLevel !== undefined ? { listLevel } : {}),
@@ -3034,7 +3175,7 @@ export function Editor({
     const box = anchor !== null ? boxesRef.current.blocks[anchor] : undefined;
     const rect = stageRect();
     if (!rect) return;
-    const kk = rect.width / 1600 || 1;
+    const kk = rect.width / pageRef.current.width || 1;
     const x = rect.left + (box ? (box[0] + box[2] / 2) * kk : rect.width / 2);
     const y = rect.top + (box ? (box[1] + box[3] / 2) * kk : rect.height / 2);
     const element =
@@ -3339,6 +3480,13 @@ export function Editor({
         if (first) void insertPicture(first);
         return;
       }
+      /* a media file (gslides-parity SPEC-5 3.2; b2.md R7): the shell's intake inserts it */
+      const media = mediaFileOf(e.clipboardData);
+      if (media !== undefined && onMediaFileRef.current !== undefined) {
+        e.preventDefault();
+        onMediaFileRef.current(media);
+        return;
+      }
       const text = e.clipboardData?.getData('text/plain') ?? '';
       const payload = decodeClipboard(text) ?? clipboardRef.current.last();
       if (payload === null) return;
@@ -3369,7 +3517,9 @@ export function Editor({
       const next = zoomFromWheel(current, e.deltaY);
       if (Math.abs(next - current) < 1e-4) return;
       const pointerAt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      const under = sheet ? sheetPoint(sheet, e.clientX, e.clientY) : { x: 800, y: 450 };
+      const under = sheet
+        ? sheetPoint(sheet, e.clientX, e.clientY, pageRef.current)
+        : pageCentre(pageRef.current);
       onZoomRef.current?.(
         next,
         centerKeepingPoint(under, pointerAt, { width: rect.width, height: rect.height }, next),
@@ -3442,9 +3592,12 @@ export function Editor({
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
-      const point = sheetPoint(r, ev.clientX, ev.clientY);
+      const point = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
       last = Math.round(axis === 'x' ? point.x : point.y);
-      last = Math.max(0, Math.min(axis === 'x' ? 1600 : 900, last));
+      last = Math.max(
+        0,
+        Math.min(axis === 'x' ? pageRef.current.width : pageRef.current.height, last),
+      );
       setDraggingGuide({ axis, at: last, label: inchesLabel(last), from: at });
     };
     const up = () => {
@@ -3474,10 +3627,10 @@ export function Editor({
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
-      const kk = r.width / 1600 || 1;
+      const kk = r.width / pageRef.current.width || 1;
       const edge = axis === 'x' ? r.left : r.top;
       const client = axis === 'x' ? ev.clientX : ev.clientY;
-      const at = rulerToSheet(axis, client, edge, kk);
+      const at = rulerToSheet(axis, client, edge, kk, pageRef.current);
       const inside = axis === 'x' ? ev.clientY >= r.top - 1 : ev.clientX >= r.left - 1;
       last = inside ? at : null;
       setDraggingGuide(inside ? { axis, at, label: inchesLabel(at) } : null);
@@ -3500,7 +3653,7 @@ export function Editor({
     if (!el || !slideNow) return;
     if (settingsRef.current.showRuler) {
       const rect = stageRect();
-      if (rect) setPointer(sheetPoint(rect, e.clientX, e.clientY));
+      if (rect) setPointer(sheetPoint(rect, e.clientX, e.clientY, pageRef.current));
     }
     if (gesture.current) return;
     const id = resolveObject(e.target, el, slideNow);
@@ -3508,7 +3661,8 @@ export function Editor({
     const drawTool = toolRef.current;
     if (drawTool !== 'select' && isLineTool(drawTool) && isFreeformSlide(slideNow)) {
       const rect = stageRect();
-      if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
+      if (rect)
+        setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY, pageRef.current)));
     }
   };
 
@@ -3541,14 +3695,14 @@ export function Editor({
   const armMarquee = (clientX: number, clientY: number) => {
     const rect = stageRect();
     if (!rect) return;
-    const start = sheetPoint(rect, clientX, clientY);
+    const start = sheetPoint(rect, clientX, clientY, pageRef.current);
     let live = false;
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       const slideNow = slideRef.current;
       const el = body.current;
       if (!r || !slideNow || !el) return;
-      const box = marqueeBox(start, sheetPoint(r, ev.clientX, ev.clientY));
+      const box = marqueeBox(start, sheetPoint(r, ev.clientX, ev.clientY, pageRef.current));
       if (!live && !isMarquee(box)) return;
       live = true;
       setMarquee(box);
@@ -3562,7 +3716,7 @@ export function Editor({
            is crossed by every marquee inside the sheet; it joins only when the marquee holds it
            whole, so a marquee over the plate selects the plate (SPEC-2 0.100) */
         if (
-          coversSheet(slideNow, id) &&
+          coversSheet(slideNow, id, pageRef.current) &&
           !(
             box[0] <= box2[0] &&
             box[1] <= box2[1] &&
@@ -3705,7 +3859,7 @@ export function Editor({
   ) => {
     const rect = stageRect();
     if (!rect) return;
-    const start = sheetPoint(rect, clientX, clientY);
+    const start = sheetPoint(rect, clientX, clientY, pageRef.current);
     if (isPointTool(drawTool)) {
       const points = drawPointsRef.current;
       const first = points[0];
@@ -3722,7 +3876,7 @@ export function Editor({
       const move = (ev: PointerEvent) => {
         const r = stageRect();
         if (!r) return;
-        const now = sheetPoint(r, ev.clientX, ev.clientY);
+        const now = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
         const last = samples[samples.length - 1];
         if (!last || Math.hypot(now.x - last.x, now.y - last.y) >= SCRIBBLE_SAMPLE_PX) {
           samples.push(now);
@@ -3748,7 +3902,12 @@ export function Editor({
       const r = stageRect();
       if (!r) return;
       current = { shift: ev.shiftKey, alt: ev.altKey };
-      const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY), current);
+      const drawn = drawnBox(
+        drawTool,
+        start,
+        sheetPoint(r, ev.clientX, ev.clientY, pageRef.current),
+        current,
+      );
       setMarquee(drawn.dragged ? drawn.box : null);
     };
     const finishDraw = (ev: PointerEvent) => {
@@ -3759,7 +3918,7 @@ export function Editor({
       setSites([]);
       const r = stageRect();
       if (!r) return;
-      const end = sheetPoint(r, ev.clientX, ev.clientY);
+      const end = sheetPoint(r, ev.clientX, ev.clientY, pageRef.current);
       const drawn = drawnBox(drawTool, start, end, current);
       const orientation =
         isLineTool(drawTool) && drawTool.line !== 'rule' && drawn.dragged
@@ -3822,7 +3981,7 @@ export function Editor({
     if (cropNow) {
       /* inside the frame a drag pans the picture; outside commits (SPEC-2 6.1 row 19) */
       const rect = stageRect();
-      const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : null;
+      const point = rect ? sheetPoint(rect, e.clientX, e.clientY, pageRef.current) : null;
       const [fx, fy, fw, fh] = cropNow.frame;
       if (point && point.x >= fx && point.x <= fx + fw && point.y >= fy && point.y <= fy + fh) {
         e.preventDefault();
@@ -3884,9 +4043,31 @@ export function Editor({
         return;
       }
     }
-    if (!selected.includes(id) || (grouped && selected.length === 1)) {
+    const groupPath = blockById(slideNow, id)?.pos?.group;
+    if (grouped && groupPath !== undefined && groupDepth(groupPath) > 1) {
+      /* nested groups (gslides-parity SPEC-5 0.48; b3.md B3-16): the first click selects the
+         outermost group, a click on a member already inside the selected group goes one level in,
+         until the member's own path is exhausted and the member stands alone; a click on a member
+         of another group starts again at the outermost */
+      const level = selectionLevelOnClick(
+        groupPath,
+        selected.includes(id) ? groupLevelRef.current : null,
+      );
+      groupLevelRef.current = level;
+      if (groupEnteredRef.current !== id) setGroupEntered(null);
+      if (level === null) {
+        setGroupEntered(id);
+        groupEnteredRef.current = id;
+        select({ kind: 'block', blockId: id }, []);
+      } else {
+        const members = selectionAtLevel(canvasObjects(slideNow), level);
+        const picked = selectionOf([id, ...members.filter((member) => member !== id)]);
+        select(picked.selection, picked.extra);
+      }
+    } else if (!selected.includes(id) || (grouped && selected.length === 1)) {
       /* a click on a member of a group selects the group, so the drag that follows moves it whole */
       if (groupEnteredRef.current !== id) setGroupEntered(null);
+      groupLevelRef.current = null;
       selectObjects([id]);
     }
     /* every object drags by its body: a picture, a shape, a material anywhere; the text of a
@@ -3986,10 +4167,23 @@ export function Editor({
     const files = imageFilesOf(e.dataTransfer);
     const el = body.current;
     const slideNow = slideRef.current;
-    if (files.length === 0 || !el || !slideNow) return;
+    if (!el || !slideNow) return;
+    if (files.length === 0) {
+      /* a media file (gslides-parity SPEC-5 3.2; b2.md R7): the shell's intake inserts it at the drop point */
+      const media = mediaFileOf(e.dataTransfer);
+      if (media !== undefined && onMediaFileRef.current !== undefined) {
+        e.preventDefault();
+        const rectNow = stageRect();
+        onMediaFileRef.current(
+          media,
+          rectNow ? sheetPoint(rectNow, e.clientX, e.clientY, pageRef.current) : undefined,
+        );
+      }
+      return;
+    }
     e.preventDefault();
     const rect = stageRect();
-    const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : undefined;
+    const point = rect ? sheetPoint(rect, e.clientX, e.clientY, pageRef.current) : undefined;
     const id = resolveObject(e.target, el, slideNow);
     const [first] = files;
     if (!first) return;
@@ -4002,6 +4196,8 @@ export function Editor({
 
   const selectedId = selectedBlockId(selection);
   const ids = selectedIds(selection, extra);
+  /* the block of the open inline session, for the autocorrect context (SPEC-5 7.1) */
+  const editingBlock = editing && slide ? blockById(slide, editing.blockId) : undefined;
   const anchorBlock = slide && selectedId !== null ? blockById(slide, selectedId) : undefined;
   const anchorPos: Position | null =
     anchorBlock?.pos ??
@@ -4028,6 +4224,7 @@ export function Editor({
     shownSlide && !editing && editable
       ? handlesFor(shownSlide, boxes, selection, {
           ids,
+          page,
           ...(crop ? { crop: { frame: crop.frame } } : {}),
         })
       : [];
@@ -4113,6 +4310,7 @@ export function Editor({
     rulers: showRuler
       ? {
           on: true,
+          page,
           pointer,
           selection:
             slide && ids.length > 0
@@ -4191,6 +4389,7 @@ export function Editor({
           edges={false}
           scrollerRef={scroller}
           onScroll={setScroll}
+          page={page}
         >
           <Frame index={index} total={total} />
           <div
@@ -4236,6 +4435,23 @@ export function Editor({
             autoLink={editing.link === true}
             onBurst={onBurst}
             onEnd={endEdit}
+            /* the autocorrect rules and the typed list prefix (gslides-parity SPEC-5 7.1; b5.md R15) */
+            autocorrect={
+              preferences === undefined
+                ? undefined
+                : {
+                    preferences,
+                    language: language ?? 'en-US',
+                    exceptions: [...preferences.spelling.dictionary, ...PRODUCT_TOKENS],
+                    isList: editingBlock?.type === 'plain' && editingBlock.marker !== undefined,
+                    listable:
+                      editingBlock?.type === 'paragraph' ||
+                      editingBlock?.type === 'text' ||
+                      editingBlock?.type === 'box' ||
+                      editingBlock?.type === 'plain',
+                  }
+            }
+            onList={onList}
             onListEnter={onListEnter}
             onListBackspace={onListBackspace}
             onListLevel={onListLevel}

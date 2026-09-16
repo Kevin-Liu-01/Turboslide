@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "t-dissolve",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Dissolve, the ellipse fades in on click",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "obj",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "text": "Fade in",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 600,
+          "y": 260,
+          "w": 400,
+          "h": 240,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "transition": {
+    "kind": "dissolve",
+    "durationMs": 500
+  },
+  "animations": [
+    {
+      "id": "a1",
+      "blockId": "obj",
+      "effect": "fadeIn",
+      "trigger": "click",
+      "durationMs": 1000
+    }
+  ]
+}

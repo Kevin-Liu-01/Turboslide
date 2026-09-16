@@ -212,7 +212,10 @@ describe('templates and deck heads', () => {
     expect(blank.record.id).toBe('blank');
     expect(blank.record.assets).toBe('assets');
     expect(() => parseTemplateRecord({ schemaVersion: 2 }, 'x')).toThrow(/schemaVersion/);
-    expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'nope' }, 'x')).toThrow(/id must/);
+    // round five widens the id to any template folder (gslides-parity SPEC-5 4.1): a non slug is the malformed form
+    expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'Not A Slug' }, 'x')).toThrow(
+      /id must/,
+    );
   });
 
   it('lists deck heads newest first and skips the templates folder', () => {

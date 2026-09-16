@@ -49,6 +49,12 @@
     },
     {
       "path": "../../packages/identity"
+    },
+    {
+      "path": "../../packages/spelling"
+    },
+    {
+      "path": "../../packages/viewer"
     }
   ]
 }

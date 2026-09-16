@@ -16,6 +16,7 @@ import type { MenuItem } from '@turboslide/chrome/menus/model';
 import { DIALOGS, HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { preferencesMirror } from '@turboslide/schema/preferences';
 
 import { useMountEffect } from '../components/useMountEffect';
 import { bundleDownloadTicket } from '../server/bundle';
@@ -29,6 +30,7 @@ import {
 } from '../server/decks';
 import type { DeckCard } from '../server/decks';
 import { getServerHealth } from '../server/health';
+import { createFromTemplate } from '../server/templates';
 import { RouterLinkSlot } from './-link-slot';
 import { parseRecentCookie, readOpened, readRecent, recordDeckOpened } from './-recent';
 import type { DeckOpenFacts, RecentEntry } from './-recent';
@@ -67,6 +69,38 @@ import './decks.css';
  * stays so every build carries the server-only marker scripts/check-client-bundle.mjs looks for
  * (AGENTS.md).
  */
+/**
+ * The strip's template cards after Blank and the GT brand deck (gslides-parity SPEC-5 0.22, 4.2;
+ * B3): the Plate theme's blank and the three work templates a rep starts most; the gallery holds
+ * the rest. Each card is one `createFromTemplate` (deck.create --from <id>) and opens the editor.
+ */
+const STRIP_TEMPLATES: ReadonlyArray<{ id: string; name: string; glyph: string; doc: string }> = [
+  {
+    id: 'blank-plate',
+    name: 'Blank (Plate)',
+    glyph: 'Aa',
+    doc: 'An untitled presentation on the Plate theme.',
+  },
+  {
+    id: 'sales-pitch',
+    name: 'Sales pitch',
+    glyph: '15',
+    doc: 'Fifteen slides: the problem, the product, a demo clip, results, pricing and next steps.',
+  },
+  {
+    id: 'status-report',
+    name: 'Status report',
+    glyph: '8',
+    doc: 'Eight slides: the status board, progress, wins, risks and the decisions needed.',
+  },
+  {
+    id: 'consulting-proposal',
+    name: 'Consulting proposal',
+    glyph: '10',
+    doc: 'Ten slides: the situation, the scope, the approach, the timeline and the investment.',
+  },
+];
+
 export const Route = createFileRoute('/decks/')({
   loader: async () => {
     const [health, cookies] = await Promise.all([getServerHealth(), readHomeCookies()]);
@@ -445,6 +479,11 @@ function HomePage() {
   /* decks moved to the trash from this page and not yet reloaded: hidden at once, Undo shows them */
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
   const [creating, setCreating] = useState(false);
+  /* the Starred view (gslides-parity SPEC-5 7.7; b5.md section 2): the caller's `preferences.starred`
+     from the localStorage mirror after hydration (the record is per principal, never in the cookie),
+     and whether the list is filtered to it; the integrator at round five merge 2 */
+  const [starredIds, setStarredIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [starredOnly, setStarredOnly] = useState(false);
 
   useMountEffect(() => {
     /* this browser's history is read after hydration, so the server's HTML and the first client
@@ -454,8 +493,13 @@ function HomePage() {
     setOpened((current) => ({ ...current, ...readOpened() }));
     const stored = readRecent();
     if (stored.length > 0) setRecentRow(stored);
+    const readStarred = () =>
+      setStarredIds(new Set(preferencesMirror(window.localStorage).read()?.starred ?? []));
+    readStarred();
+    window.addEventListener('ts-preferences', readStarred);
     setMounted(true);
     page.current?.setAttribute('data-hydrated', '');
+    return () => window.removeEventListener('ts-preferences', readStarred);
   });
 
   const choose = (patch: Partial<HomeSettings>) => {
@@ -564,6 +608,22 @@ function HomePage() {
     }
   };
 
+  const [creatingId, setCreatingId] = useState<string | null>(null);
+  const createFromStrip = async (card: (typeof STRIP_TEMPLATES)[number]) => {
+    if (creating) return;
+    setCreating(true);
+    setCreatingId(card.id);
+    try {
+      const created = await createFromTemplate({ from: card.id, name: card.name });
+      recordDeckOpened(created.deckId);
+      await navigate({ to: '/edit/$deckId', params: { deckId: created.deckId } });
+    } catch (error) {
+      snackbar.show(`${card.name}: ${errorMessage(error)}`);
+      setCreating(false);
+      setCreatingId(null);
+    }
+  };
+
   const now = new Date();
   const listProps: ListProps = {
     query,
@@ -579,6 +639,7 @@ function HomePage() {
     onRename: (card, name) => void rename(card, name),
     onCopied: () => void refresh(),
     onError: (message) => snackbar.show(message),
+    starred: starredOnly ? starredIds : null,
   };
 
   return (
@@ -598,23 +659,37 @@ function HomePage() {
             onChange={(event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
             {...tipProps({ name: HOME.search, doc: 'Filters the list by title.' })}
           />
+          <button
+            type="button"
+            className="pt-ib ts-appbar-starred"
+            data-control="home.starred"
+            aria-pressed={starredOnly}
+            onClick={(event) => {
+              event.preventDefault();
+              setStarredOnly((current) => !current);
+            }}
+            {...tipProps({ name: HOME.starred, doc: HOME.starredDoc })}
+          >
+            <Icon name="star" />
+            {HOME.starred}
+          </button>
         </label>
       </header>
 
       <section className="ts-strip" id="templates" aria-labelledby="ts-strip-heading">
         <div className="ts-strip-head">
           <h2 id="ts-strip-heading">{HOME.startNew}</h2>
-          <a
+          <Link
+            to="/decks/templates"
             className="ts-strip-gallery"
-            href="#templates"
             data-control="home.gallery"
             {...tipProps({
               name: HOME.gallery,
-              doc: 'The templates a presentation can start from.',
+              doc: 'Every template a presentation can start from, by category.',
             })}
           >
             {HOME.gallery}
-          </a>
+          </Link>
         </div>
         <ul className="ts-strip-cards">
           <li>
@@ -648,6 +723,27 @@ function HomePage() {
               <span className="ts-template-label">{creating ? 'Opening' : HOME.gtBrand}</span>
             </button>
           </li>
+          {STRIP_TEMPLATES.map((card) => (
+            <li key={card.id}>
+              <button
+                type="button"
+                className="ts-template"
+                data-control={`home.template.${card.id}`}
+                disabled={creating}
+                onClick={() => void createFromStrip(card)}
+                {...tipProps({ name: card.name, doc: card.doc })}
+              >
+                <span className="ts-template-plate">
+                  <span className="ts-template-glyph" aria-hidden="true">
+                    {card.glyph}
+                  </span>
+                </span>
+                <span className="ts-template-label">
+                  {creatingId === card.id ? 'Opening' : card.name}
+                </span>
+              </button>
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -959,6 +1055,8 @@ function StoreList({ promise, ...props }: ListProps & { promise: Promise<DeckCar
 
 type ListProps = {
   query: string;
+  /** the starred ids when the Starred view is on, null for every presentation */
+  starred: ReadonlySet<string> | null;
   settings: HomeSettings;
   opened: Record<string, string>;
   mounted: boolean;
@@ -976,6 +1074,7 @@ type ListProps = {
 function DeckList({
   list,
   query,
+  starred,
   settings,
   opened,
   mounted,
@@ -997,10 +1096,12 @@ function DeckList({
     const needle = query.trim().toLowerCase();
     const filtered = list.filter(
       (card) =>
-        !hidden.has(card.id) && (needle === '' || card.title.toLowerCase().includes(needle)),
+        !hidden.has(card.id) &&
+        (starred === null || starred.has(card.id)) &&
+        (needle === '' || card.title.toLowerCase().includes(needle)),
     );
     return sortCards(filtered, settings.sort, opened);
-  }, [list, hidden, query, settings.sort, opened]);
+  }, [list, hidden, query, starred, settings.sort, opened]);
 
   const cardById = (deckId: string): DeckCard | undefined =>
     list.find((card) => card.id === deckId);
@@ -1066,6 +1167,12 @@ function DeckList({
                   {HOME_EMPTY.action}
                 </Link>
               }
+            />
+          ) : starred !== null && query.trim() === '' ? (
+            <EmptyFigure
+              figure="figure"
+              title={HOME.starredEmpty}
+              sentence={HOME.starredEmptySentence}
             />
           ) : (
             <EmptyFigure

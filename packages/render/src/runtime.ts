@@ -115,14 +115,17 @@ ${DITHER_SCRIPT}
     drawAllDither(stage, dark);
   }
   function setTheme(t, persist) { root.setAttribute('data-theme', t); if (persist) { store('gt-theme', t); store('gt-deck-theme', t); } applyTheme(); }
+  /* the deck's page from the stage root's custom properties, read once at boot (gslides-parity SPEC-5 6.1); the GT sheet when the root carries none */
+  var pageW = parseFloat(sheet.style.getPropertyValue('--ts-sheet-w')) || 1600;
+  var pageH = parseFloat(sheet.style.getPropertyValue('--ts-sheet-h')) || 900;
   function fit() {
     if (!wrap) return;
     var pad2 = window.innerWidth <= 900 ? 12 : 28;
-    var s = Math.max(0.05, Math.min((wrap.clientWidth - pad2 * 2) / 1600, (wrap.clientHeight - pad2 * 2) / 900));
-    var W = Math.round(1600 * s), H = Math.round(900 * s);
+    var s = Math.max(0.05, Math.min((wrap.clientWidth - pad2 * 2) / pageW, (wrap.clientHeight - pad2 * 2) / pageH));
+    var W = Math.round(pageW * s), H = Math.round(pageH * s);
     sheet.style.width = W + 'px'; sheet.style.height = H + 'px';
     sheet.style.left = Math.round((wrap.clientWidth - W) / 2) - 1 + 'px'; sheet.style.top = Math.round((wrap.clientHeight - H) / 2) - 1 + 'px';
-    stage.style.transform = 'scale(' + (W / 1600) + ')';
+    stage.style.transform = 'scale(' + (W / pageW) + ')';
   }
   function show(n, opts) {
     opts = opts || {};

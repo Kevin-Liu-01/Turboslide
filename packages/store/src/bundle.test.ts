@@ -25,6 +25,7 @@ import { canonicalJson } from '@turboslide/schema/json';
 
 import {
   BUNDLE_MANIFEST,
+  assetKindOf,
   assetProblem,
   bundleEntryPrefix,
   listDeckFiles,
@@ -213,6 +214,41 @@ describe('the asset scan', () => {
     expect(assetProblem('assets/a.exe', PNG)).toMatch(/only png, jpg/);
     expect(assetProblem('assets/a.recipe.json', encoder.encode('{}'))).toBe(null);
     expect(assetProblem('assets/a.recipe.json', encoder.encode('{'))).toMatch(/not valid JSON/);
+  });
+
+  it('admits the five media formats when the bytes carry the container the name claims (gslides-parity SPEC-5 3.3)', () => {
+    const media = (name: string): Uint8Array =>
+      new Uint8Array(readFileSync(new URL(`../../../fixtures/media/${name}`, import.meta.url)));
+    expect(assetKindOf('assets/talk.0123abcd.mp4')).toBe('mp4');
+    expect(assetKindOf('assets/talk.m4v')).toBe('mp4');
+    expect(assetKindOf('assets/talk.M4A')).toBe('m4a');
+    expect(assetKindOf('assets/talk.webm')).toBe('webm');
+    expect(assetKindOf('assets/talk.mp3')).toBe('mp3');
+    expect(assetKindOf('assets/talk.wav')).toBe('wav');
+    expect(assetKindOf('assets/talk.mov')).toBe(null);
+    expect(assetProblem('assets/talk.mp4', media('bars-1s.mp4'))).toBe(null);
+    expect(assetProblem('assets/talk.mp4', media('bars-1s-nofaststart.mp4'))).toBe(null);
+    expect(assetProblem('assets/talk.m4a', media('tone-1s.m4a'))).toBe(null);
+    expect(assetProblem('assets/talk.webm', media('bars-1s.webm'))).toBe(null);
+    expect(assetProblem('assets/talk.mp3', media('tone-1s.mp3'))).toBe(null);
+    expect(assetProblem('assets/talk.wav', media('tone-1s.wav'))).toBe(null);
+    // the name and the bytes disagree: refused before a byte is written (R11 1.2)
+    expect(assetProblem('assets/talk.mp4', media('webm-as.mp4'))).toBe(
+      'assets/talk.mp4: the bytes are a webm file, not mp4',
+    );
+    expect(assetProblem('assets/talk.mp4', media('bars-1s.mov'))).toBe(
+      'assets/talk.mp4: the bytes are a mov file, not mp4',
+    );
+    expect(assetProblem('assets/talk.webm', media('bars.mkv'))).toBe(
+      'assets/talk.webm: the bytes are a mkv file, not webm',
+    );
+    expect(assetProblem('assets/talk.wav', PNG)).toBe(
+      'assets/talk.wav: the bytes are not an audio or video file',
+    );
+    expect(assetProblem('assets/talk.mov', media('bars-1s.mov'))).toMatch(
+      /only png, jpg, gif, webp, svg, json and the media files/,
+    );
+    expect(assetProblem('assets/talk.ogg', media('tone.ogg'))).toMatch(/only png, jpg/);
   });
 });
 

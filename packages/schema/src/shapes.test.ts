@@ -102,29 +102,50 @@ describe('the preset table', () => {
   });
 });
 
-describe('the geometry stubs of day one', () => {
+describe('the shape interpreter behind shapes.ts (gslides-parity SPEC-5 6.5)', () => {
   const sizes: [number, number][] = [
     [48, 36],
     [200, 100],
     [400, 400],
   ];
 
-  it('answer the box as the path, the whole box as the text inset and eight sites at three sizes for every preset', () => {
+  it("answer an evaluated outline, a text rectangle inside the frame and the definition's sites at three sizes for every preset", () => {
+    /* the callouts' tail site sits past the box by construction (shapes/geometry.test.ts) */
+    const tailOutside = new Set([
+      'wedgeRectCallout',
+      'wedgeRoundRectCallout',
+      'wedgeEllipseCallout',
+      'cloudCallout',
+    ]);
     for (const row of SHAPE_PRESETS) {
       for (const [w, h] of sizes) {
         const path = shapePath(row.id, w, h, shapeAdjustDefaults(row.id));
         expect(path, row.id).toMatch(/^M/);
-        expect(path).toContain(String(w));
-        expect(textInset(row.id, w, h)).toEqual({ x: 0, y: 0, w, h });
+        // at least one closed subpath; a preset with an inner edge (`can`, `cube`) ends on an open stroke
+        expect(path.includes('Z'), row.id).toBe(true);
+        const inset = textInset(row.id, w, h);
+        expect(inset.w, row.id).toBeGreaterThan(0);
+        expect(inset.h, row.id).toBeGreaterThan(0);
+        expect(inset.x, row.id).toBeGreaterThanOrEqual(-0.01);
+        expect(inset.y, row.id).toBeGreaterThanOrEqual(-0.01);
+        expect(inset.x + inset.w, row.id).toBeLessThanOrEqual(w + 0.01);
+        expect(inset.y + inset.h, row.id).toBeLessThanOrEqual(h + 0.01);
         const points = sites(row.id, w, h);
-        expect(points).toHaveLength(8);
+        expect(points.length, row.id).toBeGreaterThanOrEqual(1);
+        if (tailOutside.has(row.id)) continue;
         for (const point of points) {
-          expect(point.x).toBeGreaterThanOrEqual(0);
-          expect(point.x).toBeLessThanOrEqual(w);
-          expect(point.y).toBeGreaterThanOrEqual(0);
-          expect(point.y).toBeLessThanOrEqual(h);
+          expect(point.x, row.id).toBeGreaterThanOrEqual(-0.5);
+          expect(point.x, row.id).toBeLessThanOrEqual(w + 0.5);
+          expect(point.y, row.id).toBeGreaterThanOrEqual(-0.5);
+          expect(point.y, row.id).toBeLessThanOrEqual(h + 0.5);
         }
       }
+    }
+    // the rectangle keeps the eight sites of a box and the box path at every size
+    for (const [w, h] of sizes) {
+      expect(sites('rect', w, h)).toHaveLength(8);
+      expect(textInset('rect', w, h)).toEqual({ x: 0, y: 0, w, h });
+      expect(shapePath('rect', w, h)).toBe(`M0,0 H${w} V${h} H0 Z`);
     }
   });
 });

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "slide-3",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h1",
+        "text": "Hidden slide",
+        "pos": {
+          "x": 80,
+          "y": 36.04,
+          "w": 1440,
+          "h": 150,
+          "z": 1
+        },
+        "typography": {
+          "size": 73.5,
+          "align": "center"
+        },
+        "autofit": "shrink",
+        "ext": {
+          "pptxName": "Title 1",
+          "placeholder": "title"
+        }
+      },
+      {
+        "id": "text",
+        "type": "text",
+        "text": "This slide is hidden and is the jump target.",
+        "pos": {
+          "x": 180,
+          "y": 360,
+          "w": 1200,
+          "h": 120,
+          "z": 2
+        },
+        "typography": {
+          "size": 40
+        },
+        "padding": {
+          "left": 12,
+          "top": 6,
+          "right": 12,
+          "bottom": 6
+        },
+        "autofit": "grow",
+        "ext": {
+          "pptxName": "TextBox 2"
+        }
+      }
+    ]
+  },
+  "title": "Hidden slide",
+  "skip": true,
+  "ext": {
+    "pptxPart": "ppt/slides/slide3.xml",
+    "pptxSlideId": 258
+  }
+}

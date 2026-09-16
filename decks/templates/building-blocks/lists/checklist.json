@@ -1,0 +1,51 @@
+{
+  "id": "lists/checklist",
+  "category": "lists",
+  "label": "Checklist",
+  "blocks": [
+    {
+      "id": "h",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 72,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Checklist"
+    },
+    {
+      "id": "list",
+      "pos": {
+        "x": 0,
+        "y": 100,
+        "w": 1326,
+        "h": 420,
+        "group": "block"
+      },
+      "type": "plain",
+      "marker": "bullet",
+      "preset": "checkbox",
+      "items": [
+        {
+          "text": "Scope agreed"
+        },
+        {
+          "text": "Owner named"
+        },
+        {
+          "text": "Date set"
+        },
+        {
+          "text": "Budget approved"
+        }
+      ]
+    }
+  ],
+  "box": [
+    1326,
+    520
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "id": "cards/pricing-card",
+  "category": "cards",
+  "label": "Pricing card",
+  "blocks": [
+    {
+      "id": "card",
+      "pos": {
+        "x": 0,
+        "y": 0,
+        "w": 420,
+        "h": 520,
+        "group": "block"
+      },
+      "type": "shape",
+      "shape": "rect",
+      "stroke": "ink",
+      "width": 1
+    },
+    {
+      "id": "plan",
+      "pos": {
+        "x": 32,
+        "y": 32,
+        "w": 356,
+        "h": 56,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "h2",
+      "text": "Team"
+    },
+    {
+      "id": "price",
+      "pos": {
+        "x": 32,
+        "y": 96,
+        "w": 356,
+        "h": 100,
+        "group": "block"
+      },
+      "type": "heading",
+      "level": "big",
+      "text": "199 dollars"
+    },
+    {
+      "id": "period",
+      "pos": {
+        "x": 32,
+        "y": 200,
+        "w": 356,
+        "h": 40,
+        "group": "block"
+      },
+      "type": "paragraph",
+      "text": "a month, up to twenty five people",
+      "role": "cap"
+    },
+    {
+      "id": "features",
+      "pos": {
+        "x": 32,
+        "y": 260,
+        "w": 356,
+        "h": 200,
+        "group": "block"
+      },
+      "type": "plain",
+      "items": [
+        {
+          "text": "Every workflow"
+        },
+        {
+          "text": "Chat support"
+        },
+        {
+          "text": "Weekly report"
+        }
+      ]
+    }
+  ],
+  "box": [
+    420,
+    520
+  ]
+}

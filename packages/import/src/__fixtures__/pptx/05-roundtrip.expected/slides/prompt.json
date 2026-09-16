@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "prompt",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": []
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide6.xml",
+    "pptxSlideId": 261
+  }
+}

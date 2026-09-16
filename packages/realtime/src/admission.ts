@@ -5,7 +5,7 @@
 // with a channel in its hands is `appendWithRetry`, the compare and append loop of 3.4 step 5:
 // transform against what landed, retry, and after two misses take the deck's short append lock
 // so a busy room cannot starve one writer (report 10 F34).
-import type { AppendResult, Entry, NewEntry, RealtimeChannel } from './channel.ts';
+import type { AppendResult, Entry, NewEntry, RealtimeChannel, Role } from './channel.ts';
 import { deckKeys } from './keys.ts';
 import {
   BASE_SEQ_WINDOW,
@@ -230,4 +230,121 @@ export async function appendWithRetry(
   } finally {
     if (held) await channel.unlock(lockKey, token);
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Chat (gslides-parity SPEC-5 0.46, 10; MILESTONES-5 B5): a message is a `chat` entry on the
+// deck's operation stream beside `edit` and `comment`, admitted with the comment caps (4,000 code
+// points, 20 mentions), the per deck rate rows below and the comment write limits per identity
+// and per IP the route already applies. The entries are never checkpointed, never in a sidecar,
+// the version log or an export; the room clears them when the last participant leaves. These
+// functions are pure; the room's `admitChat` and the ops route call them.
+
+/** The chat rate rows of SPEC-5 0.46: messages per minute per deck by identity kind. */
+export const CHAT_CAPS = {
+  messagesPerMinutePerDeck: { anonymous: 30, signedIn: 60, agent: 120 } as const,
+  /** the comment body cap, in code points */
+  textMaxCodePoints: 4000,
+  /** the comment mention cap */
+  mentionsMax: 20,
+} as const;
+
+export type ChatCheckResult =
+  | { ok: true; text: string; mentions: string[] }
+  | {
+      ok: false;
+      status: 400 | 403;
+      code: 'empty' | 'too-long' | 'too-many-mentions' | 'forbidden';
+      message: string;
+    };
+
+/** The `@name` mentions of a message text, deduplicated, in order (the round three picker's form). */
+export function chatMentions(text: string): string[] {
+  const out: string[] = [];
+  for (const match of text.matchAll(/(?:^|\s)@([\p{L}\p{N}_.-]{1,64})/gu)) {
+    const name = match[1];
+    if (name !== undefined && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
+/** Step 1 of a chat admission: the text trimmed, the two caps, the role (commenters and above send). */
+export function checkChatMessage(text: string, role: Role): ChatCheckResult {
+  if (role === 'viewer')
+    return {
+      ok: false,
+      status: 403,
+      code: 'forbidden',
+      message: 'Commenters and editors can chat',
+    };
+  const trimmed = text.trim();
+  if (trimmed === '')
+    return { ok: false, status: 400, code: 'empty', message: 'A message needs some text' };
+  const points = [...trimmed].length;
+  if (points > CHAT_CAPS.textMaxCodePoints)
+    return {
+      ok: false,
+      status: 400,
+      code: 'too-long',
+      message: `A message is at most ${CHAT_CAPS.textMaxCodePoints.toLocaleString('en-US')} characters; this one has ${points.toLocaleString('en-US')}`,
+    };
+  const mentions = chatMentions(trimmed);
+  if (mentions.length > CHAT_CAPS.mentionsMax)
+    return {
+      ok: false,
+      status: 400,
+      code: 'too-many-mentions',
+      message: `A message mentions at most ${CHAT_CAPS.mentionsMax} people; this one mentions ${mentions.length}`,
+    };
+  return { ok: true, text: trimmed, mentions };
+}
+
+/** The rate limit sentence a chat over its row gets (the panel and the CLI print it as is). */
+export const CHAT_RATE_SENTENCE = 'Too many messages; wait a moment';
+
+/** The budget key and cap of a deck's chat window for an identity kind. */
+export function chatBudget(
+  deckId: string,
+  kind: IdentityKind,
+  nowMs: number,
+): { key: string; cap: number; windowMs: number } {
+  return {
+    key: `q:deck:${deckId}:chat:${windowOf(nowMs, 60_000)}`,
+    cap: CHAT_CAPS.messagesPerMinutePerDeck[kind],
+    windowMs: 60_000,
+  };
+}
+
+/** A new `chat` entry for the append, the message id minted here (`chat_<time>_<random>`). */
+export function chatEntry(input: {
+  rev: number;
+  author: Entry['author'];
+  clientId: string;
+  principalId: string;
+  text: string;
+  at: string;
+  id?: string;
+}): NewEntry {
+  const id = input.id ?? `chat_${Date.parse(input.at).toString(36)}_${randomToken().slice(0, 8)}`;
+  return {
+    rev: input.rev,
+    kind: 'chat',
+    author: input.author,
+    clientId: input.clientId,
+    opId: id,
+    at: input.at,
+    chat: { id, principalId: input.principalId, text: input.text, at: input.at },
+  };
+}
+
+/** The chat messages of a stream slice since a time, oldest first (chat.list). */
+export function chatMessagesOf(
+  entries: ReadonlyArray<Entry>,
+  since?: string,
+): NonNullable<Entry['chat']>[] {
+  const from = since === undefined ? Number.NEGATIVE_INFINITY : Date.parse(since);
+  return entries
+    .filter((entry) => entry.kind === 'chat' && entry.chat !== undefined)
+    .map((entry) => entry.chat as NonNullable<Entry['chat']>)
+    .filter((message) => Number.isNaN(from) || Date.parse(message.at) > from);
 }

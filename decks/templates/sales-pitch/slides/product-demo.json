@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "product-demo",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "title": "Product demo",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Product demo",
+        "pos": {
+          "x": 137,
+          "y": 92,
+          "w": 1000,
+          "h": 72,
+          "z": 1
+        }
+      },
+      {
+        "id": "demo",
+        "type": "media",
+        "kind": "video",
+        "source": {
+          "asset": "demo"
+        },
+        "playback": {
+          "start": "click"
+        },
+        "alt": "The product demo clip",
+        "pos": {
+          "x": 320,
+          "y": 190,
+          "w": 960,
+          "h": 540,
+          "z": 2
+        }
+      },
+      {
+        "id": "caption",
+        "type": "text",
+        "text": "Replace this clip with your demo through Insert > Video",
+        "typography": {
+          "size": 18
+        },
+        "pos": {
+          "x": 320,
+          "y": 748,
+          "w": 960,
+          "h": 40,
+          "z": 3
+        }
+      }
+    ]
+  }
+}

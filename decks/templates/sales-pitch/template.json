@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "sales-pitch",
+  "name": "Sales pitch",
+  "description": "Fifteen slides a rep opens and rewrites: the problem, the product, a demo clip, results, pricing that reveals one row per click, a timeline, the team and the next steps.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 15
+    }
+  ],
+  "archetypes": [],
+  "category": "work",
+  "useCases": [
+    "sales pitches",
+    "product pitches",
+    "business proposals"
+  ],
+  "cover": "title",
+  "slideCount": 15
+}

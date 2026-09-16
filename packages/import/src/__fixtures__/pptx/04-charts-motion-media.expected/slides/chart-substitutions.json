@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-substitutions",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "pie",
+        "categories": [
+          "Starter",
+          "Team",
+          "Enterprise"
+        ],
+        "series": [
+          {
+            "name": "Plans",
+            "values": [
+              55,
+              30,
+              15
+            ]
+          }
+        ],
+        "pos": {
+          "x": 60,
+          "y": 60,
+          "w": 480,
+          "h": 360,
+          "z": 1
+        },
+        "title": "Doughnut",
+        "legend": "right",
+        "ext": {
+          "pptxName": "Chart 1",
+          "pptxChartPart": "ppt/charts/chart5.xml"
+        }
+      },
+      {
+        "id": "chart-2",
+        "type": "chart",
+        "kind": "bar",
+        "categories": [
+          "North",
+          "South",
+          "East",
+          "West"
+        ],
+        "series": [
+          {
+            "name": "Share",
+            "values": [
+              0.41,
+              0.24,
+              0.2,
+              0.15
+            ]
+          }
+        ],
+        "pos": {
+          "x": 560,
+          "y": 60,
+          "w": 480,
+          "h": 360,
+          "z": 2
+        },
+        "title": "Three D bars",
+        "numberFormat": "percent",
+        "ext": {
+          "pptxName": "Chart 2",
+          "pptxChartPart": "ppt/charts/chart6.xml"
+        }
+      },
+      {
+        "id": "chart-3",
+        "type": "chart",
+        "kind": "column",
+        "categories": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        "series": [
+          {
+            "name": "Revenue",
+            "values": [
+              1200,
+              1450,
+              1600,
+              2100
+            ]
+          },
+          {
+            "name": "Cost",
+            "values": [
+              800,
+              900,
+              950,
+              1100
+            ]
+          }
+        ],
+        "pos": {
+          "x": 1060,
+          "y": 60,
+          "w": 480,
+          "h": 360,
+          "z": 3
+        },
+        "title": "Stacked",
+        "numberFormat": "thousands",
+        "ext": {
+          "pptxName": "Chart 3",
+          "pptxChartPart": "ppt/charts/chart7.xml"
+        }
+      },
+      {
+        "id": "chart-4",
+        "type": "chart",
+        "kind": "column",
+        "categories": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "series": [
+          {
+            "name": "Series 1",
+            "values": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12
+            ]
+          },
+          {
+            "name": "Series 2",
+            "values": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13
+            ]
+          },
+          {
+            "name": "Series 3",
+            "values": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "name": "Series 4",
+            "values": [
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          {
+            "name": "Series 5",
+            "values": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ]
+          },
+          {
+            "name": "Series 6",
+            "values": [
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17
+            ]
+          }
+        ],
+        "pos": {
+          "x": 60,
+          "y": 450,
+          "w": 840,
+          "h": 420,
+          "z": 4
+        },
+        "title": "Thirteen by seven",
+        "ext": {
+          "pptxName": "Chart 4",
+          "pptxChartPart": "ppt/charts/chart8.xml"
+        }
+      },
+      {
+        "id": "combination",
+        "type": "chart",
+        "kind": "column",
+        "categories": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        "series": [
+          {
+            "name": "Revenue",
+            "values": [
+              1200,
+              1450,
+              1600,
+              2100
+            ]
+          },
+          {
+            "name": "Cost",
+            "values": [
+              800,
+              900,
+              950,
+              1100
+            ]
+          }
+        ],
+        "pos": {
+          "x": 960,
+          "y": 450,
+          "w": 580,
+          "h": 420,
+          "z": 5
+        },
+        "title": "Combination",
+        "numberFormat": "thousands",
+        "ext": {
+          "pptxName": "Combination",
+          "pptxChartPart": "ppt/charts/chart9.xml"
+        }
+      }
+    ]
+  },
+  "title": "Chart substitutions",
+  "transition": {
+    "kind": "slideRight",
+    "durationMs": 500
+  },
+  "ext": {
+    "pptxPart": "ppt/slides/slide2.xml",
+    "pptxSlideId": 257
+  }
+}

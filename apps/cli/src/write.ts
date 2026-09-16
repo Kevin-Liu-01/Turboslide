@@ -30,10 +30,22 @@ import {
 import { headlessCanvasMeasurer, headlessFitMeasurer } from './deps/canvas.ts';
 import { lintLists } from './deps/theme.ts';
 import { GateError, UsageError } from './exit.ts';
+import type { LaneDeps } from './actions/deps.ts';
 import { localCaller, originOf } from './record-actions.ts';
 import type { RecordDeps } from './record-actions.ts';
-import { principalIdOf } from './records/principal.ts';
-import type { SlideResult, StoreActionDeps, WriteContext } from './store-actions.ts';
+import { localPreferencesStore, principalIdOf } from './records/principal.ts';
+import { importLaneDeps } from '@turboslide/import/lane-node';
+import {
+  documentSpelling,
+  readDictionaryFile,
+  writeDictionaryFile,
+} from '@turboslide/spelling/node';
+import { deckTextRefs } from '@turboslide/lint/static/spelling';
+import { CORRECTIONS } from '@turboslide/schema/autocorrect-lists';
+import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
+import { versionPath } from '@turboslide/store/versions';
+import { rmSync } from 'node:fs';
+import type { SlideResult, WriteContext } from './store-actions.ts';
 
 /** The store over the deck the run resolves (--deck, TURBOSLIDE_DECK, the nearest deck.json). */
 export function openStore(ctx: CommandContext): FileStore {
@@ -41,7 +53,18 @@ export function openStore(ctx: CommandContext): FileStore {
   return openFileStore({ dir });
 }
 
-export function storeDeps(ctx: CommandContext, store: FileStore): StoreActionDeps {
+/**
+ * The checkout's state folder, `<repo>/.turboslide`: the inbox, the principal records and the
+ * preferences live there, beside the derived folder when the deck sits outside a repository.
+ */
+export function stateDirOf(ctx: CommandContext, store: FileStore): string {
+  return join(
+    repoRootFor(store.dir) ?? derivedDir(store.dir, ctx.cwd).replace(/\/\.turboslide$/, ''),
+    '.turboslide',
+  );
+}
+
+export function storeDeps(ctx: CommandContext, store: FileStore): LaneDeps {
   // the canvas and fit measurers run headless Chromium over the deck directory, one page per
   // action call (gslides-parity SPEC-2 1.3, 0.104); the slides are read from disk at call time
   const slidesOf = (): Record<string, Slide> => loadDeck(store.dir).slides;
@@ -54,6 +77,35 @@ export function storeDeps(ctx: CommandContext, store: FileStore): StoreActionDep
     measureFit: headlessFitMeasurer(store.dir, slidesOf),
     // the diagram templates (SPEC-2 2.8.3): B5's @turboslide/schema/diagrams, bound at merge 2
     diagrams: makeDiagram,
+    // the caller's preferences record on the checkout (gslides-parity SPEC-5 7.1; b5.md request
+    // 1): the --author principal's file under <repo>/.turboslide/principals/, the file the editor
+    // on localhost reads, so prefs.get and prefs.set run on the CLI without a studio
+    preferences: localPreferencesStore(stateDirOf(ctx, store), principalIdOf(ctx.author)),
+    /* round five (gslides-parity SPEC-5 5.5, 4.6; b3.md B3-7): the import bridge over the decks
+       folder, file paths allowed on a checkout */
+    imports: importLaneDeps({ decksDir: decksDirOfStore(store), cwd: ctx.cwd, allowPaths: true }),
+    /* SPEC-5 7.2, 7.4, 7.7 (b5.md request 9): nspell over the deck's language with the personal
+       dictionary of the --author principal, the checkout's dictionary.txt, the version files */
+    spelling: documentSpelling({
+      corrections: CORRECTIONS,
+      stateDir: stateDirOf(ctx, store),
+      ignore: [...PROPER_NOUNS, ...PRODUCT_TOKENS],
+      refs: deckTextRefs,
+      personal: async () =>
+        (await localPreferencesStore(stateDirOf(ctx, store), principalIdOf(ctx.author)).load())
+          .spelling.dictionary,
+    }),
+    dictionaryFile: {
+      read: () => readDictionaryFile(stateDirOf(ctx, store)),
+      write: (words) => {
+        writeDictionaryFile(stateDirOf(ctx, store), words);
+      },
+    },
+    versions: {
+      remove: async (ns) => {
+        for (const n of ns) rmSync(versionPath(store.dir, n), { force: true });
+      },
+    },
   };
 }
 
@@ -76,10 +128,7 @@ export function recordDeps(ctx: CommandContext, store: FileStore): RecordDeps {
   return {
     store,
     deckId: store.id,
-    stateDir: join(
-      repoRootFor(store.dir) ?? derivedDir(store.dir, ctx.cwd).replace(/\/\.turboslide$/, ''),
-      '.turboslide',
-    ),
+    stateDir: stateDirOf(ctx, store),
     decksDir: decksDirOfStore(store),
     origin: originOf(ctx.env),
     caller: localCaller(author),

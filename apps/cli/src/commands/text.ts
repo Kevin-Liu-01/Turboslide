@@ -12,6 +12,7 @@ import type { BulletPreset, CaseMode, ListMarker, NumberPreset } from '@turbosli
 
 import { flagBoolean, flagList, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
+import { runDeckAction } from '../dispatch.ts';
 import { UsageError } from '../exit.ts';
 import {
   textCase,
@@ -34,7 +35,7 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide text <replace|style|case|insert|list|spacing|columns|indent> ...
+const USAGE = `usage: turboslide text <replace|style|case|insert|list|spacing|columns|indent|autocorrect> ...
   text replace <find> <replace> [--match-case] [--slides <id,id,...>]
                                     every occurrence in the deck's visible text and the notes (text.replaceAll)
   text style <slideId>#<blockId> <pointer> --range <start:end> [--italic|--no-italic] [--underline|--no-underline]
@@ -54,7 +55,9 @@ const USAGE = `usage: turboslide text <replace|style|case|insert|list|spacing|co
   text indent <slideId>#<blockId>[,<blockId>] --in | --out | --to <px> [--items <i,i>]
                                     the left indent by 64 px steps, or a list's item levels (text.indent)
 The bullet presets: ${BULLET_PRESETS.join(', ')}. The numbering presets: ${NUMBER_PRESETS.join(', ')}.
-Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
+Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.
+  text autocorrect [<slideId>[#<blockId>]] [<path>] [--dry-run]
+                                    the autocorrect rules and the caller's substitutions over a Text, a block or the deck (text.autocorrect)`;
 
 export async function text(ctx: CommandContext): Promise<number> {
   const [sub, ...rest] = ctx.rest;
@@ -76,6 +79,8 @@ export async function text(ctx: CommandContext): Promise<number> {
       return columns(inner);
     case 'indent':
       return indent(inner);
+    case 'autocorrect':
+      return autocorrect(inner);
     default:
       throw new UsageError(`unknown subcommand "text ${sub ?? ''}"\n${USAGE}`);
   }
@@ -352,5 +357,36 @@ async function indent(ctx: CommandContext): Promise<number> {
     }),
   );
   printSlideResult(ctx, `indented ${blockIds.join(', ')} on`, result);
+  return 0;
+}
+
+/**
+ * `text autocorrect [<slideId>[#<blockId>]] [<path>] [--dry-run]` (gslides-parity SPEC-5 7.1;
+ * b5.md request 9): the autocorrect rules and the caller's substitution table over one Text, one
+ * block, one slide or the deck through the shared handler; --dry-run lists the changes alone.
+ */
+async function autocorrect(ctx: CommandContext): Promise<number> {
+  const [address, path] = ctx.rest;
+  const parsed: { slideId?: string; blockId?: string } = {};
+  if (address !== undefined) {
+    const [slideId, blockId] = address.split('#');
+    if (slideId !== undefined && slideId !== '') parsed.slideId = slideId;
+    if (blockId !== undefined && blockId !== '') parsed.blockId = blockId;
+  }
+  const store = openStore(ctx);
+  const result = await runDeckAction<{ changes: unknown[]; revision: number }>(
+    ctx,
+    'text.autocorrect',
+    {
+      ...parsed,
+      ...(path === undefined ? {} : { path }),
+      ...(flagBoolean(ctx.args, 'dry-run') ? { dryRun: true } : {}),
+      baseRevision: await baseRevision(ctx, store),
+    },
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `${flagBoolean(ctx.args, 'dry-run') ? 'would change' : 'changed'} ${result.changes.length} text(s) at revision ${result.revision}`,
+  );
   return 0;
 }

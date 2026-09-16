@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "shapes",
+  "title": "Import fixture 02 shapes",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Import fixture 02 shapes",
+      "slideIds": [
+        "presets-and-outlines",
+        "lines-and-connectors",
+        "groups"
+      ]
+    }
+  ],
+  "assets": {},
+  "revision": 0,
+  "createdAt": "2026-09-15T00:00:00.000Z",
+  "updatedAt": "2026-09-15T00:00:00.000Z"
+}

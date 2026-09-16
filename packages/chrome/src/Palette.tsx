@@ -9,7 +9,7 @@ import { IconPicker } from './IconPicker';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import type { PaletteEntry, PaletteGroupId, PaletteGroupRows, PaletteRun } from './palette-data';
-import { filterPalette, paletteCount } from './palette-data';
+import { DECK_TEXT_GROUP_MAX, filterPalette, findReplaceEntry, paletteCount } from './palette-data';
 import { tipProps } from './Tooltip';
 
 import './Palette.css';
@@ -43,6 +43,12 @@ export type PaletteProps = {
   /** the key the field's tooltip names; Cmd K or Ctrl K unless set */
   shortcutKey?: string;
   className?: string;
+  /**
+   * Opens Edit > Find and replace prefilled (gslides-parity SPEC-5 7.4): when set and the query
+   * matches deck text, the "Text in this presentation" group shows "Find and replace <query>"
+   * first and at most five hits after it.
+   */
+  onFindReplace?: (query: string) => void;
 };
 
 const TITLE = 'Search slides, actions, blocks and views';
@@ -73,6 +79,8 @@ function rowDoc(row: PaletteEntry): string {
       return 'Runs the menu item.';
     case 'layouts':
       return 'Adds a slide with this layout after the current one.';
+    case 'deckText':
+      return 'Goes to the slide that holds this text.';
   }
 }
 
@@ -91,6 +99,7 @@ export function Palette({
   groups: shownGroups,
   shortcutKey = 'Cmd K or Ctrl K',
   className,
+  onFindReplace,
 }: PaletteProps) {
   const [query, setQuery] = useState('');
   const [sel, setSel] = useState(0);
@@ -113,9 +122,22 @@ export function Palette({
 
   if (!open) return null;
 
-  const groups: readonly PaletteGroupRows[] = filterPalette(entries, query).filter(
-    (group) => shownGroups === undefined || shownGroups.includes(group.group.id),
-  );
+  const groups: readonly PaletteGroupRows[] = filterPalette(entries, query)
+    .filter((group) => shownGroups === undefined || shownGroups.includes(group.group.id))
+    .map((group) => {
+      /* the deck text group (SPEC-5 7.4): the Find and replace row first, then up to five hits;
+         nothing without a query, since every text would match */
+      if (group.group.id !== 'deckText') return group;
+      const needle = query.trim();
+      if (needle === '') return { ...group, rows: [] };
+      const hits = group.rows.slice(0, DECK_TEXT_GROUP_MAX);
+      return {
+        ...group,
+        rows:
+          onFindReplace === undefined ? hits : [findReplaceEntry(needle, onFindReplace), ...hits],
+      };
+    })
+    .filter((group) => group.rows.length > 0);
   const rows: readonly PaletteEntry[] = groups.flatMap((group) => group.rows);
   const at = Math.min(sel, Math.max(rows.length - 1, 0));
 

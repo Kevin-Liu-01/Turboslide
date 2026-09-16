@@ -1,0 +1,7 @@
+# 2026-09-15T11:49:09.721Z the parity audit's scratch deck, trashed by the audit at File > Move to trash and left in the trash when its Delete forever step did not run (BASELINE.md section 6 class 4, finding 9); removed here the way round four's verifier did (verification-4/preview-pass2/remove-write-deck-2026-09-14.txt)
+untitled-20260915-wes8 deck.info 200 {"revision":258,"title":"Audit scratch","counts":{"slides":3,"sections":1,"assets":5,"htmlBlocks":0,"skipped":0,"canvas":2,"charts":0,"guides":0,"snapshots":50},"trashedAt":"2026-09-15T11:44:44.782Z"}
+untitled-20260915-wes8 deck.remove 200 {"id":"untitled-20260915-wes8","removed":true}
+untitled-20260915-wes8 /deck/untitled-20260915-wes8 probe 404
+untitled-20260915-wes8 /edit/untitled-20260915-wes8 probe 404
+untitled-20260915-wes8 /decks/trash mentions the id: false
+/decks cards after: 26

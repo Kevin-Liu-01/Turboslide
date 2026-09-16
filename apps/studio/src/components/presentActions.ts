@@ -1,4 +1,28 @@
 import type { MenuClientHandler } from '@turboslide/chrome/menus/model';
+import {
+  compileMotion,
+  countParagraphs,
+  deckMediaLength,
+  MOTION_BASE_CSS,
+  motionCss,
+} from '@turboslide/render/motion';
+import type { DeckDocument, Slide } from '@turboslide/schema/deck';
+import type { MotionSchedule } from '@turboslide/schema/motion';
+import { blockParagraphCount, motionTargets, slideHasMotion } from '@turboslide/schema/motion';
+import { deckPage } from '@turboslide/schema/render';
+import type { Page } from '@turboslide/schema/render';
+import type { ViewerSlide } from '@turboslide/viewer/model';
+import { stepCount } from '@turboslide/viewer/present/presentModel';
+import {
+  attachMotionLayer,
+  MOTION_STYLE_ID,
+  playTransition,
+  prefersReducedMotion,
+  setMotionPreview,
+  setMotionStyle,
+  stopMotionPreview,
+} from '@turboslide/viewer/present/SlideshowLayer';
+import type { TransitionRun } from '@turboslide/viewer/present/SlideshowLayer';
 
 /**
  * The handlers behind the Slideshow split button (gslides-parity SPEC 9.1; MILESTONES B6 item 1).
@@ -107,4 +131,176 @@ export function presentClientHandlers(host: PresentHost): Record<PresentClientHa
     presenterView: () => presenterView(host),
     presentFromBeginning: () => presentFromBeginning(host),
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Round five (gslides-parity SPEC-5 2.1, 2.2; MILESTONES-5 B1 days 3 and 4): the schedules the
+// show and the presenter read, and the Motion panel's Play over the editor's canvas.
+
+/**
+ * The schedule of a slide from the document alone (SPEC-5 0.4): the paragraph counts from the
+ * schema (the number the renderer's nodes and the exporter's scene lines agree with) and the
+ * media lengths from `deck.media`. The same arithmetic `motion.compile` answers.
+ */
+export function slideSchedule(document: DeckDocument, slide: Slide): MotionSchedule {
+  const blocks = motionTargets(slide);
+  const byId = new Map(blocks.map((block) => [block.id, block]));
+  return compileMotion(
+    slide,
+    blocks,
+    (blockId) => {
+      const block = byId.get(blockId);
+      return block === undefined ? 0 : blockParagraphCount(block);
+    },
+    deckMediaLength(document.deck, slide),
+  );
+}
+
+/** A viewer slide with its schedule attached as `motion` when the record carries motion (`motionOf` reads it). */
+export function withMotion<T extends ViewerSlide>(
+  viewerSlide: T,
+  document: DeckDocument,
+  record: Slide | undefined,
+): T & { motion?: MotionSchedule } {
+  if (record === undefined || !slideHasMotion(record)) return viewerSlide;
+  return { ...viewerSlide, motion: slideSchedule(document, record) };
+}
+
+export type MotionPlayInput = { slideId: string; from?: number };
+export type MotionPlayOutput = { slideId: string; step: number; steps: number };
+
+export type MotionPlayDeps = {
+  document: () => DeckDocument;
+  /** the deck's page in sheet px; `deckPage(deck)` when absent */
+  page?: Page;
+};
+
+/** The editor canvas root of a slide: the rendered `.slide[data-slide]` inside the edit stage, never the show's. */
+function canvasSlideRoot(slideId: string): HTMLElement | null {
+  const roots = document.querySelectorAll<HTMLElement>(
+    `.pt-slide [data-slide="${slideId.replace(/"/g, '\\"')}"]`,
+  );
+  for (const root of roots) if (root.closest('.ts-stagewrap.is-present') === null) return root;
+  return null;
+}
+
+/**
+ * The Motion panel's Play (SPEC-5 2.1, `motion.play`, window only): compiles the slide's schedule
+ * against the rendered nodes of the editor's canvas, loads the show's stylesheet, plays the
+ * transition's incoming half then the steps on the canvas through the motion layer, waits on
+ * every click step for a click on the slide, Enter, or the panel's own advance, and returns every
+ * object to rest at the end, on Stop or on Esc. The state rides on the layer's preview registry,
+ * which the panel reads to show Stop. Answers the step it started at and the step count.
+ */
+export function motionPlay(input: MotionPlayInput, deps: MotionPlayDeps): MotionPlayOutput {
+  stopMotionPreview();
+  const doc = deps.document();
+  const slide = doc.slides[input.slideId];
+  if (slide === undefined) throw new RangeError(`No slide "${input.slideId}"`);
+  const root = canvasSlideRoot(input.slideId);
+  if (root === null)
+    throw new RangeError(`Slide "${input.slideId}" is not on the canvas; select it first`);
+  const blocks = motionTargets(slide);
+  const schedule = compileMotion(
+    slide,
+    blocks,
+    (blockId) => {
+      const block = root.querySelector(`[data-block="${blockId.replace(/"/g, '\\"')}"]`);
+      if (block === null) return 0;
+      return countParagraphs(block);
+    },
+    deckMediaLength(doc.deck, slide),
+  );
+  const steps = stepCount(schedule);
+  const page = deps.page ?? deckPage(doc.deck);
+  setMotionStyle(
+    document,
+    MOTION_STYLE_ID,
+    [MOTION_BASE_CSS, motionCss(schedule, page)].filter((css) => css !== '').join('\n'),
+  );
+  const reduced = prefersReducedMotion();
+  let step = Math.max(-1, Math.min(input.from ?? 0, steps) - 1);
+  let stopped = false;
+  let waitTimer = 0;
+  const layer = attachMotionLayer(root, schedule, {
+    reduced,
+    onSettled: (settled) => {
+      if (stopped) return;
+      if (settled >= steps) {
+        // the last step settled: a beat at rest, then the objects return to their still
+        waitTimer = window.setTimeout(stop, reduced ? 0 : 400);
+        return;
+      }
+      publish(false, true);
+    },
+  });
+  const publish = (running: boolean, waiting: boolean): void => {
+    setMotionPreview(
+      { slideId: input.slideId, step: Math.max(0, step), steps, running, waiting },
+      { stop, advance },
+    );
+  };
+  const onKey = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement | null;
+    if (target !== null && target.closest('input, textarea, select, [contenteditable="true"]'))
+      return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      stop();
+    } else if (event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      if (target !== null && target.closest('[data-control="motion.play"]')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      advance();
+    }
+  };
+  const onClick = (event: MouseEvent): void => {
+    const target = event.target as Element | null;
+    if (target === null || !root.contains(target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    advance();
+  };
+  function stop(): void {
+    if (stopped) return;
+    stopped = true;
+    window.clearTimeout(waitTimer);
+    document.removeEventListener('keydown', onKey, true);
+    document.removeEventListener('click', onClick, true);
+    transitionRun?.cancel();
+    layer.unmount();
+    setMotionPreview(null);
+  }
+  function advance(): void {
+    if (stopped || layer.playing) return;
+    if (step >= steps) {
+      stop();
+      return;
+    }
+    step += 1;
+    const duration = layer.play(step);
+    publish(duration > 0, false);
+    if (duration === 0) layer.settle();
+  }
+  document.addEventListener('keydown', onKey, true);
+  document.addEventListener('click', onClick, true);
+  layer.mount();
+  if (step >= 0) layer.seek(step);
+  publish(true, false);
+  // the transition's incoming half on the canvas, then the entry step (R01 4: the transition
+  // plays first, then the chains that hang off the slide's start)
+  let transitionRun: TransitionRun | null = null;
+  const container = root.parentElement ?? root;
+  transitionRun = playTransition(container, root, null, step < 0 ? schedule.transition : null, {
+    scopeSlideId: input.slideId,
+    reduced,
+    onDone: () => {
+      transitionRun = null;
+      if (stopped) return;
+      if (step < 0) advance();
+      else publish(false, step < steps);
+    },
+  });
+  return { slideId: input.slideId, step: Math.max(0, step), steps };
 }

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "product-roadmap",
+  "name": "Product roadmap",
+  "description": "Eight slides for a roadmap review: the themes, now, next and later, the quarters, the dependencies, the risks and the asks.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 8
+    }
+  ],
+  "archetypes": [],
+  "category": "work",
+  "useCases": [
+    "product roadmaps",
+    "strategic plans",
+    "quarterly reviews"
+  ],
+  "cover": "title",
+  "slideCount": 8
+}

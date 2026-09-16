@@ -34,9 +34,10 @@ import {
   ditherSourceOf,
   resolveDither,
 } from '@turboslide/render/dither-key';
-import type { Autofit, Block, Shadow, ShapeBlock } from '@turboslide/schema/blocks';
+import type { Autofit, Block, Shadow, ShapeBlock, ShotAdjust } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
-import { applyGuides, toCanvas } from '@turboslide/schema/canvas';
+import { applyGuides, picturePos, toCanvas } from '@turboslide/schema/canvas';
+import { diagramDefaultBox } from '@turboslide/schema/diagrams';
 import type { GuidesInput } from '@turboslide/schema/canvas';
 import { blockAssetRefs, blockTextPaths } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
@@ -68,7 +69,7 @@ import {
 import { describeMutation, diffDecks } from '@turboslide/schema/diff';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Finding } from '@turboslide/schema/findings';
-import { freeLayoutSlideId, layoutEntry } from '@turboslide/schema/layouts';
+import { freeLayoutSlideId, isLayoutId, layoutEntry } from '@turboslide/schema/layouts';
 import type {
   BulletPreset,
   CaseMode,
@@ -117,11 +118,29 @@ import { getAt, jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
 import type { RenderRecord } from '@turboslide/schema/render';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import type { Page } from '@turboslide/schema/render';
+import { DEFAULT_PAGE, deckPage } from '@turboslide/schema/render';
 import type { RuleId } from '@turboslide/schema/rules';
 import type { DeckStore, VersionRecord, WriteOutcome } from '@turboslide/store/store';
 
 import type { LintLists } from './deps/theme.ts';
+import { groupPathOnGroup, innerGroupPath } from '@turboslide/schema/position';
+import { isCustomLayoutId } from '@turboslide/schema/deck';
+import type { CustomLayoutId } from '@turboslide/schema/deck';
+
+import { registerChatActions } from './actions/chat.ts';
+import type { LaneDeps } from './actions/deps.ts';
+import { registerEquationActions } from './actions/equation.ts';
+import { registerFontActions } from './actions/font.ts';
+import { registerImportActions } from './actions/import.ts';
+import { registerMediaActions } from './actions/media.ts';
+import { registerMotionActions } from './actions/motion.ts';
+import { registerPageActions } from './actions/page.ts';
+import { registerPrefsActions } from './actions/prefs.ts';
+import { registerPrintActions } from './actions/print.ts';
+import { registerSpellingActions } from './actions/spelling.ts';
+import { registerTemplatesActions } from './actions/templates.ts';
+import { registerThemeActions, slideApplyCustomLayout } from './actions/theme.ts';
 
 /**
  * The measurement a canvas conversion reads (gslides-parity SPEC-2 1.3, 0.104): the boxes of
@@ -799,7 +818,7 @@ export async function withCanvas(
 ): Promise<CanvasPrefix> {
   if (isCanvasSlide(slide)) return { prefix: [], document, slide, converted: false };
   const boxes = measured?.[slide.id] ?? (await measureOne(deps, document.deck, slide));
-  const result = toCanvas(slide, boxes);
+  const result = toCanvas(slide, boxes, deckPage(document.deck));
   if (result === null) return { prefix: [], document, slide, converted: false };
   const prefix: Mutation[] = [{ op: 'slide.replace', slideId: slide.id, slide: result.slide }];
   const next = applyMutations(document, prefix).document;
@@ -1040,6 +1059,11 @@ export type SlideNewInput = Rev & {
 export type SlideDuplicateInput = Rev & { slideIds: string[] };
 export type SlideSkipInput = Rev & { slideIds: string[]; skip: boolean };
 export type SlideApplyLayoutInput = Rev & { slideIds: string[]; layout: LayoutId };
+/** The action's input as the table admits it (SPEC-5 9.2): a built in id, or a custom layout of the deck's theme record. */
+export type SlideApplyAnyLayoutInput = Rev & {
+  slideIds: string[];
+  layout: LayoutId | CustomLayoutId;
+};
 export type SlideImportInput = Rev & {
   sourceDeckId: string;
   slideIds: string[];
@@ -1767,6 +1791,9 @@ export type BlockAdjustInput = Rev & {
   transparency?: number | null;
   brightness?: number | null;
   contrast?: number | null;
+  /* round five (gslides-parity SPEC-5 11, 0.47; b2.md R8): Reflection and Recolor */
+  reflection?: ShotAdjust['reflection'] | null;
+  recolor?: ShotAdjust['recolor'] | 'none' | null;
 };
 export type BlockSetAltInput = Rev & { slideId: string; blockId: string; alt: string };
 export type BlockShadowInput = Rev & { slideId: string; blockIds: string[]; shadow: Shadow | null };
@@ -1999,7 +2026,9 @@ export async function slideToCanvas(
     rows.push({
       slideId: slide.id,
       converted: canvas.converted,
-      ...(canvas.slide.template !== undefined ? { template: canvas.slide.template } : {}),
+      ...(canvas.slide.template !== undefined && isLayoutId(canvas.slide.template)
+        ? { template: canvas.slide.template }
+        : {}),
       objects: objectRows(canvas.slide),
     });
   }
@@ -2033,7 +2062,7 @@ export async function deckGuides(
 ): Promise<{ guides: DeckGuides | null; revision: number }> {
   const current = (await deps.store.read()).document;
   const { baseRevision, ...edit } = input;
-  const next = applyGuides(current.deck.guides, edit);
+  const next = applyGuides(current.deck.guides, edit, deckPage(current.deck));
   if (jsonEqual(next ?? null, current.deck.guides ?? null)) {
     if (baseRevision !== current.deck.revision)
       throw new ConflictError(
@@ -2105,11 +2134,16 @@ export async function blockGroup(
   const canvas = await withCanvas(deps, current, requireSlide(current, input.slideId));
   const rows = pickBlocks(freeformBlocks(canvas.slide), input.blockIds, input.slideId);
   const tag = input.group ?? freeId('group', groupTags(canvas.slide));
+  /* nested groups (gslides-parity SPEC-5 0.48; b3.md B3-17): a member that already carries a
+     group keeps it as the inner segment and the new tag becomes the outer one */
   const mutations: Mutation[] = [
     ...canvas.prefix,
-    ...rows.flatMap((row) =>
-      row.pos.group === tag ? [] : [setField(input.slideId, row.block.id, '/pos/group', tag)],
-    ),
+    ...rows.flatMap((row) => {
+      const next = groupPathOnGroup(row.pos.group, tag);
+      return row.pos.group === next
+        ? []
+        : [setField(input.slideId, row.block.id, '/pos/group', next)];
+    }),
   ];
   const result = await commitOrCurrent(deps, ctx, input, current, mutations);
   return { ...result, group: tag };
@@ -2130,10 +2164,11 @@ export async function blockUngroup(
     throw new RangeError(
       `No block on slide "${input.slideId}" carries the group "${input.group ?? ''}"`,
     );
+  /* one level off (SPEC-5 0.48; b3.md B3-17): the inner path stays when the member sat in a nested group */
   const mutations = members.flatMap((row) =>
     row.pos.group === undefined
       ? []
-      : [setField(input.slideId, row.block.id, '/pos/group', undefined)],
+      : [setField(input.slideId, row.block.id, '/pos/group', innerGroupPath(row.pos.group))],
   );
   return commitOrCurrent(deps, ctx, input, current, mutations);
 }
@@ -2287,12 +2322,17 @@ export async function blockAdjust(
   const current = (await deps.store.read()).document;
   const slide = requireSlide(current, input.slideId);
   const block = requirePicture(slide, input.blockId);
-  const adjust: Record<string, number> = { ...(block.adjust ?? {}) };
+  const adjust: ShotAdjust = { ...(block.adjust ?? {}) };
   for (const key of ['transparency', 'brightness', 'contrast'] as const) {
     const value = input[key];
     if (value === null) delete adjust[key];
     else if (value !== undefined) adjust[key] = value;
   }
+  /* round five (SPEC-5 0.47; b2.md R8): null clears a reflection; null or none clears a recolor */
+  if (input.reflection === null) delete adjust.reflection;
+  else if (input.reflection !== undefined) adjust.reflection = input.reflection;
+  if (input.recolor === null || input.recolor === 'none') delete adjust.recolor;
+  else if (input.recolor !== undefined) adjust.recolor = input.recolor;
   const next = Object.keys(adjust).length === 0 ? null : adjust;
   return commitOrCurrent(
     deps,
@@ -2987,14 +3027,6 @@ export async function lineSet(
   return commitOrCurrent(deps, ctx, input, current, mutations);
 }
 
-/** The default box a diagram lands in: 960 by 540 centred on the sheet (Insert > Chart's box, SPEC-2 2.8.2). */
-const DIAGRAM_BOX: Position = {
-  x: (SHEET_WIDTH - 960) / 2,
-  y: (SHEET_HEIGHT - 540) / 2,
-  w: 960,
-  h: 540,
-};
-
 export async function diagramInsert(
   deps: StoreActionDeps,
   ctx: WriteContext,
@@ -3009,7 +3041,8 @@ export async function diagramInsert(
   const slide = canvas.slide;
   const taken = new Set(slideBlocks(slide).map(({ block }) => block.id));
   const group = freeId(input.kind, groupTags(slide));
-  const box = input.pos ?? { ...DIAGRAM_BOX };
+  // the default box: 960 by 540 centred on the deck's page (Insert > Chart's box, SPEC-2 2.8.2; SPEC-5 6.1)
+  const box = input.pos ?? diagramDefaultBox(deckPage(current.deck));
   const maxZ = Math.max(-1, ...canvasObjects(slide).map((block) => block.pos?.z ?? 0));
   const blocks = deps
     .diagrams(input.kind, input.count, input.style ?? 'outline', box, group)
@@ -3176,10 +3209,14 @@ export type PictureDitherResult = SlideResult & {
   warnings: string[];
 };
 
-/** The screen size a dithered picture is keyed at: its box, or the sheet for a covering picture without one (the renderer's rule). */
-function screenOf(block: Block, dither: PictureDither): [number, number] {
-  const w = block.pos?.w ?? SHEET_WIDTH;
-  const h = block.pos?.h ?? SHEET_HEIGHT;
+/** The screen size a dithered picture is keyed at: its box, or the deck's page for a covering picture without one (the renderer's rule). */
+function screenOf(
+  block: Block,
+  dither: PictureDither,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): [number, number] {
+  const w = block.pos?.w ?? page.width;
+  const h = block.pos?.h ?? page.height;
   return ditherScreen(w, h, resolveDither(dither).cell);
 }
 
@@ -3229,7 +3266,7 @@ export async function pictureDither(
   const key = ditherKey({
     source: ditherSourceOf(asset),
     dither: input.dither,
-    screen: screenOf(picture, input.dither),
+    screen: screenOf(picture, input.dither, deckPage(current.deck)),
   });
   const variant = asset.variants?.[key];
   if (variant === undefined)
@@ -3284,7 +3321,7 @@ function ditheredPictures(
       if (dither === undefined) continue;
       const asset = document.deck.assets[block.asset];
       if (asset === undefined) continue;
-      const screen = screenOf(block, dither);
+      const screen = screenOf(block, dither, deckPage(document.deck));
       out.push({
         slideId,
         block,
@@ -3409,15 +3446,18 @@ export type SlideSetBackgroundPictureResult = {
 };
 
 /** The covering picture at the bottom of a canvas slide's stack, when one exists (SPEC-3 10.6). */
-export function coveringPicture(slide: Slide): (Block & { type: 'picture' }) | undefined {
+export function coveringPicture(
+  slide: Slide,
+  page: Pick<Page, 'width' | 'height'> = DEFAULT_PAGE,
+): (Block & { type: 'picture' }) | undefined {
   const objects = canvasObjects(slide).filter(
     (block): block is Block & { type: 'picture' } =>
       block.type === 'picture' &&
       block.pos !== undefined &&
       block.pos.x === 0 &&
       block.pos.y === 0 &&
-      block.pos.w === SHEET_WIDTH &&
-      block.pos.h === SHEET_HEIGHT,
+      block.pos.w === page.width &&
+      block.pos.h === page.height,
   );
   if (objects.length === 0) return undefined;
   return objects.sort((a, b) => (a.pos?.z ?? 0) - (b.pos?.z ?? 0))[0];
@@ -3449,7 +3489,8 @@ export async function slideSetBackgroundPicture(
     const canvas = await withCanvas(deps, working, slide);
     mutations.push(...canvas.prefix);
     working = canvas.document;
-    const existing = input.replace === false ? undefined : coveringPicture(canvas.slide);
+    const existing =
+      input.replace === false ? undefined : coveringPicture(canvas.slide, deckPage(current.deck));
     if (existing !== undefined) {
       mutations.push(
         ...fieldMutations(canvas.slide, existing.id, {
@@ -3470,7 +3511,7 @@ export async function slideSetBackgroundPicture(
       asset: input.assetId,
       ...(input.alt !== undefined ? { alt: input.alt } : {}),
       ...(input.dither !== undefined ? { dither: input.dither } : {}),
-      pos: { x: 0, y: 0, w: SHEET_WIDTH, h: SHEET_HEIGHT, z: minZ - 1 },
+      pos: { ...picturePos(deckPage(current.deck)), z: minZ - 1 },
     } as unknown as Block;
     mutations.push({ op: 'block.insert', slideId: slide.id, slot: 'main', block });
     placed.push({ slideId: slide.id, blockId: id });
@@ -3488,7 +3529,7 @@ export async function slideSetBackgroundPicture(
 // Registration
 
 /** Registers every store-backed action on a dispatcher; inputs arrive validated by the action's schema. */
-export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDeps): void {
+export function registerStoreActions(dispatcher: Dispatcher, deps: LaneDeps): void {
   const on = <T>(run: (input: T, ctx: WriteContext) => Promise<unknown>): ActionHandler => {
     return (input, ctx) => run(input as T, ctx);
   };
@@ -3522,7 +3563,12 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   );
   dispatcher.register(
     'slide.applyLayout',
-    on<SlideApplyLayoutInput>((i, c) => slideApplyLayout(deps, c, i)),
+    /* a custom layout of the deck's theme record applies through B6's handler (SPEC-5 9.2; b6.md R9) */
+    on<SlideApplyAnyLayoutInput>((i, c) =>
+      isCustomLayoutId(i.layout)
+        ? slideApplyCustomLayout(deps, c, { ...i, layout: i.layout })
+        : slideApplyLayout(deps, c, { ...i, layout: i.layout }),
+    ),
   );
   dispatcher.register(
     'block.duplicate',
@@ -3761,4 +3807,28 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
     'picture.materialize',
     on<PictureMaterializeInput>((i, c) => pictureMaterialize(deps, c, i)),
   );
+  registerLaneActions(dispatcher, deps);
+}
+
+/**
+ * The round five lanes (gslides-parity SPEC-5 1.6, 13; MILESTONES-5 "The seams every builder types
+ * against"): one handler module per lane under apps/cli/src/actions/, spread here for the CLI, the
+ * MCP server and the window transport and again in the hosted deckDispatcher (apps/studio/src/
+ * server/actions.ts) with the hosted facts. The later registration of an id wins, so a lane that
+ * needs the request registers its hosted form there. Every module is empty on day 0 and its
+ * builder fills it; the order is the merge 2 order of SPEC-5-amendments A7.
+ */
+export function registerLaneActions(dispatcher: Dispatcher, deps: LaneDeps): void {
+  registerPageActions(dispatcher, deps);
+  registerPrintActions(dispatcher, deps);
+  registerMotionActions(dispatcher, deps);
+  registerMediaActions(dispatcher, deps);
+  registerEquationActions(dispatcher, deps);
+  registerThemeActions(dispatcher, deps);
+  registerImportActions(dispatcher, deps);
+  registerTemplatesActions(dispatcher, deps);
+  registerPrefsActions(dispatcher, deps);
+  registerSpellingActions(dispatcher, deps);
+  registerChatActions(dispatcher, deps);
+  registerFontActions(dispatcher, deps);
 }

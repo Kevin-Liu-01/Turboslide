@@ -1,0 +1,1575 @@
+{
+  "base": "http://localhost:4357",
+  "build": {
+    "version": 1,
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "language",
+      "zoom",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "deckId": "untitled-20260915-dufn",
+  "startedAt": "2026-09-15T22:24:19.795Z",
+  "ms": 476618,
+  "steps": 220,
+  "passed": 215,
+  "failed": 3,
+  "notDriven": 2,
+  "consoleErrors": [],
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260915-dufn; state keys deckId,revision,serverRevision,pending,slideId,blockId,mode,theme,language,zoom,author,sync,presence,access,account,comments,inbox",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the title slide shows its runs",
+      "expected": "a heading run and a body run",
+      "observed": "heading/text, lead/text",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "double click the title and type with spaces and punctuation",
+      "expected": "text \"Quarterly review: Q3, 2026!\"",
+      "observed": "editing true; text \"Quarterly review: Q3, 2026!\"; focus h1[contenteditable][run heading/text]",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Escape commits the title and creates the deck",
+      "expected": "the address moves to /edit/<id>, revision 1",
+      "observed": "/edit/untitled-20260915-dufn; revision 1; stored true",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "single click mid text places the caret there and typing lands there",
+      "expected": "xx inside the text, not at its end",
+      "observed": "editing true; \"Quarterly revixxew: Q3, 2026!\"; focus h1[contenteditable][run heading/text]",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "double click a word selects it and typing replaces it",
+      "expected": "the first word becomes Annual",
+      "observed": "selection \"Quarterly\"; \"Annual revixxew: Q3, 2026!\"",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Home then typing lands at the start",
+      "expected": "the text starts with \"A \"",
+      "observed": "\"A Annual revixxew: Q3, 2026!\"; lines 1",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "End then typing lands at the end",
+      "expected": "the text ends with \" end\"",
+      "observed": "\"A Annual revixxew: Q3, 2026! end\" [U+0021 U+0020 U+0065 U+006E U+0064]; lines 1; focus h1[contenteditable][run heading/text]",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "a space typed at the end of the text, then a pause, then a word (the pace of a person between words)",
+      "expected": "the text ends with \"x y\": the space survives the 100 ms burst that fires during the pause",
+      "observed": "after x \"! endx\"; right after the space [U+0064 U+0078 U+00A0]; after a 700 ms pause [U+0064 U+0078 U+00A0]; stored tail x\"; after y \"! endx y\" [U+0078 U+0020 U+0079]",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "Cmd Down inside the title moves the caret to the text end and moves no slide or object",
+      "expected": "the typed word lands at the end; the slide order and the active slide are unchanged",
+      "observed": "\"026! endx ycdn\"; order unchanged; active title; editing true; focus h1[contenteditable][run heading/text]",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Cmd Up inside the title moves the caret to the text start",
+      "expected": "the typed word lands at the start; nothing else moves",
+      "observed": "\"cupA Annual re\"; order unchanged",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "PageUp, PageDown, Shift End and Cmd Shift Up inside the title change no slide and keep the session",
+      "expected": "the same slide is active, the session is open, the text is intact",
+      "observed": "text intact; order unchanged; active title; editing true",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "ArrowLeft four times then Shift ArrowLeft three times selects three characters",
+      "expected": "a selection of 3 characters",
+      "observed": "selection \"ixx\" (3) in \"cupA Annual revixxew: Q3, 2026! endx ycdn\"",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "typing over the selection replaces it",
+      "expected": "the three selected characters become Z, the rest of the text unchanged",
+      "observed": "\"cupA Annual revZew: Q3, 2026! endx ycdn\"",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Backspace removes the character before the caret",
+      "expected": "the Z is gone and the text is one character shorter",
+      "observed": "\"cupA Annual revZew: Q3, 2026! endx ycdn\" -> \"cupA Annual revew: Q3, 2026! endx ycdn\"",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "Delete removes the character after the caret",
+      "expected": "the text is one character shorter",
+      "observed": "\"cupA Annual revew: Q3, 2026! endx ycdn\" -> \"cupA Annual revw: Q3, 2026! endx ycdn\"",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Cmd A then Cmd B bolds the text",
+      "expected": "a bold mark on the run",
+      "observed": "selected 37 chars; marks 1",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "Cmd I italicises the text",
+      "expected": "an italic mark on the run",
+      "observed": "marks 2; \"cupA Annual revw: Q3, 2026! endx ycdn\"",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "Enter on the single line title ends the session",
+      "expected": "no editing session after Enter",
+      "observed": "editing false; focus body",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "step": "the writes of the battery landed",
+      "expected": "the edited text is stored and no stale message showed",
+      "observed": "revision 1 -> 2; stored holds the text true; stale none",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "Cmd Z inside the text undoes the typed word as one step",
+      "expected": "the text is what it was before \" undo\" was typed (the bursts of one word are one undo group)",
+      "observed": "typed \"cupA Annual revw:  undoQ3, 2026! endx ycdn\" then \"cupA Annual revw: Q3, 2026! endx ycdn\" (before: \"cupA Annual revw: Q3, 2026! endx ycdn\"); reverted true; history before: canUndo undefined, entries ?, log ?; after: canUndo undefined, canRedo undefined, entries ?, log ?; snackbar \"Edits are kept on this server instance only and do not persist until a Blob store is connected; connect one to the Vercel project to keep them.\"; state error none; sync {\"seq\":19,\"revision\":2,\"pending\":0,\"retained\":8,\"tier\":\"memory\",\"transport\":\"sse\",\"connected\":true,\"offline\":false,\"rebased\":0}; revision 2 -> 2",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "step": "Cmd Shift Z redoes it",
+      "expected": "the undone text returns",
+      "observed": "\"cupA Annual revw:  undoQ3, 2026! endx ycdn\" (redo of \"cupA Annual revw:  undoQ3, 2026! endx ycdn\"; before the undo pair: \"cupA Annual revw: Q3, 2026! endx ycdn\")",
+      "ok": true
+    },
+    {
+      "n": 23,
+      "step": "Shift Enter in the title ends the session as Enter does",
+      "expected": "no editing session",
+      "observed": "editing false",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "step": "double click the body placeholder and type with spaces",
+      "expected": "the body holds the typed sentence",
+      "observed": "editing true; \"Revenue grew 12 percent, costs held.\"",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "step": "Enter in the body makes a line break and the next words land on it",
+      "expected": "the session stays open, a break in the body, \"Second line\" in the text",
+      "observed": "session open after Enter true; after typing true; breaks 1; text \"Revenue grew 12 percent, costs held.Second line\"; theme dark -> dark; focus p[contenteditable][run lead/text]",
+      "ok": true
+    },
+    {
+      "n": 26,
+      "step": "Shift Enter in the body makes a line break too",
+      "expected": "a further break and \"Third line\" in the text",
+      "observed": "session open after Shift Enter true; lines 3; text \"Revenue grew 12 percent, costs held.Second lineThird line\"",
+      "ok": true
+    },
+    {
+      "n": 27,
+      "step": "Home, End, arrows and Backspace in the body",
+      "expected": "the caret moves and the text follows",
+      "observed": "\"Revenue grew 12 percent, costs held.Second line>Tird line!\"",
+      "ok": true
+    },
+    {
+      "n": 28,
+      "step": "Escape commits the body",
+      "expected": "the body text is stored",
+      "observed": "revision 3; stored true",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "New slide from the toolbar",
+      "expected": "one more slide, and the new one becomes the current slide",
+      "observed": "1 -> 2; new split-1; active after 5 s split-1",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "Apply layout from the toolbar gives the new slide the Title layout",
+      "expected": "a title layout tile picked, the slide kind becomes title",
+      "observed": "tile title of 21; slide kind title",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "step": "type a short title and a body into the new slide",
+      "expected": "both runs hold their text",
+      "observed": "runs heading/text,lead/text; \"Hi\" / \"Body copy, with a comma.\"",
+      "ok": true
+    },
+    {
+      "n": 32,
+      "step": "a shape placed on the slide with the short title converts it to a canvas",
+      "expected": "a shape object on the second slide",
+      "observed": "shape shape at 1200,700 240x160",
+      "ok": true
+    },
+    {
+      "n": 33,
+      "step": "the converted short title keeps a wide box and wraps a long title at word boundaries",
+      "expected": "the title box spans most of the sheet and no word is split across lines",
+      "observed": "converted true; title box 1326 sheet px wide before typing; after typing lines 2, words split across lines 0, box 935x63, overflow-wrap break-word",
+      "ok": true
+    },
+    {
+      "n": 34,
+      "step": "New slide from the Slide menu",
+      "expected": "one more slide, and the new one becomes the current slide",
+      "observed": "2 -> 3; new title-1; active after 6 s title-1",
+      "ok": true
+    },
+    {
+      "n": 35,
+      "step": "back to the title slide by its filmstrip card",
+      "expected": "the stage shows the title slide and its heading run",
+      "observed": "active title; heading run shown",
+      "ok": true
+    },
+    {
+      "n": 36,
+      "step": "insert a mark",
+      "expected": "a mark object on the title slide (the slide becomes a canvas)",
+      "observed": "window API block.insert, the action the Insert entries dispatch (no toolbar Insert card, no palette button; the menubar's Insert menu has no Mark row); mark-walk at 1100,620 160x100",
+      "ok": true
+    },
+    {
+      "n": 37,
+      "step": "select the mark",
+      "expected": "the chip and the eight resize handles plus the ring",
+      "observed": "chip \"Mark\"; handles nw,n,ne,e,se,s,sw,w,rotate",
+      "ok": true
+    },
+    {
+      "n": 38,
+      "step": "drag the mark by its bottom right handle by 330 by 210 px: the readout shows during the drag",
+      "expected": "a readout \"W × H\" while the pointer is down and the box follows",
+      "observed": "readout \"637 × 398\"; box 112.8x70.5 -> 449.1x280.6; glyph 449.1x280.6",
+      "ok": true
+    },
+    {
+      "n": 39,
+      "step": "after the pointer is released the readout clears",
+      "expected": "no .ts-readout on the page",
+      "observed": "readout none; focus div",
+      "ok": true
+    },
+    {
+      "n": 40,
+      "step": "the mark glyph scales with its box",
+      "expected": "the svg fills the resized box",
+      "observed": "box 449.1x280.6 (pos 1100,620 637x398), glyph 449.1x280.6 attrs nullxnull",
+      "ok": true
+    },
+    {
+      "n": 41,
+      "step": "Escape during a drag cancels it: the box returns, the readout clears and nothing is written",
+      "expected": "pos unchanged, no readout after the release, the revision unchanged",
+      "observed": "readout during \"376 × 235\", after Escape none, after the release none; pos 200,250 240x150 -> 200,250 240x150; revision 10 -> 10; chip \"Mark\"",
+      "ok": true
+    },
+    {
+      "n": 42,
+      "step": "the window losing focus during a drag ends it: the readout clears and nothing is written (a synthetic window blur event)",
+      "expected": "no readout after the blur, pos unchanged, the revision unchanged",
+      "observed": "readout during \"376 × 235\", after the blur none, after the release none; pos 200,250 240x150 -> 200,250 240x150; revision 11 -> 11",
+      "ok": true
+    },
+    {
+      "n": 43,
+      "step": "Space with the handle focused after the drag",
+      "expected": "nothing scrolls or pans and no object changes",
+      "observed": "focus before div; pos 200,250 240x150 -> 200,250 240x150; readout none",
+      "ok": true
+    },
+    {
+      "n": 44,
+      "step": "a single click on the title then typing \" New Slide Template\" with spaces",
+      "expected": "the title ends with \" New Slide Template\" and every space landed",
+      "observed": "editing true; \"cupA Annual revw:  undoQ3, 2026! endx ycdn New Slide Template\"; readout while typing none; focus h1[contenteditable][run heading/text]",
+      "ok": true
+    },
+    {
+      "n": 45,
+      "step": "the readout is gone while the title is being edited",
+      "expected": "no .ts-readout with the title selected",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 46,
+      "step": "the converted title wraps at word boundaries and stays clear of the body placeholder",
+      "expected": "no word split across lines, no overlap with the body box",
+      "observed": "lines 3, words split across lines 0, overflow-wrap break-word, word-break normal, box 935x127 css px at 88px, overlap with the body 0 px²",
+      "ok": true
+    },
+    {
+      "n": 47,
+      "step": "End on the canvas title moves the caret to the end of its line",
+      "expected": "the caret sits at a line end after End (the text end on a one line title) and the typed word lands there",
+      "observed": "caret offset 61 of 61, at a line end true, at the text end true, lines 3; landed at the caret true; \"cupA Annual revw:  undoQ3, 2026! endx ycdn New Slide Template tail\"",
+      "ok": true
+    },
+    {
+      "n": 48,
+      "step": "Home on the canvas title moves the caret to the start of its line",
+      "expected": "the caret sits at a line start after Home (the text start on a one line title) and the typed word lands there",
+      "observed": "caret offset 43 of 66, at a line start true, at the text start false, lines 3; landed at the caret true; \"cupA Annual revw:  undoQ3, 2026! endx ycdn Start New Slide Template tail\"",
+      "ok": true
+    },
+    {
+      "n": 49,
+      "step": "insert a text box (Insert > Text box, a click on the sheet)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: text text at 80,480 480x64",
+      "ok": true
+    },
+    {
+      "n": 50,
+      "step": "insert a rectangle (Insert > Shape > Shapes)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: shape shape at 480,480 240x160",
+      "ok": true
+    },
+    {
+      "n": 51,
+      "step": "insert an arrow shape (Insert > Shape > Arrows)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: shape shape-2 at 880,480 240x160",
+      "ok": true
+    },
+    {
+      "n": 52,
+      "step": "insert a callout (Insert > Shape > Callouts)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: shape shape-3 at 1280,480 240x160",
+      "ok": true
+    },
+    {
+      "n": 53,
+      "step": "insert an equation shape (Insert > Shape > Equation)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: shape shape-4 at 80,700 240x160",
+      "ok": true
+    },
+    {
+      "n": 54,
+      "step": "insert a line (Insert > Line > Line, drawn by a drag)",
+      "expected": "a new object on the title slide",
+      "observed": "menu: shape shape-5 at 480,720 280x40",
+      "ok": true
+    },
+    {
+      "n": 55,
+      "step": "insert a picture (Image by URL, a data URL)",
+      "expected": "a new object on the title slide",
+      "observed": "menu Insert > Image > By URL (no object within 30 s); then window API asset.add + block.insert: shot shot-walk at 880,700 240x150",
+      "ok": true
+    },
+    {
+      "n": 56,
+      "step": "insert an icon (Insert > Icon)",
+      "expected": "a new object on the title slide",
+      "observed": "menu Insert > Icon: icon icon at 776,426 48x48",
+      "ok": true
+    },
+    {
+      "n": 57,
+      "step": "insert a material (Insert > Material)",
+      "expected": "a material object",
+      "observed": "not driven: menu Insert > Material",
+      "ok": null
+    },
+    {
+      "n": 58,
+      "step": "insert a table (Insert > Table)",
+      "expected": "a new object on the title slide",
+      "observed": "menu Insert > Table (the hover grid, 3 by 3): table table at 320,290 960x320",
+      "ok": true
+    },
+    {
+      "n": 59,
+      "step": "insert a chart (Insert > Chart)",
+      "expected": "a new object on the title slide",
+      "observed": "menu Insert > Chart > Column: chart chart at 320,180 960x540",
+      "ok": true
+    },
+    {
+      "n": 60,
+      "step": "insert a diagram (Insert > Diagram)",
+      "expected": "a new object on the title slide",
+      "observed": "menu Insert > Diagram, the panel Insert button: shape step-1 at 320,370 196.8x160",
+      "ok": true
+    },
+    {
+      "n": 61,
+      "step": "insert a code panel with its marks (the palette)",
+      "expected": "a new object on the title slide",
+      "observed": "this build has no toolbar Insert card and no palette button; then the window API block.insert with term and marks set: panel panel-walk at 900,40 320x120",
+      "ok": true
+    },
+    {
+      "n": 62,
+      "step": "insert the logo plates (the palette)",
+      "expected": "a new object on the title slide",
+      "observed": "not driven: this build has no toolbar Insert card and no palette button",
+      "ok": null
+    },
+    {
+      "n": 63,
+      "step": "the code panel takes the terminal form with its marks",
+      "expected": "term and marks set (block.set, the inspector's write)",
+      "observed": "set",
+      "ok": true
+    },
+    {
+      "n": 64,
+      "step": "every object placed in its own cell (block.set /pos, the setup for the drags)",
+      "expected": "13 objects placed",
+      "observed": "13 placed",
+      "ok": true
+    },
+    {
+      "n": 65,
+      "step": "the slide's other objects parked along the bottom (block.set /pos, the setup for the drags)",
+      "expected": "13 objects parked",
+      "observed": "13 parked: mark, heading, lead, label-4, step-4, link-3, label-3, step-3, link-2, label-2, step-2, link-1, label-1",
+      "ok": true
+    },
+    {
+      "n": 66,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Text box\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 67,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 52; ",
+      "ok": true
+    },
+    {
+      "n": 68,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,105 240x150 -> 140,105 300x195 (expected 140,105 300x190); font 22 -> 22, inner 211.5x23.3 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Text box\" -> \"Text box\"; guides 2; revision 52 -> 52",
+      "ok": true
+    },
+    {
+      "n": 69,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] undo restores the box after the se plain resize",
+      "expected": "pos back to 140,105 240x150",
+      "observed": "pos 140,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 70,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,105 240x150 -> 80,65 300x190 (expected 80,65 300x190); font 22 -> 22, inner 211.5x23.3 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Text box\" -> \"Text box\"; guides 1; revision 52 -> 52",
+      "ok": true
+    },
+    {
+      "n": 71,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 140,105 240x150",
+      "observed": "pos 140,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 72,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 73,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,105 240x150 -> 140,105 300x195 (expected 140,105 300x190); font 22 -> 22, inner 600x66 in box 600x390; readout during 300 × 195, after none; chip \"Text box\" -> \"Text box\"; guides 2; revision 53 -> 53",
+      "ok": true
+    },
+    {
+      "n": 74,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 140,105 240x150",
+      "observed": "pos 140,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 75,
+      "step": "[a text box (Insert > Text box, a click on the sheet)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 76,
+      "step": "[a rectangle (Insert > Shape > Shapes)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Shape\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 77,
+      "step": "[a rectangle (Insert > Shape > Shapes)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 54; ",
+      "ok": true
+    },
+    {
+      "n": 78,
+      "step": "[a rectangle (Insert > Shape > Shapes)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,105 240x150 -> 440,105 300x195 (expected 440,105 300x190); svg 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 54 -> 54",
+      "ok": true
+    },
+    {
+      "n": 79,
+      "step": "[a rectangle (Insert > Shape > Shapes)] undo restores the box after the se plain resize",
+      "expected": "pos back to 440,105 240x150",
+      "observed": "pos 440,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 80,
+      "step": "[a rectangle (Insert > Shape > Shapes)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,105 240x150 -> 380,65 300x190 (expected 380,65 300x190); svg 211.5x133.9 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 54 -> 54",
+      "ok": true
+    },
+    {
+      "n": 81,
+      "step": "[a rectangle (Insert > Shape > Shapes)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 440,105 240x150",
+      "observed": "pos 440,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 82,
+      "step": "[a rectangle (Insert > Shape > Shapes)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 83,
+      "step": "[a rectangle (Insert > Shape > Shapes)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,105 240x150 -> 440,105 300x195 (expected 440,105 300x190); svg 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 54 -> 55",
+      "ok": true
+    },
+    {
+      "n": 84,
+      "step": "[a rectangle (Insert > Shape > Shapes)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 440,105 240x150",
+      "observed": "pos 440,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 85,
+      "step": "[a rectangle (Insert > Shape > Shapes)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 86,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Shape\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 87,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 56; ",
+      "ok": true
+    },
+    {
+      "n": 88,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,105 240x150 -> 740,105 300x195 (expected 740,105 300x190); svg 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 56 -> 56",
+      "ok": true
+    },
+    {
+      "n": 89,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] undo restores the box after the se plain resize",
+      "expected": "pos back to 740,105 240x150",
+      "observed": "pos 740,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 90,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,105 240x150 -> 680,65 300x190 (expected 680,65 300x190); svg 211.5x133.9 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 56 -> 56",
+      "ok": true
+    },
+    {
+      "n": 91,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 740,105 240x150",
+      "observed": "pos 740,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 92,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 93,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,105 240x150 -> 740,105 300x195 (expected 740,105 300x190); svg 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 56 -> 57",
+      "ok": true
+    },
+    {
+      "n": 94,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 740,105 240x150",
+      "observed": "pos 740,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 95,
+      "step": "[an arrow shape (Insert > Shape > Arrows)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 96,
+      "step": "[a callout (Insert > Shape > Callouts)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Shape\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 97,
+      "step": "[a callout (Insert > Shape > Callouts)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 58; ",
+      "ok": true
+    },
+    {
+      "n": 98,
+      "step": "[a callout (Insert > Shape > Callouts)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,105 240x150 -> 1040,105 300x195 (expected 1040,105 300x190); svg 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 58 -> 58",
+      "ok": true
+    },
+    {
+      "n": 99,
+      "step": "[a callout (Insert > Shape > Callouts)] undo restores the box after the se plain resize",
+      "expected": "pos back to 1040,105 240x150",
+      "observed": "pos 1040,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 100,
+      "step": "[a callout (Insert > Shape > Callouts)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,105 240x150 -> 980,65 300x190 (expected 980,65 300x190); svg 211.5x133.9 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 58 -> 58",
+      "ok": true
+    },
+    {
+      "n": 101,
+      "step": "[a callout (Insert > Shape > Callouts)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 1040,105 240x150",
+      "observed": "pos 1040,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 102,
+      "step": "[a callout (Insert > Shape > Callouts)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 103,
+      "step": "[a callout (Insert > Shape > Callouts)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,105 240x150 -> 1040,105 300x195 (expected 1040,105 300x190); svg 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 2; revision 58 -> 59",
+      "ok": true
+    },
+    {
+      "n": 104,
+      "step": "[a callout (Insert > Shape > Callouts)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 1040,105 240x150",
+      "observed": "pos 1040,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 105,
+      "step": "[a callout (Insert > Shape > Callouts)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 106,
+      "step": "[an equation shape (Insert > Shape > Equation)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Shape\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 107,
+      "step": "[an equation shape (Insert > Shape > Equation)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 60; ",
+      "ok": true
+    },
+    {
+      "n": 108,
+      "step": "[an equation shape (Insert > Shape > Equation)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,105 240x150 -> 1340,105 300x195 (expected 1340,105 300x190); svg 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 60 -> 60",
+      "ok": true
+    },
+    {
+      "n": 109,
+      "step": "[an equation shape (Insert > Shape > Equation)] undo restores the box after the se plain resize",
+      "expected": "pos back to 1340,105 240x150",
+      "observed": "pos 1340,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 110,
+      "step": "[an equation shape (Insert > Shape > Equation)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,105 240x150 -> 1280,65 300x190 (expected 1280,65 300x190); svg 211.5x133.9 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 60 -> 60",
+      "ok": true
+    },
+    {
+      "n": 111,
+      "step": "[an equation shape (Insert > Shape > Equation)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 1340,105 240x150",
+      "observed": "pos 1340,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 112,
+      "step": "[an equation shape (Insert > Shape > Equation)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 113,
+      "step": "[an equation shape (Insert > Shape > Equation)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,105 240x150 -> 1340,105 300x195 (expected 1340,105 300x190); svg 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Shape\" -> \"Shape\"; guides 1; revision 60 -> 61",
+      "ok": true
+    },
+    {
+      "n": 114,
+      "step": "[an equation shape (Insert > Shape > Equation)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 1340,105 240x150",
+      "observed": "pos 1340,105 240x150",
+      "ok": true
+    },
+    {
+      "n": 115,
+      "step": "[an equation shape (Insert > Shape > Equation)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 116,
+      "step": "[a line (Insert > Line > Line, drawn by a drag)] select",
+      "expected": "the chip names the line and its two end handles show",
+      "observed": "chip \"Shape\"; handles 0 (a line: start and end)",
+      "ok": true
+    },
+    {
+      "n": 117,
+      "step": "[a line (Insert > Line > Line, drawn by a drag)] drag the line end by 80 by 40 px",
+      "expected": "the line's box changes and the readout clears",
+      "observed": "pos 20,300 240x150 -> 20,300 320x190; readout during none, after none",
+      "ok": true
+    },
+    {
+      "n": 118,
+      "step": "[a line (Insert > Line > Line, drawn by a drag)] undo restores the line",
+      "expected": "pos back",
+      "observed": "pos 20,300 240x150",
+      "ok": true
+    },
+    {
+      "n": 119,
+      "step": "[a picture (Image by URL, a data URL)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Image\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 120,
+      "step": "[a picture (Image by URL, a data URL)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 63; ",
+      "ok": true
+    },
+    {
+      "n": 121,
+      "step": "[a picture (Image by URL, a data URL)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,375 240x150 -> 440,375 300x195 (expected 440,375 300x190); content 211.5x141.5 in box 211.5x137.5 (content did not scale); readout during 300 × 195, after none; chip \"Image\" -> \"Image\"; guides 2; revision 63 -> 63",
+      "ok": false
+    },
+    {
+      "n": 122,
+      "step": "[a picture (Image by URL, a data URL)] undo restores the box after the se plain resize",
+      "expected": "pos back to 440,375 240x150",
+      "observed": "pos 440,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 123,
+      "step": "[a picture (Image by URL, a data URL)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,375 240x150 -> 380,335 300x190 (expected 380,335 300x190); content 211.5x141.5 in box 211.5x134 (content did not scale); readout during 300 × 190, after none; chip \"Image\" -> \"Image\"; guides 1; revision 63 -> 63",
+      "ok": false
+    },
+    {
+      "n": 124,
+      "step": "[a picture (Image by URL, a data URL)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 440,375 240x150",
+      "observed": "pos 440,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 125,
+      "step": "[a picture (Image by URL, a data URL)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 126,
+      "step": "[a picture (Image by URL, a data URL)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,375 240x150 -> 440,375 300x195 (expected 440,375 300x190); content 600x401.3 in box 600x390 (content did not scale); readout during 300 × 195, after none; chip \"Image\" -> \"Image\"; guides 2; revision 63 -> 64",
+      "ok": false
+    },
+    {
+      "n": 127,
+      "step": "[a picture (Image by URL, a data URL)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 440,375 240x150",
+      "observed": "pos 440,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 128,
+      "step": "[a picture (Image by URL, a data URL)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 129,
+      "step": "[an icon (Insert > Icon)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Icon\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 130,
+      "step": "[an icon (Insert > Icon)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 65; ",
+      "ok": true
+    },
+    {
+      "n": 131,
+      "step": "[an icon (Insert > Icon)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,375 240x150 -> 740,375 312x195 (ratio 1.600 -> 1.600, anchor kept (aspect locked corner)); svg 220x137.5 in box 220x137.5; readout during 312 × 195, after none; chip \"Icon\" -> \"Icon\"; guides 1; revision 65 -> 65",
+      "ok": true
+    },
+    {
+      "n": 132,
+      "step": "[an icon (Insert > Icon)] undo restores the box after the se plain resize",
+      "expected": "pos back to 740,375 240x150",
+      "observed": "pos 740,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 133,
+      "step": "[an icon (Insert > Icon)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,375 240x150 -> 676,335 304x190 (ratio 1.600 -> 1.600, anchor kept (aspect locked corner)); svg 214.3x134 in box 214.3x134; readout during 304 × 190, after none; chip \"Icon\" -> \"Icon\"; guides 0; revision 65 -> 65",
+      "ok": true
+    },
+    {
+      "n": 134,
+      "step": "[an icon (Insert > Icon)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 740,375 240x150",
+      "observed": "pos 740,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 135,
+      "step": "[an icon (Insert > Icon)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 136,
+      "step": "[an icon (Insert > Icon)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,375 240x150 -> 740,375 312x195 (ratio 1.600 -> 1.600, anchor kept (aspect locked corner)); svg 624x390 in box 624x390; readout during 312 × 195, after none; chip \"Icon\" -> \"Icon\"; guides 1; revision 65 -> 66",
+      "ok": true
+    },
+    {
+      "n": 137,
+      "step": "[an icon (Insert > Icon)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 740,375 240x150",
+      "observed": "pos 740,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 138,
+      "step": "[an icon (Insert > Icon)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 139,
+      "step": "[a table (Insert > Table)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Table\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 140,
+      "step": "[a table (Insert > Table)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 67; ",
+      "ok": true
+    },
+    {
+      "n": 141,
+      "step": "[a table (Insert > Table)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,375 240x150 -> 1040,375 300x195 (expected 1040,375 300x190); content 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Table\" -> \"Table\"; guides 2; revision 67 -> 67",
+      "ok": true
+    },
+    {
+      "n": 142,
+      "step": "[a table (Insert > Table)] undo restores the box after the se plain resize",
+      "expected": "pos back to 1040,375 240x150",
+      "observed": "pos 1040,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 143,
+      "step": "[a table (Insert > Table)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,375 240x150 -> 980,335 300x190 (expected 980,335 300x190); content 211.5x134 in box 211.5x134; readout during 300 × 190, after none; chip \"Table\" -> \"Table\"; guides 1; revision 67 -> 67",
+      "ok": true
+    },
+    {
+      "n": 144,
+      "step": "[a table (Insert > Table)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 1040,375 240x150",
+      "observed": "pos 1040,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 145,
+      "step": "[a table (Insert > Table)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 146,
+      "step": "[a table (Insert > Table)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1040,375 240x150 -> 1040,375 300x195 (expected 1040,375 300x190); content 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Table\" -> \"Table\"; guides 2; revision 68 -> 68",
+      "ok": true
+    },
+    {
+      "n": 147,
+      "step": "[a table (Insert > Table)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 1040,375 240x150",
+      "observed": "pos 1040,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 148,
+      "step": "[a table (Insert > Table)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 149,
+      "step": "[a chart (Insert > Chart)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Chart\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 150,
+      "step": "[a chart (Insert > Chart)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 69; ",
+      "ok": true
+    },
+    {
+      "n": 151,
+      "step": "[a chart (Insert > Chart)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,375 240x150 -> 1340,375 300x195 (expected 1340,375 300x190); svg 211.5x137.5 in box 211.5x137.5; readout during 300 × 195, after none; chip \"Chart\" -> \"Chart\"; guides 1; revision 69 -> 69",
+      "ok": true
+    },
+    {
+      "n": 152,
+      "step": "[a chart (Insert > Chart)] undo restores the box after the se plain resize",
+      "expected": "pos back to 1340,375 240x150",
+      "observed": "pos 1340,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 153,
+      "step": "[a chart (Insert > Chart)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,375 240x150 -> 1280,335 300x190 (expected 1280,335 300x190); svg 211.5x134 in box 211.5x134; readout during 300 × 190, after none; chip \"Chart\" -> \"Chart\"; guides 1; revision 69 -> 69",
+      "ok": true
+    },
+    {
+      "n": 154,
+      "step": "[a chart (Insert > Chart)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 1340,375 240x150",
+      "observed": "pos 1340,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 155,
+      "step": "[a chart (Insert > Chart)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 156,
+      "step": "[a chart (Insert > Chart)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 1340,375 240x150 -> 1340,375 300x195 (expected 1340,375 300x190); svg 600x390 in box 600x390; readout during 300 × 195, after none; chip \"Chart\" -> \"Chart\"; guides 1; revision 69 -> 70",
+      "ok": true
+    },
+    {
+      "n": 157,
+      "step": "[a chart (Insert > Chart)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 1340,375 240x150",
+      "observed": "pos 1340,375 240x150",
+      "ok": true
+    },
+    {
+      "n": 158,
+      "step": "[a chart (Insert > Chart)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 159,
+      "step": "[a diagram (Insert > Diagram)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Group\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 160,
+      "step": "[a diagram (Insert > Diagram)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,75 (box was 169.2x105.8 css); readout during none, after none; revision 71; ",
+      "ok": true
+    },
+    {
+      "n": 161,
+      "step": "[a diagram (Insert > Diagram)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,645 240x150 -> 140,645 300x185 (expected 140,645 300x190); svg 211.5x130.4 in box 211.5x130.4; readout during 300 × 185, after none; chip \"Group\" -> \"Group\"; guides 2; revision 71 -> 71",
+      "ok": true
+    },
+    {
+      "n": 162,
+      "step": "[a diagram (Insert > Diagram)] undo restores the box after the se plain resize",
+      "expected": "pos back to 140,645 240x150",
+      "observed": "pos 140,645 240x150",
+      "ok": true
+    },
+    {
+      "n": 163,
+      "step": "[a diagram (Insert > Diagram)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,645 240x150 -> 80,605 300x190 (expected 80,605 300x190); svg 211.5x133.9 in box 211.5x133.9; readout during 300 × 190, after none; chip \"Group\" -> \"Group\"; guides 0; revision 71 -> 71",
+      "ok": true
+    },
+    {
+      "n": 164,
+      "step": "[a diagram (Insert > Diagram)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 140,645 240x150",
+      "observed": "pos 140,645 240x150",
+      "ok": true
+    },
+    {
+      "n": 165,
+      "step": "[a diagram (Insert > Diagram)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 166,
+      "step": "[a diagram (Insert > Diagram)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 140,645 240x150 -> 140,645 300x185 (expected 140,645 300x190); svg 600x370 in box 600x370; readout during 300 × 185, after none; chip \"Group\" -> \"Group\"; guides 2; revision 71 -> 72",
+      "ok": true
+    },
+    {
+      "n": 167,
+      "step": "[a diagram (Insert > Diagram)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 140,645 240x150",
+      "observed": "pos 140,645 240x150",
+      "ok": true
+    },
+    {
+      "n": 168,
+      "step": "[a diagram (Insert > Diagram)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 169,
+      "step": "[a code panel with its marks (the palette)] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Code\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 170,
+      "step": "[a code panel with its marks (the palette)] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,83 (box was 169.2x105.8 css); readout during none, after none; revision 73; ",
+      "ok": true
+    },
+    {
+      "n": 171,
+      "step": "[a code panel with its marks (the palette)] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,653 240x150 -> 440,653 300x191 (expected 440,653 300x190); panel 211.5x134.7 in box 211.5x134.7; mark svg 66.5x42.3 -> 89.3x56.8 (mark is 54% -> 53% of the content height 77.8 -> 106.7); readout during 300 × 191, after none; chip \"Code\" -> \"Code\"; guides 2; revision 73 -> 73",
+      "ok": true
+    },
+    {
+      "n": 172,
+      "step": "[a code panel with its marks (the palette)] undo restores the box after the se plain resize",
+      "expected": "pos back to 440,653 240x150",
+      "observed": "pos 440,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 173,
+      "step": "[a code panel with its marks (the palette)] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,653 240x150 -> 380,613 300x190 (expected 380,613 300x190); panel 211.5x134 in box 211.5x134; mark svg 66.5x42.3 -> 88.7x56.4 (mark is 54% -> 53% of the content height 77.8 -> 106); readout during 300 × 190, after none; chip \"Code\" -> \"Code\"; guides 1; revision 73 -> 73",
+      "ok": true
+    },
+    {
+      "n": 174,
+      "step": "[a code panel with its marks (the palette)] undo restores the box after the nw plain resize",
+      "expected": "pos back to 440,653 240x150",
+      "observed": "pos 440,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 175,
+      "step": "[a code panel with its marks (the palette)] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 176,
+      "step": "[a code panel with its marks (the palette)] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 440,653 240x150 -> 440,653 300x191 (expected 440,653 300x190); panel 600x382 in box 600x382; mark svg 188.8x120 -> 253.3x161 (mark is 44% -> 45% of the content height 272 -> 354); readout during 300 × 191, after none; chip \"Code\" -> \"Code\"; guides 2; revision 74 -> 74",
+      "ok": true
+    },
+    {
+      "n": 177,
+      "step": "[a code panel with its marks (the palette)] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 440,653 240x150",
+      "observed": "pos 440,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 178,
+      "step": "[a code panel with its marks (the palette)] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 179,
+      "step": "[the mark] select",
+      "expected": "the chip names the object and the eight handles show",
+      "observed": "chip \"Mark\"; handles 8",
+      "ok": true
+    },
+    {
+      "n": 180,
+      "step": "[the mark] drag by 120 by 80 px",
+      "expected": "pos moves by 120, 80 (within 12 px for a snap) and no readout stays",
+      "observed": "moved 120,83 (box was 169.2x105.8 css); readout during none, after none; revision 75; ",
+      "ok": true
+    },
+    {
+      "n": 181,
+      "step": "[the mark] resize se plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,653 240x150 -> 740,653 306x191 (ratio 1.600 -> 1.602, anchor kept (aspect locked corner)); svg 215.7x134.7 in box 215.7x134.7; readout during 306 × 191, after none; chip \"Mark\" -> \"Mark\"; guides 1; revision 75 -> 75",
+      "ok": true
+    },
+    {
+      "n": 182,
+      "step": "[the mark] undo restores the box after the se plain resize",
+      "expected": "pos back to 740,653 240x150",
+      "observed": "pos 740,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 183,
+      "step": "[the mark] resize nw plain at zoom 100",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,653 240x150 -> 676,613 304x190 (ratio 1.600 -> 1.600, anchor kept (aspect locked corner)); svg 214.3x134 in box 214.3x134; readout during 304 × 190, after none; chip \"Mark\" -> \"Mark\"; guides 0; revision 75 -> 75",
+      "ok": true
+    },
+    {
+      "n": 184,
+      "step": "[the mark] undo restores the box after the nw plain resize",
+      "expected": "pos back to 740,653 240x150",
+      "observed": "pos 740,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 185,
+      "step": "[the mark] zoom to 200 percent on the object",
+      "expected": "the stage draws 2 CSS px per sheet px",
+      "observed": "k 0.7 -> 2",
+      "ok": true
+    },
+    {
+      "n": 186,
+      "step": "[the mark] resize se plain at zoom 200",
+      "expected": "box follows the pointer, content scales, readout during then clears, chip unchanged",
+      "observed": "pos 740,653 240x150 -> 740,653 306x191 (ratio 1.600 -> 1.602, anchor kept (aspect locked corner)); svg 612x382 in box 612x382; readout during 306 × 191, after none; chip \"Mark\" -> \"Mark\"; guides 1; revision 75 -> 76",
+      "ok": true
+    },
+    {
+      "n": 187,
+      "step": "[the mark] undo restores the box after the se plain at zoom 200 resize",
+      "expected": "pos back to 740,653 240x150",
+      "observed": "pos 740,653 240x150",
+      "ok": true
+    },
+    {
+      "n": 188,
+      "step": "[the mark] the readout cleared after every resize",
+      "expected": "no readout on the page after each of the 3 releases",
+      "observed": "0 of 3 releases left the readout on the page",
+      "ok": true
+    },
+    {
+      "n": 189,
+      "step": "the angle readout clears after the ring is released",
+      "expected": "no .ts-readout after the rotation",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 190,
+      "step": "rotate the rectangle by its ring",
+      "expected": "pos.rotate near 35 degrees, a degree readout during, none after",
+      "observed": "rotate 0 -> 35; readout during 35°, after none",
+      "ok": true
+    },
+    {
+      "n": 191,
+      "step": "undo the rotation",
+      "expected": "pos.rotate back to 0",
+      "observed": "rotate 0",
+      "ok": true
+    },
+    {
+      "n": 192,
+      "step": "Shift click a second object adds it to the selection",
+      "expected": "the chip reads \"2 objects\"",
+      "observed": "chip \"2 objects\"",
+      "ok": true
+    },
+    {
+      "n": 193,
+      "step": "Cmd G (the task's key) on the two objects",
+      "expected": "recorded: what the product binds (the model binds Group to Cmd Option G and Cmd G to Find next)",
+      "observed": "chip \"2 objects\"; groups none / none; focus input[dialog.findReplace.find]; dialog opened dialog.findReplace (closed, the pair reselected)",
+      "ok": true
+    },
+    {
+      "n": 194,
+      "step": "Cmd Option G (the product's binding) groups the two objects",
+      "expected": "the chip reads \"Group\" and both carry one group tag",
+      "observed": "chip \"Group\"; groups group / group; focus div",
+      "ok": true
+    },
+    {
+      "n": 195,
+      "step": "resize the group by its bottom right handle",
+      "expected": "both members scale, readout during and cleared after",
+      "observed": "A 440,105 240x150 -> 486.5,105 277.5x195; B 140,105 240x150 -> 140,105 277.5x195; readout during 624 × 195, after none",
+      "ok": true
+    },
+    {
+      "n": 196,
+      "step": "Cmd Option Shift G ungroups, else Arrange > Ungroup",
+      "expected": "no group tag on either member",
+      "observed": "the chord; groups none / none; chip \"2 objects\"",
+      "ok": true
+    },
+    {
+      "n": 197,
+      "step": "Cmd D duplicates the selected object",
+      "expected": "one more object on the slide",
+      "observed": "26 -> 27",
+      "ok": true
+    },
+    {
+      "n": 198,
+      "step": "Delete removes the selected object",
+      "expected": "one object fewer",
+      "observed": "27 -> 26",
+      "ok": true
+    },
+    {
+      "n": 199,
+      "step": "Cmd Z brings the object back",
+      "expected": "the count goes back up",
+      "observed": "26 -> 27",
+      "ok": true
+    },
+    {
+      "n": 200,
+      "step": "Cmd Shift Z removes it again",
+      "expected": "the count goes back down",
+      "observed": "27 -> 26",
+      "ok": true
+    },
+    {
+      "n": 201,
+      "step": "drag the second filmstrip card above the first",
+      "expected": "the slide order swaps",
+      "observed": "title,split-1,title-1 -> split-1,title,title-1",
+      "ok": true
+    },
+    {
+      "n": 202,
+      "step": "the layout picker opens from the toolbar and closes with Escape",
+      "expected": "layout.apply.plate visible then gone",
+      "observed": "via toolbar.layout; shown true, tiles 22, focus after the click button[toolbar.layout], gone after Escape true",
+      "ok": true
+    },
+    {
+      "n": 203,
+      "step": "the theme panel opens, switches to dark and back, and closes",
+      "expected": "state.theme follows the tiles",
+      "observed": "dark dark, light light, closed true",
+      "ok": true
+    },
+    {
+      "n": 204,
+      "step": "Slideshow opens and the keys page it",
+      "expected": "ArrowRight to 2, ArrowLeft to 1, digit 3 Enter to 3, Escape leaves",
+      "observed": "present true; n 2, 1, 3 (counter \"3 of 3\"); after Escape present false",
+      "ok": true
+    },
+    {
+      "n": 205,
+      "step": "the Share dialog opens and closes",
+      "expected": "dialog.share visible then gone after Escape",
+      "observed": "shown true, gone true",
+      "ok": true
+    },
+    {
+      "n": 206,
+      "step": "the file menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "15 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 207,
+      "step": "the edit menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "11 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 208,
+      "step": "the view menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "17 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 209,
+      "step": "the insert menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "24 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 210,
+      "step": "the format menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "9 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 211,
+      "step": "the slide menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "10 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 212,
+      "step": "the arrange menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "8 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 213,
+      "step": "the tools menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "9 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 214,
+      "step": "the extensions menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "2 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 215,
+      "step": "the help menu opens and closes with Escape",
+      "expected": "the menu shows, Escape removes it, no console error",
+      "observed": "6 rows, closed true, console errors 0",
+      "ok": true
+    },
+    {
+      "n": 216,
+      "step": "export.run pptx flatten returns a report and a downloadable file",
+      "expected": "a report, the browser's download, and a file that starts with the zip magic PK",
+      "observed": "13414 ms; report keys deckId,revision,format,mode,theme,fontSet,fontSetVersion,files,fonts,slides; report card files 0; download /api/export/untitled-20260915-dufn?job=mu38xa1z-abb475&file=untitled-20260915-du; file 200 140995 bytes head PK",
+      "ok": true
+    },
+    {
+      "n": 217,
+      "step": "export.run pptx native returns a report and a downloadable file",
+      "expected": "a report, the browser's download, and a file that starts with the zip magic PK",
+      "observed": "25031 ms; report keys deckId,revision,format,mode,theme,fontSet,fontSetVersion,files,fonts,slides; report card files 0; download /api/export/untitled-20260915-dufn?job=mu38xkdx-6a6fbe&file=untitled-20260915-du; file 200 71057 bytes head PK",
+      "ok": true
+    },
+    {
+      "n": 218,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 219,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260915-dufn",
+      "ok": true
+    },
+    {
+      "n": 220,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /edit/untitled-20260915-dufn is 404 within 20 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ]
+}

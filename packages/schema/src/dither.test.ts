@@ -10,6 +10,7 @@ import {
   assetVariantSchema,
   assetVariantTwin,
   hasContinuousSource,
+  isPictureAsset,
 } from './assets.ts';
 import type { Asset } from './assets.ts';
 import { pictureBlockSchema, shotBlockSchema } from './blocks.ts';
@@ -119,6 +120,8 @@ describe('pictureDitherSchema', () => {
       minFilter: 'Advanced',
       channel: 'Advanced',
       seed: 'Advanced',
+      /* round five (gslides-parity SPEC-5 11): the halftone screen's angle */
+      angle: 'Advanced',
     });
     expect(readInspector(shape.minFilter as z.ZodType)?.label).toBe('Thicken');
     const json = z.toJSONSchema(pictureDitherSchema, { target: 'draft-2020-12' }) as {
@@ -185,7 +188,7 @@ describe('the validator and a block dither (SPEC-3 10.1)', () => {
     expect(validateDocument(withDitheredPicture('mood-earth')).ok).toBe(true);
     const document = withDitheredPicture('liquid-metal-diamond');
     const asset = document.deck.assets['liquid-metal-diamond'];
-    if (asset === undefined) throw new Error('fixture');
+    if (asset === undefined || !isPictureAsset(asset)) throw new Error('fixture');
     asset.sourceFile = 'assets/liquid-metal-diamond.source.png';
     expect(validateDocument(document).ok).toBe(true);
     expect(hasContinuousSource(SITE_HOME)).toBe(true);

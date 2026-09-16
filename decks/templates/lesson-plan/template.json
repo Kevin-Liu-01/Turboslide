@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "lesson-plan",
+  "name": "Lesson plan",
+  "description": "Eight slides for one lesson: the objectives, a warm up, the lesson in two columns, an activity, a check for understanding, the homework and a closing.",
+  "theme": "ts-plate",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../blank/assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 8
+    }
+  ],
+  "archetypes": [],
+  "category": "education",
+  "useCases": [
+    "lesson plans",
+    "workshop facilitation"
+  ],
+  "cover": "title",
+  "slideCount": 8
+}

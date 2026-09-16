@@ -115,7 +115,8 @@ describe('turboslide writes', () => {
       '--json',
     ]);
     expect(r.code).toBe(1);
-    expect(r.stderr).toMatch(/stale/);
+    /* the plain sentence of gslides-parity SPEC-5-amendments A3 item 8 (reduce.ts) */
+    expect(r.stderr).toMatch(/moved to revision/);
     const body = r.json as {
       error: string;
       status: number;

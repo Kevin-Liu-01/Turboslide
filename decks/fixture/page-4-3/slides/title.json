@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Standard (4:3)",
+  "lead": "A deck on a 1200 by 900 page: every slot derives from the 926 by 642 content box.",
+  "notes": "The title slide of the 4:3 page fixture.",
+  "template": "title"
+}

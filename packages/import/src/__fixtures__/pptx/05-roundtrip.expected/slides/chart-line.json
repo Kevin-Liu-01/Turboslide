@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-line",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "A line chart with values shown",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 1326,
+          "h": 48.4,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:chart-line#h/text"
+        }
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "line",
+        "categories": [
+          "2023",
+          "2024",
+          "2025",
+          "2026"
+        ],
+        "series": [
+          {
+            "name": "Locales",
+            "values": [
+              12,
+              24,
+              40,
+              58
+            ],
+            "color": "ink"
+          },
+          {
+            "name": "Projects",
+            "values": [
+              30,
+              55,
+              90,
+              140
+            ],
+            "color": "ink-2"
+          },
+          {
+            "name": "Teams",
+            "values": [
+              4,
+              9,
+              16,
+              25
+            ],
+            "color": "titanium"
+          }
+        ],
+        "pos": {
+          "x": 137,
+          "y": 217.39,
+          "w": 1326,
+          "h": 460,
+          "z": 2
+        },
+        "legend": "bottom",
+        "labels": true,
+        "ext": {
+          "pptxName": "ts:chart-line#chart",
+          "pptxChartPart": "ppt/charts/chart2.xml"
+        }
+      }
+    ]
+  },
+  "title": "A line chart with values shown",
+  "ext": {
+    "pptxPart": "ppt/slides/slide23.xml",
+    "pptxSlideId": 278
+  }
+}

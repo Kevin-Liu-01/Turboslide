@@ -6,6 +6,10 @@
   "description": "One framework-free string renderer: renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, slot geometry, the GT word transform, RasterRef emission.",
   "exports": {
     "./slide": "./src/slide.ts",
+    "./motion": "./src/motion.ts",
+    "./motion-css": "./src/motion-css.ts",
+    "./fonts": "./src/fonts.ts",
+    "./theme-css": "./src/theme-css.ts",
     "./deck": "./src/deck.ts",
     "./standalone": "./src/standalone.ts",
     "./thumb": "./src/thumb.ts",
@@ -36,6 +40,10 @@
     "./blocks/dither-attrs": "./src/blocks/dither-attrs.ts",
     "./blocks/html-frame": "./src/blocks/html-frame.ts",
     "./blocks/img-size": "./src/blocks/img-size.ts",
+    "./blocks/media": "./src/blocks/media.ts",
+    "./blocks/picture": "./src/blocks/picture.ts",
+    "./blocks/equation": "./src/blocks/equation.ts",
+    "./print-layout": "./src/print-layout.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -46,7 +54,8 @@
     "@turboslide/schema": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "dompurify": "catalog:",
-    "jsdom": "catalog:"
+    "jsdom": "catalog:",
+    "temml": "catalog:"
   },
   "devDependencies": {
     "@types/jsdom": "catalog:",

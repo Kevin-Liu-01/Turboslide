@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "breaks",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Paragraph breaks and slide links",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 418,
+          "h": 96.79,
+          "z": 1
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:breaks#h/text"
+        }
+      },
+      {
+        "id": "p1",
+        "type": "text",
+        "text": "The first paragraph of the head.\nThe second paragraph follows a line break.",
+        "pos": {
+          "x": 627,
+          "y": 124,
+          "w": 767.58,
+          "h": 66,
+          "z": 2
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:breaks#p1/text"
+        }
+      },
+      {
+        "id": "p2",
+        "type": "text",
+        "text": "[The table is on ]{c:ink}[the next slide](#s/table){u}[ and the ]{c:ink}[last slide](#s/autofit){u}[ holds an empty placeholder.]{c:ink}\n[A third paragraph closes the body.]{c:ink}",
+        "pos": {
+          "x": 137,
+          "y": 488.39,
+          "w": 767.58,
+          "h": 66,
+          "z": 3
+        },
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:breaks#p2/text"
+        }
+      }
+    ]
+  },
+  "title": "Paragraph breaks and slide links",
+  "ext": {
+    "pptxPart": "ppt/slides/slide2.xml",
+    "pptxSlideId": 257
+  }
+}

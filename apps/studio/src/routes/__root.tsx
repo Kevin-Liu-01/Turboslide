@@ -1,4 +1,5 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
+import { VitalsReporter } from '../components/VitalsReporter';
 import { HeadContent, Link, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
@@ -248,6 +249,8 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        {/* the field sample of INP, LCP and CLS on one page load in ten (gslides-parity SPEC-5 11) */}
+        <VitalsReporter />
         {/* Dev only (SPEC 3.3 item 5): the component is Solid based and must never reach a
             production bundle. The devtools() Vite plugin strips it from builds as well. */}
         {import.meta.env.DEV ? <DevtoolsMount /> : null}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "progress",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "title": "Progress",
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Progress",
+        "pos": {
+          "x": 137,
+          "y": 92,
+          "w": 1000,
+          "h": 72,
+          "z": 1
+        }
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "column",
+        "categories": [
+          "Week 1",
+          "Week 2",
+          "Week 3",
+          "Week 4"
+        ],
+        "series": [
+          {
+            "name": "Planned",
+            "values": [
+              20,
+              40,
+              60,
+              80
+            ]
+          },
+          {
+            "name": "Done",
+            "values": [
+              18,
+              39,
+              55,
+              78
+            ]
+          }
+        ],
+        "legend": "bottom",
+        "pos": {
+          "x": 137,
+          "y": 190,
+          "w": 1326,
+          "h": 560,
+          "z": 2
+        }
+      }
+    ]
+  }
+}

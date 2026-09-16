@@ -11,11 +11,11 @@ import type { PictureDither } from '@turboslide/schema/blocks/dither';
 import { COLOR_LABELS, COLOR_TOKENS, isColorToken, isHexColor } from '@turboslide/schema/color';
 import type { Color } from '@turboslide/schema/color';
 import { isCanvasSlide, slideBlocks } from '@turboslide/schema/deck';
-import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import { coversPage, deckPage } from '@turboslide/schema/render';
 import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
-import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shell';
+import { backgroundPicturePos, insertBlockPlan, factsOf } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
@@ -81,10 +81,7 @@ export function BackgroundDialog() {
             (block) =>
               block.type === 'picture' &&
               block.pos !== undefined &&
-              block.pos.x <= 0 &&
-              block.pos.y <= 0 &&
-              block.pos.x + block.pos.w >= SHEET_WIDTH &&
-              block.pos.y + block.pos.h >= SHEET_HEIGHT,
+              coversPage(block.pos, deckPage(input.document.deck)),
           );
   const pictureAsset =
     picture?.type === 'picture' ? input.document.deck.assets[picture.asset] : undefined;
@@ -221,7 +218,7 @@ export function BackgroundDialog() {
         ...(rememberedOn ? { dither: rememberedDither() } : {}),
       }),
       words.choose,
-      { at: BACKGROUND_PICTURE_POS },
+      { at: backgroundPicturePos(deckPage(input.document.deck)) },
     );
     if ('refused' in plan) {
       setError(plan.refused);

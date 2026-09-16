@@ -194,18 +194,19 @@ function compactProperty(name: string, schema: JsonSchema): JsonSchema {
 export function compactOutputSchema(schema: JsonSchema): JsonSchema {
   const properties = isRecord(schema.properties) ? schema.properties : undefined;
   if (properties === undefined) return schema;
+  const definitions = isRecord(schema.definitions) ? schema.definitions : undefined;
   let changed = false;
   const compacted: Record<string, unknown> = {};
   for (const [name, property] of Object.entries(properties)) {
-    if (isRecord(property) && byteSize(property) > OUTPUT_PROPERTY_BUDGET) {
+    if (isRecord(property) && propertyWeight(property, definitions) > OUTPUT_PROPERTY_BUDGET) {
       compacted[name] = compactProperty(name, property);
       changed = true;
     } else compacted[name] = property;
   }
   if (!changed) return schema;
-  const { definitions, ...rest } = schema;
+  const { definitions: _dropped, ...rest } = schema;
   const next: JsonSchema = { ...rest, properties: compacted };
-  if (isRecord(definitions)) {
+  if (definitions !== undefined) {
     const refs = new Set<string>();
     collectRefs(next, refs);
     const kept = Object.fromEntries(
@@ -214,6 +215,38 @@ export function compactOutputSchema(schema: JsonSchema): JsonSchema {
     if (Object.keys(kept).length > 0) next.definitions = kept;
   }
   return next;
+}
+
+/**
+ * The bytes a property costs on the wire: its own JSON plus every definition it reaches through
+ * `$ref`, transitively. A property that names the recursive Block union through a `$ref` (a
+ * custom layout's `blocks`, gslides-parity SPEC-5 9.2) is a few hundred bytes itself and carries
+ * 300 KB of definitions, so the budget reads the closure and not the fragment.
+ */
+function propertyWeight(
+  property: JsonSchema,
+  definitions: Record<string, unknown> | undefined,
+): number {
+  let weight = byteSize(property);
+  if (definitions === undefined) return weight;
+  const seen = new Set<string>();
+  const queue: unknown[] = [property];
+  while (queue.length > 0) {
+    const refs = new Set<string>();
+    collectRefs(queue.pop(), refs);
+    for (const ref of refs) {
+      const name = ref.startsWith('#/definitions/')
+        ? ref.slice('#/definitions/'.length)
+        : undefined;
+      if (name === undefined || seen.has(name)) continue;
+      seen.add(name);
+      const definition = definitions[name];
+      if (definition === undefined) continue;
+      weight += byteSize(definition);
+      queue.push(definition);
+    }
+  }
+  return weight;
 }
 
 function describe(spec: ActionSpec, shape: ToolEntry['shape'], returnsImages: boolean): string {

@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "id": "shapes",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "template": "blank",
+  "slots": {
+    "main": [
+      {
+        "id": "hex",
+        "type": "shape",
+        "shape": "hexagon",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 300,
+          "h": 220,
+          "z": 1
+        },
+        "stroke": "ink",
+        "width": 1,
+        "text": "Hexagon",
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": {
+          "left": 42.83,
+          "top": 26.77,
+          "right": 42.84,
+          "bottom": 35.79
+        },
+        "ext": {
+          "pptxName": "ts:shapes#hex"
+        }
+      },
+      {
+        "id": "right",
+        "type": "shape",
+        "shape": "rightArrow",
+        "pos": {
+          "x": 477,
+          "y": 300,
+          "w": 300,
+          "h": 140,
+          "z": 2
+        },
+        "fill": "paper",
+        "stroke": "ink",
+        "width": 1,
+        "text": "Right arrow",
+        "typography": {
+          "size": 22,
+          "align": "center",
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": {
+          "left": 0,
+          "top": 30,
+          "right": 34.5,
+          "bottom": 39
+        },
+        "ext": {
+          "pptxName": "ts:shapes#right"
+        }
+      },
+      {
+        "id": "callout",
+        "type": "shape",
+        "shape": "wedgeRectCallout",
+        "pos": {
+          "x": 817,
+          "y": 260,
+          "w": 340,
+          "h": 180,
+          "z": 3
+        },
+        "adjust": [
+          -30000,
+          70000
+        ],
+        "stroke": "ink",
+        "width": 1,
+        "text": "A callout with its wedge moved",
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "middle",
+        "padding": {
+          "left": 16,
+          "top": 11.5,
+          "right": 16,
+          "bottom": 20.5
+        },
+        "ext": {
+          "pptxName": "ts:shapes#callout"
+        }
+      },
+      {
+        "id": "plus",
+        "type": "shape",
+        "shape": "mathPlus",
+        "pos": {
+          "x": 1197,
+          "y": 260,
+          "w": 220,
+          "h": 220,
+          "z": 4
+        },
+        "fill": "ink",
+        "stroke": "ink",
+        "width": 1,
+        "ext": {
+          "pptxName": "ts:shapes#plus"
+        }
+      },
+      {
+        "id": "snip",
+        "type": "shape",
+        "shape": "snip1Rect",
+        "pos": {
+          "x": 137,
+          "y": 540,
+          "w": 420,
+          "h": 180,
+          "z": 5
+        },
+        "stroke": "ink",
+        "width": 1,
+        "text": "Snipped corner",
+        "typography": {
+          "size": 22,
+          "leading": 1.5
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": {
+          "left": 16,
+          "top": 26,
+          "right": 30.5,
+          "bottom": 20.5
+        },
+        "ext": {
+          "pptxName": "ts:shapes#snip"
+        }
+      },
+      {
+        "id": "dashed",
+        "type": "shape",
+        "shape": "ellipse",
+        "pos": {
+          "x": 617,
+          "y": 540,
+          "w": 420,
+          "h": 180,
+          "z": 6
+        },
+        "stroke": "ink",
+        "width": 2,
+        "dash": "dash",
+        "ext": {
+          "pptxName": "ts:shapes#dashed"
+        }
+      },
+      {
+        "id": "h",
+        "type": "text",
+        "text": "Shape presets",
+        "pos": {
+          "x": 137,
+          "y": 129.3,
+          "w": 900,
+          "h": 48.4,
+          "z": 7
+        },
+        "typography": {
+          "size": 44,
+          "leading": 1.1
+        },
+        "color": "ink",
+        "valign": "top",
+        "padding": 0,
+        "ext": {
+          "pptxName": "ts:shapes#h/text"
+        }
+      }
+    ]
+  },
+  "title": "Shape presets",
+  "ext": {
+    "pptxPart": "ppt/slides/slide12.xml",
+    "pptxSlideId": 267
+  }
+}

@@ -29,10 +29,27 @@ describe('the theme CSS', () => {
     expect(parseCss(stageCss()).map((rule) => rule.selector)).toContain('.ts-sheet .slide');
   });
 
-  it('writes the root attributes', () => {
-    expect(sheetRootAttributes('dark')).toBe('class="ts-sheet" data-theme="dark"');
-    expect(sheetRootAttributes('light', ['sheet', 'is-picture'])).toBe(
-      'class="ts-sheet sheet is-picture" data-theme="light"',
+  it('writes the root attributes with the theme id beside the appearance (SPEC-5 9.3)', () => {
+    expect(sheetRootAttributes('gt-ink-paper', 'dark')).toBe(
+      'class="ts-sheet" data-theme="dark" data-sheet="gt-ink-paper"',
     );
+    expect(
+      sheetRootAttributes('ts-plate', 'light', { classes: ['sheet', 'is-picture'], base: true }),
+    ).toBe(
+      'class="ts-sheet sheet is-picture" data-theme="light" data-sheet="ts-plate" data-theme-base=""',
+    );
+  });
+
+  it('reads the GT files first and the Plate rules after them on ts-plate (SPEC-5 9.3)', () => {
+    expect(sheetCss('ts-plate').startsWith(sheetCss('gt-ink-paper'))).toBe(true);
+    expect(stageCss('ts-plate').startsWith(stageCss('gt-ink-paper'))).toBe(true);
+    expect(sheetCss('ts-plate').length).toBeGreaterThan(sheetCss('gt-ink-paper').length);
+    expect(themeCss('gt-ink-paper')).toBe(themeCss());
+    const plateRules = parseCss(sheetCss('ts-plate').slice(sheetCss('gt-ink-paper').length));
+    expect(plateRules.length).toBeGreaterThan(0);
+    for (const rule of plateRules) {
+      for (const part of rule.selector.split(','))
+        expect(part.trim().startsWith(".ts-sheet[data-sheet='ts-plate']"), part).toBe(true);
+    }
   });
 });

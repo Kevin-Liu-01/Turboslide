@@ -133,6 +133,31 @@ export class BlobPreconditionError extends Error {
   }
 }
 
+/**
+ * True for a BlobExistsError from any copy of this module. A server bundle can carry two copies
+ * of blob-store.ts (the studio's own chunk and the one the hosted dispatcher pulls in), and then
+ * `instanceof` fails against the copy that threw while the name and the message survive. Every
+ * catch site reads through this helper, never through `instanceof` (VERIFICATION-3 finding 34;
+ * the production outage of 2026-09-15 where the seed's refused asset put poisoned `ready()`).
+ */
+export function isBlobExistsError(error: unknown): error is BlobExistsError {
+  if (error instanceof BlobExistsError) return true;
+  return (
+    error instanceof Error &&
+    (error.name === 'BlobExistsError' || / exists in the Blob store already$/.test(error.message))
+  );
+}
+
+/** True for a BlobPreconditionError from any copy of this module (see isBlobExistsError). */
+export function isBlobPreconditionError(error: unknown): error is BlobPreconditionError {
+  if (error instanceof BlobPreconditionError) return true;
+  return (
+    error instanceof Error &&
+    (error.name === 'BlobPreconditionError' ||
+      / changed in the Blob store since it was read$/.test(error.message))
+  );
+}
+
 const CONTENT_TYPES: Record<string, string> = {
   '.json': 'application/json',
   '.png': 'image/png',
@@ -733,7 +758,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         contentType: blobContentType(relative),
       });
     } catch (error) {
-      if (!(error instanceof BlobExistsError)) throw error;
+      if (!isBlobExistsError(error)) throw error;
       const existing = await client.head(`${prefix}${relative}`);
       if (existing !== null && existing.version === quotedMd5(body)) return;
       throw new SnapshotContestedError(deckId, key);
@@ -892,7 +917,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
         } catch (error) {
-          if (error instanceof BlobPreconditionError) return conflictFromStore();
+          if (isBlobPreconditionError(error)) return conflictFromStore();
           if (error instanceof SnapshotContestedError) {
             // the other writer may have committed already (the round one sentence holds) or may
             // still be between its snapshot and its manifest push (the contention alone)
@@ -941,7 +966,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           return version;
         } catch (error) {
           rmSync(pathOf(relative), { force: true });
-          if (error instanceof BlobExistsError) {
+          if (isBlobExistsError(error)) {
             invalidate();
             await pull();
             const current = loadDeckDir(dir).document;
@@ -1056,7 +1081,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         });
         return { ...local, url: entry.url };
       } catch (error) {
-        if (!(error instanceof BlobExistsError)) throw error;
+        if (!isBlobExistsError(error)) throw error;
         const existing = await client.head(pathname);
         if (existing !== null && existing.version === quotedMd5(bytes)) {
           return { ...local, url: existing.url, existed: true };
@@ -1130,7 +1155,7 @@ export async function pushDeckDir(
       });
     } catch (error) {
       // the seed of two cold instances at once: the file is there, which is what was wanted
-      if (error instanceof BlobExistsError) return;
+      if (isBlobExistsError(error)) return;
       throw error;
     }
     if (isMirroredDocument(relative)) manifest.files[relative] = entry.version;
@@ -1268,7 +1293,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
           contentType: blobContentType(relative),
         });
       } catch (error) {
-        if (!(error instanceof BlobExistsError)) throw error;
+        if (!isBlobExistsError(error)) throw error;
       }
     });
     if (written > 0)
@@ -1288,7 +1313,14 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       if ((await c.head(`${deckPrefix(deckId)}deck.json`)) !== null) continue;
       await overlay.ensureAssets(deckId);
       await fetchMissingTwins(deckId, false);
-      await pushDeckDir(c, deckId, join(decksDir, deckId), { overwrite: false, log });
+      try {
+        await pushDeckDir(c, deckId, join(decksDir, deckId), { overwrite: false, log });
+      } catch (error) {
+        // another instance seeded the deck between the head and the push, or the store still
+        // holds the deck's files from an earlier life: the deck is there, which is what was wanted
+        if (!isBlobExistsError(error)) throw error;
+        log(`blob: seed of ${deckId} found its files in the store already`);
+      }
     }
   };
 
@@ -1296,7 +1328,11 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     readyPromise ??= (async () => {
       await overlay.ready();
       await seedOnce();
-    })();
+    })().catch((error: unknown) => {
+      // a failed seed is retried by the next request instead of answering every route with it
+      readyPromise = undefined;
+      throw error;
+    });
     return readyPromise;
   };
 
@@ -1335,7 +1371,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     } catch (error) {
       // the store moved under us: forget the mirror's manifest so the next sync pulls the truth
       writeManifestFile(store.dir, { files: {} });
-      if (error instanceof BlobPreconditionError) {
+      if (isBlobPreconditionError(error)) {
         await store.sync(true);
         const current = loadDeckDir(store.dir).document;
         throw new ConflictError(
@@ -1413,7 +1449,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await pushDeckDir(c, deckId, dir, { overwrite: false, log });
       } catch (error) {
         rmSync(dir, { recursive: true, force: true });
-        if (error instanceof BlobExistsError) {
+        if (isBlobExistsError(error)) {
           throw new TypeError(`decks/${deckId} exists already; pick another name`);
         }
         throw error;
@@ -1449,7 +1485,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await pushDeckDir(c, deckId, dir, { overwrite: false, log });
       } catch (error) {
         rmSync(dir, { recursive: true, force: true });
-        if (error instanceof BlobExistsError) {
+        if (isBlobExistsError(error)) {
           throw new TypeError(`decks/${deckId} exists already; pick another name`);
         }
         throw error;

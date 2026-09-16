@@ -40,7 +40,12 @@ import { canonicalJson } from '@turboslide/schema/json';
 import type { Mutation } from '@turboslide/schema/mutations';
 
 import type { BlobClient } from './blob-store.ts';
-import { BlobPreconditionError, COMMENTS_DIR, deckPrefix } from './blob-store.ts';
+import {
+  COMMENTS_DIR,
+  deckPrefix,
+  isBlobExistsError,
+  isBlobPreconditionError,
+} from './blob-store.ts';
 
 export { COMMENTS_DIR };
 export const INDEX_FILE = 'index.json';
@@ -406,7 +411,7 @@ export async function applyAndPush(
       const result = await pushSidecar(client, deckId, deckDir, change, stored?.version ?? null);
       return { ...change, indexEtag: result.indexEtag };
     } catch (error) {
-      if (!(error instanceof BlobPreconditionError) && !/exists/.test(String(error))) throw error;
+      if (!isBlobPreconditionError(error) && !isBlobExistsError(error)) throw error;
       // another instance committed first: the pull at the top of the next round takes its bytes
     }
   }

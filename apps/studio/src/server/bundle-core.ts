@@ -6,7 +6,7 @@ import { bearerToken } from '@turboslide/agent/http/auth';
 import { refuse } from '@turboslide/agent/http/errors';
 import { defaultPaths } from '@turboslide/render-worker/paths';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
-import { BlobExistsError, deckPrefix, pushDeckDir } from '@turboslide/store/blob-store';
+import { deckPrefix, isBlobExistsError, pushDeckDir } from '@turboslide/store/blob-store';
 import { BUNDLE_MAX_BYTES, listDeckFiles } from '@turboslide/store/bundle';
 import { packDeckDir } from '@turboslide/store/pack';
 import type { PackedBundle } from '@turboslide/store/pack';
@@ -283,7 +283,7 @@ export async function importDeckBundle(
       await pushDeckDir(client, result.deckId, result.dir, { overwrite: result.replaced });
     } catch (error) {
       rmSync(result.dir, { recursive: true, force: true });
-      if (error instanceof BlobExistsError) {
+      if (isBlobExistsError(error)) {
         throw new TypeError(
           `decks/${result.deckId} appeared in the store meanwhile; run the upload again`,
         );

@@ -1,0 +1,10 @@
+{
+  "deck": "copy-of-audit-decks-tab-title-check",
+  "log": [
+    "2026-09-16T01:02:37.578Z GET /edit/copy-of-audit-decks-tab-title-check -> 200",
+    "2026-09-16T01:02:38.820Z found in trash after 1 s",
+    "2026-09-16T01:02:39.933Z trash card shown true after 1 s",
+    "2026-09-16T01:02:41.163Z Delete forever: card left true; snackbar \"\"",
+    "2026-09-16T01:02:41.360Z GET /edit/copy-of-audit-decks-tab-title-check -> 404"
+  ]
+}

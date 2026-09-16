@@ -1,0 +1,477 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-9l8u",
+  "startedAt": "2026-09-16T00:53:46.394Z",
+  "ms": 355229,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Deck",
+      "interaction": "create a deck from /new and type a title",
+      "result": "works",
+      "evidence": "untitled-20260916-9l8u; /edit/untitled-20260916-9l8u; revision 1",
+      "shot": null
+    },
+    {
+      "n": 2,
+      "feature": "Toolbar",
+      "interaction": "find a Shape or Line button in the toolbar with nothing selected",
+      "result": "works",
+      "evidence": "controls toolbar.insertImage, toolbar.insertShape, toolbar.insertLine, toolbar.insertComment",
+      "shot": null
+    },
+    {
+      "n": 3,
+      "feature": "Insert > Shape",
+      "interaction": "open the Insert menu and hover Shape",
+      "result": "works",
+      "evidence": "Shape row enabled; categories shapes:enabled, arrows:enabled, callouts:enabled, equation:enabled; console errors 0",
+      "shot": null
+    },
+    {
+      "n": 4,
+      "feature": "Insert > Shape > shapes",
+      "interaction": "hover the shapes row and count the gallery tiles",
+      "result": "broken",
+      "evidence": "99 tiles (100 presets in the shape table), 99 with a name; legacy rows none",
+      "shot": "01-gallery-shapes-miss.png"
+    },
+    {
+      "n": 5,
+      "feature": "Insert > Shape > arrows",
+      "interaction": "hover the arrows row and count the gallery tiles",
+      "result": "broken",
+      "evidence": "26 tiles (20 presets in the shape table), 26 with a name; legacy rows none",
+      "shot": "02-gallery-arrows-miss.png"
+    },
+    {
+      "n": 6,
+      "feature": "Insert > Shape > callouts",
+      "interaction": "hover the callouts row and count the gallery tiles",
+      "result": "broken",
+      "evidence": "the gallery did not open: locator.waitFor: Timeout 6000ms exceeded.",
+      "shot": "03-gallery-callouts-miss.png"
+    },
+    {
+      "n": 7,
+      "feature": "Insert > Shape > equation",
+      "interaction": "hover the equation row and count the gallery tiles",
+      "result": "works",
+      "evidence": "6 tiles (6 presets in the shape table), 6 with a name; legacy rows none",
+      "shot": "04-gallery-equation.png"
+    },
+    {
+      "n": 8,
+      "feature": "Slides",
+      "interaction": "New slide from the toolbar (the gallery slide)",
+      "result": "works",
+      "evidence": "active split-1",
+      "shot": null
+    },
+    {
+      "n": 9,
+      "feature": "Insert preset rect",
+      "interaction": "Insert > Shape > shapes > rect, then one click on the slide",
+      "result": "flaky",
+      "evidence": "try 1: tool \"shape\"; heading h shape undefined at 137,129 418x49; svg data-shape none ; fill none stroke none width none; try 2: tool \"shape\"; shape shape-2 shape rect at 40,60 240x160; svg data-shape rect 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": "05-insert-preset-rect.png"
+    },
+    {
+      "n": 10,
+      "feature": "Insert preset roundRect",
+      "interaction": "Insert > Shape > shapes > roundRect, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-3 shape roundRect at 350,60 240x160; svg data-shape roundRect 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 11,
+      "feature": "Insert preset ellipse",
+      "interaction": "Insert > Shape > shapes > ellipse, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-4 shape ellipse at 660,60 240x160; svg data-shape ellipse 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 12,
+      "feature": "Insert preset triangle",
+      "interaction": "Insert > Shape > shapes > triangle, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-5 shape triangle at 970,60 240x160; svg data-shape triangle 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 13,
+      "feature": "Insert preset diamond",
+      "interaction": "Insert > Shape > shapes > diamond, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-6 shape diamond at 1280,60 240x160; svg data-shape diamond 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 14,
+      "feature": "Insert preset hexagon",
+      "interaction": "Insert > Shape > shapes > hexagon, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-7 shape hexagon at 40,340 240x160; svg data-shape hexagon 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 15,
+      "feature": "Insert preset star5",
+      "interaction": "Insert > Shape > shapes > star5, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-8 shape star5 at 350,340 240x160; svg data-shape star5 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 16,
+      "feature": "Insert preset flowChartProcess",
+      "interaction": "Insert > Shape > shapes > flowChartProcess, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-9 shape flowChartProcess at 660,340 240x160; svg data-shape flowChartProcess 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 17,
+      "feature": "Insert preset cloud",
+      "interaction": "Insert > Shape > shapes > cloud, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-10 shape cloud at 970,340 240x160; svg data-shape cloud 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 18,
+      "feature": "Insert preset rightArrow",
+      "interaction": "Insert > Shape > arrows > rightArrow, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-11 shape rightArrow at 1280,340 240x160; svg data-shape rightArrow 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 19,
+      "feature": "Insert preset leftRightArrow",
+      "interaction": "Insert > Shape > arrows > leftRightArrow, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-12 shape leftRightArrow at 40,620 240x160; svg data-shape leftRightArrow 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 20,
+      "feature": "Insert preset chevron",
+      "interaction": "Insert > Shape > arrows > chevron, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-13 shape chevron at 350,620 240x160; svg data-shape chevron 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 21,
+      "feature": "Insert preset wedgeRectCallout",
+      "interaction": "Insert > Shape > callouts > wedgeRectCallout, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-14 shape wedgeRectCallout at 660,620 240x160; svg data-shape wedgeRectCallout 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 22,
+      "feature": "Insert preset wedgeEllipseCallout",
+      "interaction": "Insert > Shape > callouts > wedgeEllipseCallout, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-15 shape wedgeEllipseCallout at 970,620 240x160; svg data-shape wedgeEllipseCallout 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 23,
+      "feature": "Insert preset mathPlus",
+      "interaction": "Insert > Shape > equation > mathPlus, then one click on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; shape shape-16 shape mathPlus at 1280,620 240x160; svg data-shape mathPlus 169.2x112.8 css; fill none stroke var(--hair) width 1",
+      "shot": null
+    },
+    {
+      "n": 24,
+      "feature": "Gallery",
+      "interaction": "the fifteen presets inserted by click on the gallery slide",
+      "result": "flaky",
+      "evidence": "16 of 15 on the slide",
+      "shot": "06-gallery-click-presets.png"
+    },
+    {
+      "n": 25,
+      "feature": "Draw preset rect",
+      "interaction": "Insert > Shape > shapes > rect, then a drag from 60,480 to 360,660 on the slide",
+      "result": "flaky",
+      "evidence": "try 1: tool \"shape\"; undefined h at 137,129 418x49 (drawn 60,480 300x180); try 2: tool \"shape\"; rect shape-2 at 60,480 300x180 (drawn 60,480 300x180)",
+      "shot": "07-draw-preset-rect.png"
+    },
+    {
+      "n": 26,
+      "feature": "Draw preset ellipse",
+      "interaction": "Insert > Shape > shapes > ellipse, then a drag from 420,480 to 640,700 on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; ellipse shape-3 at 420,480 220x220 (drawn 420,480 220x220)",
+      "shot": null
+    },
+    {
+      "n": 27,
+      "feature": "Draw preset rightArrow",
+      "interaction": "Insert > Shape > arrows > rightArrow, then a drag from 700,480 to 1040,600 on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; rightArrow shape-4 at 700,480 340x120 (drawn 700,480 340x120)",
+      "shot": null
+    },
+    {
+      "n": 28,
+      "feature": "Draw preset wedgeRectCallout",
+      "interaction": "Insert > Shape > callouts > wedgeRectCallout, then a drag from 1100,480 to 1400,680 on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; wedgeRectCallout shape-5 at 1100,480 300x200 (drawn 1100,480 300x200)",
+      "shot": null
+    },
+    {
+      "n": 29,
+      "feature": "Draw preset mathMinus",
+      "interaction": "Insert > Shape > equation > mathMinus, then a drag from 60,720 to 300,860 on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; mathMinus shape-6 at 60,720 240x140 (drawn 60,720 240x140)",
+      "shot": null
+    },
+    {
+      "n": 30,
+      "feature": "Draw preset star5",
+      "interaction": "Insert > Shape > shapes > star5, then a drag from 700,660 to 900,860 on the slide",
+      "result": "works",
+      "evidence": "tool \"shape\"; star5 shape-7 at 700,660 200x200 (drawn 700,660 200x200)",
+      "shot": null
+    },
+    {
+      "n": 31,
+      "feature": "Gallery",
+      "interaction": "the six presets drawn by drag",
+      "result": "works",
+      "evidence": "slide split-2: 7 shapes",
+      "shot": "08-drawn-presets.png"
+    },
+    {
+      "n": 32,
+      "feature": "Insert row Rectangle",
+      "interaction": "Insert > Shape > Shapes > Rectangle (the named row), then a click on the gallery slide",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded.; try 2: error: locator.waitFor: Timeout 6000ms exceeded.; try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "shot": "09-insert-row-rectangle.png"
+    },
+    {
+      "n": 33,
+      "feature": "Insert row Rounded rectangle",
+      "interaction": "Insert > Shape > Shapes > Rounded rectangle (the named row), then a click on the gallery slide",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded.; try 2: error: locator.waitFor: Timeout 6000ms exceeded.; try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "shot": "10-insert-row-rounded-rectangle.png"
+    },
+    {
+      "n": 34,
+      "feature": "Insert row Ellipse",
+      "interaction": "Insert > Shape > Shapes > Ellipse (the named row), then a click on the gallery slide",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded.; try 2: error: locator.waitFor: Timeout 6000ms exceeded.; try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "shot": "11-insert-row-ellipse.png"
+    },
+    {
+      "n": 35,
+      "feature": "Insert row Arrow",
+      "interaction": "Insert > Shape > Arrows > Arrow (the named row), then a click on the gallery slide",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded.; try 2: error: locator.waitFor: Timeout 6000ms exceeded.; try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "shot": "12-insert-row-arrow.png"
+    },
+    {
+      "n": 36,
+      "feature": "Battery",
+      "interaction": "draw rectangle A, rectangle B and a rounded rectangle on a fresh slide",
+      "result": "works",
+      "evidence": "A 137,129 418x49; B 900,480 300x180; roundRect 1260,700 240x160",
+      "shot": null
+    },
+    {
+      "n": 37,
+      "feature": "Select",
+      "interaction": "click rectangle A",
+      "result": "works",
+      "evidence": "chip \"Title\"; handles nw,n,ne,e,se,s,sw,w,rotate; se label \"h: Resize se\"",
+      "shot": null
+    },
+    {
+      "n": 38,
+      "feature": "Move",
+      "interaction": "drag rectangle A by 120 by 80 sheet px by its frame",
+      "result": "works",
+      "evidence": "moved 120,80; readout during none, after none; dragged back to 137,129 418x49",
+      "shot": null
+    },
+    {
+      "n": 39,
+      "feature": "Resize nw",
+      "interaction": "drag the nw handle of rectangle A by -60,-40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 77,89 478x89 (expected 77,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 77,89 478x89 (expected 77,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 77,89 478x89 (expected 77,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "13-resize-nw.png"
+    },
+    {
+      "n": 40,
+      "feature": "Resize n",
+      "interaction": "drag the n handle of rectangle A by 0,-40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 137,89 418x89 (expected 137,89 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 137,89 418x89 (expected 137,89 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 137,89 418x89 (expected 137,89 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "14-resize-n.png"
+    },
+    {
+      "n": 41,
+      "feature": "Resize ne",
+      "interaction": "drag the ne handle of rectangle A by 60,-40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 137,89 478x89 (expected 137,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 137,89 478x89 (expected 137,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 137,89 478x89 (expected 137,89 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "15-resize-ne.png"
+    },
+    {
+      "n": 42,
+      "feature": "Resize e",
+      "interaction": "drag the e handle of rectangle A by 60,0 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 137,129 478x49 (expected 137,129 478x49); svg none in box 337x34.5; readout during 478 × 49, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 137,129 478x49 (expected 137,129 478x49); svg none in box 337x34.5; readout during 478 × 49, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 137,129 478x49 (expected 137,129 478x49); svg none in box 337x34.5; readout during 478 × 49, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "16-resize-e.png"
+    },
+    {
+      "n": 43,
+      "feature": "Resize se",
+      "interaction": "drag the se handle of rectangle A by 60,40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 137,129 478x89 (expected 137,129 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 137,129 478x89 (expected 137,129 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 137,129 478x89 (expected 137,129 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "17-resize-se.png"
+    },
+    {
+      "n": 44,
+      "feature": "Resize s",
+      "interaction": "drag the s handle of rectangle A by 0,40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 137,129 418x89 (expected 137,129 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: pos 137,129 418x49 -> 137,129 418x89 (expected 137,129 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49; try 3: pos 137,129 418x49 -> 137,129 418x89 (expected 137,129 418x89); svg none in box 294.7x62.7; readout during 418 × 89, after none; chip Title; undo -> 137,129 418x49",
+      "shot": "18-resize-s.png"
+    },
+    {
+      "n": 45,
+      "feature": "Resize sw",
+      "interaction": "drag the sw handle of rectangle A by -60,40 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: pos 137,129 418x49 -> 77,129 478x89 (expected 77,129 478x89); svg none in box 337x62.7; readout during 478 × 89, after none; chip Title; undo -> 137,129 418x49; try 2: error: mouse.click: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "19-resize-sw.png"
+    },
+    {
+      "n": 46,
+      "feature": "Resize w",
+      "interaction": "drag the w handle of rectangle A by -60,0 sheet px, then Undo",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "20-resize-w.png"
+    },
+    {
+      "n": 47,
+      "feature": "Resize se with Shift",
+      "interaction": "drag the se handle of rectangle A with Shift held (aspect kept)",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "21-resize-se-with-shift.png"
+    },
+    {
+      "n": 48,
+      "feature": "Rotate",
+      "interaction": "drag the rotation ring of rectangle A to about 35 degrees, then Undo",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "22-rotate.png"
+    },
+    {
+      "n": 49,
+      "feature": "Rotate by key",
+      "interaction": "Option ArrowRight with rectangle A selected (15 degrees), then Undo",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "23-rotate-by-key.png"
+    },
+    {
+      "n": 50,
+      "feature": "Toolbar tail",
+      "interaction": "select rectangle A and read the toolbar",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "24-toolbar-tail.png"
+    },
+    {
+      "n": 51,
+      "feature": "Fill colour",
+      "interaction": "toolbar Fill color, pick the Blue swatch on rectangle A",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "25-fill-colour.png"
+    },
+    {
+      "n": 52,
+      "feature": "Fill colour hex",
+      "interaction": "toolbar Fill color, type d94f2b in the custom field and Enter",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "26-fill-colour-hex.png"
+    },
+    {
+      "n": 53,
+      "feature": "Border colour",
+      "interaction": "toolbar Border color, pick the Red swatch on rectangle A",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "27-border-colour.png"
+    },
+    {
+      "n": 54,
+      "feature": "Border weight",
+      "interaction": "toolbar Border weight, pick 3 px on rectangle A",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "28-border-weight.png"
+    },
+    {
+      "n": 55,
+      "feature": "Border dash",
+      "interaction": "toolbar Border dash, pick Dash on rectangle A",
+      "result": "broken",
+      "evidence": "try 1: error: keyboard.press: Target page, context or browser has been closed; try 2: error: keyboard.press: Target page, context or browser has been closed; try 3: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": "29-border-dash.png"
+    },
+    {
+      "n": 56,
+      "feature": "Audit",
+      "interaction": "the run reached its end",
+      "result": "broken",
+      "evidence": "page.evaluate: Target page, context or browser has been closed\n    at invoke (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/shapes/audit-shapes.mjs:93:8)\n    at slideJson (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/shapes/audit-shapes.mjs:119:3)\n    at objectsOf (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/shapes/audit-shapes.mjs:121:23)\n    at blockOf (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/shapes/audit-shapes.mjs:142:47)\n    at /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/shapes/audit-shapes.mjs:796:118",
+      "shot": "30-run-error.png"
+    },
+    {
+      "n": 57,
+      "feature": "Cleanup",
+      "interaction": "the product trash path",
+      "result": "broken",
+      "evidence": "page.goto: Target page, context or browser has been closed; falling back to the actions API",
+      "shot": null
+    },
+    {
+      "n": 58,
+      "feature": "Cleanup",
+      "interaction": "the scratch deck answers 404",
+      "result": "broken",
+      "evidence": "apiRequestContext.get: Target page, context or browser has been closed",
+      "shot": null
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 409 ()"
+  ],
+  "downloads": []
+}

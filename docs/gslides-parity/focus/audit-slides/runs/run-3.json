@@ -1,0 +1,285 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-qmbx",
+  "version": 1,
+  "startedAt": "2026-09-16T00:55:29.849Z",
+  "ms": 84572,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Layout picker",
+      "interaction": "Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "via toolbar.layout; shown true; tiles 21 [title,opener,split,cols,title-only,one-column,statement,section-description,mood,big-number,blank,rows,plain,table,figure,pair,tiles,details,board,matrix,closing]; ringed split (slide content/split/split); missing none; gone after Escape true",
+      "shot": "audit-slides/81-layout-picker-open.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title slide\" (title) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/split/split -> title/title/-; runs heading/text,lead/text; prompts \"Click to add title\" / \"Click to add subtitle\"; blocks 2; snackbar {\"text\":\"Applied Title slide. 1 block did not fit this layout\",\"action\":\"Undo\"}; plate closed true",
+      "shot": "audit-slides/82-layout-title.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Section header\" (opener) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide title/title/- -> opener/opener/-; runs h/text,p1/text,credit/text; prompts \"Click to add title\" / \"Click to add text\"; blocks 3; snackbar {\"text\":\"Applied Title slide. 1 block did not fit this layout\",\"action\":\"Undo\"}; plate closed true; picker rings title after the previous apply of title",
+      "shot": "audit-slides/83-layout-opener.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and body\" (split) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide opener/opener/- -> content/split/split; runs h/text,p1/text,p2/text; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar {\"text\":\"Applied Title slide. 1 block did not fit this layout\",\"action\":\"Undo\"}; plate closed true; picker rings opener after the previous apply of opener",
+      "shot": "audit-slides/84-layout-split.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and two columns\" (cols) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/split/split -> content/cols/cols; runs h/text,p1/text,p2/text; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar null; plate closed true; picker rings split after the previous apply of split",
+      "shot": "audit-slides/85-layout-cols.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title only\" (title-only) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/cols/cols -> content/title-only/stack; runs h/text; prompts \"Click to add title\"; blocks 2; snackbar null; plate closed true; picker rings cols after the previous apply of cols",
+      "shot": "audit-slides/86-layout-title-only.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"One column text\" (one-column) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/title-only/stack -> content/one-column/stack; runs h/text,p1/text; prompts \"Click to add title\" / \"Click to add text\"; blocks 3; snackbar null; plate closed true; picker rings title-only after the previous apply of title-only",
+      "shot": "audit-slides/87-layout-one-column.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Main point\" (statement) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/one-column/stack -> statement/statement/-; runs big/text; prompts \"Click to add text\"; blocks 1; snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}; plate closed true; picker rings one-column after the previous apply of one-column",
+      "shot": "audit-slides/88-layout-statement.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Section title and description\" (section-description) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide statement/statement/- -> content/section-description/cols; runs h/text,p1/text,p2/text; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\"; blocks 3; snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}; plate closed true; picker rings statement after the previous apply of statement",
+      "shot": "audit-slides/89-layout-section-description.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Caption\" (mood) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/section-description/cols -> mood/mood/-; runs h/text,p1/text,credit/text; prompts \"Click to add title\" / \"Click to add text\"; blocks 3; snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}; plate closed true; picker rings section-description after the previous apply of section-description",
+      "shot": "audit-slides/90-layout-mood.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Big number\" (big-number) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide mood/mood/- -> content/big-number/center; runs h/text,p1/text; prompts \"Click to add a number\" / \"Click to add text\"; blocks 3; snackbar null; plate closed true; picker rings mood after the previous apply of mood",
+      "shot": "audit-slides/91-layout-big-number.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 12,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Blank\" (blank) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/big-number/center -> content/blank/freeform; runs h/text,p1/text; prompts \"Click to add a number\" / \"Click to add text\"; blocks 3; snackbar null; plate closed true; picker rings big-number after the previous apply of big-number",
+      "shot": "audit-slides/92-layout-blank.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 13,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Ruled rows\" (rows) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/blank/freeform -> content/rows/cols; runs h/text,p1/text,rows/items/0/key,rows/items/0/value,rows/items/1/key,rows/items/1/value,rows/items/2/key,rows/items/2/value; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar null; plate closed true; picker rings blank after the previous apply of blank",
+      "shot": "audit-slides/93-layout-rows.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 14,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Ruled statement list\" (plain) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/rows/cols -> content/plain/cols; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar null; plate closed true; picker rings rows after the previous apply of rows",
+      "shot": "audit-slides/94-layout-plain.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 15,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and table\" (table) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/plain/cols -> content/table/split; runs h/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar null; plate closed true; picker rings plain after the previous apply of plain",
+      "shot": "audit-slides/95-layout-table.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 16,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Figure\" (figure) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/table/split -> content/figure/cols; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,fig/caption; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Add a caption\"; blocks 5; snackbar null; plate closed true; picker rings table after the previous apply of table",
+      "shot": "audit-slides/96-layout-figure.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 17,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Pair of figures\" (pair) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/figure/cols -> content/pair/split; runs h/text,pair/figures/0/caption,pair/figures/1/caption,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2; prompts \"Click to add title\" / \"Add a caption\" / \"Click to add a picture\" / \"Add a caption\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\"; blocks 4; snackbar null; plate closed true; picker rings figure after the previous apply of figure",
+      "shot": "audit-slides/97-layout-pair.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 18,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Tile grid\" (tiles) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/pair/split -> content/tiles/split; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\"; blocks 5; snackbar null; plate closed true; picker rings pair after the previous apply of pair",
+      "shot": "audit-slides/98-layout-tiles.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 19,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Detail grid\" (details) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/tiles/split -> content/details/split; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,grid/items/0/caption,grid/items/1/caption,grid/items/2/caption; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Add a caption\" / \"Click to add a picture\" / \"Add a caption\" / \"Click to add a picture\" / \"Add a caption\"; blocks 5; snackbar null; plate closed true; picker rings tiles after the previous apply of tiles",
+      "shot": "audit-slides/99-layout-details.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 20,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Status board\" (board) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/details/split -> content/board/split; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,fig-more-1/caption,board/rows/0/name,board/rows/0/note,board/rows/1/name,board/rows/1/note,board/rows/2/name,board/rows/2/note; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Add a caption\"; blocks 6; snackbar null; plate closed true; picker rings details after the previous apply of details",
+      "shot": "audit-slides/100-layout-board.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 21,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Matrix\" (matrix) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/board/split -> content/matrix/cols; runs h/text,p1/text,list/items/0/key,list/items/0/value,list/items/1/key,list/items/1/value,list/items/2/key,list/items/2/value,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,fig-more-1/caption,board/rows/0/name,board/rows/0/note,board/rows/1/name,board/rows/1/note,board/rows/2/name,board/rows/2/note; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Click to add text\" / \"Add a caption\"; blocks 7; snackbar null; plate closed true; picker rings board after the previous apply of board",
+      "shot": "audit-slides/101-layout-matrix.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 22,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Closing\" (closing) from the toolbar picker to slide split-1",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide content/matrix/cols -> closing/closing/-; runs h/text,p1/text,p-more-1/text,p-more-2/text,board/rows/0/name,board/rows/0/note,board/rows/1/name,board/rows/1/note,board/rows/2/name,board/rows/2/note,credit/text; prompts \"Click to add title\" / \"Click to add text\"; blocks 7; snackbar null; plate closed true; picker rings matrix after the previous apply of matrix",
+      "shot": "audit-slides/102-layout-closing.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 23,
+      "feature": "Apply layout",
+      "interaction": "Reopen the picker after the last apply and read which tile is ringed",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "ringed closing; last applied closing",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 24,
+      "feature": "Apply layout",
+      "interaction": "Right click a card > Apply layout > Title and body",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "submenu as rows; closing/closing/- -> content/split/split; menu closed true",
+      "shot": "audit-slides/103-context-apply-layout.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 25,
+      "feature": "Apply layout",
+      "interaction": "Slide menu > Apply layout > Title and two columns, then Cmd+Z",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "submenu as tiles; content/split/split -> content/cols/cols -> undo content/split/split",
+      "shot": "audit-slides/104-menu-apply-layout.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 26,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-qmbx left the trash",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 27,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 404",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

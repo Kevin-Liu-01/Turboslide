@@ -1,0 +1,139 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "build": {
+    "version": 1,
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "deckId": "untitled-20260916-vody",
+  "slide": "split-1",
+  "startedAt": "2026-09-16T02:28:10.945Z",
+  "ms": 45678,
+  "rows": 7,
+  "works": 6,
+  "flaky": 0,
+  "broken": 1,
+  "notDriven": 0,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "net": [
+    "200 GET /_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"downloads\",\"worker\",\"sync\",\"batchSize\"],\"v\":[{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"local\"},{\"t\":2,\"s\":2},{\"t\":0,\"s\":60}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"6519d861-6e22-4d6c-8dc7-cbbdcb819f78\\\\\\\",\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260916-vody\\\\\\\",\\\\\\\"owner\\\\\\\":\\\\\\\"editor\\\\\\\",\\\\\\\"actions\\\\\\\":[\\\\\\\"deck.info\\\\\\\",\\\\\\\"deck.create\\\\\\\",\\\\\\\"deck.rename\\\\\\\",\\\\\\\"deck.set\\\\\\\",\\\\\\\"dec",
+    "200 GET /_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"url\",\"tokenRequired\",\"store\",\"persistent\",\"hosted\"],\"v\":[{\"t\":1,\"s\":\"https://turboslide.vercel.app\"},{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"blob\"},{\"t\":2,\"s\":2},{\"t\":2,\"s\":2}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]}",
+    "200 POST /_serverFn/a98ce57408eb7d0bf930866f8f2af33ca7a111064bb59c9d90359780c7554137 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"ok\\\\\\\":true,\\\\\\\"revision\\\\\\\":1,\\\\\\\"entry\\\\\\\":{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"baseRevision\\\\\\\":0,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-874",
+    "200 POST /_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"revision\",\"ready\",\"failed\",\"rendered\",\"cached\",\"ms\",\"queued\"],\"v\":[{\"t\":0,\"s\":-1},{\"t\":9,\"i\":2,\"a\":[],\"o\":0},{\"t\":9,\"i\":3,\"a\":[],\"o\":0},{\"t\":0,\"s\":0},{\"t\":0,\"s\":0},{\"t\":0,\"s\":0},{\"t\":2,\"s\":2}]},\"o\":0},{\"t\":2,\"s\":1},{\"t",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"activityForCommenters\\\\\\\":false}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"total\\\\\\\":0}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"capture\\\\\\\",\\\\\\\"role\\\\\\\":\\\\\\\"capture\\\\\\\",\\\\\\\"alt\\\\\\\":\\\\\\\"audit picture\\\\\\\",\\\\\\\"twins\\\\\\\":{\\\\\\\"neutral\\\\\\\":\\\\\\\"assets/capture.png\\\\\\\"},\\\\\\\"size\\\\\\\":[640,400],\\\\\\\"scale\\\\\\\":1,\\\\\\\"source\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"file\\\\\\\"}",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Cotton 361\\\\\\\",\\\\\\\"principalId\\\\\\\":\\\\\\\"anon_9d431281-97f9-4cf7-8742-1549ef99e338\\\\\\\"},\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-09-",
+    "200 GET /_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"downloads\",\"worker\",\"sync\",\"batchSize\"],\"v\":[{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"local\"},{\"t\":2,\"s\":2},{\"t\":0,\"s\":60}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 GET /_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"url\",\"tokenRequired\",\"store\",\"persistent\",\"hosted\"],\"v\":[{\"t\":1,\"s\":\"https://turboslide.vercel.app\"},{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"blob\"},{\"t\":2,\"s\":2},{\"t\":2,\"s\":2}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]}",
+    "200 POST /_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"1ae71d8f-366c-41b2-9801-90af19ef13bd\\\\\\\",\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260916-vody\\\\\\\",\\\\\\\"owner\\\\\\\":\\\\\\\"editor\\\\\\\",\\\\\\\"actions\\\\\\\":[\\\\\\\"deck.info\\\\\\\",\\\\\\\"deck.create\\\\\\\",\\\\\\\"deck.rename\\\\\\\",\\\\\\\"deck.set\\\\\\\",\\\\\\\"dec",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"activityForCommenters\\\\\\\":false}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"total\\\\\\\":0}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260916-vody\\\\\\\",\\\\\\\"trashedAt\\\\\\\":\\\\\\\"2026-09-16T02:28:44.369Z\\\\\\\",\\\\\\\"revision\\\\\\\":14}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "404 GET /api/render/pictures?deck=03-pictures-tables&theme=dark&w=320&r=0 :: {\"error\":{\"message\":\"no slide pictures in 03-pictures-tables\",\"status\":404}}",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260915-tsv1\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260915-tsv1\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Title one\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sections\\\\\\\":[{",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260916-vody\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260916-vody\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Untitled presentation\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sec",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260914-y0mk\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260914-y0mk\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Untitled presentation\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sec",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"/tmp/turboslide/decks/untitled-20260916-yask/versions/10.json is not a version record at /: Unrecognized keys: \\\\\\\"clientId\\\\\\\", \\\\\\\"opIds\\\\\\\"\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"gt-brand-mu2ul4sq\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"gt-brand-mu2ul4sq\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"GT brand deck\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sections\\\\\\\":[{\\\\\\\"id",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260915-1g7z\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260915-1g7z\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Title one\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sections\\\\\\\":[{",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"03-pictures-tables\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"03-pictures-tables\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Import fixture 03 pictures and tables\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\"",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"/tmp/turboslide/decks/untitled-20260915-hodg/versions/2.json is not a version record at /: Unrecognized keys: \\\\\\\"clientId\\\\\\\", \\\\\\\"opIds\\\\\\\"\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[]",
+    "200 GET /_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i% :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260915-vgz6\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"deck\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"id\\\\\\\":\\\\\\\"untitled-20260915-vgz6\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Title one\\\\\\\",\\\\\\\"theme\\\\\\\":\\\\\\\"gt-ink-paper\\\\\\\",\\\\\\\"sections\\\\\\\":[{",
+    "200 POST /_serverFn/4f13088ac1edd359f3b5c064e03aa8d3a84df1defa596f81cce7bbdb8481a8ce :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"id\",\"removed\"],\"v\":[{\"t\":1,\"s\":\"untitled-20260916-vody\"},{\"t\":2,\"s\":2}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 GET /_serverFn/f742a2587f06d76c0eab1e068c7e04db1390b8f4eaf301619c762c6aa9fb2e67 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":9,\"i\":1,\"a\":[{\"t\":10,\"i\":2,\"p\":{\"k\":[\"id\",\"title\",\"slides\",\"sections\",\"revision\",\"updatedAt\",\"createdAt\",\"trashedAt\",\"appearance\",\"firstSlide\"],\"v\":[{\"t\":1,\"s\":\"untitled-20260915-84sh\"},{\"t\":1,\"s\":\"Q4 review\"},{\"t\":0,\"s\":2},{\"t\":0,\"s\":1},"
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "setup",
+      "interaction": "open /new",
+      "result": "works",
+      "evidence": "deck untitled-20260916-vody; state keys deckId,revision,serverRevision,pending,slideId,blockId,mode,theme,zoom,author,sync,presence,access,account,comments,inbox",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 2,
+      "feature": "setup",
+      "interaction": "New slide from the toolbar, then the room connected",
+      "result": "works",
+      "evidence": "slides 2; working slide split-1; active split-1; sync {\"seq\":1,\"revision\":1,\"pending\":0,\"retained\":0,\"tier\":\"blob\",\"transport\":\"sse\",\"connected\":true}",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 3,
+      "feature": "Alignment guides",
+      "interaction": "drag a 200 px wide picture low on the slide so its centre comes within 3 px of the slide centre, no other edge near: a guide shows and the centre snaps to 800",
+      "result": "broken",
+      "evidence": "try 1: guides during 1 (x@921,231; sheet centre at css x 848); centre 300 -> 803 (aimed at 803); pos 200,700 200x125 -> 703,700 200x125 | try 2: guides during 1 (x@921,231; sheet centre at css x 848); centre 300 -> 803 (aimed at 803); pos 200,700 200x125 -> 703,700 200x125 | try 3: guides during 1 (x@921,231; sheet centre at css x 848); centre 300 -> 803 (aimed at 803); pos 200,700 200x125 -> 703,700 200x125",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 4,
+      "feature": "Alignment guides",
+      "interaction": "the same drag aimed 1 px right of the slide centre",
+      "result": "works",
+      "evidence": "try 1: guides during 1 (x); centre 300 -> 800 (aimed at 801); pos 700,700 200x125",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 5,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks",
+      "consoleErrorsAt": 4
+    },
+    {
+      "n": 6,
+      "feature": "cleanup",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260916-vody",
+      "consoleErrorsAt": 5
+    },
+    {
+      "n": 7,
+      "feature": "cleanup",
+      "interaction": "GET /edit/untitled-20260916-vody and /deck/untitled-20260916-vody answer 404",
+      "result": "works",
+      "evidence": "/edit 404, /deck 404",
+      "consoleErrorsAt": 5
+    }
+  ]
+}

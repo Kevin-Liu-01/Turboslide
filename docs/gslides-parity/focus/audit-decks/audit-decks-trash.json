@@ -1,0 +1,42 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deck": "copy-of-audit-decks-tab-title-check",
+  "rows": [
+    {
+      "feature": "/decks/trash",
+      "interaction": "Card menu > Move to trash, then click the Trash link at the foot of /decks",
+      "result": "works",
+      "evidence": "card left /decks at once true (snackbar \"Moved to trashUndo\"); Trash link -> /decks/trash h1 \"Trash\"; the card is listed true reading \"Trashed 6:00 PM · 1 slide\"; 7 cards in the trash; Empty trash enabled true; screenshot audit-decks/run3-trash-list.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Click Restore, then the Recent presentations link back to /decks",
+      "result": "works",
+      "evidence": "card left the trash at once true; snackbar \"Restored Copy of Audit decks tab title check\"; link -> /decks; the deck listed again true as \"Copy of Audit decks tab title check\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "Run 3",
+      "interaction": "The script ran to the end",
+      "result": "broken",
+      "evidence": "stopped: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"home.card.copy-of-audit-decks-tab-title-check\"]').first() to be visible\n",
+      "severity": 0,
+      "need": "core",
+      "why": "A stopped run leaves rows undriven"
+    },
+    {
+      "feature": "Cleanup",
+      "interaction": "copy-of-audit-decks-tab-title-check deleted forever and answers 404",
+      "result": "broken",
+      "evidence": "failed: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.copy-of-audit-decks-tab-title-check\"]') to be visible\n",
+      "severity": 2,
+      "need": "core",
+      "why": "The production store must be left as it was found"
+    }
+  ]
+}

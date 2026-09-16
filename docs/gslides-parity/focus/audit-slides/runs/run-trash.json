@@ -1,0 +1,30 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-80o0",
+  "version": null,
+  "startedAt": "2026-09-16T01:00:16.914Z",
+  "ms": 62612,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "failed: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.untitled-20260916-80o0\"]') to be visible\n; falling back to the actions API",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 200",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": []
+}

@@ -1,0 +1,797 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "run3": {
+    "deckId": "untitled-20260916-7bfu",
+    "startedAt": "2026-09-16T01:10:54.307Z",
+    "seconds": 1223,
+    "counts": {
+      "total": 71,
+      "works": 36,
+      "flaky": 2,
+      "broken": 32,
+      "notDriven": 1
+    }
+  },
+  "rows": [
+    {
+      "feature": "Click selects an object",
+      "interaction": "Click the middle of a rectangle",
+      "result": "works",
+      "evidence": "chip \"Shape\"; resize handles 8; move true; rotate true; rings 1; labels shape: Move / shape: Resize nw / shape: Resize n; state.blockId shape; shot audit-arrange/02-click-select.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Every edit a seller makes starts by clicking the object.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Shift click adds to the selection",
+      "interaction": "Select one rectangle, then Shift click a second",
+      "result": "works",
+      "evidence": "chip \"2 objects\"; rings 2 (extra 1); shot audit-arrange/03-shift-click-two.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Aligning a logo with a heading needs two objects selected.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Shift click removes from the selection",
+      "interaction": "With two selected, Shift click one of them again",
+      "result": "works",
+      "evidence": "chip \"2 objects\" then \"Shape\"; handles on A true",
+      "severity": 0,
+      "need": "useful",
+      "why": "Undoing an accidental addition without starting over.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Marquee selection",
+      "interaction": "Press on the empty slide and drag a box across two rectangles",
+      "result": "works",
+      "evidence": "during: .ts-marquee 352.5x148 css, data-marquee true, chip \"2 objects\"; after release chip \"2 objects\"; shot audit-arrange/04-marquee-after.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The fastest way to grab several objects before aligning or moving them.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Marquee inside the slide selects a partly crossed object",
+      "interaction": "Drag a small box that only crosses the corner of one rectangle",
+      "result": "works",
+      "evidence": "chip \"Shape\"; C selected true",
+      "severity": 0,
+      "need": "useful",
+      "why": "Google takes a touched object; a seller expects the same.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Click on the empty slide clears the selection",
+      "interaction": "Select a rectangle, then click empty slide",
+      "result": "works",
+      "evidence": "chip \"Shape\" then none; handles 0",
+      "severity": 0,
+      "need": "core",
+      "why": "Deselecting by clicking away is a habit from every editor.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Cmd+A selects every object",
+      "interaction": "Press Cmd+A with nothing selected",
+      "result": "works",
+      "evidence": "objects on the slide 6; chip \"6 objects\"; rings 6; shot audit-arrange/05-select-all.png Follow-up 1, with a group on the slide: 6 objects, chip \"6 objects\" (the members are counted, not the group).",
+      "severity": 0,
+      "need": "useful",
+      "why": "Moving everything on a slide at once when re-centring a layout.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Escape clears the selection",
+      "interaction": "Select a rectangle, press Escape",
+      "result": "works",
+      "evidence": "chip \"Shape\" then none; handles 0; focus div",
+      "severity": 0,
+      "need": "core",
+      "why": "Escape is the universal way out.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Group with Cmd+Option+G",
+      "interaction": "Select two rectangles, press Cmd+Option+G",
+      "result": "works",
+      "evidence": "groups group / group; chip \"Group\"; shot audit-arrange/06-group.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "A logo and its caption move together once grouped.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrow keys move a group as one",
+      "interaction": "With the group selected, press Right five times",
+      "result": "works",
+      "evidence": "chip \"Group\"; A 200,150 240x150 z3 g:group -> 205,150 240x150 z3 g:group; B 340,240 240x150 z4 g:group -> 345,240 240x150 z4 g:group",
+      "severity": 0,
+      "need": "useful",
+      "why": "A grouped logo and caption must stay together when nudged.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Ungroup with Cmd+Option+Shift+G",
+      "interaction": "With the group selected, press Cmd+Option+Shift+G",
+      "result": "works",
+      "evidence": "groups none / none; chip \"2 objects\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Breaking a group to edit one member.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Group (the menu)",
+      "interaction": "Select two rectangles, Arrange > Group",
+      "result": "works",
+      "evidence": "chip before \"2 objects\"; row \"Group⌥⌘G\" disabled false keys Alt+Meta+G; groups group / group; chip after \"Group\" Follow-up 1 (deck untitled-20260916-lyc8), the same path with no Escape afterwards: chip before \"2 objects\", grouped true, chip after \"Group\", 10 handles, focus body.",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu is where a seller looks when the chord is unknown.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Ungroup (the menu)",
+      "interaction": "With the group selected, Arrange > Ungroup",
+      "result": "works",
+      "evidence": "chip before \"Group\"; row \"Ungroup⌥⇧⌘G\" disabled false keys Alt+Shift+Meta+G; groups none / none; chip after \"2 objects\" Follow-up 1: chip before \"Group\", ungrouped true, chip after \"2 objects\", 10 handles.",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu route to break a group.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Order > Bring to front",
+      "interaction": "Select the back rectangle, Arrange > Order > Bring to front",
+      "result": "works",
+      "evidence": "row \"Bring to front⇧⌘↑\" disabled false keys Shift+Meta+ArrowUp; z A:z3 B:z4 C:z5 -> A:z5 B:z3 C:z4; A at the top true; drawn on top at the A/B overlap: shape; undo by Cmd+Z / Cmd+Shift+Z restored true; redo reapplied true; shot audit-arrange/07-bring-to-front.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A logo dropped behind a plate must come forward.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Order > Send to back",
+      "interaction": "Select the front rectangle, Arrange > Order > Send to back",
+      "result": "works",
+      "evidence": "row \"Send to back⇧⌘↓\" disabled false keys Shift+Meta+ArrowDown; z A:z3 B:z4 C:z5 -> A:z4 B:z5 C:z0; C at the bottom true; drawn on top at the A/B overlap: shape-2; undo by the toolbar buttons restored true; redo reapplied true",
+      "severity": 0,
+      "need": "core",
+      "why": "A background plate pasted on top must go behind.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Order > Bring forward",
+      "interaction": "Select a rectangle, Arrange > Order > Bring forward",
+      "result": "works",
+      "evidence": "row \"Bring forward⌘↑\" disabled false keys Meta+ArrowUp; z A:z3 B:z4 C:z5 -> A:z4 B:z3 C:z5; A z 3 -> 4; drawn on top at the A/B overlap: shape; undo by Edit > Undo / Edit > Redo restored true; redo reapplied true; console 1: console: Failed to load resource: the server responded with a status of 409 ()",
+      "severity": 0,
+      "need": "useful",
+      "why": "One step of stacking when three things overlap.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Order > Send backward",
+      "interaction": "Select a rectangle, Arrange > Order > Send backward",
+      "result": "works",
+      "evidence": "row \"Send backward⌘↓\" disabled false keys Meta+ArrowDown; z A:z3 B:z4 C:z5 -> A:z4 B:z3 C:z5; B z 4 -> 3; drawn on top at the A/B overlap: shape; undo by Cmd+Z / Cmd+Shift+Z restored true; redo reapplied true",
+      "severity": 0,
+      "need": "useful",
+      "why": "One step of stacking.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Cmd+Shift+Up brings to front (the key)",
+      "interaction": "Select the back rectangle, press Cmd+Shift+Up",
+      "result": "works",
+      "evidence": "A z 3 -> 5 of 5,0,1,2,3,4",
+      "severity": 0,
+      "need": "useful",
+      "why": "Google binds the stacking keys the same way.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Cmd+Down sends backward (the key)",
+      "interaction": "Select a rectangle above another, press Cmd+Down",
+      "result": "works",
+      "evidence": "B z 4 -> 3",
+      "severity": 0,
+      "need": "useful",
+      "why": "The one step key.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Align > Left",
+      "interaction": "Select three rectangles, Arrange > Align > Left",
+      "result": "works",
+      "evidence": "chip \"3 objects\"; row \"Left\" aria-disabled false; before 200,150 240x150 z3 | 340,240 240x150 z4 | 1000,500 240x150 z5; after 200,150 240x150 z3 | 200,240 240x150 z4 | 200,500 240x150 z5; every x = 200: true; undo by Cmd+Z / Cmd+Shift+Z restored true; redo reapplied true; shot audit-arrange/08-align-left.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Lining up three logos on a slide is a weekly task.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Align > Center",
+      "interaction": "Select three rectangles, Arrange > Align > Center",
+      "result": "works",
+      "evidence": "chip \"3 objects\"; row \"Center\" aria-disabled false; before 200,150 240x150 z3 | 340,240 240x150 z4 | 1000,500 240x150 z5; after 600,150 240x150 z3 | 600,240 240x150 z4 | 600,500 240x150 z5; centres 720,720,720; undo by the toolbar buttons restored true; redo reapplied true",
+      "severity": 0,
+      "need": "core",
+      "why": "Centring objects on one another.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Align > Right",
+      "interaction": "Select three rectangles, Arrange > Align > Right",
+      "result": "flaky",
+      "evidence": "Run 3 try 1: the two Shift clicks did not form a multi-selection (chip \"Shape\"), the align then moved the one object to the slide's right edge (x 200 -> 1360) and the console logged a 409; undo by Edit > Undo restored it. Try 2: chip \"3 objects\", right edges 440, 580, 1240 -> all 1240, undo by Edit > Undo restored the three, Edit > Redo reapplied. Run 2 passed the same row on its first try.",
+      "severity": 2,
+      "need": "core",
+      "why": "Right edges lined up for numbers and prices.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Arrange > Align > Top",
+      "interaction": "Select three rectangles, Arrange > Align > Top",
+      "result": "broken",
+      "evidence": "Run 3 (three tries) and run 2: tops 150, 240, 500 -> 152, 152, 152: every top lands on 152, not on the topmost object's 150; the topmost object itself moves 2 px. Cmd+Z restored the three, Cmd+Shift+Z reapplied. Mechanism (follow-up 1, deck untitled-20260916-lyc8): the same block.align with snap false through the window API lands 150, 243, 501 -> 150, 150, 150; with snap unset (what the menu sends) -> 152, 152, 152; the action snaps the shared edge to the 8 px grid unless told not to (152 = 19 x 8). Align > Left from an off grid edge does the same: lefts 203, 600, 1000 -> 200, 200, 200, the reference object moved 3 px. Align > Left, Center, Right and Middle passed only because their shared edges (200, 720, 1240, 400) already sit on the grid.",
+      "severity": 2,
+      "need": "core",
+      "why": "Tops lined up across a row of cards.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Arrange > Align > Middle",
+      "interaction": "Select three rectangles, Arrange > Align > Middle",
+      "result": "works",
+      "evidence": "chip \"3 objects\"; row \"Middle\" aria-disabled false; before 200,150 240x150 z3 | 340,240 240x150 z4 | 1000,500 240x150 z5; after 200,325 240x150 z3 | 340,325 240x150 z4 | 1000,325 240x150 z5; middles 400,400,400; undo by the toolbar buttons restored true; redo reapplied true; console 1: console: Failed to load resource: the server responded with a status of 409 ()",
+      "severity": 0,
+      "need": "core",
+      "why": "Vertical centring of a row.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Align > Bottom",
+      "interaction": "Select three rectangles, Arrange > Align > Bottom",
+      "result": "broken",
+      "evidence": "Run 3 (three tries) and run 2: bottoms 300, 390, 650 -> 648, 648, 648 (y 498), 2 px above the lowest object's 650; undo by Edit > Undo restored, Edit > Redo reapplied. The same grid snap as Align > Top (650 is not a multiple of 8, 648 is).",
+      "severity": 2,
+      "need": "core",
+      "why": "Bottoms lined up.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Align with one object lines it up with the slide",
+      "interaction": "Select one rectangle, Arrange > Align > Left",
+      "result": "works",
+      "evidence": "row \"Left\" disabled false; A x 200 -> 0; Cmd+Z back to 200",
+      "severity": 0,
+      "need": "useful",
+      "why": "A single logo snapped to the slide edge.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Distribute > Horizontally",
+      "interaction": "Select three rectangles, Arrange > Distribute > Horizontally",
+      "result": "works",
+      "evidence": "chip \"3 objects\"; row \"Horizontally\" aria-disabled false; before 200,150 240x150 z3 | 340,240 240x150 z4 | 1000,500 240x150 z5; after 200,150 240x150 z3 | 600,240 240x150 z4 | 1000,500 240x150 z5; gaps along x 160,160; undo by Cmd+Z / Cmd+Shift+Z restored true; redo reapplied true; console 1: console: Failed to load resource: the server responded with a status of 409 (); shot audit-arrange/09-distribute-h.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "Even spacing of three cards; useful, and a seller can eyeball it.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Distribute > Vertically",
+      "interaction": "Select three rectangles, Arrange > Distribute > Vertically",
+      "result": "works",
+      "evidence": "chip \"3 objects\"; row \"Vertically\" aria-disabled false; before 200,150 240x150 z3 | 340,240 240x150 z4 | 1000,500 240x150 z5; after 200,150 240x150 z3 | 340,325 240x150 z4 | 1000,500 240x150 z5; gaps along y 25,25; undo by the toolbar buttons restored true; redo reapplied true; console 1: console: Failed to load resource: the server responded with a status of 409 ()",
+      "severity": 0,
+      "need": "useful",
+      "why": "Even vertical spacing.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Distribute needs three objects",
+      "interaction": "Select two rectangles, open Arrange > Distribute",
+      "result": "works",
+      "evidence": "chip \"2 objects\"; Distribute row disabled true label \"Distribute\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu should say why it is greyed.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Center on page > Horizontally",
+      "interaction": "Select one rectangle, Arrange > Center on page > Horizontally",
+      "result": "works",
+      "evidence": "row \"Horizontally\" disabled false; A 200,150 240x150 z3 -> 680,150 240x150 z3 (centre x 800); Cmd+Z back true",
+      "severity": 0,
+      "need": "core",
+      "why": "Centring a title or logo on the slide.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Center on page > Vertically",
+      "interaction": "Select one rectangle, Arrange > Center on page > Vertically",
+      "result": "works",
+      "evidence": "row \"Vertically\" disabled false; A 200,150 240x150 z3 -> 200,375 240x150 z3 (centre y 450); Cmd+Z back true",
+      "severity": 0,
+      "need": "core",
+      "why": "Centring on the slide.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Arrange > Rotate > Rotate clockwise 90°",
+      "interaction": "Select one rectangle, Arrange > Rotate > Rotate clockwise 90°, then Cmd+Z, Cmd+Shift+Z, then Rotate counter-clockwise 90°",
+      "result": "works",
+      "evidence": "row \"Rotate clockwise 90°\" disabled false; rotate 0 -> 90; Cmd+Z -> 0; Cmd+Shift+Z -> 90; \"Rotate counter-clockwise 90°\" -> 0; shot audit-arrange/10-rotate-90.png",
+      "severity": 0,
+      "need": "park",
+      "why": "Sellers rarely rotate; a designer tool.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Toolbar Undo and Redo on an arrange step",
+      "interaction": "After Align > Center, Align > Middle, Send to back or Distribute > Vertically, click the toolbar Undo, then Redo",
+      "result": "works",
+      "severity": 0,
+      "need": "core",
+      "why": "The buttons are the visible undo.",
+      "evidence": "Run 3 rows 15, 21, 24 and 28: the toolbar Undo restored the three positions (or the z order) and the toolbar Redo reapplied them, each time.",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Edit > Undo and Edit > Redo on an arrange step",
+      "interaction": "After Bring forward, Align > Right or Align > Bottom, Edit > Undo, then Edit > Redo",
+      "result": "works",
+      "severity": 0,
+      "need": "core",
+      "why": "The menu is where a seller finds undo when the key is forgotten.",
+      "evidence": "Run 3 rows 16, 22 and 25: Edit > Undo (row \"Undo ⌘Z\", enabled) restored the positions and Edit > Redo (row \"Redo ⌘Y\", enabled) reapplied them, each time; Edit > Undo reads disabled with nothing to undo (row 42 read undo aria-disabled null on the toolbar button, which uses the disabled property).",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Copy and paste (Cmd+C, Cmd+V)",
+      "interaction": "Select a rectangle, press Cmd+C then Cmd+V",
+      "result": "works",
+      "evidence": "objects 6 -> 7; copy shape-3-2 1016,516 240x150 z6 from 1000,500 240x150 z5; chip \"Shape\"; copy selected true; shot audit-arrange/11-paste-copy.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Copying a card to make a second one is the seller’s main way to build.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Delete removes the selected object",
+      "interaction": "With the pasted copy selected, press Delete",
+      "result": "works",
+      "evidence": "objects 7 -> 6; shape-3-2 gone true",
+      "severity": 0,
+      "need": "core",
+      "why": "Removing what does not apply to this prospect.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Undo and redo a delete (Cmd+Z, Cmd+Shift+Z)",
+      "interaction": "After the delete, press Cmd+Z, then Cmd+Shift+Z",
+      "result": "works",
+      "evidence": "objects 6 -> Cmd+Z 7 -> Cmd+Shift+Z 6",
+      "severity": 0,
+      "need": "core",
+      "why": "Undo is the seller’s safety net.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Cut and paste (Cmd+X, Cmd+V)",
+      "interaction": "Select a rectangle, press Cmd+X, then Cmd+V",
+      "result": "flaky",
+      "evidence": "Run 3 try 1: 6 objects -> Cmd+X 5 -> Cmd+V 6, the pasted shape-3 at 1016,516 from 1000,500 (the 16 px offset); then two Cmd+Z about half a second apart: the first removed the paste (5), the second did not bring the cut object back within 12 s (C missing). Tries 2 and 3 started without C. Follow-up 3 (deck untitled-20260916-kdvo), the same keys 1.5 s apart: C selected (5, rev 8) -> Cmd+X 4 (rev 9) -> Cmd+V 5 with shape-2 at 1016,516 (rev 10) -> Cmd+Z 4 (rev 11) -> Cmd+Z 5 with shape-2 back at 1000,500 (rev 12) -> Cmd+Shift+Z 1000,500 -> Cmd+Shift+Z 4: the whole chain correct.",
+      "severity": 2,
+      "need": "core",
+      "why": "Moving an object between slides starts with cut.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Edit > Copy and Edit > Paste (the menu)",
+      "interaction": "Select a rectangle, Edit > Copy, then Edit > Paste",
+      "result": "flaky",
+      "evidence": "Run 3, three tries right after the cut row above left the slide without C: Copy row enabled, Paste row enabled, objects 5 -> 5, nothing pasted, no notice. Follow-up 3 on a clean stage: Edit > Copy then Cmd+V 4 -> 5 (copy at 216,166); Cmd+C then Edit > Paste 4 -> 5; Edit > Copy then Edit > Paste 4 -> 5; Cmd+C then Cmd+V 4 -> 5; no console entry in any of the four.",
+      "severity": 2,
+      "need": "useful",
+      "why": "The menu route when the chord is unknown.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Paste in place",
+      "interaction": "A paste that keeps the source position on the same slide",
+      "result": "not driven",
+      "evidence": "not driven: production has no paste in place command: the Edit menu holds Paste and Paste without formatting, the stage binds Cmd+V (offset 16 px on the same slide) and Cmd+Shift+V (plain text), and no menu row, key or action is named for it",
+      "severity": 0,
+      "need": "useful",
+      "why": "Google has no paste in place either; sellers paste and drag.",
+      "source": "run 3"
+    },
+    {
+      "feature": "Cmd+V right after the toolbar's New slide button",
+      "interaction": "Copy a rectangle, click New slide in the toolbar, press Cmd+V",
+      "result": "broken",
+      "evidence": "Run 3, three tries: a new slide each time (title-1, title-3, title-4), Cmd+V put nothing on it (objects 0 -> 0), no notice. Follow-up 4 (deck untitled-20260916-i56x) case (a): the keyboard focus after the button click is button[toolbar.newSlide], the active slide is the new one, Cmd+V pastes nothing and the slide stays a title slide; case (b): a click on the empty new slide first, then Cmd+V: the copy lands at 200,150 (the source position) and the slide becomes a canvas; case (c): Edit > Paste right after New slide works the same way (200,150). Follow-up 5 (deck untitled-20260916-zv03) on a slide that is already a canvas: with the focus on the filmstrip card just clicked, Cmd+V pastes nothing; two Escapes leave the focus on the card and Cmd+V still pastes nothing; a click on the empty sheet, or the slide's own rectangle selected, or Tab to a handle, and Cmd+V pastes at 200,150. Mechanism: the stage handles the paste only when it owns the keyboard focus; the toolbar button and the filmstrip card keep it after a click.",
+      "severity": 2,
+      "need": "core",
+      "why": "Carrying a card to the next slide is the seller's most common paste; the key must land where the seller expects.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+V with the keyboard focus in the filmstrip",
+      "interaction": "Copy a rectangle, click another slide's card in the filmstrip, press Cmd+V",
+      "result": "broken",
+      "severity": 2,
+      "need": "core",
+      "why": "Clicking the next slide's thumbnail and pasting is how a seller moves a card between slides.",
+      "evidence": "Follow-up 5 (deck untitled-20260916-zv03): after the filmstrip card click the focus is div.ts-card.is-current[filmstrip.slide.title-1]; Cmd+V pastes nothing (objects 4 -> 4, no notice, no console entry); two Escapes leave the focus on the card and Cmd+V still pastes nothing; a click on the empty sheet (focus div.ts-stagewrap.ts-sheet) then Cmd+V pastes shape-2 at 200,150.",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Paste keeps the source position on another slide",
+      "interaction": "With the target slide focused by a click on it, press Cmd+V or Edit > Paste",
+      "result": "works",
+      "severity": 0,
+      "need": "core",
+      "why": "A logo pasted onto the next slide must sit where it sat.",
+      "evidence": "Follow-up 4 cases (b) and (c) and follow-up 5 cases (3), (4) and (5): the copy of A (200,150 on the first slide) lands at 200,150 on the other slide, no 16 px offset; a title slide converts to a canvas on the paste (its mark, heading and lead gain positions); the copy is selected afterwards (chip \"Shape\").",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Duplicate (Cmd+D)",
+      "interaction": "Select a rectangle, press Cmd+D",
+      "result": "works",
+      "evidence": "Run 3 rows 42 to 44 on the first slide: Cmd+D 5 -> 6 objects, three times. Follow-up 5 (deck untitled-20260916-zv03) case 6: filmstrip card clicked (focus on the card), then rectangle A clicked (focus moves to div.ts-stagewrap.ts-sheet, chip \"Shape\"), Cmd+D 4 -> 5 objects, Cmd+Z 4. The production walk of 2026-09-15 passed the same key (row 779, 27 -> 28). Run 3 row 40 itself read 5 -> 5 three times, with the stage still showing an empty new slide left by the paste row above it; the object under the pointer was not there.",
+      "severity": 0,
+      "need": "core",
+      "why": "Cmd+D is how a seller makes the second card.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Edit > Duplicate and Edit > Delete (the menu)",
+      "interaction": "Select a rectangle, Edit > Duplicate, then Edit > Delete",
+      "result": "works",
+      "evidence": "Follow-up 8, two runs (decks untitled-20260916-nj1q and 31fi): A clicked (chip \"Shape\", focus on the sheet); Edit > Duplicate (row enabled) 5 -> 6 objects, chip \"Shape\"; Edit > Delete (row enabled) 6 -> 5, chip none; the slide count stayed 1. The object removed was the original A, not the copy: after the two menu actions A's block was gone from the stage and only the copy remained (the third run lists the shapes left). Edit > Duplicate leaves the original selected, where Cmd+D selects the copy (run 3 row 33 and follow-up 5 case 6), so a Delete straight after the menu duplicate leaves the seller with the copy 16 px right and down of where the object was. Run 3 row 41 read 5 -> 5 three times while the stage held another slide; the Edit rows then acted on the current slide, which is what they do with no object selected (follow-up 5 case 8).",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+D with nothing selected on the canvas",
+      "interaction": "Click the empty slide (or leave the focus on the page body), press Cmd+D",
+      "result": "works",
+      "severity": 0,
+      "need": "useful",
+      "why": "Google's Cmd+D duplicates the current slide when no object is selected; a seller relies on it in the filmstrip.",
+      "evidence": "Follow-up 5 case 7 (focus body): Cmd+D took the deck from 2 to 3 slides and made the new slide current; Cmd+Z 3 -> 2; Cmd+Y 2 -> 3. Case 8 (focus body after a menu): slides 1 -> 2.",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Redo after an undone duplicate",
+      "interaction": "Cmd+D on a rectangle, Cmd+Z, then Cmd+Shift+Z, Cmd+Y, the toolbar Redo or Edit > Redo",
+      "result": "broken",
+      "severity": 2,
+      "need": "core",
+      "why": "Undo then redo is the seller's way to compare before and after; an empty redo loses the duplicate.",
+      "evidence": "Follow-up 5 case 7, route 1 (deck untitled-20260916-zv03): A clicked (chip \"Shape\", focus on the sheet) -> Cmd+D 5 objects -> Cmd+Z 4 -> Cmd+Shift+Z 4 (nothing redone) and the toolbar Redo button reads aria-disabled true. Run 3 rows 42 to 44 on the first slide: Cmd+D 5 -> 6 -> toolbar Undo 5 -> toolbar Redo 5; Cmd+D 6 -> Edit > Undo 5 -> Edit > Redo 5 (both rows enabled); Cmd+D 6 -> Cmd+Z 5 -> Cmd+Y 5. Four drives, the undo each time the next action after the duplicate. Counter cases: the redo of an undone delete works (run 3 row 35: Delete 7 -> 6, Cmd+Z 7, Cmd+Shift+Z 6; follow-up 8 by the toolbar and the Edit menu), the redo of an undone slide duplicate works (follow-up 5: Cmd+Y 2 -> 3 slides), and in follow-up 8 (deck untitled-20260916-6g42) a duplicate followed by a delete, two undos and Cmd+Shift+Z came back (5 -> 6), the Redo button reading enabled after that second undo. So the empty redo follows an undo issued straight after the duplicate; the follow-up 8 chain, where other steps came between, kept its redo.",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Backspace or Delete with nothing selected on the canvas",
+      "interaction": "Click the empty slide so the stage has focus, press Backspace or Delete",
+      "result": "broken",
+      "severity": 3,
+      "need": "core",
+      "why": "A seller who presses Backspace believing a text is selected loses the slide without a prompt; on the last slide the deck is left with no slide.",
+      "evidence": "Follow-up 5 case 8 (deck untitled-20260916-zv03): empty sheet clicked (focus div.ts-stagewrap.ts-sheet, chip none), Backspace: slides 3 -> 2 and the next slide becomes current; Delete: slides 2 -> 1; after Edit > Delete had removed the last object (focus body), Backspace: slides 1 -> 0, the state reports no slide, the console logs a 400. Follow-up 4 section (e) hit the same: its Backspace after Edit > Delete removed the first slide and the probe stopped with \"No slide title\". In Google Slides the Delete key removes a slide only while the filmstrip has focus.",
+      "source": "the follow-ups"
+    },
+    {
+      "feature": "Undo and redo through the toolbar",
+      "interaction": "Duplicate a rectangle, click the toolbar Undo, then the toolbar Redo",
+      "result": "broken",
+      "evidence": "Run 3, three tries on the first slide: Cmd+D 5 -> 6, toolbar Undo 6 -> 5, toolbar Redo 5 -> 5 (nothing redone), Undo 5. The buttons themselves work on other steps: follow-up 8 (deck untitled-20260916-6g42) Delete 6 -> 5, toolbar Undo 5 -> 6, toolbar Redo 6 -> 5; run 3 rows 15, 21, 24 and 28 undid and redid Send to back, Align > Center, Align > Middle and Distribute > Vertically by the buttons. The gap is the redo of a duplicate undone as the latest action (the row below).",
+      "severity": 2,
+      "need": "core",
+      "why": "The buttons are what a seller reaches for.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Undo and redo through the Edit menu",
+      "interaction": "Duplicate, then Edit > Undo and Edit > Redo",
+      "result": "broken",
+      "evidence": "Run 3, three tries: Cmd+D 5 -> 6, Edit > Undo (row \"Undo ⌘Z\", enabled) 6 -> 5, Edit > Redo (row \"Redo ⌘Y\", enabled) 5 -> 5, Cmd+Z 5. The menu rows work on other steps: follow-up 8 Edit > Undo of a delete 5 -> 6 and Edit > Redo 6 -> 5; run 3 rows 16, 22 and 25 undid and redid Bring forward, Align > Right and Align > Bottom by the menu. The gap is the same redo of a fresh duplicate.",
+      "severity": 2,
+      "need": "core",
+      "why": "The menu route to undo.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+Y redoes",
+      "interaction": "Duplicate, Cmd+Z, then Cmd+Y",
+      "result": "broken",
+      "evidence": "Run 3, three tries: Cmd+D 5 -> 6, Cmd+Z 6 -> 5, Cmd+Y 5 -> 5. Cmd+Y itself redoes: follow-up 5 case 7 route 2 redid an undone slide duplicate (slides 2 -> 3); follow-up 8 redid an undone duplicate with Cmd+Shift+Z once other actions had followed it (5 -> 6). The gap is the same redo of a fresh duplicate.",
+      "severity": 2,
+      "need": "useful",
+      "why": "Windows habits carry Cmd+Y.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Arrow keys nudge 1 px",
+      "interaction": "Select a rectangle, press Right three times and Down twice",
+      "result": "works",
+      "evidence": "Follow-up 3 (deck untitled-20260916-kdvo): Right x3, Down x2 moved A 200,150 -> 203,152, chip \"Shape\". Run 3 row 45 could not be driven: rectangle C was gone from the slide after the cut row (error reading a null position, three tries).",
+      "severity": 0,
+      "need": "core",
+      "why": "Fine placement of a logo without a drag.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Shift arrows nudge 10 px",
+      "interaction": "With the rectangle selected, press Shift+Left twice and Shift+Up once",
+      "result": "works",
+      "evidence": "Follow-up 3: Shift+Left x2, Shift+Up x1 moved A 203,152 -> 183,142. Run 3 row 46 met the same missing C.",
+      "severity": 0,
+      "need": "core",
+      "why": "The coarse nudge.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Undo a nudge",
+      "interaction": "After the nudges, press Cmd+Z until the rectangle is back",
+      "result": "works",
+      "evidence": "Follow-up 3: after 8 arrow presses, 8 Cmd+Z presses walked A back one step each (183,152; 193,152; 203,152; 203,151; 203,150; 202,150; 201,150; 200,150); one Cmd+Shift+Z then moved it to 201,150. One undo step per arrow press, no coalescing. Run 3 row 47 met the missing C.",
+      "severity": 0,
+      "need": "useful",
+      "why": "A wrong nudge should undo in a step or two.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "The zoom box shows the percentage",
+      "interaction": "Read the toolbar zoom box at Fit",
+      "result": "works",
+      "evidence": "Run 3: at Fit the box reads \"Fit\" (scale 0.705, state.zoom \"fit\"); the audit script expected \"71%\" and marked its own check failed. After a preset or a typed value the box reads the number: \"100%\" after Cmd+0, \"150%\" after typing 150, \"200%\" after the arrow menu (run 3 rows 53 and 55, follow-up 6).",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller reads the percentage to know they are at fit.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Zoom > Zoom in",
+      "interaction": "View > Zoom > Zoom in from Fit",
+      "result": "broken",
+      "evidence": "Run 3 from Fit, three tries: the scale stayed 71%, the box stayed \"Fit\", state.zoom \"fit\" (nothing happened). Follow-up 6 (deck untitled-20260916-pxsf) from Fit: 71% -> 25%, box \"25%\", state.zoom 0.25; from 100%: 100% -> 25%, box still \"100%\", state.zoom 0.25; from a typed 150%: 150% -> 25%, box still \"150%\". Every zoom step lands on 25%, the bottom of the 25 to 1600 ladder, whatever the start; the box keeps the previous preset text when the start was a preset, so the chrome and the stage disagree.",
+      "severity": 2,
+      "need": "useful",
+      "why": "Getting close to a small logo.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+Minus zooms out",
+      "interaction": "Press Cmd+Minus",
+      "result": "broken",
+      "evidence": "Run 3 from Fit: 71% -> 25% (one press, the ladder would give 50%), box \"25%\". Follow-up 6: from Fit 71% -> 25%; from 100% -> 25% with the box still \"100%\"; from a typed 150% -> 25% with the box still \"150%\".",
+      "severity": 2,
+      "need": "useful",
+      "why": "The keyboard zoom.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+Plus zooms in",
+      "interaction": "Press Cmd+= (then Cmd+Shift+= if nothing happened)",
+      "result": "broken",
+      "evidence": "Run 3 from Fit: Cmd+= took the scale to 25% (a zoom out to the bottom), box \"25%\". Follow-up 6: Cmd+= from Fit -> 25%; from 100% -> 25% with the box still \"100%\"; Cmd+Shift+= from Fit changed nothing (71%, \"Fit\").",
+      "severity": 2,
+      "need": "useful",
+      "why": "The keyboard zoom.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Zoom > Fit",
+      "interaction": "View > Zoom > Fit",
+      "result": "flaky",
+      "evidence": "Run 3 try 1, after the broken step had left the stage at 25%: the Fit row already read checked, the click changed nothing (scale 0.25, box \"25%\", state.zoom 0.25); try 2, after the reset: state.zoom \"fit\", scale 0.705, box \"Fit\". Follow-up 6 used View > Zoom > Fit as its reset eleven times from 25%, 100% and 150% and it returned to 71% each time.",
+      "severity": 1,
+      "need": "core",
+      "why": "Back to the whole slide before presenting or moving on.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Typing a percentage in the zoom box",
+      "interaction": "Click the zoom box, type 150, press Enter",
+      "result": "works",
+      "evidence": "scale 1.500; box \"150%\"; state.zoom 1.5; focus body",
+      "severity": 0,
+      "need": "useful",
+      "why": "A precise zoom.",
+      "source": "run 3"
+    },
+    {
+      "feature": "The zoom arrow menu",
+      "interaction": "Click the arrow beside the zoom box, pick 200%",
+      "result": "works",
+      "evidence": "Follow-up 6: the arrow beside the zoom box opens #ts-menu-zoom with the rows Zoom in, Zoom out, Fit, 50%, 100%, 200%; 100% set the scale to 1.0 (box \"100%\"), 200% set 2.0 (box \"200%\"). Run 3 row 54 picked 200% while the audit's own API reset had left the box at \"150%\" over a stage at Fit, and the pick did not take; a person has no such route.",
+      "severity": 0,
+      "need": "useful",
+      "why": "The presets are the quick zooms.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd+0 sets 100%",
+      "interaction": "Press Cmd+0",
+      "result": "works",
+      "evidence": "scale 1.000; box \"100%\"; state.zoom 1",
+      "severity": 0,
+      "need": "useful",
+      "why": "The one to one view.",
+      "source": "run 3"
+    },
+    {
+      "feature": "View > Zoom > Zoom out",
+      "interaction": "View > Zoom > Zoom out from 100%",
+      "result": "broken",
+      "evidence": "Follow-up 6 from Fit: 71% -> 25%; from 100%: 100% -> 25%, box still \"100%\". Run 3: from a stage the earlier rows had left at 71% under a box reading \"100%\", the row changed nothing.",
+      "severity": 2,
+      "need": "useful",
+      "why": "The menu zoom out.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "The size readout while resizing (Fit)",
+      "interaction": "Drag the bottom right handle of a rectangle at Fit; read the readout during and after",
+      "result": "works",
+      "evidence": "Follow-up 6 (deck untitled-20260916-pxsf) at Fit (71%): handle aria-label \"shape: Resize se\", readout during the drag \"300 × 200\", after the release none, box 800,450 240x160 -> 300x200, Cmd+Z back. Run 3 rows 57 and 58 could not select the rectangle (the stage held another slide after the paste row).",
+      "severity": 0,
+      "need": "useful",
+      "why": "Sizing a logo to a known width.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "The size readout while resizing (200%)",
+      "interaction": "Zoom to 200% on the rectangle, drag its bottom right handle",
+      "result": "works",
+      "evidence": "Follow-up 6 at 200% (set by the arrow menu; scale 2.0, box \"200%\"): readout during \"300 × 200\", after none, box 240x160 -> 300x200 (a 60 by 40 sheet px drag at 200% moved the pointer 120 by 80 css px), Cmd+Z back.",
+      "severity": 0,
+      "need": "useful",
+      "why": "The readout must not stay on screen.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Show ruler",
+      "interaction": "View > Show ruler, then reopen the View menu to read the row",
+      "result": "works",
+      "evidence": "row before \"Show ruler\"; data-show-ruler true; rulers x true y true numerals 22; row after \"Hide ruler\"; shot audit-arrange/18-rulers.png",
+      "severity": 0,
+      "need": "park",
+      "why": "Rulers are a designer tool; sellers align by snapping.",
+      "source": "run 3"
+    },
+    {
+      "feature": "View > Guides > Show guides",
+      "interaction": "View > Guides > Show guides",
+      "result": "works",
+      "evidence": "Follow-up 7 (deck untitled-20260916-ez6v): the row (menuitemcheckbox) checked false -> true, the stage root gains data-show-guides, the setting persists in localStorage ts-editor-settings (showGuides true); no failed response. Run 3 row 60 read false -> false three times while the stage held another slide.",
+      "severity": 0,
+      "need": "park",
+      "why": "Guides are a designer tool.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Guides > Add vertical guide",
+      "interaction": "View > Guides > Add vertical guide",
+      "result": "works",
+      "evidence": "Follow-up 7: guides none -> guide.x.800 in the DOM, deck.info guides {x:[800], y:[]}, revision 6 -> 7, no failed response; the same deck.guides add through the window API answered {guides:{x:[800]}, revision 7}. Run 3 row 61 saw no guide appear (three tries) on its poisoned stage.",
+      "severity": 0,
+      "need": "park",
+      "why": "A designer tool.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Drag out of the ruler adds a guide",
+      "interaction": "With the rulers shown, press on the top ruler at x 400 and drag down into the slide",
+      "result": "works",
+      "evidence": "Follow-up 7: during the drag the readout reads \"3.33 in\" and a live guide is drawn; on release a vertical guide at x 400 is added (guide.x.400, deck.info guides x [400, 800]). A drag out of the top ruler makes a vertical guide at the pointer's x, as in Google Slides; the audit script expected a horizontal one at the drop y and would have marked this failed.",
+      "severity": 0,
+      "need": "park",
+      "why": "A designer tool.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Drag a guide to a new position",
+      "interaction": "Press on the vertical guide at 800 and drag it to 600",
+      "result": "works",
+      "evidence": "Follow-up 7: the guide at x 400 dragged to x 600, readout \"5.00 in\" during, guides after [guide.x.600, guide.x.800].",
+      "severity": 0,
+      "need": "park",
+      "why": "A designer tool.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Snap to guides while dragging",
+      "interaction": "With Snap to > Guides on, drag a rectangle so its left edge stops 4 px short of the guide at 600",
+      "result": "flaky",
+      "evidence": "Follow-up 8 (deck untitled-20260916-6g42), Snap to > Guides on, a guide at x 600, the preview box read during the drag: pointer leaving A's left edge at 603 -> preview 600, landed 600; at 598 (a slow 40 step drag) -> preview 600, landed 600; at 596 -> preview 596, landed 596, with a different snap line drawn (an object line, not the guide's); at 597 from x 900 -> preview 596, landed 596, the same other line. Follow-up 7 (deck untitled-20260916-ez6v): at 596 -> landed 596 with one snap line drawn. The snap commits what it previews: an object edge snap (A's left edge left at 704 beside B's left edge 700) previewed 700 and landed 700, and the sheet centre snap (A's centre left at 796) previewed 800 and landed 800. So the guide takes the drag from 2 to 3 px away and loses it at 3 to 4 px when another line is drawn instead; a seller sees a snap line and lands 3 or 4 px off the guide.",
+      "severity": 1,
+      "need": "useful",
+      "why": "Snapping is how a seller lines things up without the Arrange menu.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Cmd drag skips the snap",
+      "interaction": "Hold Cmd while dragging to 4 px short of the guide",
+      "result": "works",
+      "evidence": "Follow-up 7: the same drag to 596 with Cmd held drew no snap line (0, against 1 without Cmd) and landed at 596. The plain drag had landed at 596 as well (the guide snap row), so the override's effect shows in the missing snap line, not in the landing.",
+      "severity": 0,
+      "need": "park",
+      "why": "A precision override.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Snap to > Guides off",
+      "interaction": "View > Snap to > Guides (off), drag to 4 px short of the guide, then turn it back on",
+      "result": "works",
+      "evidence": "Follow-up 7: View > Snap to > Guides read checked true; one click -> checked false; a drag to 596 with it off landed at 596 (no snap line drawn); one more click -> checked true.",
+      "severity": 0,
+      "need": "park",
+      "why": "The off switch.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Guides > Clear guides",
+      "interaction": "View > Guides > Clear guides",
+      "result": "works",
+      "evidence": "Follow-up 7: guides guide.x.600, guide.x.800 -> none; deck.info guides null. Run 3 row 67 found the row disabled because no guide had been added on its poisoned stage.",
+      "severity": 0,
+      "need": "park",
+      "why": "A designer tool.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "View > Hide ruler",
+      "interaction": "View > Hide ruler",
+      "result": "works",
+      "evidence": "row \"Hide ruler\"; data-show-ruler false; rulers x false y false",
+      "severity": 0,
+      "need": "park",
+      "why": "The off switch.",
+      "source": "run 3"
+    },
+    {
+      "feature": "The selection blue on a light slide",
+      "interaction": "Select a rectangle on the light theme; read the ring colour",
+      "result": "works",
+      "evidence": "Follow-up 2 (deck untitled-20260916-tfni): the /new deck opens on the dark theme (the audit script assumed light and failed its own check); after the theme panel switched to light (themes.gt.light, state.theme light, html data-theme light) the ring border is rgb(26, 115, 232), the chip background rgb(26, 115, 232) with white text, --pt-select #1a73e8, the sheet text colour rgb(7, 7, 7); screenshot audit-arrange/selection-light-theme.png.",
+      "severity": 0,
+      "need": "core",
+      "why": "The ring must read on the slide the seller edits.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "The selection blue on a dark slide",
+      "interaction": "Switch the theme to dark in the theme panel, select a rectangle, read the ring colour, switch back",
+      "result": "works",
+      "evidence": "Follow-up 2 on the dark theme (the default of /new, state.theme dark, html data-theme dark): ring border rgb(61, 134, 240), chip background rgb(61, 134, 240) with rgb(7, 7, 7) text, --pt-select #3d86f0, the handles white bordered; the theme panel listed themes.gt.light, themes.gt.dark (checked), themes.inThis.light, themes.inThis.dark, themes.import; screenshot audit-arrange/selection-dark-theme.png. Run 3 row 70 timed out opening the theme panel on its poisoned stage.",
+      "severity": 0,
+      "need": "core",
+      "why": "Dark decks are common in sales; the ring must read on them.",
+      "source": "run 3 and the follow-ups"
+    },
+    {
+      "feature": "Escape steps out of the text, then clears the selection",
+      "interaction": "Insert > Text box, click the slide, type a word, press Escape twice",
+      "result": "works",
+      "evidence": "Run 3 (three tries, the same each time): Insert > Text box and a click on the sheet opened a text session (editing true), the word typed, Escape ended the session (editing false) and left the box selected (chip \"Text box\"), the second Escape cleared the selection (chip none). The script's own object lookup read the first slide while the stage showed another, so it reported the box as not found and marked the row failed; the behaviour it recorded is the expected one.",
+      "severity": 0,
+      "need": "core",
+      "why": "Escape out of typing is constant work.",
+      "source": "run 3 and the follow-ups"
+    }
+  ]
+}

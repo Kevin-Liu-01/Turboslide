@@ -1,0 +1,127 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "build": {
+    "version": 1,
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "deckId": "untitled-20260916-5n17",
+  "slide": "title",
+  "startedAt": "2026-09-16T01:58:25.517Z",
+  "ms": 389094,
+  "rows": 8,
+  "works": 1,
+  "flaky": 0,
+  "broken": 7,
+  "notDriven": 0,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "net": [
+    "200 GET /_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"downloads\",\"worker\",\"sync\",\"batchSize\"],\"v\":[{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"local\"},{\"t\":2,\"s\":2},{\"t\":0,\"s\":60}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"14b32696-a1d8-4746-a6bd-4712f05f4d93\\\\\\\",\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260916-5n17\\\\\\\",\\\\\\\"owner\\\\\\\":\\\\\\\"editor\\\\\\\",\\\\\\\"actions\\\\\\\":[\\\\\\\"deck.info\\\\\\\",\\\\\\\"deck.create\\\\\\\",\\\\\\\"deck.rename\\\\\\\",\\\\\\\"deck.set\\\\\\\",\\\\\\\"dec",
+    "200 GET /_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"url\",\"tokenRequired\",\"store\",\"persistent\",\"hosted\"],\"v\":[{\"t\":1,\"s\":\"https://turboslide.vercel.app\"},{\"t\":2,\"s\":2},{\"t\":1,\"s\":\"blob\"},{\"t\":2,\"s\":2},{\"t\":2,\"s\":2}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":2,\"p\":{\"k\":[],\"v\":[]}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+    "200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "setup",
+      "interaction": "open /new",
+      "result": "works",
+      "evidence": "deck untitled-20260916-5n17; state keys deckId,revision,serverRevision,pending,slideId,blockId,mode,theme,zoom,author,sync,presence,access,account,comments,inbox",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 2,
+      "feature": "setup",
+      "interaction": "New slide from the toolbar",
+      "result": "broken",
+      "evidence": "slides 1; working slide title; active title",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 3,
+      "feature": "Insert picture",
+      "interaction": "Insert > Image > Upload from computer, a PNG through the file chooser (with the sync facts)",
+      "result": "broken",
+      "evidence": "try 1: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; 45309 ms; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 2: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; 45290 ms; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 3: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; 45297 ms; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 4,
+      "feature": "Insert picture",
+      "interaction": "drag a PNG file from the desktop and drop it on the slide (a DataTransfer built in the page, dispatched as dragover and drop at a point), with the sync facts",
+      "result": "broken",
+      "evidence": "try 1: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; dropped at sheet 1000,560; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 2: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; dropped at sheet 1000,560; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 3: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; dropped at sheet 1000,560; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 5,
+      "feature": "Insert picture",
+      "interaction": "copy a PNG to the clipboard and press Cmd V on the slide, with the sync facts",
+      "result": "broken",
+      "evidence": "try 1: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; clipboard.write ok; Meta+V; no block; snackbar No deck untitled-20260916-5n17 in the Blob store; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301 :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":1},{\"t\":25,\"i\":1,\"s\":{\"message\":{\"t\":1,\"s\":\"No deck untitled-20260916-5n17 in the Blob store\"}},\"c\":\"$TSR/Error\"},{\"t\":10,\"i\":2,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} || 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 2: before: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; clipboard.write ok; Control+V; no block; snackbar null; after: revision 0, serverRevision 0, pending 0, sync {\"seq\":0,\"revision\":0,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"poll\",\"connected\":false}, document.deck.revision ?; network 200 POST /_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c :: {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0} | try 3: error: page.evaluate: Target page, context or browser has been closed",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 6,
+      "feature": "the audit ran to completion",
+      "interaction": "no exception outside a step",
+      "result": "broken",
+      "evidence": "page.evaluate: Target page, context or browser has been closed\n    at invoke (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/images/retest3-images.mjs:141:8)\n    at slideJson (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/images/retest3-images.mjs:166:3)\n    at blocksOf (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/images/retest3-images.mjs:169:23)\n    at /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/images/retest3-images.mjs:657:20",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 7,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash then Delete forever",
+      "result": "broken",
+      "evidence": "failed: page.goto: Target page, context or browser has been closed; falling back to the actions API",
+      "consoleErrorsAt": 1
+    },
+    {
+      "n": 8,
+      "feature": "cleanup",
+      "interaction": "the scratch deck answers 404",
+      "result": "broken",
+      "evidence": "probe failed: apiRequestContext.get: Target page, context or browser has been closed",
+      "consoleErrorsAt": 1
+    }
+  ]
+}

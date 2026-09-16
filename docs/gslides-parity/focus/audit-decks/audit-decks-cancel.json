@@ -1,0 +1,51 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-0oz3",
+  "rows": [
+    {
+      "feature": "Editor",
+      "interaction": "File > Move to trash, then open /decks/trash until the deck is listed",
+      "result": "works",
+      "evidence": "File > Move to trash landed on /decks after 7176 ms; the deck still listed on /decks right after: false; /decks/trash listed the card after 1 s of reloads every 8 s",
+      "severity": 0,
+      "need": "core",
+      "why": "A deck moved to the trash must be findable there at once, or the seller believes it is lost"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Click Delete forever, then Cancel in the dialog",
+      "result": "works",
+      "evidence": "dialog \"Delete Audit decks cancel check forever? This cannot be undone\" / \"1 slide and every version of Audit decks cancel check are deleted.\"; Cancel focused first true; after Cancel the card stays true, focus on trash.delete.untitled-20260916-0oz3, GET /edit/untitled-20260916-0oz3 -> 200; screenshot audit-decks/run4-delete-forever-dialog.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Delete forever must ask once, and Cancel must keep the deck"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Click Delete forever, then press Enter in the dialog",
+      "result": "broken",
+      "evidence": "the card left the trash false; GET /edit/untitled-20260916-0oz3 -> 200 after 61 s; snackbar \"\"",
+      "severity": 2,
+      "need": "core",
+      "why": "Delete forever must ask once and then really delete"
+    },
+    {
+      "feature": "Cleanup",
+      "interaction": "Sweep /decks and /decks/trash for any card of this audit",
+      "result": "broken",
+      "evidence": "/decks: []; /decks/trash: [{\"id\":\"untitled-20260916-0oz3\",\"title\":\"Audit decks cancel check\"}]",
+      "severity": 2,
+      "need": "core",
+      "why": "The production store must be left as it was found"
+    },
+    {
+      "feature": "Cleanup",
+      "interaction": "untitled-20260916-0oz3 deleted forever and answers 404",
+      "result": "works",
+      "evidence": "GET /edit/untitled-20260916-0oz3 -> 404",
+      "severity": 0,
+      "need": "core",
+      "why": "The production store must be left as it was found"
+    }
+  ]
+}

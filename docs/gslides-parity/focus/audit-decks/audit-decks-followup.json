@@ -1,0 +1,80 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-dv8g",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "feature": "Title row",
+      "interaction": "Rename the deck created from /new, read the browser tab title, reload, read it again",
+      "result": "broken",
+      "evidence": "tab title before \"Untitled presentation, Turboslide\"; after the rename to \"Audit decks tab title check\" the tab reads \"Untitled presentation, Turboslide\"; after a reload of /edit/untitled-20260916-dv8g the field reads \"Audit decks tab title check\" and the tab reads \"Audit decks tab title check, editor, Turboslide\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "A seller with several decks open tells the tabs apart by their titles"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Wait for the card thumbnail of the deck to load",
+      "result": "broken",
+      "evidence": "after 0 s: img false, complete null, naturalWidth null, title plate \"Audit decks thumbnail check\"; no src; across the 39 store cards: 6 with an img, 1 loaded, 33 showing the title plate instead; console [\"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\",\"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\"]; screenshot audit-decks/followup-decks-thumbnail.png",
+      "severity": 1,
+      "need": "useful",
+      "why": "The thumbnail is how a seller recognises a deck in the list without reading every title"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Rename twice in a row without a reload, watching the card, the snackbar and the store",
+      "result": "broken",
+      "evidence": "rename to \"Audit decks renamed once\" (card before: \"Audit decks thumbnail check\" rnull): card title changed after never within 60 s; snackbar [\"Rename: baseRevision 1 is stale; the document is at revision 2\"]; timeline [{\"at\":68,\"title\":\"Audit decks thumbnail check\",\"revision\":null}] | rename to \"Audit decks renamed twice\" (card before: \"Audit decks thumbnail check\" rnull): card title changed after never within 60 s; snackbar [\"Rename: baseRevision 1 is stale; the document is at revision 2\"]; timeline [{\"at\":93,\"title\":\"Audit decks thumbnail check\",\"revision\":null}] | after a reload the card reads \"Audit decks tab title check\" rnull | the store (deck.info) reads title \"Audit decks tab title check\" revision 2",
+      "severity": 2,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; a rename that the list does not show, or that lands nowhere, misleads the seller"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Make a copy, three attempts, reading the snackbar and the failed responses",
+      "result": "works",
+      "evidence": "attempt 1: name \"Copy of Audit decks tab title check\"; button read Copying; after 3554 ms: popup /edit/copy-of-audit-decks-tab-title-check, dialog open false, snackbar [], failed responses [] | \"Copy of\" cards on /decks afterwards: [{\"id\":\"copy-of-audit-decks-tab-title-check\",\"title\":\"Copy of Audit decks tab title check\"}]",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller clones the last customer deck and tailors it; Make a copy is that clone"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Move to trash, then Undo from the snackbar",
+      "result": "works",
+      "evidence": "card left at once true; snackbar \"Moved to trashUndo\" with Undo true; after Undo the card is back true; snackbar then \"\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "Follow up",
+      "interaction": "The script ran to the end",
+      "result": "broken",
+      "evidence": "stopped: page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/decks/audit-decks-followup.mjs:391:16",
+      "severity": 0,
+      "need": "core",
+      "why": "A stopped run leaves rows undriven"
+    },
+    {
+      "feature": "Cleanup",
+      "interaction": "The follow up deck trashed and deleted forever, and answers 404",
+      "result": "works",
+      "evidence": "untitled-20260916-dv8g: GET /edit/untitled-20260916-dv8g -> 404",
+      "severity": 0,
+      "need": "core",
+      "why": "The production store must be left as it was found"
+    }
+  ]
+}

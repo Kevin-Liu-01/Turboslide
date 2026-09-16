@@ -1,0 +1,638 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-nb3i",
+  "startedAt": "2026-09-16T00:49:16.977Z",
+  "ms": 806528,
+  "rows": 61,
+  "works": 29,
+  "broken": 31,
+  "flaky": 1,
+  "notDriven": 0,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: Failed to load resource: the server responded with a status of 409 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "Title placeholder",
+      "interaction": "Single click on \"Click to add title\"",
+      "result": "works",
+      "evidence": "prompt before \"Click to add title\"; after one click: session true, run editable true, prompt \"null\", chip Title, focus h1[contenteditable][run heading/text]; screenshot docs/gslides-parity/focus/audit-text/02-title-single-click.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller retypes the customer name on the cover; a single click is the first thing they try."
+    },
+    {
+      "n": 2,
+      "feature": "Title placeholder",
+      "interaction": "Double click on \"Click to add title\"",
+      "result": "works",
+      "evidence": "session true; run editable true; prompt after \"null\"; text \"\"; focus h1[contenteditable][run heading/text]",
+      "severity": 0,
+      "need": "core",
+      "why": "Google Slides opens the caret on a double click; without it a seller cannot start typing."
+    },
+    {
+      "n": 3,
+      "feature": "Title placeholder",
+      "interaction": "Type \"Acme renewal: Q3 2026, 3 sites.\" with pauses between words, then Escape",
+      "result": "works",
+      "evidence": "typed \"Acme renewal: Q3 2026, 3 sites.\"; stored heading \"Acme renewal: Q3 2026, 3 sites.\"; address /edit/untitled-20260916-nb3i; revision 5; screenshot docs/gslides-parity/focus/audit-text/03-title-typed.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Retyping a cover line with spaces, punctuation and a number is the seller's first edit on every deck."
+    },
+    {
+      "n": 4,
+      "feature": "Title text",
+      "interaction": "Click to place the caret in the middle of a word and type",
+      "result": "works",
+      "evidence": "session true; caret offset after the click 9; text after xx \"Acme renexxwal: Q3 2026, 3 sites.\"; after two Backspace \"Acme renewal: Q3 2026, 3 sites.\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Fixing one letter in a customer name needs the caret where the click landed."
+    },
+    {
+      "n": 5,
+      "feature": "Title text",
+      "interaction": "Home, then End, then typing at each",
+      "result": "works",
+      "evidence": "offset after Home 0, after End 32; text \"HAcme renewal: Q3 2026, 3 sites.E\"; restored \"Acme renewal: Q3 2026, 3 sites.\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Home and End are how a seller jumps to the start or end of a line to add a word."
+    },
+    {
+      "n": 6,
+      "feature": "Title text",
+      "interaction": "Shift+ArrowLeft three times selects three characters; typing replaces them",
+      "result": "works",
+      "evidence": "selection \"tes\" (3); text \"Acme renewal: Q3 2026, 3 siTES.\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Selecting a few characters with Shift and the arrows is the keyboard way to fix a number."
+    },
+    {
+      "n": 7,
+      "feature": "Title text",
+      "interaction": "Shift+Home selects to the start of the line; Shift+End to the end",
+      "result": "works",
+      "evidence": "Shift+Home selected \"Acme renewal: Q3 2026, \" (23); Shift+End selected \"3 sites.\" (8)",
+      "severity": 0,
+      "need": "useful",
+      "why": "Selecting to the line end is a common way to replace the rest of a heading."
+    },
+    {
+      "n": 8,
+      "feature": "Title text",
+      "interaction": "Backspace across a word (six presses through \"sites\")",
+      "result": "works",
+      "evidence": "after six Backspace \"Acme renewal: Q3 2026, 3.\"; restored \"Acme renewal: Q3 2026, 3 sites.\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Deleting a word letter by letter with Backspace is the most common correction."
+    },
+    {
+      "n": 9,
+      "feature": "Title text",
+      "interaction": "Option+Backspace deletes the word before the caret",
+      "result": "works",
+      "evidence": "after Option+Backspace \"Acme renewal: Q3 2026, 3 .\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Word delete is a Mac habit; a seller finishes without it."
+    },
+    {
+      "n": 10,
+      "feature": "Title text",
+      "interaction": "Delete removes the character after the caret",
+      "result": "works",
+      "evidence": "after Delete at Home \"cme renewal: Q3 2026, 3 sites.\"; restored \"Acme renewal: Q3 2026, 3 sites.\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Forward delete is part of ordinary text correction."
+    },
+    {
+      "n": 11,
+      "feature": "Title text",
+      "interaction": "Cmd+A selects the whole text of the run",
+      "result": "works",
+      "evidence": "selection \"Acme renewal: Q3 2026, 3 sites.\" (31 of 31); session still open true",
+      "severity": 0,
+      "need": "core",
+      "why": "Select all then type is how a seller replaces a placeholder line in one motion."
+    },
+    {
+      "n": 12,
+      "feature": "Title text",
+      "interaction": "Enter in the title (a single line run)",
+      "result": "works",
+      "evidence": "session after Enter false; text \"Acme renewal: Q3 2026, 3 sites.\"; stored \"Acme renewal: Q3 2026, 3 sites.\"; focus body (Enter commits a single line run by design)",
+      "severity": 0,
+      "need": "useful",
+      "why": "Google keeps the caret in the title on Enter; here the observed behaviour decides what a seller learns."
+    },
+    {
+      "n": 13,
+      "feature": "Title text",
+      "interaction": "Shift+Enter in the title",
+      "result": "works",
+      "evidence": "session after Shift+Enter false; text \"Acme renewal: Q3 2026, 3 sites.\"; stored \"Acme renewal: Q3 2026, 3 sites.\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Shift+Enter is the line break habit from every other editor."
+    },
+    {
+      "n": 14,
+      "feature": "Subtitle placeholder",
+      "interaction": "Double click \"Click to add subtitle\" and type a line with a comma and a number",
+      "result": "works",
+      "evidence": "prompt before \"Click to add subtitle\"; session true; text \"Prepared for Jordan Lee, 14 September 2026\"",
+      "severity": 0,
+      "need": "core",
+      "why": "The cover subtitle carries the prospect name and date on every tailored deck."
+    },
+    {
+      "n": 15,
+      "feature": "Subtitle text",
+      "interaction": "Enter makes a new line and the next words land on it",
+      "result": "works",
+      "evidence": "session after Enter true; lines 2; breaks 1; text \"Prepared for Jordan Lee, 14 September 2026Second line\"",
+      "severity": 0,
+      "need": "core",
+      "why": "A two line subtitle (name, then date) needs Enter inside the body."
+    },
+    {
+      "n": 16,
+      "feature": "Subtitle text",
+      "interaction": "Shift+Enter makes a line break",
+      "result": "works",
+      "evidence": "lines 2 -> 3; session true; text \"Prepared for Jordan Lee, 14 September 2026Second lineThird line\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Sellers press Shift+Enter for a soft break out of habit."
+    },
+    {
+      "n": 17,
+      "feature": "Subtitle text",
+      "interaction": "ArrowUp and ArrowDown move between lines; Backspace at a line start joins the lines",
+      "result": "works",
+      "evidence": "offset at End 63, after ArrowUp 51, after ArrowDown 63; lines 3 -> 2; text \"Prepared for Jordan Lee, 14 September 2026Second lineThird line\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Editing a two line body needs the vertical arrows and a join."
+    },
+    {
+      "n": 18,
+      "feature": "Subtitle text",
+      "interaction": "Escape commits the subtitle and it is stored",
+      "result": "works",
+      "evidence": "revision 25; stored lead \"Prepared for Jordan Lee, 14 September 2026\\nSecond line\\nThird line\"; screenshot docs/gslides-parity/focus/audit-text/04-subtitle-three-lines.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A commit that does not store loses the seller's edit."
+    },
+    {
+      "n": 19,
+      "feature": "Autofit (placeholder)",
+      "interaction": "Type a long title into the title placeholder and see how it fits",
+      "result": "works",
+      "evidence": "font 88px -> 88px; lines 4; title rect h 253.1 (bottom 581 vs sheet bottom 774.5); overlap with the subtitle 0px; stored heading length 121; autofit on the title slide's heading: none (kind title); screenshot docs/gslides-parity/focus/audit-text/05-title-long-autofit.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Long customer names overflow covers; Google shrinks placeholder text so the slide stays whole."
+    },
+    {
+      "n": 20,
+      "feature": "Text box",
+      "interaction": "Insert > Text box, then one click on the slide, then type",
+      "result": "flaky",
+      "evidence": "try 1: row enabled; new object mark mark at 137,269.6 132x84; caret state after the click true; stored text undefined; autofit undefined | try 2: row enabled; new object text text-2 at 140,640 480x64; caret state after the click true; stored text \"Caption by\"; autofit grow | try 3: row enabled; new object text text-3 at 140,640 480x64; caret state after the click true; stored text \"Caption by click\"; autofit grow; screenshot docs/gslides-parity/focus/audit-text/08-text-box-by-click.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A seller adds a caption or a footnote through Insert > Text box."
+    },
+    {
+      "n": 21,
+      "feature": "Text box",
+      "interaction": "Insert > Text box, then drag a rectangle on the slide, then type",
+      "result": "broken",
+      "evidence": "try 1: new object text text-4 at 860,620 600x140 (drag 860,620 -> 1460,760); caret state after the drag true; stored text \"\" | try 2: new object text text-5 at 860,620 600x140 (drag 860,620 -> 1460,760); caret state after the drag true; stored text \"Pricing note by dragg\" | try 3: new object text text-6 at 860,620 600x140 (drag 860,620 -> 1460,760); caret state after the drag true; stored text \"Pricing note by dragrag\"; screenshot docs/gslides-parity/focus/audit-text/11-text-box-by-drag.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "Drawing the box to a size is the Google gesture; a click also works."
+    },
+    {
+      "n": 22,
+      "feature": "Toolbar (text)",
+      "interaction": "Select the text box: the toolbar shows the text controls",
+      "result": "works",
+      "evidence": "chip Text box; font:disabled fontSize:on bold:on italic:on underline:on textColor:on highlightColor:on insertLink:on align:on spacing:on bulletedList:on numberedList:on decreaseIndent:on increaseIndent:on clearFormatting:on; screenshot docs/gslides-parity/focus/audit-text/12-toolbar-text-box-selected.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The contextual toolbar is where Google puts the ten text actions a seller uses."
+    },
+    {
+      "n": 23,
+      "feature": "Font family",
+      "interaction": "Click the Font dropdown on the toolbar",
+      "result": "broken",
+      "evidence": "try 1: button \"Font\" disabled true; tip none; plate opened false; picks none; snackbar \"\" | try 2: button \"Font\" disabled true; tip none; plate opened false; picks none; snackbar \"\" | try 3: button \"Font\" disabled true; tip none; plate opened false; picks none; snackbar \"\"; screenshot docs/gslides-parity/focus/audit-text/15-font-dropdown.png",
+      "severity": 1,
+      "need": "useful",
+      "why": "Sellers rarely change fonts; the theme font is the brand."
+    },
+    {
+      "n": 24,
+      "feature": "Font size",
+      "interaction": "Type 40 in the Font size field and press Enter",
+      "result": "broken",
+      "evidence": "try 1: field 20 -> null; stored typography.size undefined; DOM font 22px; snackbar \"\" | try 2: field 20 -> null; stored typography.size undefined; DOM font 22px; snackbar \"\" | try 3: field 20 -> null; stored typography.size undefined; DOM font 22px; snackbar \"\"",
+      "severity": 2,
+      "need": "core",
+      "why": "Making a number bigger on a pricing slide is a weekly task."
+    },
+    {
+      "n": 25,
+      "feature": "Font size",
+      "interaction": "Click the plus (increase) then the minus (decrease)",
+      "result": "broken",
+      "evidence": "try 1: field 20 -> plus 20 -> minus 20; stored size undefined then undefined | try 2: field 20 -> plus 20 -> minus 20; stored size undefined then undefined | try 3: field 20 -> plus 20 -> minus 20; stored size undefined then undefined",
+      "severity": 2,
+      "need": "core",
+      "why": "Stepping the size is the quick way to fit a line."
+    },
+    {
+      "n": 26,
+      "feature": "Bold",
+      "interaction": "Select the text box and click Bold; click again to undo it",
+      "result": "broken",
+      "evidence": "try 1: button disabled false; after one click: stored weight undefined, DOM font-weight 400, pressed false; after the second click: stored weight undefined, DOM 400 | try 2: button disabled false; after one click: stored weight undefined, DOM font-weight 400, pressed false; after the second click: stored weight undefined, DOM 400 | try 3: button disabled false; after one click: stored weight undefined, DOM font-weight 400, pressed false; after the second click: stored weight undefined, DOM 400",
+      "severity": 2,
+      "need": "core",
+      "why": "Bold is the most used text style on a sales slide."
+    },
+    {
+      "n": 27,
+      "feature": "Bold",
+      "interaction": "Double click a word inside the text box, press Cmd+B: the word alone is bold",
+      "result": "works",
+      "evidence": "selection \"by\"; DOM <b> count 1; stored text \"Caption *by* click\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Bolding one word (a number, a name) is a weekly task and must not bold the whole box."
+    },
+    {
+      "n": 28,
+      "feature": "Italic",
+      "interaction": "Select a word in the session and click Italic on the toolbar",
+      "result": "broken",
+      "evidence": "try 1: selection \"Caption\"; italic button disabled false; session still open after the click false; stored text \"Caption *by* click\" (word only false, whole run false); DOM italic spans none font-style normal | try 2: selection \"Caption\"; italic button disabled false; session still open after the click false; stored text \"Caption *by* click\" (word only false, whole run false); DOM italic spans none font-style normal | try 3: selection \"Caption\"; italic button disabled false; session still open after the click false; stored text \"Caption *by* click\" (word only false, whole run false); DOM italic spans none font-style normal",
+      "severity": 2,
+      "need": "core",
+      "why": "Italic on a quote or a product name is common; a wrong range is a wrong result."
+    },
+    {
+      "n": 29,
+      "feature": "Underline",
+      "interaction": "Select a word in the session and press Cmd+U",
+      "result": "works",
+      "evidence": "selection \"click\"; stored text \"Caption *by* [click]{u}\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Underline is rare on slides; links carry their own underline."
+    },
+    {
+      "n": 30,
+      "feature": "Underline",
+      "interaction": "Click Underline on the toolbar with the box selected (no caret)",
+      "result": "broken",
+      "evidence": "try 1: stored text \"Caption *by* [click]{u}\" -> \"Caption *by* [click]{u}\"; snackbar \"\" | try 2: stored text \"Caption *by* [click]{u}\" -> \"Caption *by* [click]{u}\"; snackbar \"\" | try 3: stored text \"Caption *by* [click]{u}\" -> \"Caption *by* [click]{u}\"; snackbar \"\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "The toolbar route must match the key route."
+    },
+    {
+      "n": 31,
+      "feature": "Strikethrough",
+      "interaction": "Select a word in the session and press Cmd+Shift+X",
+      "result": "works",
+      "evidence": "selection \"Caption\"; stored text \"[Caption]{s} *by* [click]{u}\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Strikethrough shows a struck price; a seller can do without it."
+    },
+    {
+      "n": 32,
+      "feature": "Strikethrough",
+      "interaction": "Format > Text > Strikethrough with the box selected",
+      "result": "broken",
+      "evidence": "try 1: row enabled; stored text \"[Caption]{s} *by* [click]{u}\" -> \"[Caption]{s} *by* [click]{u}\"; snackbar \"\" | try 2: row enabled; stored text \"[Caption]{s} *by* [click]{u}\" -> \"[Caption]{s} *by* [click]{u}\"; snackbar \"\" | try 3: row enabled; stored text \"[Caption]{s} *by* [click]{u}\" -> \"[Caption]{s} *by* [click]{u}\"; snackbar \"\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu is the complete map; the row must do what the key does."
+    },
+    {
+      "n": 33,
+      "feature": "Text colour",
+      "interaction": "Select a word, open Text color on the toolbar and pick a swatch",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded. | try 2: error: locator.waitFor: Timeout 6000ms exceeded. | try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "severity": 2,
+      "need": "useful",
+      "why": "Colouring a number red or green is common on results slides."
+    },
+    {
+      "n": 34,
+      "feature": "Highlight",
+      "interaction": "Select a word, open Highlight color and pick a swatch",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded. | try 2: error: locator.waitFor: Timeout 6000ms exceeded. | try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "severity": 1,
+      "need": "useful",
+      "why": "Highlight is a review habit; sellers finish without it."
+    },
+    {
+      "n": 35,
+      "feature": "Alignment",
+      "interaction": "Open Align on the toolbar and pick Center; then Cmd+Shift+R for right",
+      "result": "broken",
+      "evidence": "try 1: list opened false; options none; after Center: stored align undefined, DOM start; after Cmd+Shift+R: stored right, DOM start | try 2: list opened false; options none; after Center: stored align right, DOM right; after Cmd+Shift+R: stored right, DOM right | try 3: list opened false; options none; after Center: stored align right, DOM right; after Cmd+Shift+R: stored right, DOM right; screenshot docs/gslides-parity/focus/audit-text/18-align-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Centring a title or right aligning numbers is routine."
+    },
+    {
+      "n": 36,
+      "feature": "Line spacing",
+      "interaction": "Open Line & paragraph spacing on the toolbar and pick 1.5",
+      "result": "broken",
+      "evidence": "try 1: options none; clicked 1.5 false; stored leading undefined -> undefined; DOM line-height 33px | try 2: options none; clicked 1.5 false; stored leading undefined -> undefined; DOM line-height 33px | try 3: options none; clicked 1.5 false; stored leading undefined -> undefined; DOM line-height 33px",
+      "severity": 1,
+      "need": "useful",
+      "why": "Spacing fixes a cramped body; sellers rarely touch it."
+    },
+    {
+      "n": 37,
+      "feature": "Text box",
+      "interaction": "Insert a text box by click and type three lines with Enter between them",
+      "result": "works",
+      "evidence": "object text text-7 at 140,760 480x64; stored text \"Onboarding in 30 days\\nDedicated support line\\nQuarterly reviews\" (3 paragraphs); run text-7/text",
+      "severity": 0,
+      "need": "core",
+      "why": "A three line body is the raw material for a bulleted list."
+    },
+    {
+      "n": 38,
+      "feature": "Bulleted list",
+      "interaction": "Select the three line box and click Bulleted list; click again to remove",
+      "result": "broken",
+      "evidence": "try 1: button disabled false; after one click: type text, marker none, preset none, items n/a, DOM p li 0, snackbar \"\"; after the second click: type text, marker none | try 2: button disabled false; after one click: type text, marker none, preset none, items n/a, DOM p li 0, snackbar \"\"; after the second click: type text, marker none | try 3: button disabled false; after one click: type text, marker none, preset none, items n/a, DOM p li 0, snackbar \"\"; after the second click: type text, marker none; screenshot docs/gslides-parity/focus/audit-text/21-bulleted-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Bullets are the default body form of a sales slide."
+    },
+    {
+      "n": 39,
+      "feature": "Numbered list",
+      "interaction": "Select the three line box and click Numbered list",
+      "result": "broken",
+      "evidence": "try 1: type text, marker none, preset none; DOM text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\" | try 2: type text, marker none, preset none; DOM text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\" | try 3: type text, marker none, preset none; DOM text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\"; screenshot docs/gslides-parity/focus/audit-text/24-numbered-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Agenda slides are numbered lists."
+    },
+    {
+      "n": 40,
+      "feature": "Indent",
+      "interaction": "Click Increase indent on a list item, then Decrease indent",
+      "result": "works",
+      "evidence": "levels before indent 0; after Increase indent 64 (snackbar \"\"); after Decrease indent 0",
+      "severity": 0,
+      "need": "useful",
+      "why": "Sub bullets appear on agenda slides; a seller can flatten instead."
+    },
+    {
+      "n": 41,
+      "feature": "Indent",
+      "interaction": "Cmd+] then Cmd+[ inside the list session",
+      "result": "works",
+      "evidence": "session true; address unchanged true; levels after Cmd+] indent 64, after Cmd+[ indent 0",
+      "severity": 0,
+      "need": "useful",
+      "why": "The indent chords are Chrome's Back and Forward; the editor must take them."
+    },
+    {
+      "n": 42,
+      "feature": "Link",
+      "interaction": "Select a word in the text box, press Cmd+K, type a URL, press Enter",
+      "result": "broken",
+      "evidence": "try 1: selection \"Caption\"; Cmd+K opened popover true, dialog false; DOM anchors 1; stored text \"[https://example.com/acme-proposalCaption]{s} *by* [click]{u}\" | try 2: selection \"acme\"; Cmd+K opened popover true, dialog false; DOM anchors 1; stored text \"[https://example.com/acme-proposalhttps://example.com/acme-proposalCaption]{s} *by* [click]{u}\" | try 3: selection \"example\"; Cmd+K opened popover true, dialog false; DOM anchors 1; stored text \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://example.com/acme-proposalCaption]{s} *by* [click]{u}\"; screenshot docs/gslides-parity/focus/audit-text/27-link-popover.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A link to the proposal or a case study is how a deck sends the reader onward."
+    },
+    {
+      "n": 43,
+      "feature": "Link",
+      "interaction": "Start the slideshow and click the linked word",
+      "result": "broken",
+      "evidence": "try 1: no visible anchor for https://example.com/acme-proposal in present mode | try 2: no visible anchor for https://example.com/acme-proposal in present mode | try 3: no visible anchor for https://example.com/acme-proposal in present mode; screenshot docs/gslides-parity/focus/audit-text/30-present-link.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A link that does not open while presenting fails the seller in front of the customer."
+    },
+    {
+      "n": 44,
+      "feature": "Clear formatting",
+      "interaction": "Select the formatted text box and click Clear formatting",
+      "result": "works",
+      "evidence": "before: typography {\"align\":\"right\"}, color none; after: typography undefined, color none, text \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://example.com/acme-proposalCaption]{s} *by* [click]{u}\" (inline marks left true); snackbar \"\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Pasted text arrives with stray styles; Clear formatting returns the theme."
+    },
+    {
+      "n": 45,
+      "feature": "Clear formatting",
+      "interaction": "Cmd+\\ with the box selected after re-bolding it",
+      "result": "broken",
+      "evidence": "try 1: after Bold: weight undefined; after Cmd+\\: typography undefined; snackbar \"Nothing to clear\" | try 2: after Bold: weight undefined; after Cmd+\\: typography undefined; snackbar \"Nothing to clear\" | try 3: after Bold: weight undefined; after Cmd+\\: typography undefined; snackbar \"Nothing to clear\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "The shortcut is Google's; the toolbar carries the same action."
+    },
+    {
+      "n": 46,
+      "feature": "Format menu",
+      "interaction": "Open Format > Text with the box selected: the rows are enabled",
+      "result": "works",
+      "evidence": "bold:enabled italic:enabled underline:enabled strikethrough:enabled superscript:enabled subscript:enabled size:enabled capitalization:enabled; screenshot docs/gslides-parity/focus/audit-text/31-format-text-menu.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu is the complete map of text actions."
+    },
+    {
+      "n": 47,
+      "feature": "Format menu",
+      "interaction": "Format > Text > Size > Increase font size",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded. | try 2: error: locator.waitFor: Timeout 6000ms exceeded. | try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to the size step."
+    },
+    {
+      "n": 48,
+      "feature": "Format menu",
+      "interaction": "Format > Text > Capitalization > UPPERCASE",
+      "result": "broken",
+      "evidence": "try 1: error: locator.waitFor: Timeout 6000ms exceeded. | try 2: error: locator.waitFor: Timeout 6000ms exceeded. | try 3: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "severity": 1,
+      "need": "park",
+      "why": "Case rewriting is a designer's tool."
+    },
+    {
+      "n": 49,
+      "feature": "Format menu",
+      "interaction": "Format > Align & indent > Left",
+      "result": "broken",
+      "evidence": "try 1: row enabled; stored align undefined; DOM text-align start | try 2: row enabled; stored align undefined; DOM text-align start | try 3: row enabled; stored align undefined; DOM text-align start",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to alignment."
+    },
+    {
+      "n": 50,
+      "feature": "Format menu",
+      "interaction": "Format > Line & paragraph spacing > Double",
+      "result": "broken",
+      "evidence": "try 1: stored leading undefined -> undefined | try 2: stored leading undefined -> undefined | try 3: stored leading undefined -> undefined",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to spacing."
+    },
+    {
+      "n": 51,
+      "feature": "Format menu",
+      "interaction": "Format > Bullets & numbering > Bulleted list opens the presets; pick the first",
+      "result": "broken",
+      "evidence": "try 1: the Bulleted list row opened no preset submenu | try 2: the Bulleted list row opened no preset submenu | try 3: the Bulleted list row opened no preset submenu; screenshot docs/gslides-parity/focus/audit-text/34-bullets-presets.png",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to lists with a preset choice."
+    },
+    {
+      "n": 52,
+      "feature": "Format menu",
+      "interaction": "Format > Clear formatting on the list box",
+      "result": "broken",
+      "evidence": "row enabled; snackbar \"Nothing to clear\"; block after: type text, marker none, typography undefined",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to the same action as the toolbar."
+    },
+    {
+      "n": 53,
+      "feature": "Autofit (text box)",
+      "interaction": "Type a long paragraph into the click placed text box: the box grows with the text",
+      "result": "broken",
+      "evidence": "try 1: autofit grow; box h 140 -> 140; font 22px; text rect bottom 670.2 vs box bottom 675.8 (text inside the box true); lines 4 | try 2: autofit grow; box h 140 -> 140; font 22px; text rect bottom 716.7 vs box bottom 675.8 (text inside the box false); lines 6 | try 3: autofit grow; box h 140 -> 140; font 22px; text rect bottom 786.5 vs box bottom 675.8 (text inside the box false); lines 9; screenshot docs/gslides-parity/focus/audit-text/37-text-box-autofit.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A caption that spills out of its box shows on the customer's screen."
+    },
+    {
+      "n": 54,
+      "feature": "Autofit (text box)",
+      "interaction": "Format > Text fitting opens the panel; choose Shrink text on overflow",
+      "result": "broken",
+      "evidence": "try 1: error: locator.boundingBox: Timeout 30000ms exceeded. | try 2: error: locator.boundingBox: Timeout 30000ms exceeded. | try 3: error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "severity": 1,
+      "need": "useful",
+      "why": "Google's three autofit radios; a seller rarely opens them."
+    },
+    {
+      "n": 55,
+      "feature": "Copy and paste",
+      "interaction": "Within a box: double click a word, Cmd+C, End, Cmd+V",
+      "result": "broken",
+      "evidence": "try 1: copied \"Onboarding\"; text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\" -> \"Onboarding in 30 days OnboardingDedicated support lineQuarterly reviews\"; stored \"Onboarding in 30 days Onboarding\\nDedicated support line\\nQuarterly reviews\" | try 2: copied \"Onboarding\"; text \"Onboarding in 30 days OnboardingDedicated support lineQuarterly reviews\" -> \"Onboarding in 30 days Onboarding OnboardingDedicated support lineQuarterly reviews\"; stored \"Onboarding in 30 days Onboarding Onboarding\\nDedicated support line\\nQuarterly reviews\" | try 3: copied \"Onboarding\"; text \"Onboarding in 30 days Onboarding OnboardingDedicated support lineQuarterly reviews\" -> \"Onboarding in 30 days Onboarding Onboarding OnboardingDedicated support lineQuarterly reviews\"; stored \"Onboarding in 30 days Onboarding Onboarding Onboarding\\nDedicated support line\\nQuarterly reviews\"",
+      "severity": 2,
+      "need": "core",
+      "why": "Copying a phrase inside a box is routine editing."
+    },
+    {
+      "n": 56,
+      "feature": "Copy and paste",
+      "interaction": "Between boxes: Cmd+A, Cmd+C in the list box; double click the subtitle, End, Cmd+V",
+      "result": "broken",
+      "evidence": "try 1: error: Cannot read properties of undefined (reading 'slice') | try 2: error: Cannot read properties of undefined (reading 'slice') | try 3: error: Cannot read properties of undefined (reading 'slice')",
+      "severity": 2,
+      "need": "core",
+      "why": "Moving text between boxes is how a seller reuses a line from another slide."
+    },
+    {
+      "n": 57,
+      "feature": "Copy and paste",
+      "interaction": "Cmd+Shift+V pastes the same text without formatting inside the subtitle",
+      "result": "broken",
+      "evidence": "try 1: subtitle length 249 -> 249; tail \"Onboarding OnboardingDedicated support lineQuarterly reviews\" | try 2: subtitle length 249 -> 249; tail \"Onboarding OnboardingDedicated support lineQuarterly reviews\" | try 3: subtitle length 249 -> 249; tail \"Onboarding OnboardingDedicated support lineQuarterly reviews\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "Pasting from email or a CRM should keep the theme font."
+    },
+    {
+      "n": 58,
+      "feature": "Find and replace",
+      "interaction": "Edit > Find and replace: find \"Acme\", replace with \"Globex\", Replace all",
+      "result": "broken",
+      "evidence": "error: locator.boundingBox: Error: strict mode violation: locator('[data-control=\"dialog.findReplace.replace\"]') resolved to 2 elements:",
+      "severity": 3,
+      "need": "core",
+      "why": "Renaming the customer across a cloned deck is the seller's top task."
+    },
+    {
+      "n": 59,
+      "feature": "Find and replace",
+      "interaction": "Cmd+Shift+H opens the dialog; the count shows for \"Globex\"",
+      "result": "broken",
+      "evidence": "try 1: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape true | try 2: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape true | try 3: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape true",
+      "severity": 1,
+      "need": "useful",
+      "why": "The Google shortcut; the menu row also opens it."
+    },
+    {
+      "n": 60,
+      "feature": "Persistence",
+      "interaction": "Reload the deck: the edits are on the page",
+      "result": "broken",
+      "evidence": "try 1: revision 146 -> 146; title \"Acme renewal: Q3 2026, 3 sites.\"; subtitle \"Prepared for Jordan Lee, 14 September 2026Second lineThird l\"; text box \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://exam; list box text marker none | try 2: revision 146 -> 146; title \"Acme renewal: Q3 2026, 3 sites.\"; subtitle \"Prepared for Jordan Lee, 14 September 2026Second lineThird l\"; text box \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://exam; list box text marker none | try 3: revision 146 -> 146; title \"Acme renewal: Q3 2026, 3 sites.\"; subtitle \"Prepared for Jordan Lee, 14 September 2026Second lineThird l\"; text box \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://exam; list box text marker none; screenshot docs/gslides-parity/focus/audit-text/43-after-reload.png",
+      "severity": 3,
+      "need": "core",
+      "why": "Autosave is the contract; a lost edit is the worst outcome."
+    },
+    {
+      "n": 61,
+      "feature": "Scratch deck",
+      "interaction": "File > Move to trash, Delete forever, then GET /deck/<id>",
+      "result": "works",
+      "evidence": "File > Move to trash: /decks; Delete forever: the card left the trash; GET /deck/untitled-20260916-nb3i 404, GET /edit/untitled-20260916-nb3i 404",
+      "severity": 0,
+      "need": "core",
+      "why": "A run must leave production as it found it."
+    }
+  ]
+}

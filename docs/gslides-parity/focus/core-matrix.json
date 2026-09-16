@@ -1,0 +1,3193 @@
+{
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids.",
+  "rows": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "interaction": "On /home click the hero New Presentation button; the address is /new with a draft",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 2"
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "interaction": "On /home click Your presentations; /decks is hydrated",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 4"
+    },
+    {
+      "id": "decks.root.redirect",
+      "feature": "decks",
+      "interaction": "GET / answers 307 to /new and the browser lands on a fresh draft",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 10"
+    },
+    {
+      "id": "decks.new.draft",
+      "feature": "decks",
+      "interaction": "/new before any write: revision 0, Not saved yet, the title placeholder prompts",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 11"
+    },
+    {
+      "id": "decks.new.first-write",
+      "feature": "decks",
+      "interaction": "Double click the title, type, Escape; revision 1, the address moves to /edit/<id>, the save words read Saving then All changes saved",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 12; audit-slides row 2"
+    },
+    {
+      "id": "decks.title.save-words",
+      "feature": "decks",
+      "interaction": "A second edit turns the save words to Saving and back to All changes saved",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 14"
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "feature": "decks",
+      "interaction": "Click the deck name, type, Enter; the name and deck.info title change",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 18"
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "feature": "decks",
+      "interaction": "Click the deck name, type, Escape; the name is restored",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 19"
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "feature": "decks",
+      "interaction": "Click the deck name, type, click the canvas; the typed name is kept",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 20"
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "feature": "decks",
+      "interaction": "Clear the deck name and press Enter; the old name comes back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 21"
+    },
+    {
+      "id": "decks.title.file-rename",
+      "feature": "decks",
+      "interaction": "File > Rename focuses the name field",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 22"
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "feature": "decks",
+      "interaction": "After a rename on a deck created from /new the browser tab title reads the new name without a reload",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-decks row 23"
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "feature": "decks",
+      "interaction": "Click the Turboslide mark; /decks opens",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 24"
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "feature": "decks",
+      "interaction": "Reload /edit/<id>#s/<slide>; the same slide is current",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks row 25"
+    },
+    {
+      "id": "decks.list.read",
+      "feature": "decks",
+      "interaction": "/decks lists Blank presentation, the GT brand deck, the Recent row and the store cards",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 26"
+    },
+    {
+      "id": "decks.list.search",
+      "feature": "decks",
+      "interaction": "Search presentations filters the cards; a query nothing matches shows the empty sentence; clearing restores them",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 27"
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "feature": "decks",
+      "interaction": "Click a card thumbnail; the editor opens; Back returns to /decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 30"
+    },
+    {
+      "id": "decks.list.open-title",
+      "feature": "decks",
+      "interaction": "Click a card title; the editor opens; Back returns",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 31"
+    },
+    {
+      "id": "decks.list.open-recent",
+      "feature": "decks",
+      "interaction": "Click the Recent row card; the editor opens; Back returns",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 32"
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "feature": "decks",
+      "interaction": "Open the card menu; its seven rows read Open, Open in new tab, Present, Rename, Make a copy, Download, Move to trash; Escape returns focus",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 33"
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "interaction": "Card menu > Rename, type, Enter on the deck just edited; the card shows the new name within 5 s and the store has it",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-decks row 34"
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "feature": "decks",
+      "interaction": "Card menu > Rename, type, Escape; the title is unchanged",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 35"
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "feature": "decks",
+      "interaction": "List view row menu > Rename, type, Enter; the row shows the new name within 5 s and the store has it",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-decks row 36"
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "feature": "decks",
+      "interaction": "Card menu > Make a copy on the deck just edited; the copy opens in a new tab within 30 s and is listed on /decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-decks row 37"
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "feature": "decks",
+      "interaction": "Card menu > Open in new tab; a new tab holds the editor and the list stays",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-decks row 39"
+    },
+    {
+      "id": "decks.card.present",
+      "feature": "decks",
+      "interaction": "Card menu > Present; a new tab opens /deck/<id>?present=1 as a show",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 40"
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "feature": "decks",
+      "interaction": "Card menu > Move to trash; the card leaves; Undo on the snackbar brings it back",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 42"
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "interaction": "Click the GT brand deck card; a copy opens in the editor within 15 s with its 85 slides",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 45"
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "feature": "decks",
+      "interaction": "File > Move to trash; the address moves to /decks and the deck is not listed",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-decks rows 47 and 48"
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "interaction": "/decks/trash lists the deck within 5 s of File > Move to trash",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-decks rows 48 and 61; audit-slides section 1; audit-images row 67"
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "interaction": "Restore on the trash card; the card leaves the trash and the deck is listed on /decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 50"
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "interaction": "Reload /decks and /decks/trash within 5 s of Restore; the deck is on /decks and not in the trash",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-decks row 51"
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "interaction": "Delete forever, then Cancel; the card stays and the deck answers 200",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 52"
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "interaction": "Delete forever, then the dialog's button; the card leaves and /edit/<id> answers 404 within 20 s",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 53"
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "interaction": "Delete forever, then Enter in the dialog; the key the button's tooltip names deletes",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-decks row 53a"
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "interaction": "Back and Forward across /home, /decks, /edit/<id> and the /new address move render each page",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks rows 13 and 55"
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "interaction": "/edit/<unknown id> answers 404 with the You need access page and its sign in link",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 56"
+    },
+    {
+      "id": "decks.access.paint",
+      "feature": "decks",
+      "interaction": "The You need access page paints clean in a browser that has used the editor on the light appearance",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-decks row 57"
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "interaction": "Sign in from your presentations opens /decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 58"
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "feature": "decks",
+      "interaction": "/deck/<unknown id> answers 404 with You need access",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 59"
+    },
+    {
+      "id": "decks.notfound.page",
+      "feature": "decks",
+      "interaction": "An address with no route answers 404 with Not found and its three links",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 60"
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "interaction": "File > Make a copy > Entire presentation with Remove speaker notes checked; the copy opens in a new tab within 30 s, is listed on /decks, and its notes are empty",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove the editor's dialog; audit-decks row 37 drove the card menu's copy; packages/chrome/src/dialogs/MakeCopy.tsx 105 to 110 carries the checkbox"
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "interaction": "Card menu > Download starts the bundle download within 30 s",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "audit-decks row 41"
+    },
+    {
+      "id": "slides.new.toolbar",
+      "feature": "slides",
+      "interaction": "Click New slide in the toolbar; one slide is added after the current one and becomes current",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 3"
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "feature": "slides",
+      "interaction": "The arrow beside New slide opens the layout plate; a pick adds a slide with that layout",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 4"
+    },
+    {
+      "id": "slides.new.menu",
+      "feature": "slides",
+      "interaction": "Slide > New slide adds a slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 5"
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "feature": "slides",
+      "interaction": "Ctrl+M with a filmstrip card focused adds a slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 6"
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "feature": "slides",
+      "interaction": "Ctrl+M with the canvas focused adds a slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 7"
+    },
+    {
+      "id": "slides.new.context",
+      "feature": "slides",
+      "interaction": "Right click a card > New slide adds a slide after it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 9"
+    },
+    {
+      "id": "slides.new.undo",
+      "feature": "slides",
+      "interaction": "Cmd+Z after New slide removes it and restores the order",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 10"
+    },
+    {
+      "id": "slides.duplicate.context",
+      "feature": "slides",
+      "interaction": "Right click > Duplicate slide; the copy lands after the source with its heading",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 11"
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "feature": "slides",
+      "interaction": "Slide > Duplicate slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 12"
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "feature": "slides",
+      "interaction": "Cmd+D with a card focused duplicates the slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 13"
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "feature": "slides",
+      "interaction": "The toolbar Undo removes a duplicate",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 14"
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "feature": "slides",
+      "interaction": "Cmd+Z removes a duplicate and Cmd+Shift+Z brings it back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 15"
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "feature": "slides",
+      "interaction": "Two cards selected, Cmd+D copies both",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 31"
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "feature": "slides",
+      "interaction": "Two cards selected, Slide > Duplicate slide copies both",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides rows 98 to 100"
+    },
+    {
+      "id": "slides.delete.key",
+      "feature": "slides",
+      "interaction": "Delete with a card focused removes the slide with the Slide deleted snackbar",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 16"
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "feature": "slides",
+      "interaction": "Undo on the snackbar restores the slide at its index",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 17"
+    },
+    {
+      "id": "slides.delete.context",
+      "feature": "slides",
+      "interaction": "Right click > Delete removes the slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 18"
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "feature": "slides",
+      "interaction": "Cmd+Z restores a deleted slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 19"
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "feature": "slides",
+      "interaction": "Slide > Delete slide, the toolbar Undo, Edit > Redo",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 20"
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "feature": "slides",
+      "interaction": "Two cards selected, Delete removes both, the snackbar Undo restores both, the server order matches after a reload",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides rows 30 and 85 to 87"
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "feature": "slides",
+      "interaction": "Two cards selected, Slide > Delete slide removes both",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-slides rows 88 to 90"
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "feature": "slides",
+      "interaction": "Two cards selected, Edit > Delete removes both",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-slides rows 104 to 106"
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "feature": "slides",
+      "interaction": "Click the empty canvas, Delete, Cmd+Z; the slide returns in the tab and on the server after a reload",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-slides rows 91 to 93"
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "feature": "slides",
+      "interaction": "Delete a slide, wait for the save, Cmd+Z, wait, Cmd+Shift+Z; the server order matches the screen after a reload",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-slides rows 94 to 96"
+    },
+    {
+      "id": "slides.select.click",
+      "feature": "slides",
+      "interaction": "Click a card; it is current, selected and focused; the stage and the hash follow",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 21"
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "feature": "slides",
+      "interaction": "Down and Up move the current card; Shift+Down extends the selection",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 22"
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "feature": "slides",
+      "interaction": "Shift click selects a range, Cmd click adds one, a plain click collapses to one",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 28"
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "feature": "slides",
+      "interaction": "Cmd click a card twice adds and drops it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 29"
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "feature": "slides",
+      "interaction": "Drag a card above another; the order changes",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 23"
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "feature": "slides",
+      "interaction": "Drag a card below another; the order changes",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 24"
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "feature": "slides",
+      "interaction": "Cmd+Down and Cmd+Up move the focused card one step",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 25"
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "feature": "slides",
+      "interaction": "Slide > Move slide > Move slide to end, then Cmd+Z",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 26"
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "feature": "slides",
+      "interaction": "Cmd+Z after a drag restores the order",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 27"
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "feature": "slides",
+      "interaction": "Two selected cards drag together",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 32"
+    },
+    {
+      "id": "slides.skip.context",
+      "feature": "slides",
+      "interaction": "Right click > Skip slide fades the card with the eye glyph; the row then reads Unskip slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 72"
+    },
+    {
+      "id": "slides.skip.context-two",
+      "feature": "slides",
+      "interaction": "Two cards selected, right click > Skip slide skips both with the Skipped 2 slides snackbar",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 33"
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "feature": "slides",
+      "interaction": "Slide > Unskip slide brings a skipped slide back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 73"
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "feature": "slides",
+      "interaction": "Two cards selected, Slide > Skip slide skips both",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides rows 101 to 103"
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "feature": "slides",
+      "interaction": "The toolbar Layout button opens the picker ringing the current layout; Escape closes it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 34"
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "feature": "slides",
+      "interaction": "Apply Title slide from the picker",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 35"
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "feature": "slides",
+      "interaction": "Apply Section header",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 36"
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "feature": "slides",
+      "interaction": "Apply Title and body",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 37"
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "feature": "slides",
+      "interaction": "Apply Title and two columns",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 38"
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "feature": "slides",
+      "interaction": "Apply Title only",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 39"
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "feature": "slides",
+      "interaction": "Apply One column text",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 40"
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "feature": "slides",
+      "interaction": "Apply Main point",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 41"
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "feature": "slides",
+      "interaction": "Apply Section title and description",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 42"
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "feature": "slides",
+      "interaction": "Apply Caption",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 43"
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "feature": "slides",
+      "interaction": "Apply Big number",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 44"
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "feature": "slides",
+      "interaction": "Apply Blank",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 45"
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "feature": "slides",
+      "interaction": "Apply Ruled rows",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 46"
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "feature": "slides",
+      "interaction": "Apply Ruled statement list",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 47"
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "feature": "slides",
+      "interaction": "Apply Title and table",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 48"
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "feature": "slides",
+      "interaction": "Apply Figure",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 49"
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "feature": "slides",
+      "interaction": "Apply Pair of figures",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 50"
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "feature": "slides",
+      "interaction": "Apply Tile grid",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 51"
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "feature": "slides",
+      "interaction": "Apply Detail grid",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 52"
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "feature": "slides",
+      "interaction": "Apply Status board",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 53"
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "feature": "slides",
+      "interaction": "Apply Matrix",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 54"
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "feature": "slides",
+      "interaction": "Apply Closing",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 55"
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "feature": "slides",
+      "interaction": "Reopen the picker; the applied layout is ringed",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 56"
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "feature": "slides",
+      "interaction": "Right click a card > Apply layout > a layout applies",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 57"
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "feature": "slides",
+      "interaction": "Slide > Apply layout > a layout, then Cmd+Z restores the previous layout",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 58"
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "feature": "slides",
+      "interaction": "On a fresh empty slide apply two layouts in turn; the slide holds only the second layout's placeholders",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-slides rows 59 to 64"
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "feature": "slides",
+      "interaction": "Type a title, apply Main point, then Title and body; the title comes back and nothing else",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides rows 65 to 67"
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "feature": "slides",
+      "interaction": "Applying a layout to an untouched slide raises no dropped block warning",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-slides rows 68 to 70"
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "feature": "slides",
+      "interaction": "Cmd+Z after a layout change on a typed slide brings the layout and the text back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 71"
+    },
+    {
+      "id": "slides.notes.type",
+      "feature": "slides",
+      "interaction": "Click the notes field and type a talk track with spaces; the slide stores it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 79"
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "feature": "slides",
+      "interaction": "Each slide shows its own notes",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 80"
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "feature": "slides",
+      "interaction": "Drag the notes handle taller, double click it, drag it back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 81"
+    },
+    {
+      "id": "slides.notes.reload",
+      "feature": "slides",
+      "interaction": "Notes survive a reload",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 82"
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "feature": "slides",
+      "interaction": "The sheet footer counter and the card numbers follow a click, New slide, Delete and a drag",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 97"
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "feature": "slides",
+      "interaction": "A card click writes #s/<id>; a reload with the hash and the numeric form land on that slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-slides row 84"
+    },
+    {
+      "id": "slides.clipboard.copy-paste-card",
+      "feature": "slides",
+      "interaction": "Right click a card > Copy, right click another card > Paste; the slide lands after it with its text; the same between two decks open in two tabs",
+      "driver": "core/slides.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove a card copy and paste, within a deck or between decks"
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "feature": "slides",
+      "interaction": "Slide > Move slide > Move slide up, Move slide down and Move slide to beginning each move the current card",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-slides row 26 drove Move slide to end only"
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "feature": "slides",
+      "interaction": "Cmd+Shift+Up moves the focused card to the beginning and Cmd+Shift+Down to the end",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-slides row 25 drove Cmd+Up and Cmd+Down only"
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "feature": "slides",
+      "interaction": "View > Show speaker notes hides the notes pane, and again shows it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the toggle; audit-slides rows 79 to 82 typed, switched, resized and reloaded the notes"
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "feature": "slides",
+      "interaction": "Right click the empty sheet lists Paste, New slide, Duplicate slide, Delete slide, Skip slide, Change background, Apply layout and Comment, and New slide from it adds a slide",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the emptyCanvas menu (model.ts 2527 to 2543)"
+    },
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "interaction": "A single click on Click to add title opens the editing session",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 1"
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "interaction": "A double click on the title placeholder opens the session",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 2"
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "interaction": "Type a sentence with spaces, punctuation and a number, Escape; typed equals stored",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 3"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "interaction": "Click mid word places the caret; typing lands there",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 4"
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "interaction": "Home and End move the caret and typing lands at each",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 5"
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "interaction": "Shift+ArrowLeft selects three characters; typing replaces them",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 6"
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "interaction": "Shift+Home and Shift+End select to the line ends",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 7"
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "interaction": "Backspace across a word",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 8"
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "interaction": "Option+Backspace deletes the word before the caret",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 9"
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "interaction": "Delete removes the character after the caret",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 10"
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "interaction": "Cmd+A selects the whole run and the session stays open",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 11"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "interaction": "Enter on the single line title ends the session and keeps the text",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 12"
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "interaction": "Double click the subtitle placeholder and type a line",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 14"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "interaction": "Enter in the subtitle makes a new line and the next words land on it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 15"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "interaction": "Shift+Enter makes a line break",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 16"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "interaction": "ArrowUp and ArrowDown move between lines; Backspace joins two lines",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 17"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "interaction": "Escape commits the multiline subtitle",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 18"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "interaction": "Insert > Text box, one click on the sheet, type; the text is stored",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 19"
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "interaction": "Insert > Text box drawn by a drag lands at the drawn box",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 20"
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "interaction": "Insert three text boxes in a row and type into each; no refused write, no doubled word",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 21"
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "interaction": "Selecting a text box swaps the toolbar to the text controls",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 22"
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "interaction": "Type a size in the field and press Enter; the size applies as typed or the snackbar names the step taken",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 24",
+      "note": "audit-text row 24 recorded the snap of 40 to 44 as a severity 1 defect; this row accepts the snap when the snackbar names the step taken, so the criterion is looser than the audit's"
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "interaction": "The plus and minus step the size up and down",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 25"
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "interaction": "Bold on the toolbar with the box selected, then again",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 26"
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+B; the word alone is bold",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 27"
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "interaction": "Double click a word, click Italic on the toolbar; the word alone is italic and the session stays open",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 28"
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+I",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 29"
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+U",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 30"
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "interaction": "Underline on the toolbar with the box selected",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 31"
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+Shift+X",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 32"
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "interaction": "Format > Text > Strikethrough with the box selected",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 33"
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "interaction": "Double click a word, open Text color, pick a swatch; the word takes the colour",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 34"
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "interaction": "Align > Center on the toolbar, then Cmd+Shift+R",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 36"
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "interaction": "Line & paragraph spacing > 1.5 on the toolbar",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 37"
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "interaction": "The toolbar Bulleted list button turns the box into a bulleted list",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 38"
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "interaction": "The toolbar Numbered list button turns the box into a numbered list",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 39"
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "interaction": "Format > Bullets & numbering > Bulleted list, pick a preset",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 40"
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "interaction": "Increase indent then Decrease indent on the toolbar",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 41"
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "interaction": "Cmd+] then Cmd+[ inside the list session",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 42"
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+K, type a URL, Enter; the word carries the link and no URL text lands in the caption",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text row 43"
+    },
+    {
+      "id": "text.link.present-click",
+      "feature": "text",
+      "interaction": "Present the deck and click the linked word; the link opens",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-text row 44: no link was stored, so nothing could be clicked"
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "interaction": "Clear formatting on the toolbar and Cmd+\\ clear the size, alignment, leading and weight",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 45",
+      "note": "audit-text row 45 recorded the inline marks left behind and the \"Nothing to clear\" snackbar as a severity 1 defect; this row checks the block typography only, so the criterion is narrower than the audit's"
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "interaction": "Format > Text rows are enabled with a box selected",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 46"
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "interaction": "Format > Text > Size > Increase font size",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 47"
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "interaction": "Format > Align & indent > Left",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 49"
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "interaction": "Format > Line & paragraph spacing > Double",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 50"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "interaction": "Format options opens at Text fitting for a text box",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 52: the row could not be located to click"
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "interaction": "A long title wraps inside the sheet without overlapping the subtitle",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 53"
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "interaction": "A long paragraph in a text box grows the box; no text overflows the frame",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text row 54"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "interaction": "Double click a word, Cmd+C, End, space, Cmd+V appends the word",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 55"
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "interaction": "Cmd+A, Cmd+C in one box, Cmd+V in another",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 56"
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "feature": "text",
+      "interaction": "Cmd+Shift+V pastes plain text into a box",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 57"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "interaction": "Edit > Find and replace, find, replace, Replace all across the deck",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 58"
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "interaction": "Cmd+Shift+H opens the dialog, a typed query counts, Escape closes",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-text row 59"
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "interaction": "The title, subtitle, text box and list persist after a reload",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-text row 60"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "interaction": "Format > Bullets & numbering > Numbered list, pick a preset; the box becomes a numbered list",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 40 drove the bulleted preset only"
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "interaction": "Cmd+Shift+8 turns a selected text box into a bulleted list and Cmd+Shift+7 into a numbered one",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the chords (model.ts 1537 and 1548)"
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "interaction": "Double click a word, click the toolbar Insert link button, type a URL, Enter; the word carries the link and no URL text lands in the caption",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the button; audit-text row 43 drove Cmd+K"
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "interaction": "Format > Format options with a text box selected opens the panel with its text sections",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the row on a text box; audit-images row 45 opened the panel for a picture"
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "interaction": "Type a number into a table cell of Title and table, a value of Ruled rows, a row name of Status board and the big number of Big number; reload; each reads back",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit typed into those runs; audit-slides rows 44, 46, 48 and 53 list the runs the layouts place"
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "interaction": "Right click a text box lists the clipboard, arrange, Link, Text fitting, Format options and Comment rows, and Duplicate from it adds a copy",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the textBlock menu (model.ts 2544 to 2558)"
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "interaction": "Right click a selected word lists the clipboard rows, Italic, Underline, Strikethrough, Link and Format options, and Italic from it marks the word alone",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the textSelection menu (model.ts 2687 to 2703)"
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "interaction": "Format > Text > Size > Decrease font size steps the size down",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 47 drove Increase only"
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "interaction": "Format > Line & paragraph spacing > Single and 1.15 set the leading",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text rows 37 and 50 drove 1.5 and Double"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "interaction": "Format > Align & indent > Center, Right, Increase indent and Decrease indent apply from the menu",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 49 drove Left; rows 41 and 42 drove the toolbar buttons and the keys"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "interaction": "The toolbar Text box button, then a click on the sheet, places a box that takes typing",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 19 drove Insert > Text box"
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "interaction": "On a fresh /new draft, Insert > Image > Upload from computer before any other write; the picture lands within 5 s",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-images row 1"
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "interaction": "Insert > Image > Upload from computer through the file chooser; the picture lands within 5 s",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-images row 6"
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "interaction": "Upload a second picture right after the first, while its write is pending; both land within 5 s, or the snackbar names the refusal",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-images rows 6 and 7 (the stale refusal)"
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "interaction": "Drop a PNG on the slide; it lands at the drop point within 5 s",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-images row 7"
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "interaction": "Cmd+V with a PNG on the clipboard inserts it within 5 s",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-images row 8"
+    },
+    {
+      "id": "images.insert.toolbar-sources",
+      "feature": "images",
+      "interaction": "The toolbar Image button lists Upload from computer",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 9"
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "feature": "images",
+      "interaction": "Click the picture: chip Image, eight handles, the ring and the picture toolbar tail",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 11"
+    },
+    {
+      "id": "images.delete.key",
+      "feature": "images",
+      "interaction": "Delete removes the selected picture",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 12"
+    },
+    {
+      "id": "images.move.drag-frame",
+      "feature": "images",
+      "interaction": "Drag the picture by its frame edge by a known distance",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 13"
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "feature": "images",
+      "interaction": "Dragging near another object's edge shows a guide and snaps to it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 14"
+    },
+    {
+      "id": "images.guides.centre-y",
+      "feature": "images",
+      "interaction": "Dragging near the slide's horizontal centre snaps to it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 15"
+    },
+    {
+      "id": "images.guides.centre-x",
+      "feature": "images",
+      "interaction": "Dragging within 3 px of the slide's vertical centre snaps to it",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-images row 16"
+    },
+    {
+      "id": "images.nudge.arrows",
+      "feature": "images",
+      "interaction": "ArrowRight 1 px, Shift+ArrowRight 10 px, ArrowDown 1 px",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 17"
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "feature": "images",
+      "interaction": "Drag each of the eight handles by a known delta; the box, the readout during and after, the chip and Undo",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images rows 18 to 25"
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "feature": "images",
+      "interaction": "The same eight drags with Shift; the aspect holds and Undo restores",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images rows 26 to 33"
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "feature": "images",
+      "interaction": "After an n, e or s drag the picture fills its box",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-images row 34; hotfix-4.md section 3.8 (the 23 W7 rows)"
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "feature": "images",
+      "interaction": "A drag with Alt grows the box from its centre",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 35"
+    },
+    {
+      "id": "images.rotate.ring",
+      "feature": "images",
+      "interaction": "Drag the ring about 35 degrees; the readout during and none after; Undo restores",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 36"
+    },
+    {
+      "id": "images.crop.double-click",
+      "feature": "images",
+      "interaction": "Double click enters crop mode with the dimmed picture and eight crop handles",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 37"
+    },
+    {
+      "id": "images.crop.east-edge",
+      "feature": "images",
+      "interaction": "Drag the east crop edge; the frame narrows and the full picture stays",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 38"
+    },
+    {
+      "id": "images.crop.south-edge",
+      "feature": "images",
+      "interaction": "Drag the south crop edge",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 39"
+    },
+    {
+      "id": "images.crop.enter",
+      "feature": "images",
+      "interaction": "Enter writes the trim and shrinks the box to the frame",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 40"
+    },
+    {
+      "id": "images.crop.undo",
+      "feature": "images",
+      "interaction": "Undo removes the trim and restores the box",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 41"
+    },
+    {
+      "id": "images.crop.redo",
+      "feature": "images",
+      "interaction": "Redo brings the crop back",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 42"
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "feature": "images",
+      "interaction": "Format > Image > Crop image enters crop mode; Escape leaves it without a write",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 43"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "feature": "images",
+      "interaction": "The toolbar Crop image button enters crop mode; Escape after an edge drag cancels the drag",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-images row 44"
+    },
+    {
+      "id": "images.options.panel",
+      "feature": "images",
+      "interaction": "The toolbar Image options button opens Format options with the Picture and Adjustments sections",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 45"
+    },
+    {
+      "id": "images.options.transparency",
+      "feature": "images",
+      "interaction": "Drag the Transparency slider; the picture fades on the sheet",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 46"
+    },
+    {
+      "id": "images.options.reset",
+      "feature": "images",
+      "interaction": "Adjustments > Reset clears the adjustments",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 49"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "feature": "images",
+      "interaction": "Format > Image > Reset image removes the trim",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 55"
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "interaction": "The toolbar Replace image > Upload from computer swaps the asset within 5 s and keeps the box",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-images row 57"
+    },
+    {
+      "id": "images.background.colour",
+      "feature": "images",
+      "interaction": "Slide > Change background, a colour swatch, Done paints the slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 58"
+    },
+    {
+      "id": "images.background.toolbar",
+      "feature": "images",
+      "interaction": "The toolbar Background button opens the same dialog",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 59"
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "interaction": "Change background > Choose image > Upload from computer covers the sheet at the bottom of the stack within 5 s",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-images row 61"
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "interaction": "Change background > Remove picture takes the covering picture away",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "evidence": "audit-images row 63"
+    },
+    {
+      "id": "images.background.reset",
+      "feature": "images",
+      "interaction": "Change background > Reset to theme clears the colour",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 64"
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "feature": "images",
+      "interaction": "Slideshow shows the picture on the coloured ground; Escape returns",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-images row 65"
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "interaction": "File > Download > PDF Document; the PDF arrives within 30 s and holds one image object per picture",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-images row 66"
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "interaction": "Drop a PNG on a picture; its asset is replaced within 5 s and the box keeps its position and size",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove it: audit-images row 7 dropped on the empty slide; packages/viewer/src/Editor.tsx 2580 to 2584 and 3985 to 4004 at ec61c6b carry the replace path"
+    },
+    {
+      "id": "images.context.image",
+      "feature": "images",
+      "interaction": "Right click a picture lists the clipboard, arrange and image rows, and Crop image from it enters crop mode",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-images row 56 opened the menu (19 rows) and ran the parked Replace image > By URL row; no core row was run from it"
+    },
+    {
+      "id": "images.options.menu-row",
+      "feature": "images",
+      "interaction": "Format > Image > Image options opens Format options at the Picture section",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-images row 45 drove the toolbar button"
+    },
+    {
+      "id": "images.background.hex-field",
+      "feature": "images",
+      "interaction": "Change background, type a hex colour in the field, Done; the slide paints it and slide.background holds it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit typed in the field; audit-images row 58 picked a swatch"
+    },
+    {
+      "id": "arrange.select.click",
+      "feature": "arrange",
+      "interaction": "Click an object: chip, eight handles, the ring",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 1"
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "feature": "arrange",
+      "interaction": "Shift click adds a second object; chip 2 objects",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 2"
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "feature": "arrange",
+      "interaction": "Shift click a selected object again removes it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 3"
+    },
+    {
+      "id": "arrange.select.marquee",
+      "feature": "arrange",
+      "interaction": "Drag a box on the empty slide across two objects; both are selected",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 4"
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "feature": "arrange",
+      "interaction": "A marquee that crosses only a corner takes the object",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 5"
+    },
+    {
+      "id": "arrange.select.click-away",
+      "feature": "arrange",
+      "interaction": "A click on the empty slide clears the selection",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 6"
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "feature": "arrange",
+      "interaction": "Cmd+A selects every object on the slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 7"
+    },
+    {
+      "id": "arrange.select.escape",
+      "feature": "arrange",
+      "interaction": "Escape clears the selection",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 8"
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "feature": "arrange",
+      "interaction": "Arrange > Order > Bring to front; undo and redo",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 14"
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "feature": "arrange",
+      "interaction": "Arrange > Order > Send to back; undo and redo by the toolbar",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 15"
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "feature": "arrange",
+      "interaction": "Arrange > Order > Bring forward; undo and redo by the Edit menu",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 16"
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "feature": "arrange",
+      "interaction": "Arrange > Order > Send backward",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 17"
+    },
+    {
+      "id": "arrange.order.keys",
+      "feature": "arrange",
+      "interaction": "Cmd+Shift+Up brings to front and Cmd+Down sends backward",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange rows 18 and 19"
+    },
+    {
+      "id": "arrange.align.left",
+      "feature": "arrange",
+      "interaction": "Three objects, Arrange > Align > Left; the reference object does not move",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 20"
+    },
+    {
+      "id": "arrange.align.center",
+      "feature": "arrange",
+      "interaction": "Arrange > Align > Center",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 21"
+    },
+    {
+      "id": "arrange.align.right",
+      "feature": "arrange",
+      "interaction": "Arrange > Align > Right",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-arrange row 22"
+    },
+    {
+      "id": "arrange.align.top",
+      "feature": "arrange",
+      "interaction": "Arrange > Align > Top from off grid tops; every top lands on the topmost object's top",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 23"
+    },
+    {
+      "id": "arrange.align.middle",
+      "feature": "arrange",
+      "interaction": "Arrange > Align > Middle",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 24"
+    },
+    {
+      "id": "arrange.align.bottom",
+      "feature": "arrange",
+      "interaction": "Arrange > Align > Bottom from an off grid bottom; every bottom lands on the lowest object's bottom",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 25"
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "feature": "arrange",
+      "interaction": "One object, Align > Left lines it up with the slide edge",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 26"
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "feature": "arrange",
+      "interaction": "Arrange > Center on page > Horizontally lands the centre on 800",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 30"
+    },
+    {
+      "id": "arrange.center.vertical",
+      "feature": "arrange",
+      "interaction": "Arrange > Center on page > Vertically lands the centre on 450",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 31"
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "feature": "arrange",
+      "interaction": "The toolbar Undo and Redo on an align, order or distribute step",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 33"
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "feature": "arrange",
+      "interaction": "Edit > Undo and Edit > Redo on an arrange step",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 34"
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "feature": "arrange",
+      "interaction": "Cmd+C then Cmd+V puts the copy 16 px right and down, selected",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 35"
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "feature": "arrange",
+      "interaction": "Delete removes the selected object",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 36"
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "feature": "arrange",
+      "interaction": "Cmd+Z and Cmd+Shift+Z after a delete",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 37"
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "feature": "arrange",
+      "interaction": "Cmd+X, Cmd+V, then two Cmd+Z half a second apart; the cut object is back",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-arrange row 38"
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "interaction": "Edit > Copy then Edit > Paste on a clean stage",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-arrange row 39"
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "feature": "arrange",
+      "interaction": "Copy an object, click New slide in the toolbar, Cmd+V; the copy lands on the new slide",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 41"
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "feature": "arrange",
+      "interaction": "Copy an object, click another slide's card, Cmd+V; the copy lands on that slide",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 42"
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "interaction": "A paste onto another slide keeps the source position",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 43"
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "feature": "arrange",
+      "interaction": "Cmd+D on a selected object adds one",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 44"
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "feature": "arrange",
+      "interaction": "Edit > Duplicate leaves the copy selected so Edit > Delete removes the copy, as Cmd+D does",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-arrange row 45"
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "feature": "arrange",
+      "interaction": "Cmd+D with nothing selected duplicates the current slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 46"
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "interaction": "Cmd+D, Cmd+Z, then Cmd+Shift+Z, Cmd+Y, the toolbar Redo or Edit > Redo brings the duplicate back",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange rows 47, 49, 50 and 51"
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "feature": "arrange",
+      "interaction": "Backspace or Delete with the stage focused and nothing selected removes no slide",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-arrange row 48"
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "feature": "arrange",
+      "interaction": "The arrow keys move a selected object 1 px",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 52"
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "feature": "arrange",
+      "interaction": "Shift and an arrow move 10 px",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 53"
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "feature": "arrange",
+      "interaction": "Cmd+Z walks the nudges back one step each",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 54"
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "feature": "arrange",
+      "interaction": "The zoom box reads Fit at fit and the number after a preset or a typed value",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 55"
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "feature": "arrange",
+      "interaction": "View > Zoom > Zoom in steps up the ladder from the current zoom",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 56"
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "feature": "arrange",
+      "interaction": "Cmd+Minus steps down one rung",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 57"
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "feature": "arrange",
+      "interaction": "Cmd+Plus steps up one rung",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 58"
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "feature": "arrange",
+      "interaction": "View > Zoom > Fit returns to the whole slide on its first click",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-arrange row 59"
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "feature": "arrange",
+      "interaction": "Type 150 in the zoom box and press Enter",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 60"
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "feature": "arrange",
+      "interaction": "The arrow beside the zoom box lists the presets; 200% applies",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 61"
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "feature": "arrange",
+      "interaction": "Cmd+0 sets 100%",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 62"
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "feature": "arrange",
+      "interaction": "View > Zoom > Zoom out steps down one rung",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-arrange row 63"
+    },
+    {
+      "id": "arrange.readout.fit",
+      "feature": "arrange",
+      "interaction": "The size readout shows W × H while a handle is dragged at Fit and is gone after",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 64"
+    },
+    {
+      "id": "arrange.readout.200",
+      "feature": "arrange",
+      "interaction": "The same at 200%",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 65"
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "feature": "arrange",
+      "interaction": "The ring and chip are #1a73e8 on the light theme",
+      "driver": "probe --core",
+      "setup": "deck.set { path: \"/defaults/appearance\", value: \"light\" } through the window API before the driven steps, the write the Themes panel tile makes (packages/chrome/src/ThemesPanel.tsx 52 to 61 at ec61c6b); never a driven step, since slide.changeTheme and toolbar.theme are parked",
+      "today": "works",
+      "evidence": "audit-arrange row 76"
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "feature": "arrange",
+      "interaction": "The ring and chip are #3d86f0 on the dark theme",
+      "driver": "probe --core",
+      "setup": "none: a /new deck opens on the dark appearance (audit-arrange row 77); a deck.set of /defaults/appearance to dark through the window API restores it after the light row",
+      "today": "works",
+      "evidence": "audit-arrange row 77"
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "feature": "arrange",
+      "interaction": "Escape inside a text box ends the session; a second Escape clears the selection",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 78"
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "feature": "arrange",
+      "interaction": "View > Zoom > 50%, 100% and 200% set the stage and the row reads checked",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-arrange row 61 drove the toolbar arrow menu's presets and row 62 Cmd+0"
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "feature": "arrange",
+      "interaction": "After a draw tool the toolbar Select button returns the pointer, and a click then selects an object",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove toolbar.select"
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Rectangle, one click on the sheet; a 240 by 160 rectangle drawn as a rectangle",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-shapes row 9"
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Rounded rectangle, one click; the svg path has rounded corners",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 10 recorded works with the corner radius unconfirmed at the screenshot's size; the source reading in audit-orchestrator-shapes.md (shapePath returns the box for every preset, packages/schema/src/shapes.ts 385 to 393 at ec61c6b) says no rounded path exists; the radius was not measured, so the row is not driven"
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Ellipse, one click; an ellipse",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-shapes row 11"
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "feature": "shapes",
+      "interaction": "Rectangle drawn by a drag lands at the drawn box",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-shapes row 25"
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "feature": "shapes",
+      "interaction": "Ellipse drawn by a drag",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-shapes row 26"
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "feature": "shapes",
+      "interaction": "Insert > Shape lists Rectangle, Rounded rectangle and Ellipse as named rows and the toolbar Shape arrow lists the same",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes rows 31 to 34: production draws the gallery plate instead of the named rows"
+    },
+    {
+      "id": "shapes.default-look",
+      "feature": "shapes",
+      "interaction": "A fresh shape is visible on both themes: a fill or a stroke the seller can see",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-shapes row 35"
+    },
+    {
+      "id": "shapes.select",
+      "feature": "shapes",
+      "interaction": "Click a shape: chip Shape, eight handles, the ring",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 1 (a rectangle); audit-shapes row 36 not driven this run"
+    },
+    {
+      "id": "shapes.move",
+      "feature": "shapes",
+      "interaction": "Drag a shape by its frame by a known distance",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 37 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (the rectangle's drag row)"
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "feature": "shapes",
+      "interaction": "Drag each handle of a shape plain, with Shift and with Alt; the svg fills the box; Undo after each",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 38 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (the rectangle's resize rows, none of which failed; the 23 failed rows were the picture's)"
+    },
+    {
+      "id": "shapes.rotate",
+      "feature": "shapes",
+      "interaction": "Drag the ring to about 35 degrees; Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 39 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (rows 771 to 773)"
+    },
+    {
+      "id": "shapes.fill.colour",
+      "feature": "shapes",
+      "interaction": "The toolbar Fill color: a swatch and a hex value paint the shape; Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 40: not reached before the stop; never driven by the previous walks"
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "feature": "shapes",
+      "interaction": "The toolbar Border color, Border weight and Border dash, and Format > Borders & lines, change the stroke; Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 41"
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "feature": "shapes",
+      "interaction": "Double click a shape or press Enter, type, align, Cmd+B; the text sits inside the shape",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 42: a fresh shape has no text run to open"
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "feature": "shapes",
+      "interaction": "Cmd+D, Delete, Cmd+Z, Cmd+Shift+Z on a shape",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 43 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (rows 779 to 782)"
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "feature": "shapes",
+      "interaction": "Format options shows Size and Position for the shape and a typed width applies",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 44"
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "interaction": "A filled shape survives File > Download > PDF Document; the file arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shapes row 47"
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "interaction": "A filled shape survives the PowerPoint download in Perfect and Editable text; each file arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shapes row 48 (the walk passed both modes through the window API)"
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "feature": "shapes",
+      "interaction": "Reload /edit and open /deck; the shapes and their paint are the same",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 49"
+    },
+    {
+      "id": "shapes.context.shape",
+      "feature": "shapes",
+      "interaction": "Right click a shape lists the clipboard, arrange, Link, Text fitting, Format options and Comment rows, and Duplicate from it adds a copy",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes was stopped before row 44"
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "feature": "lines",
+      "interaction": "Insert > Line > Line drawn by a drag; the toolbar Line button does the same",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 45 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (row 54, a line drawn by a drag)"
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "feature": "lines",
+      "interaction": "Insert > Line > Arrow drawn by a drag ends in an arrow head",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 45"
+    },
+    {
+      "id": "lines.end-handle",
+      "feature": "lines",
+      "interaction": "Drag an end handle of a line; the other end holds",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: audit-shapes row 45 was not reached before the stop; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (the line's end drag)"
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "feature": "lines",
+      "interaction": "The line toolbar's Line color, Line weight, Line dash, Line start and Line end apply; Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 45"
+    },
+    {
+      "id": "lines.context.line",
+      "feature": "lines",
+      "interaction": "Right click a line lists the clipboard, arrange, Link, Format options, Line start, Line end and Comment rows, and Line end > Arrow from it adds the head",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shapes row 45 was not reached before the stop"
+    },
+    {
+      "id": "present.slideshow.button",
+      "feature": "present",
+      "interaction": "Slideshow in the title row starts the show from the current slide in full screen within 5 s",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 1"
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "feature": "present",
+      "interaction": "Cmd+Enter starts the show within 5 s",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 2"
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "feature": "present",
+      "interaction": "ArrowRight advances",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 3"
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "feature": "present",
+      "interaction": "ArrowLeft goes back",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 4"
+    },
+    {
+      "id": "present.keys.space",
+      "feature": "present",
+      "interaction": "Space advances",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 5"
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "feature": "present",
+      "interaction": "A digit then Enter jumps to that slide",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 6"
+    },
+    {
+      "id": "present.keys.home",
+      "feature": "present",
+      "interaction": "Home goes to the first slide",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 7"
+    },
+    {
+      "id": "present.keys.end",
+      "feature": "present",
+      "interaction": "End goes to the last slide",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 8"
+    },
+    {
+      "id": "present.click-advances",
+      "feature": "present",
+      "interaction": "A click on the slide advances",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 9"
+    },
+    {
+      "id": "present.counter",
+      "feature": "present",
+      "interaction": "The counter reads n of total in the corner toolbar",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 10"
+    },
+    {
+      "id": "present.laser",
+      "feature": "present",
+      "interaction": "L toggles the laser pointer",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 11"
+    },
+    {
+      "id": "present.escape",
+      "feature": "present",
+      "interaction": "Escape leaves the show on the slide shown",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 13"
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "feature": "present",
+      "interaction": "Slideshow arrow > Presenter view opens a second window within 5 s with notes, next slide and timer; the two windows follow each other",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 14"
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "feature": "present",
+      "interaction": "S in the show opens Presenter view",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 15"
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "feature": "present",
+      "interaction": "A note typed under the slide reads back in Presenter view",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 16"
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "feature": "present",
+      "interaction": "The Slideshow arrow's Start from beginning row, and Cmd+Shift+Enter, open the show on slide 1 within 5 s while another slide is current",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove it; the row is title.slideshow.startFromBeginning (model.ts 718 to 723 at ec61c6b)"
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "feature": "present",
+      "interaction": "In the show, B shows a black slide and W a white one; any key returns to the slide",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove it; packages/viewer/src/present/presentKeys.ts 8 to 9 binds B or . and W or ,"
+    },
+    {
+      "id": "present.skipped-left-out",
+      "feature": "present",
+      "interaction": "With one slide skipped, Slideshow, the card's Present and /deck/<id>?present=1 show the unskipped slides only and the counter's total leaves the skipped one out",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove a skipped slide through the show: audit-present's decks had no skipped slide and audit-decks row 40 presented three unskipped slides; apps/studio/src/server/decks.ts 125 and 169 to 171 leave skipped slides out of the payload unless asked, and the route file deck.$deckId.tsx carries no skip handling of its own"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "interaction": "Share in the title row opens the dialog with the View, Present and Edit links",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 17"
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "interaction": "Copy link on the View link row copies /deck/<id>",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 20"
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "interaction": "Copy link on the Edit link row copies /edit/<id>",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 22"
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "interaction": "Escape closes the dialog",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 23"
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "interaction": "File > Share > Copy link copies the view address",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 24"
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "interaction": "A second browser on the View link lands on the read only viewer with no editor chrome",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 27"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "interaction": "A third browser on the Edit link lands in the editor",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 30"
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "interaction": "A browser that arrived by the View link and changes /deck/ to /edit/ cannot edit the deck",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-present row 29"
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "interaction": "A browser with no link that opens /edit/<id> of a deck never shared cannot edit it",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-present row 26"
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "interaction": "Text typed in a second browser reaches the owner within 5 s, three times of three",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-present row 31"
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "interaction": "Text typed by the owner reaches the second browser within 5 s, three times of three",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 32"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "interaction": "A slide added in the second browser appears in the owner's filmstrip within 5 s, three times of three",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-present row 33"
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "interaction": "Presence chips show the other person in both tabs within 10 s, and a chip leaves within 30 s of its tab closing",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-present row 34: the owner tab showed one chip; the third browser showed four chips for two other tabs, and chips of closed tabs stayed"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "interaction": "A rename reaches the second browser's name field within 5 s and its tab title reads the new name without a reload",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-present row 46: the name field read the new name after 2149 ms; document.title kept \"Pipeline review: Acme, Q3 2026, editor, Turboslide\""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "interaction": "A second browser on the View link sees no skipped slide and no note text, in the page and in the payload",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove it; the dialog's footer says so to the seller (audit-present row 17); apps/studio/src/server/decks.ts 123 to 126"
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "interaction": "A second browser on the Present link shows the unskipped slides only",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "no audit drove it; the same payload options as the View link (server/decks.ts 125)"
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "interaction": "Copy link on the Present link row copies /deck/<id>?present=1",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 21"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "feature": "share",
+      "interaction": "File > Share > Share with others opens the Share dialog",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "no audit drove the menu row; audit-present row 17 opened the dialog from the title row"
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "feature": "comments",
+      "interaction": "Select the title placeholder, Cmd+Option+M, type, Comment; a marker and a thread appear within 20 s",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-present row 35"
+    },
+    {
+      "id": "comments.on-slide",
+      "feature": "comments",
+      "interaction": "Nothing selected, Cmd+Option+M, type, Comment; a slide level marker and thread appear within 20 s",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 36"
+    },
+    {
+      "id": "comments.on-object",
+      "feature": "comments",
+      "interaction": "Select a text box, Cmd+Option+M, type, Comment; a marker and a thread appear within 20 s",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 37"
+    },
+    {
+      "id": "comments.reply",
+      "feature": "comments",
+      "interaction": "Open the thread from its marker and reply; the reply is listed within 20 s",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "evidence": "audit-present row 38"
+    },
+    {
+      "id": "comments.resolve",
+      "feature": "comments",
+      "interaction": "Resolve on the first click; the thread reads resolved within 5 s",
+      "driver": "core/present.spec.ts",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-present row 39"
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "feature": "comments",
+      "interaction": "With nothing selected, the toolbar Insert comment button and Insert > Comment each open the card; a comment submitted from each appears as a marker within 20 s",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-present row 35 drove the three routes on the title placeholder, which is refused; rows 36 and 37 drove Cmd+Option+M on a slide and on an object"
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "interaction": "A comment added in one browser is listed in a second browser's Comments panel within 10 s",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-present row 40: no comment was created in the run that had two browsers open"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "interaction": "Last edit opens Version history with the day window",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-present row 41; audit-decks row 17"
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "interaction": "Pick a version in the panel",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-present row 42"
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "interaction": "Name current version saves the name",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-present row 43"
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "interaction": "Restore this version returns the deck to that version within 5 s, on a deck a second browser has also written into",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-present row 44"
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "interaction": "Cmd+Z after a restore brings the current version back",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-present row 45"
+    },
+    {
+      "id": "export.download-submenu",
+      "feature": "export",
+      "interaction": "File > Download lists the PowerPoint and PDF rows",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 6"
+    },
+    {
+      "id": "export.pdf.dialog",
+      "feature": "export",
+      "interaction": "File > Download > PDF Document opens the dialog with its sentence, the skipped slides checkbox off, Cancel and Download",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 8"
+    },
+    {
+      "id": "export.pdf.skipped-check",
+      "feature": "export",
+      "interaction": "Include skipped slides toggles",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 10"
+    },
+    {
+      "id": "export.pdf.close-paths",
+      "feature": "export",
+      "interaction": "Escape, Cancel and the X close the dialog",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 11"
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "interaction": "Download with the defaults; a PDF with one page per unskipped slide arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-export row 12"
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "interaction": "With Include skipped slides the file, arriving within 30 s, has a page for the skipped slide",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-export row 14"
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "interaction": "The dialog offers Include speaker notes only when the PDF carries them; a checked box changes the file",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-export row 15"
+    },
+    {
+      "id": "export.pptx.dialog",
+      "feature": "export",
+      "interaction": "File > Download > Microsoft PowerPoint opens with Perfect selected and Editable text as the other radio",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 16"
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "interaction": "Download with Perfect; a PPTX with one slide part per unskipped slide arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-export row 18"
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "interaction": "Download with Editable text; the file arrives within 30 s and the title is a text run in slide1.xml",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-export row 19"
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "interaction": "With both checkboxes the file, arriving within 30 s, has every slide and the talk track in the notes part",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "audit-export row 20"
+    },
+    {
+      "id": "export.print.preview-page",
+      "feature": "export",
+      "interaction": "File > Print settings and preview opens /print/<id> with the pages and the layout dropdown",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 28"
+    },
+    {
+      "id": "export.print.layout-with-notes",
+      "feature": "export",
+      "interaction": "1 slide with notes shows the talk track under the slide",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 29"
+    },
+    {
+      "id": "export.print.include-skipped",
+      "feature": "export",
+      "interaction": "Include skipped slides adds the page and marks it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 30"
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "interaction": "Download as PDF on the print page arrives within 30 s and carries the preview's skipped slides and notes layout",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-export rows 31 and 32"
+    },
+    {
+      "id": "export.print.print-button",
+      "feature": "export",
+      "interaction": "Print calls the browser's print once",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 33"
+    },
+    {
+      "id": "export.print.close-preview",
+      "feature": "export",
+      "interaction": "Close preview returns to the editor",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 34"
+    },
+    {
+      "id": "export.print.file-menu-after-close",
+      "feature": "export",
+      "interaction": "The first click on File after Close preview opens the menu",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 1,
+      "evidence": "audit-export row 35"
+    },
+    {
+      "id": "export.print.menu-row",
+      "feature": "export",
+      "interaction": "File > Print lands on the print page",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 36"
+    },
+    {
+      "id": "export.print.cmd-p",
+      "feature": "export",
+      "interaction": "Cmd+P lands on the print page",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 37"
+    },
+    {
+      "id": "help.help-dialog",
+      "feature": "help",
+      "interaction": "Help > Help lists the how-tos and Done closes",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 38"
+    },
+    {
+      "id": "help.documentation-link",
+      "feature": "help",
+      "interaction": "The Documentation link in Help > Help answers 200",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-export row 39"
+    },
+    {
+      "id": "help.keyboard-shortcuts",
+      "feature": "help",
+      "interaction": "Help > Keyboard shortcuts opens, filters on a search, closes on Escape",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 40"
+    },
+    {
+      "id": "help.search-the-menus",
+      "feature": "help",
+      "interaction": "Help > Search the menus and the toolbar Search find a menu row by name",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-export row 41"
+    },
+    {
+      "id": "surface.menus.open-close-escape",
+      "feature": "surface",
+      "interaction": "Every menu of the bar opens and closes with Escape with no console error",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "not driven on ec61c6b: no focus audit opened every menu of the bar in one pass; the last observation is the hotfix 4 production walk against e2e6307 (hotfix-4.md section 3.8, started 2026-09-15T10:15Z), which ec61c6b's changes to packages/store/src/blob-store.ts, comments-store.ts and migrate.ts came after; --core drives it this round (rows 788 to 797, every menu 0 console errors)"
+    },
+    {
+      "id": "surface.advanced.off-by-default",
+      "feature": "surface",
+      "interaction": "With Advanced tools off, no parked row is in the menu bar, the toolbar, a right click menu or Search the menus",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "evidence": "FOCUS.md section 3: the switch does not exist on production"
+    },
+    {
+      "id": "surface.advanced.on-shows-parked",
+      "feature": "surface",
+      "interaction": "Tools > Advanced tools on draws every parked row in its Google position",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "evidence": "FOCUS.md section 3"
+    },
+    {
+      "id": "surface.advanced.remembered",
+      "feature": "surface",
+      "interaction": "Advanced tools stays on after a reload and off in a fresh browser",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "evidence": "FOCUS.md section 3"
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "feature": "surface",
+      "interaction": "A deck carrying a parked block (a chart, a table, a diagram, placed as setup) renders it on the sheet, in the viewer and in the PDF with the switch off",
+      "driver": "core/surface.spec.ts",
+      "setup": "block.insert of a chart, a table and a diagram through the window API before the driven steps (the convention audit-arrange section 1 records for the rectangles' homes); never a driven step",
+      "today": "not driven",
+      "evidence": "FOCUS.md section 3"
+    },
+    {
+      "id": "surface.cleanup",
+      "feature": "surface",
+      "interaction": "The scratch deck is trashed and deleted forever and answers 404 on /edit and /deck",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "every audit's cleanup row; hotfix-4.md section 3.8 rows 800 to 802"
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "feature": "surface",
+      "interaction": "With Advanced tools off, the chord of a parked row (Cmd+Option+G on two selected objects, Cmd+Shift+J in a text box) changes nothing; with it on, the chord runs the row",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "evidence": "the switch does not exist on production (FOCUS.md section 3)"
+    },
+    {
+      "id": "surface.parked-block-core-rows",
+      "feature": "surface",
+      "interaction": "A parked block placed as setup is selected by a click, moved by a drag, resized by its se handle, sent to back, aligned left, duplicated with Cmd+D and deleted with Delete, with Undo after each, while the switch is off",
+      "driver": "core/surface.spec.ts",
+      "setup": "block.insert of a chart through the window API before the driven steps; never a driven step",
+      "today": "not driven",
+      "evidence": "the switch does not exist on production (FOCUS.md section 3)"
+    }
+  ]
+}

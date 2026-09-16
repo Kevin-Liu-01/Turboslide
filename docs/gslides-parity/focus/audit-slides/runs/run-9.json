@@ -1,0 +1,136 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-y0k7",
+  "version": 1,
+  "startedAt": "2026-09-16T01:10:58.207Z",
+  "ms": 221309,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Slide counter",
+      "interaction": "Read the sheet footer counter and the card numbers after clicking card 3, after New slide, after Delete and after a drag reorder",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "on card 3: footer {\"text\":\"03 / 04\",\"n\":3,\"total\":4}, card numbers 1,2,3,4; after New slide: footer {\"text\":\"04 / 05\",\"n\":4,\"total\":5}, cards 1,2,3,4,5; after Delete of the new slide: footer {\"text\":\"04 / 04\",\"n\":4,\"total\":4}, cards 1,2,3,4, active split-3; after dragging card 3 above card 2: order title,split-2,split-1,split-3, footer {\"text\":\"04 / 04\",\"n\":4,\"total\":4}, cards 1,2,3,4, active split-3; toolbar view.count present false",
+      "shot": "audit-slides/241-footer-counter.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "Duplicate slide",
+      "interaction": "Trial 1: two cards selected, Slide menu > Duplicate slide; how many copies appear",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-1,split-3; 4 -> 6; copies split-1-2,split-3-2 (2); after undo 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Duplicate slide",
+      "interaction": "Trial 2: two cards selected, Slide menu > Duplicate slide; how many copies appear",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; 4 -> 6; copies split-2-2,split-3-2 (2); after undo 5",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Duplicate slide",
+      "interaction": "Trial 3: two cards selected, Slide menu > Duplicate slide; how many copies appear",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-4,split-3; 5 -> 7; copies split-4-2,split-3-2 (2); after undo 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Skip slide",
+      "interaction": "Trial 1: two cards selected, Slide menu > Skip slide; how many slides are skipped",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; skip split-2 true, split-3 true; cards skipped split-2,split-3",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Skip slide",
+      "interaction": "Trial 2: two cards selected, Slide menu > Skip slide; how many slides are skipped",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; skip split-2 true, split-3 true; cards skipped split-2,split-3",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Skip slide",
+      "interaction": "Trial 3: two cards selected, Slide menu > Skip slide; how many slides are skipped",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; skip split-2 true, split-3 true; cards skipped split-2,split-3",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Delete slide",
+      "interaction": "Trial 1: two cards selected, Edit menu > Delete; how many slides go",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; row {\"present\":true,\"disabled\":false,\"label\":\"Delete\"}; 4 -> 3 (1 removed; snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}); after undo 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Delete slide",
+      "interaction": "Trial 2: two cards selected, Edit menu > Delete; how many slides go",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; row {\"present\":true,\"disabled\":false,\"label\":\"Delete\"}; 4 -> 3 (1 removed; snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}); after undo 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "Delete slide",
+      "interaction": "Trial 3: two cards selected, Edit menu > Delete; how many slides go",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-2,split-3; row {\"present\":true,\"disabled\":false,\"label\":\"Delete\"}; 4 -> 3 (1 removed; snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}); after undo 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash (run 9)",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "failed: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.untitled-20260916-y0k7\"]') to be visible\n",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 12,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete (run 9)",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 200",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

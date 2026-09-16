@@ -1,0 +1,391 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-74xj",
+  "startedAt": "2026-09-16T00:55:23.000Z",
+  "ms": 966264,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Scratch deck",
+      "interaction": "Open /new, type a title, Escape",
+      "result": "works",
+      "evidence": "untitled-20260916-74xj; /edit/untitled-20260916-74xj; title \"Pipeline review: Acme, Q3 2026\"; name prompt not shown"
+    },
+    {
+      "n": 2,
+      "feature": "Scratch deck",
+      "interaction": "Add two slides (Ctrl+M)",
+      "result": "works",
+      "evidence": "slides 1 -> 2 (Ctrl+M) -> 3 (Ctrl+M)"
+    },
+    {
+      "n": 3,
+      "feature": "Speaker notes",
+      "interaction": "Type a note under slide 1",
+      "result": "works",
+      "evidence": "notes pane shown; stored in the slide true"
+    },
+    {
+      "n": 4,
+      "feature": "Slideshow",
+      "interaction": "Click Slideshow in the title row",
+      "result": "works",
+      "evidence": "present true; index 0 of 3; counter \"1 of 3\"; fullscreen true",
+      "tries": 1
+    },
+    {
+      "n": 5,
+      "feature": "Slideshow keys",
+      "interaction": "ArrowRight advances",
+      "result": "works",
+      "evidence": "index 0 -> 1; counter \"2 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 6,
+      "feature": "Slideshow keys",
+      "interaction": "ArrowLeft goes back",
+      "result": "works",
+      "evidence": "index 1 -> 0; counter \"1 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 7,
+      "feature": "Slideshow keys",
+      "interaction": "Space advances",
+      "result": "works",
+      "evidence": "index 0 -> 1; counter \"2 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 8,
+      "feature": "Slideshow keys",
+      "interaction": "Type 3 then Enter jumps to slide 3",
+      "result": "works",
+      "evidence": "after \"3\" snackbar \"Slide 3, press Enter\"; index 2; counter \"3 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 9,
+      "feature": "Slideshow keys",
+      "interaction": "Home goes to the first slide",
+      "result": "works",
+      "evidence": "index 2 -> 0; counter \"1 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 10,
+      "feature": "Slideshow keys",
+      "interaction": "End goes to the last slide",
+      "result": "works",
+      "evidence": "index 0 -> 2; counter \"3 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 11,
+      "feature": "Slideshow",
+      "interaction": "A click on the slide advances",
+      "result": "works",
+      "evidence": "click at 158,60; index 0 -> 1; counter \"2 of 3\"",
+      "tries": 1
+    },
+    {
+      "n": 12,
+      "feature": "Slideshow",
+      "interaction": "The slide counter reads n of total",
+      "result": "works",
+      "evidence": "counter \"1 of 3\" then \"2 of 3\"; toolbar visible true",
+      "tries": 1
+    },
+    {
+      "n": 13,
+      "feature": "Slideshow",
+      "interaction": "L toggles the laser pointer",
+      "result": "works",
+      "evidence": "after L laser true, dot true at 754,464; after L again laser false",
+      "tries": 1
+    },
+    {
+      "n": 14,
+      "feature": "Slideshow",
+      "interaction": "Draw with the pen",
+      "result": "not driven",
+      "evidence": "the Options menu lists Pen as a disabled row (Options rows menu.present.options.notes, menu.present.options.autoPlay, menu.present.options.laser, menu.present.options.fullScreen, menu.present.options.pen, menu.present.options.more, menu.present.options.exit; pen row {\"text\":\"Turn on the pen\",\"disabled\":\"true\",\"title\":\"\"})"
+    },
+    {
+      "n": 15,
+      "feature": "Slideshow",
+      "interaction": "Escape leaves the show",
+      "result": "works",
+      "evidence": "present false; editor slide 2; fullscreen false",
+      "tries": 1
+    },
+    {
+      "n": 16,
+      "feature": "Slideshow",
+      "interaction": "Cmd+Enter starts the show",
+      "result": "works",
+      "evidence": "present true; index 1 (started on slide 2, so the show opens on the current slide when index is 1)",
+      "tries": 1
+    },
+    {
+      "n": 17,
+      "feature": "Presenter view",
+      "interaction": "Slideshow arrow > Presenter view opens a second window with notes, next slide and timer",
+      "result": "works",
+      "evidence": "popup /present/untitled-20260916-74xj; pages 2; audience present true; presenter index 0 of 3, counter \"1 of 3Pipeline review: Acme, Q3 2026▾\"; notes \"Open with the renewal date and the two new logos.\"; timer \"0:01\" -> \"0:04\" after 2.5 s; connection \"Slideshow connected\"; frames 2, next labelled true; presenter ArrowRight -> audience index 1, presenter 1; audience ArrowRight -> presenter 2",
+      "tries": 1
+    },
+    {
+      "n": 18,
+      "feature": "Presenter view",
+      "interaction": "S in the show opens Presenter view",
+      "result": "works",
+      "evidence": "popup /present/untitled-20260916-74xj",
+      "tries": 1
+    },
+    {
+      "n": 19,
+      "feature": "Restricted deck",
+      "interaction": "A second browser with no link opens /edit/<id> of the new (restricted) deck",
+      "result": "broken",
+      "evidence": "GET /edit/untitled-20260916-74xj status 200; You need access page false; editor opened with data-edit-mode editing, role editor; the stranger typed \" STRANGER\" into the title: owner tab title \"Pipeline review: Acme, Q3 2026\", revision 4 -> 4"
+    },
+    {
+      "n": 20,
+      "feature": "Share dialog",
+      "interaction": "Click Share in the title row",
+      "result": "broken",
+      "evidence": "try 1: title \"Share Pipeline review: Acme, Q3 2026\"; legacy form true; General access null (options ); invite roles ; owner \"\"; people \"\"; Copy link false | try 2: title \"Share Pipeline review: Acme, Q3 2026\"; legacy form true; General access null (options ); invite roles ; owner \"\"; people \"\"; Copy link false | try 3: title \"Share Pipeline review: Acme, Q3 2026\"; legacy form true; General access null (options ); invite roles ; owner \"\"; people \"\"; Copy link false",
+      "tries": 3
+    },
+    {
+      "n": 21,
+      "feature": "Share dialog",
+      "interaction": "Copy link while restricted",
+      "result": "broken",
+      "evidence": "try 1: error locator.boundingBox: Timeout 30000ms exceeded. | try 2: error locator.boundingBox: Timeout 30000ms exceeded. | try 3: error locator.boundingBox: Timeout 30000ms exceeded.",
+      "tries": 3
+    },
+    {
+      "n": 22,
+      "feature": "Share dialog",
+      "interaction": "General access to Anyone with the link",
+      "result": "broken",
+      "evidence": "try 1: error locator.selectOption: Timeout 30000ms exceeded. | try 2: error locator.selectOption: Timeout 30000ms exceeded. | try 3: error locator.selectOption: Timeout 30000ms exceeded.",
+      "tries": 3
+    },
+    {
+      "n": 23,
+      "feature": "Share dialog",
+      "interaction": "Copy link with the link on",
+      "result": "broken",
+      "evidence": "try 1: error locator.boundingBox: Timeout 30000ms exceeded. | try 2: error locator.boundingBox: Timeout 30000ms exceeded. | try 3: error locator.boundingBox: Timeout 30000ms exceeded.",
+      "tries": 3
+    },
+    {
+      "n": 24,
+      "feature": "Viewer link",
+      "interaction": "A second browser opens the viewer link",
+      "result": "broken",
+      "evidence": "try 1: no viewer link was minted | try 2: no viewer link was minted | try 3: no viewer link was minted",
+      "tries": 3
+    },
+    {
+      "n": 25,
+      "feature": "Viewer link",
+      "interaction": "The viewer opens /edit/<id> directly: read only",
+      "result": "broken",
+      "evidence": "try 1: data-edit-mode editing; role editor; toolbar true; double click opened a text session true; their title \"Pipeline review: Acme,  VIEWERTYPEDQ3 2026 STRANGER\"; owner title \"Pipeline review: Acme,  VIEWERTYPEDQ3 2026 STRANGER\"; owner revision 5 -> 6 | try 2: data-edit-mode editing; role editor; toolbar true; double click opened a text session true; their title \"Pipeline review: Acme,  VIEWERTYPEDQ3  VIEWERTYPED2026 STRANGER\"; owner title \"Pipeline review: Acme,  VIEWERTYPEDQ3  VIEWERTYPED2026 STRANGER\"; owner revision 6 -> 7 | try 3: data-edit-mode editing; role editor; toolbar true; double click opened a text session true; their title \"Pipeline review: Acme,  VIEWERTYPEDQ3   VIEWERTYPEDVIEWERTYPED2026 STRANGER\"; owner title \"Pipeline review: Acme,  VIEWERTYPEDQ3  VIEWERTYPED2026 STRANGER\"; owner revision 7 -> 7",
+      "tries": 3
+    },
+    {
+      "n": 26,
+      "feature": "Share dialog",
+      "interaction": "Link role to Editor",
+      "result": "broken",
+      "evidence": "try 1: error locator.selectOption: Timeout 30000ms exceeded. | try 2: error locator.selectOption: Timeout 30000ms exceeded. | try 3: error locator.selectOption: Timeout 30000ms exceeded.",
+      "tries": 3
+    },
+    {
+      "n": 27,
+      "feature": "Editor link",
+      "interaction": "A third browser opens the editor link and lands in the editor",
+      "result": "broken",
+      "evidence": "try 1: no editor link | try 2: no editor link | try 3: no editor link",
+      "tries": 3
+    },
+    {
+      "n": 28,
+      "feature": "Collaboration",
+      "interaction": "An edit in the third browser reaches the owner within a few seconds",
+      "result": "broken",
+      "evidence": "try 1: no heading run in the third browser | try 2: no heading run in the third browser | try 3: no heading run in the third browser",
+      "tries": 3
+    },
+    {
+      "n": 29,
+      "feature": "Collaboration",
+      "interaction": "An edit by the owner reaches the third browser within a few seconds",
+      "result": "broken",
+      "evidence": "try 1: typed \" +A1\" in A; third browser title \"null\" after 20128 ms | try 2: typed \" +A2\" in A; third browser title \"null\" after 20011 ms | try 3: typed \" +A3\" in A; third browser title \"null\" after 20040 ms",
+      "tries": 3
+    },
+    {
+      "n": 30,
+      "feature": "Collaboration",
+      "interaction": "Presence chips show the other person in both tabs",
+      "result": "broken",
+      "evidence": "try 1: owner tab chips [{\"label\":\"G\",\"title\":\"\"}] count \"\"; third browser chips [] | try 2: owner tab chips [{\"label\":\"G\",\"title\":\"\"}] count \"\"; third browser chips [] | try 3: owner tab chips [{\"label\":\"G\",\"title\":\"\"}] count \"\"; third browser chips []",
+      "tries": 3
+    },
+    {
+      "n": 31,
+      "feature": "Share dialog",
+      "interaction": "Link role to Commenter and a fourth browser lands in Commenting mode",
+      "result": "broken",
+      "evidence": "try 1: error locator.selectOption: Timeout 30000ms exceeded. | try 2: error locator.selectOption: Timeout 30000ms exceeded. | try 3: error locator.selectOption: Timeout 30000ms exceeded.",
+      "tries": 3
+    },
+    {
+      "n": 32,
+      "feature": "Comments",
+      "interaction": "Select the title block and add a comment (Cmd+Option+M, else the toolbar button)",
+      "result": "broken",
+      "evidence": "try 1: chip \"Title\"; card via Cmd+Option+M; markers after submit 0; card open false | try 2: chip \"Title\"; card via Cmd+Option+M; markers after submit 0; card open false | try 3: chip \"Title\"; card via Cmd+Option+M; markers after submit 0; card open false",
+      "tries": 3
+    },
+    {
+      "n": 33,
+      "feature": "Comments",
+      "interaction": "Open the thread from its marker and reply",
+      "result": "broken",
+      "evidence": "try 1: no marker | try 2: no marker | try 3: no marker",
+      "tries": 3
+    },
+    {
+      "n": 34,
+      "feature": "Comments",
+      "interaction": "The comment reaches the third browser",
+      "result": "broken",
+      "evidence": "try 1: markers in the third browser 0 | try 2: markers in the third browser 0 | try 3: markers in the third browser 0",
+      "tries": 3
+    },
+    {
+      "n": 35,
+      "feature": "Comments",
+      "interaction": "Resolve the thread",
+      "result": "broken",
+      "evidence": "try 1: no marker and no card | try 2: no marker and no card | try 3: no marker and no card",
+      "tries": 3
+    },
+    {
+      "n": 36,
+      "feature": "Version history",
+      "interaction": "Open Version history",
+      "result": "works",
+      "evidence": "opened via Last edit; day windows 1; version rows 0; text \"Version historyOnly show named versionsName current versionTodayT8G2M705:55 PM to 06:03 PMTitanium 817, Graphite 215, Ma\"",
+      "tries": 1
+    },
+    {
+      "n": 37,
+      "feature": "Version history",
+      "interaction": "Expand a window and pick a version",
+      "result": "works",
+      "evidence": "rows 0, picks 8, restores 8; picked selected; Show changes false; change marks 0",
+      "tries": 1
+    },
+    {
+      "n": 38,
+      "feature": "Version history",
+      "interaction": "Name current version",
+      "result": "broken",
+      "evidence": "try 1: named rows [\"Pipeline review: Acme, Q3 2026\"]; snackbar \"Saved \\\"Before the call\\\" at r11\" | try 2: named rows [\"Pipeline review: Acme, Q3 2026\"]; snackbar \"Saved \\\"Before the call\\\" at r11\" | try 3: named rows [\"Pipeline review: Acme, Q3 2026\"]; snackbar \"Another instance saved version 10 of untitled-20260916-74xj first\"",
+      "tries": 3
+    },
+    {
+      "n": 39,
+      "feature": "Version history",
+      "interaction": "Restore an older version",
+      "result": "broken",
+      "evidence": "try 1: restore control versionHistory.1.restore of 8; confirm dialog none; title \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\" -> \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\"; slides 3 -> 3; revision 11 -> 11; snackbar \"mutation 0 (version.restore): The version log breaks between versions 3 (revision 3) and 4 (from revision 4); the deck was changed outside the store there\" | try 2: restore control versionHistory.1.restore of 8; confirm dialog none; title \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\" -> \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\"; slides 3 -> 3; revision 11 -> 11; snackbar \"mutation 0 (version.restore): The version log breaks between versions 3 (revision 3) and 4 (from revision 4); the deck was changed outside the store there\" | try 3: restore control versionHistory.1.restore of 8; confirm dialog none; title \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\" -> \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\"; slides 3 -> 3; revision 11 -> 11; snackbar \"mutation 0 (version.restore): The version log breaks between versions 3 (revision 3) and 4 (from revision 4); the deck was changed outside the store there\"",
+      "tries": 3
+    },
+    {
+      "n": 40,
+      "feature": "Version history",
+      "interaction": "Cmd+Z undoes the restore",
+      "result": "works",
+      "evidence": "title \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2  +A3+A1VIEWERTYPED2026 STRANGER\" -> \"Pipeline review: Acme,  VIEWERTYPEDQ3   +A2 +A1VIEWERTYPED2026 STRANGER\"; slides 3 -> 3; revision 11 -> 12",
+      "tries": 1
+    },
+    {
+      "n": 41,
+      "feature": "Rename",
+      "interaction": "Click the deck name, type a new name, Enter; the third browser shows it",
+      "result": "broken",
+      "evidence": "try 1: owner name \"Acme renewal deck 1\"; third browser name \"null\" after 20007 ms; its document.title \"\" | try 2: owner name \"Acme renewal deck 2\"; third browser name \"null\" after 20151 ms; its document.title \"\" | try 3: owner name \"Acme renewal deck 3\"; third browser name \"null\" after 20132 ms; its document.title \"\"",
+      "tries": 3
+    },
+    {
+      "n": 42,
+      "feature": "You need access",
+      "interaction": "Open the editor address of a deck that does not exist",
+      "result": "works",
+      "evidence": "status 404; page true; title \"You need access\"; sentence \"This presentation is not available to you, or does not exist.\"; request form true with role true, button \"Request access\"; sign in section true",
+      "tries": 1
+    },
+    {
+      "n": 43,
+      "feature": "Share dialog",
+      "interaction": "Stop sharing revokes the link",
+      "result": "broken",
+      "evidence": "try 1: no Stop sharing control | try 2: no Stop sharing control | try 3: no Stop sharing control",
+      "tries": 3
+    },
+    {
+      "n": 44,
+      "feature": "Teardown",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks"
+    },
+    {
+      "n": 45,
+      "feature": "Teardown",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260916-74xj left the trash"
+    },
+    {
+      "n": 46,
+      "feature": "Teardown",
+      "interaction": "GET /edit/untitled-20260916-74xj after the delete",
+      "result": "works",
+      "evidence": "status 404"
+    }
+  ],
+  "consoleErrors": {
+    "A": [
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "B0": [
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "B": [
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "console: Failed to load resource: the server responded with a status of 404 ()",
+      "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "C": [],
+    "D": [],
+    "P": [],
+    "E": []
+  },
+  "shareResponses": []
+}

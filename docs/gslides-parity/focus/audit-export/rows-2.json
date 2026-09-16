@@ -1,0 +1,358 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-lmwb",
+  "startedAt": "2026-09-16T01:00:52.889Z",
+  "ms": 95572,
+  "rows": 29,
+  "works": 22,
+  "broken": 5,
+  "flaky": 1,
+  "notDriven": 1,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "downloads": [
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3ea897-2c0361/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3eabch-51ee87/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3eaece-28ea89/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3eahg0-585b8b/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3eawuf-8841c7/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-lmwb-dark.pdf",
+      "bytes": 44238,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-lmwb/mu3eb3em-11f9ad/untitled-20260916",
+      "error": null
+    }
+  ],
+  "popups": [
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-lmwb&theme=light&scale=2&revision=5",
+      "contentType": "application/json"
+    }
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "environment",
+      "interaction": "production reached; e2e lock state",
+      "result": "works",
+      "evidence": "https://turboslide.vercel.app; playwright-core 1.62.1; node v24.13.0; lock .turboslide/e2e.lock present (another walk in flight); not taken",
+      "severity": 0,
+      "need": "core",
+      "why": "The conditions of the run."
+    },
+    {
+      "n": 2,
+      "feature": "setup: the scratch deck",
+      "interaction": "open /new, double click the title, type a title, Escape",
+      "result": "works",
+      "evidence": "draft untitled-20260916-lmwb; address /edit/untitled-20260916-lmwb; revision 1; title \"Acme pricing review, Q3 2026\"; slides 1",
+      "severity": 0,
+      "need": "core",
+      "why": "The deck every export below reads."
+    },
+    {
+      "n": 3,
+      "feature": "setup: Slide > New slide twice",
+      "interaction": "Slide menu > New slide, twice",
+      "result": "works",
+      "evidence": "slide.list title, split-1, split-2",
+      "severity": 0,
+      "need": "core",
+      "why": "Three slides so the PDF page count and the PPTX slide parts can be counted."
+    },
+    {
+      "n": 4,
+      "feature": "setup: Slide > Skip slide",
+      "interaction": "Slide menu > Skip slide on slide 3",
+      "result": "works",
+      "evidence": "deck.info counts {\"slides\":3,\"sections\":1,\"assets\":4,\"htmlBlocks\":0,\"skipped\":1,\"canvas\":0,\"charts\":0,\"guides\":0}; snackbar null",
+      "severity": 0,
+      "need": "core",
+      "why": "One skipped slide so the Include skipped slides controls have an effect to observe."
+    },
+    {
+      "n": 5,
+      "feature": "setup: a speaker note on slide 1",
+      "interaction": "click the notes field under the slide, type, Escape",
+      "result": "works",
+      "evidence": "revision 5; stored notes \"Internal talk track: lead with the renewal\"",
+      "severity": 0,
+      "need": "core",
+      "why": "A note so Include speaker notes and the print layout with notes have something to carry."
+    },
+    {
+      "n": 6,
+      "feature": "Download as PDF, default options (run 2)",
+      "interaction": "Download in the dialog, default options",
+      "result": "works",
+      "evidence": "try 1: 1703 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; error null; pdf pages 2, 44238 B; title text present true; note text present false",
+      "severity": 0,
+      "need": "core",
+      "why": "The reference file for the notes comparison below."
+    },
+    {
+      "n": 7,
+      "feature": "Download as PDF with Include speaker notes (three tries)",
+      "interaction": "check Include speaker notes, Download; three times",
+      "result": "broken",
+      "evidence": "try 1: checked true; 1474 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; error null; pdf pages 2, 44238 B; title text present true; note text present false; against the plain PDF: same length, 2 differing bytes | try 2: checked true; 1256 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; error null; pdf pages 2, 44238 B; title text present true; note text present false; against the plain PDF: same length, 2 differing bytes | try 3: checked true; 5176 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; error null; pdf pages 2, 44238 B; title text present true; note text present false; against the plain PDF: same length, 4 differing bytes",
+      "severity": 2,
+      "need": "useful",
+      "why": "The checkbox promises the notes in the file; the file must differ from the plain PDF and carry the note text."
+    },
+    {
+      "n": 8,
+      "feature": "Download as JPEG image: the tab it opens",
+      "interaction": "File > Download > JPEG image (.jpg, current slide); screenshot of the new tab",
+      "result": "broken",
+      "evidence": "popup /api/render/title?deck=untitled-20260916-lmwb&theme=light&scale=2&revision=5 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; docs/gslides-parity/focus/audit-export/popup-1.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "The evidence screenshot of the tab the JPEG and PNG rows open."
+    },
+    {
+      "n": 9,
+      "feature": "Print preview: Download as PDF under \"1 slide with notes\"",
+      "interaction": "pick the notes layout, click Download as PDF",
+      "result": "broken",
+      "evidence": "notes blocks shown 2; try 1: button disabled before the click false; 6939 ms; status line \"Your file is ready\"; download untitled-20260916-lmwb-dark.pdf 44238 B; pdf pages 2; note text present false; snackbar Your file is ready; docs/gslides-parity/focus/audit-export/19-print-pdf-notes-try1.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "The preview shows the notes under each slide; the file must carry them."
+    },
+    {
+      "n": 10,
+      "feature": "Print preview: Download as PDF with Include skipped slides (run 2)",
+      "interaction": "check Include skipped slides (three pages shown), click Download as PDF; three tries with a 3 s pause",
+      "result": "broken",
+      "evidence": "data-count 3; try 1: button disabled before the click false; 1397 ms; status line \"Your file is ready\"; download untitled-20260916-lmwb-dark.pdf 44238 B; pdf pages 2; note text present false; snackbar Your file is ready; docs/gslides-parity/focus/audit-export/19-print-pdf-skipped-try1.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "The file must hold the three pages the preview shows."
+    },
+    {
+      "n": 11,
+      "feature": "The File menu after Close preview",
+      "interaction": "click File in the menubar right after Close preview brought the editor back",
+      "result": "flaky",
+      "evidence": "try 1: {\"url\":\"/edit/untitled-20260916-lmwb\",\"studio\":true,\"settled\":true,\"menubar\":true,\"active\":\"body\"}; button box 6,44 46x28; menu open false; docs/gslides-parity/focus/audit-export/20-file-menu-after-close-preview-try1.png | try 2: {\"url\":\"/edit/untitled-20260916-lmwb\",\"studio\":true,\"settled\":true,\"menubar\":true,\"active\":\"body\"}; button box 6,44 46x28; menu open true; docs/gslides-parity/focus/audit-export/20-file-menu-after-close-preview-try2.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Run 1 ended here: the menu did not open within 8 s on the first click."
+    },
+    {
+      "n": 12,
+      "feature": "File > Print",
+      "interaction": "click the Print row",
+      "result": "works",
+      "evidence": "address /print/untitled-20260916-lmwb",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu row lands on the print page."
+    },
+    {
+      "n": 13,
+      "feature": "Cmd+P",
+      "interaction": "press Cmd+P in the editor",
+      "result": "works",
+      "evidence": "address /print/untitled-20260916-lmwb",
+      "severity": 0,
+      "need": "useful",
+      "why": "The shortcut Google lists for print."
+    },
+    {
+      "n": 14,
+      "feature": "Help > Help",
+      "interaction": "open the Help menu, click Help; read the how-tos; fetch the Documentation link; Done",
+      "result": "works",
+      "evidence": "menu rows searchMenus, help, improve, keyboardShortcuts; how-tos 10 (last: \"Send a PDF or a link. Share > Copy link under View link, or \"); Documentation href /docs answers 404; Done closed true; docs/gslides-parity/focus/audit-export/14-help-dialog.png",
+      "severity": 1,
+      "need": "useful",
+      "why": "The one line how-tos name the tasks of the seller; the documentation link is the only outbound help."
+    },
+    {
+      "n": 15,
+      "feature": "Help dialog: Documentation link",
+      "interaction": "GET the href of the Documentation link",
+      "result": "broken",
+      "evidence": "/docs answers 404; /help answers 404",
+      "severity": 1,
+      "need": "useful",
+      "why": "A help link that answers 404 sends a seller nowhere."
+    },
+    {
+      "n": 16,
+      "feature": "Help > Keyboard shortcuts",
+      "interaction": "open the dialog, type \"print\" in its search, Escape",
+      "result": "works",
+      "evidence": "dialog true; rows before 132, after the search 2; text \"Keyboard shortcutsCommon actionsPrintCmd PPresentingPrintCmd P\"; Escape closed true; docs/gslides-parity/focus/audit-export/15-keyboard-shortcuts.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The shortcut list a seller consults once."
+    },
+    {
+      "n": 17,
+      "feature": "Help > Search the menus",
+      "interaction": "click the row, type Download",
+      "result": "works",
+      "evidence": "focus input palette.query Search the menus; rows 12: 1Acme pricing review, Q3 2026 | 2 | 3 | Microsoft PowerPoint (.pptx)File › DownloadPerfect | ODP Document (.odp)File › DownloadNot available in | PDF Document (.pdf)File › DownloadOne slide per pa | Plain Text (.txt)File › DownloadEvery slide’s text | JPEG image (.jpg, current slide)File › Download | PNG image (.png, current slide)File › Download | Scalable Vector Graphics (.svg, current slide)File | Web page (.html)File › DownloadOne file that opens | Turboslide bundle (.zip)File › DownloadThe file Op; docs/gslides-parity/focus/audit-export/16-search-the-menus.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The Search the menus of Google; finds Download for a seller who does not know the File menu."
+    },
+    {
+      "n": 18,
+      "feature": "Help > Report a problem",
+      "interaction": "find the row",
+      "result": "not driven",
+      "evidence": "no row with problem, issue or feedback in its label",
+      "severity": 0,
+      "need": "park",
+      "why": "A GitHub issue form."
+    },
+    {
+      "n": 19,
+      "feature": "window.turboslide.studio.describe()",
+      "interaction": "from the console",
+      "result": "works",
+      "evidence": "{\"version\":1,\"global\":\"window.turboslide.studio\",\"event\":\"turboslide:studio-api-ready\",\"owner\":\"editor\",\"actions\":156,\"source\":{\"read\":true,\"apply\":true},\"stateKeys\":[\"deckId\",\"revision\",\"serverRevision\",\"pending\",\"slideId\",\"blockId\",\"mode\",\"theme\",\"zoom\",\"author\",\"sync\",\"presence\",\"access\",\"account\",\"comments\",\"inbox\"],\"deckId\":\"untitled-20260916-lmwb\",\"revision\":5}",
+      "severity": 0,
+      "need": "useful",
+      "why": "The first read of an agent; the sales user never sees it, the agents of the org do."
+    },
+    {
+      "n": 20,
+      "feature": "invoke(\"deck.info\")",
+      "interaction": "from the console",
+      "result": "works",
+      "evidence": "id untitled-20260916-lmwb; title \"Acme pricing review, Q3 2026\"; revision 5; counts {\"slides\":3,\"sections\":1,\"assets\":4,\"htmlBlocks\":0,\"skipped\":1,\"canvas\":0,\"charts\":0,\"guides\":0}; sections 1",
+      "severity": 0,
+      "need": "useful",
+      "why": "The deck facts an agent reads before writing."
+    },
+    {
+      "n": 21,
+      "feature": "invoke(\"slide.list\")",
+      "interaction": "from the console",
+      "result": "works",
+      "evidence": "3 rows: 1 title title \"Acme pricing review, Q3 2026\" | 2 split-1 content \"Slide 2\" | 3 split-2 content \"Slide 3\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "The slide order an agent walks."
+    },
+    {
+      "n": 22,
+      "feature": "invoke(\"block.set\", { ..., baseRevision })",
+      "interaction": "from the console: a stale baseRevision, then the current one, on block \"h\" (heading) path /text",
+      "result": "works",
+      "evidence": "stale base 4 answered \"ConflictError: baseRevision 4 is stale; the document is at revision 5\" (revision stayed true); current base 5 answered {\"ok\":true,\"revision\":6,\"keys\":[\"slide\",\"revision\",\"findings\"]}; revision now 6; the value reads back true; docs/gslides-parity/focus/audit-export/17-block-set.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The agent write with the revision guard; a stale base must be refused and a fresh one applied."
+    },
+    {
+      "n": 23,
+      "feature": "invoke(\"render.slide\") and its image URL from the page",
+      "interaction": "from the console; then GET the returned image URL with the cookies of the page and no bearer",
+      "result": "works",
+      "evidence": "{\"ok\":true,\"images\":[\"/api/render/title?deck=untitled-20260916-lmwb&theme=light&scale=1&revision=6\"],\"recordKeys\":[\"deckId\",\"slideId\",\"revision\",\"theme\",\"scale\",\"image\",\"renderer\",\"pageErrors\",\"consoleErrors\",\"overflow\",\"blocks\",\"fonts\",\"anchors\",\"rasters\",\"timing\"]}; GET of images[0] from the page's context: 401 application/json; charset=utf-8",
+      "severity": 0,
+      "need": "useful",
+      "why": "The render the PNG and JPEG rows depend on."
+    },
+    {
+      "n": 24,
+      "feature": "GET /api/agent",
+      "interaction": "curl without a bearer, then with the agent bearer from hosts.json",
+      "result": "works",
+      "evidence": "no bearer: 401 application/json; charset=utf-8; with bearer: 200 application/json; charset=utf-8; manifest {\"keys\":[\"name\",\"schemaVersion\",\"description\",\"discovery\",\"transports\",\"rules\",\"execution\",\"skills\",\"actionCount\",\"resources\",\"version\",\"actions\",\"actionsByGroup\",\"window\",\"implemented\",\"notImplemented\",\"http\",\"auth\",\"sessions\",\"defaultDeck\",\"generatedAt\",\"instance\"],\"version\":\"0.0.0\",\"actions\":156,\"implemented\":150,\"notImplemented\":19,\"httpImplemented\":148,\"auth\":{\"required\":true,\"env\":\"TURBOSLIDE_TOKEN\",\"localhostOpen\":false},\"sessions\":0,\"defaultDeck\":\"untitled-20260916-lmwb\",\"instance\":{\"effectsBackend\":\"typescript\",\"glibcVersionRuntime\":\"2.34\",\"node\":\"v24.18.1\",\"platform\":\"linux\"},\"transports\":[\"cli\",\"mcp\",\"http\",\"window\"],\"execution\":{\"method\":\"POST\",\"path\":\"/api/actions/<id>\",\"describ",
+      "severity": 0,
+      "need": "useful",
+      "why": "The manifest an agent reads first; refused without the token, answered with it."
+    },
+    {
+      "n": 25,
+      "feature": "GET /openapi.json",
+      "interaction": "curl",
+      "result": "works",
+      "evidence": "status 200 application/json; charset=utf-8; cache-control public, max-age=300; openapi 3.1.0; title \"Turboslide agent API\" 0.1.0; paths 153; has /api/actions/deck.info true",
+      "severity": 0,
+      "need": "useful",
+      "why": "The contract document the CLI and MCP are generated from."
+    },
+    {
+      "n": 26,
+      "feature": "GET /llms.txt and /mcp",
+      "interaction": "curl without a bearer",
+      "result": "works",
+      "evidence": "/llms.txt 200 text/plain; charset=utf-8; /mcp 401 (documented, not driven further: the MCP and CLI are out of the scope of this audit)",
+      "severity": 0,
+      "need": "park",
+      "why": "Documentation for agents; the MCP transport is documented but not driven here."
+    },
+    {
+      "n": 27,
+      "feature": "cleanup: File > Move to trash",
+      "interaction": "click the row",
+      "result": "works",
+      "evidence": "address /decks",
+      "severity": 0,
+      "need": "core",
+      "why": "The scratch deck leaves the home page."
+    },
+    {
+      "n": 28,
+      "feature": "cleanup: Delete forever",
+      "interaction": "Delete forever on the trash card, confirm",
+      "result": "works",
+      "evidence": "card untitled-20260916-lmwb left the trash",
+      "severity": 0,
+      "need": "core",
+      "why": "The store is left as it was found."
+    },
+    {
+      "n": 29,
+      "feature": "cleanup: the scratch deck answers 404",
+      "interaction": "GET /edit/untitled-20260916-lmwb and /deck/untitled-20260916-lmwb",
+      "result": "works",
+      "evidence": "/edit 404; /deck 404",
+      "severity": 0,
+      "need": "core",
+      "why": "Proof the deck is gone."
+    }
+  ]
+}

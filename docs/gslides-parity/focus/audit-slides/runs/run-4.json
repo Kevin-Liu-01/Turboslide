@@ -1,0 +1,165 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-m7ki",
+  "version": 1,
+  "startedAt": "2026-09-16T01:03:59.678Z",
+  "ms": 98417,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Apply layout",
+      "interaction": "Trial 1: on a fresh empty Title and body slide apply Section header, then Title and body again; count the blocks left on the slide",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide split-1: 3 blocks, runs h/text,p1/text,p2/text -> Section header opener/opener/-, 3 blocks -> Title and body content/split/split, 4 blocks (1 more than the fresh slide), runs h/text,p1/text,p2/text; snackbars null / null",
+      "shot": "audit-slides/121-carry-picture-1.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "Apply layout",
+      "interaction": "Trial 2: on a fresh empty Title and body slide apply Section header, then Title and body again; count the blocks left on the slide",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide split-2: 3 blocks, runs h/text,p1/text,p2/text -> Section header opener/opener/-, 3 blocks -> Title and body content/split/split, 4 blocks (1 more than the fresh slide), runs h/text,p1/text,p2/text; snackbars null / null",
+      "shot": "audit-slides/122-carry-picture-2.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Apply layout",
+      "interaction": "Trial 3: on a fresh empty Title and body slide apply Section header, then Title and body again; count the blocks left on the slide",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide split-3: 3 blocks, runs h/text,p1/text,p2/text -> Section header opener/opener/-, 3 blocks -> Title and body content/split/split, 4 blocks (1 more than the fresh slide), runs h/text,p1/text,p2/text; snackbars null / null",
+      "shot": "audit-slides/123-carry-picture-3.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Apply layout",
+      "interaction": "Trial 1: on a fresh empty Title and body slide apply Ruled statement list, then Title and table; do the empty list rows stay",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide split-4 -> Ruled statement list content/plain/cols, runs h/text,p1/text,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text -> Title and table content/table/split, 3 blocks, runs h/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text; list runs carried into the table layout 4; snackbars null / null",
+      "shot": "audit-slides/124-carry-list-1.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Apply layout",
+      "interaction": "Trial 2: on a fresh empty Title and body slide apply Ruled statement list, then Title and table; do the empty list rows stay",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide table-1 -> Ruled statement list content/plain/cols, runs h/text,p1/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text -> Title and table content/table/split, 3 blocks, runs h/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text; list runs carried into the table layout 4; snackbars null / null",
+      "shot": "audit-slides/125-carry-list-2.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Apply layout",
+      "interaction": "Trial 3: on a fresh empty Title and body slide apply Ruled statement list, then Title and table; do the empty list rows stay",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh slide table-2 -> Ruled statement list content/plain/cols, runs h/text,p1/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text -> Title and table content/table/split, 3 blocks, runs h/text,table/rows/0/cells/0,table/rows/0/cells/1,table/rows/0/cells/2,table/rows/1/cells/0,table/rows/1/cells/1,table/rows/1/cells/2,table/rows/2/cells/0,table/rows/2/cells/1,table/rows/2/cells/2,table/rows/3/cells/0,table/rows/3/cells/1,table/rows/3/cells/2,list/items/0/text,list/items/1/text,list/items/2/text,list/items/3/text; list runs carried into the table layout 4; snackbars null / null",
+      "shot": "audit-slides/126-carry-list-3.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Apply layout",
+      "interaction": "Trial 1: type a title on a fresh slide, apply Main point, then Title and body; the title must come back and nothing else",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "typed slide 2 blocks, text \"Agenda for todayClick to add textClick to add textClick to a\" -> Main point statement/statement/-, runs big/text, text \"Agenda for today\", snackbar {\"text\":\"Applied Main point. 1 block did not fit this layout\",\"action\":\"Undo\"} -> Title and body content/split/split, 3 blocks, runs h/text,p1/text,p2/text, text \"Agenda for todayClick to add textClick to add text\", title kept true, snackbar {\"text\":\"Applied Main point. 1 block did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": "audit-slides/127-carry-typed-1.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Apply layout",
+      "interaction": "Trial 2: type a title on a fresh slide, apply Main point, then Title and body; the title must come back and nothing else",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "typed slide 3 blocks, text \"Agenda for todayClick to add textClick to add text\" -> Main point statement/statement/-, runs big/text, text \"Agenda for today\", snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"} -> Title and body content/split/split, 3 blocks, runs h/text,p1/text,p2/text, text \"Agenda for todayClick to add textClick to add text\", title kept true, snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": "audit-slides/128-carry-typed-2.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Apply layout",
+      "interaction": "Trial 3: type a title on a fresh slide, apply Main point, then Title and body; the title must come back and nothing else",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "typed slide 3 blocks, text \"Agenda for todayClick to add textClick to add text\" -> Main point statement/statement/-, runs big/text, text \"Agenda for today\", snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"} -> Title and body content/split/split, 3 blocks, runs h/text,p1/text,p2/text, text \"Agenda for todayClick to add textClick to add text\", title kept true, snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": "audit-slides/129-carry-typed-3.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "Apply layout",
+      "interaction": "Trial 1: apply Title slide to a fresh empty Title and body slide and read the snackbar at once",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh empty slide split-7 -> Title slide title/title/-, runs heading/text,lead/text, 2 blocks; snackbar {\"text\":\"Applied Main point. 2 blocks did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "Apply layout",
+      "interaction": "Trial 2: apply Title slide to a fresh empty Title and body slide and read the snackbar at once",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh empty slide split-8 -> Title slide title/title/-, runs heading/text,lead/text, 2 blocks; snackbar {\"text\":\"Applied Title slide. 1 block did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 12,
+      "feature": "Apply layout",
+      "interaction": "Trial 3: apply Title slide to a fresh empty Title and body slide and read the snackbar at once",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "fresh empty slide split-9 -> Title slide title/title/-, runs heading/text,lead/text, 2 blocks; snackbar {\"text\":\"Applied Title slide. 1 block did not fit this layout\",\"action\":\"Undo\"}",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 13,
+      "feature": "Apply layout",
+      "interaction": "Undo after a layout change on a typed slide brings the previous layout and text back",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "content/split/split -> content/cols/cols (text \"Pricing optionsClick to add textClick to add text\") -> undo content/split/split, title kept true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 14,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-m7ki left the trash",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 15,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 404",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

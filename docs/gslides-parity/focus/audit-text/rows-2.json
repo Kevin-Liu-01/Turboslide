@@ -1,0 +1,470 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-itw2",
+  "startedAt": "2026-09-16T01:03:11.476Z",
+  "ms": 356834,
+  "rows": 45,
+  "works": 27,
+  "broken": 17,
+  "flaky": 1,
+  "notDriven": 0,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "Title placeholder",
+      "interaction": "Double click the title, type a sentence with pauses between words, Escape (control case for the burst rows)",
+      "result": "works",
+      "evidence": "typed \"Acme renewal: Q3 2026, 3 sites.\"; stored \"Acme renewal: Q3 2026, 3 sites.\"; revision 5; reject card null; status \"null\"",
+      "severity": 0,
+      "need": "core",
+      "why": "The cover line is the first edit on every deck."
+    },
+    {
+      "n": 2,
+      "feature": "Text box (new)",
+      "interaction": "Insert > Text box, one click, type \"Renewal terms for Acme, 3 sites\" with pauses between words, wait, Escape (box 1 of 3)",
+      "result": "works",
+      "evidence": "text text at 120,560 480x64; DOM after typing \"Renewal terms for Acme, 3 sites\"; stored after Escape \"Renewal terms for Acme, 3 sites\"; reject card while typing none, after Escape none; status while typing \"null\", after \"null\"; revision 12; pending 0; screenshot docs/gslides-parity/focus/audit-text/41-fresh-text-box-1.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A caption typed into a new box must keep every word; a lost or doubled word reaches the customer."
+    },
+    {
+      "n": 3,
+      "feature": "Text box (new)",
+      "interaction": "Insert > Text box, one click, type \"Renewal terms for Acme, 3 sites\" with pauses between words, wait, Escape (box 2 of 3)",
+      "result": "works",
+      "evidence": "text text-2 at 620,560 480x64; DOM after typing \"Renewal terms for Acme, 3 sites\"; stored after Escape \"Renewal terms for Acme, 3 sites\"; reject card while typing none, after Escape none; status while typing \"null\", after \"null\"; revision 17; pending 0; screenshot docs/gslides-parity/focus/audit-text/42-fresh-text-box-2.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A caption typed into a new box must keep every word; a lost or doubled word reaches the customer."
+    },
+    {
+      "n": 4,
+      "feature": "Text box (new)",
+      "interaction": "Insert > Text box, one click, type \"Renewal terms for Acme, 3 sites\" with pauses between words, wait, Escape (box 3 of 3)",
+      "result": "works",
+      "evidence": "text text-3 at 1120,560 480x64; DOM after typing \"Renewal terms for Acme, 3 sites\"; stored after Escape \"Renewal terms for Acme, 3 sites\"; reject card while typing none, after Escape none; status while typing \"null\", after \"null\"; revision 23; pending 0; screenshot docs/gslides-parity/focus/audit-text/43-fresh-text-box-3.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A caption typed into a new box must keep every word; a lost or doubled word reaches the customer."
+    },
+    {
+      "n": 5,
+      "feature": "Text box (new)",
+      "interaction": "Insert > Text box, one click, wait 3 s before typing, then the same sentence with pauses",
+      "result": "works",
+      "evidence": "text text-4; stored \"Renewal terms for Acme, 3 sites\"; reject card while typing none, after none; status \"null\"; revision 30",
+      "severity": 0,
+      "need": "core",
+      "why": "Tells whether the refusals come from typing right after the insert."
+    },
+    {
+      "n": 6,
+      "feature": "Text box (new)",
+      "interaction": "Insert > Text box, one click, type the sentence without pauses (40 to 90 ms per key)",
+      "result": "works",
+      "evidence": "text text-5; stored \"Renewal terms for Acme, 3 sites\"; reject card while typing none, after none; status \"null\"; revision 32",
+      "severity": 0,
+      "need": "core",
+      "why": "Tells whether the pause between words is part of the mechanism."
+    },
+    {
+      "n": 7,
+      "feature": "Subtitle text",
+      "interaction": "Open the subtitle, End, Enter, type a second line with pauses (a placeholder run, the same pace)",
+      "result": "broken",
+      "evidence": "stored subtitle \"Prepared for Jordan Lee, 14 September 2026\"; reject card while typing none, after none; status \"null\"; revision 37",
+      "severity": 3,
+      "need": "core",
+      "why": "Tells whether the refusals are specific to new text boxes."
+    },
+    {
+      "n": 8,
+      "feature": "Toolbar (text)",
+      "interaction": "Click the text box: the state names it and the toolbar shows the text controls",
+      "result": "works",
+      "evidence": "chip Text box; state blockId text (the box text); font:disabled fontSize:on bold:on italic:on underline:on textColor:on highlightColor:on insertLink:on align:on spacing:on bulletedList:on numberedList:on decreaseIndent:on increaseIndent:on clearFormatting:on; screenshot docs/gslides-parity/focus/audit-text/45-toolbar-on-text-box.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The contextual toolbar is where the ten text actions live."
+    },
+    {
+      "n": 9,
+      "feature": "Font family",
+      "interaction": "Click the Font dropdown on the toolbar",
+      "result": "broken",
+      "evidence": "button \"Font\" aria-disabled true; attributes \"Font\"; plate opened false; tooltip \"text-5: Resize nwDrag the top left corner to resize; Shift keeps the aspect ratio, Option resizes from the centre. Arrows step 1 px, Shift 10 px.\"; snackbar \"\"; screenshot docs/gslides-parity/focus/audit-text/46-font-button.png",
+      "severity": 1,
+      "need": "park",
+      "why": "The theme font is the brand; sellers do not change fonts."
+    },
+    {
+      "n": 10,
+      "feature": "Font size",
+      "interaction": "Type 40 in the Font size field and press Enter",
+      "result": "broken",
+      "evidence": "try 1: selected text (same true); field 20 -> 44; selected after Enter text; stored typography {\"size\":44}; DOM font 44px; snackbar \"Font size 44: the nearest step of the type ladder\"; reject null | try 2: selected text (same true); field 44 -> 44; selected after Enter text; stored typography {\"size\":44}; DOM font 44px; snackbar \"Font size 44: the nearest step of the type ladder\"; reject null | try 3: selected text (same true); field 44 -> 44; selected after Enter text; stored typography {\"size\":44}; DOM font 44px; snackbar \"Font size 44: the nearest step of the type ladder\"; reject null",
+      "severity": 2,
+      "need": "core",
+      "why": "Making a number bigger on a pricing slide is a weekly task."
+    },
+    {
+      "n": 11,
+      "feature": "Font size",
+      "interaction": "Click the plus (increase) then the minus (decrease)",
+      "result": "works",
+      "evidence": "field 44 -> plus 58 -> minus 44; stored size after plus 58, after minus 44; DOM font 44px; selected text",
+      "severity": 0,
+      "need": "core",
+      "why": "Stepping the size is the quick way to fit a line."
+    },
+    {
+      "n": 12,
+      "feature": "Bold",
+      "interaction": "Select the text box and click Bold; click again to undo it",
+      "result": "works",
+      "evidence": "after one click: stored weight 500, DOM font-weight 500, button pressed true; after the second: stored weight undefined, DOM 400; selected text",
+      "severity": 0,
+      "need": "core",
+      "why": "Bold is the most used text style on a sales slide."
+    },
+    {
+      "n": 13,
+      "feature": "Bold",
+      "interaction": "Double click a word in the box, press Cmd+B: the word alone is bold",
+      "result": "works",
+      "evidence": "selection \"terms\"; DOM <b> 1; stored \"Renewal *terms* for Acme, 3 sites\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Bolding one number must not bold the whole box."
+    },
+    {
+      "n": 14,
+      "feature": "Italic",
+      "interaction": "Double click a word in the box and click Italic on the toolbar",
+      "result": "broken",
+      "evidence": "try 1: selection \"Renewal\"; session still open after the click false; stored \"Renewal *terms* for Acme, 3 sites\" -> \"[Renewal ]{i}*[terms]{i}*[ for Acme, 3 sites]{i}\" (the word alone false); snackbar \"\"; selected text | try 2: selection \"Renewal\"; session still open after the click false; stored \"[Renewal ]{i}*[terms]{i}*[ for Acme, 3 sites]{i}\" -> \"Renewal *terms* for Acme, 3 sites\" (the word alone false); snackbar \"\"; selected text | try 3: selection \"Renewal\"; session still open after the click false; stored \"Renewal *terms* for Acme, 3 sites\" -> \"[Renewal ]{i}*[terms]{i}*[ for Acme, 3 sites]{i}\" (the word alone false); snackbar \"\"; selected text",
+      "severity": 2,
+      "need": "core",
+      "why": "The toolbar button must act on the selected word like Cmd+I does."
+    },
+    {
+      "n": 15,
+      "feature": "Italic",
+      "interaction": "Double click a word in the box and press Cmd+I",
+      "result": "broken",
+      "evidence": "try 1: selection \"for\"; stored \"[Renewal ]{i}*[terms]{i}*[ ]{i}for[ Acme, 3 sites]{i}\" | try 2: selection \"for\"; stored \"[Renewal ]{i}*[terms]{i}*[ for Acme, 3 sites]{i}\" | try 3: selection \"for\"; stored \"[Renewal ]{i}*[terms]{i}*[ ]{i}for[ Acme, 3 sites]{i}\"",
+      "severity": 2,
+      "need": "core",
+      "why": "The key route to italic."
+    },
+    {
+      "n": 16,
+      "feature": "Underline",
+      "interaction": "Double click a word and press Cmd+U; then click Underline on the toolbar with the box selected",
+      "result": "works",
+      "evidence": "selection \"Acme\"; after Cmd+U \"[Renewal ]{i}*[terms]{i}*[ ]{i}for[ ]{i}[Acme]{i u}[, 3 sites]{i}\"; after the toolbar Underline on the whole box \"[Renewal ]{i u}*[terms]{i u}*[ ]{i u}[for]{u}[ Acme, 3 sites]{i u}\"; snackbar \"\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Underline is rare on slides."
+    },
+    {
+      "n": 17,
+      "feature": "Strikethrough",
+      "interaction": "Double click a word and press Cmd+Shift+X; then Format > Text > Strikethrough on the box",
+      "result": "broken",
+      "evidence": "try 1: selection \" \"; after Cmd+Shift+X \"[Renewal ]{i u}*[terms]{i u}*[ ]{i u}[for]{u}[ Acme, 3]{i u}[ ]{i u s}[sites]{i u}\"; row enabled; after the menu row on the whole box \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; snackbar \"\" | try 2: selection \" \"; after Cmd+Shift+X \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3]{i u s}[ ]{i u}[sites]{i u s}\"; row enabled; after the menu row on the whole box \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; snackbar \"\" | try 3: selection \" \"; after Cmd+Shift+X \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3]{i u s}[ ]{i u}[sites]{i u s}\"; row enabled; after the menu row on the whole box \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; snackbar \"\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "A struck price is the one sales use."
+    },
+    {
+      "n": 18,
+      "feature": "Text colour",
+      "interaction": "Double click a word, open Text color and pick a swatch",
+      "result": "broken",
+      "evidence": "try 1: selection \"sites\"; plate false; session open with the plate false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked paper; stored text \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; block color none; DOM color rgb(242, 242, 240) | try 2: selection \"sites\"; plate false; session open with the plate false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked paper; stored text \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; block color none; DOM color rgb(242, 242, 240) | try 3: selection \"sites\"; plate false; session open with the plate false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked paper; stored text \"[Renewal ]{i u s}*[terms]{i u s}*[ ]{i u s}[for]{u s}[ Acme, 3 sites]{i u s}\"; block color none; DOM color rgb(242, 242, 240); screenshot docs/gslides-parity/focus/audit-text/49-text-colour-plate.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "Colouring a number is common on results slides."
+    },
+    {
+      "n": 19,
+      "feature": "Highlight",
+      "interaction": "Double click a word, open Highlight color and pick a swatch",
+      "result": "works",
+      "evidence": "selection \"for\"; plate false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked ink; stored \"[Renewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Highlight is a review habit."
+    },
+    {
+      "n": 20,
+      "feature": "Alignment",
+      "interaction": "Open Align on the toolbar and pick Center; then Cmd+Shift+R with the box selected",
+      "result": "works",
+      "evidence": "options format.alignIndent.left=Left format.alignIndent.center=Center format.alignIndent.right=Right format.alignIndent.justified=Justified valign-top=Top valign-middle=Middle valign-bottom=Bottom; clicked Center true; stored align center (DOM center); after Cmd+Shift+R stored right (DOM center); screenshot docs/gslides-parity/focus/audit-text/50-align-list.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Centring a caption or right aligning numbers is routine."
+    },
+    {
+      "n": 21,
+      "feature": "Line spacing",
+      "interaction": "Open Line & paragraph spacing on the toolbar and pick 1.5",
+      "result": "works",
+      "evidence": "options format.spacing.single=Single format.spacing.1_15=1.15 format.spacing.1_5=1.5 format.spacing.double=Double; clicked true; stored leading undefined -> 1.5; DOM line-height 66px",
+      "severity": 0,
+      "need": "useful",
+      "why": "Spacing fixes a cramped body."
+    },
+    {
+      "n": 22,
+      "feature": "Clear formatting",
+      "interaction": "Select the formatted box and click Clear formatting",
+      "result": "works",
+      "evidence": "before typography {\"size\":44,\"align\":\"right\",\"leading\":1.5}; after typography undefined, color none, text \"[Renewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\" (inline marks kept true); snackbar \"\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Pasted text arrives with stray styles."
+    },
+    {
+      "n": 23,
+      "feature": "Clear formatting",
+      "interaction": "Bold the box again, then Cmd+\\ with the box selected",
+      "result": "works",
+      "evidence": "after Bold weight 500; after Cmd+\\ typography undefined; snackbar \"\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "The Google shortcut."
+    },
+    {
+      "n": 24,
+      "feature": "Text box",
+      "interaction": "Insert a text box by click and type three lines with Enter between them",
+      "result": "works",
+      "evidence": "text text-6 at 120,760 480x64; stored \"Onboarding in 30 days\\nDedicated support line\\nQuarterly reviews\" (3 paragraphs); reject card none; status \"null\"",
+      "severity": 0,
+      "need": "core",
+      "why": "A three line body is the raw material for a list."
+    },
+    {
+      "n": 25,
+      "feature": "Bulleted list",
+      "interaction": "Select the three line box and click Bulleted list; click again to remove",
+      "result": "broken",
+      "evidence": "try 1: after one click: type text, marker none, preset none, items n/a, DOM p li 0 text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\"; after the second: type text, marker none; snackbar \"\" | try 2: after one click: type text, marker none, preset none, items n/a, DOM p li 0 text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\"; after the second: type text, marker none; snackbar \"\" | try 3: after one click: type text, marker none, preset none, items n/a, DOM p li 0 text \"Onboarding in 30 daysDedicated support lineQuarterly reviews\"; after the second: type text, marker none; snackbar \"\"; screenshot docs/gslides-parity/focus/audit-text/53-bulleted-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Bullets are the default body form of a sales slide."
+    },
+    {
+      "n": 26,
+      "feature": "Numbered list",
+      "interaction": "Select the three line box and click Numbered list",
+      "result": "broken",
+      "evidence": "try 1: type text, marker none, preset none; DOM \"Onboarding in 30 daysDedicated support lineQuarterly reviews\" | try 2: type text, marker none, preset none; DOM \"Onboarding in 30 daysDedicated support lineQuarterly reviews\" | try 3: type text, marker none, preset none; DOM \"Onboarding in 30 daysDedicated support lineQuarterly reviews\"; screenshot docs/gslides-parity/focus/audit-text/56-numbered-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Agenda slides are numbered lists."
+    },
+    {
+      "n": 27,
+      "feature": "Indent",
+      "interaction": "Click Increase indent on the list, then Decrease indent",
+      "result": "works",
+      "evidence": "levels before indent 0; after Increase indent 64 (snackbar \"\"); after Decrease indent 0",
+      "severity": 0,
+      "need": "useful",
+      "why": "Sub bullets appear on agenda slides."
+    },
+    {
+      "n": 28,
+      "feature": "Indent",
+      "interaction": "Cmd+] then Cmd+[ inside the list session",
+      "result": "works",
+      "evidence": "session true; address unchanged true; levels after Cmd+] indent 64, after Cmd+[ indent 0",
+      "severity": 0,
+      "need": "useful",
+      "why": "The indent chords are Chrome's Back and Forward."
+    },
+    {
+      "n": 29,
+      "feature": "Link",
+      "interaction": "Double click a word in the box, press Cmd+K, type a URL, press Enter",
+      "result": "broken",
+      "evidence": "try 1: selection \"Renewal\"; Cmd+K opened popover true, dialog false; focus after Cmd+K input[run.link.href]; clicked into the field false; field value before Enter \"https://example.com/acme-proposal\"; DOM anchors 1; stored \"[https://example.com/acme-proposalRenewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\" | try 2: selection \"acme\"; Cmd+K opened popover true, dialog false; focus after Cmd+K input[run.link.href]; clicked into the field false; field value before Enter \"https://example.com/acme-proposal\"; DOM anchors 1; stored \"[https://example.com/acme-proposalhttps://example.com/acme-proposalRenewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\" | try 3: selection \"example\"; Cmd+K opened popover true, dialog false; focus after Cmd+K input[run.link.href]; clicked into the field false; field value before Enter \"https://example.com/acme-proposal\"; DOM anchors 1; stored \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://example.com/acme-proposalRenewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\"; screenshot docs/gslides-parity/focus/audit-text/59-link-popover.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A link to the proposal or a case study sends the reader onward."
+    },
+    {
+      "n": 30,
+      "feature": "Link",
+      "interaction": "Start the slideshow and click the linked word",
+      "result": "broken",
+      "evidence": "try 1: no visible anchor for https://example.com/acme-proposal in present mode | try 2: no visible anchor for https://example.com/acme-proposal in present mode | try 3: no visible anchor for https://example.com/acme-proposal in present mode; screenshot docs/gslides-parity/focus/audit-text/62-present-link.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A link that does not open while presenting fails in front of the customer."
+    },
+    {
+      "n": 31,
+      "feature": "Format menu",
+      "interaction": "Open Format > Text with the box selected: the rows are enabled",
+      "result": "works",
+      "evidence": "bold:enabled italic:enabled underline:enabled strikethrough:enabled superscript:enabled subscript:enabled size:enabled capitalization:enabled; screenshot docs/gslides-parity/focus/audit-text/63-format-text-menu.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu is the complete map of text actions."
+    },
+    {
+      "n": 32,
+      "feature": "Format menu",
+      "interaction": "Format > Text > Size > Increase font size",
+      "result": "flaky",
+      "evidence": "try 1: stored size theme default -> 22; DOM font 22px -> 22px | try 2: stored size 22 -> 24; DOM font 22px -> 24px",
+      "severity": 1,
+      "need": "useful",
+      "why": "The menu route to the size step."
+    },
+    {
+      "n": 33,
+      "feature": "Format menu",
+      "interaction": "Format > Text > Capitalization > UPPERCASE",
+      "result": "works",
+      "evidence": "stored \"[https://example.com/acme-proposalhttps://example.com/acme-proposalhttps://example.com/acme-proposalRenewal ]{i u s h:ink}*[terms]{i u s h:ink}*[ ]{i u s h:ink}[for]{u s h:ink}[ Acme, 3 sites]{i u s h:ink}\" -> \"[HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL ]{i u s h:ink}*[TERMS]{i u s h:ink}*[ ]{i u s h:ink}[FOR]{u s h:ink}[ ACME, 3 SITES]{i u s h:ink}\"",
+      "severity": 0,
+      "need": "park",
+      "why": "Case rewriting is a designer's tool."
+    },
+    {
+      "n": 34,
+      "feature": "Format menu",
+      "interaction": "Format > Align & indent > Left",
+      "result": "works",
+      "evidence": "row enabled; stored align left; DOM text-align left",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu route to alignment."
+    },
+    {
+      "n": 35,
+      "feature": "Format menu",
+      "interaction": "Format > Line & paragraph spacing > Double",
+      "result": "works",
+      "evidence": "stored leading undefined -> 2",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu route to spacing."
+    },
+    {
+      "n": 36,
+      "feature": "Format menu",
+      "interaction": "Format > Bullets & numbering > Bulleted list opens the presets; pick the first",
+      "result": "works",
+      "evidence": "presets disc-circle-square,diamondx-arrow3d-square,checkbox,arrow-diamond-disc,star-circle-square,arrow3d-circle-square,lefttriangle-diamond-disc,diamondx-hollowdiamond-square,diamond-circle-square; picked disc-circle-square; stored marker bullet, preset disc-circle-square; screenshot docs/gslides-parity/focus/audit-text/64-bullets-presets.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The menu route to lists with a preset choice."
+    },
+    {
+      "n": 37,
+      "feature": "Format menu",
+      "interaction": "Format > Text fitting opens the panel; choose Shrink text on overflow",
+      "result": "broken",
+      "evidence": "try 1: error: locator.boundingBox: Timeout 5000ms exceeded. | try 2: error: locator.boundingBox: Timeout 5000ms exceeded. | try 3: error: locator.boundingBox: Timeout 5000ms exceeded.",
+      "severity": 1,
+      "need": "useful",
+      "why": "Google's three autofit radios."
+    },
+    {
+      "n": 38,
+      "feature": "Autofit (text box)",
+      "interaction": "Type a long paragraph into the list box: the box grows with the text (autofit grow)",
+      "result": "broken",
+      "evidence": "try 1: autofit none; box h 64 -> 64; DOM box 172 vs content 243 (overflow visible); font 24px; reject null | try 2: autofit none; box h 64 -> 64; DOM box 243 vs content 344 (overflow visible); font 24px; reject null | try 3: autofit none; box h 64 -> 64; DOM box 290.4 vs content 411 (overflow visible); font 24px; reject null; screenshot docs/gslides-parity/focus/audit-text/67-text-box-autofit-grow.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A caption that spills out of its box shows on the customer's screen."
+    },
+    {
+      "n": 39,
+      "feature": "Copy and paste",
+      "interaction": "Within a box: double click a word, Cmd+C, End, space, Cmd+V",
+      "result": "broken",
+      "evidence": "try 1: copied \"sites\"; text \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\" -> \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\"; stored \"[HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL ]{i u s h:ink}*[TERMS]{i u s h:ink}*[ ]{i u s h:ink}[FOR]{u s h:ink}[ ACME, 3 SITES]{i u s h:ink}\" | try 2: copied \"sites\"; text \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\" -> \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\"; stored \"[HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL ]{i u s h:ink}*[TERMS]{i u s h:ink}*[ ]{i u s h:ink}[FOR]{u s h:ink}[ ACME, 3 SITES]{i u s h:ink}\" | try 3: copied \"sites\"; text \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\" -> \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL TERMS FOR ACME, 3 SITES\"; stored \"[HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS://EXAMPLE.COM/ACME-PROPOSALRENEWAL ]{i u s h:ink}*[TERMS]{i u s h:ink}*[ ]{i u s h:ink}[FOR]{u s h:ink}[ ACME, 3 SITES]{i u s h:ink}\"",
+      "severity": 2,
+      "need": "core",
+      "why": "Copying a phrase inside a box is routine editing."
+    },
+    {
+      "n": 40,
+      "feature": "Copy and paste",
+      "interaction": "Between boxes: Cmd+A, Cmd+C in the text box; open the subtitle, End, Enter, Cmd+V",
+      "result": "broken",
+      "evidence": "try 1: copied 130 chars \"HTTPS://EXAMPLE.COM/ACME-PROPOSALHTTPS:/\"; subtitle \"Prepared for Jordan Lee, 14 September 2026\" -> \"Prepared for Jordan Lee, 14 September 2026\" (lines 1); stored subtitle \"Prepared for Jordan Lee, 14 September 2026\"; reject null | try 2: copied 21 chars \"Onboarding in 30 days\"; subtitle \"Prepared for Jordan Lee, 14 September 2026\" -> \"Prepared for Jordan Lee, 14 September 2026\" (lines 1); stored subtitle \"Prepared for Jordan Lee, 14 September 2026\"; reject null | try 3: copied 0 chars \"\"; subtitle \"Prepared for Jordan Lee, 14 September 2026\" -> \"Prepared for Jordan Lee, 14 September 2026\" (lines 1); stored subtitle \"Prepared for Jordan Lee, 14 September 2026\"; reject null; screenshot docs/gslides-parity/focus/audit-text/70-paste-between-boxes.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Moving text between boxes is how a seller reuses a line."
+    },
+    {
+      "n": 41,
+      "feature": "Copy and paste",
+      "interaction": "Cmd+Shift+V pastes the copied text without formatting inside the subtitle",
+      "result": "broken",
+      "evidence": "try 1: subtitle length 42 -> 42; tail \"Prepared for Jordan Lee, 14 September 2026\" | try 2: subtitle length 42 -> 42; tail \"Prepared for Jordan Lee, 14 September 2026\" | try 3: subtitle length 42 -> 42; tail \"Prepared for Jordan Lee, 14 September 2026\"",
+      "severity": 1,
+      "need": "useful",
+      "why": "Pasting from email or a CRM should keep the theme font."
+    },
+    {
+      "n": 42,
+      "feature": "Find and replace",
+      "interaction": "Edit > Find and replace: find \"Acme\", replace with \"Globex\", Replace all",
+      "result": "works",
+      "evidence": "row enabled; hint \"26 matches on 1 slide\"; result \"Replaced 26 occurrences\"; title now \"Globex renewal: Q3 2026, 3 sites.\"; stored heading \"Globex renewal: Q3 2026, 3 sites.\"; text box \"[HTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALRENEWAL ]{i u s h:ink}*[TERMS]{i u s h:ink}*[ ]{i u s h:ink}[FOR]{u s h:ink}[ Globex, 3 SITES]{i u s h:ink}\\n[HTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALRENEWAL TERMS FOR Globex, 3 SITES]{i u s h:ink}\\n[Onboarding in 30 days]{i u s h:ink}\\n[turboslide:v1:{\\\"kind\\\":\\\"blocks\\\",\\\"deckId\\\":\\\"untitled-20260916-itw2\\\",\\\"slideId\\\":\\\"title\\\",\\\"blocks\\\":\\\\[{\\\"id\\\":\\\"mark\\\",\\\"pos\\\":{\\\"x\\\":137,\\\"y\\\":307.28125,\\\"w\\\":132,\\\"h\\\":84,\\\"z\\\":0},\\\"type\\\":\\\"mark\\\",\\\"w\\\":132,\\\"h\\\":84},{\\\"id\\\":\\\"heading\\\",\\\"pos\\\":{\\\"x\\\":137,\\\"y\\\":439.28125,\\\"w\\\":1326,\\\"h\\\":89.75,\\\"z\\\":1},\\\"type\\\":\\\"heading\\\",\\\"level\\\":\\\"h1\\\",\\\"text\\\":\\\"Globex renewal: Q3 2026, 3 sites.\\\",\\\"autofit\\\":\\\"shrink\\\"},{\\\"id\\\":\\\"lead\\\",\\\"pos\\\":{\\\"x\\\":137,\\\"y\\\":555.03125,\\\"w\\\":901.453125,\\\"h\\\":37.6875,\\\"z\\\":2},\\\"type\\\":\\\"paragraph\\\",\\\"text\\\":\\\"Prepared for Jordan Lee, 14 September 2026\\\",\\\"role\\\":\\\"lead\\\",\\\"tone\\\":\\\"muted\\\",\\\"measure\\\":56,\\\"autofit\\\":\\\"shrink\\\"},{\\\"id\\\":\\\"text\\\",\\\"pos\\\":{\\\"x\\\":120,\\\"y\\\":560,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":3},\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"\\\\[HTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALRENEWAL \\\\*\\\\[TERMS]{i u s h:ink}\\\\*\\\\[ ]{i u s h:ink}\\\\[FOR]{u s h:ink}\\\\[ Globex, 3 SITES]{i u s h:ink}\\\\n\\\\[HTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALRENEWAL TERMS FOR Globex, 3 SITES]{i u s h:ink}\\\\n\\\\[Onboarding in 30 days]{i u s h:ink}\\\",\\\"autofit\\\":\\\"grow\\\",\\\"typography\\\":{\\\"size\\\":24,\\\"align\\\":\\\"left\\\",\\\"leading\\\":2}},{\\\"id\\\":\\\"text-2\\\",\\\"pos\\\":{\\\"x\\\":620,\\\"y\\\":560,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":4},\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"Renewal terms for Globex 3 sites\\\",\\\"autofit\\\":\\\"grow\\\"},{\\\"id\\\":\\\"text-3\\\",\\\"pos\\\":{\\\"x\\\":1120,\\\"y\\\":560,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":5},\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"Renewal terms for Globex 3 sites\\\",\\\"autofit\\\":\\\"grow\\\"},{\\\"id\\\":\\\"text-4\\\",\\\"pos\\\":{\\\"x\\\":120,\\\"y\\\":700,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":6},\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"Renewal terms for Globex 3 sites sites sites sites\\\",\\\"autofit\\\":\\\"grow\\\"},{\\\"id\\\":\\\"text-5\\\",\\\"pos\\\":{\\\"x\\\":620,\\\"y\\\":700,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":7},\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"Renewal terms for Globex 3 sites\\\",\\\"autofit\\\":\\\"grow\\\"},{\\\"id\\\":\\\"text-6\\\",\\\"pos\\\":{\\\"x\\\":120,\\\"y\\\":760,\\\"w\\\":480,\\\"h\\\":64,\\\"z\\\":8},\\\"type\\\":\\\"plain\\\",\\\"marker\\\":\\\"bullet\\\",\\\"preset\\\":\\\"disc-circle-square\\\",\\\"items\\\":\\\\[{\\\"text\\\":\\\"Onboarding in 30 days\\\"},{\\\"text\\\":\\\"Dedicated support line with the account team, the renewal desk and the regional leads for every site in scope this year with the account team, the renewal desk and the regional leads for every site in scope this year with the account team, the renewal desk and the regional leads for every site in scope this year\\\"},{\\\"text\\\":\\\"Quarterly reviews\\\"}]}]}]{i u s h:ink}]{i u s h:ink}\"; any \"Acme\" left on the slide false; screenshot docs/gslides-parity/focus/audit-text/71-find-replace-dialog.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Renaming the customer across a cloned deck is the seller's top task."
+    },
+    {
+      "n": 43,
+      "feature": "Find and replace",
+      "interaction": "Cmd+Shift+H opens the dialog; the count shows for \"Globex\"; Escape closes it",
+      "result": "broken",
+      "evidence": "try 1: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape false | try 2: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape false | try 3: dialog opened true; hint \"0 matches on 0 slide\"; closed on Escape false",
+      "severity": 1,
+      "need": "useful",
+      "why": "The Google shortcut."
+    },
+    {
+      "n": 44,
+      "feature": "Persistence",
+      "interaction": "Reload the deck: the edits are on the page",
+      "result": "works",
+      "evidence": "status before the reload \"null\"; revision 96 -> 96; title \"Globex renewal: Q3 2026, 3 sites.\"; subtitle \"Prepared for Jordan Lee, 14 September 2026\"; text box \"[HTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-PROPOSALHTTPS://EXAMPLE.COM/Globex-P; list box plain marker bullet text 3; screenshot docs/gslides-parity/focus/audit-text/72-after-reload.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Autosave is the contract."
+    },
+    {
+      "n": 45,
+      "feature": "Scratch deck",
+      "interaction": "File > Move to trash, Delete forever, then GET /deck/<id>",
+      "result": "works",
+      "evidence": "File > Move to trash: /decks; Delete forever: the card left the trash; GET /deck/untitled-20260916-itw2 404, GET /edit/untitled-20260916-itw2 404",
+      "severity": 0,
+      "need": "core",
+      "why": "A run must leave production as it found it."
+    }
+  ]
+}

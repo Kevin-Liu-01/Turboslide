@@ -1,0 +1,182 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-xpin",
+  "version": 1,
+  "startedAt": "2026-09-16T01:04:04.814Z",
+  "ms": 398912,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Delete slide",
+      "interaction": "Trial 1: in the grid, Shift click two tiles, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"snackbar.action\"]').first()\n",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "Delete slide",
+      "interaction": "Trial 2: in the grid, Shift click two tiles, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"snackbar.action\"]').first()\n",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Delete slide",
+      "interaction": "Trial 3: in the grid, Shift click two tiles, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"snackbar.action\"]').first()\n",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Delete slide",
+      "interaction": "Trial 1: in the filmstrip, Shift click two cards, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 4 (snackbar {\"text\":\"Deleted 2 slides\",\"action\":\"Undo\"}; sync {\"revision\":12,\"serverRevision\":12,\"pending\":2,\"rejects\":0,\"error\":null,\"connected\":true}) -> Undo by snackbar 6 (restored in the tab true; sync {\"revision\":14,\"serverRevision\":14,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeSaving…\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 5,
+      "feature": "Delete slide",
+      "interaction": "Trial 2: in the filmstrip, Shift click two cards, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 4 (snackbar {\"text\":\"Deleted 2 slides\",\"action\":\"Undo\"}; sync {\"revision\":14,\"serverRevision\":14,\"pending\":2,\"rejects\":0,\"error\":null,\"connected\":true}) -> Undo by snackbar 6 (restored in the tab true; sync {\"revision\":16,\"serverRevision\":16,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeSaving…\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 6,
+      "feature": "Delete slide",
+      "interaction": "Trial 3: in the filmstrip, Shift click two cards, press Delete, click Undo on the snackbar; then reload and compare the server's order",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 4 (snackbar {\"text\":\"Deleted 2 slides\",\"action\":\"Undo\"}; sync {\"revision\":16,\"serverRevision\":16,\"pending\":2,\"rejects\":0,\"error\":null,\"connected\":true}) -> Undo by snackbar 6 (restored in the tab true; sync {\"revision\":18,\"serverRevision\":18,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeAll changes saved\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 7,
+      "feature": "Delete slide",
+      "interaction": "Trial 1: two cards selected, Slide menu > Delete slide, then Cmd+Z; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":19,\"serverRevision\":19,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}) -> Cmd+Z 6 (restored in the tab true; sync {\"revision\":20,\"serverRevision\":20,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeAll changes saved\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 8,
+      "feature": "Delete slide",
+      "interaction": "Trial 2: two cards selected, Slide menu > Delete slide, then Cmd+Z; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":21,\"serverRevision\":21,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}) -> Cmd+Z 6 (restored in the tab true; sync {\"revision\":22,\"serverRevision\":22,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeSaving…\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 9,
+      "feature": "Delete slide",
+      "interaction": "Trial 3: two cards selected, Slide menu > Delete slide, then Cmd+Z; then reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "selected split-5,split-4; 6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":23,\"serverRevision\":23,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}) -> Cmd+Z 6 (restored in the tab true; sync {\"revision\":24,\"serverRevision\":24,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeSaving…\"; dialogs none); server after reload 6: title,split-1,split-2,split-3,split-5,split-4 (matches true)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 10,
+      "feature": "Delete slide",
+      "interaction": "Trial 1: in the grid, Shift click two tiles and press Delete, no undo; reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":25,\"serverRevision\":25,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeAll changes saved\"; dialogs none); server after reload 5: title,split-1,split-2,split-3,split-4 (the two gone false)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 11,
+      "feature": "Delete slide",
+      "interaction": "Trial 2: in the grid, Shift click two tiles and press Delete, no undo; reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":27,\"serverRevision\":27,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeSaving…\"; dialogs none); server after reload 5: title,split-1,split-2,split-3,split-5 (the two gone false)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 12,
+      "feature": "Delete slide",
+      "interaction": "Trial 3: in the grid, Shift click two tiles and press Delete, no undo; reload and compare the server's order",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "6 -> Delete 5 (snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; sync {\"revision\":29,\"serverRevision\":29,\"pending\":0,\"rejects\":0,\"error\":null,\"connected\":true}; save \"Q3 pipeline review for AcmeAll changes saved\"; dialogs none); server after reload 5: title,split-1,split-2,split-3,split-4 (the two gone false)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 13,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-xpin left the trash",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 14,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 404",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

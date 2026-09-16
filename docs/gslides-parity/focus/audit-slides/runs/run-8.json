@@ -1,0 +1,45 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-w0i4",
+  "version": 1,
+  "startedAt": "2026-09-16T01:07:53.725Z",
+  "ms": 52258,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Slide counter",
+      "interaction": "Read the sheet footer counter and the card numbers after clicking card 3, after New slide, after Delete and after a drag reorder",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: on card 3: footer null, card numbers 1,2,3,4; after New slide: footer null, cards 1,2,3,4,5; after Delete of the new slide: footer null, cards 1,2,3,4, active split-3; after dragging card 3 above card 2: order title,split-2,split-1,split-3, footer null, cards 1,2,3,4, active split-3; toolbar view.count present false | attempt 2: on card 3: footer null, card numbers 1,2,3,4; after New slide: footer null, cards 1,2,3,4,5; after Delete of the new slide: footer null, cards 1,2,3,4, active split-3; after dragging card 3 above card 2: order title,split-1,split-2,split-3, footer null, cards 1,2,3,4, active split-3; toolbar view.count present false | attempt 3: on card 3: footer null, card numbers 1,2,3,4; after New slide: footer null, cards 1,2,3,4,5; after Delete of the new slide: footer null, cards 1,2,3,4, active split-3; after dragging card 3 above card 2: order title,split-2,split-1,split-3, footer null, cards 1,2,3,4, active split-3; toolbar view.count present false | attempt 4: on card 3: footer null, card numbers 1,2,3,4; after New slide: footer null, cards 1,2,3,4,5; after Delete of the new slide: footer null, cards 1,2,3,4, active split-3; after dragging card 3 above card 2: order title,split-1,split-2,split-3, footer null, cards 1,2,3,4, active split-3; toolbar view.count present false",
+      "shot": "audit-slides/234-footer-counter.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash (run 8)",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-w0i4 left the trash",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete (run 8)",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 404",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

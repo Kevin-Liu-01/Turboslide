@@ -1,0 +1,181 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-yvia",
+  "version": 1,
+  "startedAt": "2026-09-16T01:04:01.914Z",
+  "ms": 144526,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Skip slide",
+      "interaction": "Right click a card > Skip slide; the card fades with the eye glyph; the row then reads Unskip slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row before \"Skip slide\"; slide.skip true; card {\"id\":\"split-4\",\"n\":\"5\",\"current\":true,\"selected\":true,\"skipped\":true,\"skipAttr\":true,\"glyph\":true,\"ariaSelected\":\"true\",\"focused\":false}; row after \"Unskip slide\"; counter null",
+      "shot": "audit-slides/141-skip-slide.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "Skip slide",
+      "interaction": "Slide menu > Unskip slide on the skipped slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row \"Unskip slide\"; skip true -> undefined; card skipped false, glyph false",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Grid view",
+      "interaction": "Click Grid view in the bottom bar; every slide is a tile; Filmstrip view brings the canvas back",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "grid on: {\"tiles\":5,\"order\":true,\"active\":\"split-4\",\"skipped\":1,\"filmHidden\":true,\"filmWidth\":256,\"gridPressed\":\"true\"}; back: {\"grid\":false,\"stage\":true,\"filmWidth\":256,\"filmPressed\":\"true\"}",
+      "shot": "audit-slides/142-grid-view.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Grid view",
+      "interaction": "In the grid, click a tile to select it and double click it to open that slide",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: after click: active tile null, selected 0, state split-2; after double click: grid false, active split-2, counter null | attempt 2: after click: active tile null, selected 0, state split-2; after double click: grid false, active split-2, counter null | attempt 3: after click: active tile null, selected 0, state split-2; after double click: grid false, active split-2, counter null | attempt 4: after click: active tile null, selected 0, state split-2; after double click: grid false, active split-2, counter null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Grid view",
+      "interaction": "View menu > Grid view toggles the grid on, and again off",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"Grid view\"}; on true (5 tiles); checked while on true; off true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Grid view",
+      "interaction": "Double click a filmstrip card opens the grid; the bottom bar Filmstrip view returns",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "grid after the double click true; after Escape still on; back true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Grid view",
+      "interaction": "Drag a grid tile to a new place",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: title,split-1,split-2,split-3,split-4 -> title,split-1,split-2,split-3,split-4 | attempt 2: title,split-1,split-2,split-3,split-4 -> title,split-1,split-2,split-3,split-4 | attempt 3: title,split-1,split-2,split-3,split-4 -> title,split-1,split-2,split-3,split-4 | attempt 4: title,split-1,split-2,split-3,split-4 -> title,split-1,split-2,split-3,split-4",
+      "shot": "audit-slides/146-grid-drag.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Speaker notes",
+      "interaction": "Click the notes field and type a talk track with spaces; the slide keeps it",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "placeholder \"Click to add speaker notes\"; height 64px; field after typing \"Open with the Q3 number, then pause for questions.\"; stored notes \"Open with the Q3 number, then pause for questions.\"; revision 10",
+      "shot": "audit-slides/147-notes-typed.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Speaker notes",
+      "interaction": "Switch to another slide and back; each slide shows its own notes",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "slide 1 field \"\"; slide 2 field \"Open with the Q3 number, then pause for questions.\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "Speaker notes",
+      "interaction": "Drag the notes handle up to make the pane taller, double click it, drag it back",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "height 64px -> drag 184px (box 184) -> double click 64px (hidden false) -> 64px; value kept \"Open with the Q3 number, then pause for questions.\"",
+      "shot": "audit-slides/148-notes-resized.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "Speaker notes",
+      "interaction": "Reload the deck; the notes are still there",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "revision before 10, after 10; field \"Open with the Q3 number, then pause for questions.\"; stored \"Open with the Q3 number, then pause for questions.\"; height 64px",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 12,
+      "feature": "Slide counter",
+      "interaction": "The counter reads the slide number; clicking it opens a field; a number and Enter go there",
+      "result": "not driven",
+      "attempts": 1,
+      "evidence": "no view.count control on the toolbar",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 13,
+      "feature": "Address hash",
+      "interaction": "The address carries the slide; a reload with the hash and the numeric form land on that slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "after clicking card 3 hash \"#s/split-2\" (/edit/untitled-20260916-yvia#s/split-2); reload lands on split-2; /edit/<id>#2 lands on split-1 (order[1] split-1); hash then \"#s/split-1\"",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 14,
+      "feature": "Slide counter",
+      "interaction": "The counter follows New slide and Delete",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: before null; after New slide null; after Delete null | attempt 2: before null; after New slide null; after Delete null | attempt 3: before null; after New slide null; after Delete null | attempt 4: before null; after New slide null; after Delete null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 15,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-yvia left the trash",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 16,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> and /edit/<id> after the delete",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "/deck 404, /edit 404",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

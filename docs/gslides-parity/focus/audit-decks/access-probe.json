@@ -1,0 +1,250 @@
+[
+  {
+    "theme": "dark",
+    "page": {
+      "x": 480,
+      "y": 90,
+      "w": 480,
+      "h": 563,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "title": {
+      "x": 504,
+      "y": 114,
+      "w": 432,
+      "h": 24,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "sentence": {
+      "x": 504,
+      "y": 146,
+      "w": 432,
+      "h": 19,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(185, 188, 195)",
+      "opacity": "1"
+    },
+    "form": {
+      "x": 504,
+      "y": 181,
+      "w": 432,
+      "h": 255,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "role": {
+      "x": 504,
+      "y": 202,
+      "w": 432,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "message": {
+      "x": 504,
+      "y": 266,
+      "w": 432,
+      "h": 65,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "email": {
+      "x": 504,
+      "y": 362,
+      "w": 432,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "request": {
+      "x": 504,
+      "y": 404,
+      "w": 127,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(242, 242, 240)",
+      "color": "rgb(7, 7, 7)",
+      "opacity": "1"
+    },
+    "signin": {
+      "x": 504,
+      "y": 460,
+      "w": 432,
+      "h": 169,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "figure": null,
+    "children": [
+      "h1.ts-access-title",
+      "p.ts-access-sentence",
+      "form.ts-access-form",
+      "section.ts-access-signin"
+    ],
+    "stylesheets": [
+      "/assets/inter-DJL1FIyQ.css",
+      "/assets/tokens-OLHOkdwO.css",
+      "/assets/brand-CFd7wGFs.css",
+      "/assets/sheet-C4EFVwHh.css",
+      "/assets/stage-DAHOds8-.css",
+      "/assets/styles-CUVxzxxu.css",
+      "/assets/index-CGo_5oGi.css",
+      "/assets/-access-page-BS3CFlrt.css",
+      "/assets/useStudioSession-CIsb7PjM.css",
+      "/assets/Progress-Qh-4a0X0.css",
+      "/assets/IdentityChip-CoVEmx6j.css",
+      "/assets/ToolButton-Ds73Umhw.css"
+    ],
+    "bodyBg": "rgb(7, 7, 7)"
+  },
+  {
+    "theme": "dark",
+    "page": {
+      "x": 480,
+      "y": 90,
+      "w": 480,
+      "h": 563,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "title": {
+      "x": 504,
+      "y": 114,
+      "w": 432,
+      "h": 24,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "sentence": {
+      "x": 504,
+      "y": 146,
+      "w": 432,
+      "h": 19,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(185, 188, 195)",
+      "opacity": "1"
+    },
+    "form": {
+      "x": 504,
+      "y": 181,
+      "w": 432,
+      "h": 255,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "role": {
+      "x": 504,
+      "y": 202,
+      "w": 432,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "message": {
+      "x": 504,
+      "y": 266,
+      "w": 432,
+      "h": 65,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "email": {
+      "x": 504,
+      "y": 362,
+      "w": 432,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(7, 7, 7)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "request": {
+      "x": 504,
+      "y": 404,
+      "w": 127,
+      "h": 32,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgb(242, 242, 240)",
+      "color": "rgb(7, 7, 7)",
+      "opacity": "1"
+    },
+    "signin": {
+      "x": 504,
+      "y": 460,
+      "w": 432,
+      "h": 169,
+      "z": "auto",
+      "pos": "static",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 242, 240)",
+      "opacity": "1"
+    },
+    "figure": null,
+    "children": [
+      "h1.ts-access-title",
+      "p.ts-access-sentence",
+      "form.ts-access-form",
+      "section.ts-access-signin"
+    ],
+    "stylesheets": [
+      "/assets/inter-DJL1FIyQ.css",
+      "/assets/tokens-OLHOkdwO.css",
+      "/assets/brand-CFd7wGFs.css",
+      "/assets/sheet-C4EFVwHh.css",
+      "/assets/stage-DAHOds8-.css",
+      "/assets/styles-CUVxzxxu.css",
+      "/assets/index-CGo_5oGi.css",
+      "/assets/-access-page-BS3CFlrt.css",
+      "/assets/useStudioSession-CIsb7PjM.css",
+      "/assets/Progress-Qh-4a0X0.css",
+      "/assets/IdentityChip-CoVEmx6j.css",
+      "/assets/ToolButton-Ds73Umhw.css"
+    ],
+    "bodyBg": "rgb(7, 7, 7)"
+  }
+]

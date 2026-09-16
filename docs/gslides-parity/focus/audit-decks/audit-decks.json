@@ -1,0 +1,560 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-16T00:47:18.257Z",
+  "ms": 1297262,
+  "deckId": "untitled-20260916-jek6",
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 502 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 500 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Error: Vercel Blob: Failed to fetch blob: 500 Internal Server Error\n    at https://turboslide.vercel.app/edit/untitled-20260916-jek6:271:3619\n    at https://turboslide.vercel.app/edit/untitled-2026091",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "downloads": [
+    "untitled-20260916-jek6-r8.zip"
+  ],
+  "rows": [
+    {
+      "feature": "/home",
+      "interaction": "Open /home",
+      "result": "works",
+      "evidence": "title \"Turboslide\"; h1 \"Turboslide\"; nav Your presentations -> /decks, Documentation -> https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md, For agents -> #agents, GitHub -> https://github.com/Kevin-Liu-01/Turboslide, New Presentation -> /new; hero New Presentation -> /new, Open the GT Deck -> /deck/gt-brand, GitHub -> https://github.com/Kevin-Liu-01/Turboslide; theme dark; screenshot audit-decks/01-home.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller who lands on the product page needs one click to a new deck or to the list"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click the hero New Presentation button",
+      "result": "works",
+      "evidence": "address /new; draft untitled-20260916-dtw5; connected false; save words {\"state\":\"saved\",\"words\":\"Not saved yet\"}; title field \"Untitled presentation\"; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller who lands on the product page needs one click to a new deck or to the list"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click the hero Open the GT Deck button",
+      "result": "works",
+      "evidence": "href /deck/gt-brand; address /deck/gt-brand; viewer settled true; .pt-slide count 17; title \"GT brand deck, Turboslide\"; screenshot audit-decks/02-home-gt-deck-viewer.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The brand deck in the viewer shows a seller what a finished deck looks like"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click the nav link Your presentations",
+      "result": "works",
+      "evidence": "address /decks; h2 Start a new presentation | Recent presentations",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller who lands on the product page needs one click to a new deck or to the list"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click the nav New Presentation button",
+      "result": "works",
+      "evidence": "address /new; draft untitled-20260916-7yrh; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller who lands on the product page needs one click to a new deck or to the list"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click the nav link For agents",
+      "result": "works",
+      "evidence": "hash #agents; scrollY 0 -> 7999; #agents exists true",
+      "severity": 0,
+      "need": "park",
+      "why": "The agent section is for people wiring tools, not for a seller"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Click Dark then Light in the appearance group, reload between",
+      "result": "works",
+      "evidence": "after Dark: data-theme dark, aria-pressed true; after reload dark; after Light light; screenshot audit-decks/04-home-dark.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller on a dark room screen switches the appearance once and expects it to stay"
+    },
+    {
+      "feature": "/home",
+      "interaction": "External links: Documentation and GitHub answer 200 and open in a new tab",
+      "result": "works",
+      "evidence": "Documentation https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md target=_blank rel=noopener status=200; GitHub https://github.com/Kevin-Liu-01/Turboslide target=_blank rel=noopener status=200; GitHub https://github.com/Kevin-Liu-01/Turboslide target=_blank rel=noopener status=200",
+      "severity": 0,
+      "need": "park",
+      "why": "Documentation and the repository are not a seller task"
+    },
+    {
+      "feature": "/home",
+      "interaction": "Tab through the page from the top and read the focus order",
+      "result": "works",
+      "evidence": "1 a [home.nav.lockup] \"Turboslide\" href=/home; 2 a [home.nav.decks] \"Your presentations\" href=/decks; 3 a [home.nav.docs] \"Documentation\" href=https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md; 4 a [home.nav.agents] \"For agents\" href=#agents; 5 a [home.nav.github] \"GitHub\" href=https://github.com/Kevin-Liu-01/Turboslide; 6 button [home.theme.light] \"Light\"; 7 button [home.theme.dark] \"Dark\"; 8 a [home.nav.new] \"New Presentation\" href=/new; 9 a [home.hero.new] \"New Presentation\" href=/new; 10 a [home.hero.deck] \"Open the GT Deck\" href=/deck/gt-brand; 11 a [home.hero.github] \"GitHub\" href=https://github.com/Kevin-Liu-01/Turboslide; 12 a [home.specimen.new] \"New Presentation\" href=/new; 13 a [home.agents.openapi] \"Read the file on GitHub\" href=https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json; 14 a [home.agents.skills] \"Read the file on GitHub\" href=https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md; offscreen at focus 0; screenshot audit-decks/05-home-focus.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "Keyboard order matters to a seller who tabs through the list, but the mouse finishes the task"
+    },
+    {
+      "feature": "/",
+      "interaction": "Open the root address",
+      "result": "works",
+      "evidence": "GET / -> 307 location /new; browser lands on /new; draft untitled-20260916-2jn6; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "severity": 0,
+      "need": "core",
+      "why": "The root address is the one a seller types; it must land on an editable slide"
+    },
+    {
+      "feature": "/new",
+      "interaction": "Read the draft before any write",
+      "result": "works",
+      "evidence": "draft untitled-20260916-jek6; revision 0; save words {\"state\":\"saved\",\"words\":\"Not saved yet\"}; title field \"Untitled presentation\"; runs heading/text,lead/text; document.title \"Untitled presentation, Turboslide\"; screenshot audit-decks/06-new-draft.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Starting a deck and having the first write saved is the first task of every deck"
+    },
+    {
+      "feature": "/new",
+      "interaction": "Double click the title placeholder, type the title, press Escape (the first write)",
+      "result": "works",
+      "evidence": "contenteditable true; typed \"Audit decks Northwind renewal\"; text \"Audit decks Northwind renewal\"; revision 1; address /edit/untitled-20260916-jek6; sync {\"connected\":false,\"transport\":\"poll\",\"tier\":\"memory\"}; save words seen [\"Not saved yet\",\"Saving…\",\"All changes saved\"] then {\"state\":\"saved\",\"words\":\"All changes saved\"}; screenshot audit-decks/07-new-first-write.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Starting a deck and having the first write saved is the first task of every deck"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Read the Saving and Saved words while typing a second edit",
+      "result": "works",
+      "evidence": "revision 1 -> 2; words seen [\"saved:All changes saved\",\"unsaved:Saving…\",\"saved:All changes saved\"]; final {\"state\":\"saved\",\"words\":\"All changes saved\"}; Saving shown true",
+      "severity": 0,
+      "need": "core",
+      "why": "The seller trusts the tool because it says every change is saved"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Read the status chip and the Last edit clock after the write",
+      "result": "works",
+      "evidence": "save words \"All changes saved\" (data-state saved); Last edit \"Last edit just now by Argon 344\"; slot class \"ts-title-clock-slot\"; .ts-status chip absent; presence count 0; buttons \"Slideshow\" \"Share\"; screenshot audit-decks/08-title-row-saved.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The seller trusts the tool because it says every change is saved"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the save words",
+      "result": "works",
+      "evidence": "snackbar \"All changes are saved automatically\"; panel null",
+      "severity": 0,
+      "need": "useful",
+      "why": "The seller trusts the tool because it says every change is saved"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the Last edit clock",
+      "result": "works",
+      "evidence": "aria-pressed true; headings [\"Version history\"]; screenshot audit-decks/09-title-version-history.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "Version history is how a seller recovers a slide they broke"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the deck name, type a new name, press Enter",
+      "result": "works",
+      "evidence": "input focused true, whole name selected true; typed \"Northwind renewal deck\"; shown \"Northwind renewal deck\"; revision 2 -> 3; deck.info title \"Northwind renewal deck\"; document.title \"Untitled presentation, Turboslide\"; screenshot audit-decks/10-title-rename-enter.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the deck name, type, press Escape (restores the name)",
+      "result": "works",
+      "evidence": "before \"Northwind renewal deck\"; after Escape \"Northwind renewal deck\"; revision 3 -> 3",
+      "severity": 0,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the deck name, type, click the canvas (blur commits)",
+      "result": "works",
+      "evidence": "typed \"Northwind renewal deck 1\"; shown \"Northwind renewal deck 1\"; revision 3 -> 4",
+      "severity": 0,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Clear the deck name and press Enter (an empty name)",
+      "result": "works",
+      "evidence": "field after Backspace \"\"; shown after Enter \"Northwind renewal deck 1\" (was \"Northwind renewal deck 1\"); revision 4 -> 4",
+      "severity": 0,
+      "need": "useful",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "File > Rename focuses the name field",
+      "result": "works",
+      "evidence": "File > Rename: input shown true, focused true",
+      "severity": 0,
+      "need": "useful",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "/edit/<id>",
+      "interaction": "Add a slide, then reload the page (the slide stays)",
+      "result": "works",
+      "evidence": "before reload: slide split-1, hash #s/split-1, revision 5; after reload: slide split-1, hash #s/split-1, revision 5, filmstrip active filmstrip.slide.split-1, title \"Northwind renewal deck 1\"; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/11-edit-reload-slide.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Back, forward and reload are how a seller moves between the list and the deck during a call"
+    },
+    {
+      "feature": "Title row",
+      "interaction": "Click the Turboslide mark (home link)",
+      "result": "works",
+      "evidence": "address /decks; hydrated",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller opens existing decks from the list far more often than building new ones"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Read the list after leaving the editor: the strip, Recent and the deck card",
+      "result": "works",
+      "evidence": "Blank -> /new; \"GT brand deck\"; \"Template gallery\"; Recent row true (card \"Northwind renewal deck 1\", \"Opened just now\"); store card \"Northwind renewal deck 1\" \"Opened just now\" thumbnail set loaded false; 30 cards; view grid pressed true; sort opened; Trash -> /decks/trash; screenshot audit-decks/12-decks-list.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller opens existing decks from the list far more often than building new ones"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Type in Search presentations, then a query nothing matches, then clear it",
+      "result": "works",
+      "evidence": "\"Northwind renewal\" -> 1 cards [\"Northwind renewal deck 1\"], recent row [\"Northwind renewal deck 1\"]; nonsense -> \"No presentation matches \\\"nothing like this qzx\\\"Clear the search to see every presentation again.\"; cleared -> 30 cards; screenshot audit-decks/13-decks-search.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller with many decks finds the customer deck by name"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Change Sort by to Title, Last modified, Last opened by me",
+      "result": "works",
+      "evidence": "Title: sorted true (30 cards, first \"Audit scratch\"); Last modified: this deck at index 0; Last opened by me: this deck at index 0; cookie ts-home view%3Agrid%3Bsort%3Aopened",
+      "severity": 0,
+      "need": "useful",
+      "why": "Sort helps a seller with a long list; the default order already puts their decks first"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Switch to list view, reload, switch back to grid",
+      "result": "works",
+      "evidence": "list view: table true, row \"Northwind renewal deck 15:48 PM2⋮\", pressed true; after reload table true pressed true; grid back true; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/14-decks-list-view.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The list view is a preference; the grid is the default a seller sees"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Click the card thumbnail to open the deck, then the browser Back",
+      "result": "works",
+      "evidence": "opened /decks title \"Northwind renewal deck 1\"; Back -> /decks with the card present",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller opens existing decks from the list far more often than building new ones"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Click the card title to open the deck, then Back",
+      "result": "works",
+      "evidence": "opened /edit/untitled-20260916-jek6; Back -> /decks",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller opens existing decks from the list far more often than building new ones"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Click the Recent row card to open the deck, then Back",
+      "result": "works",
+      "evidence": "opened /edit/untitled-20260916-jek6; Back -> /decks; Recent card reads \"Opened just now\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Recent is the row a seller uses to get back to the deck of the last call"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Open the card menu (the three dots), read its rows, close it with Escape",
+      "result": "works",
+      "evidence": "rows [\"Open\",\"Open in new tab\",\"Present\",\"Rename\",\"Make a copy\",\"Download\",\"Move to trash\"]; focus inside the menu true; after Escape focus button [home.more.untitled-20260916-jek6] \"⋮\"; screenshot audit-decks/16-decks-card-menu.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A seller opens existing decks from the list far more often than building new ones"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Rename, type a new name, press Enter",
+      "result": "broken",
+      "evidence": "1: field focused and selected true; typed \"Northwind renewal v2\"; title shows \"Northwind renewal deck 1\"; snackbar \"\"; after reload \"Northwind renewal v2\" | 2: field focused and selected true; typed \"Northwind renewal v2 2\"; title shows \"Northwind renewal v2\"; snackbar \"\"; after reload \"Northwind renewal v2 2\" | 3: field focused and selected true; typed \"Northwind renewal v2 3\"; title shows \"Northwind renewal v2 2\"; snackbar \"\"; after reload \"Northwind renewal v2 2\"; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/17-decks-rename-card.png",
+      "severity": 3,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Rename, type, press Escape (cancels)",
+      "result": "works",
+      "evidence": "before \"Northwind renewal v2 2\"; after Escape \"Northwind renewal v2 2\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "List view: row menu > Rename, type a new name, press Enter",
+      "result": "broken",
+      "evidence": "1: typed \"Northwind renewal rows\"; row title shows \"Northwind renewal v2 2\" | 2: typed \"Northwind renewal rows 2\"; row title shows \"Northwind renewal v2 2\" | 3: typed \"Northwind renewal rows 3\"; row title shows \"Northwind renewal v2 2\"; screenshot audit-decks/18-decks-rename-row.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Tailored decks are named after the customer; the name is the seller handle in the list"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Make a copy, keep the name, click Make a copy",
+      "result": "broken",
+      "evidence": "1: dialog \"Make a copy\", name field \"Copy of Northwind renewal v2 2\" focused true; new tab about:blank; copy id none; copy listed on /decks false as \"null\" | 2: error locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#home-card-menu') to be visible\n | 3: dialog \"Make a copy\", name field \"Copy of Northwind renewal v2 2\" focused true; new tab about:blank; copy id none; copy listed on /decks false as \"null\"; screenshot audit-decks/21-decks-make-a-copy.png",
+      "severity": 3,
+      "need": "core",
+      "why": "A seller clones the last customer deck and tailors it; Make a copy is that clone"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Star a deck",
+      "result": "not driven",
+      "evidence": "not driven: no star control on the card, the row or the title row on production (title.star is omitted in the menu model)",
+      "severity": 0,
+      "need": "park",
+      "why": "Starring is a per person list; the menu model omits title.star and the cards carry no star"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Open in new tab",
+      "result": "flaky",
+      "evidence": "1: error locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#home-card-menu') to be visible\n | 2: new tab /edit/untitled-20260916-jek6; editor settled true; list still at /decks",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller keeps the list open in one tab and the deck in another during a call"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Present",
+      "result": "works",
+      "evidence": "new tab /deck/untitled-20260916-jek6?present=1; viewer settled true; {\"present\":\"1\",\"fullscreenish\":\"pt-viewer is-present\",\"slides\":3}; screenshot audit-decks/22-decks-present-tab.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Presenting over a call is the dominant context; the card must present in one click"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Download",
+      "result": "works",
+      "evidence": "download \"untitled-20260916-jek6-r8.zip\"; snackbar \"\"",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller sends a PDF or a link; the bundle download is a backup of the deck"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Move to trash on the copy, then Undo from the snackbar",
+      "result": "broken",
+      "evidence": "1: no copy to trash | 2: no copy to trash | 3: no copy to trash; screenshot audit-decks/23-decks-trash-undo.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Card menu > Move to trash on the copy (kept in the trash)",
+      "result": "broken",
+      "evidence": "1: no copy to trash | 2: no copy to trash | 3: no copy to trash",
+      "severity": 2,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Click the Template gallery link",
+      "result": "works",
+      "evidence": "address /decks#templates#templates",
+      "severity": 0,
+      "need": "park",
+      "why": "The gallery is the two cards already on the page"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Tab through the list from the top and read the focus order",
+      "result": "works",
+      "evidence": "1 a [appbar.home] \"Turboslide\" href=/decks; 2 a [appbar.about] \"Turboslide\" href=/home; 3 input [home.search] \"Search presentations\"; 4 a [home.gallery] \"Template gallery\" href=#templates; 5 a [home.blank] \"Blank presentation\" href=/new; 6 button [home.gt-brand] \"GT brand deck\"; 7 button [home.view.grid] \"\"; 8 button [home.view.list] \"\"; 9 select [home.sort] \"Last opened by meLast modified\"; 10 a [home.recent.open.untitled-20260916-jek6] \"\" href=/edit/untitled-20260916-jek6; 11 a [home.open.untitled-20260916-jek6] \"Northwind renewal v2 3\" href=/edit/untitled-20260916-jek6; 12 a [home.title.untitled-20260916-jek6] \"Northwind renewal v2 3\" href=/edit/untitled-20260916-jek6; 13 button [home.more.untitled-20260916-jek6] \"⋮\"; 14 a [home.open.untitled-20260916-80o0] \"\" href=/edit/untitled-20260916-80o0; 15 a [home.title.untitled-20260916-80o0] \"Q3 pipeline review for Acme\" href=/edit/untitled-20260916-80o0; 16 button [home.more.untitled-20260916-80o0] \"⋮\"; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/24-decks-focus.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "Keyboard order matters to a seller who tabs through the list, but the mouse finishes the task"
+    },
+    {
+      "feature": "/decks",
+      "interaction": "Click the GT brand deck card (a copy of the 85 slide template)",
+      "result": "works",
+      "evidence": "button read \"Opening\" while opening; 7 s to /edit/gt-brand-mu3e09eu; title \"GT brand deck\"; 85 slides; revision 0; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/25-decks-gt-brand-opened.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Starting from the company template is the second top task"
+    },
+    {
+      "feature": "Editor",
+      "interaction": "File > Move to trash on the GT brand copy",
+      "result": "works",
+      "evidence": "address /decks; snackbar \"\"; the deck listed false; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/26-editor-move-to-trash.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Open the trash from the Trash link at the foot of /decks",
+      "result": "broken",
+      "evidence": "1: address /decks/trash; copy card false \"undefined\"; GT copy card true; 5 cards; Empty trash enabled true | 2: address /decks/trash; copy card false \"undefined\"; GT copy card true; 5 cards; Empty trash enabled true | 3: address /decks/trash; copy card false \"undefined\"; GT copy card true; 5 cards; Empty trash enabled true; console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/27-trash-list.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Restore the copy, then find it on /decks",
+      "result": "broken",
+      "evidence": "1: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.\"]') to be visible\n | 2: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.\"]') to be visible\n | 3: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.\"]') to be visible\n",
+      "severity": 2,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Move the copy to the trash again, click Delete forever, Cancel, then Delete forever and confirm",
+      "result": "broken",
+      "evidence": "1: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"home.card.\"]').first() to be visible\n | 2: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"home.card.\"]').first() to be visible\n | 3: error locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"home.card.\"]').first() to be visible\n; screenshot audit-decks/28-trash-delete-forever.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Delete the GT brand copy forever",
+      "result": "works",
+      "evidence": "card left true; GET /edit/gt-brand-mu3e09eu -> 404 after 5 s; snackbar \"\"",
+      "severity": 0,
+      "need": "core",
+      "why": "Trash and restore protect against losing a deck by a wrong click"
+    },
+    {
+      "feature": "/decks/trash",
+      "interaction": "Empty trash",
+      "result": "not driven",
+      "evidence": "not driven: the button would delete every trashed presentation on the shared production store, including other people's; only its enabled state was read",
+      "severity": 0,
+      "need": "useful",
+      "why": "Emptying the trash is rare; per deck Delete forever covers the seller"
+    },
+    {
+      "feature": "Navigation",
+      "interaction": "Walk /home > /decks > /edit/<id>, then Back, Back, Forward, Forward",
+      "result": "works",
+      "evidence": "trail /edit/untitled-20260916-jek6 > /decks > /home > /decks > /edit/untitled-20260916-jek6; editor title \"Northwind renewal v2 3\"; screenshot audit-decks/29-nav-forward-end.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Back, forward and reload are how a seller moves between the list and the deck during a call"
+    },
+    {
+      "feature": "Navigation",
+      "interaction": "From /home open New Presentation, write the title, then Back and Forward",
+      "result": "works",
+      "evidence": "draft untitled-20260916-5fkl; after the write /edit/untitled-20260916-5fkl; Back -> /home (page rendered true); Forward -> /edit/untitled-20260916-5fkl (editor true, deck untitled-20260916-5fkl, revision 1, title field \"Audit decks second draft\"); console: console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/30-nav-new-back-forward.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "Back, forward and reload are how a seller moves between the list and the deck during a call"
+    },
+    {
+      "feature": "You need access",
+      "interaction": "Open /edit/<unknown id>",
+      "result": "works",
+      "evidence": "GET -> 404; access page true; h1 \"You need access\"; sentence \"This presentation is not available to you, or does not exist.\"; form true button \"Request access\"; sign in link -> /decks; document.title \"Turboslide\"; console: console: Failed to load resource: the server responded with a status of 404 () ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/31-access-edit-unknown.png",
+      "severity": 0,
+      "need": "core",
+      "why": "A wrong or expired link must say so plainly and offer a way back"
+    },
+    {
+      "feature": "You need access",
+      "interaction": "Click Sign in from your presentations on the access page",
+      "result": "works",
+      "evidence": "address /decks; hydrated",
+      "severity": 0,
+      "need": "core",
+      "why": "A wrong or expired link must say so plainly and offer a way back"
+    },
+    {
+      "feature": "You need access",
+      "interaction": "Open /deck/<unknown id> (the viewer link)",
+      "result": "works",
+      "evidence": "GET -> 404; access page true; h1 \"You need access\"; console: console: Failed to load resource: the server responded with a status of 404 () ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "severity": 0,
+      "need": "core",
+      "why": "A wrong or expired link must say so plainly and offer a way back"
+    },
+    {
+      "feature": "Not found",
+      "interaction": "Open an address with no route",
+      "result": "works",
+      "evidence": "GET -> 404; not found page true; h1 \"Not found\"; New Presentation -> /new, Your Presentations -> /decks, About Turboslide -> /home; console: console: Failed to load resource: the server responded with a status of 404 () ; console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; screenshot audit-decks/32-not-found.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "A wrong or expired link must say so plainly and offer a way back"
+    },
+    {
+      "feature": "Cleanup",
+      "interaction": "Every scratch deck trashed and deleted forever, and answers 404",
+      "result": "broken",
+      "evidence": "untitled-20260916-jek6: Delete forever on /decks/trash failed: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.untitled-20260916-jek6\"]') to be visible\n | untitled-20260916-jek6: fallback; GET /edit/untitled-20260916-jek6 -> 200 | untitled-20260916-5fkl: Delete forever on /decks/trash failed: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.card.untitled-20260916-5fkl\"]') to be visible\n | untitled-20260916-5fkl: fallback; GET /edit/untitled-20260916-5fkl -> 200",
+      "severity": 2,
+      "need": "core",
+      "why": "The production store must be left as it was found"
+    }
+  ]
+}

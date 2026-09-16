@@ -1,0 +1,129 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-tsb3",
+  "startedAt": "2026-09-16T01:11:28.475Z",
+  "ms": 192443,
+  "rows": 11,
+  "works": 4,
+  "broken": 6,
+  "flaky": 0,
+  "notDriven": 1,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "Link",
+      "interaction": "Fresh box, double click a word, Cmd+K, type a URL, Enter: the word becomes a link",
+      "result": "broken",
+      "evidence": "try 1: selection \"the\"; popover true; focus after Cmd+K input[run.link.href]; field value \"https://example.com/acme\"; stored \"https://example.com/acmeSee the proposal online\" (word wrapped as a link false; URL leaked into the text true) | try 2: selection \"the\"; popover true; focus after Cmd+K input[run.link.href]; field value \"https://example.com/acme\"; stored \"https://example.com/acmehttps://example.com/acmeSee the proposal online\" (word wrapped as a link false; URL leaked into the text true) | try 3: selection \"acmeSee\"; popover true; focus after Cmd+K input[run.link.href]; field value \"https://example.com/acme\"; stored \"https://example.com/acmehttps://example.com/acmehttps://example.com/acmeSee the proposal online\" (word wrapped as a link false; URL leaked into the text true); screenshot docs/gslides-parity/focus/audit-text/83-link-clean.png",
+      "severity": 3,
+      "need": "core",
+      "why": "A link to the proposal or a case study is how a sent deck carries the reader onward; it is a weekly action."
+    },
+    {
+      "n": 2,
+      "feature": "Link",
+      "interaction": "Present the deck and click the linked word",
+      "result": "not driven",
+      "evidence": "not driven: no link href stored (text \"https://example.com/acmehttps://example.com/acmehttps://example.com/acmeSee the proposal online\")",
+      "severity": 2,
+      "need": "core",
+      "why": "A link that does not open while presenting fails in front of the customer."
+    },
+    {
+      "n": 3,
+      "feature": "Text colour",
+      "interaction": "Fresh box, double click a word, open Text color, pick a swatch",
+      "result": "broken",
+      "evidence": "try 1: selection \"18\"; plate opened false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked red; stored \"Revenue up 18 percent\"; block color none (a c: mark on the word false) | try 2: selection \"18\"; plate opened false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked red; stored \"Revenue up 18 percent\"; block color none (a c: mark on the word false) | try 3: selection \"18\"; plate opened false; swatches none,ink,paper,ink-2,titanium,hair,hair-soft,edge,green,amber,red,blue; picked red; stored \"Revenue up 18 percent\"; block color none (a c: mark on the word false); screenshot docs/gslides-parity/focus/audit-text/86-text-colour-clean.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "Colouring a number green or red on a results slide is common; a seller can do without it."
+    },
+    {
+      "n": 4,
+      "feature": "Italic (toolbar, word selected)",
+      "interaction": "Fresh box, double click a word in the session, click Italic on the toolbar",
+      "result": "broken",
+      "evidence": "try 1: selection \"Renewal\"; session open after the toolbar click false; stored \"[Renewal terms apply]{i}\" (the word alone italic false, the whole box italic true) | try 2: selection \"Renewal\"; session open after the toolbar click false; stored \"Renewal terms apply\" (the word alone italic false, the whole box italic false) | try 3: selection \"Renewal\"; session open after the toolbar click false; stored \"[Renewal terms apply]{i}\" (the word alone italic false, the whole box italic true); screenshot docs/gslides-parity/focus/audit-text/89-italic-toolbar-word.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A seller selects one word and clicks Italic; the whole box going italic is a wrong result."
+    },
+    {
+      "n": 5,
+      "feature": "Bulleted list (toolbar)",
+      "interaction": "Fresh three line box, select it, click the toolbar Bulleted list button",
+      "result": "broken",
+      "evidence": "try 1: before type text; after click: type text, marker none, preset none; snackbar \"\" | try 2: before type text; after click: type text, marker none, preset none; snackbar \"\" | try 3: before type text; after click: type text, marker none, preset none; snackbar \"\"; screenshot docs/gslides-parity/focus/audit-text/92-bulleted-toolbar.png",
+      "severity": 2,
+      "need": "core",
+      "why": "Bullets are the default body of a sales slide; the toolbar button is the Google gesture a seller reaches for."
+    },
+    {
+      "n": 6,
+      "feature": "Numbered list (toolbar)",
+      "interaction": "Fresh three line box, select it, click the toolbar Numbered list button",
+      "result": "broken",
+      "evidence": "try 1: after click: type text, marker none, preset none; snackbar \"\" | try 2: no three line text box | try 3: after click: type text, marker none, preset none; snackbar \"\"",
+      "severity": 2,
+      "need": "core",
+      "why": "Agenda slides are numbered lists; the toolbar button is the common path."
+    },
+    {
+      "n": 7,
+      "feature": "Bulleted list (Format menu preset)",
+      "interaction": "Fresh three line box, Format > Bullets & numbering > Bulleted list, pick the first preset",
+      "result": "works",
+      "evidence": "presets 9; picked disc-circle-square; after: type plain, marker bullet, preset disc-circle-square; screenshot docs/gslides-parity/focus/audit-text/93-bulleted-menu-preset.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The menu preset route is the fallback for the same weekly task."
+    },
+    {
+      "n": 8,
+      "feature": "Autofit (text box grow)",
+      "interaction": "Fresh box, type a long paragraph: the box grows so the text stays inside",
+      "result": "broken",
+      "evidence": "try 1: autofit grow; stored box h 64 -> 64; DOM box 93 vs content 132 (overflow visible; text inside false) | try 2: autofit grow; stored box h 64 -> 64; DOM box 93 vs content 132 (overflow visible; text inside false) | try 3: autofit grow; stored box h 64 -> 64; DOM box 93 vs content 132 (overflow visible; text inside false); screenshot docs/gslides-parity/focus/audit-text/96-autofit-grow-clean.png",
+      "severity": 2,
+      "need": "core",
+      "why": "A caption that spills out of its box shows on the customer screen."
+    },
+    {
+      "n": 9,
+      "feature": "Copy and paste (within a box)",
+      "interaction": "Fresh box, double click a word, Cmd+C, End, space, Cmd+V",
+      "result": "works",
+      "evidence": "copied \"Quarterly\"; \"Quarterly reviews included\" -> \"Quarterly reviews included Quarterly\" (payload leaked into the text false)",
+      "severity": 0,
+      "need": "core",
+      "why": "Copying a phrase inside a caption is routine editing."
+    },
+    {
+      "n": 10,
+      "feature": "Copy and paste (between boxes)",
+      "interaction": "Fresh box A: Cmd+A, Cmd+C; fresh box B: open it, Cmd+V",
+      "result": "works",
+      "evidence": "copied \"Quarterly reviews included Quarterly\"; destination \"Destination\" -> \"Destination Quarterly reviews included Quarterly\" (encoded clipboard payload leaked into the text false); screenshot docs/gslides-parity/focus/audit-text/97-paste-between-clean.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Reusing a line from one slide on another is how a seller tailors a deck."
+    },
+    {
+      "n": 11,
+      "feature": "Scratch deck",
+      "interaction": "File > Move to trash, Delete forever, then GET /deck/<id>",
+      "result": "works",
+      "evidence": "GET /deck/untitled-20260916-tsb3 404, GET /edit/untitled-20260916-tsb3 404",
+      "severity": 0,
+      "need": "core",
+      "why": "A run must leave production as it found it."
+    }
+  ]
+}

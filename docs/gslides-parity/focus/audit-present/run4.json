@@ -1,0 +1,67 @@
+{
+  "deckId": "untitled-20260916-n424",
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Scratch deck",
+      "interaction": "Open /new, type a title",
+      "result": "works",
+      "evidence": "untitled-20260916-n424; revision 1"
+    },
+    {
+      "n": 2,
+      "feature": "Comments",
+      "interaction": "Nothing selected, Cmd+Option+M, type, Comment (the slide as the anchor)",
+      "result": "works",
+      "evidence": "chip null; snackbar within 6 s null; markers after 20 s 1; panel threads 1, list \"IIridium 609slide 1Swap the logo before the callnow\""
+    },
+    {
+      "n": 3,
+      "feature": "Comments",
+      "interaction": "Insert a text box, select it, Cmd+Option+M, type, Comment",
+      "result": "works",
+      "evidence": "text box mark (mark); chip \"Mark\"; snackbar within 6 s null; markers after 20 s 2; panel threads 2, list \"IIridium 609slide 1Swap the logo before the callnowIIridium 609slide 1Swap the logo before the calln\""
+    },
+    {
+      "n": 4,
+      "feature": "Comments",
+      "interaction": "Open the thread from its marker and reply",
+      "result": "works",
+      "evidence": "first \"IIridium 609now☺Swap the logo before the call\"; replies 3; snackbar null"
+    },
+    {
+      "n": 5,
+      "feature": "Comments",
+      "interaction": "Resolve the thread",
+      "result": "flaky",
+      "evidence": "try 1: resolve button \"Resolve\"; markers 2 -> 2; panel threads 2, reopen buttons 0, list \"IIridium 609slide 1Swap the logo before the call1 replynowIIridium 609slide 1Swap the logo before the callnow\" | try 2: resolve button \"Resolve\"; markers 2 -> 1; panel threads 2, reopen buttons 1, list \"IIridium 609slide 1Swap the logo before the callnowIIridium 609slide 1Swap the logo before the callnowRe-open\""
+    },
+    {
+      "n": 6,
+      "feature": "Teardown",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks"
+    },
+    {
+      "n": 7,
+      "feature": "Teardown",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260916-n424 left the trash"
+    },
+    {
+      "n": 8,
+      "feature": "Teardown",
+      "interaction": "GET /edit/untitled-20260916-n424 after the delete",
+      "result": "works",
+      "evidence": "status 404"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

@@ -1,0 +1,484 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-2ie1",
+  "startedAt": "2026-09-16T00:50:51.571Z",
+  "ms": 412705,
+  "rows": 37,
+  "works": 32,
+  "broken": 4,
+  "flaky": 0,
+  "notDriven": 1,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "downloads": [
+    {
+      "name": "untitled-20260916-2ie1-dark.pdf",
+      "bytes": 44222,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dxji1-3c4616/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pdf",
+      "bytes": 46540,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dxozd-84f4b2/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pdf",
+      "bytes": 44222,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dxua7-b63774/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pptx",
+      "bytes": 74434,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dxyvr-de90d2/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pptx",
+      "bytes": 32453,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dy64r-5893ec/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pptx",
+      "bytes": 89404,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dyb2k-be3ea2/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1.txt",
+      "bytes": 28,
+      "url": "blob:https://turboslide.vercel.app/34715424-69ac-4203-b956-7a0f5295d761",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1.html",
+      "bytes": 561009,
+      "url": "https://turboslide.vercel.app/api/download/eyJrIjoiYnVpbGQiLCJkIjoidW50aXRsZWQtMjAyNjA5MTYtMmllMSIsIm4iOiJ1bnRpdGxlZC0yM",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-r6.zip",
+      "bytes": 403086,
+      "url": "https://turboslide.vercel.app/api/decks/untitled-20260916-2ie1/bundle",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pdf",
+      "bytes": 44222,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3dztcf-aa5c60/untitled-20260916",
+      "error": null
+    },
+    {
+      "name": "untitled-20260916-2ie1-dark.pdf",
+      "bytes": 44222,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3e5ak6-8bf885/untitled-20260916",
+      "error": null
+    }
+  ],
+  "popups": [
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    },
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    },
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    },
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    },
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    },
+    {
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6",
+      "contentType": "application/json"
+    }
+  ],
+  "table": [
+    {
+      "n": 1,
+      "feature": "environment",
+      "interaction": "production reached; e2e lock state",
+      "result": "works",
+      "evidence": "https://turboslide.vercel.app; playwright-core 1.62.1; node v24.13.0; lock .turboslide/e2e.lock present (another walk in flight); not taken",
+      "severity": 0,
+      "need": "core",
+      "why": "The conditions of the run."
+    },
+    {
+      "n": 2,
+      "feature": "setup: the scratch deck",
+      "interaction": "open /new, double click the title, type a title, Escape",
+      "result": "works",
+      "evidence": "draft untitled-20260916-2ie1; address /edit/untitled-20260916-2ie1; revision 1; title \"Acme pricing\"; slides 1",
+      "severity": 0,
+      "need": "core",
+      "why": "The deck every export below reads."
+    },
+    {
+      "n": 3,
+      "feature": "setup: Slide > New slide twice",
+      "interaction": "Slide menu > New slide, twice",
+      "result": "works",
+      "evidence": "slide.list title, split-1, split-2",
+      "severity": 0,
+      "need": "core",
+      "why": "Three slides so the PDF page count and the PPTX slide parts can be counted."
+    },
+    {
+      "n": 4,
+      "feature": "setup: Slide > Skip slide",
+      "interaction": "Slide menu > Skip slide on slide 3",
+      "result": "works",
+      "evidence": "deck.info counts {\"slides\":3,\"sections\":1,\"assets\":4,\"htmlBlocks\":0,\"skipped\":1,\"canvas\":0,\"charts\":0,\"guides\":0}; snackbar null",
+      "severity": 0,
+      "need": "core",
+      "why": "One skipped slide so the Include skipped slides controls have an effect to observe."
+    },
+    {
+      "n": 5,
+      "feature": "setup: a speaker note on slide 1",
+      "interaction": "click the notes field under the slide, type, Escape",
+      "result": "works",
+      "evidence": "revision 6; stored notes \"Internal talk track: lead with the renewal\"",
+      "severity": 0,
+      "need": "core",
+      "why": "A note so Include speaker notes and the print layout with notes have something to carry."
+    },
+    {
+      "n": 6,
+      "feature": "File > Download submenu",
+      "interaction": "open the File menu, hover Download",
+      "result": "works",
+      "evidence": "pptx: Microsoft PowerPoint (.pptx) | odp (disabled): ODP Document (.odp) | pdf: PDF Document (.pdf) | txt: Plain Text (.txt) | jpg: JPEG image (.jpg, current slide) | png: PNG image (.png, current slide) | svg (disabled): Scalable Vector Graphics (.svg, current slide) | html: Web page (.html) | zip: Turboslide bundle (.zip); docs/gslides-parity/focus/audit-export/02-file-download-submenu.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The map of what a seller can download."
+    },
+    {
+      "n": 7,
+      "feature": "File menu print rows",
+      "interaction": "read the Print settings and preview, Print and Page setup rows",
+      "result": "works",
+      "evidence": "printPreview: Print settings and preview | print: Print⌘P | pageSetup (disabled): Page setup",
+      "severity": 0,
+      "need": "useful",
+      "why": "Where the print path starts."
+    },
+    {
+      "n": 8,
+      "feature": "Download as PDF: the dialog",
+      "interaction": "File > Download > PDF Document (.pdf)",
+      "result": "works",
+      "evidence": "sentence \"One slide per page, 13.333 by 7.5 inches.\"; notes false; skipped false; buttons , Cancel, Download; docs/gslides-parity/focus/audit-export/03-pdf-dialog.png",
+      "severity": 0,
+      "need": "core",
+      "why": "Sending a PDF is a weekly task (research 07 section 3, Export PPTX or PDF)."
+    },
+    {
+      "n": 9,
+      "feature": "PDF dialog: Include speaker notes",
+      "interaction": "click the check row on, then off",
+      "result": "works",
+      "evidence": "after first click true, after second false",
+      "severity": 0,
+      "need": "core",
+      "why": "Notes default off keeps talk tracks away from the customer (research 07 frustrations)."
+    },
+    {
+      "n": 10,
+      "feature": "PDF dialog: Include skipped slides",
+      "interaction": "click the check row on, then off",
+      "result": "works",
+      "evidence": "after first click true, after second false",
+      "severity": 0,
+      "need": "core",
+      "why": "Skipped pricing slides must stay out of the file by default."
+    },
+    {
+      "n": 11,
+      "feature": "PDF dialog: close paths",
+      "interaction": "Escape; reopen and Cancel; reopen and the X",
+      "result": "works",
+      "evidence": "Escape closed true; Cancel closed true (button found); X closed true",
+      "severity": 0,
+      "need": "useful",
+      "why": "A dialog a seller can leave three ways."
+    },
+    {
+      "n": 12,
+      "feature": "Download as PDF: the file",
+      "interaction": "Download in the dialog, default options",
+      "result": "works",
+      "evidence": "try 1: 4058 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; ready true; error null; download untitled-20260916-2ie1-dark.pdf 44222 B from https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-20260916-2ie1/mu3; pdf head \"%PDF-1.4\" pages 2; docs/gslides-parity/focus/audit-export/04-pdf-ready.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The PDF a seller sends after the call; it must hold the two unskipped slides."
+    },
+    {
+      "n": 13,
+      "feature": "PDF ready: Details opens the report card",
+      "interaction": "click Details under Your file is ready",
+      "result": "works",
+      "evidence": "Details link true; report card file rows 1; docs/gslides-parity/focus/audit-export/05-pdf-report-card.png",
+      "severity": 0,
+      "need": "park",
+      "why": "A report of the export; a seller needs the file, not the report."
+    },
+    {
+      "n": 14,
+      "feature": "Download as PDF with Include skipped slides",
+      "interaction": "check Include skipped slides, Download",
+      "result": "works",
+      "evidence": "try 1: 4150 ms; progress \"Preparing your PDF, about half a minute for 3 slides\"; error null; pdf pages 3, 46540 B",
+      "severity": 0,
+      "need": "useful",
+      "why": "The progress sentence counts three slides and the file must hold three pages."
+    },
+    {
+      "n": 15,
+      "feature": "Download as PDF with Include speaker notes",
+      "interaction": "check Include speaker notes, Download",
+      "result": "works",
+      "evidence": "try 1: 1245 ms; progress \"Preparing your PDF, about half a minute for 2 slides\"; error null; pdf pages 2, 44222 B; note text found in the bytes false",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller printing a talk track for themselves; the page count says whether notes are carried."
+    },
+    {
+      "n": 16,
+      "feature": "Download as PowerPoint: the dialog",
+      "interaction": "File > Download > Microsoft PowerPoint (.pptx)",
+      "result": "works",
+      "evidence": "modes flatten checked=true \"Perfect\"; native checked=false \"Editable text\"; More options open false; notes false; skipped false; docs/gslides-parity/focus/audit-export/06-pptx-dialog.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The PPTX a seller sends to a customer who asks for PowerPoint."
+    },
+    {
+      "n": 17,
+      "feature": "PowerPoint dialog: More options and the Perfect | Editable text choice",
+      "interaction": "open More options; pick Editable text; read Embed fonts; set Appearance and Fonts; toggle Headings as pictures; back to Perfect",
+      "result": "works",
+      "evidence": "More open true; Appearance default dark; Fonts default exact; Embed fonts disabled under Perfect true; Editable text checked true; Embed fonts disabled under Editable false; Appearance set dark dark; Fonts set standard standard; Headings on true; Perfect again true; Download doc null; docs/gslides-parity/focus/audit-export/07-pptx-more-options.png",
+      "severity": 0,
+      "need": "park",
+      "why": "Designer settings; a seller downloads with the defaults."
+    },
+    {
+      "n": 18,
+      "feature": "Download as PowerPoint, Perfect",
+      "interaction": "Download with Perfect selected",
+      "result": "works",
+      "evidence": "try 1: 6968 ms; progress \"Preparing your PowerPoint file, about half a minute for 2 slides\"; ready true; error null; download untitled-20260916-2ie1-dark.pptx 74434 B; pptx {\"entries\":47,\"slides\":2,\"notes\":2,\"media\":4,\"fonts\":0,\"types\":true}; docs/gslides-parity/focus/audit-export/08-pptx-perfect-ready.png",
+      "severity": 0,
+      "need": "core",
+      "why": "The default PowerPoint file; one slide part per unskipped slide."
+    },
+    {
+      "n": 19,
+      "feature": "Download as PowerPoint, Editable text",
+      "interaction": "pick Editable text, Download",
+      "result": "works",
+      "evidence": "try 1: 3397 ms; progress \"Preparing your PowerPoint file, about half a minute for 2 slides\"; error null; download untitled-20260916-2ie1-dark.pptx 32453 B; pptx {\"entries\":46,\"slides\":2,\"notes\":2,\"media\":3,\"fonts\":0,\"types\":true}; slide1.xml text runs 3, title text present true",
+      "severity": 0,
+      "need": "useful",
+      "why": "The variant for a customer who edits the deck; the title must be a text run in slide1.xml."
+    },
+    {
+      "n": 20,
+      "feature": "Download as PowerPoint with notes and skipped slides",
+      "interaction": "check Include speaker notes and Include skipped slides, Download",
+      "result": "works",
+      "evidence": "try 1: 6674 ms; progress \"Preparing your PowerPoint file, about half a minute for 3 slides\"; error null; download untitled-20260916-2ie1-dark.pptx 89404 B; pptx {\"entries\":52,\"slides\":3,\"notes\":3,\"media\":5,\"fonts\":0,\"types\":true}; note text in a notesSlide true",
+      "severity": 0,
+      "need": "useful",
+      "why": "Three slide parts and at least one notes part."
+    },
+    {
+      "n": 21,
+      "feature": "Download as Plain Text (.txt)",
+      "interaction": "File > Download > Plain Text (.txt)",
+      "result": "works",
+      "evidence": "try 1: download untitled-20260916-2ie1.txt 28 B from blob:https://turboslide.vercel.app/34715; title in text true; first line \"Acme pricing review, Q3 2026\"; snackbar null",
+      "severity": 0,
+      "need": "park",
+      "why": "A text dump; rarely a need of a seller."
+    },
+    {
+      "n": 22,
+      "feature": "Download as JPEG image (.jpg, current slide)",
+      "interaction": "File > Download > JPEG image (.jpg, current slide)",
+      "result": "broken",
+      "evidence": "try 1: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-jpg.png | try 2: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-jpg.png | try 3: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-jpg.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "A slide image for an email or a chat; the seller expects an image, not an error page."
+    },
+    {
+      "n": 23,
+      "feature": "Download as PNG image (.png, current slide)",
+      "interaction": "File > Download > PNG image (.png, current slide)",
+      "result": "broken",
+      "evidence": "try 1: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-png.png | try 2: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-png.png | try 3: popup /api/render/title?deck=untitled-20260916-2ie1&theme=light&scale=2&revision=6 contentType application/json text \"{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>\",\"code\":\"unauthorized\"}}\"; the tab's URL fetched from the page's context: 401 application/json; charset=utf-8; download none; snackbar null; docs/gslides-parity/focus/audit-export/09-download-png.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "A slide image for an email or a chat; the seller expects an image, not an error page."
+    },
+    {
+      "n": 24,
+      "feature": "The slide image route with the agent bearer",
+      "interaction": "node fetch of the URL of the tab with Authorization: Bearer (never shown)",
+      "result": "works",
+      "evidence": "status 200 type image/png location none",
+      "severity": 0,
+      "need": "park",
+      "why": "Shows whether the route itself renders when the caller carries the token."
+    },
+    {
+      "n": 25,
+      "feature": "Download as Web page (.html)",
+      "interaction": "File > Download > Web page (.html)",
+      "result": "works",
+      "evidence": "try 1: 3258 ms; download untitled-20260916-2ie1.html 561009 B from /api/download/eyJrIjoiYnVpbGQiLCJkIjoidW50aXRsZWQtMjAyNjA5MTYtMmllMSIsIm4iOiJ1bn; head \"<!doctype html><html lang=\\\"en\\\"\"; title in file true; snackbar The web page is ready; docs/gslides-parity/focus/audit-export/10-download-html.png",
+      "severity": 0,
+      "need": "park",
+      "why": "One file that opens in any browser; useful to a designer, rare for a seller who sends a link."
+    },
+    {
+      "n": 26,
+      "feature": "Download as Turboslide bundle (.zip)",
+      "interaction": "File > Download > Turboslide bundle (.zip)",
+      "result": "works",
+      "evidence": "try 1: download untitled-20260916-2ie1-r6.zip 403086 B from /api/decks/untitled-20260916-2ie1/bundle; zip entries 19, deck.json true, slides 3; snackbar The bundle is at untitled-20260916-2ie1.zip",
+      "severity": 0,
+      "need": "park",
+      "why": "The file Open and Import slides read; a transfer format, not a deliverable for a seller."
+    },
+    {
+      "n": 27,
+      "feature": "ODP and SVG rows",
+      "interaction": "hover File > Download and read the ODP and SVG rows",
+      "result": "not driven",
+      "evidence": "odp: present, aria-disabled true, title \"\" | svg: present, aria-disabled true, title \"\"; the rows are disabled with the Not available clause, so no download can be started",
+      "severity": 0,
+      "need": "park",
+      "why": "Neither format is a deliverable for a seller."
+    },
+    {
+      "n": 28,
+      "feature": "File > Print settings and preview",
+      "interaction": "click the row; the /print page",
+      "result": "works",
+      "evidence": "address /print/untitled-20260916-2ie1; pages data-count 2, articles 2; theme dark; layout slides; options 1 slide without notes, 1 slide with notes, Handout (2 slides per page) (disabled), Handout (3 slides per page) (disabled), Handout (4 slides per page) (disabled), Handout (6 slides per page) (disabled), Handout (9 slides per page) (disabled); skipped false; bar Close preview, Download as PDF, Print; title \"Acme pricing, print, Turboslide\"; docs/gslides-parity/focus/audit-export/11-print-preview.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "The paper path and the fallback when the PDF misses."
+    },
+    {
+      "n": 29,
+      "feature": "Print preview: layout 1 slide with notes",
+      "interaction": "pick \"1 slide with notes\" in the layout dropdown",
+      "result": "works",
+      "evidence": "notes blocks 2: Speaker notesInternal talk track: lead with the renewal || Speaker notesNo speaker notes for this slide; docs/gslides-parity/focus/audit-export/12-print-with-notes.png",
+      "severity": 0,
+      "need": "useful",
+      "why": "A seller prints a talk track for themselves."
+    },
+    {
+      "n": 30,
+      "feature": "Print preview: Include skipped slides",
+      "interaction": "click the check in the print bar",
+      "result": "works",
+      "evidence": "data-count 3; pages marked skipped 1",
+      "severity": 0,
+      "need": "useful",
+      "why": "The third slide joins the pages and is marked."
+    },
+    {
+      "n": 31,
+      "feature": "Print preview: Download as PDF",
+      "interaction": "click Download as PDF in the print bar with three pages shown",
+      "result": "broken",
+      "evidence": "try 1: 4592 ms; status line \"Your file is ready\"; download untitled-20260916-2ie1-dark.pdf 44222 B; pdf pages 2; snackbar Your file is ready; docs/gslides-parity/focus/audit-export/13-print-download-pdf.png | try 2: 250568 ms; status line \"null\"; download none; pdf none; snackbar null; docs/gslides-parity/focus/audit-export/13-print-download-pdf.png | try 3: 4501 ms; status line \"Your file is ready\"; download untitled-20260916-2ie1-dark.pdf 44222 B; pdf pages 2; snackbar Your file is ready; docs/gslides-parity/focus/audit-export/13-print-download-pdf.png",
+      "severity": 2,
+      "need": "useful",
+      "why": "The same PDF path from the print page; the file must hold the pages shown."
+    },
+    {
+      "n": 32,
+      "feature": "Print preview: Print",
+      "interaction": "click Print; the print dialog of the browser",
+      "result": "works",
+      "evidence": "window.print() called 1 time(s) (spied); headless Chromium shows no dialog, so Save as PDF in the dialog is not driven; the page printed through the CDP print pipeline with the print stylesheet gives 4 pages, 153523 B",
+      "severity": 0,
+      "need": "useful",
+      "why": "The fallback path Google also documents: Print, then Save as PDF."
+    },
+    {
+      "n": 33,
+      "feature": "Print preview: Close preview",
+      "interaction": "click Close preview",
+      "result": "works",
+      "evidence": "address /edit/untitled-20260916-2ie1",
+      "severity": 0,
+      "need": "useful",
+      "why": "Back to the editor."
+    },
+    {
+      "n": 34,
+      "feature": "the audit ran to completion",
+      "interaction": "no exception outside a step",
+      "result": "broken",
+      "evidence": "locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-file') to be visible\n\n    at openMenu (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/export/audit-export.mjs:125:36)\n    at async file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/focus/export/audit-export.mjs:746:5",
+      "severity": 0,
+      "need": "core",
+      "why": "An exception outside a step ends the walk early."
+    },
+    {
+      "n": 35,
+      "feature": "cleanup: File > Move to trash",
+      "interaction": "click the row",
+      "result": "works",
+      "evidence": "address /decks",
+      "severity": 0,
+      "need": "core",
+      "why": "The scratch deck leaves the home page."
+    },
+    {
+      "n": 36,
+      "feature": "cleanup: Delete forever",
+      "interaction": "Delete forever on the trash card, confirm",
+      "result": "works",
+      "evidence": "card untitled-20260916-2ie1 left the trash",
+      "severity": 0,
+      "need": "core",
+      "why": "The store is left as it was found."
+    },
+    {
+      "n": 37,
+      "feature": "cleanup: the scratch deck answers 404",
+      "interaction": "GET /edit/untitled-20260916-2ie1 and /deck/untitled-20260916-2ie1",
+      "result": "works",
+      "evidence": "/edit 404; /deck 404",
+      "severity": 0,
+      "need": "core",
+      "why": "Proof the deck is gone."
+    }
+  ]
+}

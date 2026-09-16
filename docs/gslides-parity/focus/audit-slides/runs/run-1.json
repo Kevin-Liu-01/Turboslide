@@ -1,0 +1,715 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260916-80o0",
+  "version": 1,
+  "startedAt": "2026-09-16T00:49:56.322Z",
+  "ms": 626289,
+  "rows": [
+    {
+      "n": 1,
+      "feature": "New slide template",
+      "interaction": "Open /new and look at the slide the deck opens on, the filmstrip, the counter, the notes pane and the address",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "deck untitled-20260916-80o0; slides title; runs heading/text,lead/text; prompts \"Click to add title\" / \"Click to add subtitle\"; cards 1:title*+; counter null; notes present, height 64px, placeholder \"Click to add speaker notes\"; hash \"\"; url /new; connected false; title \"\"; version 1",
+      "shot": "audit-slides/01-new-landing.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 2,
+      "feature": "New slide template",
+      "interaction": "Double click the title placeholder and type a title with spaces, then Escape",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "contenteditable true; shown \"Q3 pipeline review for Acme\"; stored \"Q3 pipeline review for Acme\"; revision 1; url /edit/untitled-20260916-80o0; hash \"\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "New slide",
+      "interaction": "Click New slide in the toolbar",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "current title; 1 -> 2; new split-1 at index 1; active split-1; layout content/split/split; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\"; runs h/text,p1/text,p2/text; counter null",
+      "shot": "audit-slides/02-new-slide-toolbar.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "New slide",
+      "interaction": "Click the arrow beside New slide (New slide with layout) and pick Title and two columns",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "plate shown true, tiles 21, missing none; 2 -> 3; new cols-1; active cols-1; layout content/cols/cols; prompts \"Click to add title\" / \"Click to add text\" / \"Click to add text\"; plate closed after the pick true",
+      "shot": "audit-slides/03-new-slide-arrow-plate.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "New slide",
+      "interaction": "Slide menu > New slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"New slide\"}; 3 -> 4; new cols-2; active cols-2; layout content/cols/cols",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "New slide",
+      "interaction": "Press Ctrl+M with a filmstrip card focused (Google prints Ctrl+M on every platform)",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "card focused true; 4 -> 5; new cols-3; active cols-3",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "New slide",
+      "interaction": "Press Ctrl+M with the canvas focused and nothing selected",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focus before div; 5 -> 6; new cols-4; active cols-4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "New slide",
+      "interaction": "Press Cmd+M with a filmstrip card focused (the Mac chord the brief names; the product binds Ctrl+M)",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: card focused true; 6 -> 6 after 6 s; snackbar null | attempt 2: card focused true; 6 -> 6 after 6 s; snackbar null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "New slide",
+      "interaction": "Right click a filmstrip card and pick New slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "menu rows edit.cut,edit.copy,edit.paste,slide.newSlide,slide.duplicateSlide,edit.delete,slide.skipSlide,slide.changeBackground,slide.applyLayout,slide.changeTheme,slide.transition,slide.moveSlide,insert.comment; 6 -> 7; new split-2 at index 1 (after the clicked first card); active split-2",
+      "shot": "audit-slides/04-filmstrip-context-menu.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "New slide",
+      "interaction": "Undo a New slide with Cmd+Z (a card focused)",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; 7 -> 8 -> 7; order restored true; focus after div[filmstrip.slide.cols-4]",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "Duplicate slide",
+      "interaction": "Right click the title card and pick Duplicate slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "7 -> 8; copy title-2 at index 1; copy heading \"Q3 pipeline review for Acme\" vs source \"Q3 pipeline review for Acme\"; active title-2",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 12,
+      "feature": "Duplicate slide",
+      "interaction": "Slide menu > Duplicate slide",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"Duplicate slide\"}; current title-2; 8 -> 9; copy title-2-2 at index 2",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 13,
+      "feature": "Duplicate slide",
+      "interaction": "Press Cmd+D with a filmstrip card focused",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; 9 -> 10; copy title-2-2-2 at index 2; snackbar null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 14,
+      "feature": "Duplicate slide",
+      "interaction": "Undo a duplicate with the toolbar Undo button",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "10 -> 11 -> 10; order restored true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 15,
+      "feature": "Duplicate slide",
+      "interaction": "Undo a duplicate with Cmd+Z, then Redo with Cmd+Shift+Z",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; 10 -> 11 -> undo 10 -> redo 11 -> undo 10",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 16,
+      "feature": "Delete slide",
+      "interaction": "Press Delete with a filmstrip card focused",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; 10 -> 9; removed cols-4 gone true; snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}; active cols-3; focus body",
+      "shot": "audit-slides/05-delete-snackbar.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 17,
+      "feature": "Delete slide",
+      "interaction": "Undo a delete with the snackbar Undo button",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "9 -> 8 -> 9; snackbar \"Slide deleted\" [Undo]; cols-3 back at index 8 (was 8); heading kept true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 18,
+      "feature": "Delete slide",
+      "interaction": "Right click a card and pick Delete",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"Delete\"}; 9 -> 8; cols-3 gone true; snackbar {\"text\":\"Slide deleted\",\"action\":\"Undo\"}",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 19,
+      "feature": "Delete slide",
+      "interaction": "Undo a delete with Cmd+Z",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "8 -> 7 -> 8; order restored true; focus before Cmd+Z body",
+      "shot": null,
+      "consoleErrors": [
+        "console: Failed to load resource: the server responded with a status of 409 ()"
+      ]
+    },
+    {
+      "n": 20,
+      "feature": "Delete slide",
+      "interaction": "Slide menu > Delete slide, then the toolbar Undo, then Redo from the Edit menu",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"Delete slide\"}; 8 -> 7 -> undo 8 (restored true) -> redo {\"present\":true,\"disabled\":false,\"label\":\"Redo\"} 7",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 21,
+      "feature": "Filmstrip selection",
+      "interaction": "Click the second card",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "active title-2; cards 1:title 2:title-2*+@ 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1 (* current, + selected, @ focused); counter null; hash \"#s/title-2\"; stage layout title/title/- text \"Q3 pipeline review for AcmeClick to add subtitle\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 22,
+      "feature": "Filmstrip selection",
+      "interaction": "Shift click the fourth card, then Cmd click the first",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: after Shift click 1:title 2:title-2 3:title-2-2-2 4:title-2-2*+@ 5:split-2 6:split-1 7:cols-1; after Cmd click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; after a plain click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; active title | attempt 2: after Shift click 1:title 2:title-2 3:title-2-2-2 4:title-2-2*+@ 5:split-2 6:split-1 7:cols-1; after Cmd click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; after a plain click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; active title | attempt 3: after Shift click 1:title 2:title-2 3:title-2-2-2 4:title-2-2*+@ 5:split-2 6:split-1 7:cols-1; after Cmd click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; after a plain click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; active title | attempt 4: after Shift click 1:title 2:title-2 3:title-2-2-2 4:title-2-2*+@ 5:split-2 6:split-1 7:cols-1; after Cmd click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; after a plain click 1:title*+@ 2:title-2 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; active title",
+      "shot": "audit-slides/09-filmstrip-shift-select.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 23,
+      "feature": "Filmstrip selection",
+      "interaction": "Arrow down and arrow up with a card focused, then Shift+Down to extend",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; Down -> title-2 (focus div[filmstrip.slide.title-2]); Up -> title; Shift+Down 1:title+ 2:title-2*+@ 3:title-2-2-2 4:title-2-2 5:split-2 6:split-1 7:cols-1; Shift+Down again 1:title+ 2:title-2+ 3:title-2-2-2*+@ 4:title-2-2 5:split-2 6:split-1 7:cols-1",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 24,
+      "feature": "Delete slide",
+      "interaction": "Select two cards with Shift click, press Delete, then Undo from the snackbar",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: 7 -> 6; snackbar null | attempt 2: 6 -> 5; snackbar null | attempt 3: 5 -> 4; snackbar null | attempt 4: 4 -> 3; snackbar null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 25,
+      "feature": "Reorder slides",
+      "interaction": "Drag the second filmstrip card above the first",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "title,title-2,title-2-2-2 -> title-2,title,title-2-2-2; cards 1:title-2@ 2:title 3:title-2-2-2*+",
+      "shot": "audit-slides/10-reorder-after-drag.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 26,
+      "feature": "Reorder slides",
+      "interaction": "Drag the first filmstrip card below the third",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "title-2,title,title-2-2-2 -> title,title-2-2-2,title-2",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 27,
+      "feature": "Reorder slides",
+      "interaction": "Press Cmd+Down then Cmd+Up with a card focused",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "focused true; title,title-2-2-2,title-2 -> Cmd+Down title,title-2,title-2-2-2 (focus div[filmstrip.slide.title-2-2-2]) -> Cmd+Up title,title-2-2-2,title-2",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 28,
+      "feature": "Reorder slides",
+      "interaction": "Slide menu > Move slide > Move slide to end, then Cmd+Z",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "row {\"present\":true,\"disabled\":false,\"label\":\"Move slide to end\"}; title,title-2-2-2,title-2 -> title,title-2,title-2-2-2 -> undo title,title-2-2-2,title-2",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 29,
+      "feature": "Reorder slides",
+      "interaction": "Undo a drag reorder with Cmd+Z",
+      "result": "works",
+      "attempts": 1,
+      "evidence": "title,title-2-2-2,title-2 -> title-2-2-2,title,title-2 -> undo title,title-2-2-2,title-2; focus at Cmd+Z div[filmstrip.slide.title-2-2-2]",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 30,
+      "feature": "Layout picker",
+      "interaction": "Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: no card split-1 | attempt 2: error: no card split-1 | attempt 3: error: no card split-1 | attempt 4: error: no card split-1",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 31,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title slide\" (title) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: no card split-1 | attempt 2: error: no card split-1",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 32,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Section header\" (opener) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: no card split-1 | attempt 2: error: no card split-1",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 33,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and body\" (split) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: no card split-1 | attempt 2: error: no card split-1",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 34,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and two columns\" (cols) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: no card split-1 | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 35,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title only\" (title-only) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 36,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"One column text\" (one-column) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 37,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Main point\" (statement) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 38,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Section title and description\" (section-description) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 39,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Caption\" (mood) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 40,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Big number\" (big-number) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 41,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Blank\" (blank) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 42,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Ruled rows\" (rows) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 43,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Ruled statement list\" (plain) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 44,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Title and table\" (table) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 45,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Figure\" (figure) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 46,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Pair of figures\" (pair) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 47,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Tile grid\" (tiles) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 48,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Detail grid\" (details) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 49,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Status board\" (board) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 50,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Matrix\" (matrix) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 51,
+      "feature": "Apply layout",
+      "interaction": "Apply the layout \"Closing\" (closing) from the toolbar picker to slide split-1",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 52,
+      "feature": "Apply layout",
+      "interaction": "Reopen the picker after the last apply and read which tile is ringed",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "error: keyboard.press: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 53,
+      "feature": "Apply layout",
+      "interaction": "Right click a card > Apply layout > Title and body",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: keyboard.press: Target page, context or browser has been closed | attempt 2: error: keyboard.press: Target page, context or browser has been closed | attempt 3: error: keyboard.press: Target page, context or browser has been closed | attempt 4: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 54,
+      "feature": "Apply layout",
+      "interaction": "Slide menu > Apply layout > Title and two columns, then Cmd+Z",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: keyboard.press: Target page, context or browser has been closed | attempt 2: error: keyboard.press: Target page, context or browser has been closed | attempt 3: error: keyboard.press: Target page, context or browser has been closed | attempt 4: error: keyboard.press: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 55,
+      "feature": "Skip slide",
+      "interaction": "Right click a card > Skip slide; the card fades with the eye glyph; the row then reads Unskip slide",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 56,
+      "feature": "Skip slide",
+      "interaction": "Slide menu > Unskip slide on the skipped slide",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 57,
+      "feature": "Grid view",
+      "interaction": "Click Grid view in the bottom bar; every slide is a tile; Filmstrip view brings the canvas back",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 58,
+      "feature": "Grid view",
+      "interaction": "In the grid, click a tile to select it and double click it to open that slide",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 59,
+      "feature": "Grid view",
+      "interaction": "View menu > Grid view toggles the grid on, and again off",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 60,
+      "feature": "Grid view",
+      "interaction": "Double click a filmstrip card opens the grid; the bottom bar Filmstrip view returns",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 61,
+      "feature": "Grid view",
+      "interaction": "Drag a grid tile to a new place",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 62,
+      "feature": "Speaker notes",
+      "interaction": "Click the notes field and type a talk track with spaces; the slide keeps it",
+      "result": "broken",
+      "attempts": 2,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 63,
+      "feature": "Speaker notes",
+      "interaction": "Switch to another slide and back; each slide shows its own notes",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 64,
+      "feature": "Speaker notes",
+      "interaction": "Drag the notes handle up to make the pane taller, double click it, drag it back",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 65,
+      "feature": "Speaker notes",
+      "interaction": "Reload the deck; the notes are still there",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 66,
+      "feature": "Slide counter",
+      "interaction": "The counter reads the slide number; clicking it opens a field; a number and Enter go there",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 67,
+      "feature": "Address hash",
+      "interaction": "The address carries the slide; a reload with the hash and the numeric form land on that slide",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 68,
+      "feature": "Slide counter",
+      "interaction": "The counter follows New slide and Delete",
+      "result": "broken",
+      "attempts": 4,
+      "evidence": "attempt 1: error: page.evaluate: Target page, context or browser has been closed | attempt 2: error: page.evaluate: Target page, context or browser has been closed | attempt 3: error: page.evaluate: Target page, context or browser has been closed | attempt 4: error: page.evaluate: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 69,
+      "feature": "cleanup",
+      "interaction": "File > Move to trash, then Delete forever on /decks/trash",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "failed: page.goto: Target page, context or browser has been closed; falling back to the actions API",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 70,
+      "feature": "cleanup",
+      "interaction": "GET /deck/<id> after the delete",
+      "result": "broken",
+      "attempts": 1,
+      "evidence": "probe failed: apiRequestContext.get: Target page, context or browser has been closed",
+      "shot": null,
+      "consoleErrors": []
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 409 ()"
+  ]
+}

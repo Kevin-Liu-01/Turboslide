@@ -280,7 +280,8 @@ describe('the filmstrip', () => {
   });
 
   it("opens Google's menu on right-click with the rows of SPEC 4.2 and runs Skip slide as slide.skip", () => {
-    const { calls } = harness();
+    /* the Later row Transition is drawn behind Tools > Advanced tools (docs/FOCUS.md 3.1) */
+    const { calls } = harness({ edit: { settings: { advancedTools: true } } });
     fireEvent.contextMenu(card('thesis'), { clientX: 120, clientY: 80 });
     const menu = document.querySelector('[role="menu"][aria-label="Slide menu"]');
     expect(menu).not.toBeNull();
@@ -306,6 +307,33 @@ describe('the filmstrip', () => {
     const skip = calls.find((call) => call.id === 'slide.skip');
     expect(skip?.input).toEqual({ slideIds: ['thesis'], skip: true, baseRevision: 7 });
     expect(document.querySelector('[role="menu"][aria-label="Slide menu"]')).toBeNull();
+  });
+
+  it('leaves the Later row out of the card menu while Advanced tools is off (docs/FOCUS.md 3.1)', () => {
+    harness();
+    fireEvent.contextMenu(card('thesis'), { clientX: 120, clientY: 80 });
+    const menu = document.querySelector('[role="menu"][aria-label="Slide menu"]');
+    expect(menu).not.toBeNull();
+    const labels = [
+      ...menu!.querySelectorAll(':scope > .ts-menu-group > [role^="menuitem"] .ts-menu-label'),
+    ].map((el) => el.textContent);
+    expect(labels).toEqual([
+      'Cut',
+      'Copy',
+      'Paste',
+      'New slide',
+      'Duplicate slide',
+      'Delete',
+      'Skip slide',
+      'Change background',
+      'Apply layout',
+      'Move slide',
+      'Comment',
+    ]);
+    /* Change theme is parked with the Later row (docs/FOCUS.md 3.2, 3.4) */
+    expect(document.querySelector('[data-menu-item="slide.changeTheme"]')).toBeNull();
+    expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
+    fireEvent.keyDown(menu!, { key: 'Escape' });
   });
 
   it('Duplicate slide, Move slide and Apply layout are one action each; Paste inserts copies after the selection', async () => {

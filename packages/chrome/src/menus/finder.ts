@@ -1,6 +1,6 @@
 import { tooltipKey } from './keys.ts';
 import type { MenuContext, MenuItem, Platform } from './model.ts';
-import { allItems, isEnabled, itemPath, resolveLabel, tooltipDoc } from './model.ts';
+import { allItems, isEnabled, isPresent, itemPath, resolveLabel, tooltipDoc } from './model.ts';
 
 /**
  * Search the menus (SPEC 2.10, 3.1 row 1; Google's tool finder, Option+/): the rows the ToolFinder
@@ -38,12 +38,16 @@ export function isFinderItem(item: MenuItem): boolean {
   return item.effect !== undefined || item.status === 'later';
 }
 
-/** Every finder row of the model in its order: the title row's controls, then the ten menus. */
+/**
+ * Every finder row of the model in its order: the title row's controls, then the ten menus. A row
+ * the context does not draw (a role's row, a parked row or a Later row while Tools > Advanced
+ * tools is off; docs/FOCUS.md 3.1) is not listed, the same `isPresent` the menus read.
+ */
 export function finderRows(ctx: MenuContext): FinderRow[] {
   const platform: Platform = ctx.platform;
   const rows: FinderRow[] = [];
   const push = (item: MenuItem) => {
-    if (!isFinderItem(item)) return;
+    if (!isFinderItem(item) || !isPresent(item, ctx)) return;
     const path = itemPath(item.id);
     const title = resolveLabel(item, ctx);
     const parents = path.slice(0, -1);

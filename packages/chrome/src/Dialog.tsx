@@ -20,6 +20,17 @@ import './Dialog.css';
  * these; the card takes the title, the body and the actions row and owns nothing else. Lines: one
  * `--pt-edge` frame, the card floats over a scrim where the hairline would vanish (SPEC 2.2, the
  * help card's rule). New in Turboslide (no Prototemplate source).
+ *
+ * The focus round, cycle 2 (docs/gslides-parity/focus/VERIFICATION.md F-share-copy and
+ * F-shapes-export, build/b3.md R19, build/b4.md FR1): a modal card closes on Escape wherever the
+ * focus sits in the page, through a document listener while it is mounted, because the focused
+ * button can leave the document (the Download dialog's OK becomes Done when a run completes, the
+ * Share dialog's Copy link re-renders busy) and a key pressed with the focus on the body never
+ * reached the card. When the actions row changes and the focus has left the card, the confirming
+ * button takes it, so Enter and Escape keep working. Enter runs the default button only when the
+ * field under the caret did not handle the key itself (`defaultPrevented`): the Change background
+ * dialog's hex field applies its colour on Enter and the same key must not also run Done from a
+ * render that has not seen the colour yet (F-hex-field, `images.background.hex-field`).
  */
 export type DialogAction = {
   label: string;
@@ -127,6 +138,42 @@ export function Dialog({
     return () => document.removeEventListener('focusin', onFocusIn);
   }, [modal]);
 
+  /* Escape closes a modal card wherever the focus sits (cycle 2, b3 R19 and b4 FR1): the card's
+     own handler takes a key pressed inside it and stops its propagation, so this listener sees
+     only a key pressed with the focus outside the card, on the body after a focused button left
+     the document. The floating form leaves the focus in the page on purpose and keeps Escape to
+     the card, so the person typing can still end a text session with it. */
+  useEffect(() => {
+    if (!modal) return undefined;
+    const onDocumentEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      const el = card.current;
+      if (el && event.target instanceof Node && el.contains(event.target)) return;
+      event.preventDefault();
+      onClose();
+    };
+    document.addEventListener('keydown', onDocumentEscape);
+    return () => document.removeEventListener('keydown', onDocumentEscape);
+  }, [modal, onClose]);
+
+  /* the focus follows the actions row: when a run completes the confirming button is replaced
+     (Download's OK becomes Done) or disabled and the browser drops the focus to the body; the
+     card then gives it to the confirming button, else the first control, so Enter and Escape
+     keep working (cycle 2, b3 R19 part b, F-share-copy's Escape after Copy link) */
+  const actionsKey = rows
+    .map((action) => `${action.label}${action.disabled === true ? '!' : ''}`)
+    .join('|');
+  useEffect(() => {
+    if (!modal) return;
+    const el = card.current;
+    if (!el) return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== el && el.contains(active)) return;
+    const list = focusableIn(el);
+    const confirming = list.find((each) => each.classList.contains('is-solid'));
+    (confirming ?? list.find((each) => !each.closest('.ts-dialog-x')) ?? el).focus();
+  }, [modal, actionsKey]);
+
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -152,6 +199,9 @@ export function Dialog({
       return;
     }
     if (event.key === 'Enter' && primary !== undefined && !primary.disabled) {
+      /* a field that handled Enter itself (the hex field applies its colour) is not also the
+         default button's trigger; the default button reads the state of the next render */
+      if (event.defaultPrevented) return;
       const target = event.target;
       if (target instanceof HTMLTextAreaElement) return;
       if (target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement) return;

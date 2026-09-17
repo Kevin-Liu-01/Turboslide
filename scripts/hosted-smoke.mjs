@@ -365,6 +365,39 @@ function checks(deck, asset) {
       pass: (r) => isPage(r) && !r.text.includes('"notes"'),
       detail: (r) => `${r.bytes} chars; ${r.text.split('"notes"').length - 1} notes key(s)`,
     },
+    // the focus round (docs/FOCUS.md 2.1, 6.4 `decks.access.*` and `decks.notfound.page`): the
+    // HTTP half of the access and Not found rows the core gate drives, as a smoke before a gate run
+    {
+      // the edit route is `ssr: 'data-only'` (SPEC-4 0.34): the server answers 404 with the shell
+      // and the You need access page is drawn in the browser, so the HTTP half asserts the status
+      // alone and the page itself is the core gate's row (`decks.access.page`, roles.spec.ts)
+      name: '/edit/<unknown> access',
+      path: '/edit/no-such-deck-hosted-smoke',
+      expect: 'a 404 (the You need access page is client rendered on this data only route)',
+      pass: (r) => r.status === 404,
+      detail: (r) =>
+        `${r.bytes} chars; access page in the HTML ${r.text.includes('data-control="access.page"')} (drawn in the browser)`,
+    },
+    {
+      name: '/deck/<unknown> access',
+      path: '/deck/no-such-deck-hosted-smoke',
+      expect: 'a 404 carrying the You need access page',
+      pass: (r) => r.status === 404 && r.text.includes('data-control="access.page"'),
+      detail: (r) =>
+        `${r.bytes} chars; access page ${r.text.includes('data-control="access.page"')}`,
+    },
+    {
+      name: '/<no route> not found',
+      path: '/no-such-page-hosted-smoke',
+      expect: 'a 404 carrying the Not found page and its three links',
+      pass: (r) =>
+        r.status === 404 &&
+        ['notfound', 'notfound.new', 'notfound.decks', 'notfound.about'].every((c) =>
+          r.text.includes(`data-control="${c}"`),
+        ),
+      detail: (r) =>
+        `${r.bytes} chars; ${['notfound', 'notfound.new', 'notfound.decks', 'notfound.about'].filter((c) => r.text.includes(`data-control="${c}"`)).length} of 4 controls`,
+    },
     {
       name: `/edit/${deck}`,
       path: `/edit/${deck}`,
@@ -528,15 +561,16 @@ function securityChecks(base, deck, args) {
     name: 'unsigned thumbnail',
     path: `/api/render/title?deck=${encodeURIComponent(deck)}&theme=light&w=160`,
     expect:
-      '403 in enforce mode (SPEC-3 8.13), 200 or a 302 to the stored object in shadow mode (SPEC-4 0.31), or 404 for a deck without that slide',
+      '403 (or 401 for a caller with no identity) in enforce mode (SPEC-3 8.13), 200 or a 302 to the stored object in shadow mode (SPEC-4 0.31), or 404 for a deck without that slide',
     pass: (r) =>
       r.status === 403 ||
+      r.status === 401 ||
       r.status === 200 ||
       r.status === 404 ||
       (r.status === 302 && /\.blob\.vercel-storage\.com\//.test(r.location)),
     detail: (r) =>
-      r.status === 403
-        ? 'enforce: refused without the grant'
+      r.status === 403 || r.status === 401
+        ? `enforce: refused without the grant (${r.status})`
         : r.status === 200
           ? 'shadow: served and logged'
           : r.status === 302
@@ -686,7 +720,9 @@ async function thumbnailRows(base, deck, timeoutMs) {
   const plain = await probe(base, path, timeoutMs);
   const stamp = plain.headers['x-turboslide-stamp'] ?? null;
   const rows = [];
-  const enforce = plain.status === 403;
+  /* enforce mode refuses the probe's request, which carries no identity and no grant: 403 for an
+     identified caller, 401 for one with no cookie at all (the smoke's fetch) */
+  const enforce = plain.status === 403 || plain.status === 401;
   rows.push({
     row: {
       name: 'thumbnail without r',

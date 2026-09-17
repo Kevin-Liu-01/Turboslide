@@ -580,11 +580,19 @@ export const PICKERS = {
   weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
 } as const;
 
-/** The canvas chips, readouts and bars of round two (SPEC-2 section 10, 0.86). */
+/**
+ * The canvas chips, readouts and bars of round two (SPEC-2 section 10, 0.86). The click model of
+ * the focus round (docs/gslides-parity/focus/AMENDMENTS.md A1) adds the chip's sentence for a
+ * selected text object: one click selects and shows the ring, the handles and the chip with no
+ * caret, so the chip's tooltip tells the seller how the text opens; the placeholder prompts
+ * below stay Google's words (A1 item 5).
+ */
 export const CANVAS = {
   crop: 'Drag the handles to crop. Press Enter to finish',
   wordArt: 'Type your text and press Enter',
   group: 'Group',
+  /* the selected text object's chip tooltip (A1 items 3 and 4): the two ways into the text */
+  editText: 'Double click to edit the text, or start typing',
   /* the multi selection chip: "3 objects" */
   objects: (count: number) => `${count} objects`,
   /* the rotation chip: "37°" */

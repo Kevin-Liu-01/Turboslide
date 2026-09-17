@@ -42,7 +42,7 @@ export function generateActionsReference(): string {
     '',
     GENERATED,
     '',
-    'Every operation is one action in one table; the CLI subcommands, the MCP tools, the window API and the HTTP endpoints are generated from it. Every mutating action takes `baseRevision` and rejects a stale one with 409 and the current document; every write returns the normalized result so the re-read is free. An action whose milestone has not landed answers `NotImplementedError` (501).',
+    'Every operation is one action in one table; the CLI subcommands, the MCP tools, the window API and the HTTP endpoints are generated from it. Every mutating action takes `baseRevision` and rejects a stale one with 409 and the current document; every write returns the normalized result so the re-read is free. An action whose milestone has not landed answers `NotImplementedError` (501). An action whose menu row sits behind Tools > Advanced tools in the editor (docs/FOCUS.md section 3) runs on every transport exactly as before; the switch gates the rows a person sees, never the action.',
     '',
     markdownTable(
       ['Action', 'Label', 'Input', 'Mutates', 'Transports', 'CLI', 'MCP tool', 'Milestone'],

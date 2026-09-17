@@ -5,7 +5,10 @@
 // `turboslide mcp`, the studio's server functions and the HTTP transport. The CLI commands call
 // the same functions and print the outputs. Errors follow SPEC 7.1: a stale baseRevision or a
 // held lease is ConflictError (409) with the current document, malformed input TypeError,
-// an unknown id RangeError.
+// an unknown id RangeError. The one exception since the focus round: a plain `asset.add` writes
+// its new record against the store's head (`commitAssetsAtHead`), because the record is additive
+// and the editor's base lags or leads the store while its own writes are in flight (docs/FOCUS.md
+// rank 5); a record the head already holds under that id is still refused as a conflict.
 //
 // Round three (gslides-parity SPEC-3 10.4, 10.5, 8.5): every file the actions write goes through
 // the store's `putAsset` (digest named, never overwritten; a hosted twin reaches the store and not
@@ -157,6 +160,53 @@ export async function commitAssets(
   return { revision: outcome.revision, assets: committed };
 }
 
+/** How many times a new asset's write follows the head after another write moved it between the read and the write. */
+export const ASSET_HEAD_RETRIES = 3;
+
+/**
+ * Writes new asset records against the store's head revision (docs/FOCUS.md rank 5; audit-images
+ * rows 6 to 8, 57 and 61). The editor stamps `asset.add` with the revision its page holds, which
+ * is one behind the store whenever a write is pending or retained and one ahead while its own
+ * write is in flight, and the reducer refuses either as stale, so an upload, a drop, a paste, a
+ * Replace image and a background picture failed while the seller was still typing. An asset.set
+ * of a record the head does not hold yet is additive: it commutes with every slide write and with
+ * every other asset, so the write is made on the head the store reports, and made again on the new
+ * head when another write lands in between (a bounded number of times). The caller's base is
+ * honoured when it is the head, and a record the head already holds under the same id is refused
+ * the way the stale base was, with the head's document in the error, since that is a real
+ * conflict and not a race. `asset.add --replace-source` keeps the strict base: it changes a record.
+ */
+export async function commitAssetsAtHead(
+  deps: AssetActionDeps,
+  ctx: AssetWriteContext,
+  baseRevision: number,
+  assets: ReadonlyArray<Asset>,
+): Promise<{ revision: number; assets: Asset[] }> {
+  if (assets.length === 0) return { revision: baseRevision, assets: [] };
+  let lastConflict: ConflictError | undefined;
+  for (let attempt = 0; attempt <= ASSET_HEAD_RETRIES; attempt += 1) {
+    const current = (await deps.store.read()).document;
+    const head = current.deck.revision;
+    if (head !== baseRevision) {
+      const taken = assets.find((asset) => current.deck.assets[asset.id] !== undefined);
+      if (taken !== undefined) {
+        throw new ConflictError(
+          `asset.add: baseRevision ${baseRevision} is stale; the document is at revision ${head} and already holds an asset "${taken.id}"`,
+          { currentRevision: head, current },
+        );
+      }
+    }
+    try {
+      return await commitAssets(deps, ctx, head, assets);
+    } catch (error) {
+      // a held lease is a refusal of its own, never retried; a moved head is read again
+      if (!(error instanceof ConflictError) || error.holder !== undefined) throw error;
+      lastConflict = error;
+    }
+  }
+  throw lastConflict ?? new TypeError('asset.add: the write did not land');
+}
+
 /** The intake options every asset write shares: the store's put, the policy and the caps. */
 function intakeOptions(deps: AssetActionDeps) {
   return {
@@ -181,7 +231,7 @@ export async function assetAdd(
     return assetReplaceSource(deps, ctx, baseRevision, replaceSource, request);
   const result = await addAsset(request, intakeOptions(deps));
   for (const line of result.warnings) deps.log?.(line);
-  const committed = await commitAssets(deps, ctx, baseRevision, [result.asset]);
+  const committed = await commitAssetsAtHead(deps, ctx, baseRevision, [result.asset]);
   return committed.assets[0] ?? result.asset;
 }
 

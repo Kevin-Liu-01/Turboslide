@@ -51,7 +51,13 @@ import {
   snapshotKeyOf,
   snapshotPath,
 } from './snapshots.ts';
-import { documentAtVersion, readVersions, recordAtRevision, writeVersion } from './versions.ts';
+import {
+  documentAtVersion,
+  readVersions,
+  recordAtRevision,
+  versionRecordSchema,
+  writeVersion,
+} from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
@@ -401,6 +407,107 @@ export class SnapshotContestedError extends Error {
   }
 }
 
+/**
+ * The record number this write wants is stored already (the focus round, docs/FOCUS.md ranks 20
+ * and 21): a record of a commit this mirror has not fetched, or the claim of a write in flight on
+ * another instance. The write stops before its commit and the caller retries from the current
+ * document; a record is never overwritten.
+ */
+export class RecordTakenError extends Error {
+  readonly relative: string;
+  constructor(deckId: string, relative: string) {
+    super(
+      `Another instance holds ${relative} of ${deckId}; retry the write from the current document`,
+    );
+    this.name = 'RecordTakenError';
+    this.relative = relative;
+  }
+}
+
+/**
+ * How long a record claim whose revision is above the deck's may stand before another writer
+ * treats it as the leftover of a writer that stopped between its claim and its commit and takes
+ * the number over. A commit follows its claim within a request, so a minute is generous.
+ */
+export const CLAIM_GRACE_MS = 60_000;
+
+/** A stored record's bytes as a record, or null when they do not parse. */
+function parseRecordBytes(bytes: Uint8Array): VersionRecord | null {
+  try {
+    const parsed = versionRecordSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The slide ids a manifest lists, in section order, read from its raw bytes without validating
+ * the deck: the set of slide bodies a document at that manifest is made of. The listing of a
+ * deck prefix lags the store by up to a minute (the note on `pull`), so the manifest, never the
+ * listing, names the bodies a pull must prove (docs/FOCUS.md rank 3: an instance answered a
+ * document at the manifest's revision with the listing's slides, and refused the undo of a
+ * delete with "Slide already exists" or the redo with "No slide").
+ */
+export function manifestSlideIds(bytes: Uint8Array): string[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return [];
+  }
+  if (typeof raw !== 'object' || raw === null) return [];
+  const sections = (raw as { sections?: unknown }).sections;
+  if (!Array.isArray(sections)) return [];
+  const ids: string[] = [];
+  for (const section of sections) {
+    const list = (section as { slideIds?: unknown } | null)?.slideIds;
+    if (!Array.isArray(list)) continue;
+    for (const id of list) if (typeof id === 'string' && isSafeKey(id)) ids.push(id);
+  }
+  return ids;
+}
+
+/**
+ * Stores the whole document under its key with overwrite refused (SPEC-2 8.2). A snapshot that
+ * exists already is left alone when its bytes are ours (a retry, or an identical write on
+ * another instance: equal bytes are one document). The key is the md5 of the manifest bytes
+ * alone, so two writers that start from one revision inside one clock millisecond push equal
+ * manifests with different slide bodies and want the same name (measured in hosted.test.ts with
+ * a frozen clock); the one whose body the name holds proceeds, the other stops before its
+ * manifest push with SnapshotContestedError, which write() answers as a conflict, so no
+ * committed etag ever names a body its writer did not store. Since the focus round every push
+ * of `deck.json` stores its snapshot first: the write, the trash and restore stamps and the
+ * upload of a new deck (`pushDeckDir`), so a reader proves any current manifest from its
+ * snapshot without a body read (docs/FOCUS.md ranks 7 and 21). A stamp passes `acceptExisting`:
+ * it changes no slide, so a snapshot that already holds its key is this document (a restore's
+ * manifest bytes are the last write's, whose snapshot that write stored), and the head read that
+ * proves a write's body is one round trip a restore does not need (the fix round, F12: the
+ * reload the trash page's Restore is followed by lands inside the stamp's flight time).
+ */
+async function storeSnapshot(
+  client: BlobClient,
+  deckId: string,
+  key: string,
+  body: Uint8Array,
+  options: { acceptExisting?: boolean } = {},
+): Promise<void> {
+  const relative = snapshotPath(key);
+  const pathname = `${deckPrefix(deckId)}${relative}`;
+  try {
+    await client.put(pathname, body, {
+      overwrite: false,
+      contentType: blobContentType(relative),
+    });
+  } catch (error) {
+    if (!isBlobExistsError(error)) throw error;
+    if (options.acceptExisting === true) return;
+    const existing = await client.head(pathname);
+    if (existing !== null && existing.version === quotedMd5(body)) return;
+    throw new SnapshotContestedError(deckId, key);
+  }
+}
+
 /** The highest version record number the mirror holds (or the manifest being built names), 0 without any. */
 function lastRecord(dir: string, manifest?: Manifest): number {
   let last = 0;
@@ -412,6 +519,26 @@ function lastRecord(dir: string, manifest?: Manifest): number {
   return last;
 }
 
+type Settled<T> = { ok: true; value: T } | { ok: false; error: unknown };
+
+/** A promise's outcome as a value, so several puts in flight are every one awaited. */
+function settle<T>(promise: Promise<T>): Promise<Settled<T>> {
+  return promise.then(
+    (value) => ({ ok: true as const, value }),
+    (error: unknown) => ({ ok: false as const, error }),
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** How long a write waits before it retries after another writer's claim took its record number. */
+export const CLAIM_RETRY_MS = 200;
+
+/** How many of the newest records a pull reads to find claims above the proven document. */
+export const CLAIMS_CHECKED = 4;
+
 function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
   let tail: Promise<unknown> = Promise.resolve();
   return <T>(run: () => Promise<T>): Promise<T> => {
@@ -419,6 +546,95 @@ function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
     tail = next.catch(() => undefined);
     return next;
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The deadline on every call to the store
+
+/**
+ * How long one read of the Blob store (`head`, `get`, `list`, `folders`, `del`) may take, and how
+ * long one `put` may (a twin of up to the asset cap travels in a put). A call past its deadline
+ * is a BlobTimeoutError and the store's queue moves on (the focus round, cycle 2). Every call of
+ * a deck's store runs through one serial queue per instance (`serialQueue`), and the SDK's fetch
+ * has no timeout of its own, so one call that never answered held the queue and every request
+ * of that deck on the instance with it: `asset.add` through the window API did not return for
+ * nine and a half minutes on the enforce preview while the deck stood unchanged in the store
+ * (VERIFICATION F-stall, F-asset-add-intermittent; b4's fix round saw 665 s once).
+ */
+export const BLOB_READ_TIMEOUT_MS = 20_000;
+/** The turn after the deadline in which an answer that arrived during a stall still counts. */
+export const TIMEOUT_GRACE_MS = 250;
+export const BLOB_WRITE_TIMEOUT_MS = 90_000;
+
+export class BlobTimeoutError extends Error {
+  readonly op: keyof BlobClient;
+  readonly pathname: string;
+  constructor(op: keyof BlobClient, pathname: string, ms: number) {
+    super(`The Blob store did not answer ${op} ${pathname} within ${Math.round(ms / 1000)} s`);
+    this.name = 'BlobTimeoutError';
+    this.op = op;
+    this.pathname = pathname;
+  }
+}
+
+const BOUNDED = Symbol.for('turboslide.boundedBlobClient');
+
+type Bounded = BlobClient & { [BOUNDED]?: true };
+
+export type BlobDeadlines = { readMs?: number; writeMs?: number };
+
+/**
+ * The client with a deadline on every call. The underlying call is not cancelled (the SDK offers
+ * no handle for that); the caller's promise settles with the error and the store continues. A
+ * client wrapped once is not wrapped again.
+ */
+export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines = {}): BlobClient {
+  if ((client as Bounded)[BOUNDED] === true) return client;
+  const readMs = deadlines.readMs ?? BLOB_READ_TIMEOUT_MS;
+  const writeMs = deadlines.writeMs ?? BLOB_WRITE_TIMEOUT_MS;
+  const bound = <T>(op: keyof BlobClient, pathname: string, ms: number, run: () => Promise<T>) =>
+    new Promise<T>((resolve, reject) => {
+      let settled = false;
+      let grace: ReturnType<typeof setTimeout> | undefined;
+      const timer = setTimeout(() => {
+        // an instance that stalled (a frozen function, a blocked loop) runs its expired timers
+        // before the poll phase delivers the answers that arrived during the stall, so the
+        // deadline is judged one short turn later: an answer that did arrive settles the call,
+        // one that did not is the timeout (the cycle 2 enforce preview flushed fifteen queued
+        // presence posts in two seconds and refused the ops POST beside them with this error;
+        // the integrator at the merge, for b7)
+        grace = setTimeout(() => {
+          if (!settled) reject(new BlobTimeoutError(op, pathname, ms));
+        }, TIMEOUT_GRACE_MS);
+        grace.unref?.();
+      }, ms);
+      timer.unref?.();
+      run().then(
+        (value) => {
+          settled = true;
+          clearTimeout(timer);
+          if (grace !== undefined) clearTimeout(grace);
+          resolve(value);
+        },
+        (error: unknown) => {
+          settled = true;
+          clearTimeout(timer);
+          if (grace !== undefined) clearTimeout(grace);
+          reject(error);
+        },
+      );
+    });
+  const wrapped: Bounded = {
+    head: (pathname) => bound('head', pathname, readMs, () => client.head(pathname)),
+    get: (pathname) => bound('get', pathname, readMs, () => client.get(pathname)),
+    list: (prefix) => bound('list', prefix, readMs, () => client.list(prefix)),
+    folders: (prefix) => bound('folders', prefix, readMs, () => client.folders(prefix)),
+    put: (pathname, bytes, options) =>
+      bound('put', pathname, writeMs, () => client.put(pathname, bytes, options)),
+    del: (pathnames) => bound('del', pathnames[0] ?? '', readMs, () => client.del(pathnames)),
+  };
+  wrapped[BOUNDED] = true;
+  return wrapped;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -450,6 +666,8 @@ export type BlobStoreOptions = {
   hooks?: { beforeCommit?: () => Promise<void>; afterHead?: () => Promise<void> };
   /** how long an unreferenced snapshot is left alone before the prune removes it; default 5 minutes */
   snapshotGraceMs?: number;
+  /** the deadlines on the store's calls (boundedBlobClient); the module's defaults when absent */
+  deadlines?: BlobDeadlines;
 };
 
 export type BlobStore = DeckStore & {
@@ -465,12 +683,16 @@ export type BlobStore = DeckStore & {
 };
 
 export function openBlobStore(options: BlobStoreOptions): BlobStore {
-  const { client, deckId, dir } = options;
+  const { deckId, dir } = options;
+  // every call to the store meets a deadline, so a fetch that never answers cannot hold the
+  // deck's queue on this instance (boundedBlobClient)
+  const client = boundedBlobClient(options.client, options.deadlines ?? {});
   const prefix = deckPrefix(deckId);
   const pollMs = options.pollMs ?? 3000;
   const syncTtlMs = options.syncTtlMs ?? 750;
   const snapshotGraceMs = options.snapshotGraceMs ?? SNAPSHOT_GRACE_MS;
   const serial = serialQueue();
+  const clock = options.now ?? (() => new Date().toISOString());
   // the text anchors of the comments follow the text a write moved, inside the lock (SPEC-3
   // 0.52); the changed sidecar files are pushed after the commit below
   const shifted: SidecarChange[] = [];
@@ -505,7 +727,11 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    * it has for reads and `write()` refuses to commit on it (StaleMirrorError) rather than commit
    * a stale base over a newer document; before this a second write from another instance failed
    * with "changed in the Blob store since it was read", and a fresh mirror that took a lagging
-   * body as its base could commit over newer revisions (docs/hosting.md).
+   * body as its base could commit over newer revisions (docs/hosting.md). The bodies a document
+   * is made of are the ones its manifest names, never the listing's (the focus round, docs/
+   * FOCUS.md rank 3): the listing lags, so it named a removed slide's body and missed an added
+   * one, and a document "proven" by the manifest's etag alone carried the wrong slide set, which
+   * the reducer refused as "Slide already exists" or "No slide" on the next write.
    */
   const pull = async (): Promise<void> => {
     const manifest = readManifest(dir);
@@ -531,8 +757,8 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     };
     // 1. the records: the listing's, then by number past what the listing shows; the comments
     // sidecar (SPEC-3 2.2) travels with the same rule as a record, by version, because it is
-    // neither a slide body the snapshot proves nor a record that never changes
-    const slideEntries: { entry: BlobEntry; relative: string }[] = [];
+    // neither a slide body the snapshot proves nor a record that never changes. The listing's
+    // slide entries are not read: the manifest names the bodies (steps 2 and 4 below)
     await eachLimit(entries, 8, async ({ entry, relative }) => {
       if (relative.startsWith(`${COMMENTS_DIR}/`)) {
         if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
@@ -545,10 +771,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         next.files[relative] = fetched.version;
         return;
       }
-      if (!relative.startsWith('versions/')) {
-        slideEntries.push({ entry, relative });
-        return;
-      }
+      if (!relative.startsWith('versions/')) return;
       if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
         next.files[relative] = entry.version;
         return;
@@ -597,38 +820,73 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     // the manifest, so the snapshot is the current document, proven by its name; no revision is
     // read and no slide body is fetched. A deck written before the round, or a store whose
     // deck.json push failed after its snapshot, has none and takes the replay below.
+    /**
+     * A record whose revision is above the proven document's leaves the mirror: the claim of a
+     * write in flight on another instance (stored before its commit, the write's round two), or
+     * the leftover of a writer that stopped before its commit. The next pull fetches it again by
+     * number once the manifest moved, so a committed write's record is never lost; a reader in
+     * between never sees a log that ends above the deck (docs/FOCUS.md rank 21).
+     */
+    const dropRecordsAbove = (revision: number): void => {
+      // a claim is numbered above every committed record, so the newest few by number are the
+      // only candidates; the rest of the log is not read on every pull
+      const newest = localDocuments(dir)
+        .map((relative) => ({ relative, n: Number(/^versions\/(\d+)\.json$/.exec(relative)?.[1]) }))
+        .filter((row) => Number.isInteger(row.n))
+        .sort((a, b) => b.n - a.n)
+        .slice(0, CLAIMS_CHECKED);
+      for (const { relative } of newest) {
+        const record = parseRecordBytes(new Uint8Array(readFileSync(pathOf(relative))));
+        if (record === null || record.revision <= revision) continue;
+        rmSync(pathOf(relative), { force: true });
+        delete next.files[relative];
+      }
+    };
     const currentKey = etagMd5(deckHead.version);
     const snapshot = currentKey === null ? null : await readSnapshot(currentKey);
     if (snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version) {
       writeDocuments(snapshot);
+      dropRecordsAbove(snapshot.deck.revision);
       for (const relative of localDocuments(dir)) {
         if (next.files[relative] === undefined) rmSync(pathOf(relative), { force: true });
       }
       writeManifestFile(dir, next);
       return;
     }
-    // 2. the base: the mirror's previous state, or the bodies the store serves for an empty mirror
+    // 2. the base: the mirror's previous state, or the bodies the store serves for an empty
+    // mirror. The bodies are the ones the manifest names, fetched by name and each proven
+    // against its own head; the listing of the prefix lags and names neither a slide added a
+    // moment ago nor the removal of one (docs/FOCUS.md rank 3)
     let base = before;
     const unproven = new Set<string>();
+    let manifestBody: Uint8Array | null = null;
     if (base === null) {
       const deck = await fetchBody('deck.json');
       if (deck === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
+      manifestBody = deck.bytes;
       writeAtomic(pathOf('deck.json'), deck.bytes);
-      await eachLimit(slideEntries, 8, async ({ relative }) => {
+      await eachLimit(manifestSlideIds(deck.bytes), 8, async (id) => {
+        const relative = `slides/${id}.json`;
         const body = await fetchBody(relative);
-        if (body === null) return;
+        if (body === null) {
+          unproven.add(id);
+          return;
+        }
         writeAtomic(pathOf(relative), body.bytes);
         const head = await client.head(`${prefix}${relative}`);
-        if (head === null || head.version !== quotedMd5(body.bytes))
-          unproven.add(relative.slice('slides/'.length, -'.json'.length));
+        if (head === null || head.version !== quotedMd5(body.bytes)) unproven.add(id);
       });
       base = loadDeckDir(dir).document;
     }
-    // 3. the replay: every record above the base, through the writer's own reducer and clock
+    // 3. the replay: every record above the base, through the writer's own reducer and clock,
+    // until the derived manifest is the head's; a record that moves nothing (a named version, a
+    // claim a writer neutralized) is skipped, since the reducer would move the revision for it
     const records = readVersions(dir);
     let document = base;
     const rewritten = new Set<string>();
     for (const record of [...records].sort((a, b) => a.n - b.n)) {
+      if (quotedMd5(canonicalJson(document.deck)) === deckHead.version) break;
+      if (record.mutations.length === 0) continue;
       if (record.baseRevision !== document.deck.revision) continue;
       const applied = applyWrite(
         document,
@@ -647,15 +905,24 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     const derivedEtag = quotedMd5(canonicalJson(document.deck));
     let proven = derivedEtag === deckHead.version && [...unproven].every((id) => rewritten.has(id));
     if (!proven) {
-      // 4. the fresh path: the bodies themselves, each proven against its own head
-      const deck = await fetchBody('deck.json');
+      // 4. the fresh path: the bodies the manifest names, each proven against its own head; a
+      // body that is missing or that the CDN still serves in an older form leaves the document
+      // unproven, never a document at the manifest's revision with another slide set
+      const deck =
+        manifestBody !== null && quotedMd5(manifestBody) === deckHead.version
+          ? { bytes: manifestBody, version: deckHead.version }
+          : await fetchBody('deck.json');
       if (deck !== null && quotedMd5(deck.bytes) === deckHead.version) {
         const bodies = new Map<string, Uint8Array>();
         let lagging = 0;
-        await eachLimit(slideEntries, 8, async ({ relative }) => {
+        await eachLimit(manifestSlideIds(deck.bytes), 8, async (id) => {
+          const relative = `slides/${id}.json`;
           const body = await fetchBody(relative);
           const head = await client.head(`${prefix}${relative}`);
-          if (body === null || head === null) return;
+          if (body === null || head === null) {
+            lagging += 1;
+            return;
+          }
           if (quotedMd5(body.bytes) === head.version) bodies.set(relative, body.bytes);
           else lagging += 1;
         });
@@ -669,6 +936,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     }
     if (proven) {
       writeDocuments(document);
+      dropRecordsAbove(document.deck.revision);
     } else {
       // unprovable for now: reads keep the mirror's copy, write() refuses until a later pull proves one
       for (const relative of localDocuments(dir)) {
@@ -740,28 +1008,40 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     }
   };
 
+  const putSnapshot = (key: string, body: Uint8Array): Promise<void> =>
+    storeSnapshot(client, deckId, key, body);
+
   /**
-   * Stores the whole document under its key with overwrite refused (SPEC-2 8.2). A snapshot that
-   * exists already is left alone when its bytes are ours (a retry, or an identical write on
-   * another instance: equal bytes are one document). The key is the md5 of the manifest bytes
-   * alone, so two writers that start from one revision inside one clock millisecond push equal
-   * manifests with different slide bodies and want the same name (measured in hosted.test.ts with
-   * a frozen clock); the one whose body the name holds proceeds, the other stops before its
-   * manifest push with SnapshotContestedError, which write() answers as a conflict, so no
-   * committed etag ever names a body its writer did not store.
+   * The record of a write goes up before its commit, as a claim on its number (the focus round,
+   * docs/FOCUS.md ranks 20 and 21): `overwrite` false, so two writers that computed one number
+   * from one base store one record and the other stops before its commit (RecordTakenError, a
+   * conflict outcome), and no record is ever overwritten. Before this the record went up after
+   * the commit, so every other instance's pull (which fetches records by number when the
+   * manifest's etag moves) missed it until the next commit: the edit never reached a second
+   * browser over the head poll (rank 20), and a writer whose mirror lacked the record reused its
+   * number and overwrote it, which broke the version log (rank 21, "The version log breaks
+   * between versions 3 and 4"). A number held by a record whose revision is above the base is a
+   * claim in flight, or the leftover of a writer that stopped before its commit; the leftover is
+   * taken over once it is older than CLAIM_GRACE_MS.
    */
-  const putSnapshot = async (key: string, body: Uint8Array): Promise<void> => {
-    const relative = snapshotPath(key);
+  const claimRecord = async (relative: string, entry: VersionRecord): Promise<BlobEntry> => {
+    const bytes = new Uint8Array(readFileSync(pathOf(relative)));
+    const pathname = `${prefix}${relative}`;
+    const contentType = blobContentType(relative);
     try {
-      await client.put(`${prefix}${relative}`, body, {
-        overwrite: false,
-        contentType: blobContentType(relative),
-      });
+      return await client.put(pathname, bytes, { overwrite: false, contentType });
     } catch (error) {
       if (!isBlobExistsError(error)) throw error;
-      const existing = await client.head(`${prefix}${relative}`);
-      if (existing !== null && existing.version === quotedMd5(body)) return;
-      throw new SnapshotContestedError(deckId, key);
+      const existing = await client.get(pathname);
+      const held = existing === null ? null : parseRecordBytes(existing.bytes);
+      const stale =
+        held !== null &&
+        held.revision > entry.baseRevision &&
+        Date.parse(clock()) - Date.parse(held.createdAt) > CLAIM_GRACE_MS;
+      if (existing === null || stale) {
+        return client.put(pathname, bytes, { overwrite: true, contentType });
+      }
+      throw new RecordTakenError(deckId, relative);
     }
   };
 
@@ -829,7 +1109,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     },
 
     write(write: Write, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
-      return serial(async () => {
+      const runWrite = async (retries: number): Promise<WriteOutcome> => {
         // inside the queue already: sync directly, not through serial(). Round one of the four
         // (gslides-parity SPEC-4 0.33): the manifest head and the leases read leave together;
         // the leases file is its own document, so neither waits on the other
@@ -860,47 +1140,65 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
         const entry: VersionRecord = { ...outcome.entry, snapshot: key };
         writeVersion(dir, entry);
+        const record = `versions/${entry.n}.json`;
+        let claimed = false;
+        /** A claim this write stored and cannot commit leaves the store (best effort). */
+        const releaseClaim = async (): Promise<void> => {
+          if (!claimed) return;
+          claimed = false;
+          await client.del([`${prefix}${record}`]).catch(() => undefined);
+        };
         try {
           if (options.hooks?.beforeCommit) await options.hooks.beforeCommit();
-          // Round two (SPEC-4 0.33): the whole document under its immutable name and the changed
-          // slide bodies leave together, before the manifest flips. A loser of the race below
-          // leaves a snapshot no record and no etag names, which the prune removes, and slide
-          // bodies the live manifest still names by an older etag: a reader proves the document
-          // by the winner's snapshot (pull step 1b) and never reads those bodies, and the next
-          // write of the slide overwrites them. Deletions wait until after the commit (below),
-          // because a body removed before a commit that fails on ifMatch is one the live manifest
-          // still names, and a reader's next pull would get null for it.
+          // Round two (SPEC-4 0.33, amended in the focus round): the whole document under its
+          // immutable name, the changed slide bodies and the version record as a claim on its
+          // number leave together, before the manifest flips. A loser of the race below leaves a
+          // snapshot no record and no etag names, which the prune removes, slide bodies the live
+          // manifest still names by an older etag (a reader proves the document by the winner's
+          // snapshot, pull step 1b, and never reads those bodies, and the next write of the
+          // slide overwrites them) and a claim it releases. Deletions wait until after the commit
+          // (below), because a body removed before a commit that fails on ifMatch is one the live
+          // manifest still names, and a reader's next pull would get null for it.
           const changedBodies = outcome.changed.filter((slideId) =>
             existsSync(pathOf(`slides/${slideId}.json`)),
           );
           const removedBodies = outcome.changed.filter(
             (slideId) => !existsSync(pathOf(`slides/${slideId}.json`)),
           );
-          const [, ...pushedSlides] = await Promise.all([
-            putSnapshot(key, snapshotBody(outcome.document)),
-            ...changedBodies.map((slideId) => putDocument(`slides/${slideId}.json`)),
-          ]);
+          // the three leave together and every one is awaited, so a claim that landed while
+          // another put failed is known and released below
+          const snapshotPut = settle(putSnapshot(key, snapshotBody(outcome.document)));
+          const claimPut = settle(claimRecord(record, entry));
+          const bodyPuts = Promise.all(
+            changedBodies.map((slideId) => settle(putDocument(`slides/${slideId}.json`))),
+          );
+          const snapshotResult = await snapshotPut;
+          const claimResult = await claimPut;
+          const bodyResults = await bodyPuts;
+          claimed = claimResult.ok;
+          if (!snapshotResult.ok) throw snapshotResult.error;
+          if (!claimResult.ok) throw claimResult.error;
+          const failedBody = bodyResults.find((result) => !result.ok);
+          if (failedBody !== undefined) throw failedBody.error;
+          const stored = claimResult.value;
+          const pushedSlides = bodyResults.map((result) => (result.ok ? result.value : undefined));
           // Round three: the commit point, alone. The manifest goes up conditional on the version
           // this instance read; a precondition failure is the conflict outcome below.
           const committed = await putDocument('deck.json', synced);
+          claimed = false;
           manifest.files['deck.json'] = committed.version;
+          manifest.files[record] = stored.version;
           changedBodies.forEach((slideId, i) => {
             const pushed = pushedSlides[i];
             if (pushed !== undefined) manifest.files[`slides/${slideId}.json`] = pushed.version;
           });
           writeManifestFile(dir, manifest);
-          // the removed bodies leave after the commit, then round four: the version record, kept
-          // after the commit because records are put with overwrite and a loser's record must never
-          // overwrite the winner's, and kept synchronous because adoptExternal on another editor
-          // reads the records to apply the revision forward
+          // Round four: the removed bodies leave after the commit
           if (removedBodies.length > 0) {
             await client.del(removedBodies.map((slideId) => `${prefix}slides/${slideId}.json`));
             for (const slideId of removedBodies) delete manifest.files[`slides/${slideId}.json`];
+            writeManifestFile(dir, manifest);
           }
-          const record = `versions/${entry.n}.json`;
-          const stored = await putDocument(record);
-          manifest.files[record] = stored.version;
-          writeManifestFile(dir, manifest);
           for (const change of shifted.splice(0)) {
             // the shifted threads and their index; a stale index (another instance's comment
             // landed first) is left to that instance's next push, which pulls and re-shifts
@@ -917,7 +1215,20 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
         } catch (error) {
+          await releaseClaim();
           if (isBlobPreconditionError(error)) return conflictFromStore();
+          if (error instanceof RecordTakenError) {
+            // the number is another writer's: a commit this mirror has not fetched yet, or a
+            // claim in flight from the same base. The write runs once more from the store's
+            // current document after a short wait (the other commit lands within it); a second
+            // refusal is answered the way a lost manifest race is
+            if (retries > 0) {
+              discard();
+              await sleep(CLAIM_RETRY_MS);
+              return runWrite(retries - 1);
+            }
+            return conflictFromStore();
+          }
           if (error instanceof SnapshotContestedError) {
             // the other writer may have committed already (the round one sentence holds) or may
             // still be between its snapshot and its manifest push (the contention alone)
@@ -936,11 +1247,19 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           discard();
           throw error;
         }
-      });
+      };
+      return serial(() => runWrite(1));
     },
 
     saveVersion(author: Author, note: string): Promise<Version> {
-      return serial(async () => {
+      /**
+       * A named version's number is taken the way a write's is: `overwrite` false. A number
+       * another instance holds (its named version, or the claim of its write in flight) is the
+       * ConflictError the panel shows (audit-present row 43, "Another instance saved version 16
+       * first"); since the write's record leaves before its commit, the pull that opens this
+       * call holds every committed record, so the refusal names a true race and nothing else.
+       */
+      const save = async (): Promise<Version> => {
         const head = await client.head(`${prefix}deck.json`);
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
         if (readManifest(dir).files['deck.json'] !== head.version) await pull();
@@ -978,7 +1297,8 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           invalidate();
           throw error;
         }
-      });
+      };
+      return serial(save);
     },
 
     async listVersions(): Promise<Version[]> {
@@ -1160,11 +1480,25 @@ export async function pushDeckDir(
     }
     if (isMirroredDocument(relative)) manifest.files[relative] = entry.version;
   });
-  const deck = await client.put(
-    `${prefix}deck.json`,
-    new Uint8Array(readFileSync(join(dir, 'deck.json'))),
-    { overwrite: options.overwrite, contentType: blobContentType('deck.json') },
-  );
+  const deckBytes = new Uint8Array(readFileSync(join(dir, 'deck.json')));
+  // the snapshot of the new manifest before the manifest itself (the focus round): a reader on
+  // another instance proves the fresh deck from it while the CDN still answers nothing or an
+  // older body for its bodies (docs/FOCUS.md rank 7, the listing after Make a copy)
+  try {
+    await storeSnapshot(
+      client,
+      deckId,
+      snapshotKey(deckBytes),
+      snapshotBody(loadDeckDir(dir).document),
+    );
+  } catch (error) {
+    // a deck that does not validate has no snapshot and is proven from its bodies as before
+    if (!(error instanceof SnapshotContestedError) && !(error instanceof TypeError)) throw error;
+  }
+  const deck = await client.put(`${prefix}deck.json`, deckBytes, {
+    overwrite: options.overwrite,
+    contentType: blobContentType('deck.json'),
+  });
   manifest.files['deck.json'] = deck.version;
   writeManifestFile(dir, manifest);
   options.log?.(
@@ -1196,7 +1530,7 @@ export function deckHeadOf(deckId: string, bytes: Uint8Array): DeckHead | null {
         (typeof section === 'object' &&
         section !== null &&
         Array.isArray((section as { slideIds?: unknown }).slideIds)
-          ? ((section as { slideIds: unknown[] }).slideIds.length ?? 0)
+          ? (section as { slideIds: unknown[] }).slideIds.length
           : 0),
       0,
     ),
@@ -1227,7 +1561,11 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   const blobOption = options.blob;
   let clientPromise: Promise<BlobClient> | undefined;
   const client = (): Promise<BlobClient> => {
-    clientPromise ??= typeof blobOption === 'function' ? blobOption() : Promise.resolve(blobOption);
+    // the collection's own calls (the listing, the stamps, the uploads) meet the same deadlines
+    // as a deck store's (boundedBlobClient)
+    clientPromise ??= (
+      typeof blobOption === 'function' ? blobOption() : Promise.resolve(blobOption)
+    ).then((raw) => boundedBlobClient(raw));
     return clientPromise;
   };
   const stores = new Map<string, BlobStore>();
@@ -1336,12 +1674,65 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     return readyPromise;
   };
 
+  /**
+   * The deck ids the store holds: the folder listing of `decks/`, which lags the store by up to
+   * a minute (the note on `pull`), joined with the mirrors this instance holds, so a deck made or
+   * opened on this instance lists at once (the focus round, cycle 2; VERIFICATION F-share-404:
+   * the share link exchange runs over `list()` and did not find a deck made a minute ago, so the
+   * link answered 404 to its visitor). A mirror whose manifest the store no longer holds (a deck
+   * deleted forever elsewhere) answers null at `currentManifest` and is left out.
+   */
   const deckIds = async (): Promise<string[]> => {
     const folders = await (await client()).folders('decks/');
-    return folders
+    const listed = folders
       .map((folder) => folder.slice('decks/'.length).replace(/\/$/, ''))
-      .filter((id) => id !== '' && !id.includes('/'))
-      .sort();
+      .filter((id) => id !== '' && !id.includes('/'));
+    const mirrored = existsSync(decksDir)
+      ? readdirSync(decksDir, { withFileTypes: true })
+          .filter(
+            (entry) =>
+              entry.isDirectory() &&
+              !entry.name.startsWith('.') &&
+              isSafeKey(entry.name) &&
+              existsSync(join(decksDir, entry.name, 'deck.json')),
+          )
+          .map((entry) => entry.name)
+      : [];
+    return [...new Set([...listed, ...mirrored])].sort();
+  };
+
+  /**
+   * A deck's manifest bytes at the store's head, for the listing (docs/FOCUS.md rank 7): the
+   * mirror's copy when this instance's manifest row names the head's etag, else the origin body
+   * when its md5 is that etag, else the snapshot the etag names (every push of `deck.json`
+   * stores one since the focus round), else the body the CDN served, which is the state before
+   * the last push. Null when the store holds no manifest.
+   */
+  const currentManifest = async (c: BlobClient, deckId: string): Promise<Uint8Array | null> => {
+    const pathname = `${deckPrefix(deckId)}deck.json`;
+    const head = await c.head(pathname);
+    if (head === null) return null;
+    const dir = join(decksDir, deckId);
+    const mirrored = join(dir, 'deck.json');
+    if (readManifest(dir).files['deck.json'] === head.version && existsSync(mirrored)) {
+      return new Uint8Array(readFileSync(mirrored));
+    }
+    const fetched = await c.get(pathname);
+    if (fetched !== null && quotedMd5(fetched.bytes) === head.version) return fetched.bytes;
+    const key = etagMd5(head.version);
+    const snapshot = key === null ? null : await c.get(`${deckPrefix(deckId)}${snapshotPath(key)}`);
+    if (snapshot !== null) {
+      try {
+        const document = parseSnapshot(
+          snapshot.bytes,
+          `${deckPrefix(deckId)}${snapshotPath(key ?? '')}`,
+        );
+        return new TextEncoder().encode(canonicalJson(document.deck));
+      } catch {
+        // a snapshot that does not parse: the body below
+      }
+    }
+    return fetched === null ? null : fetched.bytes;
   };
 
   /**
@@ -1360,6 +1751,19 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     const result = apply();
     const bytes = new Uint8Array(readFileSync(join(store.dir, 'deck.json')));
     try {
+      // the stamped document under its key first (the focus round, docs/FOCUS.md rank 7): the
+      // listing on any instance proves the stamp from the snapshot while the CDN still serves
+      // the manifest without it, and a pull proves the document without a body read. A key the
+      // store holds already is this document (a restore returns the manifest to the last
+      // write's bytes, and that write stored the snapshot), so no head proves it: the stamp is
+      // the manifest head, this put and the manifest put, three round trips (the fix round, F12)
+      await storeSnapshot(
+        c,
+        deckId,
+        snapshotKey(bytes),
+        snapshotBody(loadDeckDir(store.dir).document),
+        { acceptExisting: true },
+      );
       const entry = await c.put(`${deckPrefix(deckId)}deck.json`, bytes, {
         overwrite: true,
         contentType: blobContentType('deck.json'),
@@ -1393,16 +1797,21 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     async list(listOptions) {
       await ready();
       const ids = await deckIds();
-      // the listing reads every manifest through the SDK's origin read, in parallel, and writes
-      // no mirror (gslides-parity SPEC-4 0.29, 3.1; PP 3.1): a trash stamp or a title written on
-      // another instance shows on the next home page load (SPEC 6.2), and a deck store opens only
-      // when a deck is opened. The mirrors on this instance are left as they are; open() syncs.
+      // the listing reads every manifest at the store's head, in parallel, and writes no mirror
+      // (gslides-parity SPEC-4 0.29, 3.1; PP 3.1): a trash stamp or a title written on another
+      // instance shows on the next home page load (SPEC 6.2), and a deck store opens only when a
+      // deck is opened. The mirrors on this instance are left as they are; open() syncs. Since
+      // the focus round (docs/FOCUS.md rank 7) the body is proven against the manifest's head:
+      // the mirror's copy when this instance holds the head's etag (no body read), else the
+      // origin body when its md5 is the etag, else the snapshot the etag names; the CDN kept
+      // serving an overwritten manifest for a while, so a rename, a Make a copy and a Restore
+      // listed the state before them and a card sent that revision back as a stale base.
       const c = await client();
       const heads: DeckHead[] = [];
       await eachLimit(ids, 8, async (deckId) => {
-        const fetched = await c.get(`${deckPrefix(deckId)}deck.json`);
-        if (fetched === null) return;
-        const head = deckHeadOf(deckId, fetched.bytes);
+        const bytes = await currentManifest(c, deckId);
+        if (bytes === null) return;
+        const head = deckHeadOf(deckId, bytes);
         if (head === null) return;
         if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
         heads.push(head);

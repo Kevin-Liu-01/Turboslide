@@ -5,12 +5,14 @@ import {
   ACCESS_PAGE,
   ACCOUNT,
   AGENT_SENTENCES,
+  CANVAS,
   COMMENTS,
   DIALOGS,
   DITHER,
   INBOX,
   PANELS,
   PRESENCE,
+  PROMPTS,
   REFUSALS,
   TITLE_ROW,
   forbiddenWordsIn,
@@ -268,5 +270,16 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(itemById('title.account').items).toHaveLength(6);
     expect(ACCOUNT.notSignedIn).toBe('Not signed in');
     expect(ACCOUNT.signedInAs('kevin@example.com')).toBe('Signed in as kevin@example.com');
+  });
+});
+
+describe('the click model of the focus round (AMENDMENTS.md A1)', () => {
+  it('gives the selected text object a chip sentence naming the two ways into the text, and keeps the placeholder prompts', () => {
+    expect(CANVAS.editText).toBe('Double click to edit the text, or start typing');
+    expect(forbiddenWordsIn(CANVAS.editText)).toEqual([]);
+    /* A1 item 5: the prompt text stays Google's; the matrix row records the two step entry */
+    expect(PROMPTS.title).toBe('Click to add title');
+    expect(PROMPTS.subtitle).toBe('Click to add subtitle');
+    expect(PROMPTS.text).toBe('Click to add text');
   });
 });

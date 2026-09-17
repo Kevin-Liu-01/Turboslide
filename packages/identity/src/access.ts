@@ -279,12 +279,27 @@ export function decide(
   const now = toTime(options.now);
   const principal: Principal | null =
     ctx.principal ?? (ctx.agent ? { id: ctx.agent.ownerId, kind: 'account', admin: false } : null);
-  if (principal === null) return { ok: false, status: 401, code: 'unauthorized' };
   const rec =
     record ??
     ((options.missingRecord ?? 'open') === 'open'
       ? synthesizeLegacyRecord('', new Date(now))
       : null);
+  if (principal === null) {
+    // A caller with no identity at all (a browser's very first request, before the anonymous
+    // cookie the same response mints; a curl; a link preview) may read a deck whose general access
+    // is open, as the same caller could with a cookie one request later: in enforce mode the
+    // first visit to /deck/<id> of an open deck answered You need access and the reload answered
+    // the deck (the focus round's enforce preview, hosted-smoke row `/deck/gt-brand`). Every other
+    // capability, and every read of a restricted or link mode deck, still needs an identity.
+    if (
+      rec !== null &&
+      rec.generalAccess.mode === 'open' &&
+      capability === 'read' &&
+      roleAllows(rec.generalAccess.role, capability, rec.settings)
+    )
+      return { ok: true, role: rec.generalAccess.role, via: 'open' };
+    return { ok: false, status: 401, code: 'unauthorized' };
+  }
   if (rec === null) return { ok: false, status: 404, code: 'not_found' };
 
   const standing = standingOf(rec, principal, ctx.linkGrants, now);

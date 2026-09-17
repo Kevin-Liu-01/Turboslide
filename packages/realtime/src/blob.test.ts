@@ -154,6 +154,93 @@ describe('blobChannel', () => {
     await b.close();
   });
 
+  it('announces a revision the store reached without a readable record as an external checkpoint, so a tab reloads at the head (docs/FOCUS.md rank 20)', async () => {
+    const b = blobChannel({
+      open: async () => openFileStore({ dir, now: () => now }),
+      minWriteSpacingMs: 0,
+    });
+    const seen: RoomEvent[] = [];
+    const stop = b.subscribe('gt-brand', (event) => seen.push(event));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // the manifest moves to 413 with no record behind it: what an instance met when the record
+    // of another instance's commit was not stored yet, or its put had failed
+    writeFileSync(
+      join(dir, 'deck.json'),
+      canonicalJson({ ...WORKED_DECK, revision: 413, updatedAt: now }),
+    );
+    await until(() => seen.some((event) => event.type === 'checkpoint'), 4000);
+    expect(seen.filter((event) => event.type === 'op')).toEqual([]);
+    expect(seen.find((event) => event.type === 'checkpoint')).toMatchObject({
+      type: 'checkpoint',
+      revision: 413,
+      external: true,
+    });
+    expect(await b.head('gt-brand')).toBe(413);
+    // the announcement is made once: no second checkpoint for the same revision
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(seen.filter((event) => event.type === 'checkpoint')).toHaveLength(1);
+    stop();
+    await b.close();
+  });
+
+  it('announces a version.restore record as an external checkpoint and never as an op, so every tab reloads at its revision (VERIFICATION F-versions, docs/FOCUS.md rank 21)', async () => {
+    const b = blobChannel({
+      open: async () => openFileStore({ dir, now: () => now }),
+      minWriteSpacingMs: 0,
+    });
+    const seen: RoomEvent[] = [];
+    const stop = b.subscribe('gt-brand', (event) => seen.push(event));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // two writes outside this channel, then a restore of the first (the store resolves the
+    // version from its log; a tab cannot)
+    const first = await store.write({
+      baseRevision: 412,
+      author: kevin,
+      mutations: [
+        { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: 20 },
+      ],
+    });
+    expect(first.ok).toBe(true);
+    const second = await store.write({
+      baseRevision: 413,
+      author: kevin,
+      mutations: [
+        { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: 24 },
+      ],
+    });
+    expect(second.ok).toBe(true);
+    const restore = await store.write(
+      { baseRevision: 414, author: maya, mutations: [{ op: 'version.restore', n: 1 }] },
+      { force: true },
+    );
+    expect(restore.ok).toBe(true);
+    await until(
+      () => seen.some((event) => event.type === 'checkpoint' && event.revision === 415),
+      4000,
+    );
+    const ops = seen.filter((event) => event.type === 'op');
+    // the two writes travel as ops; the restore does not
+    expect(ops.map((event) => (event.type === 'op' ? event.entry.seq : 0))).toEqual([413, 414]);
+    expect(
+      ops.some(
+        (event) =>
+          event.type === 'op' &&
+          (event.entry.mutations ?? []).some((mutation) => mutation.op === 'version.restore'),
+      ),
+    ).toBe(false);
+    expect(
+      seen.find((event) => event.type === 'checkpoint' && event.revision === 415),
+    ).toMatchObject({ type: 'checkpoint', revision: 415, external: true, author: maya });
+    expect(await b.head('gt-brand')).toBe(415);
+    // the announcement is made once
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(
+      seen.filter((event) => event.type === 'checkpoint' && event.revision === 415),
+    ).toHaveLength(1);
+    stop();
+    await b.close();
+  });
+
   it('spaces two commits of one deck by the minimum write spacing', async () => {
     const channel = blobChannel({ open: async () => store, minWriteSpacingMs: 150 });
     const started = Date.now();

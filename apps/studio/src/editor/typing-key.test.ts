@@ -38,6 +38,22 @@ describe('typingKeyOf', () => {
     );
   });
 
+  it('keeps the splice’s key when the burst grows its text box in the same call (docs/FOCUS.md rank 11)', () => {
+    const grow: Mutation = {
+      op: 'block.set',
+      slideId: 's1',
+      blockId: 'p1',
+      path: '/pos/h',
+      value: 132,
+    };
+    expect(typingKeyOf([splice, grow])).toBe('s1/p1/text');
+    /* another block, another slide, another path or the reverse order: its own step */
+    expect(typingKeyOf([splice, { ...grow, blockId: 'p2' }])).toBeNull();
+    expect(typingKeyOf([splice, { ...grow, slideId: 's2' }])).toBeNull();
+    expect(typingKeyOf([splice, { ...grow, path: '/pos/w' }])).toBeNull();
+    expect(typingKeyOf([grow, splice])).toBeNull();
+  });
+
   it('is null for every other write: another slide field, a non string value, a block.set, a text.replace, a batch', () => {
     expect(
       typingKeyOf([{ op: 'slide.set', slideId: 's1', path: '/notes', value: 'x' }]),

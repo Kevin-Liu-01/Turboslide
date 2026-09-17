@@ -101,6 +101,8 @@ export type PendingOp = {
   inflight: boolean;
   /** the local clock the op was recorded at, for `transformSince` */
   at: number;
+  /** the mutations that undo this op on the document it was applied to, for the rebase of the ops after it when it is refused */
+  inverse?: Mutation[];
   /** resolves when the op is admitted or rejected */
   settle?: (outcome: Settled) => void;
 };
@@ -412,13 +414,44 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     void store.save(queue).catch(() => undefined);
   };
 
-  /** The local document from the server document and the pending ops; an op that no longer applies is returned to its author. */
+  /**
+   * The pending ops after one of them was refused (docs/FOCUS.md rank 13): every op recorded
+   * after it moves past the refused op's inverse, as if a remote undo had landed, so a burst
+   * typed on a text that carried the refused insertion is neither refused for an offset the
+   * server never reached ("text.splice: 10 plus 0 is outside a text of 7 characters", audit-text
+   * row 21) nor folded at the wrong place; an op that cannot move is returned to its author.
+   * Pure over `pending`; the caller folds afterwards.
+   */
+  const rebasePast = (refused: PendingOp | undefined): void => {
+    if (refused?.inverse === undefined || refused.inverse.length === 0) return;
+    const next: PendingOp[] = [];
+    for (const op of pending) {
+      if (op.kind !== 'edit' || op.mutations === undefined || op.at <= refused.at) {
+        next.push(op);
+        continue;
+      }
+      const moved = transformPast(op.mutations, refused.inverse, transform);
+      if (moved === null) {
+        options.onUnplaceable?.(op);
+        const rejected: Rejected = { opId: op.opId, reason: 'stale' };
+        rejects.push({ ...rejected, mutations: op.mutations });
+        op.settle?.({ rejected });
+        continue;
+      }
+      next.push({ ...op, mutations: moved });
+    }
+    pending = next;
+  };
+
+  /** The local document from the server document and the pending ops; an op that no longer applies is returned to its author, and the ops after it move past it. */
   const fold = (): { document: DeckDocument; changed: readonly string[] | 'all' } => {
     let document = server;
     const kept: PendingOp[] = [];
     let changed: readonly string[] | 'all' = [];
     const touched = new Set<string>();
-    for (const op of pending) {
+    const queue = [...pending];
+    while (queue.length > 0) {
+      const op = queue.shift() as PendingOp;
       if (op.kind !== 'edit' || op.mutations === undefined) {
         kept.push(op);
         continue;
@@ -435,6 +468,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
         changed = 'all';
+        // the ops after it were recorded on a text that carried it: they move past its inverse
+        pending = queue;
+        rebasePast(op);
+        queue.splice(0, queue.length, ...pending);
       }
     }
     pending = kept;
@@ -516,7 +553,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     try {
       server = applyMutations(server, mutations, { now: entry.at }).document;
     } catch {
-      // an entry this copy cannot apply: the server document is behind; a resync will follow
+      // an entry this copy cannot apply (a store record whose mutations need the version log, a
+      // restore; an entry on a document this copy never reached): the server document is ahead
+      // of this copy, so the tab reloads at the entry's position, which on the blob tier is the
+      // revision the record made. Before this the catch trusted a resync that never came: the
+      // checkpoint frame after the entry moved the revision and the document stayed the one from
+      // before the entry (VERIFICATION F-versions, "restore changed the deck false")
+      scheduleResync(tier === 'blob' ? Math.max(entry.seq, revision) : revision);
     }
     const folded = fold();
     const changed = changedSlides(mutations);
@@ -576,6 +619,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     revision = next;
     server = { deck: { ...server.deck, revision: next, updatedAt: at }, slides: server.slides };
     local = { deck: { ...local.deck, revision: next, updatedAt: at }, slides: local.slides };
+  };
+
+  /** One reload at a time for the entries this copy cannot apply; a burst of them is one resync. */
+  let resyncing = false;
+  const scheduleResync = (at: number): void => {
+    if (resyncing || options.onResync === undefined) return;
+    resyncing = true;
+    void resync(at)
+      .catch(() => undefined)
+      .finally(() => {
+        resyncing = false;
+      });
   };
 
   const resync = async (at: number): Promise<void> => {
@@ -671,6 +726,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       case 'reject': {
         const own = pending.find((op) => op.opId === event.opId);
         pending = pending.filter((op) => op.opId !== event.opId);
+        rebasePast(own);
         own?.settle?.({ rejected: { opId: event.opId, reason: event.reason } });
         const notice: Rejected & { mutations?: Mutation[]; comment?: CommentOp } = {
           opId: event.opId,
@@ -777,6 +833,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
           pending = pending.filter((row) => row.opId !== rejected.opId);
+          rebasePast(op);
           op?.settle?.({ rejected });
           const notice = {
             ...rejected,
@@ -808,6 +865,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       if (response.status === 429) {
         timers.setTimeout(() => void flush(), response.retryAfterMs ?? 1000);
+        return;
+      }
+      if (response.status >= 500) {
+        // a server side failure is transient (the store did not answer within its deadline, an
+        // instance that stalled): the ops stay pending and are resent after a backoff, the way a
+        // POST that threw is, never returned to the author as a refusal. On the cycle 2 enforce
+        // preview a stalled Blob head landed here as "A change was not applied HTTPError" and
+        // every later row failed in the stuck save state (the integrator at the cycle 2 merge)
+        offline = true;
+        emitStatus();
+        backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
+        timers.setTimeout(() => void flush(), response.retryAfterMs ?? backoff);
         return;
       }
       if (response.status === 403 && response.code === 'client_unbound') {
@@ -955,6 +1024,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         label,
         inflight: false,
         at: clock,
+        inverse: result.inverse,
         ...(settle === undefined ? {} : { settle }),
       });
       emitChange(result.document, changedSlides(mutations), 'local');

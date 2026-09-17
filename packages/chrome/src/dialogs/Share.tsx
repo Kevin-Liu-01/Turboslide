@@ -1,8 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import { labelFor } from '@turboslide/identity/labels';
 
 import { Dialog, DialogCheck } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
-import type { AccessGrantView, AccessRequestView, EditorRole, IdentityView } from '../editor-shell';
+import type {
+  AccessGrantView,
+  AccessLinkView,
+  AccessRequestView,
+  EditorAccess,
+  EditorCapability,
+  EditorRole,
+  IdentityView,
+} from '../editor-shell';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { DIALOGS, SNACKBARS } from '../menus/strings';
@@ -12,19 +22,30 @@ import { tipProps } from '../Tooltip';
 import './share.css';
 
 /**
- * The Share dialog (gslides-parity SPEC-3 0.16, 6.5, 9.3; research 09 3.6, 8.5): Google's two
- * halves in Turboslide's words at a fixed width of 520 with rows of fixed height inside scroll
- * regions. "Share <title>"; the Review banner slot at the top, present at every moment ("No
- * pending requests" in the quiet colour, or the banner with Review that expands the requests);
- * "Add people by email" with the role dropdown (Viewer selected), Notify people on by default, the
- * message field and Send; the people list (the owner first, then each grant with its mark, name or
- * email, Pending or Expired in fixed width chips, and a per row dropdown with the roles, Transfer
- * ownership, Add expiration and Remove access); General access, Restricted by default, Anyone with
- * the link with its role (Viewer by default), the legacy sentence with Switch to a link, the links
- * list with Rotate and Revoke; the gear's five switches for the owner; the footer with Copy link
- * (the `/s/` form, minted once), Done, Publish to the web and the sentence about notes and skipped
- * slides. Every write is one `share.*` action with the record's revision. A deck with no record
- * shows the Claim banner. Without an access record the round one links stand in.
+ * The Share dialog (gslides-parity SPEC-3 0.16, 6.5, 9.3; research 09 3.6, 8.5; docs/FOCUS.md 2.7
+ * and section 5 rank 1): Google's two halves in Turboslide's words at a fixed width of 520 with
+ * rows of fixed height inside scroll regions. "Share <title>"; the Review banner slot at the top,
+ * present at every moment; "Add people by email" with the role dropdown (Viewer selected), Notify
+ * people on by default, the message field and Send; the people list (the owner first, then each
+ * grant with its mark, name or email, Pending or Expired in fixed width chips, and a per row
+ * dropdown with the roles, Transfer ownership, Add expiration and Remove access); the three link
+ * rows of the focus round, View link, Present link and Edit link, each a share link that grants
+ * its role (viewer, viewer opening as a show, editor; the orchestrator's ruling 2), minted on the
+ * first Copy link and remembered on this browser so a second copy sends the same address; General
+ * access, Restricted by default, Anyone with the link with its role, the legacy sentence with
+ * Switch to a link, the links list with Rotate and Revoke; the gear's five switches for the owner;
+ * the footer with Copy link, Done, Publish to the web, the sentence about notes and skipped slides
+ * and the sentence naming the deployment's mode, so the dialog never promises what shadow mode
+ * does not enforce. Every write is one `share.*` action based on the freshest revision the dialog
+ * knows and retried once on a conflict after a re-read (SPEC-3 6.4 "re-read and retry").
+ *
+ * The record the dialog reads. The shell's `input.access` when the page carries it; else, on a
+ * saved deck, the dialog reads `GET /api/access/<deckId>` itself, which is how the page of `/new`
+ * shows its record right after the first write created it (the page keeps its draft payload until
+ * a reload, `audit-present` row 17: the dialog with no role control). The same read names the
+ * deployment's `TURBOSLIDE_AUTHORIZE` mode. A deck with no record is the legacy open deck: its
+ * rows carry the plain addresses, which are the truth for such a deck, and no note promising a
+ * read only address (the words "Read only, opens on slide 1" left with the focus round).
  */
 const ROLES: ReadonlyArray<{ value: EditorRole; label: string }> = [
   { value: 'viewer', label: DIALOGS.share.roles.viewer },
@@ -39,20 +60,47 @@ const EXPIRY_DAYS: ReadonlyArray<{ id: string; label: string; days: number | nul
   { id: '90', label: DIALOGS.share.expiry.days90, days: 90 },
 ];
 
-/** The round one links, kept for a deck with no access record (a checkout, a legacy open deck). */
+export type ShareLinkRowId = 'view' | 'present' | 'edit';
+
+/**
+ * The three link rows (docs/FOCUS.md 2.7, the rows `share.copy-view-link`,
+ * `share.copy-present-link`, `share.copy-edit-link`): the label is the one the minted link carries
+ * on the record, so the rows find their links again; `note` is the role word beside the label.
+ */
+export const LINK_ROWS: ReadonlyArray<{
+  id: ShareLinkRowId;
+  label: string;
+  role: EditorRole;
+  note: string;
+}> = [
+  { id: 'view', label: DIALOGS.share.viewLink, role: 'viewer', note: DIALOGS.share.roles.viewer },
+  {
+    id: 'present',
+    label: DIALOGS.share.presentLink,
+    role: 'viewer',
+    note: `${DIALOGS.share.roles.viewer}, opens as a show`,
+  },
+  { id: 'edit', label: DIALOGS.share.editLink, role: 'editor', note: DIALOGS.share.roles.editor },
+];
+
+/**
+ * The plain addresses of a deck with no access record (a checkout, a legacy open deck): the
+ * viewer, the show and the editor. They are the truth for such a deck, where anyone with the
+ * address is an editor, so the edit row says so and the view row promises nothing.
+ */
 export function shareLinks(
   origin: string,
   deckId: string,
-): ReadonlyArray<{ id: string; label: string; url: string; note?: string }> {
+): ReadonlyArray<{ id: ShareLinkRowId; label: string; url: string; note?: string }> {
   const id = encodeURIComponent(deckId);
   return [
+    { id: 'view', label: DIALOGS.share.viewLink, url: `${origin}/deck/${id}` },
     {
-      id: 'view',
-      label: DIALOGS.share.viewLink,
-      url: `${origin}/deck/${id}`,
-      note: 'Read only, opens on slide 1',
+      id: 'present',
+      label: DIALOGS.share.presentLink,
+      url: `${origin}/deck/${id}?present=1`,
+      note: 'Opens as a show',
     },
-    { id: 'present', label: DIALOGS.share.presentLink, url: `${origin}/deck/${id}?present=1` },
     {
       id: 'edit',
       label: DIALOGS.share.editLink,
@@ -60,6 +108,363 @@ export function shareLinks(
       note: DIALOGS.share.anyoneCanEdit,
     },
   ];
+}
+
+/** The address a row hands out for a minted link: the Present link carries `?present=1` (routes/s.$token.ts). */
+export function rowAddress(rowId: ShareLinkRowId, url: string): string {
+  return rowId === 'present' ? `${url}${url.includes('?') ? '&' : '?'}present=1` : url;
+}
+
+/** True while a link can be exchanged: not revoked and not past its expiry. */
+export function linkIsLive(link: AccessLinkView, now: number = Date.now()): boolean {
+  if (link.revokedAt !== undefined && link.revokedAt !== null) return false;
+  if (link.expiresAt !== undefined && link.expiresAt !== null)
+    return new Date(link.expiresAt).getTime() > now;
+  return true;
+}
+
+/** The live links a row minted, newest first. */
+export function liveLinksFor(
+  links: ReadonlyArray<AccessLinkView> | undefined,
+  label: string,
+  now: number = Date.now(),
+): AccessLinkView[] {
+  return (links ?? [])
+    .filter((link) => link.label === label && linkIsLive(link, now))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/**
+ * The addresses this browser minted, by deck and link id (`localStorage`). A share token is
+ * stored hashed on the record (SPEC-3 6.4), so the address exists only where it was minted; keeping
+ * it here lets Copy link send the same address twice instead of rotating the link, which would
+ * stop the address the seller already sent. A browser that never minted the link mints another
+ * one with the same label; the earlier address keeps opening until it is revoked.
+ */
+export const LINK_URLS_KEY = 'ts-share-links';
+
+type LinkUrlStore = Pick<Storage, 'getItem' | 'setItem'>;
+
+function defaultStorage(): LinkUrlStore | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+export function readLinkUrls(
+  deckId: string,
+  storage: LinkUrlStore | null = defaultStorage(),
+): Record<string, string> {
+  if (storage === null) return {};
+  try {
+    const raw = storage.getItem(LINK_URLS_KEY);
+    if (raw === null) return {};
+    const parsed = JSON.parse(raw) as Record<string, Record<string, string>>;
+    const mine = parsed[deckId];
+    return mine !== null && typeof mine === 'object' ? { ...mine } : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeLinkUrls(
+  deckId: string,
+  urls: Record<string, string>,
+  storage: LinkUrlStore | null,
+): void {
+  if (storage === null) return;
+  try {
+    const raw = storage.getItem(LINK_URLS_KEY);
+    const parsed = (raw === null ? {} : JSON.parse(raw)) as Record<string, Record<string, string>>;
+    if (Object.keys(urls).length === 0) delete parsed[deckId];
+    else parsed[deckId] = urls;
+    storage.setItem(LINK_URLS_KEY, JSON.stringify(parsed));
+  } catch {
+    // a full or refused storage forgets the address; the next Copy link mints another link
+  }
+}
+
+export function rememberLinkUrl(
+  deckId: string,
+  linkId: string,
+  url: string,
+  storage: LinkUrlStore | null = defaultStorage(),
+): void {
+  writeLinkUrls(deckId, { ...readLinkUrls(deckId, storage), [linkId]: url }, storage);
+}
+
+/** Keeps the addresses of the live links alone (a revoked or rotated link's address is dead). */
+export function pruneLinkUrls(
+  deckId: string,
+  liveIds: ReadonlyArray<string>,
+  storage: LinkUrlStore | null = defaultStorage(),
+): Record<string, string> {
+  const kept: Record<string, string> = {};
+  const known = readLinkUrls(deckId, storage);
+  for (const id of liveIds) if (known[id] !== undefined) kept[id] = known[id];
+  if (Object.keys(kept).length !== Object.keys(known).length) writeLinkUrls(deckId, kept, storage);
+  return kept;
+}
+
+/** The 409 a share write meets when the record moved under it (SPEC-3 6.4; server/access.ts). */
+export function isShareConflict(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /re-read and retry|changed since they were read|is stale/i.test(message);
+}
+
+/**
+ * The revision the 409 sentence names ("the access record is at revision 2, not 1; re-read and
+ * retry", apps/cli/src/records/access.ts), or the `currentRevision` on the error, so the retry
+ * bases on the server's revision even when the route's re-read answers an older one (the focus
+ * round, VERIFICATION.md pass 2 F-share-copy: the second Copy link of a session was refused as
+ * stale and the retry repeated the refused base).
+ */
+export function conflictRevision(error: unknown): number | null {
+  const carried = (error as { currentRevision?: unknown } | null)?.currentRevision;
+  if (typeof carried === 'number' && Number.isInteger(carried) && carried >= 0) return carried;
+  const message = error instanceof Error ? error.message : String(error);
+  const match = /is at revision (\d+), not \d+/.exec(message);
+  return match === null ? null : Number(match[1]);
+}
+
+export type AuthorizeMode = 'shadow' | 'enforce';
+
+/**
+ * The sentence naming the deployment's mode (docs/FOCUS.md section 5 rank 1: "the dialog says
+ * which mode the deployment runs"). In shadow mode the roles are shown and logged and the server
+ * refuses nothing, so the dialog says so instead of promising a restriction.
+ */
+export function authorizeSentence(mode: AuthorizeMode | undefined): string | null {
+  if (mode === 'shadow')
+    return 'Sharing is not enforced on this deployment: the roles here are shown and logged, anyone with the address can open the presentation, and a change from any browser is accepted.';
+  if (mode === 'enforce')
+    return 'Sharing is enforced on this deployment: only people with access or a link can open the presentation.';
+  return null;
+}
+
+/** What `GET /api/access/<deckId>` answers (routes/api/access.$.ts): the record shaped for the caller, the standing, the mode. */
+export type AccessRecordJson = {
+  deckId: string;
+  owner: string | null;
+  pendingOwner?: { principalId: string | null } | null;
+  generalAccess: { mode: 'restricted' | 'link' | 'open'; role: EditorRole };
+  grants?: ReadonlyArray<{
+    principalId: string | null;
+    email: string | null;
+    role: EditorRole;
+    invitedAt: string;
+    acceptedAt: string | null;
+    expiresAt: string | null;
+  }>;
+  links?: ReadonlyArray<{
+    id: string;
+    role: EditorRole;
+    label?: string;
+    createdAt: string;
+    expiresAt: string | null;
+    revokedAt: string | null;
+    useCount?: number;
+  }>;
+  requests?: ReadonlyArray<{
+    id: string;
+    principalId: string | null;
+    email: string | null;
+    role: EditorRole;
+    message?: string;
+    askedAt: string;
+    respondedAt: string | null;
+  }>;
+  settings?: EditorAccess['settings'];
+  revision?: number;
+};
+
+export type AccessAnswerJson = {
+  record: AccessRecordJson;
+  role: EditorRole | null;
+  via: EditorAccess['via'] | null;
+  capabilities: ReadonlyArray<EditorCapability>;
+  authorize?: AuthorizeMode;
+};
+
+export type FetchedAccess = {
+  view: EditorAccess;
+  role: EditorRole | null;
+  capabilities: ReadonlyArray<EditorCapability>;
+  authorize: AuthorizeMode | undefined;
+};
+
+function identityOf(principalId: string): IdentityView {
+  const account = principalId.startsWith('usr_');
+  return {
+    principalId,
+    label: labelFor(principalId),
+    trust: account ? 'verified' : 'label',
+    kind: account ? 'account' : 'anonymous',
+  };
+}
+
+/** The record as the dialog draws it, from the route's JSON (the mapping the editor page makes for `input.access`). */
+export function accessViewOfRecord(
+  record: AccessRecordJson,
+  options: { signedIn: boolean; via?: EditorAccess['via'] | null; now?: number } = {
+    signedIn: false,
+  },
+): EditorAccess {
+  const now = options.now ?? Date.now();
+  return {
+    revision: record.revision ?? 0,
+    owner: record.owner === null ? null : identityOf(record.owner),
+    pendingOwner:
+      record.pendingOwner === undefined ||
+      record.pendingOwner === null ||
+      record.pendingOwner.principalId === null
+        ? null
+        : identityOf(record.pendingOwner.principalId),
+    generalAccess: record.generalAccess,
+    grants: (record.grants ?? []).map((grant) => ({
+      ...(grant.principalId !== null ? { principal: identityOf(grant.principalId) } : {}),
+      ...(grant.email !== null ? { email: grant.email } : {}),
+      role: grant.role,
+      invitedAt: grant.invitedAt,
+      ...(grant.acceptedAt !== null ? { acceptedAt: grant.acceptedAt } : {}),
+      expiresAt: grant.expiresAt,
+      status:
+        grant.acceptedAt === null
+          ? ('pending' as const)
+          : grant.expiresAt !== null && Date.parse(grant.expiresAt) < now
+            ? ('expired' as const)
+            : ('active' as const),
+    })),
+    links: (record.links ?? [])
+      .filter((link) => link.revokedAt === null)
+      .map((link) => ({
+        id: link.id,
+        role: link.role,
+        ...(link.label !== undefined ? { label: link.label } : {}),
+        createdAt: link.createdAt,
+        expiresAt: link.expiresAt,
+        revokedAt: link.revokedAt,
+        ...(link.useCount !== undefined ? { useCount: link.useCount } : {}),
+      })),
+    requests: (record.requests ?? [])
+      .filter((request) => request.respondedAt === null)
+      .map((request) => ({
+        id: request.id,
+        ...(request.principalId !== null ? { principal: identityOf(request.principalId) } : {}),
+        ...(request.email !== null ? { email: request.email } : {}),
+        role: request.role,
+        ...(request.message !== undefined ? { message: request.message } : {}),
+        askedAt: request.askedAt,
+      })),
+    ...(record.settings === undefined ? {} : { settings: record.settings }),
+    published: null,
+    claimable: record.owner === null && options.signedIn,
+    ...(options.via !== undefined && options.via !== null ? { via: options.via } : {}),
+  };
+}
+
+/**
+ * What the last share write on this page answered, by deck: the revision, and the record when the
+ * answer carried a whole one (`share.createLink` and the other record actions answer `record`).
+ * A dialog is mounted anew on every open (the rows close it with Done after a copy), and the
+ * page's own record (`input.access`) follows the stream's `access` event, which on the blob tier
+ * is process local, while `/api/access/<id>` can answer another instance's entry for a moment; so
+ * a reopened dialog reads here first and bases its write on the highest revision it knows, and
+ * finds the link the previous open minted instead of minting a second one (the cycle 2 preview:
+ * the Present row's Copy link right after the View row's mint was refused with "the access record
+ * is at revision 1, not 0", and the View row's second copy minted a second token).
+ */
+const answered = new Map<string, { revision: number; view?: EditorAccess }>();
+
+/** The revision and record the last write on this page answered for a deck. */
+export function answeredAccess(deckId: string): { revision: number; view?: EditorAccess } | null {
+  return answered.get(deckId) ?? null;
+}
+
+/** Forgets what the writes answered (a test, a deck that left the page). */
+export function forgetAnsweredAccess(deckId?: string): void {
+  if (deckId === undefined) answered.clear();
+  else answered.delete(deckId);
+}
+
+/** Records a write's answer: the revision always, the record when the answer carried a whole one. */
+export function noteAnsweredAccess(
+  deckId: string,
+  result: unknown,
+  options: { signedIn: boolean; via?: EditorAccess['via'] | null } = { signedIn: false },
+): void {
+  const record = (result as { record?: unknown } | null)?.record;
+  if (record === null || typeof record !== 'object') return;
+  const revision = (record as { revision?: unknown }).revision;
+  if (typeof revision !== 'number' || !Number.isInteger(revision) || revision < 0) return;
+  const current = answered.get(deckId);
+  if (current !== undefined && current.revision > revision) return;
+  const whole =
+    typeof (record as { deckId?: unknown }).deckId === 'string' &&
+    'owner' in (record as object) &&
+    typeof (record as { generalAccess?: unknown }).generalAccess === 'object';
+  const view = whole
+    ? accessViewOfRecord(record as AccessRecordJson, {
+        signedIn: options.signedIn,
+        ...(options.via === undefined ? {} : { via: options.via }),
+      })
+    : current?.view;
+  answered.set(deckId, { revision, ...(view === undefined ? {} : { view }) });
+}
+
+/**
+ * The record the dialog draws and bases on: the newest by revision of the page's, the route's and
+ * the last answered one, carrying the page's standing (`via`, `published`, `claimable`) when a
+ * later record wins, since a write's answer names no caller.
+ */
+export function newestAccess(
+  ...candidates: ReadonlyArray<EditorAccess | undefined>
+): EditorAccess | undefined {
+  const present = candidates.filter((view): view is EditorAccess => view !== undefined);
+  const first = present[0];
+  if (first === undefined) return undefined;
+  const newest = present.reduce((best, view) => (view.revision > best.revision ? view : best));
+  if (newest === first) return first;
+  return {
+    ...newest,
+    ...(first.via !== undefined ? { via: first.via } : {}),
+    ...(first.published !== undefined ? { published: first.published } : {}),
+    ...(first.claimable !== undefined ? { claimable: first.claimable } : {}),
+    ...(first.linkUrl !== undefined ? { linkUrl: first.linkUrl } : {}),
+  };
+}
+
+/**
+ * Reads the caller's standing and the record from the studio's route, past whatever the page
+ * carried: the fresh revision every write bases on, the mode of the deployment, and the record of
+ * a deck the page still holds as a draft. Null when the route refuses or is unreachable.
+ */
+export async function loadAccess(
+  deckId: string,
+  options: { signedIn: boolean; fetchFn?: typeof fetch } = { signedIn: false },
+): Promise<FetchedAccess | null> {
+  const fetchFn = options.fetchFn ?? (typeof fetch === 'function' ? fetch : undefined);
+  if (fetchFn === undefined) return null;
+  try {
+    const response = await fetchFn(`/api/access/${encodeURIComponent(deckId)}`, {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { accept: 'application/json' },
+    });
+    if (!response.ok) return null;
+    const answer = (await response.json()) as AccessAnswerJson;
+    if (answer === null || typeof answer !== 'object' || answer.record === undefined) return null;
+    return {
+      view: accessViewOfRecord(answer.record, { signedIn: options.signedIn, via: answer.via }),
+      role: answer.role,
+      capabilities: answer.capabilities ?? [],
+      authorize: answer.authorize,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /** The word of a grant's chip: Pending, Expired or nothing. */
@@ -92,16 +497,52 @@ function whoKey(grant: AccessGrantView): string {
   return grant.principal?.principalId ?? grant.email ?? '';
 }
 
+/** The sentence of the draft's dialog: nothing to share before the first write saves the deck. */
+export const DRAFT_SENTENCE =
+  'Links appear once the presentation is saved. The first change saves it.';
+
+/** The sentence under the plain addresses of a deck with no record. */
+export const LEGACY_SENTENCE = 'Anyone with the address can open and edit this presentation.';
+
 export function ShareDialog() {
   const shell = useEditorShell();
   const { input } = shell;
-  const access = input.access;
   const origin = input.origin ?? (typeof window === 'undefined' ? '' : window.location.origin);
   const title = input.document.deck.title;
-  const capabilities = input.capabilities;
+  const draft = input.save?.draft === true;
+  const signedIn = input.account?.signedIn === true;
+  /* the route's answer: null while it loads, 'failed' when it refused or could not be reached */
+  const [fetched, setFetched] = useState<FetchedAccess | 'failed' | null>(null);
+  /* the highest revision a write answered or a read carried, the base of the next write; the
+     writes of earlier opens of this page count too (answeredAccess) */
+  const [known, setKnown] = useState(() => answeredAccess(input.deckId)?.revision ?? 0);
+  useEffect(() => {
+    if (draft) return undefined;
+    let live = true;
+    void loadAccess(input.deckId, { signedIn }).then((got) => {
+      if (!live) return;
+      setFetched(got ?? 'failed');
+      if (got !== null) setKnown((current) => Math.max(current, got.view.revision));
+    });
+    return () => {
+      live = false;
+    };
+  }, [input.deckId, draft, signedIn]);
+
+  const loaded: FetchedAccess | null = fetched === null || fetched === 'failed' ? null : fetched;
+  /* the newest record this page knows: the page's, the route's, or the one the last write answered */
+  const access: EditorAccess | undefined = newestAccess(
+    input.access,
+    loaded?.view,
+    answeredAccess(input.deckId)?.view,
+  );
+  const capabilities: ReadonlyArray<EditorCapability> | undefined =
+    input.capabilities ?? (input.access === undefined ? loaded?.capabilities : undefined);
+  const authorize = loaded?.authorize;
   const may = (capability: 'share' | 'settings' | 'publish' | 'transfer') =>
     capabilities === undefined || capabilities.includes(capability);
-  const owner = access?.via === 'owner' || input.role === 'owner';
+  const role = input.role ?? loaded?.role ?? undefined;
+  const owner = access?.via === 'owner' || role === 'owner';
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState('');
@@ -113,13 +554,39 @@ export function ShareDialog() {
   const [linkUrl, setLinkUrl] = useState<string | null>(access?.linkUrl ?? null);
   const [expiring, setExpiring] = useState<string | null>(null);
 
+  /* after the copy the focus goes to Done, so Escape still closes the dialog: the Copy link
+     button re-renders through the busy state and the focus fell to the body, where the card's key
+     handler never saw the Escape (b4.md fix round FR1; VERIFICATION.md pass 1 F8) */
   const copy = (url: string) => {
     navigator.clipboard
       .writeText(url)
       .then(() => shell.say(SNACKBARS.linkCopied))
-      .catch(() => shell.say(url));
+      .catch(() => shell.say(url))
+      .finally(() => focusDone());
+  };
+  const focusDone = () => {
+    if (typeof document === 'undefined') return;
+    const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]');
+    if (card === null) return;
+    if (card.contains(document.activeElement) && document.activeElement !== document.body) return;
+    const done = card.querySelector<HTMLElement>('[data-control="dialog.share.done"]');
+    (done ?? card).focus();
   };
 
+  const baseRevision = (): number =>
+    Math.max(access?.revision ?? 0, known, answeredAccess(input.deckId)?.revision ?? 0);
+
+  const noteAnswer = (result: unknown): void => {
+    const record = (result as { record?: { revision?: number } } | null)?.record;
+    if (record !== undefined && typeof record.revision === 'number')
+      setKnown((current) => Math.max(current, record.revision ?? 0));
+    noteAnsweredAccess(input.deckId, result, { signedIn, via: access?.via ?? null });
+  };
+
+  /**
+   * One share write, based on the freshest revision the dialog knows; a conflict re-reads the
+   * record through the route and retries once on its revision (SPEC-3 6.4).
+   */
   const write = (
     action: string,
     payload: Record<string, unknown>,
@@ -128,11 +595,34 @@ export function ShareDialog() {
     if (busy || access === undefined) return;
     setBusy(true);
     setError(null);
-    input
-      .dispatch(action as never, { id: input.deckId, baseRevision: access.revision, ...payload })
-      .then((result) => done?.(result))
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
-      .finally(() => setBusy(false));
+    const attempt = (base: number) =>
+      input.dispatch(action as never, { id: input.deckId, baseRevision: base, ...payload });
+    void (async () => {
+      try {
+        let result: unknown;
+        try {
+          result = await attempt(baseRevision());
+        } catch (first: unknown) {
+          if (!isShareConflict(first)) throw first;
+          // the server's revision from the refusal itself, then the route's re-read (which can
+          // still answer an older copy for a moment); the retry bases on the highest of the two
+          const named = conflictRevision(first);
+          const fresh = await loadAccess(input.deckId, { signedIn });
+          if (fresh === null && named === null) throw first;
+          if (fresh !== null) setFetched(fresh);
+          const base = Math.max(fresh?.view.revision ?? 0, named ?? 0, baseRevision());
+          setKnown((current) => Math.max(current, base));
+          noteAnsweredAccess(input.deckId, { record: { revision: base } });
+          result = await attempt(base);
+        }
+        noteAnswer(result);
+        done?.(result);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setBusy(false);
+      }
+    })();
   };
 
   const invite = () => {
@@ -157,8 +647,38 @@ export function ShareDialog() {
     );
   };
 
-  /* the round one dialog for a deck with no record */
+  const doneAction = {
+    label: DIALOGS.share.done,
+    primary: true,
+    onClick: shell.closeDialog,
+    control: 'dialog.share.done',
+    doc: 'Closes the dialog',
+  };
+
+  /* the draft of /new before its first write: nothing exists in the store to share yet */
+  if (draft && access === undefined) {
+    return (
+      <Dialog
+        title={DIALOGS.share.title(title)}
+        onClose={shell.closeDialog}
+        width={520}
+        control="dialog.share"
+        className="ts-share"
+        actions={[doneAction]}
+      >
+        <p className="ts-share-draft" data-control="dialog.share.draft">
+          {DRAFT_SENTENCE}
+        </p>
+        <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
+          {DIALOGS.share.footer}
+        </p>
+      </Dialog>
+    );
+  }
+
+  /* a saved deck whose record is still on its way from the route, or could not be read */
   if (access === undefined) {
+    const failed = fetched === 'failed';
     const links = shareLinks(origin, input.deckId);
     return (
       <Dialog
@@ -166,43 +686,55 @@ export function ShareDialog() {
         onClose={shell.closeDialog}
         width={520}
         control="dialog.share"
-        actions={[
-          {
-            label: DIALOGS.share.done,
-            primary: true,
-            onClick: shell.closeDialog,
-            control: 'dialog.share.done',
-            doc: 'Closes the dialog',
-          },
-        ]}
+        className="ts-share"
+        actions={[doneAction]}
       >
-        <section aria-labelledby="ts-share-links">
-          <h3 id="ts-share-links" className="ts-dialog-field-label">
-            Links
-          </h3>
-          <ul className="ts-dialog-list">
-            {links.map((link) => (
-              <li key={link.id} className="ts-dialog-row" data-control={`dialog.share.${link.id}`}>
-                <span className="ts-dialog-row-title">
-                  <b>{link.label}</b>
-                  {link.note !== undefined ? (
-                    <span className="ts-dialog-hint"> · {link.note}</span>
-                  ) : null}
-                </span>
-                <button
-                  type="button"
-                  className="pt-ib is-text"
-                  data-control={`dialog.share.${link.id}.copy`}
-                  onClick={() => copy(link.url)}
-                  {...tipProps({ name: DIALOGS.share.copyLink, doc: link.url })}
+        {failed ? (
+          <section aria-labelledby="ts-share-links">
+            <h3 id="ts-share-links" className="ts-dialog-field-label">
+              Links
+            </h3>
+            <ul className="ts-dialog-list">
+              {links.map((link) => (
+                <li
+                  key={link.id}
+                  className="ts-dialog-row"
+                  data-control={`dialog.share.${link.id}`}
                 >
-                  <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <p className="ts-share-footer-sentence">{DIALOGS.share.footer}</p>
+                  <span className="ts-dialog-row-title">
+                    <b>{link.label}</b>
+                    {link.note !== undefined ? (
+                      <span className="ts-dialog-hint"> · {link.note}</span>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    className="pt-ib is-text"
+                    data-control={`dialog.share.${link.id}.copy`}
+                    onClick={() => copy(link.url)}
+                    {...tipProps({ name: DIALOGS.share.copyLink, doc: link.url })}
+                  >
+                    <span className="pt-lb">{DIALOGS.share.copyLink}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p
+              className="ts-share-quiet ts-share-legacy-sentence"
+              data-control="dialog.share.unread"
+            >
+              The sharing settings could not be read; the addresses above open the presentation for
+              anyone who may open it.
+            </p>
+          </section>
+        ) : (
+          <div className="ts-share-loading" data-control="dialog.share.loading" aria-busy="true">
+            <span className="ts-share-quiet">Reading who has access</span>
+          </div>
+        )}
+        <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
+          {DIALOGS.share.footer}
+        </p>
       </Dialog>
     );
   }
@@ -213,6 +745,7 @@ export function ShareDialog() {
     (link) => link.revokedAt === undefined || link.revokedAt === null,
   );
   const mode = access.generalAccess.mode;
+  const legacy = mode === 'open';
   const canShare = may('share');
   const generalCopy = () => {
     if (mode === 'link' && linkUrl !== null) copy(linkUrl);
@@ -227,6 +760,35 @@ export function ShareDialog() {
       });
     } else copy(`${origin}/deck/${encodeURIComponent(input.deckId)}`);
   };
+
+  /* the link rows: the plain addresses of a legacy deck, else the row's live link this browser
+     minted, else a new link with the row's role and label (docs/FOCUS.md 2.7; ruling 2) */
+  const plain = shareLinks(origin, input.deckId);
+  const copyRow = (row: (typeof LINK_ROWS)[number]) => {
+    if (legacy) {
+      const address = plain.find((link) => link.id === row.id);
+      if (address !== undefined) copy(address.url);
+      return;
+    }
+    const mine = liveLinksFor(access.links, row.label);
+    const remembered = pruneLinkUrls(
+      input.deckId,
+      (access.links ?? []).filter((link) => linkIsLive(link)).map((link) => link.id),
+    );
+    const known = mine.map((link) => remembered[link.id]).find((url) => url !== undefined);
+    if (known !== undefined) {
+      copy(rowAddress(row.id, known));
+      return;
+    }
+    write('share.createLink', { role: row.role, label: row.label }, (result) => {
+      const answer = result as { url?: string; link?: { id?: string } };
+      if (answer.url === undefined) return;
+      if (answer.link?.id !== undefined) rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+      copy(rowAddress(row.id, answer.url));
+    });
+  };
+  const showRows = legacy || canShare;
+  const modeSentence = authorizeSentence(authorize);
 
   return (
     <Dialog
@@ -243,15 +805,11 @@ export function ShareDialog() {
           doc:
             mode === 'link'
               ? 'The address of the link; it carries no notes and no skipped slides'
-              : 'The address; only people with access can open it',
+              : authorize === 'shadow'
+                ? 'The address; sharing is not enforced on this deployment'
+                : 'The address; only people with access can open it',
         },
-        {
-          label: DIALOGS.share.done,
-          primary: true,
-          onClick: shell.closeDialog,
-          control: 'dialog.share.done',
-          doc: 'Closes the dialog',
-        },
+        doneAction,
       ]}
     >
       {/* the Review banner slot, present at every moment (9.3) */}
@@ -306,17 +864,16 @@ export function ShareDialog() {
           <button
             type="button"
             className="pt-ib is-solid"
-            disabled={busy || input.account?.signedIn !== true}
+            disabled={busy || !signedIn}
             data-control="dialog.share.claim.button"
             onClick={() =>
               write('share.claim', {}, () => shell.say('You own this presentation now'))
             }
             {...tipProps({
               name: DIALOGS.share.claimButton,
-              doc:
-                input.account?.signedIn === true
-                  ? 'You become the owner; the address keeps working for viewers'
-                  : 'Sign in first, so the presentation survives a cleared browser',
+              doc: signedIn
+                ? 'You become the owner; the address keeps working for viewers'
+                : 'Sign in first, so the presentation survives a cleared browser',
             })}
           >
             <span className="pt-lb">{DIALOGS.share.claimButton}</span>
@@ -356,9 +913,9 @@ export function ShareDialog() {
               onChange={(event) => setInviteRole(event.target.value as EditorRole)}
               {...tipProps({ name: 'Role', doc: 'Viewer, Commenter or Editor' })}
             >
-              {ROLES.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
+              {ROLES.map((each) => (
+                <option key={each.value} value={each.value}>
+                  {each.label}
                 </option>
               ))}
             </select>
@@ -432,7 +989,7 @@ export function ShareDialog() {
             busy={busy}
             expiring={expiring === whoKey(grant)}
             onExpiring={(on) => setExpiring(on ? whoKey(grant) : null)}
-            onRole={(role) => write('share.setRole', { who: whoKey(grant), role })}
+            onRole={(next) => write('share.setRole', { who: whoKey(grant), role: next })}
             onRemove={() => write('share.remove', { who: whoKey(grant) })}
             onExpiry={(at) => write('share.setExpiry', { who: whoKey(grant), expiresAt: at })}
             onTransfer={() =>
@@ -443,6 +1000,55 @@ export function ShareDialog() {
           />
         ))}
       </ul>
+
+      {/* the three link rows (docs/FOCUS.md 2.7) */}
+      {showRows ? (
+        <section className="ts-share-rows" aria-labelledby="ts-share-links">
+          <h3 id="ts-share-links" className="ts-dialog-field-label">
+            Links
+          </h3>
+          <ul className="ts-dialog-list" data-control="dialog.share.rows">
+            {LINK_ROWS.map((row) => {
+              const address = plain.find((link) => link.id === row.id);
+              const note = legacy ? address?.note : row.note;
+              const minted = legacy ? 0 : liveLinksFor(access.links, row.label).length;
+              return (
+                <li
+                  key={row.id}
+                  className="ts-dialog-row"
+                  data-control={`dialog.share.${row.id}`}
+                  data-minted={minted}
+                >
+                  <span className="ts-dialog-row-title">
+                    <b>{row.label}</b>
+                    {note !== undefined ? <span className="ts-dialog-hint"> · {note}</span> : null}
+                  </span>
+                  <button
+                    type="button"
+                    className="pt-ib is-text"
+                    disabled={busy}
+                    data-control={`dialog.share.${row.id}.copy`}
+                    onClick={() => copyRow(row)}
+                    {...tipProps({
+                      name: DIALOGS.share.copyLink,
+                      doc: legacy
+                        ? (address?.url ?? '')
+                        : `A link that opens the presentation as ${row.note.toLowerCase()}; it can be revoked below`,
+                    })}
+                  >
+                    <span className="pt-lb">{DIALOGS.share.copyLink}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {legacy ? (
+            <p className="ts-share-quiet ts-share-legacy-sentence" data-control="dialog.share.open">
+              {LEGACY_SENTENCE}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       {/* the general access half */}
       <section className="ts-share-general" aria-label={DIALOGS.share.generalAccess}>
@@ -516,9 +1122,9 @@ export function ShareDialog() {
                 }
                 {...tipProps({ name: 'Link role', doc: 'What anyone with the link may do' })}
               >
-                {ROLES.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
+                {ROLES.map((each) => (
+                  <option key={each.value} value={each.value}>
+                    {each.label}
                   </option>
                 ))}
               </select>
@@ -539,7 +1145,7 @@ export function ShareDialog() {
                   {link.label ?? DIALOGS.share.anyoneWithLink}
                 </span>
                 <span className="ts-share-row-role">
-                  {ROLES.find((role) => role.value === link.role)?.label ?? link.role}
+                  {ROLES.find((each) => each.value === link.role)?.label ?? link.role}
                 </span>
                 <span className="ts-share-row-meta">
                   {new Date(link.createdAt).toLocaleDateString()}
@@ -556,10 +1162,12 @@ export function ShareDialog() {
                       data-control={`dialog.share.link.${link.id}.rotate`}
                       onClick={() =>
                         write('share.rotateLink', { linkId: link.id }, (result) => {
-                          const url = (result as { url?: string }).url;
-                          if (url) {
-                            setLinkUrl(url);
-                            copy(url);
+                          const answer = result as { url?: string; link?: { id?: string } };
+                          if (answer.url) {
+                            if (answer.link?.id !== undefined)
+                              rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+                            setLinkUrl(answer.url);
+                            copy(answer.url);
                           }
                         })
                       }
@@ -595,7 +1203,12 @@ export function ShareDialog() {
             className="pt-ib is-text ts-share-stop"
             disabled={busy}
             data-control="dialog.share.stop"
-            onClick={() => write('share.stop', {}, () => setLinkUrl(null))}
+            onClick={() =>
+              write('share.stop', {}, () => {
+                setLinkUrl(null);
+                pruneLinkUrls(input.deckId, []);
+              })
+            }
             {...tipProps({
               name: DIALOGS.share.stopSharing,
               doc: 'Restricted, with every link revoked',
@@ -670,6 +1283,15 @@ export function ShareDialog() {
         <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
           {DIALOGS.share.footer}
         </p>
+        {modeSentence !== null ? (
+          <p
+            className="ts-share-footer-sentence ts-share-mode-sentence"
+            data-control="dialog.share.authorize"
+            data-mode={authorize}
+          >
+            {modeSentence}
+          </p>
+        ) : null}
       </div>
       <p className="ts-dialog-error-row" role="alert" data-control="dialog.share.error">
         {error ?? ''}
@@ -689,7 +1311,7 @@ function RequestRow({
 }) {
   const [notify, setNotify] = useState(true);
   const name = request.principal !== undefined ? nameOf(request.principal) : (request.email ?? '');
-  const roleLabel = ROLES.find((role) => role.value === request.role)?.label ?? request.role;
+  const roleLabel = ROLES.find((each) => each.value === request.role)?.label ?? request.role;
   return (
     <li className="ts-share-request" data-control={`dialog.share.request.${request.id}`}>
       <span className="ts-share-request-who">
@@ -818,9 +1440,9 @@ function GrantRow({
             doc: 'Viewer, Commenter, Editor; Transfer ownership, Add expiration, Remove access',
           })}
         >
-          {ROLES.map((role) => (
-            <option key={role.value} value={role.value}>
-              {role.label}
+          {ROLES.map((each) => (
+            <option key={each.value} value={each.value}>
+              {each.label}
             </option>
           ))}
           {canTransfer && identity?.kind === 'account' ? (
@@ -831,7 +1453,7 @@ function GrantRow({
         </select>
       ) : (
         <span className="ts-share-row-role">
-          {ROLES.find((role) => role.value === grant.role)?.label ?? grant.role}
+          {ROLES.find((each) => each.value === grant.role)?.label ?? grant.role}
         </span>
       )}
       {expiring ? (

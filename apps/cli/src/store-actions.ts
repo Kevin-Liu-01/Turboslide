@@ -919,11 +919,13 @@ export async function blockAlign(
     current,
     (all) => {
       const rows = pickBlocks(all, input.blockIds, input.slideId);
+      /* the shared edge is the extreme object's own edge unless snap is asked for (docs/FOCUS.md
+         rank 14: tops 150, 240, 500 became 152 on the grid); Google's Align never snaps */
       const next = alignPositions(
         rows.map((row) => row.pos),
         input.edge,
         input.to,
-        input.snap !== false,
+        input.snap === true,
       );
       return positionMutations(input.slideId, rows, next);
     },

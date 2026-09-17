@@ -152,6 +152,25 @@ describe('useEditorKeys and the indent chords', () => {
     });
   }
 
+  it('leaves Escape to a modal dialog while its scrim is in the document (b1 R30)', () => {
+    /* the Dialog's own document listener closes the dialog; the shell's ladder would close an
+       open panel with it, where Google closes the dialog alone */
+    const escape = vi.fn(() => true);
+    const h = { ...handlers(), escape };
+    render(<Host context={withText} handlers={h} />);
+    const scrim = document.createElement('div');
+    scrim.className = 'ts-dialog-scrim';
+    document.body.appendChild(scrim);
+    try {
+      fireEvent.keyDown(document.body, { key: 'Escape' });
+      expect(escape).not.toHaveBeenCalled();
+    } finally {
+      scrim.remove();
+    }
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(escape).toHaveBeenCalledTimes(1);
+  });
+
   it('leaves the other chords to a chrome field and runs a menu chord from the canvas', () => {
     const runItem = vi.fn();
     const view = render(<Host context={withText} handlers={handlers(runItem)} />);
@@ -251,5 +270,34 @@ describe('the caret keys inside the canvas run', () => {
     });
     document.body.dispatchEvent(outside);
     expect(runItem.mock.calls.length > 0 || outside.defaultPrevented).toBe(true);
+  });
+});
+
+describe('Delete and Backspace with nothing selected (docs/FOCUS.md section 5 rank 4)', () => {
+  const noFocus: MenuContext = { ...DEFAULT_MENU_CONTEXT, focus: 'none', selectedSlides: 1 };
+  const filmstrip: MenuContext = { ...DEFAULT_MENU_CONTEXT, focus: 'filmstrip', selectedSlides: 1 };
+
+  it('runs nothing and prevents nothing from the body or a toolbar button while the filmstrip has no focus', async () => {
+    for (const key of ['Delete', 'Backspace']) {
+      const runItem = vi.fn();
+      const view = render(<Host context={noFocus} handlers={handlers(runItem)} />);
+      const field = view.getByTestId('field');
+      const fromBody = fireEvent.keyDown(document.body, { key });
+      const fromButton = fireEvent.keyDown(view.getByTestId('card'), { key });
+      expect(runItem).not.toHaveBeenCalled();
+      expect(fromBody).toBe(true);
+      expect(fromButton).toBe(true);
+      void field;
+      await settle();
+    }
+  });
+
+  it('still removes the slide while the filmstrip has the focus, and Edit > Delete stays a menu row', async () => {
+    const runItem = vi.fn();
+    render(<Host context={filmstrip} handlers={handlers(runItem)} />);
+    fireEvent.keyDown(document.body, { key: 'Delete' });
+    expect(runItem).toHaveBeenCalledTimes(1);
+    expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('edit.delete');
+    await settle();
   });
 });

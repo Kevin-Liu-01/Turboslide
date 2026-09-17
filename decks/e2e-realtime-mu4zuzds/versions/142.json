@@ -1,0 +1,38 @@
+{
+  "n": 142,
+  "revision": 142,
+  "author": {
+    "kind": "human",
+    "name": "Cork 108",
+    "principalId": "anon_c9e5ebb5-0f46-4eff-a0fc-79bf17151fd4"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T03:58:17.049Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "at": 0,
+      "remove": 0,
+      "insert": "z"
+    }
+  ],
+  "baseRevision": 141,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "at": 0,
+      "remove": 1,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 154,
+    "toSeq": 154
+  }
+}

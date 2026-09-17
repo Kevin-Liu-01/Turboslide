@@ -21,7 +21,11 @@ const CTX: MenuContext = {
   clipboard: 'slides',
 };
 
-/** The card menu of SPEC 4.2, as labels in order, dividers as '-'. */
+/* the focus round (docs/FOCUS.md 3.1): the Later stubs are drawn only while Tools > Advanced
+   tools is on, so the rows of SPEC 4.2 that include them are asserted behind the switch */
+const ADVANCED: MenuContext = { ...CTX, settings: { ...CTX.settings, advancedTools: true } };
+
+/** The card menu of SPEC 4.2, as labels in order, dividers as '-', with the switch on. */
 const CARD_ORDER = [
   'Cut',
   'Copy',
@@ -41,6 +45,14 @@ const CARD_ORDER = [
   '-',
   'Comment',
 ];
+
+/**
+ * The same menu with the switch off: the Later row Transition and the parked row Change theme
+ * are absent (docs/FOCUS.md 3.1, 3.4).
+ */
+const CARD_ORDER_DEFAULT = CARD_ORDER.filter(
+  (label) => label !== 'Transition' && label !== 'Change theme',
+);
 
 /** The right-clicked card, mounted before the menu so focus can return to it. */
 function mountCard(): HTMLElement {
@@ -96,9 +108,14 @@ afterEach(() => {
 
 describe('contextItems', () => {
   it("turns the model's card list into rows with dividers before the right items", () => {
-    const items = contextItems('filmstripCard', CTX);
+    const items = contextItems('filmstripCard', ADVANCED);
     const labels = items.flatMap((item) => (item.dividerBefore ? ['-', item.label] : [item.label]));
     expect(labels).toEqual(CARD_ORDER);
+    /* with the switch off the Later row leaves and the dividers still stand */
+    const plain = contextItems('filmstripCard', CTX);
+    expect(
+      plain.flatMap((item) => (item.dividerBefore ? ['-', item.label] : [item.label])),
+    ).toEqual(CARD_ORDER_DEFAULT);
     expect(contextMenuLabel('filmstripCard')).toBe('Slide menu');
     expect(contextMenuLabel('tableCell')).toBe('Table menu');
   });
@@ -123,7 +140,8 @@ describe('contextItems', () => {
 
 describe('ContextMenu', () => {
   it('draws the card menu in the order of SPEC 4.2 with keys, stubs and the label switch', () => {
-    render(<Harness context={{ ...CTX, slide: { ...CTX.slide!, skipped: true } }} />);
+    /* the stub row is asserted behind Tools > Advanced tools (docs/FOCUS.md 3.1) */
+    render(<Harness context={{ ...ADVANCED, slide: { ...ADVANCED.slide!, skipped: true } }} />);
     const menu = screen.getByRole('menu', { name: 'Slide menu' });
     expect(menu).toBeTruthy();
     const labels = rows().map((row) => row.querySelector('.ts-menu-label')?.textContent);
@@ -153,6 +171,16 @@ describe('ContextMenu', () => {
     ).toBeNull();
     /* the first row has focus */
     expect(document.activeElement).toBe(document.querySelector('[data-menu-item="edit.cut"]'));
+  });
+
+  it('leaves the Later row out of the card menu while Advanced tools is off (docs/FOCUS.md 3.1)', () => {
+    render(<Harness context={CTX} />);
+    const labels = rows().map((row) => row.querySelector('.ts-menu-label')?.textContent);
+    expect(labels).toEqual(CARD_ORDER_DEFAULT.filter((label) => label !== '-'));
+    expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
+    expect(
+      document.querySelectorAll('[role="menu"][aria-label="Slide menu"] [role="separator"]'),
+    ).toHaveLength(4);
   });
 
   it('runs a row through onSelect and returns focus to the card on Esc', () => {
@@ -207,8 +235,10 @@ describe('ContextMenu', () => {
      renderDynamicSubmenu through `renderDynamic`), and a pick inside it closes the menu the way
      a layout pick does (VERIFICATION-2 finding 6: the row opened nothing) */
   it('draws the chrome plate of Change shape on a shape and closes on a pick', () => {
+    /* Change shape is parked (docs/FOCUS.md section 4), so its plate is asserted behind the switch */
     const shapeContext: MenuContext = {
       ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
       focus: 'canvas',
       selection: {
         ...DEFAULT_MENU_CONTEXT.selection,

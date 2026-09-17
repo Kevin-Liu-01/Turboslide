@@ -357,14 +357,25 @@ export function EditorShell({
     root.toggleAttribute('data-spellcheck', settings.spellcheck !== false);
     root.toggleAttribute('data-show-ruler', settings.showRuler === true);
     root.toggleAttribute('data-show-guides', settings.showGuides === true);
+    /* docs/FOCUS.md 3.1: the switch on the root, so a driver and the chrome lint can read it */
+    root.toggleAttribute('data-advanced-tools', settings.advancedTools === true);
   }, [
     settings.showIds,
     settings.sectionsTree,
     settings.spellcheck,
     settings.showRuler,
     settings.showGuides,
+    settings.advancedTools,
     stageRef,
   ]);
+
+  /* the stored settings reach the page that hosts the shell (docs/FOCUS.md 3.1: the window API
+     reports Advanced tools as a setting through describe().state.settings) */
+  const onSettingsRef = useRef(input.onSettingsChange);
+  onSettingsRef.current = input.onSettingsChange;
+  useEffect(() => {
+    onSettingsRef.current?.(settings);
+  }, [settings]);
 
   /* the right panel column opens on the root (EditorShell.css reads data-rpanel) */
   useEffect(() => {
@@ -578,9 +589,17 @@ export function EditorShell({
         say(plan.refused);
         return;
       }
+      /* a batch plan is one write per input, in order (Slide > Delete slide on several cards,
+         docs/FOCUS.md rank 22); the snackbar's Undo takes every write back */
+      const inputs = plan.batch ?? [plan.input];
       const undoAction: SnackbarAction | undefined =
         plan.undo && current.history?.undo
-          ? { label: SNACKBARS.undo, run: () => current.history?.undo() }
+          ? {
+              label: SNACKBARS.undo,
+              run: () => {
+                for (let i = 0; i < inputs.length; i += 1) current.history?.undo();
+              },
+            }
           : undefined;
       if (
         plan.action === 'block.ungroup' ||
@@ -590,8 +609,12 @@ export function EditorShell({
         runBuilt(plan);
         return;
       }
-      current
-        .dispatch(plan.action, plan.input)
+      const dispatchAll = async (): Promise<unknown> => {
+        let result: unknown;
+        for (const input of inputs) result = await current.dispatch(plan.action, input);
+        return result;
+      };
+      dispatchAll()
         .then((result) => {
           if (plan.action === 'view.zoom') {
             const zoom = (plan.input as { zoom: number | 'fit' }).zoom;
@@ -650,14 +673,20 @@ export function EditorShell({
   const zoomStep = useCallback(
     (direction: 1 | -1) => {
       const current = inputRef.current;
-      if (current.editor?.zoomStep) {
+      /* the step is taken from the effective percent (the stage's scale while Fit, else the
+         setting) and applied through zoomTo, so the box text follows the step (docs/FOCUS.md
+         rank 23: every step landed on 25 percent and the box kept its old text); the editor's own
+         zoomStep stays for a route without the view report */
+      /* at Fit the controller holds no number (`snap.zoom` is 'fit', so `view.zoom` is undefined)
+         and the effective percent read 100, whose next rung is 125 (docs/FOCUS.md
+         `arrange.zoom.menu-in`: "71% -> 125%, expected 75"); the stage's live scale is the
+         percent the step starts from (b1 R20, F-zoom-fit) */
+      const live = current.view?.zoom ?? current.editor?.scale?.();
+      const next = zoomStepFrom(effectiveZoomPercent(effectiveSettings.zoom, live), direction);
+      if (current.editor?.zoomStep && live === undefined && !current.editor.zoomTo) {
         current.editor.zoomStep(direction);
         return;
       }
-      const next = zoomStepFrom(
-        effectiveZoomPercent(effectiveSettings.zoom, current.view?.zoom),
-        direction,
-      );
       if (current.editor?.zoomTo) {
         current.editor.zoomTo(next / 100);
         setSetting('zoom', String(next));
@@ -711,6 +740,16 @@ export function EditorShell({
           runPlan(itemById('slide.deleteSlide'));
           return;
         case 'duplicate':
+          /* with blocks selected the stage's own duplicate runs, which selects the copies as
+             Cmd+D does (docs/FOCUS.md rank 34: Edit > Duplicate left the original selected) */
+          if (
+            current.editor?.duplicate &&
+            current.selection?.blockId !== undefined &&
+            current.focus !== 'filmstrip'
+          ) {
+            current.editor.duplicate();
+            return;
+          }
           runPlan(item);
           return;
         case 'link':
@@ -785,7 +824,12 @@ export function EditorShell({
             say('Comments need the room; open the presentation from the studio');
             return;
           }
-          const anchor = anchorAtSelection(current.slideId, current.selection);
+          const anchor = anchorAtSelection(
+            current.slideId,
+            current.selection,
+            undefined,
+            current.document.slides[current.slideId],
+          );
           setCommentCard({ anchor });
           return;
         }
@@ -1105,7 +1149,16 @@ export function EditorShell({
           return;
         case 'toolbar.select':
           current.onSelectBlock?.(undefined);
+          current.onSelectTool?.();
           return;
+        case 'toolbar.insertLine':
+          /* the button arms the Line tool the way Text box arms the text tool; the arrow beside it
+             lists Line and Arrow (docs/FOCUS.md `lines.insert.line-drag`, the toolbar route) */
+          if (current.onDrawTool) {
+            current.onDrawTool({ kind: 'line', line: 'line' });
+            return;
+          }
+          break;
         case 'toolbar.textBox':
           if (current.onDrawTool) current.onDrawTool({ kind: 'text' });
           else runItem(itemById('insert.textBox'), anchor);
@@ -1627,6 +1680,7 @@ export function EditorShell({
             say={say}
             openSection={panelSection}
             slots={input.formatSlots}
+            advancedTools={effectiveSettings.advancedTools === true}
             onChangeLayout={(anchor) =>
               openLayoutGrid({ purpose: 'apply', anchor, returnFocusTo: anchor })
             }
@@ -1827,7 +1881,13 @@ export function EditorShell({
       case 'help':
         return <HelpDialog.Component />;
       case 'keyboardShortcuts':
-        return <ShortcutsDialog.Component platform={platform} onClose={closeDialog} />;
+        return (
+          <ShortcutsDialog.Component
+            platform={platform}
+            context={menuContext}
+            onClose={closeDialog}
+          />
+        );
       case 'imageByUrl':
         return <ImageByUrlDialog.Component target={dialog.target} />;
       case 'fromThisPresentation':

@@ -512,6 +512,11 @@ const removeDeckFn = createServerFn({ method: 'POST' })
     const { assertFlag } = await import('./flags');
     await authorizeRequest(data.deckId, 'remove', { action: 'deck.remove' });
     await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.remove' });
+    // the deck's room on this instance goes first (room.ts closeRoom says why): a checkpoint run
+    // pending or in flight would write the folder back after the removal (the focus round,
+    // cycle 2; VERIFICATION C2-F19, `/deck/<id>` 200 after Delete forever on the check's server)
+    const { closeRoom } = await import('./room');
+    await closeRoom(data.deckId);
     return mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision));
   });
 
@@ -753,9 +758,23 @@ async function loadShaped(data: GetDeckInput): Promise<ShapedLoad | null> {
   if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
   const shape = await shapeByRole(ctx, data.deckId, data);
   if (shape.role === 'none') return null;
-  const loaded = await loadDeck(data.deckId);
+  let loaded = await loadDeck(data.deckId);
   if (!loaded) return null;
   if (isTrashed(loaded.document.deck) && data.includeTrashed !== true) return null;
+  // the room's document ahead of the store when this instance holds the room: the checkpointer
+  // writes the store 2 s after the last op (10 s under a burst), so the print page and the
+  // viewer opened right after Slide > Skip slide or a fill write read the deck from before it
+  // (docs/FOCUS.md `export.print.include-skipped`; the integrator at the cycle 2 merge, for
+  // b7). The store's trash stamp is kept, as the editor's loader keeps it (write.ts)
+  const { liveIfOpen } = await import('./room');
+  const live = await liveIfOpen(loaded.servedId);
+  if (live !== null && live.document.deck.revision > loaded.document.deck.revision) {
+    const { withTrashStamp } = await import('./write');
+    loaded = {
+      ...loaded,
+      document: withTrashStamp(live.document, loaded.document.deck.trashedAt),
+    };
+  }
   // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
   const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
     JSON.stringify(slide).includes('"type":"html"'),

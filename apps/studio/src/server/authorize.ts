@@ -8,6 +8,7 @@ import type {
   AuthContext,
   Capability,
   Decision,
+  LinkGrant,
   Principal,
   Role,
   Scope,
@@ -176,11 +177,28 @@ export function roleOf(
 }
 
 /**
+ * The role a denied caller is handed in shadow mode (docs/FOCUS.md section 5 rank 1): the standing
+ * the record gives them when it gives one (an editor refused `remove`, a viewer refused `write`),
+ * the legacy open editor for a deck with no record, and otherwise the floor, `viewer`. Before the
+ * focus round the floor was `editor`, so a stranger on a restricted deck and a viewer who changed
+ * `/deck/` to `/edit/` both received the full editor on production (`audit-present` rows 26 and
+ * 29); with the floor at `viewer` the payload and the editor's mode follow the role the record
+ * grants, whatever the address, while the server still refuses no write in this mode.
+ */
+export function shadowStanding(
+  record: AccessRecord | null,
+  ctx: AuthContext,
+  now: number = Date.now(),
+): { role: Role; via: Via } {
+  return roleOf(record, ctx, now) ?? { role: 'viewer', via: 'open' };
+}
+
+/**
  * The call every server function and route makes first (SPEC-3 6.2). Deny by default: a loader
  * failure is a denial (404 in enforce mode, logged either way). In shadow mode a denial comes
- * back as `ok: true` with the legacy role and the denial attached under `shadow`, so the caller
- * proceeds as today and the log shows what enforcement will refuse; the one denial shadow mode
- * refuses is the 410 of a revoked publish token (the comment at the check says why).
+ * back as `ok: true` with the role `shadowStanding` gives and the denial attached under `shadow`,
+ * so the caller proceeds and the log shows what enforcement will refuse; the one denial shadow
+ * mode refuses is the 410 of a revoked publish token (the comment at the check says why).
  */
 export async function authorize(
   ctx: AuthContext,
@@ -227,11 +245,11 @@ export async function authorize(
     shadow: !refused,
   });
   if (refused) return decision;
-  const legacy = roleOf((record as AccessRecord | null) ?? null, ctx, d.now());
+  const standing = shadowStanding((record as AccessRecord | null) ?? null, ctx, d.now());
   return {
     ok: true,
-    role: legacy?.role ?? 'editor',
-    via: legacy?.via ?? 'open',
+    role: standing.role,
+    via: standing.via,
     shadow: { status: decision.status, code: decision.code },
   };
 }
@@ -352,10 +370,66 @@ export async function requestContext(request?: Request): Promise<AuthContext> {
     return bootstrapAgentContext('token', runId?.replace(/^agent:/, ''));
   }
   try {
-    return await authContextFor(req, studioSessionSecret());
+    return await withLinkGrants(await authContextFor(req, studioSessionSecret()), linkGrantsOf);
   } catch {
     return anonymousContext();
   }
+}
+
+/**
+ * The link grants a principal holds (SPEC-3 6.4): the exchange at `/s/<token>` writes them on the
+ * principal record and `room.requestIdentity` reads them for the room routes, while the server
+ * functions' `requestContext()` read the cookie alone (`authContextFor` answers no grants), so in
+ * enforce mode a viewer who arrived by the View link was a stranger to `/deck/<id>` and to every
+ * server function that authorizes through this path (the focus round's enforce run of
+ * roles.spec.ts: `deck.view` denied `not_found` for the link holder; shadow mode's floor hid it).
+ * The store is the room's, loaded late because room.ts imports this module; a store that cannot
+ * be read leaves the grants empty, which is the refusal, never an admission.
+ */
+async function linkGrantsOf(principalId: string): Promise<LinkGrant[]> {
+  let record: { linkGrants: LinkGrant[] } | null = null;
+  try {
+    const { principalStore } = await import('./room');
+    record = await principalStore().get(principalId);
+  } catch {
+    record = null;
+  }
+  return linkGrantsFor(principalId, record);
+}
+
+/**
+ * The grants of a principal from both places the exchange writes them (cycle 2, VERIFICATION.md
+ * pass 2 F-share-404): the principal record of this instance and the principal's deck index on
+ * the Blob store, which every instance reads (`server/access.ts` `noteLinkGrant`). The blob tier's
+ * principal store is a file under the instance's own state folder, so a grant exchanged on one
+ * instance was unknown to the next. One entry per link id, the record's first. The room routes
+ * read the same union through this function (b7's `room.requestIdentity`, request R1 of b6.md
+ * cycle 2); an index that cannot be read adds nothing, which is the refusal, never an admission.
+ */
+export async function linkGrantsFor(
+  principalId: string,
+  record: { linkGrants: readonly LinkGrant[] } | null,
+): Promise<LinkGrant[]> {
+  const grants: LinkGrant[] = [...(record?.linkGrants ?? [])];
+  try {
+    const { linkGrantsFromIndex } = await import('./access');
+    for (const grant of await linkGrantsFromIndex(principalId)) {
+      if (!grants.some((held) => held.linkId === grant.linkId)) grants.push(grant);
+    }
+  } catch {
+    // the index is a second source; the record's grants stand on their own
+  }
+  return grants;
+}
+
+/** The context with the principal's link grants loaded when it carries none; a stranger and a bearer pass through. */
+export async function withLinkGrants(
+  ctx: AuthContext,
+  load: (principalId: string) => Promise<readonly LinkGrant[]>,
+): Promise<AuthContext> {
+  if (ctx.principal === null || ctx.agent !== undefined || ctx.linkGrants.length > 0) return ctx;
+  const grants = await load(ctx.principal.id);
+  return grants.length === 0 ? ctx : { ...ctx, linkGrants: [...grants] };
 }
 
 /**

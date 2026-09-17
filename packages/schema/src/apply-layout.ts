@@ -25,11 +25,11 @@
 import type { Block, TableBlock } from './blocks.ts';
 import { EMPTY_ASSET_REF } from './blocks.ts';
 import type { ContentSlide, Deck, Layout, LayoutId, Slide, SlotName } from './deck.ts';
-import { slotsForLayout } from './deck.ts';
+import { slideBlocks, slotsForLayout } from './deck.ts';
 import { CANVAS_GROUP } from './canvas.ts';
 import { convertLayout, readingOrder } from './freeform.ts';
 import type { AssetId, BlockId, SlideId } from './ids.ts';
-import { layoutEntry } from './layouts.ts';
+import { derivedLayout, layoutEntry } from './layouts.ts';
 import type { LayoutEntry } from './layouts.ts';
 import { cloneJson } from './pointer.ts';
 import type { Text } from './text.ts';
@@ -161,34 +161,98 @@ function orderedBlocks(slide: Slide): Block[] {
   return [];
 }
 
-/** Reads the source slide into the roles of SPEC 5.5. */
-export function extractContent(slide: Slide): Extracted {
+/** A stable JSON of a value (keys sorted, undefined dropped), for the untouched comparison. */
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, each]) => each !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    return `{${entries.map(([key, each]) => `${JSON.stringify(key)}:${stableJson(each)}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/** The placeholders of the source layout nobody touched: their block ids, and whether the picture is still the starter. */
+export type Untouched = { blocks: ReadonlySet<BlockId>; picture: boolean };
+
+const NOTHING_UNTOUCHED: Untouched = { blocks: new Set<BlockId>(), picture: false };
+
+/**
+ * The placeholders the source layout placed and nobody touched (docs/FOCUS.md section 5 rank 8;
+ * SPEC 5.5): a block with the id and the content, position aside, of the same block in a fresh
+ * make of the slide's own layout, and the background picture of a picture layout while it is
+ * still the starter the layout took. Google moves what was typed and leaves the layout's own
+ * furniture behind; before this rule an untouched Section header carried its starter picture into
+ * Title and body as a figure and a Ruled statement list its four empty rows into Title and table
+ * (audit-slides rows 59 to 64), and Title slide counted an empty paragraph as a block that did not
+ * fit (rows 68 to 70). A slide whose layout needs a picture the deck lacks compares nothing here;
+ * its empty text placeholders still leave through `isEmptyText`.
+ */
+export function untouchedPlaceholders(slide: Slide, deck: Deck, sectionId: string): Untouched {
+  let fresh: Slide | null;
+  try {
+    /* the slide's own layout: its `template` when written, else the entry its shape names
+       (SPEC 5.6 derivedLayout), so a slide New slide made before `template` was stamped compares too */
+    fresh = layoutEntry(derivedLayout(slide)).make(slide.id, deck, sectionId);
+  } catch {
+    return NOTHING_UNTOUCHED;
+  }
+  if (fresh === null) return NOTHING_UNTOUCHED;
+  const freshBlocks = new Map(
+    slideBlocks(fresh).map(({ block }) => [block.id, stableJson(stripPosition(block))] as const),
+  );
+  const blocks = new Set<BlockId>();
+  const all = slideBlocks(slide);
+  for (const { block } of all) {
+    if (freshBlocks.get(block.id) === stableJson(stripPosition(block))) blocks.add(block.id);
+  }
+  /* the starter is the layout's only while nothing else on the slide was touched: a figure a
+     person brought to a picture layout became its background, and when it is the deck's starter
+     asset the two cannot be told apart, so a slide someone typed on keeps its picture */
+  const picture =
+    isPictureSlide(slide) &&
+    isPictureSlide(fresh) &&
+    slide.picture.asset === fresh.picture.asset &&
+    all.every(({ block }) => blocks.has(block.id));
+  return { blocks, picture };
+}
+
+/** True for a text block with nothing typed: an empty placeholder is furniture, not content (SPEC 5.4). */
+function isEmptyText(text: Text): boolean {
+  return plainText(text).trim() === '';
+}
+
+/** Reads the source slide into the roles of SPEC 5.5; the untouched placeholders are not content. */
+export function extractContent(slide: Slide, untouched: Untouched = NOTHING_UNTOUCHED): Extracted {
   const out: Extracted = { body: [], lists: [], tables: [], pictures: [], rest: [] };
   if (slide.kind === 'title') {
-    out.title = slide.heading;
-    out.body.push({ text: slide.lead, from: 'lead' });
+    if (!isEmptyText(slide.heading)) out.title = slide.heading;
+    if (!isEmptyText(slide.lead)) out.body.push({ text: slide.lead, from: 'lead' });
     return out;
   }
   if (slide.kind === 'statement') {
-    out.title = slide.big;
+    if (!isEmptyText(slide.big)) out.title = slide.big;
     return out;
   }
-  if (isPictureSlide(slide)) {
+  if (isPictureSlide(slide) && !untouched.picture) {
     out.pictures.push({ asset: slide.picture.asset, from: 'picture' });
   }
   for (const block of orderedBlocks(slide)) {
     if (isPlateBox(block)) continue;
+    if (untouched.blocks.has(block.id)) continue;
     if (block.type === 'heading' && out.title === undefined) {
+      if (isEmptyText(block.text)) continue;
       out.title = block.text;
       out.titleFrom = block.id;
       continue;
     }
     if (block.type === 'paragraph' || block.type === 'text') {
-      out.body.push({ text: block.text, from: block.id });
+      if (!isEmptyText(block.text)) out.body.push({ text: block.text, from: block.id });
       continue;
     }
     if (block.type === 'credit') {
-      if (out.credit === undefined) {
+      if (out.credit === undefined && !isEmptyText(block.text)) {
         out.credit = block.text;
         out.creditFrom = block.id;
       }
@@ -292,12 +356,13 @@ export function applyLayout(input: ApplyLayoutInput): ApplyLayoutResult {
   const entry = layoutEntry(input.layout);
   const source = cloneJson(input.slide);
   const kept = keptFields(source, entry.id);
+  const untouched = untouchedPlaceholders(source, input.deck, input.sectionId);
 
   // Blank: freeform keeps every box, a grammar source runs through toFreeform, the fixed kinds
   // become a stack first
   if (entry.id === 'blank') {
     const content: ContentSlide =
-      source.kind === 'content' ? source : asStack(source, extractContent(source));
+      source.kind === 'content' ? source : asStack(source, extractContent(source, untouched));
     const converted = convertLayout(content, { type: 'freeform' });
     return { slide: { ...converted, ...kept }, dropped: [] };
   }
@@ -315,7 +380,7 @@ export function applyLayout(input: ApplyLayoutInput): ApplyLayoutResult {
     source.kind === 'content' && source.layout.type === 'freeform' && made.kind === 'content'
       ? convertLayout(withoutPlateBoxes(source), made.layout)
       : source;
-  const extracted = extractContent(refiled);
+  const extracted = extractContent(refiled, untouched);
 
   if (made.kind === 'title') {
     const dropped = dropAllBut(extracted, ['title', 'body0']);

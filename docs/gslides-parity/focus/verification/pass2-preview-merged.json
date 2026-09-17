@@ -1,0 +1,2749 @@
+{
+  "base": "https://turboslide-gikztnsgb-kl01s-projects.vercel.app",
+  "mergedAt": "2026-09-16T18:52:16.671Z",
+  "sources": [
+    "gate run 1",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver2/walk-rest/core-walk.json",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver2/walk-images/core-walk.json"
+  ],
+  "counts": {
+    "passed": 329,
+    "failed": 60,
+    "not driven": 1
+  },
+  "retries": 0,
+  "results": {
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.new.draft": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.editor.move-to-trash": "failed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "failed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.file.make-a-copy": "passed",
+    "decks.card.download": "passed",
+    "slides.new.toolbar": "passed",
+    "slides.new.arrow-layout": "passed",
+    "slides.new.menu": "passed",
+    "slides.new.ctrl-m-card": "passed",
+    "slides.new.ctrl-m-canvas": "passed",
+    "slides.new.context": "passed",
+    "slides.new.undo": "passed",
+    "slides.duplicate.context": "passed",
+    "slides.duplicate.menu": "passed",
+    "slides.duplicate.cmd-d": "passed",
+    "slides.duplicate.undo-toolbar": "passed",
+    "slides.duplicate.undo-redo-keys": "passed",
+    "slides.duplicate.two-selected-cmd-d": "passed",
+    "slides.duplicate.two-selected-menu": "passed",
+    "slides.delete.key": "passed",
+    "slides.delete.undo-snackbar": "passed",
+    "slides.delete.context": "passed",
+    "slides.delete.undo-cmd-z": "passed",
+    "slides.delete.menu-undo-redo": "passed",
+    "slides.delete.two-selected-key-undo": "passed",
+    "slides.delete.two-selected-menu": "passed",
+    "slides.delete.two-selected-edit-menu": "passed",
+    "slides.delete.canvas-focus-undo": "passed",
+    "slides.delete.undo-redo-saved": "passed",
+    "slides.select.click": "passed",
+    "slides.select.arrows-shift": "passed",
+    "slides.select.shift-cmd-click": "passed",
+    "slides.select.cmd-click-toggle": "passed",
+    "slides.reorder.drag-above": "passed",
+    "slides.reorder.drag-below": "passed",
+    "slides.reorder.cmd-up-down": "passed",
+    "slides.reorder.menu-to-end-undo": "passed",
+    "slides.reorder.undo-drag": "passed",
+    "slides.reorder.two-selected-drag": "passed",
+    "slides.skip.context": "passed",
+    "slides.skip.context-two": "passed",
+    "slides.skip.menu-unskip": "passed",
+    "slides.skip.menu-two": "passed",
+    "slides.layout.picker-open-escape": "passed",
+    "slides.layout.apply.title": "passed",
+    "slides.layout.apply.opener": "passed",
+    "slides.layout.apply.split": "passed",
+    "slides.layout.apply.cols": "passed",
+    "slides.layout.apply.title-only": "passed",
+    "slides.layout.apply.one-column": "passed",
+    "slides.layout.apply.statement": "passed",
+    "slides.layout.apply.section-description": "passed",
+    "slides.layout.apply.mood": "passed",
+    "slides.layout.apply.big-number": "passed",
+    "slides.layout.apply.blank": "passed",
+    "slides.layout.apply.rows": "passed",
+    "slides.layout.apply.plain": "passed",
+    "slides.layout.apply.table": "passed",
+    "slides.layout.apply.figure": "passed",
+    "slides.layout.apply.pair": "passed",
+    "slides.layout.apply.tiles": "passed",
+    "slides.layout.apply.details": "passed",
+    "slides.layout.apply.board": "passed",
+    "slides.layout.apply.matrix": "passed",
+    "slides.layout.apply.closing": "passed",
+    "slides.layout.reopen-ring": "passed",
+    "slides.layout.context-apply": "passed",
+    "slides.layout.menu-apply-undo": "passed",
+    "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+    "slides.layout.typed-title-round-trip": "passed",
+    "slides.layout.snackbar-counts-typed-only": "passed",
+    "slides.layout.undo-typed": "passed",
+    "slides.notes.type": "passed",
+    "slides.notes.per-slide": "passed",
+    "slides.notes.resize-handle": "passed",
+    "slides.notes.reload": "passed",
+    "slides.counter.footer-and-cards": "passed",
+    "slides.hash.click-and-reload": "passed",
+    "slides.clipboard.copy-paste-card": "failed",
+    "slides.reorder.menu-up-down-beginning": "passed",
+    "slides.reorder.cmd-shift-up-down": "passed",
+    "slides.notes.view-menu-toggle": "passed",
+    "slides.context.empty-canvas": "passed",
+    "text.title.single-click": "passed",
+    "text.title.double-click": "passed",
+    "text.title.type-escape": "passed",
+    "text.caret.click-mid-word": "passed",
+    "text.caret.home-end": "passed",
+    "text.caret.shift-arrow-replace": "passed",
+    "text.caret.shift-home-end": "passed",
+    "text.caret.backspace-word": "passed",
+    "text.caret.option-backspace": "passed",
+    "text.caret.delete": "passed",
+    "text.caret.cmd-a": "passed",
+    "text.title.enter-commits": "passed",
+    "text.subtitle.double-click-type": "passed",
+    "text.subtitle.enter-new-line": "passed",
+    "text.subtitle.shift-enter": "passed",
+    "text.subtitle.arrows-backspace-join": "passed",
+    "text.subtitle.escape-commits": "passed",
+    "text.textbox.insert-click-type": "passed",
+    "text.textbox.insert-drag": "passed",
+    "text.textbox.burst-reliability": "passed",
+    "text.toolbar.swaps-on-select": "passed",
+    "text.fontsize.type-enter": "passed",
+    "text.fontsize.plus-minus": "passed",
+    "text.bold.toolbar": "passed",
+    "text.bold.cmd-b-word": "passed",
+    "text.italic.toolbar-word": "passed",
+    "text.italic.cmd-i-word": "passed",
+    "text.underline.cmd-u-word": "passed",
+    "text.underline.toolbar": "passed",
+    "text.strikethrough.cmd-shift-x": "passed",
+    "text.strikethrough.menu": "passed",
+    "text.color.swatch-on-word": "passed",
+    "text.align.toolbar-and-key": "passed",
+    "text.spacing.toolbar": "passed",
+    "text.list.bulleted-toolbar": "passed",
+    "text.list.numbered-toolbar": "passed",
+    "text.list.bulleted-menu-preset": "passed",
+    "text.indent.toolbar": "passed",
+    "text.indent.keys": "passed",
+    "text.link.cmd-k-enter": "passed",
+    "text.link.present-click": "failed",
+    "text.clear-formatting": "passed",
+    "text.format-menu.rows-enabled": "passed",
+    "text.format-menu.size-increase": "failed",
+    "text.format-menu.align-left": "failed",
+    "text.format-menu.spacing-double": "failed",
+    "text.format-menu.text-fitting": "passed",
+    "text.autofit.title-wraps": "passed",
+    "text.autofit.textbox-grow": "failed",
+    "text.clipboard.within-box": "failed",
+    "text.clipboard.between-boxes": "failed",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "failed",
+    "text.find-replace.shortcut": "failed",
+    "text.persistence.reload": "passed",
+    "text.list.numbered-menu-preset": "passed",
+    "text.list.chords": "passed",
+    "text.link.toolbar-button": "passed",
+    "text.format-options.panel": "passed",
+    "text.layout-runs.type": "failed",
+    "text.context.text-block": "failed",
+    "text.context.text-selection": "failed",
+    "text.format-menu.size-decrease": "failed",
+    "text.format-menu.spacing-single-1-15": "failed",
+    "text.format-menu.align-indent-rows": "failed",
+    "text.textbox.toolbar-button": "passed",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "failed",
+    "images.insert.toolbar-sources": "passed",
+    "images.select.chip-handles-tail": "passed",
+    "images.delete.key": "passed",
+    "images.move.drag-frame": "passed",
+    "images.guides.edge-snap": "passed",
+    "images.guides.centre-y": "passed",
+    "images.guides.centre-x": "passed",
+    "images.nudge.arrows": "passed",
+    "images.resize.eight-handles": "passed",
+    "images.resize.eight-handles-shift": "passed",
+    "images.resize.edge-fill": "passed",
+    "images.resize.alt-centre": "passed",
+    "images.rotate.ring": "passed",
+    "images.crop.double-click": "passed",
+    "images.crop.east-edge": "passed",
+    "images.crop.south-edge": "passed",
+    "images.crop.enter": "passed",
+    "images.crop.undo": "passed",
+    "images.crop.redo": "passed",
+    "images.crop.menu-escape": "passed",
+    "images.crop.toolbar-escape-cancels": "passed",
+    "images.options.panel": "passed",
+    "images.options.transparency": "failed",
+    "images.options.reset": "passed",
+    "images.reset-image.menu": "passed",
+    "images.replace.upload": "passed",
+    "images.background.colour": "passed",
+    "images.background.toolbar": "passed",
+    "images.background.upload-picture": "passed",
+    "images.background.remove-picture": "passed",
+    "images.background.reset": "passed",
+    "images.present.picture-and-ground": "failed",
+    "images.export.pdf-with-picture": "passed",
+    "images.replace.drop-on-picture": "passed",
+    "images.context.image": "passed",
+    "images.options.menu-row": "passed",
+    "images.background.hex-field": "failed",
+    "arrange.select.click": "passed",
+    "arrange.select.shift-add": "passed",
+    "arrange.select.shift-remove": "passed",
+    "arrange.select.marquee": "passed",
+    "arrange.select.marquee-partial": "passed",
+    "arrange.select.click-away": "passed",
+    "arrange.select.cmd-a": "passed",
+    "arrange.select.escape": "passed",
+    "arrange.order.bring-to-front": "failed",
+    "arrange.order.send-to-back": "failed",
+    "arrange.order.bring-forward": "failed",
+    "arrange.order.send-backward": "failed",
+    "arrange.order.keys": "passed",
+    "arrange.align.left": "passed",
+    "arrange.align.center": "passed",
+    "arrange.align.right": "passed",
+    "arrange.align.top": "passed",
+    "arrange.align.middle": "passed",
+    "arrange.align.bottom": "passed",
+    "arrange.align.single-to-slide": "passed",
+    "arrange.center.horizontal": "passed",
+    "arrange.center.vertical": "passed",
+    "arrange.undo.toolbar-on-arrange": "passed",
+    "arrange.undo.menu-on-arrange": "passed",
+    "arrange.clipboard.copy-paste": "passed",
+    "arrange.clipboard.delete": "passed",
+    "arrange.clipboard.undo-redo-delete": "passed",
+    "arrange.clipboard.cut-paste-undo": "passed",
+    "arrange.clipboard.menu-copy-paste": "passed",
+    "arrange.clipboard.paste-after-new-slide-button": "passed",
+    "arrange.clipboard.paste-with-filmstrip-focus": "failed",
+    "arrange.clipboard.paste-keeps-position": "passed",
+    "arrange.duplicate.cmd-d": "passed",
+    "arrange.duplicate.menu-selects-copy": "passed",
+    "arrange.duplicate.nothing-selected": "passed",
+    "arrange.redo.after-undone-duplicate": "passed",
+    "arrange.keys.backspace-empty-selection": "passed",
+    "arrange.nudge.arrows": "passed",
+    "arrange.nudge.shift": "passed",
+    "arrange.nudge.undo": "passed",
+    "arrange.zoom.box-reads": "passed",
+    "arrange.zoom.menu-in": "failed",
+    "arrange.zoom.cmd-minus": "passed",
+    "arrange.zoom.cmd-plus": "passed",
+    "arrange.zoom.fit": "passed",
+    "arrange.zoom.type-percent": "passed",
+    "arrange.zoom.arrow-menu": "passed",
+    "arrange.zoom.cmd-0": "passed",
+    "arrange.zoom.menu-out": "passed",
+    "arrange.readout.fit": "passed",
+    "arrange.readout.200": "failed",
+    "arrange.selection-colour.light": "passed",
+    "arrange.selection-colour.dark": "passed",
+    "arrange.escape.text-then-selection": "passed",
+    "arrange.zoom.menu-presets": "passed",
+    "arrange.toolbar.select": "passed",
+    "shapes.insert.rectangle-click": "passed",
+    "shapes.insert.rounded-click": "passed",
+    "shapes.insert.ellipse-click": "passed",
+    "shapes.insert.rectangle-drag": "passed",
+    "shapes.insert.ellipse-drag": "passed",
+    "shapes.insert.named-rows": "passed",
+    "shapes.default-look": "passed",
+    "shapes.select": "passed",
+    "shapes.move": "passed",
+    "shapes.resize.eight-handles": "passed",
+    "shapes.rotate": "passed",
+    "shapes.fill.colour": "passed",
+    "shapes.border.colour-weight-dash": "failed",
+    "shapes.text.type-align-bold": "passed",
+    "shapes.duplicate-delete-undo-redo": "passed",
+    "shapes.format-options.size-position": "passed",
+    "shapes.export.pdf": "failed",
+    "shapes.export.pptx": "failed",
+    "shapes.reload-and-viewer": "failed",
+    "shapes.context.shape": "passed",
+    "lines.insert.line-drag": "passed",
+    "lines.insert.arrow-drag": "passed",
+    "lines.end-handle": "passed",
+    "lines.tail.colour-weight-dash-ends": "failed",
+    "lines.context.line": "passed",
+    "present.slideshow.button": "passed",
+    "present.slideshow.cmd-enter": "passed",
+    "present.keys.arrow-right": "passed",
+    "present.keys.arrow-left": "passed",
+    "present.keys.space": "passed",
+    "present.keys.digit-enter": "passed",
+    "present.keys.home": "passed",
+    "present.keys.end": "passed",
+    "present.click-advances": "passed",
+    "present.counter": "passed",
+    "present.laser": "passed",
+    "present.escape": "passed",
+    "present.presenter-view.arrow": "passed",
+    "present.presenter-view.s-key": "passed",
+    "present.notes-in-presenter": "passed",
+    "present.slideshow.from-beginning": "passed",
+    "present.keys.blank-black-white": "passed",
+    "present.skipped-left-out": "passed",
+    "share.dialog.open": "failed",
+    "share.copy-view-link": "passed",
+    "share.copy-edit-link": "failed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "failed",
+    "share.edit-link-lands-editor": "failed",
+    "share.view-link-cannot-edit": "failed",
+    "share.stranger-cannot-edit": "failed",
+    "collab.edit-from-second-browser": "failed",
+    "collab.edit-from-owner": "failed",
+    "collab.slide-added-appears": "failed",
+    "collab.presence-chips": "failed",
+    "collab.rename-reaches-second-browser": "failed",
+    "share.view-link-excludes-skipped-and-notes": "failed",
+    "share.present-link-excludes-skipped": "failed",
+    "share.copy-present-link": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "comments.on-title-placeholder": "passed",
+    "comments.on-slide": "passed",
+    "comments.on-object": "passed",
+    "comments.reply": "failed",
+    "comments.resolve": "failed",
+    "comments.toolbar-and-menu-routes": "passed",
+    "comments.reaches-second-browser": "failed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "failed",
+    "versions.restore": "failed",
+    "versions.undo-restore": "failed",
+    "export.download-submenu": "passed",
+    "export.pdf.dialog": "passed",
+    "export.pdf.skipped-check": "passed",
+    "export.pdf.close-paths": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.dialog": "failed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "export.print.preview-page": "passed",
+    "export.print.layout-with-notes": "failed",
+    "export.print.include-skipped": "failed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.print.print-button": "passed",
+    "export.print.close-preview": "passed",
+    "export.print.file-menu-after-close": "failed",
+    "export.print.menu-row": "passed",
+    "export.print.cmd-p": "passed",
+    "help.help-dialog": "passed",
+    "help.documentation-link": "failed",
+    "help.keyboard-shortcuts": "passed",
+    "help.search-the-menus": "passed",
+    "surface.menus.open-close-escape": "passed",
+    "surface.advanced.off-by-default": "passed",
+    "surface.advanced.on-shows-parked": "passed",
+    "surface.advanced.remembered": "failed",
+    "surface.parked-blocks-render": "passed",
+    "surface.cleanup": "failed",
+    "surface.parked-shortcut-unbound": "passed",
+    "surface.parked-block-core-rows": "passed"
+  },
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.root.redirect",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.new.draft",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.new.first-write",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.save-words",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.file-rename",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.read",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.search",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.open-title",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.open-recent",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.present",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "result": "failed",
+      "reason": "File > Move to trash: error: page.goto: Target page, context or browser has been closed",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.restore",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.access.paint",
+      "result": "failed",
+      "reason": "Error: page.evaluate: RangeError: \"deck.set\" needs Editing mode; switch View > Mode to Editing for it.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.notfound.page",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "decks.card.download",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.new.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.key",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.select.click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.skip.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.skip.context-two",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.notes.type",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.notes.reload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.clipboard.copy-paste-card",
+      "result": "failed",
+      "reason": "Error: the Paste row is enabled",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.title.single-click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.title.double-click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.title.type-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.home-end",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.delete",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.bold.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.underline.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.indent.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.indent.keys",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.link.present-click",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.clear-formatting",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "result": "failed",
+      "reason": "Format > Text > Size > Increase font size: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "result": "failed",
+      "reason": "Format > Align & indent > Left: align right",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "result": "failed",
+      "reason": "Format > Line & paragraph spacing > Double: leading null",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "result": "failed",
+      "reason": "type a long paragraph into a text box: pos.h 140 -> 140; content 132 css px in a frame of 98.699951171875",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "result": "failed",
+      "reason": "double click a word, Cmd+C, End, space, Cmd+V: copied \"text\"; \"Onboarding plan for Acme\"",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "result": "failed",
+      "reason": "Cmd+A, Cmd+C in one box, Cmd+V in another: copied \"\n\"; box B now \"me must grow to hold  every word of it without any overflow.\"",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "result": "not driven",
+      "reason": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "result": "failed",
+      "reason": "Edit > Find and replace, find, replace, Replace all: result \"Find and replaceFindReplace withMatch casePrevNextReplaceReplace all\"; replaced false",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "result": "failed",
+      "reason": "Cmd+Shift+H, type a query, Escape: result \"Find and replaceFindReplace withMatch casePrevNextReplaceReplace all\"; closed true",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.persistence.reload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.list.chords",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-options.panel",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.layout-runs.type",
+      "result": "failed",
+      "reason": "type into a table cell, a Ruled rows value, a Status board row name and the Big number; reload: error: locator.waitFor: Timeout 8000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.context.text-block",
+      "result": "failed",
+      "reason": "right click the text box, read the rows, Duplicate from it: rows ; missing edit.cut, edit.copy, edit.paste, arrange.order, arrange.centerOnPage, arrange.align, insert.link, format.textFitting, format.formatOptions, insert.comment; duplicated false",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.context.text-selection",
+      "result": "failed",
+      "reason": "right click a selected word, read the rows, Italic from it: rows ; missing edit.cut, edit.copy, edit.paste, format.text.italic, format.text.underline, format.text.strikethrough, insert.link, format.formatOptions; italic on \"text\" false",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "result": "failed",
+      "reason": "Format > Text > Size > Decrease font size: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "result": "failed",
+      "reason": "Format > Line & paragraph spacing > Single, then 1.15: single default; 1.15 null",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "result": "failed",
+      "reason": "Format > Align & indent > Center, Right, Increase indent, Decrease indent: center right; right right; indent in false, out false",
+      "source": "gate run 1"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.upload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.drop",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.paste",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.insert.toolbar-sources",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.delete.key",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.move.drag-frame",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.guides.centre-y",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.guides.centre-x",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.nudge.arrows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.rotate.ring",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.double-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.east-edge",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.south-edge",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.redo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.options.panel",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.options.transparency",
+      "result": "failed",
+      "reason": "drag the Transparency slider: slider value 0; opacity 1 -> 1; stored transparency false",
+      "source": "walk images"
+    },
+    {
+      "id": "images.options.reset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.replace.upload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.background.colour",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.background.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.background.upload-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.background.remove-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.background.reset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "result": "failed",
+      "reason": "Slideshow, then Escape: show true; picture false; ground in the editor rgba(242, 242, 240, 0.05), in the show null; back in the editor true",
+      "source": "walk images"
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "images.context.image",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.options.menu-row",
+      "result": "passed",
+      "reason": "",
+      "source": "walk images"
+    },
+    {
+      "id": "images.background.hex-field",
+      "result": "failed",
+      "reason": "Change background, type a hex colour in the field, Enter, Done: background {\"color\":\"plate\"}; preview while open rgba(0, 0, 0, 0); sheet paints rgba(0, 0, 0, 0)",
+      "source": "walk images"
+    },
+    {
+      "id": "arrange.select.click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.marquee",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.click-away",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.select.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "result": "failed",
+      "reason": "Arrange > Order > Bring to front on a1; Cmd+Z; Cmd+Shift+Z: z {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":0,\"a2\":1001,\"a3\":2002} -> undo false -> redo true",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "result": "failed",
+      "reason": "Arrange > Order > Send to back on a1; the toolbar Undo and Redo: z {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":0,\"a2\":1001,\"a3\":2002} -> undo false -> redo true",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "result": "failed",
+      "reason": "Arrange > Order > Bring forward on a1; Edit > Undo and Edit > Redo: error: locator.waitFor: Timeout 8000ms exceeded.",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "result": "failed",
+      "reason": "Arrange > Order > Send backward on a1: rank of a1 0 -> 0",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.order.keys",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.left",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.center",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.right",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.top",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.middle",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.bottom",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.center.vertical",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "result": "failed",
+      "reason": "copy an object, click another slide's card, Cmd+V: objects on the other slide 0 -> 4",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "result": "failed",
+      "reason": "View > Zoom > Zoom in from Fit: stage 71% -> 125% (expected 75); box \"125%\"",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.readout.fit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.readout.200",
+      "result": "failed",
+      "reason": "drag the se handle of a1 at 200: error: Cannot read properties of null (reading 'x')",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.default-look",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.select",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.move",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.rotate",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.fill.colour",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "result": "failed",
+      "reason": "the toolbar Border color, Border weight and Border dash, then Format > Borders & lines; Undo: error: locator.waitFor: Timeout 5000ms exceeded.",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.export.pdf",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "source": "gate run 1"
+    },
+    {
+      "id": "shapes.export.pptx",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 200000ms exceeded.\u001b[39m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "result": "failed",
+      "reason": "give the shape a fill, reload /edit and open /deck: fill rgb(18, 163, 122) -> after reload rgb(18, 163, 122) -> viewer undefined; path same false; objects shape,shape-2,shape-3 -> shape,shape-2,shape-3",
+      "source": "walk rest"
+    },
+    {
+      "id": "shapes.context.shape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "lines.end-handle",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "result": "failed",
+      "reason": "the line toolbar's Line color, Line weight, Line dash, Line start and Line end; Undo: error: locator.waitFor: Timeout 5000ms exceeded.",
+      "source": "walk rest"
+    },
+    {
+      "id": "lines.context.line",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "present.slideshow.button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.space",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.home",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.end",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.click-advances",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.counter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.laser",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "present.skipped-left-out",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.dialog.open",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.copy-view-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.copy-edit-link",
+      "result": "failed",
+      "reason": "Error: the share link https://turboslide-gikztnsgb-kl01s-projects.vercel.app/s/<token> opens",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "result": "failed",
+      "reason": "Error: Copy link on the edit row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "collab.presence-chips",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.copy-present-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.on-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.on-object",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.reply",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.resolve",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"\",\"busy\":0,\"snackbar\":\"Link copied\"}",
+      "source": "gate run 1"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "versions.pick",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "versions.name-current",
+      "result": "failed",
+      "reason": "Name current version, type a name, Save: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "source": "walk rest"
+    },
+    {
+      "id": "versions.restore",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "versions.undo-restore",
+      "result": "failed",
+      "reason": "Restore an earlier version, then Cmd+Z: restore changed the deck false (versionHistory.1.restore; snackbar none); Cmd+Z brought the current version back true",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.download-submenu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.pdf.dialog",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.pdf.skipped-check",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.pdf.close-paths",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.pdf.file",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.pptx.dialog",
+      "result": "failed",
+      "reason": "File > Download > Microsoft PowerPoint: Perfect checked null; Editable text checked null; labels PerfectEvery slide looks exactly like the screen; the text is there but not editable | Editable textText boxes you can edit in PowerPoint; layout within a few pixels | Include speaker notes | Include skipped slides | AppearanceLightDarkBoth | FontsExactStandard | Embed fonts | Headings as pictures",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.pptx.perfect",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.pptx.editable",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.print.preview-page",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.layout-with-notes",
+      "result": "failed",
+      "reason": "pick 1 slide with notes: layout notes; notes blocks 5; talk track shown false",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.include-skipped",
+      "result": "failed",
+      "reason": "Include skipped slides: pages 5 -> 5; marked 0",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "export.print.print-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.close-preview",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.file-menu-after-close",
+      "result": "failed",
+      "reason": "the first click on File after Close preview: File menu open after one click false",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.menu-row",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "export.print.cmd-p",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "help.help-dialog",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "help.documentation-link",
+      "result": "failed",
+      "reason": "read the Documentation link in Help > Help and GET it: https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md -> 429",
+      "source": "walk rest"
+    },
+    {
+      "id": "help.keyboard-shortcuts",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "help.search-the-menus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "surface.menus.open-close-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk rest"
+    },
+    {
+      "id": "surface.advanced.off-by-default",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.advanced.on-shows-parked",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.advanced.remembered",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.cleanup",
+      "result": "failed",
+      "reason": "Delete forever on /decks/trash, then GET /edit/<id> and /deck/<id>: error: apiRequestContext.get: Target page, context or browser has been closed",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    },
+    {
+      "id": "surface.parked-block-core-rows",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1"
+    }
+  ]
+}

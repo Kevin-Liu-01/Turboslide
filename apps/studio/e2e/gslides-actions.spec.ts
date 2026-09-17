@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // The integrator's spec for the fourteen actions of the Google Slides parity round (gslides-parity
 // SPEC 7.5; MILESTONES Integrator item 2) and the thirty six of round two (SPEC-2 section 3;
 // MILESTONES-2 Integrator item 4): every one resolves through window.turboslide.studio.invoke in
@@ -706,6 +708,9 @@ test.describe('the menus over the stage selection (VERIFICATION-2 findings 5 and
   }) => {
     test.setTimeout(120_000);
     await openEditor(page);
+    /* Group, Ungroup, Distribute and Change shape are parked (docs/FOCUS.md 3.2, 3.4): the rows are
+       asserted behind Tools > Advanced tools, never in the default view */
+    await setAdvancedTools(page, true);
     let revision = (await info(page)).revision;
     const write = async <T extends { revision: number }>(
       action: string,

@@ -1465,6 +1465,15 @@ export function toolBlockType(tool: Exclude<EditorTool, 'select'>): BlockType {
   }
 }
 
+/**
+ * The look a fresh closed shape carries (docs/FOCUS.md section 4, the row shapes.default-look): the
+ * theme's plate as the fill and the ink as the stroke, so the shape reads on both themes where the
+ * renderer's default, no fill under a hairline stroke, was a faint outline on the dark theme
+ * (audit-shapes row 35). Written on the block, so a stored shape renders as it did.
+ */
+export const SHAPE_DEFAULT_FILL = 'plate' as const;
+export const SHAPE_DEFAULT_STROKE = 'ink' as const;
+
 /** The block a tool inserts under `id`: an empty text box, a shape preset, a line kind, a rule, a table, a chart or a word art text. */
 export function toolBlock(tool: Exclude<EditorTool, 'select'>, id: string): Block {
   switch (tool.kind) {
@@ -1479,7 +1488,18 @@ export function toolBlock(tool: Exclude<EditorTool, 'select'>, id: string): Bloc
         outline: { color: 'ink', width: 1.5 },
       } as Block;
     case 'shape':
-      return { id, type: 'shape', shape: tool.shape };
+      /* a closed shape carries its look and an empty text run, so Enter or a double click has a
+         run to open (audit-shapes row 42: a fresh shape had none); a line kind drawn through the
+         shape tool keeps the renderer's ink stroke and takes no text */
+      if (isLineKind(tool.shape)) return { id, type: 'shape', shape: tool.shape };
+      return {
+        id,
+        type: 'shape',
+        shape: tool.shape,
+        fill: SHAPE_DEFAULT_FILL,
+        stroke: SHAPE_DEFAULT_STROKE,
+        text: '',
+      };
     case 'table':
       return emptyTable(id, tool.columns, tool.rows);
     case 'chart':
@@ -1636,6 +1656,21 @@ export function toolInsertMutation(
     ...(after !== undefined ? { after } : {}),
     block,
   };
+}
+
+/**
+ * The box a dropped, pasted or uploaded picture lands in (docs/FOCUS.md rank 18): `width` wide at
+ * the asset's own aspect, so nothing is stretched or cropped at the insert; a 16 by 9 box when the
+ * asset's size is unknown. The top left corner is the drop point, on the 8 px grid.
+ */
+export function droppedPictureBox(
+  at: Point,
+  width: number,
+  size: readonly [number, number] | undefined,
+): Box {
+  const [aw, ah] = size !== undefined && size[0] > 0 && size[1] > 0 ? size : [16, 9];
+  const h = Math.max(8, Math.round((width * ah) / aw));
+  return [Math.round(at.x / 8) * 8, Math.round(at.y / 8) * 8, width, h];
 }
 
 /** The default box of a block inserted without a click: centred on the sheet at the tool's default size (SPEC-2 6.2). */

@@ -1,0 +1,213 @@
+{
+  "base": "http://localhost:4362",
+  "deckId": "untitled-20260916-cxl9",
+  "ok": 22,
+  "failed": 2,
+  "notDriven": 0,
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 248811",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u3tqnml-1d4654 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u3tqnml-1d4654 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u3tqnml-1d4654 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u3tqnml-1d4654 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 2",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 2",
+    "A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={some",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4362/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 1",
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "id": "decks.new.first-write",
+      "step": "double click the title, type, Escape",
+      "expected": "the typed title is stored and the address moves to /edit",
+      "observed": "Q3 pipeline review for Acme; /edit/untitled-20260916-cxl9",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "id": "text.italic.toolbar-word",
+      "step": "double click a word, click Italic on the toolbar",
+      "expected": "the word alone is italic and the session stays open",
+      "observed": "selected \"terms\"; text \"Renewal [terms]{i} apply\"; editing true; focus p[contenteditable][run text/text]",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "id": "text.context.text-selection",
+      "step": "right click a selected word; Italic from the menu",
+      "expected": "the textSelection menu lists Italic and marks the word alone",
+      "observed": "menu ts-menu ts-context-menu is-textSelection; text \"Renewal [terms]{i} [apply]{i}\"",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "id": "text.link.cmd-k-enter",
+      "step": "double click a word, Cmd+K, type a URL, Enter",
+      "expected": "the word carries the link and no URL text lands",
+      "observed": "text \"[Renewal](https://example.com/acme) [terms]{i} [apply]{i}\"; shown \"Renewal terms apply\"; hrefs [\"https://example.com/acme\"]; editing true",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "id": "text.link.toolbar-button",
+      "step": "double click a word, click Insert link on the toolbar, type, Enter",
+      "expected": "the word carries the link",
+      "observed": "text \"[Renewal](https://example.com/acme) [terms](https://example.com/terms){i} [apply]{i}\"",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "id": "text.color.swatch-on-word",
+      "step": "double click a word, open Text color, pick a swatch",
+      "expected": "the word takes the colour",
+      "observed": "swatch toolbar.textColor.ink; text \"[Renewal](https://example.com/acme) [terms](https://example.com/terms){i} [apply]{i}\"",
+      "ok": false
+    },
+    {
+      "n": 7,
+      "id": "text.autofit.textbox-grow",
+      "step": "type a long paragraph into a text box",
+      "expected": "the box grows; no text overflows the frame",
+      "observed": "pos.h 64 -> mid 132 -> 132; content 132 sheet px; run bottom 374 vs box bottom 374 css px; autofit grow",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "id": "text.textbox.burst-reliability",
+      "step": "insert three text boxes in a row and type into each without pauses",
+      "expected": "no refused write, no doubled word",
+      "observed": "texts [\"Onboarding\",\"Renewal\",\"Expansion\"]; sync {\"seq\":21,\"revision\":11,\"pending\":0,\"retained\":6,\"tier\":\"memory\",\"transport\":\"sse\",\"connected\":true}; save \"null\"; dialog none",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "id": "text.list.chords",
+      "step": "select a text box, Cmd+Shift+8; select another, Cmd+Shift+7",
+      "expected": "a bulleted list, then a numbered list",
+      "observed": "A after 8: plain/bullet (null); B after 7: plain/number (null)",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "id": "text.list.bulleted-toolbar",
+      "step": "select a fresh text box, click the toolbar Bulleted list button",
+      "expected": "the box becomes a bulleted list",
+      "observed": "plain/bullet",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "id": "text.format-menu.text-fitting",
+      "step": "right click a text box; Text fitting",
+      "expected": "the row is listed and opens Format options",
+      "observed": "unselected 12 rows, selected 12 rows; panel panel.formatOptions",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "id": "text.format-options.panel",
+      "step": "Format > Format options with a text box selected",
+      "expected": "the panel opens with its text sections",
+      "observed": "{\"control\":\"panel.formatOptions\",\"text\":\"Format optionsSize & rotationWidthpxHeightpxRotate°PositionTop-leftCenterXpxYpxText fittingDo not autofitShrink text on overflowResize shape to fit textIndentat\"}",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "id": "arrange.keys.backspace-empty-selection",
+      "step": "click the empty canvas, press Backspace then Delete",
+      "expected": "nothing selected: no slide leaves",
+      "observed": "slides 8 -> 8; focus div",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "step": "fresh Title and body: Section header then Title and body; Ruled statement list then Title and table",
+      "expected": "only the second layout's placeholders remain",
+      "observed": "A: heading,paragraph,paragraph -> heading,paragraph,paragraph; B: heading,table",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "step": "apply Title slide to a fresh Title and body and read the snackbar",
+      "expected": "no dropped block warning",
+      "observed": "template title; snackbar null (a pick with nothing dropped raises no count)",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "id": "slides.reorder.cmd-shift-up-down",
+      "step": "focus a card, Cmd+Shift+Down then Cmd+Shift+Up",
+      "expected": "the card moves to the end, then to the beginning",
+      "observed": "down: 10 of 11; up: 0",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "id": "slides.reorder.menu-up-down-beginning",
+      "step": "Slide > Move slide > up, down, to beginning",
+      "expected": "each moves the current card",
+      "observed": "down 1, up 0, end 10, beginning 0",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "id": "slides.notes.view-menu-toggle",
+      "step": "View > Show speaker notes twice",
+      "expected": "the notes pane hides, then shows",
+      "observed": "true -> false -> true",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "id": "slides.context.empty-canvas",
+      "step": "right click the empty sheet; New slide from it",
+      "expected": "the eight rows are listed and a slide is added",
+      "observed": "ts-menu ts-context-menu is-emptyCanvas; rows Paste⌘V | New slide⌃M | Duplicate slide⌘D | Delete slide | Skip slide | Change background | Apply layout | Comment⌥⌘M; missing none; slides 11 -> 12",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "id": "slides.clipboard.copy-paste-card",
+      "step": "right click a card > Copy, right click another card > Paste",
+      "expected": "the slide lands after the second card with its text",
+      "observed": "slides 12 -> 13; added split-1-2 at 12 (target at 11); content copied true; added all split-1-2; source card split-1 (index 0), active before 11",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "id": "text.textbox.toolbar-button",
+      "step": "the toolbar Text box button, then a click on the sheet, type",
+      "expected": "a box that takes typing",
+      "observed": "text \"From the button\"",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "id": "text.clipboard.paste-without-formatting",
+      "step": "copy a bold word from one box, Cmd+Shift+V into another",
+      "expected": "plain text lands, no marks",
+      "observed": "source \"Bold word\"; dest \"Bold word\"; route Cmd+Shift+V pasted nothing in headless Chromium; plain Cmd+V then pasted \"Bold word\"",
+      "ok": false
+    },
+    {
+      "n": 23,
+      "id": "text.layout-runs.type",
+      "step": "type into a table cell of Title and table and the number of Big number, reload, read back",
+      "expected": "each reads back",
+      "observed": "cell 42 true; big 3.2M true (h/text)",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "id": "teardown",
+      "step": "File > Move to trash, Delete forever, GET 404",
+      "expected": "404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ]
+}

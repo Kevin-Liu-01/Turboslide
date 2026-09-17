@@ -1,0 +1,135 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "select-gestures",
+  "startedAt": "2026-09-16T12:40:06.260Z",
+  "steps": [
+    {
+      "name": "a1 centre clicked",
+      "blockId": "a1",
+      "selection": null,
+      "editing": null,
+      "dom": {
+        "chip": "Text box",
+        "handles": 0,
+        "moveHandles": [],
+        "active": "P.text ts-editing",
+        "editable": "true",
+        "editingRuns": 1,
+        "overlayBoxes": 0
+      },
+      "at": "2026-09-16T12:40:14.391Z"
+    },
+    {
+      "name": "a2 centre shift clicked",
+      "blockId": "a1",
+      "selection": null,
+      "editing": null,
+      "dom": {
+        "chip": "Text box",
+        "handles": 0,
+        "moveHandles": [],
+        "active": "P.text ts-editing",
+        "editable": "true",
+        "editingRuns": 1,
+        "overlayBoxes": 0
+      },
+      "at": "2026-09-16T12:40:14.912Z"
+    },
+    {
+      "name": "a1 edge clicked",
+      "blockId": "a1",
+      "selection": null,
+      "editing": null,
+      "dom": {
+        "chip": "Text box",
+        "handles": 0,
+        "moveHandles": [],
+        "active": "P.text ts-editing",
+        "editable": "true",
+        "editingRuns": 1,
+        "overlayBoxes": 0
+      },
+      "at": "2026-09-16T12:40:15.632Z"
+    },
+    {
+      "name": "a2 edge shift clicked",
+      "blockId": "a1",
+      "selection": null,
+      "editing": null,
+      "dom": {
+        "chip": "Text box",
+        "handles": 0,
+        "moveHandles": [],
+        "active": "P.text ts-editing",
+        "editable": "true",
+        "editingRuns": 1,
+        "overlayBoxes": 0
+      },
+      "at": "2026-09-16T12:40:16.141Z"
+    },
+    {
+      "name": "marquee over both",
+      "blockId": "mark",
+      "selection": null,
+      "editing": null,
+      "dom": {
+        "chip": "3 objects",
+        "handles": 10,
+        "moveHandles": ["handle.mark.move"],
+        "active": "DIV.ts-stagewrap ts-sheet ts-editor is-freeform",
+        "editable": null,
+        "editingRuns": 0,
+        "overlayBoxes": 0
+      },
+      "at": "2026-09-16T12:40:16.763Z"
+    },
+    {
+      "name": "right click at the run centre of the selected a1",
+      "menus": 0,
+      "rows": [],
+      "at": "2026-09-16T12:40:17.695Z"
+    },
+    {
+      "name": "right click at the frame edge of the selected a1",
+      "menus": 1,
+      "rows": [
+        "menu.edit.cut",
+        "menu.edit.copy",
+        "menu.edit.paste",
+        "menu.edit.delete",
+        "menu.edit.duplicate",
+        "menu.arrange.order"
+      ],
+      "at": "2026-09-16T12:40:18.518Z"
+    },
+    {
+      "name": "right click at the centre of the unselected a2",
+      "menus": 1,
+      "rows": [
+        "menu.edit.cut",
+        "menu.edit.copy",
+        "menu.edit.paste",
+        "menu.edit.delete",
+        "menu.edit.duplicate",
+        "menu.arrange.order"
+      ],
+      "at": "2026-09-16T12:40:19.642Z"
+    },
+    {
+      "name": "console errors",
+      "errors": [],
+      "at": "2026-09-16T12:40:19.849Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-c8eg",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T12:40:27.340Z"
+}

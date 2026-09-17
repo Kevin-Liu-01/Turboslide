@@ -104,12 +104,15 @@ async function settled(page: Page, timeout = 15_000): Promise<void> {
   await expect.poll(async () => (await status(page)).pending, { timeout }).toBe(0);
 }
 
-/** A click at the start or the end of a run's text opens the inline session there. */
+/**
+ * A double click on a run's text opens the inline session (AMENDMENTS.md A1: one click selects
+ * the object, the double click enters); the caret is then placed at the start or the end.
+ */
 async function caretIn(page: Page, blockId: string, where: 'start' | 'end'): Promise<void> {
   const run = page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="${blockId}/text"]`);
   const box = await run.boundingBox();
   expect(box).not.toBeNull();
-  await page.mouse.click(box!.x + 8, box!.y + 8);
+  await page.mouse.dblclick(box!.x + 8, box!.y + 8);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   // the caret at the very start or end of the run (Meta+End moves to the line's end in headless
   // Chromium on macOS, so the selection is placed by hand)
@@ -170,6 +173,24 @@ test.beforeAll(async ({ browser }) => {
     baseRevision: info.revision,
   });
   expect(copied.deckId).toBe(DECK);
+  /* the copy is restricted to A since the focus round (docs/FOCUS.md rank 1, ruling 2), so B
+     joins through one editor link A mints; B's first request is a page load, which mints B's own
+     anonymous cookie before any API call (a cookieless localhost request would be admitted as
+     the checkout holder, `agent:localhost`; b6.md R9) */
+  await pageA.goto(`/edit/${DECK}`);
+  await editorReady(pageA);
+  const access = await pageA.evaluate(
+    () => (window.turboslide!.studio.describe().state as { access?: { revision?: number } }).access,
+  );
+  const link = await invoke<{ url: string }>(pageA, 'share.createLink', {
+    id: DECK,
+    role: 'editor',
+    label: 'Edit link',
+    baseRevision: access?.revision ?? 0,
+  });
+  await pageB.goto('/decks');
+  await pageB.goto(link.url);
+  await pageB.waitForURL((url) => url.pathname === `/edit/${DECK}`);
 });
 
 test.afterAll(async () => {
@@ -402,7 +423,7 @@ test('a rejected op comes back to its author with its content', async () => {
   const item = pageA.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/0/text"]');
   const box = await item.boundingBox();
   expect(box).not.toBeNull();
-  await pageA.mouse.click(box!.x + 8, box!.y + 8);
+  await pageA.mouse.dblclick(box!.x + 8, box!.y + 8);
   await expect(item).toHaveAttribute('contenteditable', 'true');
   await pageA.keyboard.press('End');
   await pageA.keyboard.type(' kept words', { delay: 20 });
@@ -435,7 +456,6 @@ test('a rejected op comes back to its author with its content', async () => {
 });
 
 test('a position more than 2,000 entries behind resyncs and rebases the pending ops', async () => {
-  // 2,001 window API calls take 2.7 to 3 minutes on a loaded machine (one round trip each)
   test.setTimeout(480_000);
   await a.setOffline(true);
   await caretIn(pageA, PARA, 'end');
@@ -444,25 +464,38 @@ test('a position more than 2,000 entries behind resyncs and rebases the pending 
   await expect
     .poll(async () => (await status(pageA)).pending, { timeout: 5000 })
     .toBeGreaterThan(0);
-  // B lands 2,001 operations through the window API while A is away
+  // B lands 2,001 operations through the window API while A is away. A window API write answers
+  // the revision its checkpoint made (controller.tsx acknowledgedAbove, VERIFICATION F22), and on
+  // the memory tier that checkpoint comes 2 s after the last op, so 2,001 writes awaited one by
+  // one cost a checkpoint each (measured 2.2 s per write: 217 entries in the 480 s the test has;
+  // VERIFICATION C2-F17). The writes go in chunks of fifty issued together: every write of a
+  // chunk bases on the revision the page reports before the chunk, the room client flushes them
+  // as one batch of entries, and the chunk's answers arrive with its checkpoint. The entries
+  // are the same 2,001 text splices on one run, one stream entry each.
   await pageB.evaluate(async () => {
-    for (let i = 0; i < 2001; i += 1) {
+    const CHUNK = 50;
+    for (let done = 0; done < 2001; done += CHUNK) {
+      const count = Math.min(CHUNK, 2001 - done);
       const rev = window.turboslide!.studio.describe().state.revision as number;
-      await window.turboslide!.studio.invoke('slide.update', {
-        slideId: 'content-rule',
-        baseRevision: rev,
-        mutations: [
-          {
-            op: 'text.splice',
+      await Promise.all(
+        Array.from({ length: count }, () =>
+          window.turboslide!.studio.invoke('slide.update', {
             slideId: 'content-rule',
-            blockId: 'h',
-            path: '/text',
-            at: 0,
-            remove: 0,
-            insert: 'z',
-          },
-        ],
-      });
+            baseRevision: rev,
+            mutations: [
+              {
+                op: 'text.splice',
+                slideId: 'content-rule',
+                blockId: 'h',
+                path: '/text',
+                at: 0,
+                remove: 0,
+                insert: 'z',
+              },
+            ],
+          }),
+        ),
+      );
     }
   });
   await settled(pageB, 60_000);

@@ -74,7 +74,7 @@ export function HelpDialog() {
       </ol>
       <p>
         <a
-          href="/docs"
+          href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md"
           target="_blank"
           rel="noopener"
           data-control="dialog.help.docs"

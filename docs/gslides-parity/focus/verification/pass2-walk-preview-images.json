@@ -1,0 +1,4067 @@
+{
+  "mode": "core",
+  "base": "https://turboslide-gikztnsgb-kl01s-projects.vercel.app",
+  "matrix": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/focus/core-matrix.json",
+  "build": {
+    "version": 1,
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "settings",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "deckId": "untitled-20260916-zoi6",
+  "startedAt": "2026-09-16T18:48:04.732Z",
+  "ms": 179223,
+  "steps": 46,
+  "passed": 43,
+  "failed": 3,
+  "notDriven": 0,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "pageerror: Error: Minified React error #185; visit https://react.dev/errors/185 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+  ],
+  "parked": {
+    "commit": null,
+    "parkedFeatures": []
+  },
+  "core": {
+    "rows": 289,
+    "passed": 40,
+    "failed": 3,
+    "notDriven": 0,
+    "noStep": 246,
+    "results": {
+      "decks.new.draft": "passed",
+      "decks.new.first-write": "passed",
+      "decks.title.save-words": "passed",
+      "decks.title.rename-enter": "passed",
+      "decks.title.rename-escape": "passed",
+      "decks.title.rename-blur": "passed",
+      "decks.title.rename-empty": "passed",
+      "decks.title.file-rename": "passed",
+      "decks.title.tab-title-after-rename": "passed",
+      "decks.title.mark-to-list": "passed",
+      "decks.edit.reload-keeps-slide": "passed",
+      "images.insert.toolbar-sources": "passed",
+      "images.select.chip-handles-tail": "passed",
+      "images.delete.key": "passed",
+      "images.move.drag-frame": "passed",
+      "images.guides.edge-snap": "passed",
+      "images.guides.centre-y": "passed",
+      "images.guides.centre-x": "passed",
+      "images.nudge.arrows": "passed",
+      "images.resize.eight-handles": "passed",
+      "images.resize.eight-handles-shift": "passed",
+      "images.resize.edge-fill": "passed",
+      "images.resize.alt-centre": "passed",
+      "images.rotate.ring": "passed",
+      "images.crop.double-click": "passed",
+      "images.crop.east-edge": "passed",
+      "images.crop.south-edge": "passed",
+      "images.crop.enter": "passed",
+      "images.crop.undo": "passed",
+      "images.crop.redo": "passed",
+      "images.crop.menu-escape": "passed",
+      "images.crop.toolbar-escape-cancels": "passed",
+      "images.options.panel": "passed",
+      "images.options.transparency": "failed",
+      "images.options.reset": "passed",
+      "images.reset-image.menu": "passed",
+      "images.background.colour": "passed",
+      "images.background.toolbar": "passed",
+      "images.background.reset": "passed",
+      "images.present.picture-and-ground": "failed",
+      "images.context.image": "passed",
+      "images.options.menu-row": "passed",
+      "images.background.hex-field": "failed"
+    },
+    "table": [
+      {
+        "id": "decks.new.draft",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [1]
+      },
+      {
+        "id": "decks.new.first-write",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [2]
+      },
+      {
+        "id": "decks.title.save-words",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [3]
+      },
+      {
+        "id": "decks.title.rename-enter",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [4]
+      },
+      {
+        "id": "decks.title.rename-escape",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [5]
+      },
+      {
+        "id": "decks.title.rename-blur",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [6]
+      },
+      {
+        "id": "decks.title.rename-empty",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [7]
+      },
+      {
+        "id": "decks.title.file-rename",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [8]
+      },
+      {
+        "id": "decks.title.tab-title-after-rename",
+        "feature": "decks",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [9]
+      },
+      {
+        "id": "decks.title.mark-to-list",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [10]
+      },
+      {
+        "id": "decks.edit.reload-keeps-slide",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [11]
+      },
+      {
+        "id": "decks.editor.move-to-trash",
+        "feature": "decks",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.toolbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.arrow-layout",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.ctrl-m-card",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.ctrl-m-canvas",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.new.undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.cmd-d",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.undo-toolbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.undo-redo-keys",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.two-selected-cmd-d",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.duplicate.two-selected-menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.key",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.undo-snackbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.undo-cmd-z",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.menu-undo-redo",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.two-selected-key-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.two-selected-menu",
+        "feature": "slides",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.two-selected-edit-menu",
+        "feature": "slides",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.canvas-focus-undo",
+        "feature": "slides",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.delete.undo-redo-saved",
+        "feature": "slides",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.select.click",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.select.arrows-shift",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.select.shift-cmd-click",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.select.cmd-click-toggle",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.drag-above",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.drag-below",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.cmd-up-down",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.menu-to-end-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.undo-drag",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.two-selected-drag",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.skip.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.skip.context-two",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.skip.menu-unskip",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.skip.menu-two",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.picker-open-escape",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.title",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.opener",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.split",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.cols",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.title-only",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.one-column",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.statement",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.section-description",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.mood",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.big-number",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.blank",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.rows",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.plain",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.table",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.figure",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.pair",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.tiles",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.details",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.board",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.matrix",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.apply.closing",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.reopen-ring",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.context-apply",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.menu-apply-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.fresh-slide-two-picks-no-carry",
+        "feature": "slides",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.typed-title-round-trip",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.snackbar-counts-typed-only",
+        "feature": "slides",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.layout.undo-typed",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.notes.type",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.notes.per-slide",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.notes.resize-handle",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.notes.reload",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.counter.footer-and-cards",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.hash.click-and-reload",
+        "feature": "slides",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.menu-up-down-beginning",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.reorder.cmd-shift-up-down",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.notes.view-menu-toggle",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "slides.context.empty-canvas",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.title.single-click",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.title.double-click",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.title.type-escape",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.click-mid-word",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.home-end",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.shift-arrow-replace",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.shift-home-end",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.backspace-word",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.option-backspace",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.delete",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.caret.cmd-a",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.title.enter-commits",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.subtitle.double-click-type",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.subtitle.enter-new-line",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.subtitle.shift-enter",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.subtitle.arrows-backspace-join",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.subtitle.escape-commits",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.textbox.insert-click-type",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.textbox.insert-drag",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.textbox.burst-reliability",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.toolbar.swaps-on-select",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.fontsize.type-enter",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.fontsize.plus-minus",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.bold.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.bold.cmd-b-word",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.italic.toolbar-word",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.italic.cmd-i-word",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.underline.cmd-u-word",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.underline.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.strikethrough.cmd-shift-x",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.strikethrough.menu",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.color.swatch-on-word",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.align.toolbar-and-key",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.spacing.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.list.bulleted-toolbar",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.list.numbered-toolbar",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.list.bulleted-menu-preset",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.indent.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.indent.keys",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.link.cmd-k-enter",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.clear-formatting",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.rows-enabled",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.size-increase",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.align-left",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.spacing-double",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.text-fitting",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.autofit.title-wraps",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.autofit.textbox-grow",
+        "feature": "text",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.clipboard.within-box",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.clipboard.between-boxes",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.clipboard.paste-without-formatting",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.find-replace.replace-all",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.find-replace.shortcut",
+        "feature": "text",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.persistence.reload",
+        "feature": "text",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.list.numbered-menu-preset",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.list.chords",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.link.toolbar-button",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-options.panel",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.layout-runs.type",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.context.text-block",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.context.text-selection",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.size-decrease",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.spacing-single-1-15",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.format-menu.align-indent-rows",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "text.textbox.toolbar-button",
+        "feature": "text",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "images.insert.toolbar-sources",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [13]
+      },
+      {
+        "id": "images.select.chip-handles-tail",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [15]
+      },
+      {
+        "id": "images.delete.key",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [16]
+      },
+      {
+        "id": "images.move.drag-frame",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [17]
+      },
+      {
+        "id": "images.guides.edge-snap",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [19]
+      },
+      {
+        "id": "images.guides.centre-y",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [20]
+      },
+      {
+        "id": "images.guides.centre-x",
+        "feature": "images",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [21]
+      },
+      {
+        "id": "images.nudge.arrows",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [22]
+      },
+      {
+        "id": "images.resize.eight-handles",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [23]
+      },
+      {
+        "id": "images.resize.eight-handles-shift",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [24]
+      },
+      {
+        "id": "images.resize.edge-fill",
+        "feature": "images",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [26]
+      },
+      {
+        "id": "images.resize.alt-centre",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [25]
+      },
+      {
+        "id": "images.rotate.ring",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [27]
+      },
+      {
+        "id": "images.crop.double-click",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [28]
+      },
+      {
+        "id": "images.crop.east-edge",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [29]
+      },
+      {
+        "id": "images.crop.south-edge",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [30]
+      },
+      {
+        "id": "images.crop.enter",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [31]
+      },
+      {
+        "id": "images.crop.undo",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [32]
+      },
+      {
+        "id": "images.crop.redo",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [33]
+      },
+      {
+        "id": "images.crop.menu-escape",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [34]
+      },
+      {
+        "id": "images.crop.toolbar-escape-cancels",
+        "feature": "images",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [35]
+      },
+      {
+        "id": "images.options.panel",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [36]
+      },
+      {
+        "id": "images.options.transparency",
+        "feature": "images",
+        "today": "works",
+        "result": "failed",
+        "reason": "drag the Transparency slider: slider value 0; opacity 1 -> 1; stored transparency false",
+        "steps": [37]
+      },
+      {
+        "id": "images.options.reset",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [38]
+      },
+      {
+        "id": "images.reset-image.menu",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [39]
+      },
+      {
+        "id": "images.background.colour",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [42]
+      },
+      {
+        "id": "images.background.toolbar",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [43]
+      },
+      {
+        "id": "images.background.reset",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [46]
+      },
+      {
+        "id": "images.present.picture-and-ground",
+        "feature": "images",
+        "today": "works",
+        "result": "failed",
+        "reason": "Slideshow, then Escape: show true; picture false; ground in the editor rgba(242, 242, 240, 0.05), in the show null; back in the editor true",
+        "steps": [45]
+      },
+      {
+        "id": "images.context.image",
+        "feature": "images",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [41]
+      },
+      {
+        "id": "images.options.menu-row",
+        "feature": "images",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [40]
+      },
+      {
+        "id": "images.background.hex-field",
+        "feature": "images",
+        "today": "not driven",
+        "result": "failed",
+        "reason": "Change background, type a hex colour in the field, Enter, Done: background {\"color\":\"plate\"}; preview while open rgba(0, 0, 0, 0); sheet paints rgba(0, 0, 0, 0)",
+        "steps": [44]
+      },
+      {
+        "id": "arrange.select.click",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.shift-add",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.shift-remove",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.marquee",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.marquee-partial",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.click-away",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.cmd-a",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.select.escape",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.order.bring-to-front",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.order.send-to-back",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.order.bring-forward",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.order.send-backward",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.order.keys",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.left",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.center",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.right",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.top",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.middle",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.bottom",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.align.single-to-slide",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.center.horizontal",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.center.vertical",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.undo.toolbar-on-arrange",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.undo.menu-on-arrange",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.copy-paste",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.delete",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.undo-redo-delete",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.cut-paste-undo",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.menu-copy-paste",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.paste-after-new-slide-button",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.paste-with-filmstrip-focus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.clipboard.paste-keeps-position",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.duplicate.cmd-d",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.duplicate.menu-selects-copy",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.duplicate.nothing-selected",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.redo.after-undone-duplicate",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.keys.backspace-empty-selection",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.nudge.arrows",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.nudge.shift",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.nudge.undo",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.box-reads",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.menu-in",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.cmd-minus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.cmd-plus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.fit",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.type-percent",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.arrow-menu",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.cmd-0",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.menu-out",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.readout.fit",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.readout.200",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.selection-colour.light",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.selection-colour.dark",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.escape.text-then-selection",
+        "feature": "arrange",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.zoom.menu-presets",
+        "feature": "arrange",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "arrange.toolbar.select",
+        "feature": "arrange",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.rectangle-click",
+        "feature": "shapes",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.rounded-click",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.ellipse-click",
+        "feature": "shapes",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.rectangle-drag",
+        "feature": "shapes",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.ellipse-drag",
+        "feature": "shapes",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.insert.named-rows",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.default-look",
+        "feature": "shapes",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.select",
+        "feature": "shapes",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.move",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.resize.eight-handles",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.rotate",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.fill.colour",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.border.colour-weight-dash",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.text.type-align-bold",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.duplicate-delete-undo-redo",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.format-options.size-position",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.reload-and-viewer",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "shapes.context.shape",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "lines.insert.line-drag",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "lines.insert.arrow-drag",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "lines.end-handle",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "lines.tail.colour-weight-dash-ends",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "lines.context.line",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "share.file-menu-share-with-others",
+        "feature": "share",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "versions.open-from-last-edit",
+        "feature": "versions",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "versions.pick",
+        "feature": "versions",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "versions.name-current",
+        "feature": "versions",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "versions.undo-restore",
+        "feature": "versions",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.download-submenu",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.pdf.dialog",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.pdf.skipped-check",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.pdf.close-paths",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.pptx.dialog",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.preview-page",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.layout-with-notes",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.include-skipped",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.print-button",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.close-preview",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.file-menu-after-close",
+        "feature": "export",
+        "today": "flaky",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.menu-row",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "export.print.cmd-p",
+        "feature": "export",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "help.help-dialog",
+        "feature": "help",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "help.documentation-link",
+        "feature": "help",
+        "today": "broken",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "help.keyboard-shortcuts",
+        "feature": "help",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "help.search-the-menus",
+        "feature": "help",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "surface.menus.open-close-escape",
+        "feature": "surface",
+        "today": "not driven",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      },
+      {
+        "id": "surface.cleanup",
+        "feature": "surface",
+        "today": "works",
+        "result": "no step",
+        "reason": "the area was not run (--only)",
+        "steps": []
+      }
+    ],
+    "verdict": {
+      "ok": false,
+      "failures": [
+        {
+          "id": "decks.editor.move-to-trash",
+          "feature": "decks",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.toolbar",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.arrow-layout",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.menu",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.ctrl-m-card",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.ctrl-m-canvas",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.context",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.new.undo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.context",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.menu",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.cmd-d",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.undo-toolbar",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.undo-redo-keys",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.two-selected-cmd-d",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.duplicate.two-selected-menu",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.key",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.undo-snackbar",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.context",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.undo-cmd-z",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.menu-undo-redo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.two-selected-key-undo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.two-selected-menu",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.two-selected-edit-menu",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.canvas-focus-undo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.delete.undo-redo-saved",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.select.click",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.select.arrows-shift",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.select.shift-cmd-click",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.select.cmd-click-toggle",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.drag-above",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.drag-below",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.cmd-up-down",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.menu-to-end-undo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.undo-drag",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.two-selected-drag",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.skip.context",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.skip.context-two",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.skip.menu-unskip",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.skip.menu-two",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.picker-open-escape",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.title",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.opener",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.split",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.cols",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.title-only",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.one-column",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.statement",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.section-description",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.mood",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.big-number",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.blank",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.rows",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.plain",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.table",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.figure",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.pair",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.tiles",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.details",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.board",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.matrix",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.apply.closing",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.reopen-ring",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.context-apply",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.menu-apply-undo",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.fresh-slide-two-picks-no-carry",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.typed-title-round-trip",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.snackbar-counts-typed-only",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.layout.undo-typed",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.notes.type",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.notes.per-slide",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.notes.resize-handle",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.notes.reload",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.counter.footer-and-cards",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.hash.click-and-reload",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.menu-up-down-beginning",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.reorder.cmd-shift-up-down",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.notes.view-menu-toggle",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "slides.context.empty-canvas",
+          "feature": "slides",
+          "result": "not driven"
+        },
+        {
+          "id": "text.title.single-click",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.title.double-click",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.title.type-escape",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.click-mid-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.home-end",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.shift-arrow-replace",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.shift-home-end",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.backspace-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.option-backspace",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.delete",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.caret.cmd-a",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.title.enter-commits",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.subtitle.double-click-type",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.subtitle.enter-new-line",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.subtitle.shift-enter",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.subtitle.arrows-backspace-join",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.subtitle.escape-commits",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.textbox.insert-click-type",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.textbox.insert-drag",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.textbox.burst-reliability",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.toolbar.swaps-on-select",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.fontsize.type-enter",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.fontsize.plus-minus",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.bold.toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.bold.cmd-b-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.italic.toolbar-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.italic.cmd-i-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.underline.cmd-u-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.underline.toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.strikethrough.cmd-shift-x",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.strikethrough.menu",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.color.swatch-on-word",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.align.toolbar-and-key",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.spacing.toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.list.bulleted-toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.list.numbered-toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.list.bulleted-menu-preset",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.indent.toolbar",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.indent.keys",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.link.cmd-k-enter",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.clear-formatting",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.rows-enabled",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.size-increase",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.align-left",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.spacing-double",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.text-fitting",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.autofit.title-wraps",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.autofit.textbox-grow",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.clipboard.within-box",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.clipboard.between-boxes",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.find-replace.replace-all",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.find-replace.shortcut",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.persistence.reload",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.list.numbered-menu-preset",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.list.chords",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.link.toolbar-button",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-options.panel",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.layout-runs.type",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.context.text-block",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.context.text-selection",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.size-decrease",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.spacing-single-1-15",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.format-menu.align-indent-rows",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "text.textbox.toolbar-button",
+          "feature": "text",
+          "result": "not driven"
+        },
+        {
+          "id": "images.options.transparency",
+          "feature": "images",
+          "result": "failed"
+        },
+        {
+          "id": "images.present.picture-and-ground",
+          "feature": "images",
+          "result": "failed"
+        },
+        {
+          "id": "images.background.hex-field",
+          "feature": "images",
+          "result": "failed"
+        },
+        {
+          "id": "arrange.select.click",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.shift-add",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.shift-remove",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.marquee",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.marquee-partial",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.click-away",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.cmd-a",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.select.escape",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.order.bring-to-front",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.order.send-to-back",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.order.bring-forward",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.order.send-backward",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.order.keys",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.left",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.center",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.right",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.top",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.middle",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.bottom",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.align.single-to-slide",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.center.horizontal",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.center.vertical",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.undo.toolbar-on-arrange",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.undo.menu-on-arrange",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.copy-paste",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.delete",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.undo-redo-delete",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.cut-paste-undo",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.menu-copy-paste",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.paste-after-new-slide-button",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.paste-with-filmstrip-focus",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.clipboard.paste-keeps-position",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.duplicate.cmd-d",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.duplicate.menu-selects-copy",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.duplicate.nothing-selected",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.redo.after-undone-duplicate",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.keys.backspace-empty-selection",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.nudge.arrows",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.nudge.shift",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.nudge.undo",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.box-reads",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.menu-in",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.cmd-minus",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.cmd-plus",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.fit",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.type-percent",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.arrow-menu",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.cmd-0",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.menu-out",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.readout.fit",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.readout.200",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.selection-colour.light",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.selection-colour.dark",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.escape.text-then-selection",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.zoom.menu-presets",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "arrange.toolbar.select",
+          "feature": "arrange",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.rectangle-click",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.rounded-click",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.ellipse-click",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.rectangle-drag",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.ellipse-drag",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.insert.named-rows",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.default-look",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.select",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.move",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.resize.eight-handles",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.rotate",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.fill.colour",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.border.colour-weight-dash",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.text.type-align-bold",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.duplicate-delete-undo-redo",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.format-options.size-position",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.reload-and-viewer",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.context.shape",
+          "feature": "shapes",
+          "result": "not driven"
+        },
+        {
+          "id": "lines.insert.line-drag",
+          "feature": "lines",
+          "result": "not driven"
+        },
+        {
+          "id": "lines.insert.arrow-drag",
+          "feature": "lines",
+          "result": "not driven"
+        },
+        {
+          "id": "lines.end-handle",
+          "feature": "lines",
+          "result": "not driven"
+        },
+        {
+          "id": "lines.tail.colour-weight-dash-ends",
+          "feature": "lines",
+          "result": "not driven"
+        },
+        {
+          "id": "lines.context.line",
+          "feature": "lines",
+          "result": "not driven"
+        },
+        {
+          "id": "share.file-menu-share-with-others",
+          "feature": "share",
+          "result": "not driven"
+        },
+        {
+          "id": "versions.open-from-last-edit",
+          "feature": "versions",
+          "result": "not driven"
+        },
+        {
+          "id": "versions.pick",
+          "feature": "versions",
+          "result": "not driven"
+        },
+        {
+          "id": "versions.name-current",
+          "feature": "versions",
+          "result": "not driven"
+        },
+        {
+          "id": "versions.undo-restore",
+          "feature": "versions",
+          "result": "not driven"
+        },
+        {
+          "id": "export.download-submenu",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.pdf.dialog",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.pdf.skipped-check",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.pdf.close-paths",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.pptx.dialog",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.preview-page",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.layout-with-notes",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.include-skipped",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.close-preview",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.file-menu-after-close",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.menu-row",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "export.print.cmd-p",
+          "feature": "export",
+          "result": "not driven"
+        },
+        {
+          "id": "help.help-dialog",
+          "feature": "help",
+          "result": "not driven"
+        },
+        {
+          "id": "help.documentation-link",
+          "feature": "help",
+          "result": "not driven"
+        },
+        {
+          "id": "help.keyboard-shortcuts",
+          "feature": "help",
+          "result": "not driven"
+        },
+        {
+          "id": "help.search-the-menus",
+          "feature": "help",
+          "result": "not driven"
+        },
+        {
+          "id": "surface.menus.open-close-escape",
+          "feature": "surface",
+          "result": "not driven"
+        },
+        {
+          "id": "surface.cleanup",
+          "feature": "surface",
+          "result": "not driven"
+        }
+      ]
+    },
+    "untaggedFailures": [],
+    "exitCode": 1
+  },
+  "rows": [
+    {
+      "n": 1,
+      "id": "decks.new.draft",
+      "step": "open /new",
+      "expected": "revision 0, Not saved yet, the title placeholder prompts",
+      "observed": "untitled-20260916-zoi6; revision 0; save words \"Not saved yet\"; prompts 2; runs heading/text,lead/text",
+      "ok": true,
+      "ms": 661
+    },
+    {
+      "n": 2,
+      "id": "decks.new.first-write",
+      "step": "double click the title, type, Escape",
+      "expected": "revision 1, the address moves to /edit/<id>, the save words read Saving then All changes saved",
+      "observed": "editing true; /edit/untitled-20260916-zoi6; revision 1; words seen Not saved yet > Saving… > All changes saved; final \"All changes saved\"; stored true",
+      "ok": true,
+      "ms": 4526
+    },
+    {
+      "n": 3,
+      "id": "decks.title.save-words",
+      "step": "a second edit",
+      "expected": "the save words turn to Saving and back to All changes saved",
+      "observed": "words All changes saved > Saving… > All changes saved; final \"All changes saved\"",
+      "ok": true,
+      "ms": 3117
+    },
+    {
+      "n": 4,
+      "id": "decks.title.rename-enter",
+      "step": "click the deck name, type, Enter",
+      "expected": "the name and deck.info title change",
+      "observed": "\"Pipeline review: Acme, Q3 2026\" -> shown \"Acme renewal deck\", stored \"Acme renewal deck\"",
+      "ok": true,
+      "ms": 2352
+    },
+    {
+      "n": 5,
+      "id": "decks.title.rename-escape",
+      "step": "click the deck name, type, Escape",
+      "expected": "the name is restored",
+      "observed": "before \"Acme renewal deck\"; shown \"Acme renewal deck\"; stored \"Acme renewal deck\"",
+      "ok": true,
+      "ms": 2232
+    },
+    {
+      "n": 6,
+      "id": "decks.title.rename-blur",
+      "step": "click the deck name, type, click the canvas",
+      "expected": "the typed name is kept",
+      "observed": "stored \"Acme renewal deck v2\"; shown \"Acme renewal deck v2\"",
+      "ok": true,
+      "ms": 2789
+    },
+    {
+      "n": 7,
+      "id": "decks.title.rename-empty",
+      "step": "clear the deck name and press Enter",
+      "expected": "the old name comes back",
+      "observed": "before \"Acme renewal deck v2\"; shown \"Acme renewal deck v2\"; stored \"Acme renewal deck v2\"",
+      "ok": true,
+      "ms": 1820
+    },
+    {
+      "n": 8,
+      "id": "decks.title.file-rename",
+      "step": "File > Rename",
+      "expected": "the name field takes the focus",
+      "observed": "field open true; focus input[deck.name]",
+      "ok": true,
+      "ms": 1856
+    },
+    {
+      "n": 9,
+      "id": "decks.title.tab-title-after-rename",
+      "step": "rename the deck and read document.title",
+      "expected": "the browser tab title reads the new name without a reload",
+      "observed": "document.title \"Acme renewal deck v3, editor, Turboslide\"",
+      "ok": true,
+      "ms": 2574
+    },
+    {
+      "n": 10,
+      "id": "decks.title.mark-to-list",
+      "step": "click the Turboslide mark",
+      "expected": "/decks opens",
+      "observed": "/decks; the deck's card listed true",
+      "ok": true,
+      "ms": 1673
+    },
+    {
+      "n": 11,
+      "id": "decks.edit.reload-keeps-slide",
+      "step": "reload /edit/<id>#s/<slide>",
+      "expected": "the same slide is current after the reload",
+      "observed": "hash before reload #s/split-1; active after split-1; hash after #s/split-1",
+      "ok": true,
+      "ms": 2492
+    },
+    {
+      "n": 12,
+      "step": "setup: a slide for the pictures",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-1",
+      "ok": true,
+      "ms": 1085
+    },
+    {
+      "n": 13,
+      "id": "images.insert.toolbar-sources",
+      "step": "click the toolbar Image button",
+      "expected": "the menu lists Upload from computer",
+      "observed": "rows menu.insert.image.upload",
+      "ok": true,
+      "ms": 571
+    },
+    {
+      "n": 14,
+      "step": "setup: a picture on the slide",
+      "expected": "asset.add and block.insert through the window API",
+      "observed": "shot shot-core-mu4gew54 at 400,250 240x160",
+      "ok": true,
+      "ms": 1187
+    },
+    {
+      "n": 15,
+      "id": "images.select.chip-handles-tail",
+      "step": "click the picture",
+      "expected": "chip Image, eight handles, the ring and the picture tail",
+      "observed": "chip \"Image\"; handles nw,n,ne,e,se,s,sw,w; tail true; ring true",
+      "ok": true,
+      "ms": 447
+    },
+    {
+      "n": 16,
+      "id": "images.delete.key",
+      "step": "Delete, then Cmd+Z",
+      "expected": "the picture leaves and comes back",
+      "observed": "gone true; back true",
+      "ok": true,
+      "ms": 2217
+    },
+    {
+      "n": 17,
+      "id": "images.move.drag-frame",
+      "step": "drag the picture by its frame edge by 120 by 80 px",
+      "expected": "pos moves by 120, 80 within the snap",
+      "observed": "moved 124,80",
+      "ok": true,
+      "ms": 3471
+    },
+    {
+      "n": 18,
+      "step": "setup: a second object for the guides",
+      "expected": "a text box placed through the window API",
+      "observed": "guide-box",
+      "ok": true,
+      "ms": 673
+    },
+    {
+      "n": 19,
+      "id": "images.guides.edge-snap",
+      "step": "drag the picture so its left edge nears the other object's left edge",
+      "expected": "a guide shows and the edge snaps",
+      "observed": "guides during 2; x 1000 vs the other's 1000",
+      "ok": true,
+      "ms": 4048
+    },
+    {
+      "n": 20,
+      "id": "images.guides.centre-y",
+      "step": "drag the picture near the slide's horizontal centre",
+      "expected": "the centre snaps to 450",
+      "observed": "centre y 450",
+      "ok": true,
+      "ms": 3885
+    },
+    {
+      "n": 21,
+      "id": "images.guides.centre-x",
+      "step": "drag the picture within 3 px of the slide's vertical centre",
+      "expected": "the centre snaps to 800",
+      "observed": "centre x 800",
+      "ok": true,
+      "ms": 3220
+    },
+    {
+      "n": 22,
+      "id": "images.nudge.arrows",
+      "step": "ArrowRight, Shift+ArrowRight, ArrowDown",
+      "expected": "1 px, 10 px, 1 px",
+      "observed": "dx 1, 10; dy 1",
+      "ok": true,
+      "ms": 5435
+    },
+    {
+      "n": 23,
+      "id": "images.resize.eight-handles",
+      "step": "drag each of the eight handles plain",
+      "expected": "the box, the readout during and after, the chip and Undo",
+      "observed": "ok nw plain: 400,250 240x160 -> 340,210 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok n plain: 400,250 240x160 -> 400,210 240x200 (expected 400,210 240x200); readout during \"240 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok ne plain: 400,250 240x160 -> 400,210 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok e plain: 400,250 240x160 -> 400,250 300x160 (expected 400,250 300x160); readout during \"300 × 160\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok se plain: 400,250 240x160 -> 400,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok s plain: 400,250 240x160 -> 400,250 240x200 (expected 400,250 240x200); readout during \"240 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok sw plain: 400,250 240x160 -> 340,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok w plain: 400,250 240x160 -> 340,250 300x160 (expected 340,250 300x160); readout during \"300 × 160\", after none; chip \"Image\" -> \"Image\"; undo restored true",
+      "ok": true,
+      "ms": 26205
+    },
+    {
+      "n": 24,
+      "id": "images.resize.eight-handles-shift",
+      "step": "drag each of the eight handles with Shift",
+      "expected": "the box, the readout during and after, the chip and Undo",
+      "observed": "ok nw shift: 400,250 240x160 -> 340,210 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok n shift: 400,250 240x160 -> 400,210 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok ne shift: 400,250 240x160 -> 400,210 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok e shift: 400,250 240x160 -> 400,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok se shift: 400,250 240x160 -> 400,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok s shift: 400,250 240x160 -> 400,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok sw shift: 400,250 240x160 -> 340,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true | ok w shift: 400,250 240x160 -> 340,250 300x200 (ratio 1.500 -> 1.500); readout during \"300 × 200\", after none; chip \"Image\" -> \"Image\"; undo restored true",
+      "ok": true,
+      "ms": 26102
+    },
+    {
+      "n": 25,
+      "id": "images.resize.alt-centre",
+      "step": "a drag with Alt on the se handle",
+      "expected": "the box grows from its centre",
+      "observed": "se alt: 400,250 240x160 -> 340,210 360x240 (ratio 1.500 -> 1.500, centre kept); readout during \"360 × 240\", after none; chip \"Image\" -> \"Image\"; undo restored true",
+      "ok": true,
+      "ms": 3684
+    },
+    {
+      "n": 26,
+      "id": "images.resize.edge-fill",
+      "step": "after an n, e and s drag the picture fills its box",
+      "expected": "the img fills the frame after each edge drag",
+      "observed": "n: box 169x141 img 169x141 fills true | e: box 212x113 img 212x113 fills true | s: box 169x141 img 169x141 fills true",
+      "ok": true,
+      "ms": 10679
+    },
+    {
+      "n": 27,
+      "id": "images.rotate.ring",
+      "step": "drag the ring about 35 degrees",
+      "expected": "a degree readout during, none after; Undo restores",
+      "observed": "rotate 35; readout during \"35°\", after none; after undo 0",
+      "ok": true,
+      "ms": 3625
+    },
+    {
+      "n": 28,
+      "id": "images.crop.double-click",
+      "step": "double click the picture",
+      "expected": "crop mode with the dimmed picture and eight crop handles",
+      "observed": "crop true; crop handles 8; dimmed true",
+      "ok": true,
+      "ms": 1242
+    },
+    {
+      "n": 29,
+      "id": "images.crop.east-edge",
+      "step": "drag the east crop edge inward",
+      "expected": "the frame narrows and the full picture stays",
+      "observed": "frame 169.2 -> 133.9; full 169.2 -> 169.2",
+      "ok": true,
+      "ms": 1345
+    },
+    {
+      "n": 30,
+      "id": "images.crop.south-edge",
+      "step": "drag the south crop edge inward",
+      "expected": "the frame shortens",
+      "observed": "frame 112.8 -> 91.6; full 112.8 -> 112.8",
+      "ok": true,
+      "ms": 1440
+    },
+    {
+      "n": 31,
+      "id": "images.crop.enter",
+      "step": "Enter",
+      "expected": "the trim is written and the box shrinks to the frame",
+      "observed": "crop mode false; 400,250 240x160 -> 400,250 190x130; stored crop true",
+      "ok": true,
+      "ms": 552
+    },
+    {
+      "n": 32,
+      "id": "images.crop.undo",
+      "step": "Cmd+Z",
+      "expected": "the trim leaves and the box is restored",
+      "observed": "400,250 240x160; stored crop false",
+      "ok": true,
+      "ms": 1315
+    },
+    {
+      "n": 33,
+      "id": "images.crop.redo",
+      "step": "Cmd+Shift+Z",
+      "expected": "the crop comes back",
+      "observed": "400,250 190x130",
+      "ok": true,
+      "ms": 1131
+    },
+    {
+      "n": 34,
+      "id": "images.crop.menu-escape",
+      "step": "Format > Image > Crop image, then Escape",
+      "expected": "crop mode enters and leaves with no write",
+      "observed": "crop on true; off after Escape true; revision 70 -> 70",
+      "ok": true,
+      "ms": 3011
+    },
+    {
+      "n": 35,
+      "id": "images.crop.toolbar-escape-cancels",
+      "step": "the toolbar Crop image button, an edge drag, Escape",
+      "expected": "Escape cancels the drag and writes nothing",
+      "observed": "crop on true; pos 400,250 190x130 -> 400,250 190x130; revision 70 -> 70",
+      "ok": true,
+      "ms": 3227
+    },
+    {
+      "n": 36,
+      "id": "images.options.panel",
+      "step": "the toolbar Image options button",
+      "expected": "Format options opens with the Picture and Adjustments sections",
+      "observed": "sections size, position, picture, adjustments",
+      "ok": true,
+      "ms": 1201
+    },
+    {
+      "n": 37,
+      "id": "images.options.transparency",
+      "step": "drag the Transparency slider",
+      "expected": "the picture fades on the sheet",
+      "observed": "slider value 0; opacity 1 -> 1; stored transparency false",
+      "ok": false,
+      "ms": 9110
+    },
+    {
+      "n": 38,
+      "id": "images.options.reset",
+      "step": "Adjustments > Reset",
+      "expected": "the adjustments clear",
+      "observed": "opacity 1; stored transparency false",
+      "ok": true,
+      "ms": 999
+    },
+    {
+      "n": 39,
+      "id": "images.reset-image.menu",
+      "step": "Format > Image > Reset image",
+      "expected": "the trim leaves",
+      "observed": "stored crop false; 400,250 190x130",
+      "ok": true,
+      "ms": 2953
+    },
+    {
+      "n": 40,
+      "id": "images.options.menu-row",
+      "step": "Format > Image > Image options",
+      "expected": "Format options opens at the Picture section",
+      "observed": "picture section open true",
+      "ok": true,
+      "ms": 3283
+    },
+    {
+      "n": 41,
+      "id": "images.context.image",
+      "step": "right click the picture, read the rows, Crop image from it",
+      "expected": "the rows and crop mode",
+      "observed": "rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, insert.comment; missing none; crop mode true",
+      "ok": true,
+      "ms": 1716
+    },
+    {
+      "n": 42,
+      "id": "images.background.colour",
+      "step": "Slide > Change background, a colour swatch, Done",
+      "expected": "the slide paints the colour",
+      "observed": "background {\"color\":\"plate\"}; sheet paints rgba(0, 0, 0, 0)",
+      "ok": true,
+      "ms": 2950
+    },
+    {
+      "n": 43,
+      "id": "images.background.toolbar",
+      "step": "the toolbar Background button",
+      "expected": "the same dialog opens",
+      "observed": "shown true; closed true",
+      "ok": true,
+      "ms": 825
+    },
+    {
+      "n": 44,
+      "id": "images.background.hex-field",
+      "step": "Change background, type a hex colour in the field, Enter, Done",
+      "expected": "the slide paints it and slide.background holds it",
+      "observed": "background {\"color\":\"plate\"}; preview while open rgba(0, 0, 0, 0); sheet paints rgba(0, 0, 0, 0)",
+      "ok": false,
+      "ms": 11434
+    },
+    {
+      "n": 45,
+      "id": "images.present.picture-and-ground",
+      "step": "Slideshow, then Escape",
+      "expected": "the show shows the picture on the coloured ground and Escape returns",
+      "observed": "show true; picture false; ground in the editor rgba(242, 242, 240, 0.05), in the show null; back in the editor true",
+      "ok": false,
+      "ms": 2182
+    },
+    {
+      "n": 46,
+      "id": "images.background.reset",
+      "step": "Change background > Reset to theme",
+      "expected": "the colour clears",
+      "observed": "background null",
+      "ok": true,
+      "ms": 2722
+    }
+  ]
+}

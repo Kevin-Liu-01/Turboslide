@@ -566,9 +566,11 @@ export function freeNudgeMutations(
 /**
  * Align the selected blocks on one edge or center (schema alignPositions, as block.align writes
  * it): against their union for several blocks, the sheet for one (SPEC-2 0.80), or the box `to`
- * names; the shared line snaps once to the guides and the grid, as the store action's block.align
- * does by default; a rotated object aligns by its bounding box (0.107). Only the blocks that move
- * get a mutation.
+ * names; a rotated object aligns by its bounding box (0.107). The shared line is the extreme
+ * object's own edge, never snapped to the guides or the grid: Google's Align > Top lands every
+ * top on the topmost object's top, and a snap moved the reference object itself (docs/FOCUS.md
+ * rank 14; audit-arrange rows 23 and 25, tops 150, 240, 500 landing on 152). Only the blocks that
+ * move get a mutation.
  */
 export function alignMutations(
   slide: Slide,
@@ -583,7 +585,7 @@ export function alignMutations(
     rows.map((row) => row.pos),
     edge,
     to,
-    true,
+    false,
   );
   return positionMutations(slide, rows, next);
 }

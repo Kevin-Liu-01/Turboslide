@@ -8,8 +8,12 @@ import {
   boldOfRange,
   colorFromCss,
   colorRange,
+  linkExtentAt,
+  linkOfRange,
+  linkRange,
   marksAt,
   marksOf,
+  normalizeLinkInput,
   rangeHasMark,
   setBoldRange,
   toggleMark,
@@ -82,6 +86,16 @@ describe('toggling marks over a range', () => {
     expect(marksOf('[Hello]{i} world', [0, 5])).toEqual({ i: true });
     expect(marksOf('[Hello]{i} world', [0, 11])).toEqual({});
   });
+
+  it('clamps a range past the text instead of throwing (C2-F22)', () => {
+    // the DOM offsets count trailing white space the trimmed canonical text no longer has, so a
+    // Cmd+A returns a range past it; the read clamps rather than throwing "The range 0:30 is
+    // outside a text of 27 characters"
+    expect(() => marksOf('[Hello]{i} world', [0, 30])).not.toThrow();
+    expect(marksOf('[Hello]{i} world', [0, 30])).toEqual({});
+    expect(marksOf('[Hello]{i}', [0, 30])).toEqual({ i: true });
+    expect(marksOf('Hello', [10, 12])).toEqual(marksAt('Hello', 5));
+  });
 });
 
 describe('reading the elements back (7.2)', () => {
@@ -120,5 +134,57 @@ describe('reading the elements back (7.2)', () => {
     expect(colorFromCss('rgb(18, 163, 122)')).toBe('green');
     expect(colorFromCss('var(--nothing)')).toBeNull();
     expect(colorFromCss('blue')).toBeNull();
+  });
+});
+
+describe('links on the run model (docs/FOCUS.md section 5 rank 2)', () => {
+  it('writes a link over a range and leaves the letters around it alone', () => {
+    const text = 'See the proposal online';
+    const linked = linkRange(text, [8, 16], 'https://example.com/acme');
+    expect(linked).toBe('See the [proposal](https://example.com/acme) online');
+    expect(
+      parseText(linked)
+        .map((run) => run.t)
+        .join(''),
+    ).toBe(text);
+  });
+
+  it('clears a link with null and reads the one link of a range', () => {
+    const linked = 'See the [proposal](https://example.com/acme) online';
+    expect(linkOfRange(linked, [8, 16])).toBe('https://example.com/acme');
+    expect(linkOfRange(linked, [4, 16])).toBeNull();
+    expect(linkOfRange(linked, [0, 3])).toBeNull();
+    expect(linkRange(linked, [8, 16], null)).toBe('See the proposal online');
+  });
+
+  it('keeps the other marks and never links the GT mark', () => {
+    const text = 'Ship *fast* with GT today';
+    const linked = linkRange(text, [0, text.length], 'https://generaltranslation.com');
+    const runs = parseText(linked);
+    expect(runs.find((run) => run.gt)?.link).toBeUndefined();
+    expect(runs.filter((run) => !run.gt).every((run) => run.link !== undefined)).toBe(true);
+    expect(runs.find((run) => run.t === 'fast')?.b).toBe(true);
+  });
+
+  it('finds the whole extent of the link around a caret across its marked runs, and none where the run has no link', () => {
+    const linked = 'See [the ](https://a.example)[proposal](https://a.example){i} online';
+    expect(linkExtentAt(linked, 6)).toEqual([4, 16]);
+    expect(linkExtentAt(linked, 16)).toEqual([4, 16]);
+    expect(linkExtentAt(linked, 1)).toBeNull();
+    expect(linkExtentAt(linked, 20)).toBeNull();
+    /* an unlinked space between two links keeps them apart */
+    const two = 'See [the](https://a.example) [proposal](https://a.example) online';
+    expect(linkExtentAt(two, 6)).toEqual([4, 7]);
+    expect(linkExtentAt(two, 10)).toEqual([8, 16]);
+  });
+
+  it('completes a bare address with https and keeps a scheme or a slide link as typed', () => {
+    expect(normalizeLinkInput('example.com/acme')).toBe('https://example.com/acme');
+    expect(normalizeLinkInput(' https://example.com ')).toBe('https://example.com');
+    expect(normalizeLinkInput('mailto:sales@example.com')).toBe('mailto:sales@example.com');
+    expect(normalizeLinkInput('#s/split-2')).toBe('#s/split-2');
+    expect(normalizeLinkInput('#next')).toBe('#next');
+    expect(normalizeLinkInput('')).toBeNull();
+    expect(normalizeLinkInput('   ')).toBeNull();
   });
 });

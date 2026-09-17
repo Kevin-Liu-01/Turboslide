@@ -152,6 +152,83 @@ export function setBoldRange(
   return paragraphs.map((runs) => serializeRuns(mergeRuns(runs))).join('\n');
 }
 
+/**
+ * The Text with a link written over a range, or cleared from it (null), on the run model
+ * (docs/FOCUS.md section 5 rank 2: Cmd+K and the toolbar's Insert link wrap the selected word as
+ * a link mark, never through execCommand('createLink'), which inserts the address as text at a
+ * collapsed caret). A gt run keeps no link (the mark is drawn, not read). marks.test.ts pins it.
+ */
+export function linkRange(
+  text: Markup,
+  range: readonly [number, number],
+  link: string | null,
+): Markup {
+  if (range[0] >= range[1]) return text;
+  const { paragraphs, inside } = splitAt(text, range);
+  for (const p of placedOf(paragraphs)) {
+    if (!inside(p) || p.run.gt) continue;
+    if (link === null) delete p.run.link;
+    else p.run.link = link;
+  }
+  return paragraphs.map((runs) => serializeRuns(mergeRuns(runs))).join('\n');
+}
+
+/**
+ * The plain range of the link around an offset: the contiguous runs of the caret's paragraph that
+ * carry the same link as the run at (or just before) the caret; null when that run has no link.
+ * Cmd K inside a linked span edits the whole span, as Google's does.
+ */
+export function linkExtentAt(text: Markup, at: number): [number, number] | null {
+  const placed = placedOf(parseParagraphs(text).map((runs) => runs.map((run) => ({ ...run }))));
+  /* the run the caret sits in; at a boundary the linked neighbour wins, so a caret at either end
+     of a link edits that link */
+  const inside = placed.find((p) => p.start <= at && at < p.end);
+  const before = placed.find((p) => p.end === at && p.start < p.end);
+  const host =
+    inside !== undefined && inside.run.link !== undefined
+      ? inside
+      : before !== undefined && before.run.link !== undefined
+        ? before
+        : inside;
+  if (host === undefined || host.run.link === undefined) return null;
+  const link = host.run.link;
+  let start = host.start;
+  let end = host.end;
+  for (const p of placed) {
+    if (p.paragraph !== host.paragraph || p.run.link !== link) continue;
+    if (p.end === start) start = p.start;
+  }
+  for (const p of placed) {
+    if (p.paragraph !== host.paragraph || p.run.link !== link) continue;
+    if (p.start === end) end = p.end;
+  }
+  return [start, end];
+}
+
+/**
+ * What the popover's field means as a link: the trimmed text, with `https://` in front of a bare
+ * address the way Google completes "example.com"; a scheme the Text takes (https, http, mailto,
+ * tel) and a slide link (`#s/<id>`, `#next`) are kept as typed; an empty field is no link (null).
+ */
+export function normalizeLinkInput(raw: string): string | null {
+  const value = raw.trim();
+  if (value === '') return null;
+  if (/^(https?:|mailto:|tel:|#)/i.test(value)) return value;
+  if (/\s/.test(value) || /^[a-z][a-z0-9+.-]*:/i.test(value)) return value;
+  return `https://${value}`;
+}
+
+/** The one link every run of the range carries, for the popover's field; null when none or when they differ. */
+export function linkOfRange(text: Markup, range: readonly [number, number]): string | null {
+  if (range[0] >= range[1]) return null;
+  const { paragraphs, inside } = splitAt(text, range);
+  const runs = placedOf(paragraphs).filter(inside);
+  const first = runs[0];
+  if (first === undefined || first.run.link === undefined) return null;
+  const link = first.run.link;
+  return runs.every((p) => p.run.link === link) ? link : null;
+}
+
 /** The marks of the caret's run at an offset (the toolbar's pressed state with no range). */
 export function marksAt(text: Markup, at: number): RunMarks & { b?: true } {
   const length = plainLength(text);
@@ -166,9 +243,17 @@ export function marksAt(text: Markup, at: number): RunMarks & { b?: true } {
 
 /** The marks of a range, with bold, for the pressed state of the toolbar (SPEC-2 6.2). */
 export function marksOf(text: Markup, range: readonly [number, number]): RunMarks & { b?: true } {
-  if (range[0] >= range[1]) return marksAt(text, range[0]);
-  const marks: RunMarks & { b?: true } = marksOfRange(text, range);
-  if (boldOfRange(text, range)) marks.b = true;
+  /* the range is clamped to the text before it reaches marksOfRange (schema/text.ts checkRange
+     throws past the length): a caret read against the trimmed canonical text can carry DOM offsets
+     one or more characters past it, VERIFICATION.md C2-F22 */
+  const length = plainLength(text);
+  const clamped: [number, number] = [
+    Math.max(0, Math.min(range[0], length)),
+    Math.max(0, Math.min(range[1], length)),
+  ];
+  if (clamped[0] >= clamped[1]) return marksAt(text, clamped[0]);
+  const marks: RunMarks & { b?: true } = marksOfRange(text, clamped);
+  if (boldOfRange(text, clamped)) marks.b = true;
   return marks;
 }
 

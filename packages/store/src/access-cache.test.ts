@@ -20,9 +20,12 @@ import { legacyAssetKey, newDeckRecord } from '@turboslide/schema/access';
 import {
   AccessPreconditionError,
   blobAccessStore,
+  blobIndexStore,
   blobLinkIndex,
   cachedAccessStore,
+  emptyDeckIndex,
   fileLinkIndex,
+  indexUpdates,
   isAccessPrecondition,
   isBlobConflict,
   linkIndexKey,
@@ -30,7 +33,12 @@ import {
   memoryAccessStore,
   memoryLinkIndex,
   newLinkHashes,
+  provenGet,
+  accessEtag,
+  immutableCopyPath,
+  putWithCopy,
 } from './access-store';
+import type { FreshBodyFetch } from './access-store';
 import { memoryBlobClient } from './blob-fake';
 import type { BlobClient } from './blob-store';
 import { BlobPreconditionError } from './blob-store';
@@ -190,6 +198,16 @@ describe('two blob tier instances over one store (finding 34)', () => {
     });
   });
 
+  it('never caches a missing record on the blob tier, so a deck made on another instance is found on the next read (b7 C2-R13)', async () => {
+    /* a cached null held the "no record" answer for the TTL while decide() reads a recordless
+       deck as the legacy open deck (VERIFICATION F-missing-record); a record, once found, is
+       cached as before */
+    const { a, b } = instances(5_000);
+    expect(await a.read(DECK)).toBeNull();
+    await b.write(DECK, recordBy('anon_maker'));
+    expect((await a.read(DECK))?.record.owner).toBe('anon_maker');
+  });
+
   it('a revoke on one instance is seen by every instance within the TTL and by a fresh read at once', async () => {
     const { a, b, client, advance } = instances(5_000);
     const live = await a.write(DECK, withLinks([link('lnk_first1', HASH_A)], 1), { ifMatch: null });
@@ -296,5 +314,193 @@ describe('the link hash index (finding 34 F2)', () => {
       overwrite: true,
     });
     expect(await blobLinkIndex(client).get(HASH_A)).toBeNull();
+  });
+});
+
+// The proven read (the focus round, docs/FOCUS.md section 5 rank 1; VERIFICATION.md pass 2
+// F-share-copy, F-share-404, F-missing-record): on the public store the body a url serves can be
+// the CDN's copy from before the last overwrite while `head()` already names the new version
+// (measured on the enforce preview 2026-09-16: a second `share.createLink` 155 ms after the first
+// read the record at revision 0 and was refused). The fake's `holdGet()` is that CDN.
+describe('the proven read (pass 2)', () => {
+  /** The url read past the CDN in tests: the fake's current bytes. */
+  const freshFrom =
+    (client: ReturnType<typeof memoryBlobClient>): FreshBodyFetch =>
+    async (url) => {
+      const pathname = url.slice(client.base.length + 1).split('?')[0] ?? '';
+      const stored = client.blobs.get(pathname);
+      return stored === undefined ? null : new Uint8Array(stored.bytes);
+    };
+  const noSleep = async (): Promise<void> => undefined;
+
+  it('reads the record the mint wrote while the plain read still answers the record from before it', async () => {
+    const client = memoryBlobClient();
+    const store = blobAccessStore(client, { fetchFresh: freshFrom(client), sleep: noSleep });
+    const first = await store.write(DECK, recordBy('anon_owner'), { ifMatch: null });
+    // every instance has read revision 0 once (the Share dialog opening, the loader)
+    expect((await store.read(DECK))?.record.revision).toBe(0);
+    client.holdGet();
+    const minted = await store.write(DECK, withLinks([link('lnk_aaaaaa', HASH_A)], 1), {
+      ifMatch: first.etag,
+    });
+    // the CDN keeps the old body: the plain client answers revision 0 under the old version
+    const plain = await client.get(`decks/${DECK}/access.json`);
+    expect(JSON.parse(new TextDecoder().decode(plain?.bytes)).revision).toBe(0);
+    // the proven read answers the mint's record under the store's version
+    const read = await store.read(DECK);
+    expect(read?.record.revision).toBe(1);
+    expect(read?.record.links.map((link) => link.id)).toEqual(['lnk_aaaaaa']);
+    expect(read?.etag).toBe(minted.etag);
+    client.releaseGet();
+  });
+
+  it('answers the last body under its own version when nothing proves it, so a write on it is refused as stale', async () => {
+    const client = memoryBlobClient();
+    const store = blobAccessStore(client, {
+      fetchFresh: async () => null,
+      retries: 1,
+      sleep: noSleep,
+    });
+    const first = await store.write(DECK, recordBy('anon_owner'), { ifMatch: null });
+    await store.read(DECK);
+    client.holdGet();
+    const minted = await store.write(DECK, withLinks([link('lnk_aaaaaa', HASH_A)], 1), {
+      ifMatch: first.etag,
+    });
+    // a record written before the copies existed has none under its version (the cycle 2 fix
+    // round): the copy is removed, so nothing proves the body
+    client.blobs.delete(immutableCopyPath(`decks/${DECK}/access.json`, minted.etag));
+    const stale = await store.read(DECK);
+    expect(stale?.record.revision).toBe(0);
+    expect(stale?.etag).toBe(first.etag);
+    await expect(
+      store.write(DECK, withLinks([link('lnk_aaaaaa', HASH_A), link('lnk_bbbbbb', HASH_B)], 2), {
+        ifMatch: stale?.etag ?? null,
+      }),
+    ).rejects.toBeInstanceOf(AccessPreconditionError);
+    client.releaseGet();
+  });
+
+  it('reads the record from its immutable copy when the plain body and the url read both lag (C2-F2)', async () => {
+    const client = memoryBlobClient();
+    // the url read lags like the plain read on the function's edge (measured on the cycle 2
+    // preview: "revision 0, not 1" with the store at revision 3)
+    const store = blobAccessStore(client, {
+      fetchFresh: async () => null,
+      retries: 0,
+      sleep: noSleep,
+    });
+    const first = await store.write(DECK, recordBy('anon_owner'), { ifMatch: null });
+    await store.read(DECK);
+    client.holdGet();
+    const minted = await store.write(DECK, withLinks([link('lnk_aaaaaa', HASH_A)], 1), {
+      ifMatch: first.etag,
+    });
+    const plain = await client.get(`decks/${DECK}/access.json`);
+    expect(JSON.parse(new TextDecoder().decode(plain?.bytes)).revision).toBe(0);
+    const read = await store.read(DECK);
+    expect(read?.record.revision).toBe(1);
+    expect(read?.etag).toBe(minted.etag);
+    // the copy lives under the deck's state folder, which the mirror never pulls
+    expect(immutableCopyPath(`decks/${DECK}/access.json`, minted.etag)).toBe(
+      `decks/${DECK}/.turboslide/copies/${minted.etag.replace(/"/g, '')}.json`,
+    );
+    expect(client.blobs.has(immutableCopyPath(`decks/${DECK}/access.json`, minted.etag))).toBe(
+      true,
+    );
+    // a write on the proven record lands
+    await store.write(
+      DECK,
+      withLinks([link('lnk_aaaaaa', HASH_A), link('lnk_bbbbbb', HASH_B)], 2),
+      {
+        ifMatch: read?.etag ?? null,
+      },
+    );
+    client.releaseGet();
+  });
+
+  it('stores the copy before the record, so no version head() names is without one', async () => {
+    const client = memoryBlobClient();
+    const bytes = new TextEncoder().encode('{"n":1}');
+    client.calls.length = 0;
+    await putWithCopy(client, 'users/anon_v/decks.json', bytes, {
+      overwrite: false,
+      contentType: 'application/json',
+    });
+    expect(client.calls.map((call) => `${call.op} ${call.pathname}`)).toEqual([
+      `put users/anon_v/.turboslide/copies/${accessEtag(bytes).replace(/"/g, '')}.json`,
+      'put users/anon_v/decks.json',
+    ]);
+    // the same bytes again overwrite the same copy without a conflict
+    await putWithCopy(client, 'users/anon_v/decks.json', bytes, { overwrite: true });
+    expect(immutableCopyPath('links/abc.json', '"00"')).toBe('links/.turboslide/copies/00.json');
+  });
+
+  it('the deck index reads its copy when its own url lags, and the link index reads no copy', async () => {
+    const client = memoryBlobClient();
+    const lagging = { fetchFresh: async () => null, retries: 0, sleep: noSleep };
+    const index = blobIndexStore(client, lagging);
+    await index.update('anon_v', indexUpdates.shared(DECK, 'viewer', NOW, 'link', 'lnk_a'));
+    await index.read('anon_v');
+    client.holdGet();
+    await index.update('anon_v', indexUpdates.shared(DECK, 'editor', NOW, 'link', 'lnk_b'));
+    expect((await index.read('anon_v')).shared).toEqual([
+      { deckId: DECK, role: 'editor', since: NOW, via: 'link', linkId: 'lnk_b' },
+    ]);
+    client.releaseGet();
+    const links = blobLinkIndex(client, lagging);
+    client.calls.length = 0;
+    await links.put(HASH_A, { deckId: DECK, linkId: 'lnk_a' });
+    expect(await links.get(HASH_A)).toEqual({ deckId: DECK, linkId: 'lnk_a' });
+    expect(client.calls.some((call) => call.pathname.includes('/copies/'))).toBe(false);
+  });
+
+  it('answers null for a path the store does not hold and the client body for a version that is not an md5', async () => {
+    const client = memoryBlobClient();
+    expect(await provenGet(client, 'decks/none/access.json')).toBeNull();
+    const dated: BlobClient = {
+      ...client,
+      head: async (pathname) => {
+        const entry = await client.head(pathname);
+        return entry === null ? null : { ...entry, version: '2026-09-16T00:00:00.000Z' };
+      },
+    };
+    await client.put('decks/x/access.json', new TextEncoder().encode('{"v":1}'), {
+      overwrite: true,
+    });
+    const got = await provenGet(dated, 'decks/x/access.json', { fetchFresh: async () => null });
+    expect(new TextDecoder().decode(got?.bytes)).toBe('{"v":1}');
+  });
+
+  it('the link index and the deck index read through the same proof', async () => {
+    const client = memoryBlobClient();
+    const fresh = freshFrom(client);
+    const links = blobLinkIndex(client, { fetchFresh: fresh, sleep: noSleep });
+    const index = blobIndexStore(client, { fetchFresh: fresh, sleep: noSleep });
+    await links.put(HASH_A, { deckId: DECK, linkId: 'lnk_a' });
+    expect(await links.get(HASH_A)).toEqual({ deckId: DECK, linkId: 'lnk_a' });
+    await index.update('anon_v', indexUpdates.shared(DECK, 'viewer', NOW, 'link', 'lnk_a'));
+    expect(await index.read('anon_v')).toEqual({
+      ...emptyDeckIndex(),
+      shared: [{ deckId: DECK, role: 'viewer', since: NOW, via: 'link', linkId: 'lnk_a' }],
+    });
+    client.holdGet();
+    await index.update('anon_v', indexUpdates.shared(DECK, 'editor', NOW, 'link', 'lnk_b'));
+    expect((await index.read('anon_v')).shared).toEqual([
+      { deckId: DECK, role: 'editor', since: NOW, via: 'link', linkId: 'lnk_b' },
+    ]);
+    client.releaseGet();
+  });
+
+  it('a shared row is written once per deck, role, via and link', () => {
+    const base = emptyDeckIndex();
+    const once = indexUpdates.shared(DECK, 'viewer', NOW, 'link', 'lnk_a')(base);
+    expect(once?.shared).toHaveLength(1);
+    expect(indexUpdates.shared(DECK, 'viewer', NOW, 'link', 'lnk_a')(once ?? base)).toBeNull();
+    const rotated = indexUpdates.shared(DECK, 'viewer', NOW, 'link', 'lnk_c')(once ?? base);
+    expect(rotated?.shared.map((row) => row.linkId)).toEqual(['lnk_c']);
+    expect(indexUpdates.shared(DECK, 'viewer', NOW, 'grant')(once ?? base)?.shared).toEqual([
+      { deckId: DECK, role: 'viewer', since: NOW, via: 'grant' },
+    ]);
   });
 });

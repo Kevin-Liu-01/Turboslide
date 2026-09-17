@@ -37,6 +37,18 @@ import { STUB_PREFIX, stubClause } from './strings.ts';
  * Copy link, Dither, Show changes, and gives every row a role predicate: a row a role cannot use
  * is absent, never disabled (13.4; `when`). What stays Later is 13.3, each row with its clause.
  *
+ * The focus round (docs/FOCUS.md sections 2 to 4) parks every row a seller does not need weekly
+ * behind one switch, Tools > Advanced tools (`tools.advancedTools`, the `advancedTools` setting):
+ * a parked row or control carries `advanced: true`, a Later stub hides with the parked set, and
+ * `isPresent` is the one predicate that reads the switch. Hidden, never disabled, never deleted:
+ * the actions stay registered on every transport. This departs from the parity rounds' rule that
+ * a Later row stands disabled in Google's position; with the switch on the rows draw as before.
+ * Cycle 2 of the round adds two rules: Insert > Shape, Insert > Line, Format > Borders & lines and
+ * the two toolbar buttons are parked whole under the orchestrator's ruling (1) on FOCUS.md section
+ * 9 (the `shapes.*` and `lines.*` rows did not all pass on the enforce preview; VERIFICATION.md
+ * section 8 item 3), and Edit > Paste stays enabled whatever this page copied, as Google's does
+ * (`canPaste`; VERIFICATION.md F-slides-paste).
+ *
  * Nothing in a label, tooltip or stub clause names an internal thing (SPEC 12); the default view
  * words test greps this file. Relative imports carry the `.ts` extension so the parity audit
  * script can load the model under Node; the icon import is a type and is erased.
@@ -242,7 +254,11 @@ export type MenuSetting =
   | 'pointerMine'
   | 'pointerOthers'
   | 'announce'
-  | 'showChanges';
+  | 'showChanges'
+  /* the focus round (docs/FOCUS.md 3.1): Tools > Advanced tools, the one switch that shows the
+     parked rows, controls and palette entries; off by default, kept per browser with the other
+     stored settings (`STORED_SETTINGS` in editor-shell.ts) */
+  | 'advancedTools';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -384,7 +400,9 @@ export type MenuPredicate =
   | 'viewOnly'
   /** the own chip's menu: Sign out and Sessions for a signed in principal, Sign in for the others (7.5) */
   | 'signedIn'
-  | 'canSignIn';
+  | 'canSignIn'
+  /** Tools > Advanced tools is on (docs/FOCUS.md 3.1): the one effect that changes with the switch, the Shapes gallery plate (section 4) */
+  | 'advancedTools';
 
 export type MenuCheck = { setting: MenuSetting; value?: string | boolean };
 
@@ -431,6 +449,14 @@ export type MenuItem = {
   turboslide?: true;
   /** reachable from a right-click menu and Search the menus, not drawn in the menu bar */
   contextOnly?: true;
+  /**
+   * A parked row (docs/FOCUS.md section 3): absent from the menu bar, the right-click menus,
+   * Search the menus and the shortcuts dialog while Tools > Advanced tools is off, present with
+   * it on. Hidden, never disabled, and never deleted: the row's action stays registered on every
+   * transport, so the CLI, MCP, HTTP and window callers see no change. `isPresent` is the one
+   * predicate that reads the flag.
+   */
+  advanced?: true;
 };
 
 export type MenuId =
@@ -528,6 +554,19 @@ const toggle = (setting: MenuSetting, value?: string | boolean): MenuEffect =>
   value === undefined ? { kind: 'toggle', setting } : { kind: 'toggle', setting, value };
 const client = (handler: MenuClientHandler): MenuEffect => ({ kind: 'client', handler });
 
+/**
+ * A parked row (docs/FOCUS.md 3.2) and, when it is a container, every row under it: each carries
+ * `advanced: true`, so the row, its children in Search the menus and their chords all follow the
+ * switch. A parked leaf row passes `advanced: true` in its extra instead.
+ */
+function parked(item: MenuItem): MenuItem {
+  return {
+    ...item,
+    advanced: true,
+    ...(item.items === undefined ? {} : { items: item.items.map(parked) }),
+  };
+}
+
 // ---------------------------------------------------------------------------------------------
 // Shared clauses (SPEC 12, SPEC-2 12, SPEC-3 13.3: one clause, no internal noun, no process word)
 
@@ -586,12 +625,13 @@ function gate(
 function replaceImageItems(prefix: string): MenuItem[] {
   return [
     now(`${prefix}.upload`, 'Upload from computer', action('asset.add'), { icon: 'photo' }),
-    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL')),
+    /* docs/FOCUS.md 3.2: By URL and From this presentation are parked with the Insert rows */
+    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL'), { advanced: true }),
     now(
       `${prefix}.fromThisPresentation`,
       'From this presentation',
       dialog('Pictures in this presentation'),
-      { turboslide: true },
+      { turboslide: true, advanced: true },
     ),
   ];
 }
@@ -677,16 +717,19 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     [
       now('title.presence.follow', 'Follow', action('presence.follow'), {
         turboslide: true,
+        advanced: true,
         when: 'follow',
         doc: 'Jumps to that person’s slide and moves with them; your own edit or click stops it',
       }),
       now('title.presence.goTo', 'Go to slide', client('goToClient'), {
         turboslide: true,
+        advanced: true,
         doc: 'A one time jump to the slide that person has open',
       }),
       later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),
       now('title.presence.me', 'You', client('accountMenu'), {
         turboslide: true,
+        advanced: true,
         dividerBefore: true,
         doc: 'Your name and avatar, and the ways to sign in and out',
       }),
@@ -703,6 +746,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   }),
   now('title.inbox', 'Notifications', panel('Notifications'), {
     turboslide: true,
+    advanced: true,
     doc: 'Mentions, replies and requests on this presentation',
   }),
   omit('title.meet', 'Meet', GOOGLE_SERVICE),
@@ -738,42 +782,45 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     icon: 'link',
     doc: 'Who can open this presentation, and the link to send',
   }),
-  /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear */
-  sub(
-    'title.account',
-    'Account',
-    [
-      now('title.account.changeName', 'Change name', dialog('Change name'), {
-        turboslide: true,
-        doc: 'How others see you in this presentation',
-      }),
-      now('title.account.changeAvatar', 'Change avatar', dialog('Change avatar'), {
-        turboslide: true,
-        doc: 'Initials, a pattern from your name, or a picture',
-      }),
-      now('title.account.signIn', 'Sign in', dialog('Sign in'), {
-        turboslide: true,
-        when: 'canSignIn',
-        dividerBefore: true,
-        doc: 'Keep your name across browsers and receive invitations by email',
-      }),
-      now('title.account.signOut', 'Sign out', action('account.signOut'), {
-        turboslide: true,
-        when: 'signedIn',
-        dividerBefore: true,
-        doc: 'Ends the sign in on this browser; your edits keep your name',
-      }),
-      now('title.account.forget', 'Forget this browser', action('account.forget'), {
-        turboslide: true,
-        doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
-      }),
-      now('title.account.sessions', 'Sessions', dialog('Sessions'), {
-        turboslide: true,
-        dividerBefore: true,
-        doc: 'The browsers signed in as you, with Sign out for each',
-      }),
-    ],
-    { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },
+  /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear; parked whole
+     (docs/FOCUS.md 3.2) */
+  parked(
+    sub(
+      'title.account',
+      'Account',
+      [
+        now('title.account.changeName', 'Change name', dialog('Change name'), {
+          turboslide: true,
+          doc: 'How others see you in this presentation',
+        }),
+        now('title.account.changeAvatar', 'Change avatar', dialog('Change avatar'), {
+          turboslide: true,
+          doc: 'Initials, a pattern from your name, or a picture',
+        }),
+        now('title.account.signIn', 'Sign in', dialog('Sign in'), {
+          turboslide: true,
+          when: 'canSignIn',
+          dividerBefore: true,
+          doc: 'Keep your name across browsers and receive invitations by email',
+        }),
+        now('title.account.signOut', 'Sign out', action('account.signOut'), {
+          turboslide: true,
+          when: 'signedIn',
+          dividerBefore: true,
+          doc: 'Ends the sign in on this browser; your edits keep your name',
+        }),
+        now('title.account.forget', 'Forget this browser', action('account.forget'), {
+          turboslide: true,
+          doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
+        }),
+        now('title.account.sessions', 'Sessions', dialog('Sessions'), {
+          turboslide: true,
+          dividerBefore: true,
+          doc: 'The browsers signed in as you, with Sign out for each',
+        }),
+      ],
+      { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },
+    ),
   ),
   omit('title.gemini', 'Ask Gemini', GOOGLE_SERVICE),
 ];
@@ -794,16 +841,25 @@ const FILE: Menu = {
       }),
       now('file.new.templateGallery', 'From template gallery', route('/decks#templates', true), {
         google: 'From Template Gallery',
+        advanced: true,
       }),
     ]),
-    now('file.open', 'Open…', dialog('Open'), { key: shortcut('Cmd+O'), icon: 'document' }),
-    now('file.importSlides', 'Import slides', dialog('Import slides'), { when: 'write' }),
+    now('file.open', 'Open…', dialog('Open'), {
+      key: shortcut('Cmd+O'),
+      icon: 'document',
+      advanced: true,
+    }),
+    now('file.importSlides', 'Import slides', dialog('Import slides'), {
+      when: 'write',
+      advanced: true,
+    }),
     sub(
       'file.makeCopy',
       'Make a copy',
       [
         now('file.makeCopy.entire', 'Entire presentation', dialog('Make a copy')),
         now('file.makeCopy.selected', 'Selected slides', dialog('Make a copy'), {
+          advanced: true,
           enabled: 'slideSubsetSelected',
           disabledReason: 'Select some of the slides in the filmstrip first',
         }),
@@ -817,6 +873,7 @@ const FILE: Menu = {
         now('file.share.withOthers', 'Share with others', dialog('Share')),
         now('file.share.publish', 'Publish to web', dialog('Publish to the web'), {
           when: 'publish',
+          advanced: true,
         }),
         /* SPEC-3 0.16, 13.2: the address of the presentation with no token in it */
         now('file.share.copyLink', 'Copy link', client('copyLink'), {
@@ -842,18 +899,23 @@ const FILE: Menu = {
         now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
           doc: 'One slide per page',
         }),
+        /* docs/FOCUS.md 3.2: the text, picture, web page and bundle downloads are parked; the
+           JPEG and PNG rows open a tab that answers 401 on production (audit-export rows 22, 23) */
         now('file.download.txt', 'Plain Text (.txt)', action('export.text'), {
           doc: 'Every slide’s text in order',
+          advanced: true,
         }),
         now(
           'file.download.jpg',
           'JPEG image (.jpg, current slide)',
           action('render.slide', { format: 'jpg' }),
+          { advanced: true },
         ),
         now(
           'file.download.png',
           'PNG image (.png, current slide)',
           action('render.slide', { format: 'png' }),
+          { advanced: true },
         ),
         later(
           'file.download.svg',
@@ -862,10 +924,12 @@ const FILE: Menu = {
         ),
         now('file.download.html', 'Web page (.html)', action('build.run'), {
           turboslide: true,
+          advanced: true,
           doc: 'One file that opens in any browser',
         }),
         now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
           turboslide: true,
+          advanced: true,
           doc: 'The file Open and Import slides read',
         }),
       ],
@@ -896,6 +960,7 @@ const FILE: Menu = {
            two delete rows of a version's More menu, present and disabled with their clause */
         now('file.versionHistory.showChanges', 'Show changes', toggle('showChanges'), {
           contextOnly: true,
+          advanced: true,
           doc: 'Marks what each person changed on the slide, with their chip',
         }),
         later(
@@ -918,7 +983,7 @@ const FILE: Menu = {
       'Make available offline',
       'Present mode keeps working after load without the network (R07 rule 29)',
     ),
-    now('file.details', 'Details', dialog('Details'), { icon: 'document' }),
+    now('file.details', 'Details', dialog('Details'), { icon: 'document', advanced: true }),
     omit(
       'file.language',
       'Language',
@@ -978,6 +1043,7 @@ const EDIT: Menu = {
     }),
     /* SPEC-2 0.61: Google's two key sequence stays unbound; the shortcuts dialog lists it greyed */
     now('edit.selectNone', 'Select none', client('selectNone'), {
+      advanced: true,
       enabled: 'hasSelection',
       doc: 'Clears the selection on the slide and in the filmstrip; Esc does the same',
     }),
@@ -1009,8 +1075,13 @@ const VIEW: Menu = {
       'Theme builder',
       'The GT theme is edited in the repository; Slide > Edit theme is the Later stub',
     ),
+    /* docs/FOCUS.md 3.2: the View menu keeps Slideshow, Zoom and Show speaker notes in the
+       default view; the grid, the rulers, the guides, the snapping, the comment display, the live
+       pointers, the filmstrip toggle, the modes, Full screen, the sections and the appearance are
+       parked */
     now('view.gridView', 'Grid view', toggle('gridView'), {
       icon: 'grid',
+      advanced: true,
       dividerBefore: true,
       doc: 'Every slide as a tile; drag to reorder',
     }),
@@ -1045,124 +1116,142 @@ const VIEW: Menu = {
        the deck's guides; Google relabels Show ruler rather than checking it */
     now('view.showRuler', 'Show ruler', toggle('showRuler'), {
       plain: true,
+      advanced: true,
       altLabel: { when: 'rulerShown', label: 'Hide ruler' },
       doc: 'Rulers in inches along the top and left of the slide; drag out of one to add a guide',
     }),
-    sub('view.guides', 'Guides', [
-      now('view.guides.show', 'Show guides', toggle('showGuides'), {
-        doc: 'The guides on every slide; they never show when presenting',
-      }),
-      now(
-        'view.guides.addVertical',
-        'Add vertical guide',
-        action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
-        { doc: 'A guide at the centre of the slide; drag it into place' },
-      ),
-      now(
-        'view.guides.addHorizontal',
-        'Add horizontal guide',
-        action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
-        { doc: 'A guide at the centre of the slide; drag it into place' },
-      ),
-      later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
-      now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
-        enabled: 'hasGuides',
-        disabledReason: 'Add a guide first',
-        doc: 'Removes every guide from the presentation',
-      }),
-      /* 4.3: the right-click menu of a guide line; the shell names the guide under the pointer */
-      now('view.guides.delete', 'Delete guide', action('deck.guides'), {
-        enabled: 'hasGuides',
-        contextOnly: true,
-        doc: 'Removes this guide from every slide',
-      }),
-    ]),
-    sub('view.snapTo', 'Snap to', [
-      now('view.snapTo.guides', 'Guides', toggle('snapGuides'), {
-        doc: 'Edges and centres of the other objects, the slide and the guides while you drag',
-      }),
-      now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
-    ]),
+    parked(
+      sub('view.guides', 'Guides', [
+        now('view.guides.show', 'Show guides', toggle('showGuides'), {
+          doc: 'The guides on every slide; they never show when presenting',
+        }),
+        now(
+          'view.guides.addVertical',
+          'Add vertical guide',
+          action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
+          { doc: 'A guide at the centre of the slide; drag it into place' },
+        ),
+        now(
+          'view.guides.addHorizontal',
+          'Add horizontal guide',
+          action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
+          { doc: 'A guide at the centre of the slide; drag it into place' },
+        ),
+        later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
+        now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
+          enabled: 'hasGuides',
+          disabledReason: 'Add a guide first',
+          doc: 'Removes every guide from the presentation',
+        }),
+        /* 4.3: the right-click menu of a guide line; the shell names the guide under the pointer */
+        now('view.guides.delete', 'Delete guide', action('deck.guides'), {
+          enabled: 'hasGuides',
+          contextOnly: true,
+          doc: 'Removes this guide from every slide',
+        }),
+      ]),
+    ),
+    parked(
+      sub('view.snapTo', 'Snap to', [
+        now('view.snapTo.guides', 'Guides', toggle('snapGuides'), {
+          doc: 'Edges and centres of the other objects, the slide and the guides while you drag',
+        }),
+        now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
+      ]),
+    ),
     /* SPEC-3 5.3, 13.1: the four display modes as radio rows over one setting, in Google's order
        (01 3, the 2024 rollout); the chord hides */
-    sub(
-      'view.comments',
-      'Comments',
-      [
-        now('view.comments.showAll', 'Show all comments', toggle('comments', 'all'), {
-          doc: 'The Comments panel and every marker on the slides',
-        }),
-        now('view.comments.expand', 'Expand comments', toggle('comments', 'expanded'), {
-          doc: 'Every card open beside the slide',
-        }),
-        now('view.comments.minimize', 'Minimize comments', toggle('comments', 'minimized'), {
-          doc: 'Markers only; a click opens the card',
-        }),
-        now('view.comments.hide', 'Hide comments', toggle('comments', 'hidden'), {
-          key: shortcut('Cmd+Option+Shift+J'),
-          doc: 'No markers and no cards; the panel still lists them',
-        }),
-      ],
-      { icon: 'chat', dividerBefore: true, when: 'readComments' },
+    parked(
+      sub(
+        'view.comments',
+        'Comments',
+        [
+          now('view.comments.showAll', 'Show all comments', toggle('comments', 'all'), {
+            doc: 'The Comments panel and every marker on the slides',
+          }),
+          now('view.comments.expand', 'Expand comments', toggle('comments', 'expanded'), {
+            doc: 'Every card open beside the slide',
+          }),
+          now('view.comments.minimize', 'Minimize comments', toggle('comments', 'minimized'), {
+            doc: 'Markers only; a click opens the card',
+          }),
+          now('view.comments.hide', 'Hide comments', toggle('comments', 'hidden'), {
+            key: shortcut('Cmd+Option+Shift+J'),
+            doc: 'No markers and no cards; the panel still lists them',
+          }),
+        ],
+        { icon: 'chat', dividerBefore: true, when: 'readComments' },
+      ),
     ),
     /* SPEC-3 4.4, 4.6, 13.1: Google's two rows; the own pointer is off by default and needs the
        editor role, the collaborators' pointers are on by default for everyone */
-    sub('view.livePointers', 'Live pointers', [
-      now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
-        when: 'write',
-        doc: 'Others see where your pointer is on the slide, with your name',
-      }),
-      now(
-        'view.livePointers.collaborators',
-        'Show collaborator pointers',
-        toggle('pointerOthers'),
-        { doc: 'The pointers of the people in this presentation, up to twenty' },
-      ),
-    ]),
+    parked(
+      sub('view.livePointers', 'Live pointers', [
+        now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
+          when: 'write',
+          doc: 'Others see where your pointer is on the slide, with your name',
+        }),
+        now(
+          'view.livePointers.collaborators',
+          'Show collaborator pointers',
+          toggle('pointerOthers'),
+          { doc: 'The pointers of the people in this presentation, up to twenty' },
+        ),
+      ]),
+    ),
     now('view.showSpeakerNotes', 'Show speaker notes', toggle('speakerNotes'), {
       dividerBefore: true,
       when: 'readNotes',
     }),
-    now('view.showFilmstrip', 'Show filmstrip', toggle('filmstrip'), { icon: 'sidebar' }),
+    now('view.showFilmstrip', 'Show filmstrip', toggle('filmstrip'), {
+      icon: 'sidebar',
+      advanced: true,
+    }),
     /* SPEC-3 5.3, 6.3, 13.1: three radios for an editor, Commenting and Viewing for a commenter,
        no Mode menu for a viewer */
-    sub(
-      'view.mode',
-      'Mode',
-      [
-        now('view.mode.editing', 'Editing', toggle('mode', 'editing'), {
-          when: 'write',
-          doc: 'Handles, the notes pane and Format options',
-        }),
-        now('view.mode.commenting', 'Commenting', toggle('mode', 'commenting'), {
-          when: 'comment',
-          doc: 'Comments without moving anything: no handles, no Format options',
-        }),
-        now('view.mode.viewing', 'Viewing', toggle('mode', 'viewing'), {
-          doc: 'Read only: no handles, no Format options, no comment controls',
-        }),
-      ],
-      { dividerBefore: true, when: 'comment' },
+    parked(
+      sub(
+        'view.mode',
+        'Mode',
+        [
+          now('view.mode.editing', 'Editing', toggle('mode', 'editing'), {
+            when: 'write',
+            doc: 'Handles, the notes pane and Format options',
+          }),
+          now('view.mode.commenting', 'Commenting', toggle('mode', 'commenting'), {
+            when: 'comment',
+            doc: 'Comments without moving anything: no handles, no Format options',
+          }),
+          now('view.mode.viewing', 'Viewing', toggle('mode', 'viewing'), {
+            doc: 'Read only: no handles, no Format options, no comment controls',
+          }),
+        ],
+        { dividerBefore: true, when: 'comment' },
+      ),
     ),
     now('view.fullScreen', 'Full screen', toggle('compact'), {
       key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
       icon: 'fullscreen',
+      advanced: true,
       doc: 'Hides the menus and the toolbar; Esc restores them',
     }),
     now('view.showSections', 'Show sections', toggle('sections'), {
       turboslide: true,
+      advanced: true,
       dividerBefore: true,
       doc: 'Section names between the slides in the filmstrip',
     }),
-    sub(
-      'view.appearance',
-      'Appearance',
-      [
-        now('view.appearance.light', 'Light', toggle('appearance', 'light')),
-        now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
-        now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
-      ],
-      { turboslide: true, icon: 'swatch' },
+    parked(
+      sub(
+        'view.appearance',
+        'Appearance',
+        [
+          now('view.appearance.light', 'Light', toggle('appearance', 'light')),
+          now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
+          now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
+        ],
+        { turboslide: true, icon: 'swatch' },
+      ),
     ),
   ],
 };
@@ -1187,12 +1276,14 @@ const INSERT: Menu = {
         ),
         omit('insert.image.drivePhotos', 'Drive & Photos', GOOGLE_SERVICE),
         omit('insert.image.camera', 'Camera', GOOGLE_SERVICE),
-        now('insert.image.byUrl', 'By URL', dialog('Image by URL')),
+        /* docs/FOCUS.md 3.2: By URL (three stacked defects, audit-images rows 2 to 4) and From
+           this presentation are parked; Upload from computer is the core route */
+        now('insert.image.byUrl', 'By URL', dialog('Image by URL'), { advanced: true }),
         now(
           'insert.image.fromThisPresentation',
           'From this presentation',
           dialog('Pictures in this presentation'),
-          { turboslide: true },
+          { turboslide: true, advanced: true },
         ),
       ],
       { icon: 'photo' },
@@ -1204,46 +1295,64 @@ const INSERT: Menu = {
     later('insert.audio', 'Audio', NO_MEDIA, { icon: 'speaker-wave' }),
     later('insert.video', 'Video', NO_MEDIA, { icon: 'video-camera' }),
     /* SPEC-2 4.1: each category is a glyph grid drawn from the shape table; a pick arms the draw
-       tool. The rows under Shapes and Arrows are the legacy presets the draw tools already know;
-       the grid replaces them as the drawn plate once the shell renders it. */
-    sub(
-      'insert.shape',
-      'Shape',
-      [
-        sub(
-          'insert.shape.shapes',
-          'Shapes',
-          [
+       tool. The focus round (docs/FOCUS.md section 4): Shapes lists Rectangle, Rounded rectangle
+       and Ellipse as named rows in both views; the Shapes gallery is its own row, All shapes,
+       drawn only while Tools > Advanced tools is on (cycle 2 fix round, VERIFICATION.md C2-F11:
+       the matrix row `shapes.insert.named-rows` is driven with the switch on while the feature is
+       parked, and the plate that stood in for the rows with the switch on hid them). Arrows,
+       Callouts and Equation are parked until the geometry interpreter draws their presets. Cycle
+       2, under the orchestrator's ruling (1) on FOCUS.md section 9 (shapes ship only when every
+       `shapes.*` row passes on the enforce preview and on production; VERIFICATION.md
+       F-shapes-export and section 8 item 3; build/b3.md R14): the whole of Insert > Shape leaves
+       the default view for this ship. The rows stay, flagged, and return whole under FOCUS.md
+       section 8 once the rows pass; nothing here is deleted. */
+    parked(
+      sub(
+        'insert.shape',
+        'Shape',
+        [
+          sub('insert.shape.shapes', 'Shapes', [
             now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
               turboslide: true,
+              doc: 'Click to place a 240 by 160 rectangle, or drag to draw one',
             }),
             now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
               turboslide: true,
+              doc: 'Click to place a rounded rectangle, or drag to draw one',
             }),
             now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
               turboslide: true,
+              doc: 'Click to place an ellipse, or drag to draw one',
             }),
-          ],
-          { effect: shapeGrid('shapes') },
-        ),
-        sub(
-          'insert.shape.arrows',
-          'Arrows',
-          [
-            now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
-              turboslide: true,
-            }),
-          ],
-          { effect: shapeGrid('arrows') },
-        ),
-        now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
-          doc: 'A shape with a pointer you can drag',
-        }),
-        now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
-          doc: 'Plus, minus, multiply, divide, equal and not equal',
-        }),
-      ],
-      { icon: 'box' },
+          ]),
+          now('insert.shape.gallery', 'All shapes', shapeGrid('shapes'), {
+            turboslide: true,
+            advanced: true,
+            doc: 'The gallery of shape presets; every tile places a shape or draws one by a drag',
+          }),
+          parked(
+            sub(
+              'insert.shape.arrows',
+              'Arrows',
+              [
+                now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
+                  turboslide: true,
+                }),
+              ],
+              { effect: shapeGrid('arrows') },
+            ),
+          ),
+          now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
+            advanced: true,
+            doc: 'A shape with a pointer you can drag',
+          }),
+          now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
+            advanced: true,
+            doc: 'Plus, minus, multiply, divide, equal and not equal',
+          }),
+        ],
+        { icon: 'box' },
+      ),
     ),
     now(
       'insert.table',
@@ -1251,75 +1360,95 @@ const INSERT: Menu = {
       { kind: 'submenu', dynamic: 'tableGrid', action: 'block.insert' },
       {
         icon: 'table',
+        advanced: true,
         enabled: 'hasSlide',
         doc: 'Point at the size you want, up to 20 columns by 20 rows',
       },
     ),
-    sub(
-      'insert.chart',
-      'Chart',
-      [
-        now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
-          enabled: 'hasSlide',
-        }),
-        now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
-          enabled: 'hasSlide',
-        }),
-        now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
-          enabled: 'hasSlide',
-        }),
-        now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
-          enabled: 'hasSlide',
-        }),
-        omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
-      ],
-      { icon: 'chart-bar', doc: 'A chart with sample numbers you edit in Format options' },
+    /* docs/FOCUS.md 2.2, 3.2: tables and charts are parked until their own audit runs */
+    parked(
+      sub(
+        'insert.chart',
+        'Chart',
+        [
+          now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
+            enabled: 'hasSlide',
+          }),
+          now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
+            enabled: 'hasSlide',
+          }),
+          now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
+            enabled: 'hasSlide',
+          }),
+          now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
+            enabled: 'hasSlide',
+          }),
+          omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
+        ],
+        { icon: 'chart-bar', doc: 'A chart with sample numbers you edit in Format options' },
+      ),
     ),
     now('insert.diagram', 'Diagram', panel('Diagram'), {
       icon: 'rectangle-group',
+      advanced: true,
       enabled: 'hasSlide',
       doc: 'Grid, Hierarchy, Timeline, Process, Relationship or Cycle',
     }),
     now('insert.wordArt', 'Word art', client('wordArt'), {
+      advanced: true,
       enabled: 'hasSlide',
       doc: 'Type your text and press Enter',
     }),
-    sub(
-      'insert.line',
-      'Line',
-      [
-        now('insert.line.line', 'Line', action('block.insert')),
-        now('insert.line.arrow', 'Arrow', action('block.insert')),
-        now('insert.line.rule', 'Rule', action('block.insert'), {
-          turboslide: true,
-          doc: 'A hairline across the slot',
-        }),
-        now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
-          google: 'Elbow Connector',
-          enabled: 'hasSlide',
-          doc: 'Turns a corner between two shapes and follows them when they move',
-        }),
-        now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
-          google: 'Curved Connector',
-          enabled: 'hasSlide',
-          doc: 'Bends between two shapes and follows them when they move',
-        }),
-        now('insert.line.curve', 'Curve', action('block.insert'), {
-          enabled: 'hasSlide',
-          doc: 'Click each point; double click to finish',
-        }),
-        now('insert.line.polyline', 'Polyline', action('block.insert'), {
-          enabled: 'hasSlide',
-          doc: 'Click each corner; double click to finish',
-        }),
-        now('insert.line.scribble', 'Scribble', action('block.insert'), {
-          enabled: 'hasSlide',
-          doc: 'Draw freehand',
-        }),
-      ],
-      { icon: 'minus' },
+    /* docs/FOCUS.md section 4: Line and Arrow are the kept kinds; the rule, the connectors, the
+       curve, the polyline and the scribble are parked. Cycle 2, under ruling (1) and section 4's
+       last rule (a `lines.*` row not passing on the enforce preview parks Line and Arrow with the
+       shapes; VERIFICATION.md section 8 item 3, build/b3.md R14): the whole of Insert > Line leaves
+       the default view for this ship and returns whole under section 8 once its rows pass. */
+    parked(
+      sub(
+        'insert.line',
+        'Line',
+        [
+          now('insert.line.line', 'Line', action('block.insert')),
+          now('insert.line.arrow', 'Arrow', action('block.insert')),
+          now('insert.line.rule', 'Rule', action('block.insert'), {
+            turboslide: true,
+            advanced: true,
+            doc: 'A hairline across the slot',
+          }),
+          now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
+            google: 'Elbow Connector',
+            advanced: true,
+            enabled: 'hasSlide',
+            doc: 'Turns a corner between two shapes and follows them when they move',
+          }),
+          now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
+            google: 'Curved Connector',
+            advanced: true,
+            enabled: 'hasSlide',
+            doc: 'Bends between two shapes and follows them when they move',
+          }),
+          now('insert.line.curve', 'Curve', action('block.insert'), {
+            advanced: true,
+            enabled: 'hasSlide',
+            doc: 'Click each point; double click to finish',
+          }),
+          now('insert.line.polyline', 'Polyline', action('block.insert'), {
+            advanced: true,
+            enabled: 'hasSlide',
+            doc: 'Click each corner; double click to finish',
+          }),
+          now('insert.line.scribble', 'Scribble', action('block.insert'), {
+            advanced: true,
+            enabled: 'hasSlide',
+            doc: 'Draw freehand',
+          }),
+        ],
+        { icon: 'minus' },
+      ),
     ),
     now('insert.specialCharacters', 'Special characters', dialog('Insert special characters'), {
+      advanced: true,
       doc: 'Arrows, punctuation, currency, math, symbols and emoji, by name',
     }),
     omit('insert.animation', 'Animation', 'Section 0.5'),
@@ -1347,19 +1476,21 @@ const INSERT: Menu = {
       dividerBefore: true,
       doc: 'After the current slide, with the same layout',
     }),
-    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers')),
+    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers'), { advanced: true }),
     omit('insert.placeholder', 'Placeholder', 'Theme builder only'),
     later('insert.templates', 'Templates', START_FROM_GT),
     later('insert.buildingBlocks', 'Building blocks', START_FROM_GT),
     omit('insert.speakerSpotlight', 'Speaker spotlight', 'Meet only'),
     now('insert.icon', 'Icon', action('block.insert'), {
       turboslide: true,
+      advanced: true,
       icon: 'sparkles',
       dividerBefore: true,
       doc: 'One of the theme’s icons',
     }),
     now('insert.material', 'Material', action('block.insert'), {
       turboslide: true,
+      advanced: true,
       icon: 'cube',
       doc: 'A captured picture from the theme',
     }),
@@ -1396,12 +1527,15 @@ const FORMAT: Menu = {
           icon: 'strikethrough',
           doc: 'Strikes through the selected text, or a whole list item',
         }),
+        /* docs/FOCUS.md 3.2: superscript, subscript and capitalization are parked */
         now('format.text.superscript', 'Superscript', action('text.style', { mark: 'sup' }), {
           key: shortcut('Cmd+.'),
+          advanced: true,
           enabled: 'textBlockSelected',
         }),
         now('format.text.subscript', 'Subscript', action('text.style', { mark: 'sub' }), {
           key: shortcut('Cmd+,'),
+          advanced: true,
           enabled: 'textBlockSelected',
           doc: 'Your browser may take this key; the Format menu has the item',
         }),
@@ -1420,30 +1554,32 @@ const FORMAT: Menu = {
           ],
           { dividerBefore: true },
         ),
-        sub(
-          'format.text.capitalization',
-          'Capitalization',
-          [
-            now(
-              'format.text.capitalization.lower',
-              'lowercase',
-              action('text.case', { mode: 'lower' }),
-              { enabled: 'textBlockSelected' },
-            ),
-            now(
-              'format.text.capitalization.upper',
-              'UPPERCASE',
-              action('text.case', { mode: 'upper' }),
-              { enabled: 'textBlockSelected' },
-            ),
-            now(
-              'format.text.capitalization.title',
-              'Title Case',
-              action('text.case', { mode: 'title' }),
-              { enabled: 'textBlockSelected' },
-            ),
-          ],
-          { enabled: 'textBlockSelected', doc: 'Rewrites the selected text' },
+        parked(
+          sub(
+            'format.text.capitalization',
+            'Capitalization',
+            [
+              now(
+                'format.text.capitalization.lower',
+                'lowercase',
+                action('text.case', { mode: 'lower' }),
+                { enabled: 'textBlockSelected' },
+              ),
+              now(
+                'format.text.capitalization.upper',
+                'UPPERCASE',
+                action('text.case', { mode: 'upper' }),
+                { enabled: 'textBlockSelected' },
+              ),
+              now(
+                'format.text.capitalization.title',
+                'Title Case',
+                action('text.case', { mode: 'title' }),
+                { enabled: 'textBlockSelected' },
+              ),
+            ],
+            { enabled: 'textBlockSelected', doc: 'Rewrites the selected text' },
+          ),
         ),
       ],
       { icon: 'text' },
@@ -1463,6 +1599,7 @@ const FORMAT: Menu = {
       }),
       now('format.alignIndent.justified', 'Justified', action('block.set'), {
         key: shortcut('Cmd+Shift+J'),
+        advanced: true,
         enabled: 'textBlockSelected',
       }),
       now(
@@ -1508,6 +1645,7 @@ const FORMAT: Menu = {
         'Add space before paragraph',
         action('text.spacing', { before: 8 }),
         {
+          advanced: true,
           enabled: 'textBlockSelected',
           altLabel: { when: 'spaceBeforeSet', label: 'Remove space before paragraph' },
           dividerBefore: true,
@@ -1518,11 +1656,13 @@ const FORMAT: Menu = {
         'Add space after paragraph',
         action('text.spacing', { after: 8 }),
         {
+          advanced: true,
           enabled: 'textBlockSelected',
           altLabel: { when: 'spaceAfterSet', label: 'Remove space after paragraph' },
         },
       ),
       now('format.spacing.custom', 'Custom spacing', dialog('Custom spacing'), {
+        advanced: true,
         enabled: 'textBlockSelected',
         dividerBefore: true,
         doc: 'Line spacing, and the space before and after each paragraph',
@@ -1551,74 +1691,79 @@ const FORMAT: Menu = {
           doc: 'Nine bullet styles; the button and the key apply the first',
         },
       ),
-      sub(
-        'format.bulletsNumbering.listOptions',
-        'List options',
-        [
-          later(
-            'format.bulletsNumbering.listOptions.restart',
-            'Restart numbering',
-            NUMBERING_STARTS,
-          ),
-          later(
-            'format.bulletsNumbering.listOptions.prefixSuffix',
-            'Edit prefix and suffix',
-            NUMBERING_STARTS,
-          ),
-          now(
-            'format.bulletsNumbering.listOptions.moreBullets',
-            'More bullets',
-            dialog('Insert special characters'),
-            { enabled: 'listItemSelected' },
-          ),
-        ],
-        { enabled: 'listItemSelected' },
+      parked(
+        sub(
+          'format.bulletsNumbering.listOptions',
+          'List options',
+          [
+            later(
+              'format.bulletsNumbering.listOptions.restart',
+              'Restart numbering',
+              NUMBERING_STARTS,
+            ),
+            later(
+              'format.bulletsNumbering.listOptions.prefixSuffix',
+              'Edit prefix and suffix',
+              NUMBERING_STARTS,
+            ),
+            now(
+              'format.bulletsNumbering.listOptions.moreBullets',
+              'More bullets',
+              dialog('Insert special characters'),
+              { enabled: 'listItemSelected' },
+            ),
+          ],
+          { enabled: 'listItemSelected' },
+        ),
       ),
     ]),
-    sub(
-      'format.table',
-      'Table',
-      [
-        now('format.table.insertRowAbove', 'Insert row above', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.insertRowBelow', 'Insert row below', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.insertColumnLeft', 'Insert column left', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.insertColumnRight', 'Insert column right', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.deleteRow', 'Delete row', action('block.set'), {
-          enabled: 'tableCellSelected',
-          dividerBefore: true,
-        }),
-        now('format.table.deleteColumn', 'Delete column', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.deleteTable', 'Delete table', action('block.remove'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.distributeRows', 'Distribute rows', action('block.set'), {
-          enabled: 'tableCellSelected',
-          dividerBefore: true,
-        }),
-        now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
-          enabled: 'tableCellSelected',
-        }),
-        now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
-          enabled: 'cellRangeSelected',
-          disabledReason: 'Select two or more cells first',
-          dividerBefore: true,
-        }),
-        now('format.table.unmergeCells', 'Unmerge cells', action('table.unmerge'), {
-          enabled: 'mergedCellSelected',
-          disabledReason: 'Select a merged cell first',
-        }),
-      ],
-      { icon: 'table', dividerBefore: true },
+    /* docs/FOCUS.md 2.2, 3.2: the table rows are parked; a table a core layout places is text */
+    parked(
+      sub(
+        'format.table',
+        'Table',
+        [
+          now('format.table.insertRowAbove', 'Insert row above', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.insertRowBelow', 'Insert row below', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.insertColumnLeft', 'Insert column left', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.insertColumnRight', 'Insert column right', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.deleteRow', 'Delete row', action('block.set'), {
+            enabled: 'tableCellSelected',
+            dividerBefore: true,
+          }),
+          now('format.table.deleteColumn', 'Delete column', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.deleteTable', 'Delete table', action('block.remove'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.distributeRows', 'Distribute rows', action('block.set'), {
+            enabled: 'tableCellSelected',
+            dividerBefore: true,
+          }),
+          now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
+            enabled: 'tableCellSelected',
+          }),
+          now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
+            enabled: 'cellRangeSelected',
+            disabledReason: 'Select two or more cells first',
+            dividerBefore: true,
+          }),
+          now('format.table.unmergeCells', 'Unmerge cells', action('table.unmerge'), {
+            enabled: 'mergedCellSelected',
+            disabledReason: 'Select a merged cell first',
+          }),
+        ],
+        { icon: 'table', dividerBefore: true },
+      ),
     ),
     sub(
       'format.image',
@@ -1633,7 +1778,7 @@ const FORMAT: Menu = {
           'format.image.maskImage',
           'Mask image',
           { kind: 'submenu', dynamic: 'shapes', action: 'block.mask' },
-          { enabled: 'imageSelected', doc: 'Shows the picture inside a shape' },
+          { advanced: true, enabled: 'imageSelected', doc: 'Shows the picture inside a shape' },
         ),
         sub(
           'format.image.replaceImage',
@@ -1649,6 +1794,7 @@ const FORMAT: Menu = {
         /* SPEC-3 10.5, 13.2: the deck's two tone screen over the picture, on and off; the Format
            options Dither section carries the parameters */
         now('format.image.dither', 'Dither', action('picture.dither'), {
+          advanced: true,
           enabled: 'imageSelected',
           turboslide: true,
           doc: 'The deck’s two tone screen over the picture; change it under Format options',
@@ -1660,35 +1806,39 @@ const FORMAT: Menu = {
       { icon: 'photo' },
     ),
     /* SPEC-2 0.27, 0.62: Border color and Border weight open the toolbar's pickers anchored to
-       the row and write the block's border, or a word art block's outline */
-    sub('format.bordersLines', 'Borders & lines', [
-      now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
-        enabled: 'hasBorderField',
-        disabledReason: SELECT_BORDERED,
-      }),
-      now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
-        enabled: 'hasBorderField',
-        disabledReason: SELECT_BORDERED,
-      }),
-      sub(
-        'format.bordersLines.borderDash',
-        'Border dash',
-        dashItems('format.bordersLines.borderDash', 'blockSelected'),
-        { enabled: 'blockSelected' },
-      ),
-      sub(
-        'format.bordersLines.lineStart',
-        'Line start',
-        lineEndItems('format.bordersLines.lineStart', 'start'),
-        { enabled: 'lineSelected', dividerBefore: true },
-      ),
-      sub(
-        'format.bordersLines.lineEnd',
-        'Line end',
-        lineEndItems('format.bordersLines.lineEnd', 'end'),
-        { enabled: 'lineSelected' },
-      ),
-    ]),
+       the row and write the block's border, or a word art block's outline. Cycle 2: the submenu
+       is the shapes and lines feature's (docs/FOCUS.md 2.6) and leaves the default view with it
+       under ruling (1) (build/b3.md R14); it returns with the two features under section 8. */
+    parked(
+      sub('format.bordersLines', 'Borders & lines', [
+        now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
+          enabled: 'hasBorderField',
+          disabledReason: SELECT_BORDERED,
+        }),
+        now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
+          enabled: 'hasBorderField',
+          disabledReason: SELECT_BORDERED,
+        }),
+        sub(
+          'format.bordersLines.borderDash',
+          'Border dash',
+          dashItems('format.bordersLines.borderDash', 'blockSelected'),
+          { enabled: 'blockSelected' },
+        ),
+        sub(
+          'format.bordersLines.lineStart',
+          'Line start',
+          lineEndItems('format.bordersLines.lineStart', 'start'),
+          { enabled: 'lineSelected', dividerBefore: true },
+        ),
+        sub(
+          'format.bordersLines.lineEnd',
+          'Line end',
+          lineEndItems('format.bordersLines.lineEnd', 'end'),
+          { enabled: 'lineSelected' },
+        ),
+      ]),
+    ),
     now('format.formatOptions', 'Format options', panel('Format options'), {
       icon: 'adjustments',
       dividerBefore: true,
@@ -1699,18 +1849,26 @@ const FORMAT: Menu = {
       doc: 'Removes the size, weight, colour and border overrides',
     }),
     /* 4.3: on the right-click menus and in Search the menus; Format options carries the sections */
+    /* docs/FOCUS.md 3.2, 3.4: Alt text, Drop shadow, Change shape, Edit data, Edit HTML and Chart
+       type are parked; Text fitting stays */
     now('format.altText', 'Alt text', panel('Format options'), {
       key: shortcut('Cmd+Option+Y'),
+      advanced: true,
       enabled: 'blockSelected',
       contextOnly: true,
       doc: 'The description a screen reader reads',
     }),
+    /* docs/FOCUS.md 2.3 lists Text fitting among the Format menu's rows and the matrix row
+       `text.format-menu.text-fitting` drives it from the menu bar (VERIFICATION F18), so the row
+       is drawn in the Format menu as well as on the text block's right-click menu; Google keeps
+       the section inside Format options alone, hence `turboslide` */
     now('format.textFitting', 'Text fitting', panel('Format options'), {
       enabled: 'textBlockSelected',
-      contextOnly: true,
+      turboslide: true,
       doc: 'Do not autofit, Shrink text on overflow, or Resize shape to fit text',
     }),
     now('format.dropShadow', 'Drop shadow', panel('Format options'), {
+      advanced: true,
       enabled: 'blockSelected',
       contextOnly: true,
       doc: 'Colour, transparency, angle, distance and blur',
@@ -1720,9 +1878,10 @@ const FORMAT: Menu = {
       'format.changeShape',
       'Change shape',
       { kind: 'submenu', dynamic: 'shapes', action: 'shape.set' },
-      { enabled: 'shapeSelected', contextOnly: true, turboslide: true },
+      { advanced: true, enabled: 'shapeSelected', contextOnly: true, turboslide: true },
     ),
     now('format.editData', 'Edit data', panel('Format options'), {
+      advanced: true,
       enabled: 'chartSelected',
       contextOnly: true,
       turboslide: true,
@@ -1730,34 +1889,37 @@ const FORMAT: Menu = {
     }),
     /* SPEC-3 0.27: the html block shows inside a frame, so its markup is edited in the Edit HTML panel */
     now('format.editHtml', 'Edit HTML', panel('Edit HTML'), {
+      advanced: true,
       enabled: 'htmlBlockSelected',
       contextOnly: true,
       turboslide: true,
       doc: 'The markup and styles of the embedded block',
     }),
-    sub(
-      'format.chartType',
-      'Chart type',
-      [
-        now('format.chartType.bar', 'Bar', action('chart.setKind', { kind: 'bar' }), {
-          enabled: 'chartSelected',
-          turboslide: true,
-        }),
-        now('format.chartType.column', 'Column', action('chart.setKind', { kind: 'column' }), {
-          enabled: 'chartSelected',
-          turboslide: true,
-        }),
-        now('format.chartType.line', 'Line', action('chart.setKind', { kind: 'line' }), {
-          enabled: 'chartSelected',
-          turboslide: true,
-        }),
-        now('format.chartType.pie', 'Pie', action('chart.setKind', { kind: 'pie' }), {
-          enabled: 'chartSelected',
-          turboslide: true,
-          doc: 'Keeps the first series',
-        }),
-      ],
-      { enabled: 'chartSelected', contextOnly: true, turboslide: true },
+    parked(
+      sub(
+        'format.chartType',
+        'Chart type',
+        [
+          now('format.chartType.bar', 'Bar', action('chart.setKind', { kind: 'bar' }), {
+            enabled: 'chartSelected',
+            turboslide: true,
+          }),
+          now('format.chartType.column', 'Column', action('chart.setKind', { kind: 'column' }), {
+            enabled: 'chartSelected',
+            turboslide: true,
+          }),
+          now('format.chartType.line', 'Line', action('chart.setKind', { kind: 'line' }), {
+            enabled: 'chartSelected',
+            turboslide: true,
+          }),
+          now('format.chartType.pie', 'Pie', action('chart.setKind', { kind: 'pie' }), {
+            enabled: 'chartSelected',
+            turboslide: true,
+            doc: 'Keeps the first series',
+          }),
+        ],
+        { enabled: 'chartSelected', contextOnly: true, turboslide: true },
+      ),
     ),
   ],
 };
@@ -1837,7 +1999,8 @@ const SLIDE: Menu = {
       'The footer mark, the slide counter and the rails belong to the GT theme',
       { dividerBefore: true },
     ),
-    now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch' }),
+    /* docs/FOCUS.md 3.2: the GT theme is the one theme, so Change theme is parked */
+    now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch', advanced: true }),
   ],
 };
 
@@ -1916,24 +2079,28 @@ const ARRANGE: Menu = {
         doc: 'One object lines up with the slide; several line up with each other',
       },
     ),
-    sub(
-      'arrange.distribute',
-      'Distribute',
-      [
-        now(
-          'arrange.distribute.horizontally',
-          'Horizontally',
-          action('block.distribute', { axis: 'x' }),
-          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
-        ),
-        now(
-          'arrange.distribute.vertically',
-          'Vertically',
-          action('block.distribute', { axis: 'y' }),
-          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
-        ),
-      ],
-      { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+    /* docs/FOCUS.md 3.2: Distribute, Rotate, Group, Ungroup and Regroup are parked (they passed
+       their audit rows and are the least work to bring back, section 8) */
+    parked(
+      sub(
+        'arrange.distribute',
+        'Distribute',
+        [
+          now(
+            'arrange.distribute.horizontally',
+            'Horizontally',
+            action('block.distribute', { axis: 'x' }),
+            { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+          ),
+          now(
+            'arrange.distribute.vertically',
+            'Vertically',
+            action('block.distribute', { axis: 'y' }),
+            { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+          ),
+        ],
+        { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+      ),
     ),
     /* SPEC-2 0.80: Center on page is block.align against the sheet, on every slide kind */
     sub(
@@ -1956,46 +2123,49 @@ const ARRANGE: Menu = {
       { enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
     ),
     /* SPEC-2 0.2, 0.3, 4.1: rotation, flip and groups on every object of every slide kind */
-    sub(
-      'arrange.rotate',
-      'Rotate',
-      [
-        now(
-          'arrange.rotate.clockwise',
-          'Rotate clockwise 90°',
-          action('block.rotate', { by: 90 }),
-          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-        ),
-        now(
-          'arrange.rotate.counterClockwise',
-          'Rotate counter-clockwise 90°',
-          action('block.rotate', { by: -90 }),
-          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-        ),
-        now(
-          'arrange.rotate.flipHorizontally',
-          'Flip horizontally',
-          action('block.flip', { axis: 'h' }),
-          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-        ),
-        now(
-          'arrange.rotate.flipVertically',
-          'Flip vertically',
-          action('block.flip', { axis: 'v' }),
-          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-        ),
-      ],
-      {
-        icon: 'arrow-path',
-        enabled: 'rotatable',
-        disabledReason: SELECT_OBJECT,
-        dividerBefore: true,
-        doc: 'Option and the Left or Right arrow turn the selection by 15 degrees; with Shift, by 1',
-      },
+    parked(
+      sub(
+        'arrange.rotate',
+        'Rotate',
+        [
+          now(
+            'arrange.rotate.clockwise',
+            'Rotate clockwise 90°',
+            action('block.rotate', { by: 90 }),
+            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+          ),
+          now(
+            'arrange.rotate.counterClockwise',
+            'Rotate counter-clockwise 90°',
+            action('block.rotate', { by: -90 }),
+            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+          ),
+          now(
+            'arrange.rotate.flipHorizontally',
+            'Flip horizontally',
+            action('block.flip', { axis: 'h' }),
+            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+          ),
+          now(
+            'arrange.rotate.flipVertically',
+            'Flip vertically',
+            action('block.flip', { axis: 'v' }),
+            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+          ),
+        ],
+        {
+          icon: 'arrow-path',
+          enabled: 'rotatable',
+          disabledReason: SELECT_OBJECT,
+          dividerBefore: true,
+          doc: 'Option and the Left or Right arrow turn the selection by 15 degrees; with Shift, by 1',
+        },
+      ),
     ),
     now('arrange.group', 'Group', action('block.group'), {
       key: shortcut('Cmd+Option+G'),
       icon: 'rectangle-group',
+      advanced: true,
       enabled: 'canGroup',
       disabledReason: SELECT_OBJECTS,
       dividerBefore: true,
@@ -2003,10 +2173,12 @@ const ARRANGE: Menu = {
     }),
     now('arrange.ungroup', 'Ungroup', action('block.ungroup'), {
       key: shortcut('Cmd+Option+Shift+G'),
+      advanced: true,
       enabled: 'groupSelected',
       disabledReason: 'Select a group first',
     }),
     now('arrange.regroup', 'Regroup', action('block.regroup'), {
+      advanced: true,
       enabled: 'canRegroup',
       disabledReason: 'Available after Ungroup, while the objects are still on the slide',
     }),
@@ -2019,25 +2191,30 @@ const TOOLS: Menu = {
   accessKey: 't',
   key: shortcut('Ctrl+Option+T', 'Alt+T'),
   items: [
-    sub(
-      'tools.spelling',
-      'Spelling',
-      [
-        later(
-          'tools.spelling.spellCheck',
-          'Spell check',
-          'Your browser underlines misspellings and offers suggestions on right-click',
-        ),
-        now('tools.spelling.underlineErrors', 'Underline errors', toggle('spellcheck'), {
-          doc: 'Your browser’s spelling marks in text and notes',
-        }),
-        omit(
-          'tools.spelling.personalDictionary',
-          'Personal dictionary',
-          'The browser’s dictionary applies',
-        ),
-      ],
-      { icon: 'language' },
+    /* docs/FOCUS.md 3.2: the Tools menu keeps Accessibility settings and the switch itself in
+       the default view; Spelling, Notification settings, Activity dashboard, Check slides and the
+       Advanced submenu are parked */
+    parked(
+      sub(
+        'tools.spelling',
+        'Spelling',
+        [
+          later(
+            'tools.spelling.spellCheck',
+            'Spell check',
+            'Your browser underlines misspellings and offers suggestions on right-click',
+          ),
+          now('tools.spelling.underlineErrors', 'Underline errors', toggle('spellcheck'), {
+            doc: 'Your browser’s spelling marks in text and notes',
+          }),
+          omit(
+            'tools.spelling.personalDictionary',
+            'Personal dictionary',
+            'The browser’s dictionary applies',
+          ),
+        ],
+        { icon: 'language' },
+      ),
     ),
     omit('tools.explore', 'Explore', 'Retired by Google in 2024 (R02 8.6)'),
     omit('tools.linkedObjects', 'Linked objects', 'No linked sources'),
@@ -2047,6 +2224,7 @@ const TOOLS: Menu = {
     /* SPEC-3 5.5, 13.2: Google's per file row; All comments, Comments for you or None */
     now('tools.notificationSettings', 'Notification settings', dialog('Notification settings'), {
       when: 'comment',
+      advanced: true,
       doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
     }),
     later(
@@ -2077,7 +2255,7 @@ const TOOLS: Menu = {
     /* SPEC-3 5.7, 13.1, 13.3: the Activity panel for editors, and for commenters when the owner
        allows; the row opens the panel itself (a split, like the Slideshow button) and its one
        child is the panel's Later tab, Viewers, with its clause */
-    {
+    parked({
       ...now('tools.activityDashboard', 'Activity dashboard', panel('Activity'), {
         when: 'activity',
         doc: 'Edits, comments, sharing, names and restores, by time and by person',
@@ -2087,61 +2265,70 @@ const TOOLS: Menu = {
           contextOnly: true,
         }),
       ],
-    },
+    }),
     now('tools.checkSlides', 'Check slides', panel('Suggestions for this slide'), {
       turboslide: true,
+      advanced: true,
       icon: 'check-badge',
       dividerBefore: true,
       when: 'write',
       doc: 'One suggestion per row, with Fix where there is one',
     }),
-    sub(
-      'tools.advanced',
-      'Advanced',
-      [
-        now('tools.advanced.showSource', 'Show source', toggle('sourceDrawer'), {
-          turboslide: true,
-          icon: 'code',
-        }),
-        now('tools.advanced.sideBySide', 'Light and dark side by side', toggle('sideBySide'), {
-          turboslide: true,
-        }),
-        now(
-          'tools.advanced.suggestionMarks',
-          'Show suggestion marks on the slide',
-          toggle('suggestionMarks'),
-          { turboslide: true },
-        ),
-        now('tools.advanced.showIds', 'Show slide and block ids', toggle('showIds'), {
-          turboslide: true,
-        }),
-        now('tools.advanced.renderSlide', 'Render this slide', action('render.slide'), {
-          turboslide: true,
-          enabled: 'hasSlide',
-        }),
-        now('tools.advanced.changeHistory', 'Change history', panel('Change history'), {
-          turboslide: true,
-          icon: 'clock',
-        }),
-        now('tools.advanced.sectionsTree', 'Show sections as a tree', toggle('sectionsTree'), {
-          turboslide: true,
-        }),
-        now('tools.advanced.readAsBook', 'Read as a book', toggle('book'), {
-          turboslide: true,
-          icon: 'book',
-        }),
-        now(
-          'tools.advanced.picturesMaterials',
-          'Pictures and materials',
-          panel('Pictures and materials'),
-          { turboslide: true, icon: 'cube' },
-        ),
-        now('tools.advanced.runAction', 'Run an action…', client('runAction'), {
-          turboslide: true,
-          doc: 'Every action by name',
-        }),
-      ],
-      { turboslide: true, icon: 'beaker' },
+    /* the focus round (docs/FOCUS.md 3.1): the one switch that shows the parked rows; a check
+       row over the `advancedTools` setting, off by default and kept per browser */
+    now('tools.advancedTools', 'Advanced tools', toggle('advancedTools'), {
+      turboslide: true,
+      doc: 'Shows the tools that are not yet tested end to end, in every menu, on the toolbar and in the right click menus',
+    }),
+    parked(
+      sub(
+        'tools.advanced',
+        'Advanced',
+        [
+          now('tools.advanced.showSource', 'Show source', toggle('sourceDrawer'), {
+            turboslide: true,
+            icon: 'code',
+          }),
+          now('tools.advanced.sideBySide', 'Light and dark side by side', toggle('sideBySide'), {
+            turboslide: true,
+          }),
+          now(
+            'tools.advanced.suggestionMarks',
+            'Show suggestion marks on the slide',
+            toggle('suggestionMarks'),
+            { turboslide: true },
+          ),
+          now('tools.advanced.showIds', 'Show slide and block ids', toggle('showIds'), {
+            turboslide: true,
+          }),
+          now('tools.advanced.renderSlide', 'Render this slide', action('render.slide'), {
+            turboslide: true,
+            enabled: 'hasSlide',
+          }),
+          now('tools.advanced.changeHistory', 'Change history', panel('Change history'), {
+            turboslide: true,
+            icon: 'clock',
+          }),
+          now('tools.advanced.sectionsTree', 'Show sections as a tree', toggle('sectionsTree'), {
+            turboslide: true,
+          }),
+          now('tools.advanced.readAsBook', 'Read as a book', toggle('book'), {
+            turboslide: true,
+            icon: 'book',
+          }),
+          now(
+            'tools.advanced.picturesMaterials',
+            'Pictures and materials',
+            panel('Pictures and materials'),
+            { turboslide: true, icon: 'cube' },
+          ),
+          now('tools.advanced.runAction', 'Run an action…', client('runAction'), {
+            turboslide: true,
+            doc: 'Every action by name',
+          }),
+        ],
+        { turboslide: true, icon: 'beaker' },
+      ),
     ),
   ],
 };
@@ -2174,13 +2361,16 @@ const EXTENSIONS: Menu = {
       'AppSheet',
       `${GOOGLE_SERVICE}; the name is not reused for unrelated things (section 0.26)`,
     ),
+    /* docs/FOCUS.md 3.2: both rows are parked, so the menu is not drawn while the switch is off */
     now('extensions.agentAccess', 'Agent access', dialog('Agent access'), {
       turboslide: true,
+      advanced: true,
       icon: 'code',
       doc: 'The addresses and commands an assistant uses to read and edit this presentation',
     }),
     now('extensions.embedInSite', 'Embed in a site', dialog('Publish to the web'), {
       turboslide: true,
+      advanced: true,
       icon: 'external',
       doc: 'The snippet that shows this presentation on a web page',
     }),
@@ -2209,7 +2399,11 @@ const HELP: Menu = {
       'help.improve',
       'Help Turboslide improve',
       route('https://github.com/Kevin-Liu-01/Turboslide/issues/new', true),
-      { google: 'Help Slides improve', doc: 'Report a problem or ask for something, in a new tab' },
+      {
+        google: 'Help Slides improve',
+        advanced: true,
+        doc: 'Report a problem or ask for something, in a new tab',
+      },
     ),
     omit('help.privacyPolicy', 'Privacy Policy', 'No policy page'),
     omit('help.termsOfService', 'Terms of Service', 'No terms page'),
@@ -2286,6 +2480,8 @@ export type ToolbarControl = {
   when?: MenuPredicate;
   /** an effect of the control's own, for a control that is no menu item (the View only button, SPEC-3 13.2) */
   effect?: MenuEffect;
+  /** a parked control (docs/FOCUS.md 3.3): absent from the toolbar while Tools > Advanced tools is off; `isPresent` reads it */
+  advanced?: true;
 };
 
 /** Positions 1 to 7 (SPEC 3.1); never collapse. */
@@ -2334,12 +2530,14 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'file.print',
   },
+  /* docs/FOCUS.md 3.3: Paint format is parked (not weekly, and it "copies too little") */
   {
     control: 'toolbar.paintFormat',
     label: 'Paint format',
     icon: 'paint-brush',
     key: shortcut('Cmd+Option+C or Cmd+Option+V'),
     status: 'now',
+    advanced: true,
     enabled: 'blockSelected',
     doc: 'Click once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms',
   },
@@ -2378,6 +2576,8 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'insert.image',
     arrow: 'insert.image',
   },
+  /* cycle 2: the two buttons leave the default view with Insert > Shape and Insert > Line under
+     ruling (1) (docs/FOCUS.md section 4, build/b3.md R14); they return with their rows */
   {
     control: 'toolbar.insertShape',
     label: 'Insert shape',
@@ -2385,6 +2585,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.shape',
     arrow: 'insert.shape',
+    advanced: true,
   },
   {
     control: 'toolbar.insertLine',
@@ -2393,6 +2594,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.line',
     arrow: 'insert.line',
+    advanced: true,
   },
   {
     control: 'toolbar.insertComment',
@@ -2424,11 +2626,13 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'slide.applyLayout',
     arrow: 'slide.applyLayout',
   },
+  /* docs/FOCUS.md 3.3: Theme, Transition (Later) and Hide the menus are parked */
   {
     control: 'toolbar.theme',
     label: 'Theme',
     text: true,
     status: 'now',
+    advanced: true,
     item: 'slide.changeTheme',
   },
   {
@@ -2445,6 +2649,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     icon: 'chevron-up',
     key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
     status: 'now',
+    advanced: true,
     item: 'view.fullScreen',
   },
 ];
@@ -2469,9 +2674,11 @@ export type ContextTarget =
 
 /**
  * A menu item by id, a divider, or an item (or a divider, `id: DIVIDER`) shown only while a
- * predicate holds.
+ * predicate holds. `advanced` parks the row on this target alone (docs/FOCUS.md 3.4): it is
+ * drawn only while Tools > Advanced tools is on, while the same item may stay in the menu bar; a
+ * row parked everywhere carries the flag on the item instead, and `isPresent` drops it here too.
  */
-export type ContextEntry = string | { id: string; when: MenuPredicate };
+export type ContextEntry = string | { id: string; when?: MenuPredicate; advanced?: true };
 
 export const DIVIDER = '-';
 
@@ -2852,7 +3059,12 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
     case 'hasSelection':
       return ctx.selectedSlides > 0 || selection.blocks > 0 || ctx.focus === 'text';
     case 'canPaste':
-      return ctx.clipboard !== 'empty';
+      /* Paste stays enabled, as Google's does (cycle 2, VERIFICATION F-slides-paste, b4 FR2):
+         `ctx.clipboard` is the kind of the payload this page last wrote and reads `empty` in a
+         tab that copied nothing, while the system clipboard may hold a slide envelope another
+         tab wrote or text copied anywhere; the browser lets the page read it only at the paste
+         (`clipboardStore.read()`), and a paste with nothing to read does nothing */
+      return true;
     case 'hasSlide':
       return slide !== null;
     case 'slideSubsetSelected':
@@ -2977,12 +3189,37 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return ctx.account?.signedIn === true;
     case 'canSignIn':
       return ctx.account !== undefined && !ctx.account.signedIn && ctx.account.signInAvailable;
+    case 'advancedTools':
+      return advancedToolsOn(ctx);
   }
 }
 
-/** True when a row is drawn at all in a context (SPEC-3 13.4): its `when` holds, or it has none. */
-export function isPresent(item: Pick<MenuItem, 'when'>, ctx: MenuContext): boolean {
+/** True while Tools > Advanced tools is on (docs/FOCUS.md 3.1): the parked set is drawn. */
+export function advancedToolsOn(ctx: Pick<MenuContext, 'settings'>): boolean {
+  return ctx.settings.advancedTools === true;
+}
+
+/** What `isPresent` reads: a menu row, a menu, a toolbar control or a right-click entry. */
+export type Presentable = { when?: MenuPredicate; status?: MenuStatus; advanced?: true };
+
+/**
+ * True when a row is drawn at all in a context (SPEC-3 13.4): its `when` holds, or it has none.
+ * The focus round (docs/FOCUS.md 3.1) adds the one rule of the parked set here and nowhere else:
+ * while Tools > Advanced tools is off, a row carrying `advanced: true` and a row whose `status`
+ * is `later` are absent; with it on both are drawn as before, the Later row disabled with its stub
+ * clause. Every surface that draws or runs a row reads presence through this function.
+ */
+export function isPresent(item: Presentable, ctx: MenuContext): boolean {
+  if (!advancedToolsOn(ctx) && (item.advanced === true || item.status === 'later')) return false;
   return item.when === undefined || evaluate(item.when, ctx);
+}
+
+/** The toolbar controls a context draws (docs/FOCUS.md 3.1): the head, a tail or the tail end filtered by `isPresent`. */
+export function presentControls<T extends ToolbarControl>(
+  controls: ReadonlyArray<T>,
+  ctx: MenuContext,
+): T[] {
+  return controls.filter((control) => isPresent(control, ctx));
 }
 
 /** True when the item takes input now: a `now` item whose predicate holds. */
@@ -3078,6 +3315,16 @@ export function itemById(id: string): MenuItem {
   return item;
 }
 
+/**
+ * True for a row the switch decides (docs/FOCUS.md 3.1, 3.2): flagged `advanced`, a Later stub, or
+ * unknown. Read by the palette, whose Insert entries name the menu row each corresponds to and
+ * leave the default view with it; the surfaces that hold a context read `isPresent` instead.
+ */
+export function isParkedRow(id: string): boolean {
+  const item = INDEX.get(id);
+  return item === undefined || item.advanced === true || item.status === 'later';
+}
+
 /** The menu an item belongs to, or 'title' for the title row. */
 export function menuOf(itemId: string): MenuId | 'title' {
   const head = itemId.split('.')[0];
@@ -3111,6 +3358,9 @@ export function itemPath(itemId: string): string[] {
 /**
  * The items a menu draws: omitted items dropped, context-only items dropped unless asked, and
  * with a context the rows whose `when` says no dropped too (SPEC-3 13.4: absent, never disabled).
+ * With a context a plain container (a row whose only effect is to open its submenu) with no
+ * visible child is dropped as well (docs/FOCUS.md 3.1: a parent whose children are all parked is
+ * absent); a split row that runs a command of its own keeps its place with an empty arrow.
  */
 export function visibleItems(
   items: ReadonlyArray<MenuItem>,
@@ -3121,13 +3371,38 @@ export function visibleItems(
     (item) =>
       item.status !== 'omit' &&
       (options.contextOnly === true || item.contextOnly !== true) &&
-      (ctx === undefined || isPresent(item, ctx)),
+      (ctx === undefined ||
+        (isPresent(item, ctx) &&
+          !isEmptyContainer(item, { contextOnly: options.contextOnly, ctx }))),
   );
 }
 
-/** The menus the bar draws in a context: a menu whose `when` says no is absent (SPEC-3 13.4). */
+/** True for a plain submenu row whose children are all absent in the context. */
+function isEmptyContainer(
+  item: MenuItem,
+  options: { contextOnly?: boolean; ctx: MenuContext },
+): boolean {
+  if (item.items === undefined || item.items.length === 0) return false;
+  if (
+    item.effect === undefined ||
+    item.effect.kind !== 'submenu' ||
+    item.effect.dynamic !== undefined
+  )
+    return false;
+  return (
+    visibleItems(item.items, { contextOnly: options.contextOnly, context: options.ctx }).length ===
+    0
+  );
+}
+
+/**
+ * The menus the bar draws in a context: a menu whose `when` says no is absent (SPEC-3 13.4), and
+ * so is a menu none of whose rows is visible (docs/FOCUS.md 3.1: Extensions with the switch off).
+ */
 export function visibleMenus(ctx: MenuContext, menus: ReadonlyArray<Menu> = MENUS): Menu[] {
-  return menus.filter((menu) => isPresent(menu, ctx));
+  return menus.filter(
+    (menu) => isPresent(menu, ctx) && visibleItems(menu.items, { context: ctx }).length > 0,
+  );
 }
 
 /**
@@ -3137,6 +3412,19 @@ export function visibleMenus(ctx: MenuContext, menus: ReadonlyArray<Menu> = MENU
  */
 export function contextMenuItems(
   target: ContextTarget,
+  ctx: MenuContext,
+): Array<MenuItem | typeof DIVIDER> {
+  return resolveContextEntries(CONTEXT_MENUS[target], ctx);
+}
+
+/**
+ * The rows a list of right-click entries draws in a context, the rule `contextMenuItems`
+ * applies: a conditional entry whose predicate says no is dropped, an entry parked on this target
+ * (`advanced`) is dropped while Tools > Advanced tools is off, a row `isPresent` refuses is
+ * dropped, and the dividers collapse. Exported so the rule is tested on a list of its own.
+ */
+export function resolveContextEntries(
+  entries: ReadonlyArray<ContextEntry>,
   ctx: MenuContext,
 ): Array<MenuItem | typeof DIVIDER> {
   const out: Array<MenuItem | typeof DIVIDER> = [];
@@ -3149,7 +3437,7 @@ export function contextMenuItems(
     if (!isPresent(entry, ctx)) return;
     out.push(entry);
   };
-  for (const entry of CONTEXT_MENUS[target]) {
+  for (const entry of entries) {
     if (entry === DIVIDER) {
       push(DIVIDER);
       continue;
@@ -3158,6 +3446,7 @@ export function contextMenuItems(
       push(itemById(entry));
       continue;
     }
+    if (entry.advanced === true && !advancedToolsOn(ctx)) continue;
     if (!evaluate(entry.when, ctx)) continue;
     push(entry.id === DIVIDER ? DIVIDER : itemById(entry.id));
   }

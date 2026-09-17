@@ -1,0 +1,208 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-16T16:27:56.555Z",
+  "scenarios": {
+    "setup": [
+      {
+        "name": "deck",
+        "deck": "untitled-20260916-v9qb",
+        "at": "2026-09-16T16:27:59.904Z"
+      },
+      {
+        "name": "done",
+        "ms": 3218,
+        "at": "2026-09-16T16:27:59.904Z"
+      }
+    ],
+    "right-click-edge": [
+      {
+        "name": "selected",
+        "handles": 1,
+        "chip": "Text box",
+        "edges": [
+          {
+            "side": "n",
+            "x": 421,
+            "y": 277,
+            "w": 177.1875,
+            "h": 8
+          },
+          {
+            "side": "s",
+            "x": 421,
+            "y": 361.59375,
+            "w": 177.1875,
+            "h": 8
+          },
+          {
+            "side": "w",
+            "x": 421,
+            "y": 285,
+            "w": 8,
+            "h": 76.59375
+          },
+          {
+            "side": "e",
+            "x": 590.1875,
+            "y": 285,
+            "w": 8,
+            "h": 76.59375
+          }
+        ],
+        "at": "2026-09-16T16:28:04.139Z"
+      },
+      {
+        "name": "trials",
+        "trials": [
+          {
+            "label": "edge n at 30 percent",
+            "under": "DIV.ts-frame-edge[]",
+            "menus": {
+              "context": 0,
+              "rows": []
+            },
+            "editing": false
+          },
+          {
+            "label": "edge n at 50 percent",
+            "under": "BUTTON.ts-handle.is-selected[handle.plain-box.resize.n]",
+            "menus": {
+              "context": 0,
+              "rows": []
+            },
+            "editing": false
+          },
+          {
+            "label": "edge n 1 px inside",
+            "under": "BUTTON.ts-handle.is-selected[handle.plain-box.resize.n]",
+            "menus": {
+              "context": 0,
+              "rows": []
+            },
+            "editing": false
+          },
+          {
+            "label": "block element right click while selected",
+            "menus": {
+              "context": 1,
+              "rows": [
+                "menu.edit.cut",
+                "menu.edit.copy",
+                "menu.edit.paste",
+                "menu.edit.delete",
+                "menu.edit.duplicate",
+                "menu.arrange.order"
+              ]
+            },
+            "editing": false
+          },
+          {
+            "label": "move handle right click",
+            "menus": {
+              "context": 0,
+              "rows": []
+            }
+          }
+        ],
+        "at": "2026-09-16T16:28:09.567Z"
+      },
+      {
+        "name": "done",
+        "ms": 9663,
+        "at": "2026-09-16T16:28:09.567Z"
+      }
+    ],
+    "show-link": [
+      {
+        "name": "facts",
+        "storedHasAcme": true,
+        "editorLink": ["A[https://example.com/acme]"],
+        "showLink": {
+          "slide": "title",
+          "anchors": [],
+          "linkMarks": 0,
+          "text": "1 of 1●⋯"
+        },
+        "at": "2026-09-16T16:28:13.551Z"
+      },
+      {
+        "name": "done",
+        "ms": 4494,
+        "at": "2026-09-16T16:28:14.061Z"
+      }
+    ],
+    "links-and-stranger": [
+      {
+        "name": "view copy",
+        "ms": 1115,
+        "clip": "/s/<token>",
+        "error": "",
+        "snackbar": "Link copied",
+        "at": "2026-09-16T16:28:15.605Z"
+      },
+      {
+        "name": "visitor on the view link",
+        "landed": false,
+        "ms": 31263,
+        "url": "/s/<token>",
+        "hops": [
+          {
+            "url": "/s/<token>",
+            "status": 404,
+            "ms": 1223
+          }
+        ],
+        "at": "2026-09-16T16:28:47.217Z"
+      },
+      {
+        "name": "stranger on /edit",
+        "status": 404,
+        "ms": 2127,
+        "url": "/edit/untitled-20260916-v9qb",
+        "accessPage": 1,
+        "viewer": 0,
+        "title": "Turboslide",
+        "bodyStart": "You need access This presentation is not available to you, or does not exist. Access Viewer Commenter Editor Message Email Request access Invited by email? S",
+        "at": "2026-09-16T16:28:49.396Z"
+      },
+      {
+        "name": "done",
+        "ms": 35336,
+        "at": "2026-09-16T16:28:49.397Z"
+      }
+    ],
+    "chord-off": [
+      {
+        "name": "facts",
+        "advancedBefore": false,
+        "advancedNow": false,
+        "afterShift": "2 objects",
+        "chipNow": "2 objects",
+        "groupedBefore": false,
+        "groupedAfter": true,
+        "snippet": "\"group\":\"group\"",
+        "menuRowPresent": 0,
+        "at": "2026-09-16T16:28:58.403Z"
+      },
+      {
+        "name": "done",
+        "ms": 9006,
+        "at": "2026-09-16T16:28:58.404Z"
+      }
+    ],
+    "teardown": [
+      {
+        "name": "untitled-20260916-v9qb",
+        "status": 404,
+        "at": "2026-09-16T16:29:00.479Z"
+      },
+      {
+        "name": "done",
+        "ms": 2075,
+        "at": "2026-09-16T16:29:00.479Z"
+      }
+    ]
+  },
+  "decks": ["untitled-20260916-v9qb"],
+  "endedAt": "2026-09-16T16:29:00.479Z"
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-devanagari",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-devanagari",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "A Devanagari manuscript"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A page of the Prashna Upanishad, copied by hand so the text could travel. The company's writing exists to travel the same way, between scripts and readers.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: Ms Sarah Welch, CC BY-SA 4.0"
+      }
+    ]
+  }
+}

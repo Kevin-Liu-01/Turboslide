@@ -2,7 +2,13 @@ import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 
 import type { MarkSpec } from '@turboslide/identity/marks';
 import type { Asset } from '@turboslide/schema/assets';
-import type { Block, BlockType, PictureDither, ShapeBlock } from '@turboslide/schema/blocks';
+import type {
+  Block,
+  BlockType,
+  PictureDither,
+  PlainBlock,
+  ShapeBlock,
+} from '@turboslide/schema/blocks';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable } from '@turboslide/schema/blocks/table';
@@ -11,6 +17,7 @@ import { CATALOG } from '@turboslide/schema/catalog';
 import type { Deck, DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
 import { deckAppearance, sectionOfSlide, slideBlocks, slideOrder } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
+import { sortByZ } from '@turboslide/schema/freeform';
 import type { BlockId } from '@turboslide/schema/ids';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
@@ -48,6 +55,7 @@ import type {
   MenuSetting,
 } from './menus/model';
 import { DEFAULT_MENU_CONTEXT } from './menus/model';
+import { SNACKBARS } from './menus/strings';
 import type { TailKind } from './menus/toolbar-tails';
 import { freeBlockId } from './palette-data';
 import type { PaletteEntry } from './palette-data';
@@ -147,6 +155,8 @@ export type EditorHandle = {
   previewBackground?: (background: unknown | null) => void;
   /** Edit > Select none: clears the block selection, the caret and the filmstrip's multi selection */
   selectNone?: () => void;
+  /** Edit > Duplicate on the canvas: copies the selected objects and selects the copies, as Cmd+D does */
+  duplicate?: () => void;
   /** measures and writes the fit of `block.autofit` on the window transport (SPEC-2 0.64) */
   applyAutofit?: (blockId: string) => void;
   /* the canvas (SPEC-2 sections 1 and 6; B4 lands the stage's side) */
@@ -156,6 +166,8 @@ export type EditorHandle = {
   zoomTo?: (zoom: number | 'fit', center?: { x: number; y: number }) => void;
   /** one step up or down the ladder of 0.81 from the effective zoom */
   zoomStep?: (direction: 1 | -1) => void;
+  /** the stage's live scale (the fit scale while the zoom is Fit), so a step from Fit starts at the right rung */
+  scale?: () => number;
   /** adds a guide at a sheet position (the centre unless set) */
   addGuide?: (axis: 'x' | 'y', at?: number) => void;
   clearGuides?: () => void;
@@ -662,6 +674,12 @@ export type EditorShellInput = {
   save?: EditorSaveState;
   clipboard?: EditorClipboard;
   toggles?: EditorToggles;
+  /**
+   * The shell's stored settings, reported after mount and on every change (docs/FOCUS.md 3.1):
+   * the page passes them to the window API as `describe().state.settings`, so a driver reads
+   * Tools > Advanced tools the way it reads the zoom. Read only; the rows flip them.
+   */
+  onSettingsChange?: (settings: ShellSettings) => void;
   /** the current slide's findings, for Check slides; every finding when the route passes them */
   findings?: ReadonlyArray<Finding>;
   versions?: ReadonlyArray<Version>;
@@ -714,6 +732,8 @@ export type EditorShellInput = {
   onPaintFormat?: () => void;
   /** the draw tools (B4): Text box, Shape and Line; block.insert into the current slot when absent */
   onDrawTool?: (tool: DrawTool) => void;
+  /** the toolbar Select button: the stage's tool returns to Select (docs/FOCUS.md `arrange.toolbar.select`) */
+  onSelectTool?: () => void;
   /** the canvas gestures of round two (SPEC-2 seams); a snackbar says what to do when one is absent */
   editor?: EditorHandle;
   /** the deck's guides in sheet px (SPEC-2 2.10), for the View rows and the guide readouts; the document's when absent */
@@ -970,6 +990,11 @@ export function isLineShape(block: Block): block is ShapeBlock {
 /** The menu model's family of a block (SPEC 3.2 to 3.8; SPEC-2 4.2 adds the chart and the picture object). */
 export function blockFamily(block: Block): BlockFamily {
   if (TEXT_TYPES.has(block.type)) return 'text';
+  /* a list (a `plain` block) keeps the text tail and the text menu: a box a person turned into a
+     list with the toolbar's list button still takes Indent, Clear formatting and Text fitting
+     (docs/FOCUS.md `text.indent.toolbar`, `text.clear-formatting`, `text.format-menu.text-fitting`
+     on the merge 1 run: the tail left with the conversion and the controls timed out) */
+  if (block.type === 'plain') return 'text';
   if (block.type === 'shape') return isLineKind(block.shape) ? 'line' : 'shape';
   if (block.type === 'rule') return 'line';
   if (block.type === 'shot' || block.type === 'picture') return 'image';
@@ -1180,23 +1205,24 @@ export function buildMenuContext(
   const blocks = ids.length;
   const freeform = slide?.kind === 'content' && slide.layout.type === 'freeform';
   const placed = slide === undefined ? [] : slideBlocks(slide);
-  /* SPEC-2 6.1 row 13: one stack per canvas. On a canvas the rows read from z; on a slide nothing
-     converted the first pick converts and the objects take document order as their z, so the rows
-     read from the block's place in that order: forward and front when it is not last, backward
-     and back when it is not first (the round one place within the slot retires with 1.6). */
-  const z = block?.pos?.z;
-  const zs = placed
-    .map(({ block: each }) => each.pos?.z)
-    .filter((v): v is number => v !== undefined);
-  const top = zs.length > 0 ? Math.max(...zs) : 0;
-  const bottom = zs.length > 0 ? Math.min(...zs) : 0;
-  const canOrderZ = freeform && block !== undefined && placed.length > 1;
+  /* SPEC-2 6.1 row 13: one stack per canvas. On a canvas the rows read from the block's rank in
+     the paint order (`sortByZ`: z ascending, a missing z sorts as 0, document order breaks ties,
+     the stack the store's `block.order` renumbers), so a box placed without a `pos.z` beside
+     boxes with one is at the bottom and can come forward (docs/FOCUS.md `arrange.order.*`: the
+     four rows were drawn disabled for a text box whose pos had no z while the chords worked,
+     b4 C2-R3); on a slide nothing converted the first pick converts and the objects take
+     document order as their z, so the rows read from the block's place in that order: forward
+     and front when it is not last, backward and back when it is not first (the round one place
+     within the slot retires with 1.6). */
+  const stack = freeform ? sortByZ(placed.map(({ block: each }) => each)).map((b) => b.id) : [];
+  const rank = block === undefined ? -1 : stack.indexOf(block.id);
+  const canOrderZ = freeform && block !== undefined && placed.length > 1 && rank >= 0;
   const at = block === undefined ? -1 : placed.findIndex(({ block: each }) => each.id === block.id);
   const canOrderDoc = !freeform && block !== undefined && placed.length > 1 && at >= 0;
   const forward = freeform
-    ? canOrderZ && z !== undefined && z < top
+    ? canOrderZ && rank < stack.length - 1
     : canOrderDoc && at < placed.length - 1;
-  const backward = freeform ? canOrderZ && z !== undefined && z > bottom : canOrderDoc && at > 0;
+  const backward = freeform ? canOrderZ && rank > 0 : canOrderDoc && at > 0;
   const family = block === undefined ? undefined : blockFamily(block);
   const typography =
     block !== undefined && 'typography' in block && typeof block.typography === 'object'
@@ -1212,8 +1238,12 @@ export function buildMenuContext(
     ...(family === undefined ? {} : { block: family }),
     box: block?.type === 'box',
     picture: block !== undefined && PICTURE_TYPES.has(block.type),
+    /* a list (a `plain` block) is text too: the list chords and Format > Text act on a selected
+       box a person has already turned into a list (docs/FOCUS.md `text.list.chords`: Cmd+Shift+7
+       on a bulleted box was refused because the plain block did not count; b2.md's note) */
     textBlock:
       (block !== undefined && TEXT_TYPES.has(block.type)) ||
+      block?.type === 'plain' ||
       input.selection?.text === true ||
       block?.type === 'table' ||
       (block?.type === 'shape' && !isLineKind(block.shape)),
@@ -1312,6 +1342,12 @@ export type ActionPlan = {
   label: string;
   /** the slide to select after the write (New slide, Duplicate) */
   selectSlide?: 'result' | string;
+  /**
+   * the same action once per input, in order, each awaited before the next (Slide > Delete slide
+   * with several cards selected: `slide.remove` takes one slide, so the plan is one write per
+   * slide, the way Filmstrip.removeSlides makes them; docs/FOCUS.md rank 22); `input` is the first
+   */
+  batch?: ReadonlyArray<Record<string, unknown>>;
   /** the sentence for the snackbar after the write; the Undo action follows when `undo` is set */
   snackbar?: string;
   undo?: true;
@@ -1643,7 +1679,21 @@ function currentSize(target: Block): number {
   if (target.type === 'paragraph')
     return target.role === 'lead' ? 26 : target.role === 'cap' ? 17 : 20;
   if (target.type === 'table') return (target as TableBlock).size ?? 20;
+  if (target.type === 'plain') return (target as PlainBlock).size ?? 20;
   return 20;
+}
+
+/**
+ * A list (a `plain` block) keeps its size at `/size` on the ladder 20, 22, 24 and has no
+ * `typography` field, so the Format > Text > Size rows step that ladder and write `/size` the way
+ * the table branch does; a `/typography` write on a list was dropped by the schema and the row
+ * wrote nothing (docs/FOCUS.md `text.format-menu.size-increase` on a list; F-list-size, b1 R22).
+ */
+export const PLAIN_SIZE_LADDER: ReadonlyArray<20 | 22 | 24> = [20, 22, 24];
+export function stepPlainSize(size: number | undefined, direction: 1 | -1): 20 | 22 | 24 {
+  const at = Math.max(0, PLAIN_SIZE_LADDER.indexOf((size ?? 20) as 20 | 22 | 24));
+  const index = Math.max(0, Math.min(PLAIN_SIZE_LADDER.length - 1, at + direction));
+  return PLAIN_SIZE_LADDER[index] ?? 20;
 }
 
 /** The next ladder step: larger sizes come first in TYPE_LADDER, so `up` walks towards the head. */
@@ -2023,15 +2073,20 @@ export function clampZoomPercent(value: number): number {
   return Math.max(25, Math.min(1600, Math.round(value)));
 }
 
-/** The next ladder step from an effective percent: the nearest step, then one up or down. */
+/**
+ * The next ladder step from an effective percent: the first rung strictly above it going up, the
+ * last rung strictly below it going down, clamped at the ends (viewer/zoom.ts `stepZoom`, the same
+ * rule; docs/FOCUS.md `arrange.zoom.menu-in`: from the fit's 71 percent Zoom in lands on 75, not on
+ * the rung after the nearest one). A percent already on a rung steps to its neighbour.
+ */
 export function zoomStepFrom(percent: number, direction: 1 | -1): number {
-  let nearest = 0;
-  for (let i = 1; i < ZOOM_LADDER.length; i += 1) {
-    const step = ZOOM_LADDER[i] ?? 100;
-    if (Math.abs(step - percent) < Math.abs((ZOOM_LADDER[nearest] ?? 100) - percent)) nearest = i;
+  const epsilon = 1e-6;
+  if (direction > 0) {
+    const next = ZOOM_LADDER.find((rung) => rung > percent + epsilon);
+    return next ?? ZOOM_LADDER[ZOOM_LADDER.length - 1] ?? 1600;
   }
-  const at = Math.max(0, Math.min(ZOOM_LADDER.length - 1, nearest + direction));
-  return ZOOM_LADDER[at] ?? 100;
+  const below = ZOOM_LADDER.filter((rung) => rung < percent - epsilon);
+  return below[below.length - 1] ?? ZOOM_LADDER[0] ?? 25;
 }
 
 /** The effective zoom in percent: the stage's report while Fit, else the setting. */
@@ -2094,14 +2149,19 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
         label: 'Duplicate slide',
         selectSlide: 'result',
       };
-    case 'slide.deleteSlide':
+    case 'slide.deleteSlide': {
+      /* every selected slide, one write each (rank 22: the menu removed one of several selected) */
+      const inputs = slideIds.map((slideId) => ({ slideId, ...rev }));
       return {
         action: 'slide.remove',
-        input: { slideId: facts.slideId, ...rev },
+        input: inputs[0] ?? { slideId: facts.slideId, ...rev },
+        ...(inputs.length > 1 ? { batch: inputs } : {}),
         label: 'Delete slide',
-        snackbar: 'Slide deleted',
+        snackbar:
+          inputs.length > 1 ? SNACKBARS.slidesDeleted(inputs.length) : SNACKBARS.slideDeleted,
         undo: true,
       };
+    }
     case 'slide.skipSlide': {
       const skip = !(slide?.skip === true);
       return {
@@ -2435,7 +2495,16 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.text.size.increase':
     case 'format.text.size.decrease': {
       if (target === undefined) return { refused: SELECT_TEXT };
-      const size = stepLadder(currentSize(target), item.id.endsWith('increase') ? 1 : -1);
+      const direction = item.id.endsWith('increase') ? 1 : -1;
+      if (target.type === 'plain')
+        return blockSet(
+          facts,
+          target.id,
+          '/size',
+          stepPlainSize((target as PlainBlock).size, direction),
+          item.label,
+        );
+      const size = stepLadder(currentSize(target), direction);
       if (target.type === 'table') return blockSet(facts, target.id, '/size', size, item.label);
       return blockSet(
         facts,
@@ -2722,6 +2791,9 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   /* SPEC-2 0.77: the rulers and the guides, per browser like the snap settings */
   'showRuler',
   'showGuides',
+  /* the focus round (docs/FOCUS.md 3.1): Tools > Advanced tools, remembered the same way; when a
+     preferences record lands the setting follows the principal and this copy is the fallback */
+  'advancedTools',
 ];
 
 /**
@@ -2755,6 +2827,8 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   pointerOthers: true,
   announce: false,
   showChanges: false,
+  /* docs/FOCUS.md 3.1: the parked set is hidden until the person asks for it */
+  advancedTools: false,
 };
 
 /** The mode the shell is in: the route's word, else the round one Viewing flag, else Editing (SPEC-3 5.3). */

@@ -240,11 +240,35 @@ export const BLOCK_CSS = `
 .ts-sheet .shape-block > svg.shape { display: block; width: 100%; height: 100%; }
 .ts-sheet .shape-text { position: absolute; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
 .ts-sheet .shape-text .para { margin: 0; }
+/* a shape whose text is empty (a fresh shape, docs/FOCUS.md section 4): the layer keeps its run
+   for Enter and a double click but takes no pointer until the session gives it the focus, so a
+   click selects the shape and a drag moves it */
+.ts-sheet .shape-text.is-empty:not(:focus) { pointer-events: none; }
+/* the click model on the editor stage (docs/gslides-parity/focus/AMENDMENTS.md A1): outside a
+   session a run is a plain surface, so a pointer down inside a selected text object and a move
+   drag the object and paint no native selection over the words, and a picture drags as an object
+   rather than as the browser's image ghost; the session's editable (.ts-editing) keeps its own
+   selection. The viewer's sheet is untouched: the rules bind to the editor root alone */
+.ts-sheet.ts-editor .pt-slide [data-run]:not(.ts-editing) { user-select: none; -webkit-user-select: none; }
+.ts-sheet.ts-editor .pt-slide img { -webkit-user-drag: none; }
 /* word art (2.2.16): the outline behind the fill */
 .ts-sheet p.text.word-art { paint-order: stroke fill; }
 /* the picture tools on a shot (2.5): the clipping frame at the picture's aspect */
 .ts-sheet .shot-crop { position: relative; display: block; width: 100%; overflow: hidden; box-sizing: border-box; background: var(--plate); }
 .ts-sheet .shot-crop > img.shot { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; border: 0; }
+/* a picture object drawn as a shot (docs/FOCUS.md rank 18, the deferred W7 of hotfix 4): on the
+   canvas the figure takes its box, the image row takes what the caption row leaves and the image
+   takes the whole row in both axes (its border box, since the sheet sizes it border-box; the fit
+   form's auto width and its two caps are off), so a drag of one edge stretches the picture the way
+   Google's does while a corner drag keeps the aspect through the resize model. At the box the
+   conversion measured (the figure's own rect: the image's border box, the gap and the caption) a
+   converted shot therefore renders the pixels it rendered in the flow, which the fidelity gate
+   measures. A trimmed, masked or dithered shot's frame takes the row the same way, its inline
+   aspect ratio ignored, and its image stretches inside the frame. */
+.ts-sheet .free > .shot-fig, .ts-sheet .free > .link > .shot-fig { height: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr); grid-auto-rows: auto; align-content: start; }
+.ts-sheet .free > .shot-fig > img.shot, .ts-sheet .free > .link > .shot-fig > img.shot { width: 100%; height: 100%; max-width: none; max-height: none; min-height: 0; object-fit: fill; }
+.ts-sheet .free > .shot-fig > .shot-crop, .ts-sheet .free > .link > .shot-fig > .shot-crop { height: 100%; min-height: 0; aspect-ratio: auto !important; }
+.ts-sheet .free > .shot-fig > .shot-crop > img.shot, .ts-sheet .free > .link > .shot-fig > .shot-crop > img.shot { object-fit: fill; }
 /* the chart block (2.8.1): the diagram grammar's sizes */
 .ts-sheet svg.chart { display: block; overflow: visible; }
 .ts-sheet .free > svg.chart, .ts-sheet .free > .link > svg.chart { width: 100%; height: 100%; }

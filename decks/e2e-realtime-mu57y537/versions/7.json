@@ -1,0 +1,38 @@
+{
+  "n": 7,
+  "revision": 7,
+  "author": {
+    "kind": "human",
+    "name": "Bismuth 669",
+    "principalId": "anon_e8b3e383-8816-4a01-bf71-8feeccc5fcea"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T07:39:43.182Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 0,
+      "remove": 0,
+      "insert": "U"
+    }
+  ],
+  "baseRevision": 6,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 0,
+      "remove": 1,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 18,
+    "toSeq": 18
+  }
+}

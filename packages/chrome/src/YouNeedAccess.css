@@ -1,10 +1,18 @@
 /* The You need access page (gslides-parity SPEC-3 6.5, 9.3): server rendered with the form
-   present, the email field decided on the server, the sign in form in a fixed height region. */
+   present, the email field decided on the server, the sign in form in a fixed height region.
+   The page paints on its own ground and above whatever else the document holds (docs/FOCUS.md
+   section 5 rank 26, `decks.access.paint`: in one browser the light figure of another page was
+   drawn over the form and the sign in line), so the form reads whatever the appearance and
+   whatever the router leaves behind it. */
 .ts-access {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
   box-sizing: border-box;
   max-width: 480px;
   margin: 10vh auto 0;
   padding: 24px;
+  background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.45 var(--pt-text);
 }

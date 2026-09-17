@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks, slideOrder } from '@turboslide/schema/deck';
@@ -6,6 +6,7 @@ import { plainText } from '@turboslide/schema/text';
 
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { useMountEffect } from '../lib/useMountEffect';
 import { DIALOGS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
@@ -82,6 +83,28 @@ export function FindReplaceDialog() {
   const [matchCase, setMatchCase] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const findField = useRef<HTMLInputElement>(null);
+  const closeRef = useRef(shell.closeDialog);
+  closeRef.current = shell.closeDialog;
+
+  /* Cmd+Shift+H opened the dialog while a typed query once landed outside the field and Escape
+     once did not close it (audit-text row 59; docs/FOCUS.md rank 32): the field takes the focus
+     itself a tick after the Dialog's own focus, and Escape closes the dialog from a document
+     capture listener whatever holds the focus, beside the Dialog's onKeyDown */
+  useMountEffect(() => {
+    const timer = window.setTimeout(() => findField.current?.focus(), 0);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeRef.current();
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener('keydown', onKey, true);
+    };
+  });
 
   const order = useMemo(() => slideOrder(input.document.deck), [input.document]);
   const counts = useMemo(
@@ -179,6 +202,7 @@ export function FindReplaceDialog() {
         }
       >
         <input
+          ref={findField}
           type="text"
           value={find}
           autoFocus

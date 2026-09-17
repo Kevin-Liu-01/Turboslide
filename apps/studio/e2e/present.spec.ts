@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // MILESTONES B6 acceptance, present.spec.ts (gslides-parity SPEC 9.2, 9.3, 14.3): the presenting
 // keys of Google's table on the audience surface (/deck/:id?present=1), the black and white
 // slides, the laser pointer, the toolbar with its slide list and Options menu, the reading keys
@@ -218,7 +220,9 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
   await expect(list).toBeHidden();
   await expect(show).toHaveAttribute('data-index', String(total - 1));
 
-  // the Options menu in Google's order, its stubs disabled with the stub sentence
+  // the Options menu in Google's order; its Later stubs (Auto-play, Turn on the pen, More > Download
+  // as PDF) are hidden in the default view (docs/FOCUS.md 3.1) and read behind the switch in the
+  // test below
   await page.locator('[data-control="present.options"]').click();
   const menu = page.getByRole('menu', { name: 'Options' });
   await expect(menu).toBeVisible();
@@ -227,17 +231,13 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
     .evaluateAll((els) => els.map((el) => el.textContent.trim()));
   expect(labels).toEqual([
     'Open speaker notes',
-    'Auto-play',
     'Turn on the laser pointer',
     'Enter full screen',
-    'Turn on the pen',
     'More',
     'Exit',
   ]);
-  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).toHaveAttribute(
-    'aria-disabled',
-    'true',
-  );
+  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).toHaveCount(0);
+  await expect(menu.locator('[data-menu-item="present.options.pen"]')).toHaveCount(0);
   await menu.locator('[data-menu-item="present.options.laser"]').click();
   await expect(menu).toBeHidden();
   await expect(show).toHaveAttribute('data-laser', 'true');
@@ -254,10 +254,7 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
   await menu.locator('[data-menu-item="present.options.more"]').click();
   const more = page.getByRole('menu', { name: 'More' });
   await expect(more).toBeVisible();
-  await expect(more.locator('[data-menu-item="present.options.more.pdf"]')).toHaveAttribute(
-    'aria-disabled',
-    'true',
-  );
+  await expect(more.locator('[data-menu-item="present.options.more.pdf"]')).toHaveCount(0);
   await more.locator('[data-menu-item="present.options.more.shortcuts"]').click();
   const card = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
   await expect(card).toBeVisible();
@@ -447,6 +444,59 @@ test("the presenter window's studio handle arrives within the bound, its documen
   );
   if (!js.dev) expect(js.decoded).toBeLessThanOrEqual(1_200 * 1024);
   await console_.close();
+});
+
+test('the two Later stubs of the Options menu return behind Tools > Advanced tools, disabled with the stub sentence', async ({
+  context,
+}) => {
+  /* the switch is remembered per browser (docs/FOCUS.md 3.1) and the show reads it; the pages here
+     come from the context so the file's init script, which clears the storage, does not run on
+     them. The flip goes through the product's own row in the editor. */
+  const editor = await context.newPage();
+  await editor.goto(`/edit/${DECK}`);
+  await editor.waitForFunction(() => {
+    try {
+      return Boolean(window.turboslide?.studio);
+    } catch {
+      return false;
+    }
+  });
+  await expect(editor.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
+  await setAdvancedTools(editor, true);
+  await editor.close();
+  const show = await context.newPage();
+  await openAudience(show);
+  const size = show.viewportSize();
+  await show.mouse.move(60, (size?.height ?? 900) - 30);
+  await expect(show.locator('.ts-present-bar')).toHaveClass(/is-shown/);
+  await show.locator('[data-control="present.options"]').click();
+  const menu = show.getByRole('menu', { name: 'Options' });
+  await expect(menu).toBeVisible();
+  const labels = await menu
+    .locator('[data-menu-item] .ts-menu-label')
+    .evaluateAll((els) => els.map((el) => el.textContent.trim()));
+  expect(labels).toEqual([
+    'Open speaker notes',
+    'Auto-play',
+    'Turn on the laser pointer',
+    'Enter full screen',
+    'Turn on the pen',
+    'More',
+    'Exit',
+  ]);
+  await expect(menu.locator('[data-menu-item="present.options.autoPlay"]')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await menu.locator('[data-menu-item="present.options.more"]').click();
+  const more = show.getByRole('menu', { name: 'More' });
+  await expect(more).toBeVisible();
+  await expect(more.locator('[data-menu-item="present.options.more.pdf"]')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await show.keyboard.press('Escape');
+  await show.close();
 });
 
 test('?screen=1 on the presenter address opens the audience form', async ({ page }) => {

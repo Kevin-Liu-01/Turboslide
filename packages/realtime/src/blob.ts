@@ -68,7 +68,7 @@ export function entryOfRecord(record: VersionRecord): Entry {
   };
 }
 
-function checkpointOf(record: VersionRecord): RoomEvent {
+function checkpointOf(record: VersionRecord, external = false): RoomEvent {
   return {
     type: 'checkpoint',
     revision: record.revision,
@@ -77,7 +77,25 @@ function checkpointOf(record: VersionRecord): RoomEvent {
     ...(record.snapshot === undefined ? {} : { snapshot: record.snapshot }),
     author: record.author,
     note: record.note,
+    ...(external ? { external: true } : {}),
   };
+}
+
+/**
+ * Whether a record's mutations apply on a tab's copy of the document at the record's base, so
+ * the record can travel as an `op`. A `version.restore` cannot: the reducer resolves the version
+ * from the log the store holds and a tab has none (the memory tier's follower makes the same
+ * distinction, apps/studio/src/server/room.ts `follow`), so it is announced as an external
+ * checkpoint and every tab reloads at its revision. Before this the blob channel announced a
+ * restore as an op whose apply failed silently in every tab, which then took the checkpoint
+ * frame's revision on the document from before the restore: the panel said "Restored" while the
+ * slides did not change (VERIFICATION F-versions; docs/FOCUS.md rank 21).
+ */
+export function isReplayableRecord(record: VersionRecord): boolean {
+  return (
+    record.mutations.length > 0 &&
+    !record.mutations.some((mutation) => mutation.op === 'version.restore')
+  );
 }
 
 function sleep(ms: number): Promise<void> {
@@ -151,15 +169,41 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
     return out;
   };
 
-  /** Delivers the records this instance has not announced yet: an `op` and a `checkpoint` each. */
+  /**
+   * Delivers the records this instance has not announced yet: an `op` and a `checkpoint` each.
+   * A revision the store reached without a record this instance can read (a record put that
+   * failed after its commit, a record the pull could not fetch) is announced as an external
+   * checkpoint at that revision, so every tab reloads at the head instead of waiting for an op
+   * that never comes; before this the watch fired once per revision, the announce found no record
+   * and nothing was delivered until the next write (docs/FOCUS.md rank 20: a second browser's
+   * edits arrived 30 to 45 s late or never).
+   */
   const announce = async (deckId: string): Promise<void> => {
     const state = stateOf(deckId);
     if (state.lastSeq < 0) return;
     const records = await recordsAfter(deckId, state.lastSeq, REPLAY_MAX_ENTRIES);
     for (const record of records) {
       state.lastSeq = record.revision;
+      if (!isReplayableRecord(record)) {
+        // a restore: the tabs reload at its revision (isReplayableRecord says why)
+        await local.publish(deckId, checkpointOf(record, true));
+        continue;
+      }
       await local.publish(deckId, { type: 'op', entry: entryOfRecord(record) });
       await local.publish(deckId, checkpointOf(record));
+    }
+    const revision = await (await storeOf(deckId)).revision();
+    if (revision > state.lastSeq) {
+      state.lastSeq = revision;
+      await local.publish(deckId, {
+        type: 'checkpoint',
+        revision,
+        fromSeq: revision,
+        toSeq: revision,
+        author: { kind: 'agent', name: 'store' },
+        note: '',
+        external: true,
+      });
     }
   };
 

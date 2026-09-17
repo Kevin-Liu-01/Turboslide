@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Dialog, DialogCheck, DialogField, focusableIn } from '../Dialog';
@@ -151,5 +152,118 @@ describe('Dialog modal={false} (the floating form of SPEC-3 7.2)', () => {
     unmount();
     opener.remove();
     other.remove();
+  });
+});
+
+// Cycle 2 of the focus round (docs/gslides-parity/focus/VERIFICATION.md F-share-copy and
+// F-shapes-export; build/b3.md R19, build/b4.md FR1, F-hex-field): a modal card closes on Escape
+// wherever the focus sits, the confirming button takes the focus when the actions row changes and
+// the focused button left the document, and Enter runs the default button only when the field did
+// not handle the key itself.
+describe('Dialog, the focus round cycle 2', () => {
+  it('closes on Escape with the focus on the body, and once on Escape inside the card', () => {
+    const onClose = vi.fn();
+    render(<Harness onClose={onClose} onOk={() => undefined} />);
+    const dialog = screen.getByRole('dialog', { name: 'Make a copy' });
+    /* the focused button left the document: the browser drops the focus to the body */
+    (document.activeElement as HTMLElement).blur();
+    expect(document.activeElement).toBe(document.body);
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    /* inside the card the card's own handler takes the key and stops it; no double close */
+    const name = dialog.querySelector<HTMLInputElement>(
+      '[data-control="dialog.test.name"]',
+    ) as HTMLInputElement;
+    name.focus();
+    fireEvent.keyDown(name, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it('leaves a floating card to its own Escape: a key on the body closes nothing', () => {
+    const onClose = vi.fn();
+    render(
+      <Dialog title="Name" onClose={onClose} control="dialog.float" modal={false}>
+        <input type="text" aria-label="Name" />
+      </Dialog>,
+    );
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('does not run the default button on an Enter the field already handled', () => {
+    const onOk = vi.fn();
+    const onField = vi.fn();
+    render(
+      <Dialog
+        title="Change background"
+        onClose={() => undefined}
+        control="dialog.bg"
+        actions={[{ label: 'Done', primary: true, onClick: onOk, control: 'dialog.bg.done' }]}
+      >
+        <input
+          type="text"
+          aria-label="Custom colour"
+          data-control="dialog.bg.hex"
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            onField();
+          }}
+        />
+        <input type="text" aria-label="Other" data-control="dialog.bg.other" />
+      </Dialog>,
+    );
+    const hex = document.querySelector('[data-control="dialog.bg.hex"]') as HTMLInputElement;
+    fireEvent.keyDown(hex, { key: 'Enter' });
+    expect(onField).toHaveBeenCalledTimes(1);
+    expect(onOk).not.toHaveBeenCalled();
+    /* a plain field still hands Enter to the default button */
+    const other = document.querySelector('[data-control="dialog.bg.other"]') as HTMLInputElement;
+    fireEvent.keyDown(other, { key: 'Enter' });
+    expect(onOk).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives the confirming button the focus when the actions row changes and the focused button left', () => {
+    function Flow() {
+      const [done, setDone] = useState(false);
+      return (
+        <Dialog
+          title="Download"
+          onClose={() => undefined}
+          control="dialog.dl"
+          cancel
+          actions={
+            done
+              ? [
+                  {
+                    label: 'Done',
+                    primary: true,
+                    onClick: () => undefined,
+                    control: 'dialog.dl.done',
+                  },
+                ]
+              : [
+                  {
+                    label: 'Download',
+                    primary: true,
+                    onClick: () => setDone(true),
+                    control: 'dialog.dl.ok',
+                  },
+                ]
+          }
+        >
+          <p>One slide per page</p>
+        </Dialog>
+      );
+    }
+    render(<Flow />);
+    const ok = document.querySelector('[data-control="dialog.dl.ok"]') as HTMLButtonElement;
+    ok.focus();
+    expect(document.activeElement).toBe(ok);
+    fireEvent.click(ok);
+    /* the OK button unmounted with the focus on it; the Done button takes the focus */
+    const doneButton = document.querySelector('[data-control="dialog.dl.done"]');
+    expect(doneButton).not.toBeNull();
+    expect(document.activeElement).toBe(doneButton);
   });
 });

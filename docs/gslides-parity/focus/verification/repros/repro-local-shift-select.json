@@ -1,0 +1,88 @@
+{
+  "base": "http://localhost:4368",
+  "scenario": "shift-select",
+  "startedAt": "2026-09-16T11:28:15.708Z",
+  "steps": [
+    {
+      "name": "a1 clicked",
+      "selected": "a1",
+      "chip": "Text box",
+      "handles": 0,
+      "at": "2026-09-16T11:28:23.538Z"
+    },
+    {
+      "name": "a2 shift clicked",
+      "selected": "a1",
+      "chip": "Text box",
+      "selection": null,
+      "at": "2026-09-16T11:28:24.066Z"
+    },
+    {
+      "name": "a2 shift clicked by mouse",
+      "chip": "Text box",
+      "at": "2026-09-16T11:28:24.575Z"
+    },
+    {
+      "name": "right click on the empty sheet",
+      "ctx": [
+        "menu.edit.paste",
+        "menu.slide.newSlide",
+        "menu.slide.duplicateSlide",
+        "menu.slide.deleteSlide",
+        "menu.slide.skipSlide",
+        "menu.slide.changeBackground",
+        "menu.slide.applyLayout",
+        "menu.insert.comment"
+      ],
+      "menus": 2,
+      "at": "2026-09-16T11:28:25.316Z"
+    },
+    {
+      "name": "right click on a1 by mouse",
+      "menus": 0,
+      "canvasMenu": false,
+      "consoleErrors": [
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 248344",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend"
+      ],
+      "at": "2026-09-16T11:28:26.615Z"
+    }
+  ],
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40ombe-d06d94 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 248344",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oqe8-f1ae79 rend",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oxpc-9b7d19 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u40oxpc-9b7d19 rend",
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "deckId": "untitled-20260916-8mrg",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:28:30.239Z"
+}

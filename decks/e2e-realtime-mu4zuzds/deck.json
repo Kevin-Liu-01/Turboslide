@@ -1,0 +1,3260 @@
+{
+  "schemaVersion": 1,
+  "id": "e2e-realtime-mu4zuzds",
+  "title": "Realtime walk",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slideIds": [
+        "opener-brand",
+        "title",
+        "thesis",
+        "reputation",
+        "why",
+        "mood-earth",
+        "positioning",
+        "audience",
+        "values",
+        "mood-rosetta",
+        "character",
+        "voice",
+        "inspirations",
+        "naming",
+        "mark"
+      ]
+    },
+    {
+      "id": "design-system",
+      "name": "Design system",
+      "slideIds": [
+        "opener-design-system",
+        "compression",
+        "color",
+        "type",
+        "multilingual",
+        "ladder",
+        "lines",
+        "doubled-line",
+        "mood-calligraphy",
+        "diagrams",
+        "dither",
+        "iso",
+        "language-as-material",
+        "motion",
+        "avoid"
+      ]
+    },
+    {
+      "id": "website",
+      "name": "Website",
+      "slideIds": [
+        "opener-website",
+        "surfaces",
+        "site",
+        "dark-mode",
+        "pages-a",
+        "pages-b",
+        "mood-lighthouse",
+        "details",
+        "details-two",
+        "shell-numbers",
+        "horizon"
+      ]
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "slideIds": [
+        "opener-documentation",
+        "docs",
+        "nearest-page-routing",
+        "mood-dictionary",
+        "docs-for-agents"
+      ]
+    },
+    {
+      "id": "blog-and-content",
+      "name": "Blog and content",
+      "slideIds": [
+        "opener-blog",
+        "blog-index",
+        "blog-covers",
+        "mood-devanagari",
+        "gem-smoke",
+        "blog-vision",
+        "content-rule",
+        "two-registers",
+        "off-the-site"
+      ]
+    },
+    {
+      "id": "developer-experience",
+      "name": "Developer experience",
+      "slideIds": [
+        "opener-developer-experience",
+        "dx",
+        "mood-cable",
+        "cli"
+      ]
+    },
+    {
+      "id": "prototemplate-and-glyphfield",
+      "name": "Prototemplate and Glyphfield",
+      "slideIds": [
+        "opener-prototemplate",
+        "lab",
+        "knowledge-base",
+        "skills-marks",
+        "viewer-shell",
+        "shell-views",
+        "line-law",
+        "presenter-compare",
+        "dossier",
+        "directions",
+        "mood-wave",
+        "archive",
+        "engines",
+        "build-log",
+        "glyphfield",
+        "glyphfield-tools",
+        "books-and-templates",
+        "glyphfield-materials",
+        "agent-api"
+      ]
+    },
+    {
+      "id": "status-and-plan",
+      "name": "Status and plan",
+      "slideIds": [
+        "opener-status",
+        "state",
+        "mood-compass",
+        "identity-project",
+        "fixed-points",
+        "goals",
+        "closing"
+      ]
+    }
+  ],
+  "assets": {
+    "cover-fumadocs": {
+      "id": "cover-fumadocs",
+      "role": "other",
+      "alt": "The Fumadocs grantee cover in orange",
+      "twins": {
+        "neutral": "assets/cover-fumadocs.png"
+      },
+      "size": [
+        960,
+        540
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "cover-gt-open-source": {
+      "id": "cover-gt-open-source",
+      "role": "other",
+      "alt": "The GT open-source cover in blue",
+      "twins": {
+        "neutral": "assets/cover-gt-open-source.png"
+      },
+      "size": [
+        960,
+        540
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "detail-404-copy": {
+      "id": "detail-404-copy",
+      "role": "detail",
+      "alt": "The 404 page copy and buttons",
+      "twins": {
+        "light": "assets/detail-404-copy-light.jpg",
+        "dark": "assets/detail-404-copy-dark.jpg"
+      },
+      "size": [
+        850,
+        470
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/404",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          840,
+          720,
+          2040,
+          1200
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The 404 page states the failure in full sentences and offers two resolutions as a filled and an outlined button, set over the ring artwork.",
+          "page": "404"
+        }
+      }
+    },
+    "detail-code-panel": {
+      "id": "detail-code-panel",
+      "role": "detail",
+      "alt": "The install panel in the docs",
+      "twins": {
+        "light": "assets/detail-code-panel-light.jpg",
+        "dark": "assets/detail-code-panel-dark.jpg"
+      },
+      "size": [
+        1400,
+        220
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/docs/react/quickstart",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          600,
+          1510,
+          2000,
+          1730
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The install panel keeps the package manager tabs on a plate above the code, marks the active tab with a short underline, and sets the commands in monospace; in dark mode the plate is near-black with light text.",
+          "page": "docs-quickstart"
+        }
+      }
+    },
+    "detail-cross": {
+      "id": "detail-cross",
+      "role": "detail",
+      "alt": "A registration cross on the left rail",
+      "twins": {
+        "light": "assets/detail-cross-light.jpg",
+        "dark": "assets/detail-cross-dark.jpg"
+      },
+      "size": [
+        1200,
+        200
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          240,
+          1400,
+          1440,
+          1600
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "A registration cross marks the point where the left rail meets the rule that closes the hero band, and the caption line below it sits inside the rails.",
+          "page": "home"
+        }
+      }
+    },
+    "detail-docs-ja": {
+      "id": "detail-docs-ja",
+      "role": "detail",
+      "alt": "The heading and opening paragraph of the docs get-started page served in Japanese, at 2x",
+      "twins": {
+        "light": "assets/detail-docs-ja-light.jpg",
+        "dark": "assets/detail-docs-ja-dark.jpg"
+      },
+      "size": [
+        1540,
+        500
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-docs-toc": {
+      "id": "detail-docs-toc",
+      "role": "detail",
+      "alt": "The docs table of contents",
+      "twins": {
+        "light": "assets/detail-docs-toc-light.jpg",
+        "dark": "assets/detail-docs-toc-dark.jpg"
+      },
+      "size": [
+        760,
+        420
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/docs/react/quickstart",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          2040,
+          0,
+          2880,
+          352
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The table of contents marks the active heading and its active sub-heading with a vertical hairline that steps in at an elbow, and the docs header repeats the outlined and filled button pair.",
+          "page": "docs-quickstart"
+        }
+      }
+    },
+    "detail-footer-corner": {
+      "id": "detail-footer-corner",
+      "role": "detail",
+      "alt": "The top left corner of the footer",
+      "twins": {
+        "light": "assets/detail-footer-corner-light.jpg",
+        "dark": "assets/detail-footer-corner-dark.jpg"
+      },
+      "size": [
+        850,
+        470
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-glyph-animation": {
+      "id": "detail-glyph-animation",
+      "role": "detail",
+      "alt": "The Glyphfield animation tool, cropped to the sequence layers, the artboard and storyboard, and the per-layer controls",
+      "twins": {
+        "light": "assets/detail-glyph-animation-light.jpg",
+        "dark": "assets/detail-glyph-animation-dark.jpg"
+      },
+      "size": [
+        2448,
+        1594
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-glyph-book": {
+      "id": "detail-glyph-book",
+      "role": "detail",
+      "alt": "The brand book page index and the first two rows of page thumbnails",
+      "twins": {
+        "light": "assets/detail-glyph-book-light.jpg",
+        "dark": "assets/detail-glyph-book-dark.jpg"
+      },
+      "size": [
+        1636,
+        880
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-glyph-book-bar": {
+      "id": "detail-glyph-book-bar",
+      "role": "detail",
+      "alt": "The brand book toolbar with the zoom slider, Overview, Read and Export PDF",
+      "twins": {
+        "light": "assets/detail-glyph-book-bar-light.jpg",
+        "dark": "assets/detail-glyph-book-bar-dark.jpg"
+      },
+      "size": [
+        1068,
+        88
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-glyph-slides": {
+      "id": "detail-glyph-slides",
+      "role": "detail",
+      "alt": "The slide library beside the canvas with the title slide",
+      "twins": {
+        "light": "assets/detail-glyph-slides-light.jpg",
+        "dark": "assets/detail-glyph-slides-dark.jpg"
+      },
+      "size": [
+        1636,
+        880
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-glyph-slides-bar": {
+      "id": "detail-glyph-slides-bar",
+      "role": "detail",
+      "alt": "The slide templates toolbar with Code, Autosaved draft, Save and Export PNG",
+      "twins": {
+        "light": "assets/detail-glyph-slides-bar-light.jpg",
+        "dark": "assets/detail-glyph-slides-bar-dark.jpg"
+      },
+      "size": [
+        1068,
+        88
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "native"
+    },
+    "detail-logo-row": {
+      "id": "detail-logo-row",
+      "role": "detail",
+      "alt": "Two cells of the customer logo row",
+      "twins": {
+        "light": "assets/detail-logo-row-light.jpg",
+        "dark": "assets/detail-logo-row-dark.jpg"
+      },
+      "size": [
+        738,
+        244
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/home (full-page capture)",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          300,
+          1548,
+          1500,
+          1820
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The customer logos sit in ruled cells with one hairline per seam, rendered in a single ink and aligned to a common cap height; a hatched band closes the row.",
+          "page": "home (full-page capture)"
+        }
+      }
+    },
+    "detail-nav-actions": {
+      "id": "detail-nav-actions",
+      "role": "detail",
+      "alt": "The right side of the header and the start of the page rail",
+      "twins": {
+        "light": "assets/detail-nav-actions-light.jpg",
+        "dark": "assets/detail-nav-actions-dark.jpg"
+      },
+      "size": [
+        850,
+        276
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          1720,
+          0,
+          2560,
+          200
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The header's right side pairs an outlined Sign In button with a filled Get a Demo button, and the search field shows its shortcut as two keycaps.",
+          "page": "home"
+        }
+      }
+    },
+    "detail-nav-mark": {
+      "id": "detail-nav-mark",
+      "role": "detail",
+      "alt": "The navigation bar with the mark",
+      "twins": {
+        "light": "assets/detail-nav-mark-light.jpg",
+        "dark": "assets/detail-nav-mark-dark.jpg"
+      },
+      "size": [
+        1200,
+        200
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          300,
+          0,
+          1500,
+          200
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The navigation bar carries the mark and four text links and is closed by a single hairline; the left page rail starts at that hairline instead of running through the header.",
+          "page": "home"
+        }
+      }
+    },
+    "detail-pricing-seam": {
+      "id": "detail-pricing-seam",
+      "role": "detail",
+      "alt": "The seam between the two pricing cards",
+      "twins": {
+        "light": "assets/detail-pricing-seam-light.jpg",
+        "dark": "assets/detail-pricing-seam-dark.jpg"
+      },
+      "size": [
+        850,
+        276
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/pricing",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "region": [
+          1240,
+          600,
+          2560,
+          916
+        ],
+        "recipe": "gt-site"
+      },
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "caption": "The two pricing cards share one vertical seam, and the hero rule runs into it; the Enterprise card is the only surface with a dotted plate and a 1px accent border.",
+          "page": "pricing"
+        }
+      }
+    },
+    "dir-aurora-paper": {
+      "id": "dir-aurora-paper",
+      "role": "thumb",
+      "alt": "Aurora Paper",
+      "twins": {
+        "light": "assets/dir-aurora-paper-light.jpg",
+        "dark": "assets/dir-aurora-paper-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-chroma-flow": {
+      "id": "dir-chroma-flow",
+      "role": "thumb",
+      "alt": "Chroma Flow",
+      "twins": {
+        "light": "assets/dir-chroma-flow-light.jpg",
+        "dark": "assets/dir-chroma-flow-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-dither-field": {
+      "id": "dir-dither-field",
+      "role": "thumb",
+      "alt": "Dither Field",
+      "twins": {
+        "light": "assets/dir-dither-field-light.jpg",
+        "dark": "assets/dir-dither-field-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-event-horizon": {
+      "id": "dir-event-horizon",
+      "role": "thumb",
+      "alt": "Event Horizon",
+      "twins": {
+        "light": "assets/dir-event-horizon-light.jpg",
+        "dark": "assets/dir-event-horizon-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-glyph-rain": {
+      "id": "dir-glyph-rain",
+      "role": "thumb",
+      "alt": "Glyph Rain",
+      "twins": {
+        "light": "assets/dir-glyph-rain-light.jpg",
+        "dark": "assets/dir-glyph-rain-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-hourglass": {
+      "id": "dir-hourglass",
+      "role": "thumb",
+      "alt": "Hourglass",
+      "twins": {
+        "light": "assets/dir-hourglass-light.jpg",
+        "dark": "assets/dir-hourglass-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-lens-gate": {
+      "id": "dir-lens-gate",
+      "role": "thumb",
+      "alt": "Lens Gate",
+      "twins": {
+        "light": "assets/dir-lens-gate-light.jpg",
+        "dark": "assets/dir-lens-gate-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-paper-foundry": {
+      "id": "dir-paper-foundry",
+      "role": "thumb",
+      "alt": "Paper Foundry",
+      "twins": {
+        "light": "assets/dir-paper-foundry-light.jpg",
+        "dark": "assets/dir-paper-foundry-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-prism": {
+      "id": "dir-prism",
+      "role": "thumb",
+      "alt": "Prism Light",
+      "twins": {
+        "light": "assets/dir-prism-light.jpg",
+        "dark": "assets/dir-prism-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-singularity": {
+      "id": "dir-singularity",
+      "role": "thumb",
+      "alt": "Singularity",
+      "twins": {
+        "light": "assets/dir-singularity-light.jpg",
+        "dark": "assets/dir-singularity-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-singularity-dossier": {
+      "id": "dir-singularity-dossier",
+      "role": "thumb",
+      "alt": "Dossier",
+      "twins": {
+        "light": "assets/dir-singularity-dossier-light.jpg",
+        "dark": "assets/dir-singularity-dossier-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-singularity-orbit": {
+      "id": "dir-singularity-orbit",
+      "role": "thumb",
+      "alt": "Orbit",
+      "twins": {
+        "light": "assets/dir-singularity-orbit-light.jpg",
+        "dark": "assets/dir-singularity-orbit-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-singularity-signal": {
+      "id": "dir-singularity-signal",
+      "role": "thumb",
+      "alt": "Signal",
+      "twins": {
+        "light": "assets/dir-singularity-signal-light.jpg",
+        "dark": "assets/dir-singularity-signal-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-terminus-board": {
+      "id": "dir-terminus-board",
+      "role": "thumb",
+      "alt": "Terminus Board",
+      "twins": {
+        "light": "assets/dir-terminus-board-light.jpg",
+        "dark": "assets/dir-terminus-board-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-toolchain": {
+      "id": "dir-toolchain",
+      "role": "thumb",
+      "alt": "Toolchain",
+      "twins": {
+        "light": "assets/dir-toolchain-light.jpg",
+        "dark": "assets/dir-toolchain-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "dir-wide-rule": {
+      "id": "dir-wide-rule",
+      "role": "thumb",
+      "alt": "Wide Rule",
+      "twins": {
+        "light": "assets/dir-wide-rule-light.jpg",
+        "dark": "assets/dir-wide-rule-dark.jpg"
+      },
+      "size": [
+        520,
+        325
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "gh-gt": {
+      "id": "gh-gt",
+      "role": "capture",
+      "alt": "The gt repository on GitHub",
+      "twins": {
+        "neutral": "assets/gh-gt.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-home-hero": {
+      "id": "glyph-home-hero",
+      "role": "capture",
+      "alt": "The glyphfield.com landing page: the navigation, the headline and a capture of the animation tool",
+      "twins": {
+        "light": "assets/glyph-home-hero-light.jpg",
+        "dark": "assets/glyph-home-hero-dark.jpg"
+      },
+      "size": [
+        2288,
+        1520
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-chroma-flow": {
+      "id": "glyph-material-chroma-flow",
+      "role": "capture",
+      "alt": "Chroma flow",
+      "twins": {
+        "neutral": "assets/glyph-material-chroma-flow.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-gem-smoke": {
+      "id": "glyph-material-gem-smoke",
+      "role": "capture",
+      "alt": "Gem smoke in the brand blue",
+      "twins": {
+        "neutral": "assets/glyph-material-gem-smoke.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-god-rays": {
+      "id": "glyph-material-god-rays",
+      "role": "capture",
+      "alt": "God rays",
+      "twins": {
+        "neutral": "assets/glyph-material-god-rays.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-grain-gradient": {
+      "id": "glyph-material-grain-gradient",
+      "role": "capture",
+      "alt": "Grain gradient",
+      "twins": {
+        "neutral": "assets/glyph-material-grain-gradient.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-liquid-metal": {
+      "id": "glyph-material-liquid-metal",
+      "role": "capture",
+      "alt": "Liquid metal",
+      "twins": {
+        "neutral": "assets/glyph-material-liquid-metal.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "glyph-material-smoke-ring": {
+      "id": "glyph-material-smoke-ring",
+      "role": "capture",
+      "alt": "Smoke ring",
+      "twins": {
+        "neutral": "assets/glyph-material-smoke-ring.jpg"
+      },
+      "size": [
+        1200,
+        680
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "gt-careers": {
+      "id": "gt-careers",
+      "role": "capture",
+      "alt": "The careers page horizon field",
+      "twins": {
+        "light": "assets/gt-careers-light.jpg",
+        "dark": "assets/gt-careers-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "liquid-metal-diamond": {
+      "id": "liquid-metal-diamond",
+      "role": "opener",
+      "alt": "Liquid metal, the diamond preset, frozen at 5.5 s",
+      "twins": {
+        "light": "assets/liquid-metal-diamond-light.png",
+        "dark": "assets/liquid-metal-diamond-dark.png"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:liquid-metal",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#ffffff",
+          "u_repetition": 3,
+          "u_softness": 0.05,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_distortion": 0.07,
+          "u_contour": 0.6,
+          "u_angle": 70,
+          "u_shape": 3,
+          "u_fit": "contain",
+          "u_scale": 0.5,
+          "u_rotation": 0,
+          "u_offsetX": 0,
+          "u_offsetY": 0,
+          "u_originX": 0.5,
+          "u_originY": 0.5,
+          "u_worldWidth": 0,
+          "u_worldHeight": 0
+        },
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 5500,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+        "recipeKey": "sha256:a00e58cf54dd307b493610cb87d7865e07c815ee77940ce456f7a1b2d16a478b"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          -1325,
+          105,
+          2709,
+          2374
+        ],
+        "autocontrast": 0.5,
+        "black": 20,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: liquid metal, Paper Shaders, rendered in Turboslide",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0235,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 204,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      }
+    },
+    "logo-ge": {
+      "id": "logo-ge",
+      "role": "logo",
+      "alt": "The General Electric monogram",
+      "twins": {
+        "neutral": "assets/logo-ge.jpg"
+      },
+      "size": [
+        640,
+        640
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "logo-gm": {
+      "id": "logo-gm",
+      "role": "logo",
+      "alt": "The General Motors logo",
+      "twins": {
+        "neutral": "assets/logo-gm.jpg"
+      },
+      "size": [
+        640,
+        640
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "mood-cable": {
+      "id": "mood-cable",
+      "role": "mood",
+      "alt": "The Eastern Telegraph Company cable chart of 1901, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-cable-light.jpg",
+        "dark": "assets/mood-cable-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:1901 Eastern Telegraph cables.png",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          500,
+          470,
+          1060,
+          785
+        ],
+        "blur": 0.4,
+        "autocontrast": 0.5,
+        "black": 100,
+        "white": 215,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Map: Eastern Telegraph Company, 1901, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.3337,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 10630,
+          "litInBand": 5559
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Developer experience, mood-cable",
+          "image": "the Eastern Telegraph Company's chart of its submarine cables, 1901.",
+          "source": "File:1901 Eastern Telegraph cables.png",
+          "crop": "500, 470, 1060, 785. The routes are isolated by color (a pixel is a route where R minus max(G, B) exceeds 35), fitted to 800 by 450 separately and composited as ink after the tone step; ground blur 0.4, black 100, white 215; positive is the light file (black lines on paper). Isolating the routes alone and thickening them, at three crops, turned them into thick blobs on a noisy gray field; the hybrid keeps the grayscale ground and composites the routes as ink without thickening.",
+          "placement": "after Translation as a build step and before The CLI, so a content slide separates it from the Prototemplate and Glyphfield opener. Round seven placed it after The CLI, directly before the opener.",
+          "license": "Public domain."
+        }
+      }
+    },
+    "mood-calligraphy": {
+      "id": "mood-calligraphy",
+      "role": "mood",
+      "alt": "A calligraphy exercise sheet by Ahmed Karahisari, 16th century, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-calligraphy-light.jpg",
+        "dark": "assets/mood-calligraphy-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Ahmed Karahisari - Karalama (calligraphy exercise) - Google Art Project.jpg",
+        "artist": "Ahmed Karahisari, 16th century",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          310,
+          475,
+          1030,
+          880
+        ],
+        "autocontrast": 0.5,
+        "black": 40,
+        "white": 215,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Calligraphy: Ahmed Karahisari, 16th century, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.269,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 10327,
+          "litInBand": 3608
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Design system, mood-calligraphy",
+          "image": "Karalama, a calligraphy exercise sheet, ink on paper.",
+          "source": "File:Ahmed Karahisari - Karalama (calligraphy exercise) - Google Art Project.jpg",
+          "crop": "310, 475, 1030, 880. A 16 by 9 window 720 pixels wide in the middle band of the sheet, holding a few strokes at 150 to 300 pixels of thickness instead of the whole field; the window stops above the crease that runs across the sheet at source rows 883 to 887, so no seam crosses the image. Black 40, white 215, no blur. The strokes render solid, the paper renders clean with the pounced ground marks as dots, and the edge consistency of each stroke is what the eye reads. The first crop (0, 500, 1341, 1254) showed the full-width field and read as overlapping chaos in the grid view.",
+          "placement": "after The doubled line.",
+          "license": "Public domain.",
+          "artist": "Ahmed Karahisari, 16th century."
+        }
+      }
+    },
+    "mood-compass": {
+      "id": "mood-compass",
+      "role": "mood",
+      "alt": "A 32-point mariner's compass rose engraved by Emanuel Bowen, 1748, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-compass-light.jpg",
+        "dark": "assets/mood-compass-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:1748 Bowen Mariner's Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg (local copy `scratchpad/photo/compass.jpg`, 1800 by 1140).",
+        "artist": "Emanuel Bowen, 1748",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          40,
+          90,
+          1040,
+          652
+        ],
+        "autocontrast": 0.5,
+        "black": 60,
+        "white": 225,
+        "minFilter": 3,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Engraving: Emanuel Bowen, 1748, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.3094,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 6742,
+          "litInBand": 2380
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Status and plan, mood-compass",
+          "image": "A Circle of Winds consisting of 32 points, commonly called the Mariners Compass, the left plate of a hand-colored engraving of a compass rose and an armillary sphere.",
+          "source": "File:1748 Bowen Mariner's Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg (local copy `scratchpad/photo/compass.jpg`, 1800 by 1140).",
+          "crop": "40, 90, 1040, 652. The compass rose plate: the 32-point rose with its degree ring fills the left two thirds of the sheet, the engraved wall and the sky, clouds and ship to its right form a textured strip, and the blank gutter between the two plates is the right quarter of the sheet, where the credit plate sits on clean ground. The box starts inside the plate's border and stops above the ribbon's text; the two ribbon knots at the plate's foot show at the bottom corners of the rose. Black 60, white 225, and a 3 pixel minimum filter, the setting from the round five reserve test; the filter thickens the engraved hatching so the points read as solid and half-tone wedges instead of noise, and the compass-point labels become texture inside the wedges. Positive is the light file (black lines on paper).",
+          "placement": "after Current status.",
+          "license": "Public domain.",
+          "artist": "Emanuel Bowen, 1748."
+        }
+      }
+    },
+    "mood-devanagari": {
+      "id": "mood-devanagari",
+      "role": "mood",
+      "alt": "A Prashna Upanishad manuscript page in Devanagari script, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-devanagari-light.jpg",
+        "dark": "assets/mood-devanagari-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Prashna Upanishad sample manuscript page, Sanskrit, Devanagari script.jpg",
+        "artist": "Ms Sarah Welch",
+        "license": "CC BY-SA 4.0",
+        "shareAlike": true
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          187,
+          0,
+          1613,
+          803
+        ],
+        "autocontrast": 0.5,
+        "black": 40,
+        "white": 215,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: Ms Sarah Welch, CC BY-SA 4.0",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.3862,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 16420,
+          "litInBand": 7119
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Blog and content, mood-devanagari",
+          "image": "a Prashna Upanishad manuscript page, Sanskrit in Devanagari script, copied by hand and corrected between the lines.",
+          "source": "File:Prashna Upanishad sample manuscript page, Sanskrit, Devanagari script.jpg",
+          "crop": "187, 0, 1613, 803; black 40, white 215, no blur; positive is the light file (black script on a pale page).",
+          "placement": "after Generated covers and before Designed covers. (Round seven's note said Designed covers; the file order was always after Generated covers.)",
+          "license": "CC BY-SA 4.0.",
+          "artist": "Ms Sarah Welch."
+        }
+      }
+    },
+    "mood-dictionary": {
+      "id": "mood-dictionary",
+      "role": "mood",
+      "alt": "The Compact Oxford English Dictionary lying open, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-dictionary-light.jpg",
+        "dark": "assets/mood-dictionary-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Compact Oxford English Dictionary 2.jpg",
+        "artist": "Cullen328",
+        "license": "CC BY-SA 4.0",
+        "shareAlike": true
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          0,
+          110,
+          1800,
+          1122
+        ],
+        "blur": 2,
+        "autocontrast": 0.5,
+        "black": 110,
+        "white": 235,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: Cullen328, CC BY-SA 4.0",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.3454,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 9817,
+          "litInBand": 3786
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Documentation, mood-dictionary",
+          "image": "The Compact Oxford English Dictionary, open on a carpet.",
+          "source": "File:Compact Oxford English Dictionary 2.jpg",
+          "crop": "0, 110, 1800, 1122. The whole open book with a margin of carpet on every side. Blur 2.0 so the small type becomes an even tone, black 110 so the carpet drops to solid ink, white 235. The pages read as paper, the text blocks as a regular dither, the gutters and margins as clean paper. Positive is the light file: the pages are the dominant field, so the light theme shows the photograph (a white book on the black carpet) and the dark theme shows the inverse, dark pages with the text columns as a light dither, which reads like the deck's code panel.",
+          "placement": "after Nearest-page routing, which follows the docs overview, and before Markdown twins, so a content slide separates it from the Blog and content opener. Round seven placed it after Markdown twins, directly before the opener; round eight placed it directly after the docs overview, before the routing slide moved into the section from the end of Website.",
+          "license": "CC BY-SA 4.0.",
+          "artist": "Cullen328."
+        }
+      }
+    },
+    "mood-earth": {
+      "id": "mood-earth",
+      "role": "mood",
+      "alt": "NASA's Blue Marble, the Earth with the Western Hemisphere in daylight, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-earth-light.jpg",
+        "dark": "assets/mood-earth-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Blue Marble Western Hemisphere.jpg (local copy `scratchpad/photo/earth-night.jpg`, 1800 by 1800).",
+        "artist": "NASA Earth Observatory, images by Reto Stöckli, based on data from NASA and NOAA; the Commons file is dated October 2, 2007",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          49,
+          -7,
+          3279,
+          1809
+        ],
+        "channel": "r",
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 80,
+        "white": 210,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Image: NASA, Reto Stöckli, 2007, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0916,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 111,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Brand, mood-earth",
+          "image": "The Blue Marble, Western Hemisphere, from NASA's Blue Marble Next Generation series: a composite of MODIS land and ocean data (2001 to 2004), a single day of clouds, sea ice, radar topography and city lights along the terminator, published in 2007.",
+          "source": "File:Blue Marble Western Hemisphere.jpg (local copy `scratchpad/photo/earth-night.jpg`, 1800 by 1800).",
+          "crop": "49, -7, 3279, 1809. The disk spans 72 to 1722 across and 72 to 1730 down in the source (center 897, 901). The box is 3230 by 1816 and reaches past the right, top and bottom edges, where Pillow pads black, which is the source's own ground. Fitted to 800 by 450 this puts the disk at 820 pixels of diameter on the sheet, centered at x 420 and y 450, so it spans x 10 to 830 and y 40 to 860. Round nine's mood plate spans about x 851 to 1463, y 539 to 771; a cell count on the dark file finds 0 lit cells inside that rectangle (scratchpad `marble3/refit.py`, candidate b820x420), so the plate meets nothing. Round eight's box (-642, 35, 2437, 1767) centered an 860 pixel disk at x 800 for the credit-only plate, and that fit is superseded. The credit plate at the 15px credit spans x 1090 to 1462, y 729 to 771. Its top-left corner is 402 pixels from the disk center, 28 pixels inside the 430 radius, but that part of the disk is the night side over the South Pacific, which is ground in both files, so no rendered cell sits under the plate (0 of the 16,039 cells in the plate rectangle are paper in the dark file; the rightmost lit cell on the plate's top row is at x 1049). Round six's box (-1201, 35, 1878, 1767) centered the disk at x 1090 to leave room for a title plate at lower left; on the mood slide that plate no longer exists and the lower-right credit plate cut the rim over the South Pacific, so round eight recentered the disk. The plate stays at lower right, as on every mood slide.",
+          "tone": "the red channel instead of luminance. In luminance the ocean and the cloud tones sit close together and the disk dithers to noise, which is why round five rejected the image. In the red channel the ocean drops toward black while land and cloud rise, so the oceans clip to ink and the continents and cloud bands render as texture; the city lights on the night side render as scattered single cells. Blur 0.6, black 80, white 210, gamma 1.0. Positive is the dark file: the disk on the ink ground. The light file is the inverse.",
+          "placement": "after Why the redesign, the first dense slide of Brand, so the section runs opener, four content slides, the Blue Marble, three content slides, the Rosetta Stone, five content slides, opener. Round seven placed it after The mark, directly before the Design system opener, which made it a second opener. Kevin asked for the image (\"also i like the blue marble\"); round six had it as the Status and plan opener.",
+          "license": "Public domain.",
+          "artist": "NASA Earth Observatory, images by Reto Stöckli, based on data from NASA and NOAA; the Commons file is dated October 2, 2007."
+        }
+      }
+    },
+    "mood-lighthouse": {
+      "id": "mood-lighthouse",
+      "role": "mood",
+      "alt": "Louisbourg lighthouse on its headland in a fall storm, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-lighthouse-light.jpg",
+        "dark": "assets/mood-lighthouse-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg",
+        "artist": "Ken Heaton",
+        "license": "CC BY-SA 4.0",
+        "shareAlike": true
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          300,
+          330,
+          1800,
+          1174
+        ],
+        "blur": 0.5,
+        "autocontrast": 0.5,
+        "black": 0,
+        "white": 212,
+        "gamma": 0.8,
+        "unsharp": {
+          "rows": [
+            150,
+            260
+          ],
+          "amount": 180
+        },
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: Ken Heaton, CC BY-SA 4.0",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.4358,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 30358,
+          "litInBand": 10684
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Website, mood-lighthouse",
+          "image": "Louisbourg Lighthouse, Nova Scotia, with waves breaking in a fall storm.",
+          "source": "File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg",
+          "crop": "300, 330, 1800, 1174. Drops most of the empty sky and the dark foreground; the tower on the right comes up to about 180 pixels wide and the breaking wave sits at sheet rows 380 to 500. Blur 0.5, black 0, white 212, gamma 0.8, plus an unsharp mask (radius 8, 180 percent, threshold 3) on rows 150 to 260 of the 800 by 450 frame, the sea band, so the spray separates from the lit water. The sky goes to paper, the sea band keeps its texture, and the heath dithers instead of clipping, so the dark twin shows a modulated field rather than a slab. The first crop (0, 150, 1800, 1162, blur 0.8, black 40) clipped the heath to solid ink.",
+          "placement": "after the second Pages slide.",
+          "license": "CC BY-SA 4.0.",
+          "artist": "Ken Heaton."
+        }
+      }
+    },
+    "mood-rosetta": {
+      "id": "mood-rosetta",
+      "role": "mood",
+      "alt": "The Rosetta Stone, its three scripts carved in rows, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-rosetta-light.jpg",
+        "dark": "assets/mood-rosetta-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Rosetta Stone.JPG (local copy `scratchpad/photo/rosetta.jpg`, 1539 by 1800).",
+        "artist": "Hans Hillewaert",
+        "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required",
+        "shareAlike": true
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          0,
+          300,
+          1539,
+          1166
+        ],
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 140,
+        "white": 230,
+        "gamma": 0.9,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: Hans Hillewaert, CC BY-SA 4.0",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0889,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 6108,
+          "litInBand": 1697
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Brand, mood-rosetta",
+          "image": "The Rosetta Stone, the Ptolemaic decree of 196 BC carved in hieroglyphic, Demotic and Greek, British Museum.",
+          "source": "File:Rosetta Stone.JPG (local copy `scratchpad/photo/rosetta.jpg`, 1539 by 1800).",
+          "crop": "0, 300, 1539, 1166. The upper body of the stone with its broken top edge against the dark ground, cover-fit to 800 by 450, so the stone fills the sheet and its right edge ends near x 1320. Blur 0.6, black 140, white 230, gamma 0.9. The high black point drops the stone's surface to ink and leaves the cut glyph rows as light lines, so the inscription reads as rows of text rather than a grey field; the earlier black points of 60 to 90 left a 50 percent screen with no edge. Positive is the dark file (light glyphs on an ink stone); the light twin reads as dark text on paper.",
+          "sentence": "One decree carved in three scripts so every reader could read it. General Translation does the same for software: one source text, every language.",
+          "placement": "after Values, where the Tower of Babel sat from round seven to round ten. Kevin: \"change the tower of babel to something else. maybe rosetta stone\".",
+          "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required.",
+          "artist": "Hans Hillewaert."
+        }
+      }
+    },
+    "mood-wave": {
+      "id": "mood-wave",
+      "role": "mood",
+      "alt": "The Great Wave off Kanagawa by Katsushika Hokusai, about 1831, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-wave-light.jpg",
+        "dark": "assets/mood-wave-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Tsunami by hokusai 19th century.jpg",
+        "artist": "Katsushika Hokusai, about 1831",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          0,
+          90,
+          1800,
+          1102
+        ],
+        "autocontrast": 0.5,
+        "white": 225,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Print: Katsushika Hokusai, about 1831, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.2276,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 12177,
+          "litInBand": 2818
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Prototemplate and Glyphfield, mood-wave",
+          "image": "The Great Wave off Kanagawa, woodblock print from Thirty-six Views of Mount Fuji.",
+          "source": "File:Tsunami by hokusai 19th century.jpg",
+          "crop": "0, 90, 1800, 1102. Full width; the crest at the top edge, the boats at the bottom edge trimmed, the signature cartouche kept at top left. White 225 so the graded sky goes to clean paper; no blur, no black point.",
+          "placement": "after Directions.",
+          "license": "Public domain.",
+          "artist": "Katsushika Hokusai, about 1831."
+        }
+      }
+    },
+    "opener-blog": {
+      "id": "opener-blog",
+      "role": "opener",
+      "alt": "The gem smoke material from Glyphfield in the brand blue, white smoke on a blue field, rendered at 3200 by 1800",
+      "twins": {
+        "light": "assets/opener-blog-light.jpg",
+        "dark": "assets/opener-blog-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:gem-smoke",
+        "uniforms": {},
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 0,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
+        "recipeKey": "sha256:d9d21175a6fd16f4e46b7adc9d2ddff41d34f3830240fedbaee886fadfa4325d"
+      },
+      "treatment": {
+        "kind": "continuous",
+        "quality": 92
+      },
+      "credit": "Material: gem smoke, Paper Shaders, rendered in Glyphfield",
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "heading": "Blog and content",
+          "image": "the gem smoke material, the GPU material behind the designed covers and the reel (the Designed covers slide), in the brand blue: white smoke over a blue field, the polarity of the GT open-source cover.",
+          "source": "Glyphfield (`/Users/kevinliu/repos/glyphfield`), route `/shader-preview?materialId=paper-gem-smoke&diagnostics=1&live=1` on the local dev server (port 3012). The route runs Paper Shaders' Gem Smoke family (Apache-2.0) through Glyphfield's live material canvas; `diagnostics=1` with `live=1` is the only combination that plays the shader live and draws no overlay. Default preset, `preservePresetGeometry`, shape `metaballs`, `colorInner` transparent, as the route sets them.",
+          "frame": "three element screenshots of the canvas at about 4, 5 and 6 seconds of playback; the third was kept because its highlight sits right of center, clear of the plate, and the left half is flat blue under the title. Saved from the 3200 by 1800 PNG as a 1600 by 900 JPEG with Lanczos at quality 92 (4:4:4). The light file is a copy.",
+          "sentence": "This section covers the blog, its covers, the content rules, and the brand assets outside the site."
+        }
+      }
+    },
+    "opener-brand": {
+      "id": "opener-brand",
+      "role": "opener",
+      "alt": "The top arc of the event horizon ring from the careers page horizon field shader, dithered",
+      "twins": {
+        "light": "assets/opener-brand-light.jpg",
+        "dark": "assets/opener-brand-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          640,
+          128,
+          960,
+          308
+        ],
+        "autocontrast": 0.5,
+        "gamma": 0.85,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Event Horizon, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.2038,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 1237,
+          "litInBand": 564
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Brand",
+          "image": "Event Horizon, the ring's top arc, two-tone",
+          "source": "`event-horizon-dark-2.jpg`, the careers page horizon field shader.",
+          "crop": "640, 128, 960, 308 (320 by 180). The top arc of the ring between the orbiting locale labels and the hero text, scaled 5x. The ring's glow fills the upper third and the field below it is solid ink, where the title plate sits.",
+          "processing": "gamma 0.85, no black point.",
+          "sentence": "This section covers the company, its values, its voice, the name, and the mark."
+        }
+      }
+    },
+    "opener-closing": {
+      "id": "opener-closing",
+      "role": "opener",
+      "alt": "The lower arc of the Singularity ring, dithered, rising from the lower left to the upper right",
+      "twins": {
+        "light": "assets/opener-closing-light.jpg",
+        "dark": "assets/opener-closing-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "two-color"
+    },
+    "opener-design-system": {
+      "id": "opener-design-system",
+      "role": "opener",
+      "alt": "Doubled flow lines from the chroma flow direction, dithered",
+      "twins": {
+        "light": "assets/opener-design-system-light.jpg",
+        "dark": "assets/opener-design-system-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          216,
+          60,
+          540,
+          242
+        ],
+        "invert": true,
+        "autocontrast": 0.5,
+        "black": 16,
+        "gamma": 1.1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Chroma Flow, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.1077,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 6291,
+          "litInBand": 1949
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Design system",
+          "image": "Chroma Flow, doubled flow lines, two-tone",
+          "source": "`chroma-flow-light-1.jpg`, the chroma flow direction in light theme.",
+          "crop": "216, 60, 540, 242 (324 by 182). The top left corner of the hero, where the doubled flow lines bend before they reach the central ellipse. No text in the region.",
+          "processing": "source inverted, black point 16, gamma 1.1. The light twin is therefore dark doubled lines on paper, which matches the site's own light rendering.",
+          "sentence": "This section covers color, type, scripts, lines, diagrams, dither, illustration, and motion."
+        }
+      }
+    },
+    "opener-developer-experience": {
+      "id": "opener-developer-experience",
+      "role": "opener",
+      "alt": "The gem smoke material from Glyphfield in its fire preset, orange and yellow smoke on black, rendered at 3200 by 1800",
+      "twins": {
+        "light": "assets/opener-developer-experience-light.jpg",
+        "dark": "assets/opener-developer-experience-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:gem-smoke",
+        "uniforms": {},
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 6000,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
+        "recipeKey": "sha256:8db25baf8767819160e7d7d6ae6688eaafa02b766854f50fdf8c0b662ba9cb15"
+      },
+      "treatment": {
+        "kind": "continuous",
+        "quality": 92
+      },
+      "credit": "Material: gem smoke, Paper Shaders, rendered in Glyphfield",
+      "inline": "native",
+      "ext": {
+        "provenance": {
+          "heading": "Developer experience",
+          "image": "the same gem smoke material in Paper's Fire preset with the preset's shipped colors (`colors [#fe5b16, #f7ff61, #ffffff]`, `colorBack #000000`, `colorInner` transparent), so the two color openers read as one material in two states.",
+          "source": "Glyphfield, route `/shader-preview?materialId=paper-gem-smoke-fire&diagnostics=1&live=1`, the same server, browser and resolution steps as the Blog opener. The route replaces the preset's colors with its violet preview palette, so the shipped colors were passed back through `setUniforms`.",
+          "frame": "the third sample, about 6 seconds in. Its lower left is black, so the plate sits on the ink ground in the dark theme and the paper plate has full contrast in the light theme, and the bright band runs across the right half. Saved the same way, 1600 by 900 at quality 92; the light file is a copy.",
+          "sentence": "This section covers the developer experience: source code as the source of truth and translation as a build step."
+        }
+      }
+    },
+    "opener-documentation": {
+      "id": "opener-documentation",
+      "role": "opener",
+      "alt": "The wireframe sphere and rules from the lens gate direction, dithered",
+      "twins": {
+        "light": "assets/opener-documentation-light.jpg",
+        "dark": "assets/opener-documentation-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          600,
+          412,
+          980,
+          626
+        ],
+        "autocontrast": 0.5,
+        "black": 30,
+        "gamma": 1.2,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Lens Gate, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0602,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 2570,
+          "litInBand": 1216
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Documentation",
+          "image": "Lens Gate, the wireframe sphere and rules, two-tone",
+          "source": "`lens-gate-dark-1.jpg`, the lens gate direction.",
+          "crop": "600, 412, 980, 626 (380 by 214). The upper half of the wireframe sphere with the horizontal rules behind it, cut below the hero card edge and above the mark and the two status chips.",
+          "processing": "black point 30, gamma 1.2. The dim gradient ground clips to ink so the rules and the sphere wires stand on their own.",
+          "sentence": "This section covers the docs: 393 pages in eight sections, served in eight locales, and the markdown twins published for agents. (Round seven's sentence said each page has a markdown twin; the Markdown twins slide says only the English pages are prebuilt, so the claim came out.)"
+        }
+      }
+    },
+    "opener-prototemplate": {
+      "id": "opener-prototemplate",
+      "role": "opener",
+      "alt": "A liquid metal diamond with two contour bands, rendered in Glyphfield, dithered",
+      "twins": {
+        "light": "assets/opener-prototemplate-light.jpg",
+        "dark": "assets/opener-prototemplate-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:liquid-metal",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#ffffff",
+          "u_softness": 0.05,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_contour": 0.6,
+          "u_repetition": 3,
+          "u_distortion": 0.07,
+          "u_offsetX": 0,
+          "u_offsetY": 0,
+          "u_scale": 0.5,
+          "u_shape": 1
+        },
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 0,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
+        "recipeKey": "sha256:c170779e628d74d29e18c8cd31541b45715cbbd3ee285f5e3552b246a00824d7"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          -1325,
+          105,
+          2709,
+          2374
+        ],
+        "autocontrast": 0.5,
+        "black": 20,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: liquid metal, Paper Shaders, rendered in Glyphfield",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.083,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 108,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Prototemplate and Glyphfield",
+          "image": "the liquid metal material in its diamond form, white chrome on a black ground: a rotated square about 620 pixels wide in the upper right of the sheet, with two contour bands and a rounded-rectangle highlight outlined in dark, on solid ink. It is made in Glyphfield, the section's own tool, and it is the only opener in liquid metal. Round ten put it in place of the Prism Light crop (see Rejected candidates).",
+          "source": "Glyphfield (`/Users/kevinliu/repos/glyphfield`), route `/shader-preview?materialId=paper-liquid-metal&diagnostics=1&live=1` on the local dev server (port 3012), Paper Shaders' Liquid Metal family, rendered the way the two color openers were: Chromium (Playwright, `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist`), 1600 by 900 viewport at device scale factor 2, `devicePixelsSupported` cleared on the `paperShaderMount` handle, `setMinPixelRatio(2)` and `setMaxPixelCount(3200 * 1800 + 1)`, buffer verified at 3200 by 1800. Uniforms passed through `setUniforms` (scratchpad `openers-60-79/glyphfield/hi/render.mjs`, variant `lm-gem-c5`): `u_colorBack #000000`, `u_colorTint #ffffff`, `u_softness 0.05`, `u_shiftRed 0`, `u_shiftBlue 0`, `u_contour 0.6`, `u_repetition 3`, `u_distortion 0.07`, `u_offsetX 0`, `u_offsetY 0`, `u_scale 0.5`, `u_shape 3` (the diamond; `u_shape 1` is the circle of the sphere runner-up). The frame is the second of the script's three samples, taken at about 4, 5.5 and 7 seconds of playback, saved as `hi/lm-gem-c5-s2.png` (3200 by 1800).",
+          "crop": "-1325, 105, 2709, 2374 (4034 by 2269), computed from the object's bounding box in the source (pixels above 30, 1563 pixels across) so that the diamond is 620 pixels wide and centered at sheet x 1160, y 315. The box reaches past the source on the left and at the bottom, where Pillow pads black, the render's own ground. The diamond's lower-left facet ends right of and above the plate's top-right corner. On the sheet the plate spans 137, 463, 877, 771 (the title wraps to two lines, so it is taller than the one-line plates); the nearest lit cell is 83 pixels from that rectangle, measured on the render, and 110 pixels from the 500-top box the candidates were screened against, and no cell inside the plate or in the 30 pixel band around it is paper.",
+          "processing": "black point 20, gamma 1.0. 8.3 percent of cells are paper. The upper facet edges, the two contour bands and the highlight's outline survive the screen as solid lines; the lower facets darken toward the ground, so the lower silhouette is carried by the bands. The dither sits only inside the object as shading, the way it sits inside the Lens Gate sphere on the Documentation opener. The light twin is a shaded diamond with black bands on paper.",
+          "sentence": "This section covers prototemplate.com, the design lab and knowledge base, and glyphfield.com, the tooling behind it."
+        }
+      }
+    },
+    "opener-status": {
+      "id": "opener-status",
+      "role": "opener",
+      "alt": "The horizon ring's left arc from the singularity direction, dithered",
+      "twins": {
+        "light": "assets/opener-status-light.jpg",
+        "dark": "assets/opener-status-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          445,
+          508,
+          1200,
+          933
+        ],
+        "autocontrast": 0.5,
+        "black": 50,
+        "gamma": 0.85,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Singularity, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.121,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 83,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Status and plan",
+          "image": "the Singularity direction's horizon ring seen from its side: a bright core with glow flanks running the full height of the sheet on the right, entering at the top between x 1180 and 1600 and leaving at the bottom between x 980 and 1290, so the curvature shows and the image reads as the ring rather than as a vertical band. The lower left is solid ink under the plate. It bookends the Brand opener, which carries the same engine's top arc, at the deck's other end. Round ten put it in place of the Aurora Paper band (see Rejected candidates).",
+          "source": "`http://localhost:3005/d/singularity-dossier/this-route-is-missing?chrome=0`, the catch-all 404 route, which mounts the Singularity direction's NotFound horizon band (`src/app/d/singularity/sections/NotFound.tsx`) with no orbit labels, which is what kept the ring off this slide in round eight. Dark theme, Chromium (Playwright, `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist`), 1600 by 900 viewport at device scale factor 2, first frame 4 seconds after load (scratchpad `openers-60-79/render2x/singularity-dossier_this-route-is-missing-dark-y0-1.png`, 3200 by 1800). The page's copy starts at device x 1232 and its content rail sits at x 432, so the box below holds only the ring and hairlines the black point clips.",
+          "crop": "445, 508, 1200, 933 in device pixels (CSS 222.5, 254, 600, 466.5), 755 by 425, scaled 1.06x to cover 800 by 450: the ring's left arc from the top edge to its leftmost point at the bottom edge, right of the content rail and left of the copy. The nearest lit cell is 84 pixels from the plate rectangle (137, 540, 877, 771); no cell inside it is paper, and no lit cell touches the sheet's left edge.",
+          "processing": "black point 50, gamma 0.85. 12.1 percent of cells are paper. The light twin is a heavy black arc on paper with the same presence.",
+          "sentence": "This section covers what has shipped, what is open, the identity project, the fixed points, and the success criteria."
+        }
+      }
+    },
+    "opener-website": {
+      "id": "opener-website",
+      "role": "opener",
+      "alt": "The glyph rain character field from the home page hero, dithered",
+      "twins": {
+        "light": "assets/opener-website-light.jpg",
+        "dark": "assets/opener-website-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          740,
+          180,
+          1384,
+          542
+        ],
+        "autocontrast": 0.5,
+        "black": 10,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Glyph Rain, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0603,
+        "plateClear": {
+          "plate": [
+            137,
+            500,
+            740,
+            271
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 1789,
+          "litInBand": 681
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Website",
+          "image": "Glyph Rain, the home page hero character field, two-tone",
+          "source": "`glyph-rain-dark-1.jpg`, the production homepage hero engine.",
+          "crop": "740, 180, 1384, 542 (644 by 362). The right half of the hero, the character field alone, clear of the headline on the left and the language grid below.",
+          "processing": "black point 10, gamma 1.0. Dim trailing glyphs render as dotted shapes, bright ones as solid shapes.",
+          "sentence": "This section covers the production site page by page, its measurements, and its shaders."
+        }
+      }
+    },
+    "proto-archive-record": {
+      "id": "proto-archive-record",
+      "role": "capture",
+      "alt": "The archive stage for Blueprint Atlas: the record row with the version, the capture date, the source address and the last commit, the note, and the first fold of the archived page",
+      "twins": {
+        "light": "assets/proto-archive-record-light.jpg",
+        "dark": "assets/proto-archive-record-dark.jpg"
+      },
+      "size": [
+        1676,
+        1318
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-brand": {
+      "id": "proto-brand",
+      "role": "capture",
+      "alt": "The brand directives page on prototemplate.com",
+      "twins": {
+        "light": "assets/proto-brand-light.jpg",
+        "dark": "assets/proto-brand-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-brand-head": {
+      "id": "proto-brand-head",
+      "role": "capture",
+      "alt": "The head of the brand directives page: the title, the lede and the mark drawn as dashed contours",
+      "twins": {
+        "light": "assets/proto-brand-head-light.jpg",
+        "dark": "assets/proto-brand-head-dark.jpg"
+      },
+      "size": [
+        2292,
+        684
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-compare-count": {
+      "id": "proto-compare-count",
+      "role": "capture",
+      "alt": "The toolbar count reading Left 02 / 17 between the previous and next buttons",
+      "twins": {
+        "light": "assets/proto-compare-count-light.jpg",
+        "dark": "assets/proto-compare-count-dark.jpg"
+      },
+      "size": [
+        492,
+        102
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-compare-list": {
+      "id": "proto-compare-list",
+      "role": "capture",
+      "alt": "The Sites group of the compare list, with Dossier marked L and Signal marked R",
+      "twins": {
+        "light": "assets/proto-compare-list-light.jpg",
+        "dark": "assets/proto-compare-list-dark.jpg"
+      },
+      "size": [
+        414,
+        468
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-compare-view": {
+      "id": "proto-compare-view",
+      "role": "capture",
+      "alt": "The Both, Left and Right view control",
+      "twins": {
+        "light": "assets/proto-compare-view-light.jpg",
+        "dark": "assets/proto-compare-view-dark.jpg"
+      },
+      "size": [
+        492,
+        102
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-docs-entry": {
+      "id": "proto-docs-entry",
+      "role": "capture",
+      "alt": "The horizon field entry in the build log: heading, prose, the plate running the lensing shader and the source path",
+      "twins": {
+        "light": "assets/proto-docs-entry-light.jpg",
+        "dark": "assets/proto-docs-entry-dark.jpg"
+      },
+      "size": [
+        1768,
+        1086
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-dither": {
+      "id": "proto-engine-dither",
+      "role": "capture",
+      "alt": "Dither",
+      "twins": {
+        "light": "assets/proto-engine-dither-light.jpg",
+        "dark": "assets/proto-engine-dither-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-doubled-line-detail": {
+      "id": "proto-engine-doubled-line-detail",
+      "role": "capture",
+      "alt": "Doubled line",
+      "twins": {
+        "light": "assets/proto-engine-doubled-line-detail-light.jpg",
+        "dark": "assets/proto-engine-doubled-line-detail-dark.jpg"
+      },
+      "size": [
+        420,
+        130
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-edge-globe": {
+      "id": "proto-engine-edge-globe",
+      "role": "capture",
+      "alt": "Edge globe",
+      "twins": {
+        "light": "assets/proto-engine-edge-globe-light.jpg",
+        "dark": "assets/proto-engine-edge-globe-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-glyph-field": {
+      "id": "proto-engine-glyph-field",
+      "role": "capture",
+      "alt": "Glyph field",
+      "twins": {
+        "light": "assets/proto-engine-glyph-field-light.jpg",
+        "dark": "assets/proto-engine-glyph-field-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-glyph-reassembler-detail": {
+      "id": "proto-engine-glyph-reassembler-detail",
+      "role": "capture",
+      "alt": "Glyph reassembler",
+      "twins": {
+        "light": "assets/proto-engine-glyph-reassembler-detail-light.jpg",
+        "dark": "assets/proto-engine-glyph-reassembler-detail-dark.jpg"
+      },
+      "size": [
+        900,
+        278
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-horizon-field": {
+      "id": "proto-engine-horizon-field",
+      "role": "capture",
+      "alt": "Horizon field",
+      "twins": {
+        "light": "assets/proto-engine-horizon-field-light.jpg",
+        "dark": "assets/proto-engine-horizon-field-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-ink-field": {
+      "id": "proto-engine-ink-field",
+      "role": "capture",
+      "alt": "Ink field",
+      "twins": {
+        "light": "assets/proto-engine-ink-field-light.jpg",
+        "dark": "assets/proto-engine-ink-field-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-iso": {
+      "id": "proto-engine-iso",
+      "role": "capture",
+      "alt": "Iso",
+      "twins": {
+        "light": "assets/proto-engine-iso-light.jpg",
+        "dark": "assets/proto-engine-iso-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-locale-tag-detail": {
+      "id": "proto-engine-locale-tag-detail",
+      "role": "capture",
+      "alt": "Locale tag",
+      "twins": {
+        "light": "assets/proto-engine-locale-tag-detail-light.jpg",
+        "dark": "assets/proto-engine-locale-tag-detail-dark.jpg"
+      },
+      "size": [
+        468,
+        145
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-prismatic-field": {
+      "id": "proto-engine-prismatic-field",
+      "role": "capture",
+      "alt": "Prismatic field",
+      "twins": {
+        "light": "assets/proto-engine-prismatic-field-light.jpg",
+        "dark": "assets/proto-engine-prismatic-field-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-reveal-seam-detail": {
+      "id": "proto-engine-reveal-seam-detail",
+      "role": "capture",
+      "alt": "Reveal seam",
+      "twins": {
+        "light": "assets/proto-engine-reveal-seam-detail-light.jpg",
+        "dark": "assets/proto-engine-reveal-seam-detail-dark.jpg"
+      },
+      "size": [
+        880,
+        272
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-engine-studio-field": {
+      "id": "proto-engine-studio-field",
+      "role": "capture",
+      "alt": "Studio field",
+      "twins": {
+        "light": "assets/proto-engine-studio-field-light.jpg",
+        "dark": "assets/proto-engine-studio-field-dark.jpg"
+      },
+      "size": [
+        1656,
+        512
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-grid-tiles": {
+      "id": "proto-grid-tiles",
+      "role": "capture",
+      "alt": "Two of the four grid columns under the Shipped heading",
+      "twins": {
+        "light": "assets/proto-grid-tiles-light.jpg",
+        "dark": "assets/proto-grid-tiles-dark.jpg"
+      },
+      "size": [
+        1470,
+        1470
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-index-panel": {
+      "id": "proto-index-panel",
+      "role": "capture",
+      "alt": "The top of the index panel with its first three rows",
+      "twins": {
+        "light": "assets/proto-index-panel-light.jpg",
+        "dark": "assets/proto-index-panel-dark.jpg"
+      },
+      "size": [
+        918,
+        918
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-marks-nine": {
+      "id": "proto-marks-nine",
+      "role": "capture",
+      "alt": "The nine marks together at 96 pixels, positive on paper and reversed on ink",
+      "twins": {
+        "light": "assets/proto-marks-nine-light.jpg",
+        "dark": "assets/proto-marks-nine-dark.jpg"
+      },
+      "size": [
+        2168,
+        1322
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-present": {
+      "id": "proto-present",
+      "role": "capture",
+      "alt": "The presenter's title screen",
+      "twins": {
+        "neutral": "assets/proto-present.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-search-card": {
+      "id": "proto-search-card",
+      "role": "capture",
+      "alt": "The search palette card",
+      "twins": {
+        "light": "assets/proto-search-card-light.jpg",
+        "dark": "assets/proto-search-card-dark.jpg"
+      },
+      "size": [
+        1276,
+        1256
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-shell-corner": {
+      "id": "proto-shell-corner",
+      "role": "capture",
+      "alt": "The corner where the sidebar meets the toolbar, at two times scale, with the sidebar in thumbnail density and the complete Gallery row with its thumbnail",
+      "twins": {
+        "light": "assets/proto-shell-corner-light.jpg",
+        "dark": "assets/proto-shell-corner-dark.jpg"
+      },
+      "size": [
+        520,
+        340
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "proto-skills-rows": {
+      "id": "proto-skills-rows",
+      "role": "capture",
+      "alt": "The first three skill rows: accessibility, aframe-webxr and agent-browser, each with a number, a name and a description",
+      "twins": {
+        "light": "assets/proto-skills-rows-light.jpg",
+        "dark": "assets/proto-skills-rows-dark.jpg"
+      },
+      "size": [
+        1760,
+        1000
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "reel-poster": {
+      "id": "reel-poster",
+      "role": "other",
+      "alt": "The open-source reel poster",
+      "twins": {
+        "neutral": "assets/reel-poster.jpg"
+      },
+      "size": [
+        1920,
+        1080
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
+    "ref-aicher": {
+      "id": "ref-aicher",
+      "role": "thumb",
+      "alt": "Otl Aicher pictograms at the Munich Olympic station",
+      "twins": {
+        "neutral": "assets/ref-aicher.jpg"
+      },
+      "size": [
+        720,
+        399
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-brockmann": {
+      "id": "ref-brockmann",
+      "role": "thumb",
+      "alt": "Beethoven poster by Josef Müller-Brockmann",
+      "twins": {
+        "neutral": "assets/ref-brockmann.jpg"
+      },
+      "size": [
+        502,
+        720
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-chart": {
+      "id": "ref-chart",
+      "role": "thumb",
+      "alt": "A NOAA chart",
+      "twins": {
+        "neutral": "assets/ref-chart.jpg"
+      },
+      "size": [
+        720,
+        677
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-chrysler": {
+      "id": "ref-chrysler",
+      "role": "thumb",
+      "alt": "The spire of the Chrysler Building",
+      "twins": {
+        "neutral": "assets/ref-chrysler.jpg"
+      },
+      "size": [
+        394,
+        720
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-rams": {
+      "id": "ref-rams",
+      "role": "thumb",
+      "alt": "The Braun ET66 calculator by Dieter Rams",
+      "twins": {
+        "neutral": "assets/ref-rams.jpg"
+      },
+      "size": [
+        487,
+        720
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-rosetta": {
+      "id": "ref-rosetta",
+      "role": "thumb",
+      "alt": "The Rosetta Stone",
+      "twins": {
+        "neutral": "assets/ref-rosetta.jpg"
+      },
+      "size": [
+        615,
+        720
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-solari": {
+      "id": "ref-solari",
+      "role": "thumb",
+      "alt": "A Solari split-flap departure board",
+      "twins": {
+        "neutral": "assets/ref-solari.jpg"
+      },
+      "size": [
+        720,
+        480
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-stamp": {
+      "id": "ref-stamp",
+      "role": "thumb",
+      "alt": "A 1964 Olympic stamp",
+      "twins": {
+        "neutral": "assets/ref-stamp.jpg"
+      },
+      "size": [
+        720,
+        521
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-subway-sign": {
+      "id": "ref-subway-sign",
+      "role": "thumb",
+      "alt": "A New York subway sign set in Helvetica",
+      "twins": {
+        "neutral": "assets/ref-subway-sign.jpg"
+      },
+      "size": [
+        720,
+        540
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-vignelli": {
+      "id": "ref-vignelli",
+      "role": "thumb",
+      "alt": "The 1972 Vignelli subway map",
+      "twins": {
+        "neutral": "assets/ref-vignelli.jpg"
+      },
+      "size": [
+        720,
+        484
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "ref-whole-earth": {
+      "id": "ref-whole-earth",
+      "role": "thumb",
+      "alt": "The back cover of the Whole Earth Catalog",
+      "twins": {
+        "neutral": "assets/ref-whole-earth.jpg"
+      },
+      "size": [
+        545,
+        720
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "pass-through"
+    },
+    "site-blog": {
+      "id": "site-blog",
+      "role": "capture",
+      "alt": "The blog index",
+      "twins": {
+        "light": "assets/site-blog-light.jpg",
+        "dark": "assets/site-blog-dark.jpg"
+      },
+      "size": [
+        1440,
+        1080
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/blog",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-blog-oss": {
+      "id": "site-blog-oss",
+      "role": "capture",
+      "alt": "The blog post announcing the open-source grant program",
+      "twins": {
+        "light": "assets/site-blog-oss-light.jpg",
+        "dark": "assets/site-blog-oss-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/blog/supporting-open-source-software",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-blog-post": {
+      "id": "site-blog-post",
+      "role": "capture",
+      "alt": "The gt-rrweb 0.2.0 release note with its generated cover",
+      "twins": {
+        "light": "assets/site-blog-post-light.jpg",
+        "dark": "assets/site-blog-post-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/blog",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-contact": {
+      "id": "site-contact",
+      "role": "capture",
+      "alt": "The contact page",
+      "twins": {
+        "light": "assets/site-contact-light.jpg",
+        "dark": "assets/site-contact-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/contact",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-dash": {
+      "id": "site-dash",
+      "role": "capture",
+      "alt": "The dashboard sign-in page",
+      "twins": {
+        "light": "assets/site-dash-light.jpg",
+        "dark": "assets/site-dash-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://dash.generaltranslation.com/",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-docs": {
+      "id": "site-docs",
+      "role": "capture",
+      "alt": "The docs front page",
+      "twins": {
+        "light": "assets/site-docs-light.jpg",
+        "dark": "assets/site-docs-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/docs",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-enterprise": {
+      "id": "site-enterprise",
+      "role": "capture",
+      "alt": "The enterprise page",
+      "twins": {
+        "light": "assets/site-enterprise-light.jpg",
+        "dark": "assets/site-enterprise-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/enterprise",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-home": {
+      "id": "site-home",
+      "role": "capture",
+      "alt": "The home page at 1440 by 900",
+      "twins": {
+        "light": "assets/site-home-light.jpg",
+        "dark": "assets/site-home-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-home-dark": {
+      "id": "site-home-dark",
+      "role": "capture",
+      "alt": "The home page in the dark theme",
+      "twins": {
+        "neutral": "assets/site-home-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/home-dark",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "light",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-home-light": {
+      "id": "site-home-light",
+      "role": "capture",
+      "alt": "The home page in the light theme",
+      "twins": {
+        "neutral": "assets/site-home-light.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/home-light",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "light",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-pricing": {
+      "id": "site-pricing",
+      "role": "capture",
+      "alt": "The pricing page",
+      "twins": {
+        "light": "assets/site-pricing-light.jpg",
+        "dark": "assets/site-pricing-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/pricing",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-proto-dossier": {
+      "id": "site-proto-dossier",
+      "role": "capture",
+      "alt": "The Dossier direction on prototemplate.com",
+      "twins": {
+        "light": "assets/site-proto-dossier-light.jpg",
+        "dark": "assets/site-proto-dossier-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/proto-dossier",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "site-report-card": {
+      "id": "site-report-card",
+      "role": "capture",
+      "alt": "The report card page",
+      "twins": {
+        "light": "assets/site-report-card-light.jpg",
+        "dark": "assets/site-report-card-dark.jpg"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "capture",
+        "url": "https://generaltranslation.com/report-card",
+        "viewport": [
+          1440,
+          900
+        ],
+        "scale": 2,
+        "theme": "both",
+        "recipe": "gt-site"
+      },
+      "inline": "resample-1280"
+    },
+    "x-banner": {
+      "id": "x-banner",
+      "role": "other",
+      "alt": "The X profile banner",
+      "twins": {
+        "neutral": "assets/x-banner.png"
+      },
+      "size": [
+        1500,
+        500
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    }
+  },
+  "revision": 230,
+  "createdAt": "2026-09-17T03:52:58.124Z",
+  "updatedAt": "2026-09-17T04:01:30.120Z"
+}

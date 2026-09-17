@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "gem-smoke",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "5/7"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Designed covers"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Designed covers and the reel use one GPU material from Glyphfield, gem smoke, driven by two color uniforms: a dark base and a brand color. Partner covers change only the brand color and the lockup, so the partner color is each page's single accent."
+      }
+    ],
+    "body": [
+      {
+        "id": "pair",
+        "type": "pair",
+        "figures": [
+          {
+            "assets": [
+              "cover-gt-open-source"
+            ],
+            "caption": "The GT open-source announcement cover sets the brand color to GT blue."
+          },
+          {
+            "assets": [
+              "cover-fumadocs"
+            ],
+            "caption": "The Fumadocs grantee profile cover sets the brand color to Fumadocs orange."
+          }
+        ]
+      }
+    ]
+  }
+}

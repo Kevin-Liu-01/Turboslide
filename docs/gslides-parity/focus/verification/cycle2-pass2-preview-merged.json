@@ -1,0 +1,3818 @@
+{
+  "base": "https://turboslide-1ew78vsd0-kl01s-projects.vercel.app",
+  "mergedAt": "2026-09-17T07:57:23.930Z",
+  "rule": "the last run of the origin",
+  "sources": [
+    "gate run 1",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver4/walk-rest/text-images/core-walk.json",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver4/walk-rest/arrange-shapes-lines/core-walk.json",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver4/walk-rest/share-export-help-surface-run2/core-walk.json",
+    "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver4/gate-preview-specs2/out/core-gate.json"
+  ],
+  "counts": {
+    "passed": 382,
+    "failed": 14,
+    "not driven": 1
+  },
+  "replaced": 292,
+  "retries": 0,
+  "results": {
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.new.draft": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.editor.move-to-trash": "passed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "failed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.file.make-a-copy": "passed",
+    "decks.card.download": "passed",
+    "slides.new.toolbar": "passed",
+    "slides.new.arrow-layout": "passed",
+    "slides.new.menu": "passed",
+    "slides.new.ctrl-m-card": "passed",
+    "slides.new.ctrl-m-canvas": "passed",
+    "slides.new.context": "passed",
+    "slides.new.undo": "passed",
+    "slides.duplicate.context": "passed",
+    "slides.duplicate.menu": "passed",
+    "slides.duplicate.cmd-d": "passed",
+    "slides.duplicate.undo-toolbar": "passed",
+    "slides.duplicate.undo-redo-keys": "passed",
+    "slides.duplicate.two-selected-cmd-d": "passed",
+    "slides.duplicate.two-selected-menu": "passed",
+    "slides.delete.key": "passed",
+    "slides.delete.undo-snackbar": "passed",
+    "slides.delete.context": "passed",
+    "slides.delete.undo-cmd-z": "passed",
+    "slides.delete.menu-undo-redo": "passed",
+    "slides.delete.two-selected-key-undo": "passed",
+    "slides.delete.two-selected-menu": "passed",
+    "slides.delete.two-selected-edit-menu": "passed",
+    "slides.delete.canvas-focus-undo": "passed",
+    "slides.delete.undo-redo-saved": "passed",
+    "slides.select.click": "passed",
+    "slides.select.arrows-shift": "passed",
+    "slides.select.shift-cmd-click": "passed",
+    "slides.select.cmd-click-toggle": "passed",
+    "slides.reorder.drag-above": "passed",
+    "slides.reorder.drag-below": "passed",
+    "slides.reorder.cmd-up-down": "passed",
+    "slides.reorder.menu-to-end-undo": "passed",
+    "slides.reorder.undo-drag": "passed",
+    "slides.reorder.two-selected-drag": "passed",
+    "slides.skip.context": "passed",
+    "slides.skip.context-two": "passed",
+    "slides.skip.menu-unskip": "passed",
+    "slides.skip.menu-two": "passed",
+    "slides.layout.picker-open-escape": "passed",
+    "slides.layout.apply.title": "passed",
+    "slides.layout.apply.opener": "passed",
+    "slides.layout.apply.split": "passed",
+    "slides.layout.apply.cols": "passed",
+    "slides.layout.apply.title-only": "passed",
+    "slides.layout.apply.one-column": "passed",
+    "slides.layout.apply.statement": "passed",
+    "slides.layout.apply.section-description": "passed",
+    "slides.layout.apply.mood": "passed",
+    "slides.layout.apply.big-number": "passed",
+    "slides.layout.apply.blank": "passed",
+    "slides.layout.apply.rows": "passed",
+    "slides.layout.apply.plain": "passed",
+    "slides.layout.apply.table": "passed",
+    "slides.layout.apply.figure": "passed",
+    "slides.layout.apply.pair": "passed",
+    "slides.layout.apply.tiles": "passed",
+    "slides.layout.apply.details": "passed",
+    "slides.layout.apply.board": "passed",
+    "slides.layout.apply.matrix": "passed",
+    "slides.layout.apply.closing": "passed",
+    "slides.layout.reopen-ring": "passed",
+    "slides.layout.context-apply": "passed",
+    "slides.layout.menu-apply-undo": "passed",
+    "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+    "slides.layout.typed-title-round-trip": "passed",
+    "slides.layout.snackbar-counts-typed-only": "passed",
+    "slides.layout.undo-typed": "passed",
+    "slides.notes.type": "passed",
+    "slides.notes.per-slide": "passed",
+    "slides.notes.resize-handle": "passed",
+    "slides.notes.reload": "passed",
+    "slides.counter.footer-and-cards": "passed",
+    "slides.hash.click-and-reload": "passed",
+    "slides.clipboard.copy-paste-card": "passed",
+    "slides.reorder.menu-up-down-beginning": "passed",
+    "slides.reorder.cmd-shift-up-down": "passed",
+    "slides.notes.view-menu-toggle": "passed",
+    "slides.context.empty-canvas": "passed",
+    "text.title.single-click": "passed",
+    "text.title.double-click": "passed",
+    "text.title.type-escape": "passed",
+    "text.selected.typing-replaces": "passed",
+    "text.selected.enter-appends": "passed",
+    "text.title.double-click-enters": "passed",
+    "text.caret.click-mid-word": "passed",
+    "text.caret.home-end": "passed",
+    "text.caret.shift-arrow-replace": "passed",
+    "text.caret.shift-home-end": "passed",
+    "text.caret.backspace-word": "passed",
+    "text.caret.option-backspace": "passed",
+    "text.caret.delete": "passed",
+    "text.caret.cmd-a": "passed",
+    "text.title.enter-commits": "passed",
+    "text.session.escape-twice": "passed",
+    "text.subtitle.double-click-type": "passed",
+    "text.subtitle.enter-new-line": "passed",
+    "text.subtitle.shift-enter": "passed",
+    "text.subtitle.arrows-backspace-join": "passed",
+    "text.subtitle.escape-commits": "passed",
+    "text.textbox.insert-click-type": "passed",
+    "text.textbox.insert-drag": "passed",
+    "text.textbox.drag-inside-moves": "passed",
+    "text.textbox.burst-reliability": "passed",
+    "text.toolbar.swaps-on-select": "passed",
+    "text.fontsize.type-enter": "passed",
+    "text.fontsize.plus-minus": "passed",
+    "text.bold.toolbar": "passed",
+    "text.bold.cmd-b-word": "passed",
+    "text.italic.toolbar-word": "passed",
+    "text.italic.cmd-i-word": "passed",
+    "text.underline.cmd-u-word": "passed",
+    "text.underline.toolbar": "passed",
+    "text.strikethrough.cmd-shift-x": "passed",
+    "text.strikethrough.menu": "passed",
+    "text.color.swatch-on-word": "passed",
+    "text.align.toolbar-and-key": "passed",
+    "text.spacing.toolbar": "passed",
+    "text.list.bulleted-toolbar": "passed",
+    "text.list.numbered-toolbar": "passed",
+    "text.list.bulleted-menu-preset": "passed",
+    "text.indent.toolbar": "passed",
+    "text.indent.keys": "passed",
+    "text.link.cmd-k-enter": "passed",
+    "text.link.present-click": "failed",
+    "text.clear-formatting": "passed",
+    "text.format-menu.rows-enabled": "passed",
+    "text.format-menu.size-increase": "failed",
+    "text.format-menu.align-left": "passed",
+    "text.format-menu.spacing-double": "passed",
+    "text.format-menu.text-fitting": "passed",
+    "text.autofit.title-wraps": "passed",
+    "text.autofit.textbox-grow": "passed",
+    "text.clipboard.within-box": "passed",
+    "text.clipboard.between-boxes": "passed",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "passed",
+    "text.find-replace.shortcut": "passed",
+    "text.persistence.reload": "passed",
+    "text.list.numbered-menu-preset": "passed",
+    "text.list.chords": "passed",
+    "text.link.toolbar-button": "passed",
+    "text.format-options.panel": "passed",
+    "text.layout-runs.type": "passed",
+    "text.context.text-block": "passed",
+    "text.context.text-selection": "passed",
+    "text.context.inside-session": "passed",
+    "text.format-menu.size-decrease": "passed",
+    "text.format-menu.spacing-single-1-15": "passed",
+    "text.format-menu.align-indent-rows": "passed",
+    "text.textbox.toolbar-button": "passed",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "passed",
+    "images.insert.toolbar-sources": "passed",
+    "images.select.chip-handles-tail": "passed",
+    "images.delete.key": "passed",
+    "images.move.drag-frame": "passed",
+    "images.guides.edge-snap": "passed",
+    "images.guides.centre-y": "passed",
+    "images.guides.centre-x": "passed",
+    "images.nudge.arrows": "passed",
+    "images.resize.eight-handles": "passed",
+    "images.resize.eight-handles-shift": "passed",
+    "images.resize.edge-fill": "passed",
+    "images.resize.alt-centre": "passed",
+    "images.rotate.ring": "passed",
+    "images.crop.double-click": "passed",
+    "images.crop.east-edge": "passed",
+    "images.crop.south-edge": "passed",
+    "images.crop.enter": "passed",
+    "images.crop.undo": "passed",
+    "images.crop.redo": "passed",
+    "images.crop.menu-escape": "passed",
+    "images.crop.toolbar-escape-cancels": "passed",
+    "images.options.panel": "passed",
+    "images.options.transparency": "passed",
+    "images.options.reset": "passed",
+    "images.reset-image.menu": "passed",
+    "images.replace.upload": "passed",
+    "images.background.colour": "passed",
+    "images.background.toolbar": "passed",
+    "images.background.upload-picture": "passed",
+    "images.background.remove-picture": "passed",
+    "images.background.reset": "passed",
+    "images.present.picture-and-ground": "failed",
+    "images.export.pdf-with-picture": "failed",
+    "images.replace.drop-on-picture": "failed",
+    "images.context.image": "passed",
+    "images.options.menu-row": "passed",
+    "images.background.hex-field": "passed",
+    "arrange.select.click": "passed",
+    "arrange.select.shift-add": "passed",
+    "arrange.multi.drag-inside-moves-all": "passed",
+    "arrange.select.shift-remove": "passed",
+    "arrange.select.marquee": "passed",
+    "arrange.select.marquee-partial": "passed",
+    "arrange.select.click-away": "passed",
+    "arrange.select.cmd-a": "passed",
+    "arrange.select.escape": "passed",
+    "arrange.order.bring-to-front": "passed",
+    "arrange.order.send-to-back": "passed",
+    "arrange.order.bring-forward": "passed",
+    "arrange.order.send-backward": "passed",
+    "arrange.order.keys": "passed",
+    "arrange.align.left": "passed",
+    "arrange.align.center": "passed",
+    "arrange.align.right": "passed",
+    "arrange.align.top": "passed",
+    "arrange.align.middle": "passed",
+    "arrange.align.bottom": "passed",
+    "arrange.align.single-to-slide": "passed",
+    "arrange.center.horizontal": "passed",
+    "arrange.center.vertical": "passed",
+    "arrange.undo.toolbar-on-arrange": "passed",
+    "arrange.undo.menu-on-arrange": "passed",
+    "arrange.clipboard.copy-paste": "passed",
+    "arrange.clipboard.delete": "passed",
+    "arrange.clipboard.undo-redo-delete": "passed",
+    "arrange.clipboard.cut-paste-undo": "passed",
+    "arrange.clipboard.menu-copy-paste": "passed",
+    "arrange.clipboard.paste-after-new-slide-button": "passed",
+    "arrange.clipboard.paste-with-filmstrip-focus": "passed",
+    "arrange.clipboard.paste-keeps-position": "passed",
+    "arrange.duplicate.cmd-d": "passed",
+    "arrange.duplicate.menu-selects-copy": "passed",
+    "arrange.duplicate.nothing-selected": "passed",
+    "arrange.redo.after-undone-duplicate": "passed",
+    "arrange.keys.backspace-empty-selection": "passed",
+    "arrange.nudge.arrows": "passed",
+    "arrange.nudge.shift": "passed",
+    "arrange.nudge.undo": "passed",
+    "arrange.zoom.box-reads": "passed",
+    "arrange.zoom.menu-in": "passed",
+    "arrange.zoom.cmd-minus": "passed",
+    "arrange.zoom.cmd-plus": "passed",
+    "arrange.zoom.fit": "passed",
+    "arrange.zoom.type-percent": "passed",
+    "arrange.zoom.arrow-menu": "passed",
+    "arrange.zoom.cmd-0": "passed",
+    "arrange.zoom.menu-out": "passed",
+    "arrange.readout.fit": "passed",
+    "arrange.readout.200": "passed",
+    "arrange.selection-colour.light": "passed",
+    "arrange.selection-colour.dark": "passed",
+    "arrange.escape.text-then-selection": "passed",
+    "arrange.zoom.menu-presets": "passed",
+    "arrange.toolbar.select": "passed",
+    "shapes.insert.rectangle-click": "passed",
+    "shapes.insert.rounded-click": "passed",
+    "shapes.insert.ellipse-click": "passed",
+    "shapes.insert.rectangle-drag": "passed",
+    "shapes.insert.ellipse-drag": "passed",
+    "shapes.insert.named-rows": "passed",
+    "shapes.default-look": "passed",
+    "shapes.select": "passed",
+    "shapes.move": "passed",
+    "shapes.resize.eight-handles": "passed",
+    "shapes.rotate": "passed",
+    "shapes.fill.colour": "passed",
+    "shapes.border.colour-weight-dash": "failed",
+    "shapes.text.type-align-bold": "passed",
+    "shapes.duplicate-delete-undo-redo": "passed",
+    "shapes.format-options.size-position": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "shapes.reload-and-viewer": "passed",
+    "shapes.context.shape": "passed",
+    "lines.insert.line-drag": "passed",
+    "lines.insert.arrow-drag": "passed",
+    "lines.end-handle": "passed",
+    "lines.tail.colour-weight-dash-ends": "passed",
+    "lines.context.line": "failed",
+    "present.slideshow.button": "passed",
+    "present.slideshow.cmd-enter": "passed",
+    "present.keys.arrow-right": "passed",
+    "present.keys.arrow-left": "passed",
+    "present.keys.space": "passed",
+    "present.keys.digit-enter": "passed",
+    "present.keys.home": "passed",
+    "present.keys.end": "passed",
+    "present.click-advances": "passed",
+    "present.counter": "passed",
+    "present.laser": "passed",
+    "present.escape": "passed",
+    "present.presenter-view.arrow": "passed",
+    "present.presenter-view.s-key": "passed",
+    "present.notes-in-presenter": "passed",
+    "present.slideshow.from-beginning": "passed",
+    "present.keys.blank-black-white": "passed",
+    "present.skipped-left-out": "failed",
+    "share.dialog.open": "passed",
+    "share.copy-view-link": "passed",
+    "share.copy-edit-link": "passed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "passed",
+    "share.edit-link-lands-editor": "passed",
+    "share.view-link-cannot-edit": "passed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "failed",
+    "collab.presence-chips": "failed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "share.copy-present-link": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "comments.on-title-placeholder": "passed",
+    "comments.on-slide": "passed",
+    "comments.on-object": "passed",
+    "comments.reply": "passed",
+    "comments.resolve": "passed",
+    "comments.toolbar-and-menu-routes": "failed",
+    "comments.reaches-second-browser": "failed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.restore": "passed",
+    "versions.undo-restore": "passed",
+    "export.download-submenu": "passed",
+    "export.pdf.dialog": "passed",
+    "export.pdf.skipped-check": "passed",
+    "export.pdf.close-paths": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.dialog": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "export.print.preview-page": "passed",
+    "export.print.layout-with-notes": "passed",
+    "export.print.include-skipped": "passed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.print.print-button": "passed",
+    "export.print.close-preview": "passed",
+    "export.print.file-menu-after-close": "failed",
+    "export.print.menu-row": "passed",
+    "export.print.cmd-p": "passed",
+    "help.help-dialog": "passed",
+    "help.documentation-link": "passed",
+    "help.keyboard-shortcuts": "passed",
+    "help.search-the-menus": "passed",
+    "surface.menus.open-close-escape": "passed",
+    "surface.advanced.off-by-default": "passed",
+    "surface.advanced.on-shows-parked": "passed",
+    "surface.advanced.remembered": "passed",
+    "surface.parked-blocks-render": "passed",
+    "surface.cleanup": "passed",
+    "surface.parked-shortcut-unbound": "passed",
+    "surface.parked-block-core-rows": "passed"
+  },
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.root.redirect",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.new.draft",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.new.first-write",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.save-words",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.file-rename",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "decks.list.read",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.list.search",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.list.open-title",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.list.open-recent",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.present",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.restore",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.access.paint",
+      "result": "failed",
+      "reason": "Error: the reopened deck is in Editing mode for its owner (mode viewing, role owner)",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.notfound.page",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "decks.card.download",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.new.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.key",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.select.click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.skip.context",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.skip.context-two",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.notes.type",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.notes.reload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.clipboard.copy-paste-card",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "text.title.single-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.title.double-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.title.type-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.selected.typing-replaces",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.home-end",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.delete",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.session.escape-twice",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.bold.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.underline.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.indent.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.indent.keys",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.link.present-click",
+      "result": "failed",
+      "reason": "Error: the show draws the linked word as a link element",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "text.clear-formatting",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "result": "failed",
+      "reason": "Format > Text > Size > Increase font size: error: locator.waitFor: Timeout 6000ms exceeded.",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "result": "not driven",
+      "reason": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+      "source": "walk text-images"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.persistence.reload",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.list.chords",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-options.panel",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.layout-runs.type",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.context.text-block",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.context.text-selection",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.context.inside-session",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the text boxes"
+      }
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.insert.upload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.insert.drop",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.insert.paste",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.insert.toolbar-sources",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.delete.key",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.move.drag-frame",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.guides.centre-y",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.guides.centre-x",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.nudge.arrows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.rotate.ring",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.double-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.east-edge",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.south-edge",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.enter",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.redo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.options.panel",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.options.transparency",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.options.reset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.reset-image.menu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.replace.upload",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.background.colour",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.background.toolbar",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.background.upload-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.background.remove-picture",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.background.reset",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "result": "failed",
+      "reason": "Slideshow, then Escape: show true; picture false; ground in the editor rgb(51, 102, 153), in the show null; back in the editor true",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "images.context.image",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.options.menu-row",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "images.background.hex-field",
+      "result": "passed",
+      "reason": "",
+      "source": "walk text-images",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the pictures"
+      }
+    },
+    {
+      "id": "arrange.select.click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.multi.drag-inside-moves-all",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.marquee",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.click-away",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.select.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.order.keys",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.left",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.center",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.right",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.top",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.middle",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.bottom",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.center.vertical",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.readout.fit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.readout.200",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the arrange rows"
+      }
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.default-look",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.select",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.move",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.rotate",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.fill.colour",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "result": "failed",
+      "reason": "the toolbar Border color, Border weight and Border dash, then Format > Borders & lines; Undo: colour rgb(242, 242, 240) -> rgb(229, 72, 77); weight 1px -> 2px (menu.toolbar.borderWeight.weight-2); dash none -> 8px, 6px (toolbar.borderDash.pick.dash); Format > Borders & lines > Border color (plate format.bordersLines.borderColor.plate,format.bordersLines.borderColor.plate) rgb(229, 72, 77) -> rgb(229, 72, 77); after four undos stroke rgb(7, 7, 7) 1px dash none",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.export.pdf",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "shapes.export.pptx",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "shapes.context.shape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the shapes"
+      }
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the lines"
+      }
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the lines"
+      }
+    },
+    {
+      "id": "lines.end-handle",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the lines"
+      }
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "result": "passed",
+      "reason": "",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the lines"
+      }
+    },
+    {
+      "id": "lines.context.line",
+      "result": "failed",
+      "reason": "right click the line, read the rows, Line end > Arrow from it: rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, arrange.distribute, arrange.group, arrange.ungroup, insert.link, format.dropShadow, format.formatOptions, format.bordersLines.lineStart, format.bordersLines.lineEnd, format.altText, insert.comment; missing none; picked null; head false",
+      "source": "walk arrange-shapes-lines",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "not driven",
+        "reason": "setup failed: a slide for the lines"
+      }
+    },
+    {
+      "id": "present.slideshow.button",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.space",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.home",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.end",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.click-advances",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.counter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.laser",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "present.skipped-left-out",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed",
+      "source": "gate-preview-specs2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "passed",
+        "reason": ""
+      }
+    },
+    {
+      "id": "share.dialog.open",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.copy-view-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.copy-edit-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.escape",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+      "source": "gate-preview-specs2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "passed",
+        "reason": ""
+      }
+    },
+    {
+      "id": "collab.presence-chips",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.copy-present-link",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "comments.on-slide",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "comments.on-object",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "comments.reply",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "comments.resolve",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+      "source": "gate-preview-specs2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "passed",
+        "reason": ""
+      }
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+      "source": "gate-preview-specs2"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "failed",
+        "reason": "click the Last edit words in the title row: windows versionHistory.window.w123; Today heading false"
+      }
+    },
+    {
+      "id": "versions.pick",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "versions.name-current",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "versions.restore",
+      "result": "passed",
+      "reason": "",
+      "source": "gate-preview-specs2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "failed",
+        "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+      }
+    },
+    {
+      "id": "versions.undo-restore",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "failed",
+        "reason": "Restore an earlier version, then Cmd+Z: restore changed the deck false (versionHistory.74.restore; snackbar none; panel notice Saved \"Before the customer copy\" at r124; state.error none); Cmd+Z brought the current version back false"
+      }
+    },
+    {
+      "id": "export.download-submenu",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.pdf.dialog",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.pdf.skipped-check",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.pdf.close-paths",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.pdf.file",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.pptx.dialog",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.pptx.perfect",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.pptx.editable",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.print.preview-page",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.print.layout-with-notes",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.print.include-skipped",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "failed",
+        "reason": "Include skipped slides: pages 4 -> 4; marked 0"
+      }
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "export.print.print-button",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.print.close-preview",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.print.file-menu-after-close",
+      "result": "failed",
+      "reason": "the first click on File after Close preview: File menu open after one click false",
+      "source": "walk share-export-help-surface-run2",
+      "previous": {
+        "source": "gate run 1 (the run of record)",
+        "result": "passed",
+        "reason": ""
+      }
+    },
+    {
+      "id": "export.print.menu-row",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "export.print.cmd-p",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "help.help-dialog",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "help.documentation-link",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "help.keyboard-shortcuts",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "help.search-the-menus",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "surface.menus.open-close-escape",
+      "result": "passed",
+      "reason": "",
+      "source": "walk share-export-help-surface-run2"
+    },
+    {
+      "id": "surface.advanced.off-by-default",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.advanced.on-shows-parked",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.advanced.remembered",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.cleanup",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    },
+    {
+      "id": "surface.parked-block-core-rows",
+      "result": "passed",
+      "reason": "",
+      "source": "gate run 1 (the run of record)"
+    }
+  ],
+  "flips": [
+    "text.textbox.insert-click-type: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.textbox.insert-drag: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.textbox.drag-inside-moves: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.textbox.burst-reliability: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.toolbar.swaps-on-select: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.fontsize.type-enter: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.fontsize.plus-minus: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.bold.toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.bold.cmd-b-word: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.italic.toolbar-word: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.italic.cmd-i-word: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.underline.cmd-u-word: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.underline.toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.strikethrough.cmd-shift-x: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.strikethrough.menu: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.color.swatch-on-word: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.align.toolbar-and-key: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.spacing.toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.list.bulleted-toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.list.numbered-toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.list.bulleted-menu-preset: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.indent.toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.indent.keys: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.link.cmd-k-enter: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.clear-formatting: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.rows-enabled: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.size-increase: gate run 1 (the run of record) not driven -> walk text-images failed",
+    "text.format-menu.align-left: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.spacing-double: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.text-fitting: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.autofit.title-wraps: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.autofit.textbox-grow: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.clipboard.within-box: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.clipboard.between-boxes: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.find-replace.replace-all: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.find-replace.shortcut: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.persistence.reload: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.list.numbered-menu-preset: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.list.chords: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.link.toolbar-button: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-options.panel: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.layout-runs.type: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.context.text-block: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.context.text-selection: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.context.inside-session: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.size-decrease: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.spacing-single-1-15: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.format-menu.align-indent-rows: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "text.textbox.toolbar-button: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.insert.toolbar-sources: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.select.chip-handles-tail: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.delete.key: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.move.drag-frame: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.guides.edge-snap: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.guides.centre-y: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.guides.centre-x: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.nudge.arrows: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.resize.eight-handles: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.resize.eight-handles-shift: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.resize.edge-fill: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.resize.alt-centre: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.rotate.ring: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.double-click: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.east-edge: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.south-edge: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.enter: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.undo: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.redo: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.menu-escape: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.crop.toolbar-escape-cancels: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.options.panel: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.options.transparency: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.options.reset: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.reset-image.menu: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.background.colour: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.background.toolbar: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.background.reset: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.present.picture-and-ground: gate run 1 (the run of record) not driven -> walk text-images failed",
+    "images.context.image: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.options.menu-row: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "images.background.hex-field: gate run 1 (the run of record) not driven -> walk text-images passed",
+    "arrange.select.click: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.shift-add: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.multi.drag-inside-moves-all: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.shift-remove: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.marquee: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.marquee-partial: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.click-away: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.cmd-a: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.select.escape: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.order.bring-to-front: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.order.send-to-back: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.order.bring-forward: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.order.send-backward: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.order.keys: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.left: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.center: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.right: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.top: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.middle: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.bottom: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.align.single-to-slide: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.center.horizontal: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.center.vertical: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.undo.toolbar-on-arrange: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.undo.menu-on-arrange: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.copy-paste: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.delete: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.undo-redo-delete: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.cut-paste-undo: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.menu-copy-paste: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.paste-after-new-slide-button: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.paste-with-filmstrip-focus: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.clipboard.paste-keeps-position: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.duplicate.cmd-d: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.duplicate.menu-selects-copy: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.duplicate.nothing-selected: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.redo.after-undone-duplicate: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.keys.backspace-empty-selection: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.nudge.arrows: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.nudge.shift: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.nudge.undo: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.box-reads: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.menu-in: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.cmd-minus: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.cmd-plus: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.fit: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.type-percent: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.arrow-menu: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.cmd-0: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.menu-out: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.readout.fit: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.readout.200: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.selection-colour.light: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.selection-colour.dark: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.escape.text-then-selection: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.zoom.menu-presets: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "arrange.toolbar.select: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.rectangle-click: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.rounded-click: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.ellipse-click: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.rectangle-drag: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.ellipse-drag: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.insert.named-rows: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.default-look: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.select: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.move: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.resize.eight-handles: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.rotate: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.fill.colour: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.border.colour-weight-dash: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines failed",
+    "shapes.text.type-align-bold: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.duplicate-delete-undo-redo: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.format-options.size-position: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.reload-and-viewer: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "shapes.context.shape: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "lines.insert.line-drag: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "lines.insert.arrow-drag: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "lines.end-handle: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "lines.tail.colour-weight-dash-ends: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines passed",
+    "lines.context.line: gate run 1 (the run of record) not driven -> walk arrange-shapes-lines failed",
+    "present.skipped-left-out: gate run 1 (the run of record) passed -> gate-preview-specs2 failed",
+    "collab.slide-added-appears: gate run 1 (the run of record) passed -> gate-preview-specs2 failed",
+    "comments.toolbar-and-menu-routes: gate run 1 (the run of record) passed -> gate-preview-specs2 failed",
+    "versions.open-from-last-edit: gate run 1 (the run of record) failed -> walk share-export-help-surface-run2 passed",
+    "versions.restore: gate run 1 (the run of record) failed -> gate-preview-specs2 passed",
+    "versions.undo-restore: gate run 1 (the run of record) failed -> walk share-export-help-surface-run2 passed",
+    "export.print.include-skipped: gate run 1 (the run of record) failed -> walk share-export-help-surface-run2 passed",
+    "export.print.file-menu-after-close: gate run 1 (the run of record) passed -> walk share-export-help-surface-run2 failed"
+  ]
+}

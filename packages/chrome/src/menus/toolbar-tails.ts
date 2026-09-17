@@ -19,6 +19,13 @@ import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
  * dash, Highlight color, the indents, Border weight and Reset image on a picture, Line dash; adds
  * Change shape, the merge buttons and the chart and group tails; and enables the text controls
  * on a shape (SPEC-2 0.11).
+ *
+ * The focus round (docs/FOCUS.md 3.3) parks a control with `advanced: true`: it leaves the tail
+ * while Tools > Advanced tools is off (`presentControls` in ToolbarTail.tsx) and draws as before
+ * with it on. The text tail keeps its typography controls and loses Highlight color and the fill
+ * and border controls; the shape tail loses Change shape; the image tail loses the frame and
+ * Dither; the table, chart, group and other tails are parked whole with their features;
+ * `toolbar.font` stays visible and disabled as the one exception (3.1).
  */
 export type TailKind =
   'default' | 'text' | 'shape' | 'image' | 'line' | 'table' | 'chart' | 'group' | 'other';
@@ -73,6 +80,8 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
   const textOnly = family === 'text';
   const gate = (predicate: MenuPredicate, reason: string) =>
     textOnly ? { enabled: predicate, disabledReason: reason } : {};
+  /* docs/FOCUS.md 3.3: on a text box the four controls are parked (no audit drove them) */
+  const park = textOnly ? { advanced: true as const } : {};
   const fill: TailControl = {
     control: 'toolbar.fillColor',
     label: 'Fill color',
@@ -86,6 +95,7 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
         ? 'The fill of the selected cells, or of the column'
         : 'A theme colour, none, or a hex',
     ...gate('boxSelected', NO_FILL_DOC),
+    ...park,
   };
   const border: TailControl = {
     control: 'toolbar.borderColor',
@@ -95,6 +105,7 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     op: 'borderColor',
     dropdown: true,
     ...gate('hasBorderField', NO_BORDER_DOC),
+    ...park,
   };
   const weight: TailControl = {
     control: 'toolbar.borderWeight',
@@ -105,6 +116,7 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     dropdown: true,
     doc: '0, 1, 1.5 or 2',
     ...gate('hasBorderField', NO_BORDER_DOC),
+    ...park,
   };
   const dash: TailControl = {
     control: 'toolbar.borderDash',
@@ -115,8 +127,14 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     dropdown: true,
     doc: 'Solid, dot, dash, dash dot, long dash or long dash dot',
     ...gate('boxSelected', NO_BORDER_DOC),
+    ...park,
   };
   return family === 'table' ? [border, weight, dash, fill] : [fill, border, weight, dash];
+}
+
+/** A tail parked whole (docs/FOCUS.md 3.3): every control carries the flag. */
+function parkedTail(controls: ReadonlyArray<TailControl>): TailControl[] {
+  return controls.map((control) => ({ ...control, advanced: true as const }));
 }
 
 /** The two merge buttons of the table tail (SPEC-2 4.2): Turboslide additions marked as ours. */
@@ -196,11 +214,13 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       dropdown: true,
       doc: 'Ink or muted on headings and paragraphs; the theme colours on selected text, text boxes and boxes',
     },
+    /* docs/FOCUS.md 3.3: Highlight color is parked */
     {
       control: 'toolbar.highlightColor',
       label: 'Highlight color',
       icon: 'paint-brush',
       status: 'now',
+      advanced: true,
       op: 'highlightColor',
       dropdown: true,
       doc: 'A theme colour behind the selected text, or none',
@@ -311,14 +331,18 @@ const TEXT_TAIL: TailControl[] = [...fillAndBorder('text'), ...textControls(), F
 /**
  * 3.3 with SPEC-2 0.11: a shape selected; Change shape opens the picker before Fill color (where
  * Google's picker lives for a mask, the nearest place for a shape) and the text controls apply,
- * because a shape holds text now.
+ * because a shape holds text now. Parked whole in cycle 2 of the focus round with Insert > Shape
+ * (docs/FOCUS.md section 4 under ruling (1); build/b3.md R14): a shape a deck carries still
+ * renders and, with the switch off, takes the default tail (ToolbarTail.tsx's fallback).
  */
-const SHAPE_TAIL: TailControl[] = [
+const SHAPE_TAIL: TailControl[] = parkedTail([
   {
     control: 'toolbar.changeShape',
     label: 'Change shape',
     icon: 'square-2-stack',
     status: 'now',
+    /* docs/FOCUS.md section 4: parked until the geometry interpreter draws the presets */
+    advanced: true,
     op: 'changeShape',
     dropdown: true,
     dividerBefore: true,
@@ -333,15 +357,20 @@ const SHAPE_TAIL: TailControl[] = [
   }),
   ...textControls(),
   FORMAT_OPTIONS,
-];
+]);
 
-/** 3.4 with SPEC-2 4.2: an image selected; Border weight, Border dash and Reset image apply. */
+/**
+ * 3.4 with SPEC-2 4.2: an image selected; Border weight, Border dash and Reset image apply. The
+ * frame controls and Dither are parked (docs/FOCUS.md 3.3); Crop image keeps its button and loses
+ * its Mask arrow with the parked row.
+ */
 const IMAGE_TAIL: TailControl[] = [
   {
     control: 'toolbar.borderColor',
     label: 'Border color',
     icon: 'pencil',
     status: 'now',
+    advanced: true,
     op: 'imageBorder',
     dropdown: true,
     dividerBefore: true,
@@ -352,6 +381,7 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Border weight',
     icon: 'bars-3',
     status: 'now',
+    advanced: true,
     op: 'borderWeight',
     dropdown: true,
     doc: '1, 1.5 or 2',
@@ -361,6 +391,7 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Border dash',
     icon: 'minus',
     status: 'now',
+    advanced: true,
     op: 'borderDash',
     dropdown: true,
     doc: 'Solid, dot, dash, dash dot, long dash or long dash dot',
@@ -406,6 +437,7 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Dither',
     icon: 'squares-2x2',
     status: 'now',
+    advanced: true,
     item: 'format.image.dither',
     turboslide: true,
     doc: 'The deck’s two tone screen over the picture; change it under Format options',
@@ -413,8 +445,13 @@ const IMAGE_TAIL: TailControl[] = [
   FORMAT_OPTIONS,
 ];
 
-/** 3.5 with SPEC-2 4.2: a line or arrow selected; Line dash applies and the ends list ten decorations. */
-const LINE_TAIL: TailControl[] = [
+/**
+ * 3.5 with SPEC-2 4.2: a line or arrow selected; Line dash applies and the ends list ten
+ * decorations. Parked whole in cycle 2 of the focus round with Insert > Line (docs/FOCUS.md
+ * section 4 under ruling (1); build/b3.md R14): a line a deck carries still renders and, with the
+ * switch off, takes the default tail.
+ */
+const LINE_TAIL: TailControl[] = parkedTail([
   {
     control: 'toolbar.lineColor',
     label: 'Line color',
@@ -461,18 +498,18 @@ const LINE_TAIL: TailControl[] = [
     doc: 'None, an arrow, a circle, a square or a diamond, filled or open',
   },
   FORMAT_OPTIONS,
-];
+]);
 
-/** 3.6 with SPEC-2 4.2: a table cell selected; the merge buttons follow Fill color. */
-const TABLE_TAIL: TailControl[] = [
+/** 3.6 with SPEC-2 4.2: a table cell selected; the merge buttons follow Fill color. Parked whole (docs/FOCUS.md 3.3). */
+const TABLE_TAIL: TailControl[] = parkedTail([
   ...fillAndBorder('table'),
   ...MERGE_CONTROLS,
   ...textControls({ table: true }),
   FORMAT_OPTIONS,
-];
+]);
 
-/** SPEC-2 4.2: a chart selected; every control is a Turboslide addition (Google edits charts in Sheets). */
-const CHART_TAIL: TailControl[] = [
+/** SPEC-2 4.2: a chart selected; every control is a Turboslide addition (Google edits charts in Sheets). Parked whole (docs/FOCUS.md 3.3). */
+const CHART_TAIL: TailControl[] = parkedTail([
   {
     control: 'toolbar.chartType',
     label: 'Chart type',
@@ -515,13 +552,13 @@ const CHART_TAIL: TailControl[] = [
     doc: 'The categories and series, in Format options',
   },
   FORMAT_OPTIONS,
-];
+]);
 
-/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. */
-const GROUP_TAIL: TailControl[] = [...fillAndBorder('group'), FORMAT_OPTIONS];
+/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole (docs/FOCUS.md 3.3). */
+const GROUP_TAIL: TailControl[] = parkedTail([...fillAndBorder('group'), FORMAT_OPTIONS]);
 
-/** 3.8: icons, materials and the other blocks. */
-const OTHER_TAIL: TailControl[] = [
+/** 3.8: icons, materials and the other blocks. Parked whole (docs/FOCUS.md 3.3). */
+const OTHER_TAIL: TailControl[] = parkedTail([
   { ...FORMAT_OPTIONS, dividerBefore: true },
   {
     control: 'toolbar.replaceImage',
@@ -534,7 +571,7 @@ const OTHER_TAIL: TailControl[] = [
     enabled: 'pictureBlockSelected',
     disabledReason: 'This block holds no picture',
   },
-];
+]);
 
 export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>>> = {
   default: TOOLBAR_TAIL_DEFAULT.map((control) =>
@@ -561,11 +598,13 @@ export const HIDE_MENUS_CONTROL = 'toolbar.hideMenus';
  * role and absent for the others (`when`), so nothing moves when a role is known.
  */
 export const TOOLBAR_TAIL_END: ReadonlyArray<TailControl> = [
+  /* docs/FOCUS.md 3.3: the pointer toggle is parked with Live pointers; View only is role driven */
   {
     control: 'toolbar.pointer',
     label: 'Show my pointer',
     icon: 'cursor-arrow-rays',
     status: 'now',
+    advanced: true,
     item: 'view.livePointers.mine',
     when: 'write',
     turboslide: true,

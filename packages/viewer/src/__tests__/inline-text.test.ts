@@ -8,7 +8,11 @@ import { canonicalText, mergeRuns, parseText, serializeRuns } from '@turboslide/
 
 import {
   absorbedText,
+  blurVerdict,
+  CHROME_TRANSIENT_SELECTOR,
   burstRewrite,
+  clickEntry,
+  entryCaret,
   listAppendMutation,
   noteAbsorbed,
   runKey,
@@ -17,13 +21,15 @@ import {
   paragraphsFromNode,
   readRunText,
   runsFromNode,
+  sessionContextTarget,
+  sessionPressVerdict,
   tableRowAppendMutation,
   textBurstMutation,
   textCommitMutation,
   textDiff,
   textFromNode,
 } from '../InlineText';
-import type { RunNode } from '../InlineText';
+import type { ClickEntryInput, RunNode } from '../InlineText';
 
 // A DOM stand-in: the walk reads nodeType, nodeName, nodeValue, childNodes, getAttribute and classList.
 function text(value: string): RunNode {
@@ -480,5 +486,124 @@ describe('textBurstMutation diffs against the document when a collaborator moved
     expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}BB`, `AAA${before}BB`)).toBeNull();
     noteAbsorbed(runKey('content-rule', 'p1', 'text'), `AAA${before}`);
     expect(textBurstMutation(slide, 'p1', 'text', before, `AAA${before}`)).toBeNull();
+  });
+});
+
+describe('a blur into the chrome (docs/FOCUS.md section 5 rank 10)', () => {
+  it('parks the session for a button of a transient surface and takes the focus back', () => {
+    expect(blurVerdict({ field: false, transient: true, button: true })).toBe('park-and-refocus');
+  });
+
+  it('parks the session for a menu row and leaves the focus with the menu', () => {
+    expect(blurVerdict({ field: false, transient: true, button: false })).toBe('park');
+  });
+
+  it('ends the session for a field anywhere and for anything outside the chrome surfaces', () => {
+    expect(blurVerdict({ field: true, transient: true, button: false })).toBe('end');
+    expect(blurVerdict({ field: true, transient: false, button: false })).toBe('end');
+    expect(blurVerdict({ field: false, transient: false, button: true })).toBe('end');
+    expect(blurVerdict({ field: false, transient: false, button: false })).toBe('end');
+  });
+
+  it('names the toolbar, the plates and the right click menu as the transient surfaces, and leaves the menu bar out', () => {
+    for (const part of [
+      '[role="toolbar"]',
+      '.ts-tb-tail',
+      '.ts-plate-anchored',
+      '.ts-layout-plate',
+      '.ts-context-menu',
+    ]) {
+      expect(CHROME_TRANSIENT_SELECTOR).toContain(part);
+    }
+    /* a menu bar click ends the session as the blur did: the menus' rows read the focus as the
+       caret's while a session is parked, and Insert > Text box refused itself under it */
+    expect(CHROME_TRANSIENT_SELECTOR).not.toContain('menubar');
+    expect(CHROME_TRANSIENT_SELECTOR).not.toContain('[role="menu"]');
+  });
+});
+
+describe('sessionPressVerdict (focus verification finding F5)', () => {
+  const blockId = 'a1';
+  it('leaves a press inside the run to the browser, whatever object is under it', () => {
+    expect(sessionPressVerdict({ insideRun: true, under: 'a1', blockId })).toBe('caret');
+    expect(sessionPressVerdict({ insideRun: true, under: null, blockId })).toBe('caret');
+  });
+  it('keeps the session on a press on the edited block outside its run (its padding)', () => {
+    expect(sessionPressVerdict({ insideRun: false, under: 'a1', blockId })).toBe('keep');
+  });
+  it('ends the session and runs the press as a selection press on another object', () => {
+    expect(sessionPressVerdict({ insideRun: false, under: 'a2', blockId })).toBe('end-and-select');
+  });
+  it('ends the session and keeps the block selected on the empty sheet', () => {
+    expect(sessionPressVerdict({ insideRun: false, under: null, blockId })).toBe('end');
+  });
+});
+
+describe('clickEntry (docs/gslides-parity/focus/AMENDMENTS.md A1, the click model)', () => {
+  const textBox: ClickEntryInput = {
+    clicks: 1,
+    editing: false,
+    kind: 'text',
+    groupMember: false,
+    hasRun: true,
+  };
+
+  it('rule 1: one click selects every kind of object and opens no session, a text box and a placeholder included', () => {
+    expect(clickEntry(textBox)).toBe('select');
+    expect(clickEntry({ ...textBox, kind: 'picture', hasRun: false })).toBe('select');
+    expect(clickEntry({ ...textBox, kind: 'shape' })).toBe('select');
+    expect(clickEntry({ ...textBox, kind: 'line', hasRun: false })).toBe('select');
+    expect(clickEntry({ ...textBox, groupMember: true })).toBe('select');
+    /* the placeholder ("Click to add title") is a text object with a run: the same rule (A1 rule 5) */
+    expect(clickEntry({ ...textBox, kind: 'text' })).toBe('select');
+  });
+
+  it('rule 3: a double click on a text object opens its session; on a shape with text its text; on a picture crop; on a group its member', () => {
+    expect(clickEntry({ ...textBox, clicks: 2 })).toBe('text');
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'shape' })).toBe('text');
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'picture', hasRun: false })).toBe('crop');
+    expect(clickEntry({ ...textBox, clicks: 2, groupMember: true })).toBe('member');
+    /* the member wins over the kind: the first double click enters the group, the next the text */
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'picture', groupMember: true })).toBe(
+      'member',
+    );
+  });
+
+  it('rule 3: a double click inside an open session is the browser word selection', () => {
+    expect(clickEntry({ ...textBox, clicks: 2, editing: true })).toBe('word');
+    expect(clickEntry({ ...textBox, clicks: 2, editing: true, kind: 'shape' })).toBe('word');
+  });
+
+  it('a double click on a line, or on an object with no run, opens nothing', () => {
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'line', hasRun: false })).toBe('none');
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'shape', hasRun: false })).toBe('none');
+    expect(clickEntry({ ...textBox, clicks: 2, kind: 'other', hasRun: false })).toBe('none');
+  });
+});
+
+describe('entryCaret (AMENDMENTS.md A1 rules 3 and 4)', () => {
+  it('the double click places the caret at its point, or at the end without one', () => {
+    expect(entryCaret('double-click', { x: 120, y: 40 })).toEqual({ x: 120, y: 40 });
+    expect(entryCaret('double-click', null)).toBe('end');
+  });
+  it('a printable key selects the whole text so the first character replaces it', () => {
+    expect(entryCaret('typing', null)).toBe('all');
+    expect(entryCaret('typing', { x: 1, y: 1 })).toBe('all');
+  });
+  it('Enter places the caret at the end', () => {
+    expect(entryCaret('enter', null)).toBe('end');
+  });
+});
+
+describe('sessionContextTarget (focus verification finding F4)', () => {
+  it('opens the Text menu on selected text, in a text box and in a table cell alike', () => {
+    expect(sessionContextTarget({ selected: true, cell: false })).toBe('textSelection');
+    expect(sessionContextTarget({ selected: true, cell: true })).toBe('textSelection');
+  });
+  it('ends the session and opens the object menu on a collapsed caret instead of nothing', () => {
+    expect(sessionContextTarget({ selected: false, cell: false })).toBe('object');
+  });
+  it('ends the session and opens the Table menu on a collapsed caret in a cell', () => {
+    expect(sessionContextTarget({ selected: false, cell: true })).toBe('tableCell');
   });
 });

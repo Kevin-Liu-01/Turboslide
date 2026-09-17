@@ -1,0 +1,2466 @@
+{
+  "base": "https://turboslide-fqpj83rq5-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-17T03:30:44.285Z",
+  "ms": 181422,
+  "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL",
+  "version": "147.0.7727.15",
+  "cells": 22,
+  "failures": [
+    {
+      "cell": "edit 1440 light",
+      "id": "?",
+      "why": "state panel: entries in 17 frames"
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1440 light F",
+      "id": "E3",
+      "why": "load entry 0.0005 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r | div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot | div.pt-slide > section.slide.is-on > div.in > div.center > div.big | div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title | div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title"
+    }
+  ],
+  "skipped": [
+    "edit 1440 light: filmstrip (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n)",
+    "edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:1859)\n    at Object.dispatch (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:2059)\n    at ft (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/EditorRoot-Bts-vnSX.js:21:26865)\n    at Object.<anonymous> (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:2724)\n    at nt (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:8958)\n    at Object.invoke (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30)",
+    "edit 1440 light: ditherDrag (control absent: [data-control=\"formatOptions.dither.black.slider\"])",
+    "edit 1440 light: share (control absent: [data-control=\"title.share\"])",
+    "edit 1440 light: inbox (control absent: [data-control=\"title.inbox\"])",
+    "edit 1440 light: signIn (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: profile (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: avatarBuilder (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: follow (control absent: [data-control=\"title.presence.more\"])",
+    "edit 1440 light: join20 (enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44))"
+  ],
+  "runs": [
+    {
+      "cell": "new 1440 light",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3632,
+      "unsupported": false,
+      "marks": {
+        "fonts": 203.30000001192093,
+        "first-paint": 258.60000002384186,
+        "hydrated": 520.6000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 424,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        }
+      ]
+    },
+    {
+      "cell": "new 1440 dark",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3684,
+      "unsupported": false,
+      "marks": {
+        "fonts": 159.10000002384186,
+        "first-paint": 325.30000001192093,
+        "hydrated": 577.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 479,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 light",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3970,
+      "unsupported": false,
+      "marks": {
+        "fonts": 240,
+        "first-paint": 359.60000002384186,
+        "hydrated": 865.6000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 763,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 dark",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3678,
+      "unsupported": false,
+      "marks": {
+        "fonts": 209.19999998807907,
+        "first-paint": 329.60000002384186,
+        "hydrated": 560.1000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 510,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 light",
+      "route": "/new",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3627,
+      "unsupported": false,
+      "marks": {
+        "fonts": 192.60000002384186,
+        "first-paint": 318,
+        "hydrated": 527.8000000119209
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 469,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 477,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 dark",
+      "route": "/new",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3659,
+      "unsupported": false,
+      "marks": {
+        "fonts": 163.5,
+        "first-paint": 291.19999998807907,
+        "hydrated": 558.1999999880791
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 453,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 462,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3995,
+      "unsupported": false,
+      "marks": {
+        "fonts": 422.5,
+        "first-paint": 564.3000000119209,
+        "hydrated": 879.6999999880791
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 791,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "panel",
+          "skipped": null,
+          "entries": [
+            {
+              "startTime": 4000.300000011921,
+              "value": 0.00021056179470486111,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1435.234375, 112, 4.765625, 756],
+                  "currentRect": [1415.1875, 112, 24.8125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [823.609375, 798, 44, 13],
+                  "currentRect": [813.59375, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4006,
+              "value": 0.0011670027367862653,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1415.1875, 112, 24.8125, 756],
+                  "currentRect": [1372.90625, 112, 67.09375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [1397.90625, 115.5, 30, 32],
+                  "currentRect": [1402, 115.5, 30, 32]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [813.59375, 798, 44, 13],
+                  "currentRect": [792.453125, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4014.600000023842,
+              "value": 0.018895982630851335,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 141, 1042.78125, 634],
+                  "currentRect": [283, 158, 1042.78125, 599]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1372.90625, 112, 67.09375, 756],
+                  "currentRect": [1325.78125, 112, 114.21875, 756]
+                },
+                {
+                  "path": "aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day > ul.ts-versions-list",
+                  "previousRect": [1326.78125, 276.375, 102, 86.09375],
+                  "currentRect": [1326.78125, 264.375, 109.21875, 86.09375]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > label.ts-versions-named.ts-versions-foot",
+                  "previousRect": [1342.78125, 374.46875, 90.46875, 44.78125],
+                  "currentRect": [1342.78125, 362.46875, 90.46875, 44.78125]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [1354.875, 115.5, 30, 32],
+                  "currentRect": [1402, 115.5, 30, 32]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4022.800000011921,
+              "value": 0.014268549119821136,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 158, 1005.671875, 599],
+                  "currentRect": [283, 172, 1005.671875, 572]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1325.78125, 112, 114.21875, 756],
+                  "currentRect": [1288.671875, 112, 151.328125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [768.890625, 798, 44, 13],
+                  "currentRect": [750.328125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4030.5,
+              "value": 0.00975656410081233,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 172, 979.484375, 572],
+                  "currentRect": [283, 182, 979, 552]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1288.671875, 112, 151.328125, 756],
+                  "currentRect": [1262.484375, 112, 177.515625, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [750.328125, 798, 44, 13],
+                  "currentRect": [737.234375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4039.699999988079,
+              "value": 0.009399474620426633,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 182, 953.71875, 552],
+                  "currentRect": [283, 190, 952, 536]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1262.484375, 112, 177.515625, 756],
+                  "currentRect": [1236.71875, 112, 203.28125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [737.234375, 798, 44, 13],
+                  "currentRect": [724.359375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4046.899999976158,
+              "value": 0.005911246845261058,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 190, 937.234375, 536],
+                  "currentRect": [283, 197, 927, 522]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1236.71875, 112, 203.28125, 756],
+                  "currentRect": [1220.234375, 112, 219.765625, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [724.359375, 798, 44, 13],
+                  "currentRect": [716.109375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4055.899999976158,
+              "value": 0.006068155623070988,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 197, 920.078125, 522],
+                  "currentRect": [283, 201, 910, 513]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1220.234375, 112, 219.765625, 756],
+                  "currentRect": [1203.078125, 112, 236.921875, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [716.109375, 798, 44, 13],
+                  "currentRect": [707.53125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4064.399999976158,
+              "value": 0.004704902404031635,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 201, 906.671875, 513],
+                  "currentRect": [283, 206, 893, 503]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1203.078125, 112, 236.921875, 756],
+                  "currentRect": [1189.671875, 112, 250.328125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [707.53125, 798, 44, 13],
+                  "currentRect": [700.828125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4072.800000011921,
+              "value": 0.003868586787471065,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 206, 893, 503],
+                  "currentRect": [283, 210, 880, 496]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1189.671875, 112, 250.328125, 756],
+                  "currentRect": [1178.515625, 112, 261.484375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [700.828125, 798, 44, 13],
+                  "currentRect": [695.25, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4081.100000023842,
+              "value": 0.003300283106004587,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 210, 880, 496],
+                  "currentRect": [283, 213, 869, 490]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1178.515625, 112, 261.484375, 756],
+                  "currentRect": [1168.921875, 112, 271.078125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [695.25, 798, 44, 13],
+                  "currentRect": [690.453125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4089.399999976158,
+              "value": 0.002822874988613469,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 213, 869, 490],
+                  "currentRect": [283, 216, 859, 484]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1168.921875, 112, 271.078125, 756],
+                  "currentRect": [1160.65625, 112, 279.34375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [690.453125, 798, 44, 13],
+                  "currentRect": [686.328125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4097.800000011921,
+              "value": 0.0008434483322750558,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1160.65625, 112, 279.34375, 756],
+                  "currentRect": [1153.421875, 112, 286.578125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [686.328125, 798, 44, 13],
+                  "currentRect": [682.703125, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4106.100000023842,
+              "value": 0.0007345736363624187,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1153.421875, 112, 286.578125, 756],
+                  "currentRect": [1147.25, 112, 292.75, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [682.703125, 798, 44, 13],
+                  "currentRect": [679.625, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4114.5,
+              "value": 0.002274772135416667,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1147.25, 112, 292.75, 756],
+                  "currentRect": [1141.921875, 112, 298.078125, 756]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day",
+                  "previousRect": [1142.921875, 236.375, 287.75, 114.09375],
+                  "currentRect": [1142.921875, 217.53125, 293.078125, 114.09375]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4121.699999988079,
+              "value": 0.000496997974537037,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1141.921875, 112, 298.078125, 756],
+                  "currentRect": [1137.859375, 112, 302.140625, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4130.199999988079,
+              "value": 0.0005152018229166666,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1137.859375, 112, 302.140625, 756],
+                  "currentRect": [1133.703125, 112, 306.296875, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4138,
+              "value": 0.00038921169704861114,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1133.703125, 112, 306.296875, 756],
+                  "currentRect": [1130.59375, 112, 309.40625, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4147.600000023842,
+              "value": 0.00041406159577546295,
+              "hadRecentInput": true,
+              "lastInputTime": 3975.600000023842,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1130.59375, 112, 309.40625, 756],
+                  "currentRect": [1127.328125, 112, 312.671875, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4922.800000011921,
+              "value": 0.0000042383013438786,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [667.734375, 798, 44, 13],
+                  "currentRect": [678.796875, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 4930.800000011921,
+              "value": 0.00432780517243227,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 229, 813, 458],
+                  "currentRect": [283, 222, 836, 471]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [678.796875, 798, 44, 13],
+                  "currentRect": [699.265625, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4939.199999988079,
+              "value": 0.005430188741801698,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 222, 836, 471],
+                  "currentRect": [283, 211, 877, 494]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [699.265625, 798, 44, 13],
+                  "currentRect": [722.609375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4947.5,
+              "value": 0.004858403142816573,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 211, 877, 494],
+                  "currentRect": [283, 198, 923, 520]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [722.609375, 798, 44, 13],
+                  "currentRect": [741.46875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4954.800000011921,
+              "value": 0.0034915980963059414,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 198, 923, 520],
+                  "currentRect": [283, 187, 961, 541]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [741.46875, 798, 44, 13],
+                  "currentRect": [753.984375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4962.5,
+              "value": 0.0033136417592994467,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 187, 961, 541],
+                  "currentRect": [283, 180, 986, 556]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [753.984375, 798, 44, 13],
+                  "currentRect": [765.25, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4972.399999976158,
+              "value": 0.0034928325135030864,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 180, 986, 556],
+                  "currentRect": [283, 174, 1009, 568]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [765.25, 798, 44, 13],
+                  "currentRect": [776.609375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4980.899999976158,
+              "value": 0.0025254323365429955,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 174, 1009, 568],
+                  "currentRect": [283, 167, 1031, 581]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [776.609375, 798, 44, 13],
+                  "currentRect": [784.46875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4989.300000011921,
+              "value": 0.0021693574630674514,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 167, 1031, 581],
+                  "currentRect": [283, 163, 1047, 590]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [784.46875, 798, 44, 13],
+                  "currentRect": [791.015625, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4996.699999988079,
+              "value": 0.0017767015412674682,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 163, 1047, 590],
+                  "currentRect": [283, 159, 1060, 597]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [791.015625, 798, 44, 13],
+                  "currentRect": [796.25, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5006,
+              "value": 0.0018510677384741513,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 159, 1060, 597],
+                  "currentRect": [283, 156, 1071, 603]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [796.25, 798, 44, 13],
+                  "currentRect": [801.59375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5014.199999988079,
+              "value": 0.0014233990704571758,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [283, 156, 1071, 603],
+                  "currentRect": [283, 153, 1081, 609]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [801.59375, 798, 44, 13],
+                  "currentRect": [805.625, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5022.5,
+              "value": 0.0000011868114497599452,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [805.625, 798, 44, 13],
+                  "currentRect": [809.25, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 5038.5,
+              "value": 9.821887860082305e-7,
+              "hadRecentInput": true,
+              "lastInputTime": 4904.300000011921,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [811.859375, 798, 44, 13],
+                  "currentRect": [814.859375, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            }
+          ],
+          "frames": 17,
+          "unexpected": [],
+          "anchorMoves": [
+            {
+              "selector": ".ts-rpanel",
+              "t": 3994,
+              "from": [0, 0, 0, 0],
+              "to": [1440, 112, 0, 756]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 3995,
+              "from": [256, 112, 1184, 756],
+              "to": [256, 112, 1179.23, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 3995,
+              "from": [1440, 112, 0, 756],
+              "to": [1435.23, 112, 4.77, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 3995,
+              "from": [256, 804, 1184, 64],
+              "to": [256, 804, 1179.23, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4000,
+              "from": [256, 112, 1179.23, 756],
+              "to": [256, 112, 1159.19, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4000,
+              "from": [1435.23, 112, 4.77, 756],
+              "to": [1415.19, 112, 24.81, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4000,
+              "from": [256, 804, 1179.23, 64],
+              "to": [256, 804, 1159.19, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4006,
+              "from": [256, 112, 1159.19, 756],
+              "to": [256, 112, 1116.91, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4006,
+              "from": [1415.19, 112, 24.81, 756],
+              "to": [1372.91, 112, 67.09, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4006,
+              "from": [256, 804, 1159.19, 64],
+              "to": [256, 804, 1116.91, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4014,
+              "from": [256, 112, 1116.91, 756],
+              "to": [256, 112, 1069.78, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4014,
+              "from": [1372.91, 112, 67.09, 756],
+              "to": [1325.78, 112, 114.22, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4014,
+              "from": [256, 804, 1116.91, 64],
+              "to": [256, 804, 1069.78, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4023,
+              "from": [256, 112, 1069.78, 756],
+              "to": [256, 112, 1032.67, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4023,
+              "from": [1325.78, 112, 114.22, 756],
+              "to": [1288.67, 112, 151.33, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4023,
+              "from": [256, 804, 1069.78, 64],
+              "to": [256, 804, 1032.67, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4030,
+              "from": [256, 112, 1032.67, 756],
+              "to": [256, 112, 1006.48, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4030,
+              "from": [1288.67, 112, 151.33, 756],
+              "to": [1262.48, 112, 177.52, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4030,
+              "from": [256, 804, 1032.67, 64],
+              "to": [256, 804, 1006.48, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4040,
+              "from": [256, 112, 1006.48, 756],
+              "to": [256, 112, 980.72, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4040,
+              "from": [1262.48, 112, 177.52, 756],
+              "to": [1236.72, 112, 203.28, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4040,
+              "from": [256, 804, 1006.48, 64],
+              "to": [256, 804, 980.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4047,
+              "from": [256, 112, 980.72, 756],
+              "to": [256, 112, 964.23, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4047,
+              "from": [1236.72, 112, 203.28, 756],
+              "to": [1220.23, 112, 219.77, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4047,
+              "from": [256, 804, 980.72, 64],
+              "to": [256, 804, 964.23, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4056,
+              "from": [256, 112, 964.23, 756],
+              "to": [256, 112, 947.08, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4056,
+              "from": [1220.23, 112, 219.77, 756],
+              "to": [1203.08, 112, 236.92, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4056,
+              "from": [256, 804, 964.23, 64],
+              "to": [256, 804, 947.08, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4064,
+              "from": [256, 112, 947.08, 756],
+              "to": [256, 112, 933.67, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4064,
+              "from": [1203.08, 112, 236.92, 756],
+              "to": [1189.67, 112, 250.33, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4064,
+              "from": [256, 804, 947.08, 64],
+              "to": [256, 804, 933.67, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4073,
+              "from": [256, 112, 933.67, 756],
+              "to": [256, 112, 922.52, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4073,
+              "from": [1189.67, 112, 250.33, 756],
+              "to": [1178.52, 112, 261.48, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4073,
+              "from": [256, 804, 933.67, 64],
+              "to": [256, 804, 922.52, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4081,
+              "from": [256, 112, 922.52, 756],
+              "to": [256, 112, 912.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4081,
+              "from": [1178.52, 112, 261.48, 756],
+              "to": [1168.92, 112, 271.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4081,
+              "from": [256, 804, 922.52, 64],
+              "to": [256, 804, 912.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4089,
+              "from": [256, 112, 912.92, 756],
+              "to": [256, 112, 904.66, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4089,
+              "from": [1168.92, 112, 271.08, 756],
+              "to": [1160.66, 112, 279.34, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4089,
+              "from": [256, 804, 912.92, 64],
+              "to": [256, 804, 904.66, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4098,
+              "from": [256, 112, 904.66, 756],
+              "to": [256, 112, 897.42, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4098,
+              "from": [1160.66, 112, 279.34, 756],
+              "to": [1153.42, 112, 286.58, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4098,
+              "from": [256, 804, 904.66, 64],
+              "to": [256, 804, 897.42, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4106,
+              "from": [256, 112, 897.42, 756],
+              "to": [256, 112, 891.25, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4106,
+              "from": [1153.42, 112, 286.58, 756],
+              "to": [1147.25, 112, 292.75, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4106,
+              "from": [256, 804, 897.42, 64],
+              "to": [256, 804, 891.25, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4114,
+              "from": [256, 112, 891.25, 756],
+              "to": [256, 112, 885.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4114,
+              "from": [1147.25, 112, 292.75, 756],
+              "to": [1141.92, 112, 298.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4114,
+              "from": [256, 804, 891.25, 64],
+              "to": [256, 804, 885.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4122,
+              "from": [256, 112, 885.92, 756],
+              "to": [256, 112, 881.86, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4122,
+              "from": [1141.92, 112, 298.08, 756],
+              "to": [1137.86, 112, 302.14, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4122,
+              "from": [256, 804, 885.92, 64],
+              "to": [256, 804, 881.86, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4130,
+              "from": [256, 112, 881.86, 756],
+              "to": [256, 112, 877.7, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4130,
+              "from": [1137.86, 112, 302.14, 756],
+              "to": [1133.7, 112, 306.3, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4130,
+              "from": [256, 804, 881.86, 64],
+              "to": [256, 804, 877.7, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4138,
+              "from": [256, 112, 877.7, 756],
+              "to": [256, 112, 874.59, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4138,
+              "from": [1133.7, 112, 306.3, 756],
+              "to": [1130.59, 112, 309.41, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4138,
+              "from": [256, 804, 877.7, 64],
+              "to": [256, 804, 874.59, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4148,
+              "from": [256, 112, 874.59, 756],
+              "to": [256, 112, 871.33, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4148,
+              "from": [1130.59, 112, 309.41, 756],
+              "to": [1127.33, 112, 312.67, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4148,
+              "from": [256, 804, 874.59, 64],
+              "to": [256, 804, 871.33, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4156,
+              "from": [256, 112, 871.33, 756],
+              "to": [256, 112, 869.09, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4156,
+              "from": [1127.33, 112, 312.67, 756],
+              "to": [1125.09, 112, 314.91, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4156,
+              "from": [256, 804, 871.33, 64],
+              "to": [256, 804, 869.09, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4164,
+              "from": [256, 112, 869.09, 756],
+              "to": [256, 112, 867.28, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4164,
+              "from": [1125.09, 112, 314.91, 756],
+              "to": [1123.28, 112, 316.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4164,
+              "from": [256, 804, 869.09, 64],
+              "to": [256, 804, 867.28, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4173,
+              "from": [256, 112, 867.28, 756],
+              "to": [256, 112, 865.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4173,
+              "from": [1123.28, 112, 316.72, 756],
+              "to": [1121.92, 112, 318.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4173,
+              "from": [256, 804, 867.28, 64],
+              "to": [256, 804, 865.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4181,
+              "from": [256, 112, 865.92, 756],
+              "to": [256, 112, 864.94, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4181,
+              "from": [1121.92, 112, 318.08, 756],
+              "to": [1120.94, 112, 319.06, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4181,
+              "from": [256, 804, 865.92, 64],
+              "to": [256, 804, 864.94, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4189,
+              "from": [256, 112, 864.94, 756],
+              "to": [256, 112, 864.31, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4189,
+              "from": [1120.94, 112, 319.06, 756],
+              "to": [1120.31, 112, 319.69, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4189,
+              "from": [256, 804, 864.94, 64],
+              "to": [256, 804, 864.31, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4198,
+              "from": [256, 112, 864.31, 756],
+              "to": [256, 112, 864.03, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4198,
+              "from": [1120.31, 112, 319.69, 756],
+              "to": [1120.03, 112, 319.97, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4198,
+              "from": [256, 804, 864.31, 64],
+              "to": [256, 804, 864.03, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4206,
+              "from": [256, 112, 864.03, 756],
+              "to": [256, 112, 864, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4206,
+              "from": [1120.03, 112, 319.97, 756],
+              "to": [1120, 112, 320, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4206,
+              "from": [256, 804, 864.03, 64],
+              "to": [256, 804, 864, 64]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4907,
+              "from": [1120, 112, 320, 756],
+              "to": [0, 0, 0, 0]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4913,
+              "from": [256, 112, 864, 756],
+              "to": [256, 112, 867.48, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4913,
+              "from": [256, 804, 864, 64],
+              "to": [256, 804, 867.48, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4923,
+              "from": [256, 112, 867.48, 756],
+              "to": [256, 112, 889.59, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4923,
+              "from": [256, 804, 867.48, 64],
+              "to": [256, 804, 889.59, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4931,
+              "from": [256, 112, 889.59, 756],
+              "to": [256, 112, 930.53, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4931,
+              "from": [256, 804, 889.59, 64],
+              "to": [256, 804, 930.53, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4939,
+              "from": [256, 112, 930.53, 756],
+              "to": [256, 112, 977.22, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4939,
+              "from": [256, 804, 930.53, 64],
+              "to": [256, 804, 977.22, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4947,
+              "from": [256, 112, 977.22, 756],
+              "to": [256, 112, 1014.95, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4947,
+              "from": [256, 804, 977.22, 64],
+              "to": [256, 804, 1014.95, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4955,
+              "from": [256, 112, 1014.95, 756],
+              "to": [256, 112, 1039.97, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4955,
+              "from": [256, 804, 1014.95, 64],
+              "to": [256, 804, 1039.97, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4962,
+              "from": [256, 112, 1039.97, 756],
+              "to": [256, 112, 1062.52, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4962,
+              "from": [256, 804, 1039.97, 64],
+              "to": [256, 804, 1062.52, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4972,
+              "from": [256, 112, 1062.52, 756],
+              "to": [256, 112, 1085.22, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4972,
+              "from": [256, 804, 1062.52, 64],
+              "to": [256, 804, 1085.22, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4981,
+              "from": [256, 112, 1085.22, 756],
+              "to": [256, 112, 1100.94, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4981,
+              "from": [256, 804, 1085.22, 64],
+              "to": [256, 804, 1100.94, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4989,
+              "from": [256, 112, 1100.94, 756],
+              "to": [256, 112, 1114.05, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4989,
+              "from": [256, 804, 1100.94, 64],
+              "to": [256, 804, 1114.05, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4997,
+              "from": [256, 112, 1114.05, 756],
+              "to": [256, 112, 1124.5, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4997,
+              "from": [256, 804, 1114.05, 64],
+              "to": [256, 804, 1124.5, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5006,
+              "from": [256, 112, 1124.5, 756],
+              "to": [256, 112, 1135.2, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5006,
+              "from": [256, 804, 1124.5, 64],
+              "to": [256, 804, 1135.2, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5014,
+              "from": [256, 112, 1135.2, 756],
+              "to": [256, 112, 1143.27, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5014,
+              "from": [256, 804, 1135.2, 64],
+              "to": [256, 804, 1143.27, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5022,
+              "from": [256, 112, 1143.27, 756],
+              "to": [256, 112, 1150.52, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5022,
+              "from": [256, 804, 1143.27, 64],
+              "to": [256, 804, 1150.52, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5029,
+              "from": [256, 112, 1150.52, 756],
+              "to": [256, 112, 1155.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5029,
+              "from": [256, 804, 1150.52, 64],
+              "to": [256, 804, 1155.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5039,
+              "from": [256, 112, 1155.72, 756],
+              "to": [256, 112, 1161.73, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5039,
+              "from": [256, 804, 1155.72, 64],
+              "to": [256, 804, 1161.73, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5048,
+              "from": [256, 112, 1161.73, 756],
+              "to": [256, 112, 1166.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5048,
+              "from": [256, 804, 1161.73, 64],
+              "to": [256, 804, 1166.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5056,
+              "from": [256, 112, 1166.72, 756],
+              "to": [256, 112, 1170.56, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5056,
+              "from": [256, 804, 1166.72, 64],
+              "to": [256, 804, 1170.56, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5064,
+              "from": [256, 112, 1170.56, 756],
+              "to": [256, 112, 1173.88, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5064,
+              "from": [256, 804, 1170.56, 64],
+              "to": [256, 804, 1173.88, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5072,
+              "from": [256, 112, 1173.88, 756],
+              "to": [256, 112, 1176.66, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5072,
+              "from": [256, 804, 1173.88, 64],
+              "to": [256, 804, 1176.66, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5081,
+              "from": [256, 112, 1176.66, 756],
+              "to": [256, 112, 1178.91, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5081,
+              "from": [256, 804, 1176.66, 64],
+              "to": [256, 804, 1178.91, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5089,
+              "from": [256, 112, 1178.91, 756],
+              "to": [256, 112, 1180.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5089,
+              "from": [256, 804, 1178.91, 64],
+              "to": [256, 804, 1180.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5098,
+              "from": [256, 112, 1180.72, 756],
+              "to": [256, 112, 1182.06, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5098,
+              "from": [256, 804, 1180.72, 64],
+              "to": [256, 804, 1182.06, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5104,
+              "from": [256, 112, 1182.06, 756],
+              "to": [256, 112, 1182.91, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5104,
+              "from": [256, 804, 1182.06, 64],
+              "to": [256, 804, 1182.91, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5114,
+              "from": [256, 112, 1182.91, 756],
+              "to": [256, 112, 1183.7, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5114,
+              "from": [256, 804, 1182.91, 64],
+              "to": [256, 804, 1183.7, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5123,
+              "from": [256, 112, 1183.7, 756],
+              "to": [256, 112, 1183.98, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5123,
+              "from": [256, 804, 1183.7, 64],
+              "to": [256, 804, 1183.98, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5131,
+              "from": [256, 112, 1183.98, 756],
+              "to": [256, 112, 1184, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5131,
+              "from": [256, 804, 1183.98, 64],
+              "to": [256, 804, 1184, 64]
+            }
+          ],
+          "overBudget": true
+        },
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "theme",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "notesOpen",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "filmstrip",
+          "skipped": "enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "write",
+          "skipped": "enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:1859)\n    at Object.dispatch (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:2059)\n    at ft (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/EditorRoot-Bts-vnSX.js:21:26865)\n    at Object.<anonymous> (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:2724)\n    at nt (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:8958)\n    at Object.invoke (https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/assets/useStudioSession-BiVkqhEg.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "selectBlock",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "backgroundDialog",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherToggle",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherDrag",
+          "skipped": "control absent: [data-control=\"formatOptions.dither.black.slider\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "share",
+          "skipped": "control absent: [data-control=\"title.share\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "inbox",
+          "skipped": "control absent: [data-control=\"title.inbox\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "commentAdd",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "signIn",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "profile",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "avatarBuilder",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "follow",
+          "skipped": "control absent: [data-control=\"title.presence.more\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "join20",
+          "skipped": "enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        }
+      ]
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4300,
+      "unsupported": false,
+      "marks": {
+        "fonts": 685,
+        "first-paint": 823,
+        "hydrated": 1194.300000011921
+      },
+      "loadCls": 0.013387506430041152,
+      "loadEntries": [
+        {
+          "startTime": 1099.3999999761581,
+          "value": 0.013387506430041152,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [283, 139, 1130, 637],
+              "currentRect": [283, 172, 1130, 637]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1098,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4209,
+      "unsupported": false,
+      "marks": {
+        "fonts": 562.6000000238419,
+        "first-paint": 771.9000000357628,
+        "hydrated": 1106.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1013,
+          "from": [155, 139, 1131, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4002,
+      "unsupported": false,
+      "marks": {
+        "fonts": 547.5,
+        "first-paint": 609,
+        "hydrated": 889.8000000119209
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 803,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4024,
+      "unsupported": false,
+      "marks": {
+        "fonts": 475.80000001192093,
+        "first-paint": 637.3999999761581,
+        "hydrated": 920.5
+      },
+      "loadCls": 0.013387506430041152,
+      "loadEntries": [
+        {
+          "startTime": 825.3000000119209,
+          "value": 0.013387506430041152,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [283, 139, 1130, 637],
+              "currentRect": [283, 172, 1130, 637]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 824,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4151,
+      "unsupported": false,
+      "marks": {
+        "fonts": 494.5999999642372,
+        "first-paint": 744.0999999642372,
+        "hydrated": 1052.3999999761581
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 963,
+          "from": [155, 139, 1131, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4535,
+      "unsupported": false,
+      "marks": {
+        "fonts": 908.8000000119209,
+        "first-paint": 1115.699999988079,
+        "hydrated": 1435.199999988079
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1341,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4241,
+      "unsupported": false,
+      "marks": {
+        "fonts": 530,
+        "first-paint": 779.5999999642372,
+        "hydrated": 1144.8999999761581
+      },
+      "loadCls": 0.011904656982421874,
+      "loadEntries": [
+        {
+          "startTime": 1054.3999999761581,
+          "value": 0.011904656982421874,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [292, 139, 953, 537],
+              "currentRect": [283, 167, 970, 547]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1053,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 5236,
+      "unsupported": false,
+      "marks": {
+        "fonts": 479.5999999642372,
+        "first-paint": 1901.3999999761581,
+        "hydrated": 2152.7999999523163
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 2140,
+          "from": [164, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4042,
+      "unsupported": false,
+      "marks": {
+        "fonts": 442.5999999642372,
+        "first-paint": 640.6999999880791,
+        "hydrated": 942.1999999880791
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 847,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4337,
+      "unsupported": false,
+      "marks": {
+        "fonts": 585.1000000238419,
+        "first-paint": 933,
+        "hydrated": 1224.800000011921
+      },
+      "loadCls": 0.011904656982421874,
+      "loadEntries": [
+        {
+          "startTime": 1135.5,
+          "value": 0.011904656982421874,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [292, 139, 953, 537],
+              "currentRect": [283, 167, 970, 547]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1134,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4040,
+      "unsupported": false,
+      "marks": {
+        "fonts": 485.5,
+        "first-paint": 603.3999999761581,
+        "hydrated": 936.6000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 847,
+          "from": [164, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 light",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4222,
+      "unsupported": false,
+      "marks": {
+        "fonts": 454.9000000357628,
+        "first-paint": 754.6999999880791,
+        "hydrated": 1104.800000011921
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 996,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 1012,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 dark",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4756,
+      "unsupported": false,
+      "marks": {
+        "fonts": 524.3999999761581,
+        "first-paint": 748.5999999642372,
+        "hydrated": 1648.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 1139,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 1166,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light F",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "F",
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 5270,
+      "unsupported": false,
+      "marks": {
+        "fonts": 531,
+        "first-paint": 755.8000000119209,
+        "hydrated": 2165.599999964237
+      },
+      "loadCls": 0.0005447908812099033,
+      "loadEntries": [
+        {
+          "startTime": 2144.800000011921,
+          "value": 0.0005447908812099033,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r",
+              "previousRect": [906.34375, 5.5, 521.65625, 32],
+              "currentRect": [901.46875, 5.5, 526.53125, 32]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot",
+              "previousRect": [566.8125, 75.5, 73.5, 32],
+              "currentRect": [569.859375, 75.5, 75.25, 32]
+            },
+            {
+              "path": "div.pt-slide > section.slide.is-on > div.in > div.center > div.big",
+              "previousRect": [
+                82.17985534667969, 425.3163757324219, 110.63832092285156, 20.3905029296875
+              ],
+              "currentRect": [
+                76.08900451660156, 429.984130859375, 122.82199096679688, 10.92938232421875
+              ]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title",
+              "previousRect": [323.1875, 44, 69.75, 28],
+              "currentRect": [333.09375, 44, 73.515625, 28]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title",
+              "previousRect": [204.84375, 44, 65.4375, 28],
+              "currentRect": [211.890625, 44, 67.015625, 28]
+            }
+          ],
+          "id": "E3"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 864,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        },
+        {
+          "selector": ".ts-title-clock",
+          "t": 2143,
+          "from": [479.33, 5.5, 32, 32],
+          "to": [498.78, 5.5, 32, 32]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light I",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "I",
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4066,
+      "unsupported": false,
+      "marks": {
+        "fonts": 433.5,
+        "first-paint": 552.3999999761581,
+        "hydrated": 965.8999999761581
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 875,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    }
+  ]
+}

@@ -385,6 +385,21 @@ test.describe('the chrome surfaces of section 7 (B6 days 3 to 6, B2 day 4)', () 
       (await ownChip.count()) === 0,
       'the own chip and the account dialogs are B6’s day 3 to 6 surfaces and B2’s day 4 route props; the server side of each row is unit tested in src/server/auth/actions.test.ts',
     );
+    /* the own chip's menu is parked whole since the focus round (docs/FOCUS.md 3.2:
+       `parked(sub('title.account', ...))` in menus/model.ts; AccountMenu.tsx filters its rows by
+       `isPresent`), so the rows are asserted behind Tools > Advanced tools, flipped through the
+       product's own row (3.1) and read back from describe().state.settings */
+    const advancedTools = () =>
+      page.evaluate(
+        () =>
+          (window.turboslide!.studio.describe().state as { settings?: Record<string, unknown> })
+            .settings?.['advancedTools'] === true,
+      );
+    await page.locator('[data-control="menubar.tools"]').click();
+    await page.locator('[data-control="menu.tools.advancedTools"]').click();
+    await expect.poll(advancedTools, { timeout: 5000 }).toBe(true);
+    if ((await page.locator('#ts-menu-tools').count()) > 0) await page.keyboard.press('Escape');
+    await expect(page.locator('#ts-menu-tools')).toHaveCount(0);
     await ownChip.first().click();
     await expect(page.getByRole('menuitem', { name: 'Change name' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Change avatar' })).toBeVisible();

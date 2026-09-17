@@ -247,8 +247,15 @@ function sendMintedCookie(setCookieValue: string | undefined): void {
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
-    const parsed = parseJsonInput<{ deckId: unknown }>(input);
-    return { deckId: requireSlug(parsed.deckId, 'deckId') };
+    const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown }>(input);
+    const atLeast =
+      typeof parsed.atLeast === 'number' && Number.isInteger(parsed.atLeast) && parsed.atLeast > 0
+        ? parsed.atLeast
+        : undefined;
+    return {
+      deckId: requireSlug(parsed.deckId, 'deckId'),
+      ...(atLeast === undefined ? {} : { atLeast }),
+    };
   })
   .handler(async ({ data }): Promise<string> => {
     if (!(await hasStoredDeck(data.deckId))) return JSON.stringify(null);
@@ -263,8 +270,14 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     if (!decision.ok) return JSON.stringify(null);
     const runtime = auth.identityRuntime();
     const deckRoom = await room.roomFor(data.deckId);
-    const [live, read, versions, leases] = await Promise.all([
-      deckRoom.live(),
+    // the head on the blob tier (the focus round, cycle 2): a page load and a tab's reload read
+    // the store's current document, not this instance's mirror as it stood within the sync
+    // window (750 ms), and a caller that names the revision it learned from a write's answer
+    // (`atLeast`, the editor's resync after a version.restore) gets a document at or above it
+    // (room.ts liveAtLeast). The show's loader reads here too, so a slide skipped a moment
+    // before the show opened is left out on every instance (b4.md FR8)
+    const live = await room.liveAtLeast(deckRoom, data.atLeast);
+    const [read, versions, leases] = await Promise.all([
       deckRoom.store.read(),
       deckRoom.store.listVersions(),
       deckRoom.store.leases(),
@@ -325,12 +338,19 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
  * The raw normalized document with the trimmed version log (SPEC-4 0.34: the newest 50 records
  * without their mutations, and `versionCount`) and the unexpired leases, for the editor's loader.
  */
-export async function readEditorDeck(input: { deckId: string }): Promise<EditorDeck | null> {
+export async function readEditorDeck(input: {
+  deckId: string;
+  /** a revision the caller knows the store reached; the answer is at or above it on the blob tier */
+  atLeast?: number;
+}): Promise<EditorDeck | null> {
   return JSON.parse(await readEditorDeckFn({ data: JSON.stringify(input) })) as EditorDeck | null;
 }
 
 /** The template a draft is cut from (SPEC 6.1); `deck.create --from blank` copies the same folder. */
 const DRAFT_TEMPLATE = 'blank';
+
+/** A draft's first save at or over this many milliseconds is logged with its phases (C2-F9). */
+const FIRST_SAVE_LOG_MS = 1000;
 
 const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Promise<string> => {
   const dir = await templateDir(DRAFT_TEMPLATE);
@@ -501,13 +521,27 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     const identity = await room.requestIdentity(getRequest());
     sendMintedCookie(identity.setCookie);
     let created = false;
+    // the phases of a draft's first save, timed for the server log (the focus round, cycle 2;
+    // VERIFICATION C2-F9: a second tab's first write on /new did not move the address within
+    // 30 s on the blob tier and nothing named which of the create, the record, the room's open
+    // or the admission took the time): every phase over a second is logged with its duration
+    const phases: [string, number][] = [];
+    let phaseAt = performance.now();
+    const phase = (name: string): void => {
+      const now = performance.now();
+      phases.push([name, Math.round(now - phaseAt)]);
+      phaseAt = now;
+    };
     if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
+      phase('draft check');
       await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: DRAFT_TEMPLATE, id: data.deckId });
       created = true;
+      phase('create');
       // the new deck's record (SPEC-3 6.1): restricted, this session its owner, written before
       // the decision below reads it (VERIFICATION-3 finding 4)
       const { recordNewDeck } = await import('./access');
       await recordNewDeck(data.deckId, identity.ctx);
+      phase('record');
     }
     const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
     if (!decision.ok) {
@@ -518,6 +552,7 @@ const writeDeckFn = createServerFn({ method: 'POST' })
         ? data.write.author
         : room.authorOf(identity);
     const deckRoom = await room.roomFor(data.deckId);
+    if (created) phase('decide and open the room');
     const admitted = await room.admitServerWrite(deckRoom, {
       author,
       mutations: data.write.mutations,
@@ -525,7 +560,27 @@ const writeDeckFn = createServerFn({ method: 'POST' })
       strict: true,
       ...(data.write.note === undefined ? {} : { note: data.write.note }),
     });
+    if (created) {
+      phase('admit');
+      const total = phases.reduce((sum, [, ms]) => sum + ms, 0);
+      if (total >= FIRST_SAVE_LOG_MS) {
+        console.error(
+          `turboslide write: the first save of ${data.deckId} took ${total} ms (${phases
+            .map(([name, ms]) => `${name} ${ms} ms`)
+            .join(', ')}) on the ${room.realtimeTier()} tier`,
+        );
+      }
+    }
     let result: WriteDeckResult;
+    if (!admitted.ok) {
+      // the refusal in the server log with the ops and both revisions (the focus round, cycle 2):
+      // a refused server first write (a version.restore) shows the seller a notice in the panel
+      // and nothing else, and the walk of docs/FOCUS.md 6.1 read "restore changed the deck false"
+      // with no sentence anywhere (VERIFICATION F-versions); the log line names the mechanism
+      console.error(
+        `turboslide write: ${data.deckId} refused a ${data.write.mutations.map((m) => m.op).join(', ')} write at base ${data.write.baseRevision} as ${admitted.code}: ${admitted.message}`,
+      );
+    }
     if (admitted.ok) {
       const document = data.returnDocument === true ? (await deckRoom.live()).document : undefined;
       result = {

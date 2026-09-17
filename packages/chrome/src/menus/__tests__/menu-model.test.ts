@@ -4,8 +4,18 @@ import { describe, expect, it } from 'vitest';
 
 import { ACTION_IDS } from '@turboslide/schema/actions';
 
-import { assignAccessKeys } from '../keys.ts';
-import type { MenuCapability, MenuContext, MenuItem, MenuStatus } from '../model.ts';
+import { finderRows } from '../finder.ts';
+import { assignAccessKeys, buildKeyTable } from '../keys.ts';
+import type {
+  ContextEntry,
+  Menu,
+  MenuCapability,
+  MenuContext,
+  MenuItem,
+  MenuStatus,
+  Presentable,
+  ToolbarControl,
+} from '../model.ts';
 import {
   CONTEXT_MENUS,
   DEFAULT_MENU_CONTEXT,
@@ -19,6 +29,7 @@ import {
   TOOLBAR_HEAD,
   TOOLBAR_TAIL_DEFAULT,
   actionIdsOf,
+  advancedToolsOn,
   allItems,
   contextMenuIds,
   contextMenuItems,
@@ -30,7 +41,11 @@ import {
   isPresent,
   itemById,
   itemPath,
+  presentControls,
+  resolveEffect,
+  resolveContextEntries,
   resolveLabel,
+  shortcut,
   statusOfChildren,
   tooltipDoc,
   visibleItems,
@@ -38,6 +53,7 @@ import {
   walkItems,
 } from '../model.ts';
 import { STUB_PREFIX, forbiddenWordsIn } from '../strings.ts';
+import { TOOLBAR_TAILS, TOOLBAR_TAIL_END } from '../toolbar-tails.ts';
 
 // The menu model (SPEC 2.13, 14.2; SPEC-2 section 4; SPEC-3 section 13): every row of SPEC
 // sections 2.0 to 2.10 is in the model with its round three status; every Google item R01 names
@@ -240,6 +256,8 @@ const SPEC_ROWS: Row[] = [
     'insert.shape.shapes.rounded',
     'insert.shape.shapes.ellipse',
   ]),
+  /* the Shapes gallery as its own row behind the switch (docs/FOCUS.md section 4, cycle 2 fix round) */
+  row('insert', 'now', ['insert.shape.gallery']),
   row('insert', 'now', ['insert.shape.arrows', 'insert.shape.arrows.arrow']),
   row('insert', 'now', ['insert.shape.callouts'], { was: 'later' }),
   row('insert', 'now', ['insert.shape.equation'], { was: 'omit' }),
@@ -527,8 +545,10 @@ function LINE_END_IDS(prefix: string): string[] {
 
 /**
  * Rows outside the SPEC tables: the Slideshow arrow (9.1), the context-only items (4.3, SPEC-2
- * 4.3: Alt text, Text fitting, Drop shadow, Change shape, Edit data, Chart type, Delete guide) and
- * Regroup (R01, unverified; Now since SPEC-2 0.3).
+ * 4.3: Alt text, Drop shadow, Change shape, Edit data, Chart type, Delete guide), Text fitting
+ * (SPEC-2 4.3 as a context row; since the focus round a Turboslide row of the Format menu too,
+ * docs/FOCUS.md 2.3 and the matrix row `text.format-menu.text-fitting`) and Regroup (R01,
+ * unverified; Now since SPEC-2 0.3).
  */
 const OTHER_ROWS: Row[] = [
   row('slideshow', 'now', ['title.slideshow.presenterView']),
@@ -536,7 +556,7 @@ const OTHER_ROWS: Row[] = [
   row('slideshow', 'later', ['title.slideshow.presentOnAnotherScreen']),
   row('slideshow', 'omit', ['title.slideshow.displayOptions']),
   row('context', 'now', ['format.altText']),
-  row('context', 'now', ['format.textFitting'], { was: 'later' }),
+  row('format', 'now', ['format.textFitting'], { was: 'later' }),
   row('context', 'now', ['format.dropShadow']),
   row('context', 'now', ['format.changeShape']),
   row('context', 'now', ['format.editData']),
@@ -551,6 +571,8 @@ const OTHER_ROWS: Row[] = [
   ]),
   row('context', 'now', ['view.guides.delete']),
   row('arrange', 'now', ['arrange.regroup'], { was: 'omit' }),
+  /* the focus round (docs/FOCUS.md 3.1): the one switch that shows the parked set, ours */
+  row('tools', 'now', ['tools.advancedTools']),
 ];
 
 /**
@@ -571,7 +593,8 @@ const COUNTS: Record<string, Counts> = {
   file: [24, 5, 5],
   edit: [11, 0, 0],
   view: [16, 1, 2],
-  insert: [21, 3, 5],
+  /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2) */
+  insert: [22, 3, 5],
   format: [28, 2, 0],
   slide: [8, 2, 0],
   arrange: [7, 0, 0],
@@ -718,8 +741,10 @@ describe('the SPEC rows', () => {
     }
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
-    expect(total).toEqual([146, 17, 24]);
-    expect(total[0] + total[1] + total[2]).toBe(187);
+    /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2) */
+    expect(total).toEqual([147, 17, 24]);
+    /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2) */
+    expect(total[0] + total[1] + total[2]).toBe(188);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -1000,7 +1025,7 @@ describe('the SPEC rows', () => {
 });
 
 describe('the role predicates of SPEC-3 13.4', () => {
-  it('reads a context without capabilities as the owner of a checkout: every row present', () => {
+  it('reads a context without capabilities as the owner of a checkout: every row present, the Later rows behind Advanced tools', () => {
     for (const predicate of [
       'write',
       'comment',
@@ -1025,12 +1050,21 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(hasCapability(DEFAULT_MENU_CONTEXT, 'write')).toBe(true);
     /* the two identity rows read the account facts, not a role, and wait for them (7.5) */
     const identityRows = new Set(['title.account.signIn', 'title.account.signOut']);
+    const on: MenuContext = {
+      ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    };
     for (const item of allItems()) {
       if (identityRows.has(item.id)) {
         expect(isPresent(item, DEFAULT_MENU_CONTEXT), item.id).toBe(false);
+        expect(isPresent(item, on), item.id).toBe(false);
         continue;
       }
-      expect(isPresent(item, DEFAULT_MENU_CONTEXT), item.id).toBe(true);
+      /* the focus round (docs/FOCUS.md 3.1): a Later row and a parked row are present only while
+         Tools > Advanced tools is on; every other row is present with the switch off too */
+      const parked = item.status === 'later' || item.advanced === true;
+      expect(isPresent(item, DEFAULT_MENU_CONTEXT), item.id).toBe(!parked);
+      expect(isPresent(item, on), item.id).toBe(true);
     }
     for (const menu of MENUS) expect(isPresent(menu, DEFAULT_MENU_CONTEXT), menu.id).toBe(true);
   });
@@ -1060,29 +1094,46 @@ describe('the role predicates of SPEC-3 13.4', () => {
       expect(isPresent(itemById(id), viewer), id).toBe(false);
     for (const id of [
       'title.presence',
-      'title.inbox',
       'title.slideshow',
       'title.share',
-      'title.account',
-      'file.open',
       'file.makeCopy',
       'file.share.withOthers',
       'file.share.copyLink',
       'file.download',
-      'file.details',
       'view.zoom',
-      'view.livePointers.collaborators',
       'help.help',
     ])
       expect(isPresent(itemById(id), viewer), id).toBe(true);
+    /* the parked rows a viewer may use are drawn for them behind Tools > Advanced tools alone
+       (docs/FOCUS.md 3.1, 3.2) */
+    const viewerOn = asRole('viewer', {
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    });
+    for (const id of [
+      'title.inbox',
+      'title.account',
+      'file.open',
+      'file.details',
+      'view.livePointers.collaborators',
+    ]) {
+      expect(isPresent(itemById(id), viewer), id).toBe(false);
+      expect(isPresent(itemById(id), viewerOn), id).toBe(true);
+    }
     expect(evaluate('viewOnly', viewer)).toBe(true);
     expect(evaluate('follow', viewer)).toBe(false);
-    /* a viewer who may read comments under the owner's switch sees the read surfaces alone */
+    /* a viewer who may read comments under the owner's switch sees the read surfaces alone; the
+       View > Comments submenu is parked, so it needs the switch too */
     const reading = asRole('viewer', { capabilities: [...CAPABILITIES.viewer, 'readComments'] });
+    const readingOn = {
+      ...reading,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    };
     expect(isPresent(itemById('title.comments'), reading)).toBe(true);
-    expect(isPresent(itemById('view.comments'), reading)).toBe(true);
+    expect(isPresent(itemById('view.comments'), reading)).toBe(false);
+    expect(isPresent(itemById('view.comments'), readingOn)).toBe(true);
     expect(isPresent(itemById('insert.comment'), reading)).toBe(false);
     expect(isPresent(itemById('view.mode'), reading)).toBe(false);
+    expect(isPresent(itemById('view.mode'), readingOn)).toBe(false);
   });
 
   it('shows a commenter the Insert menu with its Comment row alone, and Mode with Commenting and Viewing', () => {
@@ -1099,21 +1150,37 @@ describe('the role predicates of SPEC-3 13.4', () => {
       'insert.comment',
     ]);
     expect(isEnabled(itemById('insert.comment'), commenter)).toBe(true);
+    /* View > Mode, Notification settings and the Activity dashboard are parked (docs/FOCUS.md
+       3.2): the role rules are asserted with the switch on, their absence with it off */
+    const commenterOn = asRole('commenter', {
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    });
     const mode = itemById('view.mode');
-    expect(isPresent(mode, commenter)).toBe(true);
-    expect(visibleItems(mode.items ?? [], { context: commenter }).map((item) => item.id)).toEqual([
-      'view.mode.commenting',
-      'view.mode.viewing',
-    ]);
+    expect(isPresent(mode, commenter)).toBe(false);
+    expect(isPresent(mode, commenterOn)).toBe(true);
+    expect(visibleItems(mode.items ?? [], { context: commenterOn }).map((item) => item.id)).toEqual(
+      ['view.mode.commenting', 'view.mode.viewing'],
+    );
     expect(isPresent(itemById('view.showSpeakerNotes'), commenter)).toBe(false);
-    expect(isPresent(itemById('tools.notificationSettings'), commenter)).toBe(true);
+    expect(isPresent(itemById('tools.notificationSettings'), commenter)).toBe(false);
+    expect(isPresent(itemById('tools.notificationSettings'), commenterOn)).toBe(true);
     expect(isPresent(itemById('tools.spelling'), commenter)).toBe(false);
+    expect(isPresent(itemById('tools.spelling'), commenterOn)).toBe(false);
     /* the Activity panel opens for a commenter only when the owner allows it (5.7) */
-    expect(isPresent(itemById('tools.activityDashboard'), commenter)).toBe(false);
+    expect(isPresent(itemById('tools.activityDashboard'), commenterOn)).toBe(false);
     expect(
       isPresent(
         itemById('tools.activityDashboard'),
         asRole('commenter', { access: { activityForCommenters: true } }),
+      ),
+    ).toBe(false);
+    expect(
+      isPresent(
+        itemById('tools.activityDashboard'),
+        asRole('commenter', {
+          access: { activityForCommenters: true },
+          settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+        }),
       ),
     ).toBe(true);
     /* the context menus drop the rows a commenter cannot use and keep Comment */
@@ -1126,9 +1193,16 @@ describe('the role predicates of SPEC-3 13.4', () => {
     );
     expect(text).toEqual(['insert.comment']);
     expect(contextMenuItems('textBlock', asRole('viewer'))).toEqual([]);
-    /* an editor sees every row as before */
+    /* an editor sees every row as before; the Extensions menu is parked whole (docs/FOCUS.md 3.2) */
     const editor = asRole('editor');
-    expect(visibleMenus(editor).map((menu) => menu.id)).toEqual(MENUS.map((menu) => menu.id));
+    expect(visibleMenus(editor).map((menu) => menu.id)).toEqual(
+      MENUS.filter((menu) => menu.id !== 'extensions').map((menu) => menu.id),
+    );
+    expect(
+      visibleMenus(
+        asRole('editor', { settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true } }),
+      ).map((menu) => menu.id),
+    ).toEqual(MENUS.map((menu) => menu.id));
     expect(contextMenuItems('filmstripCard', editor).length).toBe(
       contextMenuItems('filmstripCard', DEFAULT_MENU_CONTEXT).length,
     );
@@ -1157,15 +1231,25 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(isChecked(itemById('view.comments.hide'), DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(isChecked(itemById('view.livePointers.collaborators'), DEFAULT_MENU_CONTEXT)).toBe(true);
     expect(isChecked(itemById('view.livePointers.mine'), DEFAULT_MENU_CONTEXT)).toBe(false);
-    /* the own chip's rows read the identity facts */
+    /* the own chip's rows read the identity facts; the account menu is parked (docs/FOCUS.md
+       3.2), so the facts are read with the switch on and the rows are absent with it off */
+    const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
     const anonymous = {
       ...DEFAULT_MENU_CONTEXT,
+      settings: on,
       account: { signedIn: false, signInAvailable: true },
     };
     expect(isPresent(itemById('title.account.signIn'), anonymous)).toBe(true);
     expect(isPresent(itemById('title.account.signOut'), anonymous)).toBe(false);
+    expect(
+      isPresent(itemById('title.account.signIn'), {
+        ...anonymous,
+        settings: DEFAULT_MENU_CONTEXT.settings,
+      }),
+    ).toBe(false);
     const signedIn = {
       ...DEFAULT_MENU_CONTEXT,
+      settings: on,
       account: { signedIn: true, signInAvailable: true },
     };
     expect(isPresent(itemById('title.account.signIn'), signedIn)).toBe(false);
@@ -1173,6 +1257,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     /* without DATABASE_URL the Sign in row is absent (7.3) */
     const noSignIn = {
       ...DEFAULT_MENU_CONTEXT,
+      settings: on,
       account: { signedIn: false, signInAvailable: false },
     };
     expect(isPresent(itemById('title.account.signIn'), noSignIn)).toBe(false);
@@ -1795,10 +1880,16 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
   });
 
   it('lists the card menu in the order of SPEC 4.2', () => {
-    const labels = contextMenuItems('filmstripCard', DEFAULT_MENU_CONTEXT).map((entry) =>
-      entry === DIVIDER ? '-' : resolveLabel(entry, DEFAULT_MENU_CONTEXT),
-    );
-    expect(labels).toEqual([
+    /* the Later row Transition is drawn behind Tools > Advanced tools (docs/FOCUS.md 3.1) */
+    const on: MenuContext = {
+      ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    };
+    const labelsOf = (ctx: MenuContext) =>
+      contextMenuItems('filmstripCard', ctx).map((entry) =>
+        entry === DIVIDER ? '-' : resolveLabel(entry, ctx),
+      );
+    const order = [
       'Cut',
       'Copy',
       'Paste',
@@ -1816,7 +1907,12 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       'Move slide',
       '-',
       'Comment',
-    ]);
+    ];
+    expect(labelsOf(on)).toEqual(order);
+    /* with the switch off the Later row and the parked Change theme leave (docs/FOCUS.md 3.4) */
+    expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(
+      order.filter((label) => label !== 'Transition' && label !== 'Change theme'),
+    );
   });
 
   it('builds every right-click menu from menu bar items, dividers between the groups of 4.3', () => {
@@ -1826,14 +1922,40 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
         expect(itemById(id).status, `${target}: ${id} is omitted`).not.toBe('omit');
       }
     }
+    /* the parked rows of docs/FOCUS.md 3.4 (Guides, Change theme, Transition, superscript,
+       subscript, capitalization, the table rows) are asserted behind the switch, and the default
+       view's lists without them */
+    const on: MenuContext = {
+      ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+    };
     /* SPEC-2 0.91: Guides ▸ after Comment, Google's row 7 */
-    const empty = contextMenuItems('emptyCanvas', DEFAULT_MENU_CONTEXT);
+    const empty = contextMenuItems('emptyCanvas', on);
     expect(empty.filter((entry) => entry === DIVIDER)).toHaveLength(4);
     expect(empty.at(-1)).toBe(itemById('view.guides'));
+    const emptyOff = contextMenuItems('emptyCanvas', DEFAULT_MENU_CONTEXT);
+    expect(emptyOff.filter((entry) => entry === DIVIDER)).toHaveLength(3);
+    expect(emptyOff.at(-1)).toBe(itemById('insert.comment'));
     expect(
       contextMenuItems('textSelection', DEFAULT_MENU_CONTEXT).map((entry) =>
         entry === DIVIDER ? '-' : entry.id,
       ),
+    ).toEqual([
+      'edit.cut',
+      'edit.copy',
+      'edit.paste',
+      'edit.pasteWithoutFormatting',
+      '-',
+      'format.text.italic',
+      'format.text.underline',
+      'format.text.strikethrough',
+      '-',
+      'insert.link',
+      '-',
+      'format.formatOptions',
+    ]);
+    expect(
+      contextMenuItems('textSelection', on).map((entry) => (entry === DIVIDER ? '-' : entry.id)),
     ).toEqual([
       'edit.cut',
       'edit.copy',
@@ -1852,12 +1974,18 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       'format.formatOptions',
     ]);
     expect(
-      contextMenuItems('tableCell', DEFAULT_MENU_CONTEXT).filter(
+      contextMenuItems('tableCell', on).filter(
         (entry) => entry !== DIVIDER && entry.id.startsWith('format.table.'),
       ),
     ).toHaveLength(11);
+    /* a table cell a core layout places keeps its clipboard, Link and Format options rows (2.2) */
     expect(
-      contextMenuItems('cellRange', DEFAULT_MENU_CONTEXT)
+      contextMenuItems('tableCell', DEFAULT_MENU_CONTEXT).map((entry) =>
+        entry === DIVIDER ? '-' : entry.id,
+      ),
+    ).toEqual(['edit.cut', 'edit.copy', 'edit.paste', 'insert.link', 'format.formatOptions']);
+    expect(
+      contextMenuItems('cellRange', on)
         .slice(0, 4)
         .map((entry) => (entry === DIVIDER ? '-' : entry.id)),
     ).toEqual([
@@ -1895,29 +2023,55 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     expect(plain.some((entry) => entry !== DIVIDER && entry.id === 'slide.changeBackground')).toBe(
       false,
     );
-    const covering = contextMenuItems(
+    /* Guides is parked (docs/FOCUS.md 3.4): the three appended rows behind the switch, the
+       divider and Change background alone with it off */
+    const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
+    const covering = contextMenuItems('image', {
+      ...withObjects(1, { block: 'image', coversSheet: true }),
+      settings: on,
+    });
+    const plainOn = contextMenuItems('image', {
+      ...withObjects(1, { block: 'image' }),
+      settings: on,
+    });
+    const tail = covering.slice(-3).map((entry) => (entry === DIVIDER ? '-' : entry.id));
+    expect(tail).toEqual(['-', 'slide.changeBackground', 'view.guides']);
+    expect(covering.length).toBe(plainOn.length + 3);
+    const coveringOff = contextMenuItems(
       'image',
       withObjects(1, { block: 'image', coversSheet: true }),
     );
-    const tail = covering.slice(-3).map((entry) => (entry === DIVIDER ? '-' : entry.id));
-    expect(tail).toEqual(['-', 'slide.changeBackground', 'view.guides']);
-    expect(covering.length).toBe(plain.length + 3);
+    expect(coveringOff.slice(-2).map((entry) => (entry === DIVIDER ? '-' : entry.id))).toEqual([
+      '-',
+      'slide.changeBackground',
+    ]);
+    expect(coveringOff.length).toBe(plain.length + 2);
+    /* Edit guides is Later and Delete guide is parked with Guides: a guide line draws its two
+       rows behind Tools > Advanced tools and no menu with it off (docs/FOCUS.md 3.1, 3.4) */
     expect(
-      contextMenuItems('guide', DEFAULT_MENU_CONTEXT).map((entry) =>
+      contextMenuItems('guide', { ...DEFAULT_MENU_CONTEXT, settings: on }).map((entry) =>
         entry === DIVIDER ? '-' : entry.id,
       ),
     ).toEqual(['view.guides.delete', 'view.guides.edit']);
-    /* the regroup row shows on a group menu only while the editor remembers an ungrouped set */
+    expect(contextMenuItems('guide', DEFAULT_MENU_CONTEXT)).toEqual([]);
+    /* the regroup row shows on a group menu only while the editor remembers an ungrouped set;
+       Regroup is parked with the group rows, so the rule is read with the switch on and the row
+       is absent with it off (docs/FOCUS.md 3.2) */
     expect(
-      contextMenuItems('group', withObjects(2, { group: 'g1' })).some(
+      contextMenuItems('group', { ...withObjects(2, { group: 'g1' }), settings: on }).some(
         (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
       ),
     ).toBe(false);
     expect(
-      contextMenuItems('group', withObjects(2, { regroup: true })).some(
+      contextMenuItems('group', { ...withObjects(2, { regroup: true }), settings: on }).some(
         (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
       ),
     ).toBe(true);
+    expect(
+      contextMenuItems('group', withObjects(2, { regroup: true })).some(
+        (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
+      ),
+    ).toBe(false);
   });
 
   it('reaches the context-only items from a right-click menu or a panel', () => {
@@ -1931,5 +2085,479 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     for (const item of allItems().filter((each) => each.contextOnly === true))
       expect(inContext.has(item.id) || PANEL_ROWS.has(item.id), item.id).toBe(true);
     for (const id of PANEL_ROWS) expect(itemById(id).contextOnly, id).toBe(true);
+  });
+});
+
+describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3.1)', () => {
+  const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
+  const ON: MenuContext = { ...OFF, settings: { ...OFF.settings, advancedTools: true } };
+  /** A row or control the switch decides: flagged `advanced`, or a Later stub. */
+  const parked = (entry: Presentable): boolean =>
+    entry.advanced === true || entry.status === 'later';
+  const idOf = (entry: MenuItem | typeof DIVIDER): string => (entry === DIVIDER ? '-' : entry.id);
+  const flagged: MenuItem = {
+    id: 'x.flagged',
+    label: 'Flagged',
+    status: 'now',
+    advanced: true,
+    effect: { kind: 'action', id: 'deck.info' },
+  };
+
+  it('is one check row of the Tools menu after Check slides and before Advanced, ours, off by default', () => {
+    const item = itemById('tools.advancedTools');
+    expect(item.status).toBe('now');
+    expect(item.turboslide).toBe(true);
+    expect(item.advanced).toBeUndefined();
+    expect(item.effect).toEqual({ kind: 'toggle', setting: 'advancedTools' });
+    expect(item.label).toBe('Advanced tools');
+    expect(forbiddenWordsIn(item.doc ?? '')).toEqual([]);
+    const tools = MENUS.find((menu) => menu.id === 'tools');
+    const ids = (tools?.items ?? []).map((each) => each.id);
+    expect(ids.indexOf('tools.advancedTools')).toBe(ids.indexOf('tools.checkSlides') + 1);
+    expect(ids.indexOf('tools.advanced')).toBe(ids.indexOf('tools.advancedTools') + 1);
+    expect(DEFAULT_MENU_CONTEXT.settings.advancedTools).toBeUndefined();
+    expect(advancedToolsOn(OFF)).toBe(false);
+    expect(advancedToolsOn(ON)).toBe(true);
+    expect(isChecked(item, OFF)).toBe(false);
+    expect(isChecked(item, ON)).toBe(true);
+    /* the switch itself is never parked */
+    expect(isPresent(item, OFF)).toBe(true);
+    expect(isPresent(item, ON)).toBe(true);
+  });
+
+  it('draws Text fitting in the Format menu with the switch off, and keeps it on the text block menu (docs/FOCUS.md 2.3; VERIFICATION F18)', () => {
+    const item = itemById('format.textFitting');
+    expect(item.status).toBe('now');
+    expect(item.contextOnly).toBeUndefined();
+    expect(item.advanced).toBeUndefined();
+    /* Google keeps the section inside Format options alone, so the menu row is ours */
+    expect(item.turboslide).toBe(true);
+    const format = MENUS.find((menu) => menu.id === 'format');
+    const bar = visibleItems(format?.items ?? [], { context: OFF }).map((each) => each.id);
+    expect(bar).toContain('format.textFitting');
+    expect(contextMenuIds('textBlock')).toContain('format.textFitting');
+    expect(finderRows(OFF).some((row) => row.item.id === 'format.textFitting')).toBe(true);
+  });
+
+  it('hides a flagged row and a Later row while off, draws both while on, and keeps the action registered', () => {
+    expect(isPresent(flagged, OFF)).toBe(false);
+    expect(isPresent(flagged, ON)).toBe(true);
+    expect(actionIdsOf(flagged)).toEqual(['deck.info']);
+    const later = itemById('title.presence.joinChat');
+    expect(later.status).toBe('later');
+    expect(isPresent(later, OFF)).toBe(false);
+    expect(isPresent(later, ON)).toBe(true);
+    /* the role predicate still applies with the switch on */
+    expect(isPresent({ ...flagged, when: 'viewOnly' }, ON)).toBe(false);
+    expect(isPresent({ ...flagged, when: 'write' }, ON)).toBe(true);
+    /* a toolbar control reads the same rule */
+    const control: ToolbarControl = {
+      control: 'toolbar.x',
+      label: 'X',
+      status: 'now',
+      advanced: true,
+    };
+    expect(presentControls([control], OFF)).toEqual([]);
+    expect(presentControls([control], ON)).toEqual([control]);
+    expect(presentControls([{ ...control, advanced: undefined }], OFF)).toHaveLength(1);
+  });
+
+  it('drops a plain container whose rows are all parked, keeps a split row, and drops a menu with no visible row', () => {
+    const later: MenuItem = { id: 'x.later', label: 'Later', status: 'later', stubReason: 'Soon' };
+    const items: MenuItem[] = [
+      {
+        id: 'x.plain',
+        label: 'Plain',
+        status: 'now',
+        effect: { kind: 'submenu' },
+        items: [flagged],
+      },
+      {
+        id: 'x.split',
+        label: 'Split',
+        status: 'now',
+        effect: { kind: 'action', id: 'deck.info' },
+        items: [later],
+      },
+      { id: 'x.row', label: 'Row', status: 'now', effect: { kind: 'dialog', title: 'Row' } },
+      flagged,
+    ];
+    expect(visibleItems(items, { context: OFF }).map((each) => each.id)).toEqual([
+      'x.split',
+      'x.row',
+    ]);
+    expect(visibleItems(items, { context: ON }).map((each) => each.id)).toEqual([
+      'x.plain',
+      'x.split',
+      'x.row',
+      'x.flagged',
+    ]);
+    /* without a context the filter reads as before the round: nothing is hidden */
+    expect(visibleItems(items).map((each) => each.id)).toEqual([
+      'x.plain',
+      'x.split',
+      'x.row',
+      'x.flagged',
+    ]);
+    const menu: Menu = {
+      id: 'extensions',
+      label: 'X',
+      accessKey: 'x',
+      key: shortcut('Cmd+Option+X'),
+      items: [flagged, later],
+    };
+    expect(visibleMenus(OFF, [menu])).toEqual([]);
+    expect(visibleMenus(ON, [menu])).toEqual([menu]);
+    /* the model's own data: Extensions is the one menu whose rows are all parked (3.2) */
+    expect(visibleMenus(OFF).map((each) => each.id)).toEqual(
+      MENUS.filter((each) => each.id !== 'extensions').map((each) => each.id),
+    );
+    expect(visibleMenus(ON).map((each) => each.id)).toEqual(MENUS.map((each) => each.id));
+  });
+
+  it('parks a right-click entry on one target with `advanced`, and drops a parked item on every target', () => {
+    const entries: ContextEntry[] = [
+      'edit.cut',
+      DIVIDER,
+      { id: 'edit.copy', advanced: true },
+      DIVIDER,
+      'edit.paste',
+    ];
+    expect(resolveContextEntries(entries, OFF).map(idOf)).toEqual(['edit.cut', '-', 'edit.paste']);
+    expect(resolveContextEntries(entries, ON).map(idOf)).toEqual([
+      'edit.cut',
+      '-',
+      'edit.copy',
+      '-',
+      'edit.paste',
+    ]);
+    /* the item in the menu bar is untouched by an entry level flag */
+    expect(isPresent(itemById('edit.copy'), OFF)).toBe(true);
+    /* the model's own data: the guide target's rows are parked with Guides and its Later row */
+    expect(contextMenuItems('guide', OFF).map(idOf)).toEqual([]);
+    expect(contextMenuItems('guide', ON).map(idOf)).toEqual([
+      'view.guides.delete',
+      'view.guides.edit',
+    ]);
+  });
+
+  it("changes every surface's visible set by exactly the parked rows and controls between the two contexts", () => {
+    /* an item absent off and present on is parked, or a plain container whose rows are all absent off */
+    const explained = (item: MenuItem): boolean =>
+      parked(item) ||
+      (item.items !== undefined &&
+        item.effect?.kind === 'submenu' &&
+        item.effect.dynamic === undefined &&
+        visibleItems(item.items, { contextOnly: true, context: OFF }).length === 0);
+    const tree = (items: ReadonlyArray<MenuItem>, ctx: MenuContext): MenuItem[] =>
+      visibleItems(items, { contextOnly: true, context: ctx }).flatMap((item) => [
+        item,
+        ...(item.items === undefined ? [] : tree(item.items, ctx)),
+      ]);
+    let differences = 0;
+    const compare = (
+      label: string,
+      off: ReadonlyArray<string>,
+      on: ReadonlyArray<string>,
+      isParked: (id: string) => boolean,
+    ) => {
+      const offSet = new Set(off);
+      const onSet = new Set(on);
+      for (const id of off)
+        expect(onSet.has(id), `${label}: ${id} present off, absent on`).toBe(true);
+      for (const id of on)
+        if (!offSet.has(id)) {
+          differences += 1;
+          expect(isParked(id), `${label}: ${id} absent off without a parked reason`).toBe(true);
+        }
+    };
+    /* the menu bar */
+    compare(
+      'menus',
+      visibleMenus(OFF).map((menu) => menu.id),
+      visibleMenus(ON).map((menu) => menu.id),
+      (id) => {
+        const menu = MENUS.find((each) => each.id === id);
+        return (
+          menu !== undefined && menu.items.filter((each) => each.status !== 'omit').every(parked)
+        );
+      },
+    );
+    /* every menu's rows and submenus, and the title row */
+    for (const [label, items] of [
+      ['title', TITLE_ROW_ITEMS] as const,
+      ...MENUS.map((menu) => [menu.id, menu.items] as const),
+    ]) {
+      const onItems = tree(items, ON);
+      const byId = new Map(onItems.map((item) => [item.id, item]));
+      compare(
+        label,
+        tree(items, OFF).map((item) => item.id),
+        onItems.map((item) => item.id),
+        (id) => {
+          const item = byId.get(id);
+          if (item === undefined) return false;
+          if (explained(item)) return true;
+          /* a row under a parked or emptied container is absent with it */
+          const parents = itemPath(id).slice(1, -1);
+          return walkItems(items).some(
+            (each) =>
+              parents.includes(each.label) &&
+              each.items?.some((child) => child.id === id) &&
+              explained(each),
+          );
+        },
+      );
+    }
+    /* every right-click target */
+    for (const target of Object.keys(CONTEXT_MENUS) as Array<keyof typeof CONTEXT_MENUS>) {
+      const on = contextMenuItems(target, ON).filter((entry) => entry !== DIVIDER) as MenuItem[];
+      const byId = new Map(on.map((item) => [item.id, item]));
+      compare(
+        `context ${target}`,
+        (contextMenuItems(target, OFF).filter((entry) => entry !== DIVIDER) as MenuItem[]).map(
+          (item) => item.id,
+        ),
+        on.map((item) => item.id),
+        (id) => {
+          const item = byId.get(id);
+          return item !== undefined && explained(item);
+        },
+      );
+    }
+    /* Search the menus */
+    compare(
+      'finder',
+      finderRows(OFF).map((row) => row.item.id),
+      finderRows(ON).map((row) => row.item.id),
+      (id) => parked(itemById(id)),
+    );
+    /* the toolbar: the head, every tail and the tail end */
+    for (const [label, controls] of [
+      ['head', TOOLBAR_HEAD] as const,
+      ['tail end', TOOLBAR_TAIL_END] as const,
+      ...Object.entries(TOOLBAR_TAILS).map(([kind, tail]) => [`tail ${kind}`, tail] as const),
+    ]) {
+      const byId = new Map(controls.map((control) => [control.control, control]));
+      compare(
+        `toolbar ${label}`,
+        presentControls(controls, OFF).map((control) => control.control),
+        presentControls(controls, ON).map((control) => control.control),
+        (id) => {
+          const control = byId.get(id);
+          return control !== undefined && parked(control);
+        },
+      );
+    }
+    /* the chord table: a binding of a menu item is live only while its item is present */
+    const bindings = buildKeyTable().filter((binding) => findItem(binding.id) !== undefined);
+    compare(
+      'keys',
+      bindings.filter((b) => isPresent(itemById(b.id), OFF)).map((b) => b.id),
+      bindings.filter((b) => isPresent(itemById(b.id), ON)).map((b) => b.id),
+      (id) => parked(itemById(id)),
+    );
+    /* the switch changes something today: the Later stubs */
+    expect(differences).toBeGreaterThan(0);
+    expect(finderRows(ON).some((row) => row.item.id === 'title.presence.joinChat')).toBe(true);
+    expect(finderRows(OFF).some((row) => row.item.id === 'title.presence.joinChat')).toBe(false);
+  });
+});
+
+// Cycle 2 of the focus round (docs/gslides-parity/focus/VERIFICATION.md pass 2; build/b1.md
+// "Cycle 2"): Insert > Shape, Insert > Line, Format > Borders & lines and the two toolbar buttons
+// leave the default view under the orchestrator's ruling (1) on FOCUS.md section 9 (b3's R14), and
+// Edit > Paste stays enabled whatever this page copied, as Google's does (F-slides-paste, b4 FR2).
+describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
+  const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
+  const ON: MenuContext = { ...OFF, settings: { ...OFF.settings, advancedTools: true } };
+  const ids = (items: ReadonlyArray<MenuItem>, ctx: MenuContext): string[] =>
+    visibleItems(items, { contextOnly: true, context: ctx }).flatMap((item) => [
+      item.id,
+      ...(item.items === undefined ? [] : ids(item.items, ctx)),
+    ]);
+
+  it('keeps Paste and Paste without formatting enabled in every clipboard state (F-slides-paste)', () => {
+    for (const clipboard of ['empty', 'slides', 'blocks', 'text', 'image'] as const) {
+      const ctx: MenuContext = { ...OFF, clipboard };
+      expect(evaluate('canPaste', ctx), clipboard).toBe(true);
+      expect(isEnabled(itemById('edit.paste'), ctx), clipboard).toBe(true);
+      expect(isEnabled(itemById('edit.pasteWithoutFormatting'), ctx), clipboard).toBe(true);
+    }
+    /* the card menu's Paste row in a tab that copied nothing: enabled, so a slide envelope another
+       tab wrote pastes from the row as it does from Cmd+V */
+    const card = (
+      contextMenuItems('filmstripCard', { ...OFF, clipboard: 'empty' }).filter(
+        (entry) => entry !== DIVIDER,
+      ) as MenuItem[]
+    ).map((item) => item.id);
+    expect(card).toContain('edit.paste');
+    expect(isEnabled(itemById('edit.paste'), { ...OFF, clipboard: 'empty' })).toBe(true);
+  });
+
+  it('parks Insert > Shape and Insert > Line whole in the default view and draws them with the switch on (ruling (1), b3 R14)', () => {
+    const insertOff = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
+    const insertOn = ids(MENUS.find((m) => m.id === 'insert')!.items, ON);
+    for (const id of [
+      'insert.shape',
+      'insert.shape.shapes',
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+      'insert.line',
+      'insert.line.line',
+      'insert.line.arrow',
+    ]) {
+      expect(insertOff, `${id} in the default view`).not.toContain(id);
+      expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(false);
+      expect(isPresent(itemById(id), ON), `${id} present on`).toBe(true);
+      expect(itemById(id).status, `${id} stays a now row`).toBe('now');
+    }
+    expect(insertOn).toContain('insert.shape');
+    expect(insertOn).toContain('insert.line');
+    /* the default view's Insert menu keeps the seller's rows */
+    for (const id of [
+      'insert.newSlide',
+      'insert.textBox',
+      'insert.image',
+      'insert.link',
+      'insert.comment',
+    ])
+      expect(insertOff, id).toContain(id);
+    /* the Shapes row lists the three named rows in both contexts (docs/FOCUS.md section 4, the
+       matrix row `shapes.insert.named-rows`, driven with the switch on while the feature is
+       parked, VERIFICATION.md C2-F11); the gallery plate still stands behind the switch as its
+       own row, All shapes, and never replaces the rows */
+    const shapesRow = itemById('insert.shape.shapes');
+    expect(shapesRow.altEffect).toBeUndefined();
+    expect(shapesRow.effect?.kind).toBe('submenu');
+    expect(resolveEffect(shapesRow, ON)).toEqual(shapesRow.effect);
+    /* the three rows carry the parked flag with their menu (`parked` flags every row under
+       Insert > Shape), so they are absent with the switch off and listed with it on */
+    expect(visibleItems(shapesRow.items ?? [], { context: OFF })).toEqual([]);
+    expect(visibleItems(shapesRow.items ?? [], { context: ON }).map((item) => item.id)).toEqual([
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+    ]);
+    const gallery = itemById('insert.shape.gallery');
+    expect(gallery.advanced).toBe(true);
+    expect(gallery.effect).toEqual({
+      kind: 'submenu',
+      dynamic: 'shapes',
+      category: 'shapes',
+      action: 'block.insert',
+    });
+    const shapeRows = (ctx: MenuContext) =>
+      visibleItems(itemById('insert.shape').items ?? [], { context: ctx }).map((item) => item.id);
+    expect(shapeRows(OFF)).toEqual([]);
+    expect(shapeRows(ON)).toEqual([
+      'insert.shape.shapes',
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+    ]);
+  });
+
+  it('parks Format > Borders & lines with the two features and keeps the Format menu of docs/FOCUS.md 2.3', () => {
+    const formatOff = ids(MENUS.find((m) => m.id === 'format')!.items, OFF);
+    const formatOn = ids(MENUS.find((m) => m.id === 'format')!.items, ON);
+    for (const id of [
+      'format.bordersLines',
+      'format.bordersLines.borderColor',
+      'format.bordersLines.borderWeight',
+      'format.bordersLines.borderDash',
+      'format.bordersLines.lineStart',
+      'format.bordersLines.lineEnd',
+    ]) {
+      expect(formatOff, id).not.toContain(id);
+      expect(formatOn, id).toContain(id);
+    }
+    for (const id of [
+      'format.text',
+      'format.alignIndent',
+      'format.spacing',
+      'format.bulletsNumbering',
+      'format.image',
+      'format.formatOptions',
+      'format.clearFormatting',
+      'format.textFitting',
+    ])
+      expect(formatOff, id).toContain(id);
+    /* the line target's two rows leave with the submenu; the object rows of 3.1 stay */
+    const lineOff = resolveContextEntries(CONTEXT_MENUS.line, OFF)
+      .filter((entry) => entry !== DIVIDER)
+      .map((entry) => (entry as MenuItem).id);
+    expect(lineOff).not.toContain('format.bordersLines.lineStart');
+    expect(lineOff).not.toContain('format.bordersLines.lineEnd');
+    for (const id of [
+      'edit.cut',
+      'edit.copy',
+      'edit.paste',
+      'arrange.order',
+      'format.formatOptions',
+      'insert.comment',
+    ])
+      expect(lineOff, id).toContain(id);
+    const lineOn = resolveContextEntries(CONTEXT_MENUS.line, ON)
+      .filter((entry) => entry !== DIVIDER)
+      .map((entry) => (entry as MenuItem).id);
+    expect(lineOn).toContain('format.bordersLines.lineStart');
+  });
+
+  it('parks the two toolbar buttons and the shape and line tails whole; a parked tail carries the flag on every control', () => {
+    const tailOff = presentControls(TOOLBAR_TAIL_DEFAULT, OFF).map((control) => control.control);
+    const tailOn = presentControls(TOOLBAR_TAIL_DEFAULT, ON).map((control) => control.control);
+    for (const id of ['toolbar.insertShape', 'toolbar.insertLine']) {
+      expect(tailOff, id).not.toContain(id);
+      expect(tailOn, id).toContain(id);
+    }
+    for (const id of [
+      'toolbar.select',
+      'toolbar.textBox',
+      'toolbar.insertImage',
+      'toolbar.insertComment',
+    ])
+      expect(tailOff, id).toContain(id);
+    for (const kind of ['shape', 'line'] as const) {
+      for (const control of TOOLBAR_TAILS[kind])
+        expect(control.advanced, `${kind} ${control.control}`).toBe(true);
+      expect(presentControls(TOOLBAR_TAILS[kind], OFF)).toEqual([]);
+      expect(presentControls(TOOLBAR_TAILS[kind], ON).length).toBe(TOOLBAR_TAILS[kind].length);
+    }
+  });
+
+  it('lists no shape or line row in Search the menus with the switch off, and every one with it on', () => {
+    const off = new Set(finderRows(OFF).map((row) => row.item.id));
+    const on = new Set(finderRows(ON).map((row) => row.item.id));
+    for (const id of [
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+      'insert.line.line',
+      'insert.line.arrow',
+      'format.bordersLines.borderColor',
+    ]) {
+      expect(off.has(id), `${id} off`).toBe(false);
+      expect(on.has(id), `${id} on`).toBe(true);
+    }
+    expect(off.has('insert.textBox')).toBe(true);
+  });
+
+  it('binds no parked chord with the switch off: every present binding names a present row (b4 FR5, the chrome half)', () => {
+    const table = buildKeyTable();
+    const present = table.filter((binding) => {
+      const item = findItem(binding.id);
+      return item !== undefined && isPresent(item, OFF);
+    });
+    for (const binding of present) {
+      const item = findItem(binding.id);
+      expect(item?.advanced, binding.id).not.toBe(true);
+      expect(item?.status, binding.id).not.toBe('later');
+    }
+    /* the parked chords the stage's own table used to fire (build/b2.md, the third defect) */
+    for (const id of ['arrange.group', 'arrange.ungroup', 'format.alignIndent.justified'])
+      expect(isPresent(itemById(id), OFF), id).toBe(false);
   });
 });

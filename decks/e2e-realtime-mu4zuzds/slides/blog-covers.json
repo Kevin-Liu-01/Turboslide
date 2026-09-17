@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "blog-covers",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Generated covers"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Posts without a cover image get a generated one: a keyword from the title (SEO, Next.js, i18n, React) or the package name of a release, rendered through a ten-tier Bayer dither ramp on a 400 by 225 canvas and rotated by an angle derived from the slug. Two posts have designed covers, both dithered compositions with a lockup. The rest use generated type covers.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "site-blog-post",
+        "fit": "width",
+        "aspect": "1440/780",
+        "crop": "top",
+        "caption": "The gt-rrweb 0.2.0 release note uses a generated type cover: the package name is set through the ten-tier dither ramp on a plate that follows the page theme.",
+        "captionSize": 16
+      }
+    ]
+  }
+}

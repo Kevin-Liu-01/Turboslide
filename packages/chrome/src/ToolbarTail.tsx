@@ -13,12 +13,14 @@ import type { ChartBlock } from '@turboslide/schema/blocks/chart';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { isLineKind } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
+import { BULLET_PRESETS, NUMBER_PRESETS } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 
 import {
   dashPlan,
   factsOf,
   lineEndPlan,
+  listPlan,
   memberWritePlan,
   selectedBlock,
   selectedBlocks,
@@ -34,7 +36,7 @@ import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
 import { Menu } from './Menu';
-import { evaluate, itemById, visibleItems } from './menus/model';
+import { evaluate, isPresent, itemById, presentControls, visibleItems } from './menus/model';
 import type { MenuItem } from './menus/model';
 import {
   HIDE_MENUS_CONTROL,
@@ -152,6 +154,29 @@ export function takesValign(block: Block | undefined): boolean {
   );
 }
 
+/** The controls with an `arrow` to a row the context does not draw read as plain buttons. */
+function withPresentArrows(
+  controls: ReadonlyArray<TailControl>,
+  context: Parameters<typeof isPresent>[1],
+): TailControl[] {
+  return controls.map((control) => {
+    if (control.arrow === undefined || isPresent(itemById(control.arrow), context)) return control;
+    const { arrow: _parked, ...rest } = control;
+    return rest;
+  });
+}
+
+/** The two list buttons of the text tail: the button applies the first preset, the arrow picks another (docs/FOCUS.md section 5, rank 9). */
+function listButtonOf(
+  control: TailControl,
+): { marker: 'bullet' | 'number'; preset: string } | null {
+  if (control.control === 'toolbar.bulletedList')
+    return { marker: 'bullet', preset: BULLET_PRESETS[0] ?? 'disc' };
+  if (control.control === 'toolbar.numberedList')
+    return { marker: 'number', preset: NUMBER_PRESETS[0] ?? 'decimal' };
+  return null;
+}
+
 export function ToolbarTail() {
   const shell = useEditorShell();
   const { input, menuContext } = shell;
@@ -160,7 +185,17 @@ export function ToolbarTail() {
   const members = selectedBlocks(slide, input.selection);
   const kind: TailKind = tailOfSelection(slide, input.selection);
   const many = kind === 'group' || members.length > 1;
-  const controls = tailFor(kind);
+  /* a parked control leaves the tail, and the More button's list, while Tools > Advanced tools is
+     off (docs/FOCUS.md 3.1, 3.3); `toolbar.font` stays as a disabled `now` control. A tail parked
+     whole (a chart, a table cell, a group) falls back to the default tail, so the bar is never
+     empty while a parked block is selected; a control whose arrow opens a parked row (Crop image
+     and Mask image) keeps its button and loses the arrow. */
+  const controls = withPresentArrows(
+    presentControls(tailFor(kind), menuContext).length > 0 || kind === 'default'
+      ? presentControls(tailFor(kind), menuContext)
+      : presentControls(tailFor('default'), menuContext),
+    menuContext,
+  );
   const [plate, setPlate] = useState<{ anchor: HTMLElement; plate: Plate } | null>(null);
   const [narrow, setNarrow] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -219,6 +254,11 @@ export function ToolbarTail() {
           );
           return { path: '/cells', current: colorOf(styled?.fill) };
         }
+        /* a shape or line drawn by the tool carries no fill or stroke field until one is written
+           (the schema's shape block has both optional); the swatch writes the field either way.
+           Before this the `in` check answered null on a fresh line and the Line color swatch
+           wrote nothing (VERIFICATION.md C2-F11, `lines.tail.colour-weight-dash-ends`) */
+        if (block.type === 'shape') return { path: '/fill', current: colorOf(block.fill) };
         return 'fill' in block ? { path: '/fill', current: colorOf(block.fill) } : null;
       case 'borderColor':
       case 'lineColor':
@@ -227,6 +267,7 @@ export function ToolbarTail() {
           return { path: '/outline', current: block.outline.color };
         if (block.type === 'table')
           return { path: '/border', current: colorOf((block as TableBlock).border?.color) };
+        if (block.type === 'shape') return { path: '/stroke', current: colorOf(block.stroke) };
         return 'stroke' in block ? { path: '/stroke', current: colorOf(block.stroke) } : null;
       case 'imageBorder':
         if (block.type === 'shot' || block.type === 'picture')
@@ -453,6 +494,23 @@ export function ToolbarTail() {
       );
       return;
     }
+    /* Text color with a range selected in a session (live or parked while the plate was open)
+       writes a colour mark on the range, the way Highlight does; with no session on a text box
+       or a box the block's own colour is written even though the block carries none yet
+       (docs/FOCUS.md rank 12: no colour reached a plain text box) */
+    if (op === 'textColor' && input.selection?.range !== undefined && !many) {
+      run(textStylePlan(facts(), { color: value === 'none' ? null : value }, 'Text color'));
+      return;
+    }
+    if (
+      op === 'textColor' &&
+      !many &&
+      block !== undefined &&
+      (block.type === 'text' || block.type === 'box')
+    ) {
+      write('/color', value === 'none' ? undefined : value, 'Text color');
+      return;
+    }
     if (many) {
       const field = op === 'fillColor' ? 'fill' : op === 'textColor' ? 'color' : 'stroke';
       run(memberWritePlan(facts(), field, value === 'none' ? undefined : value, 'Colour'));
@@ -584,15 +642,35 @@ export function ToolbarTail() {
         else
           setPlate({
             anchor,
-            plate: { kind: 'menu', items: visibleItems(item.items), label: control.label, control },
+            plate: {
+              kind: 'menu',
+              items: visibleItems(item.items, { context: menuContext }),
+              label: control.label,
+              control,
+            },
           });
         return;
       }
+      /* the rows the context draws: a parked row leaves the dropdown with the switch off
+         (docs/FOCUS.md 3.1; the Line arrow lists Line and Arrow). A dropdown whose first visible
+         row is a static submenu lists that submenu's rows in its place, so the Shape button offers
+         Rectangle, Rounded rectangle and Ellipse directly (docs/FOCUS.md section 4,
+         `shapes.insert.named-rows`) instead of one Shapes row to hover; with Tools > Advanced tools
+         on the gallery rows (All shapes, Arrows, Callouts, Equation) follow them (VERIFICATION.md
+         C2-F11: the row is driven with the switch on while the feature is parked) */
+      let rows = visibleItems(item.items ?? [], { context: menuContext });
+      const first = rows[0];
+      if (
+        first !== undefined &&
+        first.effect?.kind === 'submenu' &&
+        first.effect.dynamic === undefined
+      )
+        rows = [...visibleItems(first.items ?? [], { context: menuContext }), ...rows.slice(1)];
       setPlate({
         anchor,
         plate: {
           kind: 'menu',
-          items: visibleItems(item.items ?? []),
+          items: rows,
           label: control.label,
           control,
         },
@@ -639,9 +717,28 @@ export function ToolbarTail() {
       openPlate({ ...control, arrow: undefined }, anchor);
       return;
     }
+    /* the list buttons write `text.list` with the first preset (docs/FOCUS.md rank 9: the row
+       they name is a preset plate, which has nothing to draw on a button); the arrow picks another */
+    const list = listButtonOf(control);
+    if (list !== null) {
+      run(listPlan(facts(), list, control.label));
+      return;
+    }
+    /* the Line button arms the Line tool and its arrow lists the line kinds, the way Text box arms
+       the text tool (docs/FOCUS.md `lines.insert.line-drag`, the toolbar route; b3.md R12) */
+    if (control.control === 'toolbar.insertLine') {
+      shell.runControl(control, anchor);
+      return;
+    }
     if (
       control.arrow !== undefined ||
-      (control.op !== undefined && control.op !== 'formatOptions' && control.op !== 'font')
+      (control.op !== undefined &&
+        control.op !== 'formatOptions' &&
+        control.op !== 'font' &&
+        /* the Select button's op names its pressed state, not a plate: the click is the shell's,
+           which clears the selection and returns the stage to the Select tool (docs/FOCUS.md
+           `arrange.toolbar.select`: the button opened an empty list and the tool stayed text) */
+        control.op !== 'select')
     ) {
       openPlate(control, anchor);
       return;
@@ -742,8 +839,14 @@ export function ToolbarTail() {
                   : plate?.plate.control.control === control.control
                     ? true
                     : markPressed(control);
-          /* Crop image: the button and its Mask arrow are two controls (SPEC-2 4.2) */
-          if (control.op === 'crop' && control.arrow !== undefined) {
+          /* Crop image and the two list buttons: the button and its arrow are two controls
+             (SPEC-2 4.2; docs/FOCUS.md rank 9) */
+          if (
+            (control.op === 'crop' ||
+              listButtonOf(control) !== null ||
+              control.control === 'toolbar.insertLine') &&
+            control.arrow !== undefined
+          ) {
             const arrowItem = itemById(control.arrow);
             return (
               <span key={key} className="ts-tb-slot ts-tb-split">
@@ -769,7 +872,13 @@ export function ToolbarTail() {
                   }
                   {...tipProps({
                     name: arrowItem.label,
-                    doc: arrowItem.doc ?? 'Shows the picture inside a shape',
+                    doc:
+                      arrowItem.doc ??
+                      (control.op === 'crop'
+                        ? 'Shows the picture inside a shape'
+                        : control.control === 'toolbar.insertLine'
+                          ? 'Line or arrow'
+                          : 'Another style'),
                   })}
                 >
                   <Icon name="chevron-down" />
@@ -793,7 +902,7 @@ export function ToolbarTail() {
       <span className="ts-tb-spring" aria-hidden="true" />
       {/* the tail's end (SPEC-3 4.4, 6.3, 13.2): the pointer toggle for editors, the View only
           button for a viewer on the editor route; each present only when its predicate says so */}
-      {TOOLBAR_TAIL_END.filter((control) => evaluate(control.when, menuContext)).map((control) => {
+      {presentControls(TOOLBAR_TAIL_END, menuContext).map((control) => {
         if (control.control === 'toolbar.pointer') {
           const on = input.presence?.pointerMine ?? shell.settings.pointerMine === true;
           return (
@@ -821,7 +930,10 @@ export function ToolbarTail() {
           </span>
         );
       })}
-      <ToolbarButton control={hideControl} onClick={() => shell.setCompact(true)} />
+      {/* Hide the menus is parked with View > Full screen (docs/FOCUS.md 3.2, 3.3) */}
+      {isPresent(hide, menuContext) ? (
+        <ToolbarButton control={hideControl} onClick={() => shell.setCompact(true)} />
+      ) : null}
       {plate !== null ? (
         plate.plate.kind === 'menu' ? (
           <Menu

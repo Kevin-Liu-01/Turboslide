@@ -1,0 +1,4425 @@
+{
+  "base": "https://turboslide-fqpj83rq5-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-17T00:31:44.864Z",
+  "ms": 2224418,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": ["shapes", "lines"]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 898089,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/int2/gate-preview/core-walk.json",
+    "deckId": "untitled-20260917-o5x5",
+    "steps": 309
+  },
+  "specs": {
+    "exit": 1,
+    "ms": 1326323,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/int2/gate-preview/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "rows": 397,
+  "passed": 215,
+  "failed": 20,
+  "notDriven": 162,
+  "manual": ["text.clipboard.paste-without-formatting"],
+  "noStep": [],
+  "commit": "b50e38f",
+  "origin": "https://turboslide-fqpj83rq5-kl01s-projects.vercel.app",
+  "date": "2026-09-17",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.editor.move-to-trash": "passed",
+    "slides.new.toolbar": "passed",
+    "slides.new.arrow-layout": "passed",
+    "slides.new.menu": "passed",
+    "slides.new.ctrl-m-card": "passed",
+    "slides.new.ctrl-m-canvas": "passed",
+    "slides.new.context": "passed",
+    "slides.new.undo": "passed",
+    "slides.duplicate.context": "passed",
+    "slides.duplicate.menu": "passed",
+    "slides.duplicate.cmd-d": "passed",
+    "slides.duplicate.undo-toolbar": "passed",
+    "slides.duplicate.undo-redo-keys": "passed",
+    "slides.duplicate.two-selected-cmd-d": "passed",
+    "slides.duplicate.two-selected-menu": "passed",
+    "slides.delete.key": "passed",
+    "slides.delete.undo-snackbar": "passed",
+    "slides.delete.context": "passed",
+    "slides.delete.undo-cmd-z": "passed",
+    "slides.delete.menu-undo-redo": "passed",
+    "slides.delete.two-selected-key-undo": "passed",
+    "slides.delete.two-selected-menu": "passed",
+    "slides.delete.two-selected-edit-menu": "passed",
+    "slides.delete.canvas-focus-undo": "passed",
+    "slides.delete.undo-redo-saved": "passed",
+    "slides.select.click": "passed",
+    "slides.select.arrows-shift": "passed",
+    "slides.select.shift-cmd-click": "passed",
+    "slides.select.cmd-click-toggle": "passed",
+    "slides.reorder.drag-above": "passed",
+    "slides.reorder.drag-below": "passed",
+    "slides.reorder.cmd-up-down": "passed",
+    "slides.reorder.menu-to-end-undo": "passed",
+    "slides.reorder.undo-drag": "passed",
+    "slides.reorder.two-selected-drag": "passed",
+    "slides.skip.context": "passed",
+    "slides.skip.context-two": "passed",
+    "slides.skip.menu-unskip": "passed",
+    "slides.skip.menu-two": "passed",
+    "slides.layout.picker-open-escape": "passed",
+    "slides.layout.apply.title": "passed",
+    "slides.layout.apply.opener": "passed",
+    "slides.layout.apply.split": "passed",
+    "slides.layout.apply.cols": "passed",
+    "slides.layout.apply.title-only": "passed",
+    "slides.layout.apply.one-column": "passed",
+    "slides.layout.apply.statement": "passed",
+    "slides.layout.apply.section-description": "passed",
+    "slides.layout.apply.mood": "passed",
+    "slides.layout.apply.big-number": "passed",
+    "slides.layout.apply.blank": "passed",
+    "slides.layout.apply.rows": "passed",
+    "slides.layout.apply.plain": "passed",
+    "slides.layout.apply.table": "passed",
+    "slides.layout.apply.figure": "passed",
+    "slides.layout.apply.pair": "passed",
+    "slides.layout.apply.tiles": "passed",
+    "slides.layout.apply.details": "passed",
+    "slides.layout.apply.board": "passed",
+    "slides.layout.apply.matrix": "passed",
+    "slides.layout.apply.closing": "passed",
+    "slides.layout.reopen-ring": "passed",
+    "slides.layout.context-apply": "passed",
+    "slides.layout.menu-apply-undo": "passed",
+    "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+    "slides.layout.typed-title-round-trip": "passed",
+    "slides.layout.snackbar-counts-typed-only": "passed",
+    "slides.layout.undo-typed": "passed",
+    "slides.notes.type": "passed",
+    "slides.notes.per-slide": "passed",
+    "slides.notes.resize-handle": "passed",
+    "slides.notes.reload": "passed",
+    "slides.counter.footer-and-cards": "passed",
+    "slides.hash.click-and-reload": "passed",
+    "slides.reorder.menu-up-down-beginning": "passed",
+    "slides.reorder.cmd-shift-up-down": "passed",
+    "slides.notes.view-menu-toggle": "passed",
+    "slides.context.empty-canvas": "passed",
+    "text.title.single-click": "passed",
+    "text.title.double-click": "passed",
+    "text.title.type-escape": "passed",
+    "text.selected.typing-replaces": "passed",
+    "text.selected.enter-appends": "passed",
+    "text.title.double-click-enters": "passed",
+    "text.caret.click-mid-word": "passed",
+    "text.caret.home-end": "passed",
+    "text.caret.shift-arrow-replace": "passed",
+    "text.caret.shift-home-end": "passed",
+    "text.caret.backspace-word": "passed",
+    "text.caret.option-backspace": "passed",
+    "text.caret.delete": "passed",
+    "text.caret.cmd-a": "passed",
+    "text.title.enter-commits": "passed",
+    "text.session.escape-twice": "passed",
+    "text.subtitle.double-click-type": "passed",
+    "text.subtitle.enter-new-line": "passed",
+    "text.subtitle.shift-enter": "passed",
+    "text.subtitle.arrows-backspace-join": "passed",
+    "text.subtitle.escape-commits": "passed",
+    "text.textbox.insert-click-type": "not driven",
+    "text.textbox.insert-drag": "not driven",
+    "text.textbox.drag-inside-moves": "not driven",
+    "text.textbox.burst-reliability": "not driven",
+    "text.toolbar.swaps-on-select": "not driven",
+    "text.fontsize.type-enter": "not driven",
+    "text.fontsize.plus-minus": "not driven",
+    "text.bold.toolbar": "not driven",
+    "text.bold.cmd-b-word": "not driven",
+    "text.italic.toolbar-word": "not driven",
+    "text.italic.cmd-i-word": "not driven",
+    "text.underline.cmd-u-word": "not driven",
+    "text.underline.toolbar": "not driven",
+    "text.strikethrough.cmd-shift-x": "not driven",
+    "text.strikethrough.menu": "not driven",
+    "text.color.swatch-on-word": "not driven",
+    "text.align.toolbar-and-key": "not driven",
+    "text.spacing.toolbar": "not driven",
+    "text.list.bulleted-toolbar": "not driven",
+    "text.list.numbered-toolbar": "not driven",
+    "text.list.bulleted-menu-preset": "not driven",
+    "text.indent.toolbar": "not driven",
+    "text.indent.keys": "not driven",
+    "text.link.cmd-k-enter": "not driven",
+    "text.clear-formatting": "not driven",
+    "text.format-menu.rows-enabled": "not driven",
+    "text.format-menu.size-increase": "not driven",
+    "text.format-menu.align-left": "not driven",
+    "text.format-menu.spacing-double": "not driven",
+    "text.format-menu.text-fitting": "not driven",
+    "text.autofit.title-wraps": "not driven",
+    "text.autofit.textbox-grow": "not driven",
+    "text.clipboard.within-box": "not driven",
+    "text.clipboard.between-boxes": "not driven",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "not driven",
+    "text.find-replace.shortcut": "not driven",
+    "text.persistence.reload": "not driven",
+    "text.list.numbered-menu-preset": "not driven",
+    "text.list.chords": "not driven",
+    "text.link.toolbar-button": "not driven",
+    "text.format-options.panel": "not driven",
+    "text.layout-runs.type": "not driven",
+    "text.context.text-block": "not driven",
+    "text.context.text-selection": "not driven",
+    "text.context.inside-session": "not driven",
+    "text.format-menu.size-decrease": "not driven",
+    "text.format-menu.spacing-single-1-15": "not driven",
+    "text.format-menu.align-indent-rows": "not driven",
+    "text.textbox.toolbar-button": "not driven",
+    "images.insert.toolbar-sources": "not driven",
+    "images.select.chip-handles-tail": "not driven",
+    "images.delete.key": "not driven",
+    "images.move.drag-frame": "not driven",
+    "images.guides.edge-snap": "not driven",
+    "images.guides.centre-y": "not driven",
+    "images.guides.centre-x": "not driven",
+    "images.nudge.arrows": "not driven",
+    "images.resize.eight-handles": "not driven",
+    "images.resize.eight-handles-shift": "not driven",
+    "images.resize.edge-fill": "not driven",
+    "images.resize.alt-centre": "not driven",
+    "images.rotate.ring": "not driven",
+    "images.crop.double-click": "not driven",
+    "images.crop.east-edge": "not driven",
+    "images.crop.south-edge": "not driven",
+    "images.crop.enter": "not driven",
+    "images.crop.undo": "not driven",
+    "images.crop.redo": "not driven",
+    "images.crop.menu-escape": "not driven",
+    "images.crop.toolbar-escape-cancels": "not driven",
+    "images.options.panel": "not driven",
+    "images.options.transparency": "not driven",
+    "images.options.reset": "not driven",
+    "images.reset-image.menu": "not driven",
+    "images.background.colour": "not driven",
+    "images.background.toolbar": "not driven",
+    "images.background.reset": "not driven",
+    "images.present.picture-and-ground": "not driven",
+    "images.context.image": "not driven",
+    "images.options.menu-row": "not driven",
+    "images.background.hex-field": "not driven",
+    "arrange.select.click": "not driven",
+    "arrange.select.shift-add": "not driven",
+    "arrange.multi.drag-inside-moves-all": "not driven",
+    "arrange.select.shift-remove": "not driven",
+    "arrange.select.marquee": "not driven",
+    "arrange.select.marquee-partial": "not driven",
+    "arrange.select.click-away": "not driven",
+    "arrange.select.cmd-a": "not driven",
+    "arrange.select.escape": "not driven",
+    "arrange.order.bring-to-front": "not driven",
+    "arrange.order.send-to-back": "not driven",
+    "arrange.order.bring-forward": "not driven",
+    "arrange.order.send-backward": "not driven",
+    "arrange.order.keys": "not driven",
+    "arrange.align.left": "not driven",
+    "arrange.align.center": "not driven",
+    "arrange.align.right": "not driven",
+    "arrange.align.top": "not driven",
+    "arrange.align.middle": "not driven",
+    "arrange.align.bottom": "not driven",
+    "arrange.align.single-to-slide": "not driven",
+    "arrange.center.horizontal": "not driven",
+    "arrange.center.vertical": "not driven",
+    "arrange.undo.toolbar-on-arrange": "not driven",
+    "arrange.undo.menu-on-arrange": "not driven",
+    "arrange.clipboard.copy-paste": "not driven",
+    "arrange.clipboard.delete": "not driven",
+    "arrange.clipboard.undo-redo-delete": "not driven",
+    "arrange.clipboard.cut-paste-undo": "not driven",
+    "arrange.clipboard.menu-copy-paste": "not driven",
+    "arrange.clipboard.paste-after-new-slide-button": "not driven",
+    "arrange.clipboard.paste-with-filmstrip-focus": "not driven",
+    "arrange.clipboard.paste-keeps-position": "not driven",
+    "arrange.duplicate.cmd-d": "not driven",
+    "arrange.duplicate.menu-selects-copy": "not driven",
+    "arrange.duplicate.nothing-selected": "not driven",
+    "arrange.redo.after-undone-duplicate": "not driven",
+    "arrange.keys.backspace-empty-selection": "not driven",
+    "arrange.nudge.arrows": "not driven",
+    "arrange.nudge.shift": "not driven",
+    "arrange.nudge.undo": "not driven",
+    "arrange.zoom.box-reads": "not driven",
+    "arrange.zoom.menu-in": "not driven",
+    "arrange.zoom.cmd-minus": "not driven",
+    "arrange.zoom.cmd-plus": "not driven",
+    "arrange.zoom.fit": "not driven",
+    "arrange.zoom.type-percent": "not driven",
+    "arrange.zoom.arrow-menu": "not driven",
+    "arrange.zoom.cmd-0": "not driven",
+    "arrange.zoom.menu-out": "not driven",
+    "arrange.readout.fit": "not driven",
+    "arrange.readout.200": "not driven",
+    "arrange.selection-colour.light": "not driven",
+    "arrange.selection-colour.dark": "not driven",
+    "arrange.escape.text-then-selection": "not driven",
+    "arrange.zoom.menu-presets": "not driven",
+    "arrange.toolbar.select": "not driven",
+    "shapes.insert.rectangle-click": "not driven",
+    "shapes.insert.rounded-click": "not driven",
+    "shapes.insert.ellipse-click": "not driven",
+    "shapes.insert.rectangle-drag": "not driven",
+    "shapes.insert.ellipse-drag": "not driven",
+    "shapes.insert.named-rows": "not driven",
+    "shapes.default-look": "not driven",
+    "shapes.select": "not driven",
+    "shapes.move": "not driven",
+    "shapes.resize.eight-handles": "not driven",
+    "shapes.rotate": "not driven",
+    "shapes.fill.colour": "not driven",
+    "shapes.border.colour-weight-dash": "not driven",
+    "shapes.text.type-align-bold": "not driven",
+    "shapes.duplicate-delete-undo-redo": "not driven",
+    "shapes.format-options.size-position": "not driven",
+    "shapes.reload-and-viewer": "not driven",
+    "shapes.context.shape": "not driven",
+    "lines.insert.line-drag": "not driven",
+    "lines.insert.arrow-drag": "not driven",
+    "lines.end-handle": "not driven",
+    "lines.tail.colour-weight-dash-ends": "not driven",
+    "lines.context.line": "not driven",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "failed",
+    "export.download-submenu": "passed",
+    "export.pdf.dialog": "passed",
+    "export.pdf.skipped-check": "passed",
+    "export.pdf.close-paths": "passed",
+    "export.pptx.dialog": "passed",
+    "export.print.preview-page": "passed",
+    "export.print.layout-with-notes": "passed",
+    "export.print.include-skipped": "failed",
+    "export.print.print-button": "passed",
+    "export.print.close-preview": "passed",
+    "export.print.file-menu-after-close": "passed",
+    "export.print.menu-row": "passed",
+    "export.print.cmd-p": "passed",
+    "help.help-dialog": "passed",
+    "help.documentation-link": "passed",
+    "help.keyboard-shortcuts": "passed",
+    "help.search-the-menus": "passed",
+    "surface.menus.open-close-escape": "passed",
+    "surface.cleanup": "passed",
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.card.download": "passed",
+    "decks.file.make-a-copy": "passed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "failed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "export.print.download-pdf-follows-preview": "failed",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "passed",
+    "images.replace.upload": "passed",
+    "images.replace.drop-on-picture": "passed",
+    "images.background.upload-picture": "failed",
+    "images.background.remove-picture": "passed",
+    "present.slideshow.button": "passed",
+    "present.slideshow.cmd-enter": "passed",
+    "present.presenter-view.arrow": "passed",
+    "present.presenter-view.s-key": "passed",
+    "present.notes-in-presenter": "passed",
+    "present.slideshow.from-beginning": "passed",
+    "present.skipped-left-out": "failed",
+    "text.link.present-click": "failed",
+    "comments.on-slide": "passed",
+    "comments.on-object": "passed",
+    "comments.on-title-placeholder": "passed",
+    "comments.reply": "passed",
+    "comments.resolve": "passed",
+    "comments.toolbar-and-menu-routes": "failed",
+    "present.keys.arrow-right": "passed",
+    "present.keys.arrow-left": "passed",
+    "present.keys.space": "passed",
+    "present.keys.digit-enter": "passed",
+    "present.keys.home": "passed",
+    "present.keys.end": "passed",
+    "present.click-advances": "passed",
+    "present.counter": "passed",
+    "present.laser": "passed",
+    "present.escape": "passed",
+    "present.keys.blank-black-white": "passed",
+    "share.dialog.open": "failed",
+    "share.copy-view-link": "passed",
+    "share.copy-present-link": "failed",
+    "share.copy-edit-link": "failed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "failed",
+    "share.edit-link-lands-editor": "failed",
+    "share.view-link-cannot-edit": "failed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "failed",
+    "collab.edit-from-owner": "failed",
+    "collab.slide-added-appears": "passed",
+    "collab.presence-chips": "failed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "comments.reaches-second-browser": "failed",
+    "versions.restore": "failed",
+    "slides.clipboard.copy-paste-card": "passed",
+    "surface.advanced.off-by-default": "passed",
+    "surface.advanced.on-shows-parked": "passed",
+    "surface.advanced.remembered": "failed",
+    "surface.parked-blocks-render": "passed",
+    "surface.parked-shortcut-unbound": "passed",
+    "surface.parked-block-core-rows": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.access.paint",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "text.textbox.insert-click-type",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.insert-drag",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.drag-inside-moves",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.burst-reliability",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.toolbar.swaps-on-select",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.fontsize.type-enter",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.fontsize.plus-minus",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.bold.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.bold.cmd-b-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.italic.toolbar-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.italic.cmd-i-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.underline.cmd-u-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.underline.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.strikethrough.cmd-shift-x",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.strikethrough.menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.color.swatch-on-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.align.toolbar-and-key",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.spacing.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.bulleted-toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.numbered-toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.bulleted-menu-preset",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.indent.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.indent.keys",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.cmd-k-enter",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.present-click",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.clear-formatting",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.rows-enabled",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.size-increase",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.align-left",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.spacing-double",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.text-fitting",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.autofit.title-wraps",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.autofit.textbox-grow",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.clipboard.within-box",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.clipboard.between-boxes",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.find-replace.replace-all",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.find-replace.shortcut",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.persistence.reload",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.numbered-menu-preset",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.chords",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.toolbar-button",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-options.panel",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.layout-runs.type",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.text-block",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.text-selection",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.inside-session",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.size-decrease",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.spacing-single-1-15",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.align-indent-rows",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.toolbar-button",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "images.insert.toolbar-sources",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.select.chip-handles-tail",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.delete.key",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.move.drag-frame",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.edge-snap",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.centre-y",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.centre-x",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.nudge.arrows",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.eight-handles",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.eight-handles-shift",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.edge-fill",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.alt-centre",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.rotate.ring",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.double-click",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.east-edge",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.south-edge",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.enter",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.undo",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.redo",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.menu-escape",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.toolbar-escape-cancels",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.panel",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.transparency",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.reset",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.reset-image.menu",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.colour",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.toolbar",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.upload-picture",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.reset",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.present.picture-and-ground",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.context.image",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.menu-row",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.hex-field",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.click",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.shift-add",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.multi.drag-inside-moves-all",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.shift-remove",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.marquee",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.marquee-partial",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.click-away",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.cmd-a",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.select.escape",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.order.bring-to-front",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.order.send-to-back",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.order.bring-forward",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.order.send-backward",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.order.keys",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.left",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.center",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.right",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.top",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.middle",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.bottom",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.align.single-to-slide",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.center.horizontal",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.center.vertical",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.undo.toolbar-on-arrange",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.undo.menu-on-arrange",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.copy-paste",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.delete",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.undo-redo-delete",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.cut-paste-undo",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.menu-copy-paste",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.paste-after-new-slide-button",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.paste-with-filmstrip-focus",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.paste-keeps-position",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.duplicate.cmd-d",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.duplicate.menu-selects-copy",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.duplicate.nothing-selected",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.redo.after-undone-duplicate",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.keys.backspace-empty-selection",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.nudge.arrows",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.nudge.shift",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.nudge.undo",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.box-reads",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.menu-in",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.cmd-minus",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.cmd-plus",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.fit",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.type-percent",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.arrow-menu",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.cmd-0",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.menu-out",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.readout.fit",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.readout.200",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.selection-colour.light",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.selection-colour.dark",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.escape.text-then-selection",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.zoom.menu-presets",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.toolbar.select",
+        "feature": "arrange",
+        "result": "not driven"
+      },
+      {
+        "id": "present.skipped-left-out",
+        "feature": "present",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.open",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.copy-edit-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.view-link-lands-viewer",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.edit-link-lands-editor",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.view-link-cannot-edit",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.edit-from-second-browser",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.edit-from-owner",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.presence-chips",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.copy-present-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "comments.toolbar-and-menu-routes",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "comments.reaches-second-browser",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "versions.restore",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "versions.undo-restore",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "export.print.include-skipped",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.print.download-pdf-follows-preview",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "surface.advanced.remembered",
+        "feature": "surface",
+        "result": "failed"
+      }
+    ]
+  },
+  "wouldPark": [
+    "decks",
+    "text",
+    "images",
+    "arrange",
+    "shapes",
+    "lines",
+    "present",
+    "share",
+    "comments",
+    "versions",
+    "export"
+  ],
+  "blocking": [
+    {
+      "id": "surface.advanced.remembered",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.root.redirect",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.draft",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.first-write",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.save-words",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.file-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.read",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.search",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-title",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-recent",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.present",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.paint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: the reopened deck is in Editing mode for its owner (mode viewing, role owner)"
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.page",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.key",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.type",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.clipboard.copy-paste-card",
+      "feature": "slides",
+      "driver": "core/slides.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.selected.typing-replaces",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.session.escape-twice",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.link.present-click",
+      "feature": "text",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the show draws the linked word as a link element"
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.context.inside-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the text boxes"
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.toolbar-sources",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.delete.key",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.move.drag-frame",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.guides.centre-y",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.guides.centre-x",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.nudge.arrows",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.rotate.ring",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.double-click",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.east-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.south-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.enter",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.undo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.redo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.options.panel",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.options.transparency",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.options.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.colour",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.background.toolbar",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.context.image",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.options.menu-row",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "images.background.hex-field",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the pictures"
+    },
+    {
+      "id": "arrange.select.click",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.multi.drag-inside-moves-all",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.marquee",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.click-away",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.select.escape",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.order.keys",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.left",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.center",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.right",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.top",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.middle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.bottom",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.center.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.readout.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.readout.200",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the arrange rows"
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.default-look",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.select",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.move",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.rotate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.fill.colour",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "shapes.context.shape",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the shapes"
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the lines"
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the lines"
+    },
+    {
+      "id": "lines.end-handle",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the lines"
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the lines"
+    },
+    {
+      "id": "lines.context.line",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the lines"
+    },
+    {
+      "id": "present.slideshow.button",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.space",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.home",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.end",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.click-advances",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.counter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.laser",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.escape",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.skipped-left-out",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the share link https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/s/<token> opens"
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"the access record is at revision 0, not 1; re-read and retry\",\"busy\":0,\"snackbar\":\"\"}"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"the access record is at revision 0, not 1; re-read and retry\",\"busy\":0,\"snackbar\":\"\"}"
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: Copy link on the edit row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"The sharing settings changed since they were read; reload and retry\",\"busy\":0,\"snackbar\":\"\"}"
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"the access record is at revision 1, not 0; re-read and retry\",\"busy\":0,\"snackbar\":\"\"}"
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: Copy link on the present row writes a share link; the dialog read {\"clipboard\":\"cleared before the copy\",\"error\":\"the access record is at revision 0, not 1; re-read and retry\",\"busy\":0,\"snackbar\":\"\"}"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the share link https://turboslide-fqpj83rq5-kl01s-projects.vercel.app/s/<token> opens"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-slide",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-object",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reply",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.resolve",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded."
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Restore an earlier version, then Cmd+Z: restore changed the deck false (versionHistory.78.restore; snackbar none; panel notice Saved \"Before the customer copy\" at r127; state.error none); Cmd+Z brought the current version back false"
+    },
+    {
+      "id": "export.download-submenu",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.dialog",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.skipped-check",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.close-paths",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.dialog",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.preview-page",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.layout-with-notes",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.include-skipped",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Include skipped slides: pages 4 -> 4; marked 0"
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForEvent: Timeout 45000ms exceeded while waiting for event \"download\""
+    },
+    {
+      "id": "export.print.print-button",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.close-preview",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.file-menu-after-close",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.menu-row",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.cmd-p",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.help-dialog",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.documentation-link",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.keyboard-shortcuts",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.search-the-menus",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.menus.open-close-escape",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.advanced.off-by-default",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.advanced.on-shows-parked",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.advanced.remembered",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.cleanup",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.parked-block-core-rows",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

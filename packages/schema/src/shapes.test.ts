@@ -1,9 +1,10 @@
 // The shape presets (gslides-parity SPEC-2 2.3, 11.5 shapes.test.ts): every preset has a label, a
 // category and a prstGeom that is a name in the committed ECMA definitions file (ST_ShapeType, not
 // the pptxgenjs enum, 0.47); the 135 rows in Google's four categories; the legacy ids map; the
-// day one geometry stubs answer a box, a text inset and eight sites at three sizes; lineEndPath
-// for the ten decorations; the dashes and the pptxgenjs names. The interpreter's tests join in
-// shapes/geometry.test.ts when it lands (merge 1b).
+// three kept presets of the focus round (docs/FOCUS.md section 4) answer their own path and text
+// rectangle while every other preset answers the box and the whole box, and every preset eight
+// sites, at three sizes; lineEndPath for the ten decorations; the dashes and the pptxgenjs names.
+// The interpreter's tests join in shapes/geometry.test.ts when it lands.
 import { describe, expect, it } from 'vitest';
 
 import { SHAPE_KINDS } from './blocks.ts';
@@ -11,6 +12,7 @@ import {
   CONNECTOR_PRST,
   DASHES,
   DASH_PPTX,
+  DRAWN_PRESET_IDS,
   LEGACY_PRESETS,
   LEGACY_SHAPE_IDS,
   LINE_ENDS,
@@ -22,10 +24,12 @@ import {
   dashArray,
   isClosedShapeKind,
   isConnectorKind,
+  isDrawnPreset,
   isLineKind,
   lineEndFilled,
   lineEndPath,
   presetOf,
+  roundRectRadius,
   shapeAdjustDefaults,
   shapeGuides,
   shapePath,
@@ -102,20 +106,23 @@ describe('the preset table', () => {
   });
 });
 
-describe('the geometry stubs of day one', () => {
+describe('the geometry of the presets', () => {
   const sizes: [number, number][] = [
     [48, 36],
     [200, 100],
     [400, 400],
   ];
 
-  it('answer the box as the path, the whole box as the text inset and eight sites at three sizes for every preset', () => {
+  it('answers the whole box as the text inset and eight sites at three sizes for every preset, and the box as the path outside the kept curves', () => {
     for (const row of SHAPE_PRESETS) {
       for (const [w, h] of sizes) {
         const path = shapePath(row.id, w, h, shapeAdjustDefaults(row.id));
         expect(path, row.id).toMatch(/^M/);
-        expect(path).toContain(String(w));
-        expect(textInset(row.id, w, h)).toEqual({ x: 0, y: 0, w, h });
+        expect(path.endsWith('Z'), row.id).toBe(true);
+        expect(textInset(row.id, w, h), row.id).toEqual({ x: 0, y: 0, w, h });
+        if (row.id !== 'roundRect' && row.id !== 'ellipse') {
+          expect(path, row.id).toBe(`M0,0 H${w} V${h} H0 Z`);
+        }
         const points = sites(row.id, w, h);
         expect(points).toHaveLength(8);
         for (const point of points) {
@@ -126,6 +133,61 @@ describe('the geometry stubs of day one', () => {
         }
       }
     }
+  });
+
+  it('names the three kept presets of docs/FOCUS.md section 4 and reads a legacy id through its preset', () => {
+    expect(DRAWN_PRESET_IDS).toEqual(['rect', 'roundRect', 'ellipse']);
+    for (const id of DRAWN_PRESET_IDS) expect(isDrawnPreset(id), id).toBe(true);
+    expect(isDrawnPreset('rounded')).toBe(true);
+    expect(isDrawnPreset('rectangle')).toBe(true);
+    expect(isDrawnPreset('hexagon')).toBe(false);
+    expect(isDrawnPreset('rightArrow')).toBe(false);
+    expect(isDrawnPreset('line')).toBe(false);
+  });
+
+  it('draws the rectangle as its box', () => {
+    expect(shapePath('rect', 240, 160)).toBe('M0,0 H240 V160 H0 Z');
+    expect(shapePath('rectangle', 240, 160)).toBe('M0,0 H240 V160 H0 Z');
+    expect(textInset('rect', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+  });
+
+  it('draws the rounded rectangle with four quarter arcs of the ECMA radius', () => {
+    // x1 = ss * adj / 100000 with ss the shorter side: 160 * 16667 / 100000 = 26.67, on the half pixel grid 26.5
+    expect(roundRectRadius(240, 160)).toBeCloseTo(26.667, 2);
+    expect(roundRectRadius(240, 160, [50000])).toBe(80);
+    // adj pins to 0 .. 50000 (presetShapeDefinitions.xml `pin 0 adj 50000`)
+    expect(roundRectRadius(240, 160, [90000])).toBe(80);
+    expect(roundRectRadius(240, 160, [-5])).toBe(0);
+    const path = shapePath('roundRect', 240, 160);
+    expect(path).toBe(
+      'M0,26.5 A26.5,26.5 0 0 1 26.5,0 H213.5 A26.5,26.5 0 0 1 240,26.5 V133.5 A26.5,26.5 0 0 1 213.5,160 H26.5 A26.5,26.5 0 0 1 0,133.5 Z',
+    );
+    expect(path.match(/A/g)).toHaveLength(4);
+    // the legacy id draws the same preset; a zero radius is the box
+    expect(shapePath('rounded', 240, 160)).toBe(path);
+    expect(shapePath('roundRect', 240, 160, [0])).toBe('M0,0 H240 V160 H0 Z');
+    // the picker's glyph at 48 by 36: 36 * 0.16667 = 6
+    expect(shapePath('roundRect', 48, 36)).toContain('A6,6 0 0 1 6,0');
+    // the text rectangle stays the whole box until the exporter subtracts the geometry (textInset)
+    expect(textInset('roundRect', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+  });
+
+  it('draws the ellipse with four quarter arcs of the half sides', () => {
+    const path = shapePath('ellipse', 240, 160);
+    expect(path).toBe(
+      'M0,80 A120,80 0 0 1 120,0 A120,80 0 0 1 240,80 A120,80 0 0 1 120,160 A120,80 0 0 1 0,80 Z',
+    );
+    expect(path.match(/A/g)).toHaveLength(4);
+    expect(shapePath('ellipse', 48, 36)).toBe(
+      'M0,18 A24,18 0 0 1 24,0 A24,18 0 0 1 48,18 A24,18 0 0 1 24,36 A24,18 0 0 1 0,18 Z',
+    );
+    expect(textInset('ellipse', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+  });
+
+  it('answers the box for an unknown kind and for a line kind', () => {
+    expect(shapePath('not-a-shape', 100, 50)).toBe('M0,0 H100 V50 H0 Z');
+    expect(shapePath('line', 100, 50)).toBe('M0,0 H100 V50 H0 Z');
+    expect(textInset('line', 100, 50)).toEqual({ x: 0, y: 0, w: 100, h: 50 });
   });
 });
 

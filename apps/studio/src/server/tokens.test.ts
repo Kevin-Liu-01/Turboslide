@@ -33,13 +33,17 @@ describe('downloadSecret', () => {
     }
   });
 
-  it('is random per process on a checkout without the variable', () => {
+  it('is one random value per process on a checkout without the variable (b6 FR1)', () => {
+    /* the docblock's rule: random per process, not per call. Two calls in one process answer
+       the same 32 bytes, so a grant signed at the POST verifies at the PUT; per call, every
+       presigned upload on a checkout answered 403 (security.spec.ts's upload row on the check
+       chain's server) */
     const a = downloadSecret({ TURBOSLIDE_STORE: 'file' });
     const b = downloadSecret({ TURBOSLIDE_STORE: 'file' });
     expect(a.byteLength).toBe(32);
-    expect(a.equals(b)).toBe(false);
-    // no store variable and no VERCEL is the checkout too
-    expect(downloadSecret({}).byteLength).toBe(32);
+    expect(a.equals(b)).toBe(true);
+    // no store variable and no VERCEL is the checkout too, and the same value
+    expect(downloadSecret({}).equals(a)).toBe(true);
   });
 
   it('refuses a hosted store without the variable and logs config.missing once per call', () => {

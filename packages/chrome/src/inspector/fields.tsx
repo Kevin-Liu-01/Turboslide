@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { Color } from '@turboslide/schema/color';
 import { COLOR_LABELS, COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
@@ -135,6 +135,21 @@ export function SliderField({
   unit?: string;
 }) {
   const [live, setLive] = useState<number | null>(null);
+  /* the value the pointer or the keys moved to is kept in a ref beside the state: the commit on
+     the release reads the ref, so a press that moves the thumb and releases inside one event
+     turn (a click on the track) commits what the input event set, not the state of the render
+     the handler was bound in (docs/FOCUS.md `images.options.transparency`: the slider took no
+     mouse drag and no track click while ArrowRight moved it; F-transparency, b1 R25) */
+  const liveRef = useRef<number | null>(null);
+  const update = (next: number | null) => {
+    liveRef.current = next;
+    setLive(next);
+  };
+  const commit = () => {
+    const next = liveRef.current;
+    if (next !== null && next !== value) onCommit(next);
+    update(null);
+  };
   const shown = live ?? value;
   const tip = tipProps({ name: label, ...(doc === undefined ? {} : { doc }) });
   return (
@@ -151,19 +166,17 @@ export function SliderField({
         data-control={`${control}.slider`}
         disabled={disabled}
         {...tip}
-        onChange={(event) => setLive(Number(event.target.value))}
-        onPointerUp={() => {
-          if (live !== null && live !== value) onCommit(live);
-          setLive(null);
+        onChange={(event) => update(Number(event.target.value))}
+        onPointerDown={() => {
+          /* a release outside the input (a drag that ends past the track) still commits: the
+             document sees the pointer up the input does not */
+          document.addEventListener('pointerup', commit, { once: true });
         }}
-        onKeyUp={() => {
-          if (live !== null && live !== value) onCommit(live);
-          setLive(null);
-        }}
+        onPointerUp={commit}
+        onKeyUp={commit}
         onBlur={(event) => {
           tip.onBlur(event);
-          if (live !== null && live !== value) onCommit(live);
-          setLive(null);
+          commit();
         }}
       />
       <NumberField

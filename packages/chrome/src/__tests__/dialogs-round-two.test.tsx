@@ -127,6 +127,36 @@ describe('BackgroundDialog', () => {
     noTitles();
   });
 
+  it('Enter in the hex field writes the typed colour at once, as Google’s field does (F-hex-field, b1 R21)', async () => {
+    /* before, the key set the state alone and the Dialog's Enter ran Done from the render that
+       had not seen the colour, so the dialog closed with no write (docs/FOCUS.md
+       `images.background.hex-field`) */
+    dispatch.mockClear();
+    render(
+      <Host input={input()}>
+        <BackgroundDialog />
+      </Host>,
+    );
+    const field = document.querySelector(
+      '[data-control="dialog.background.color.hex"]',
+    ) as HTMLInputElement;
+    fireEvent.change(field, { target: { value: '336699' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    await flush();
+    expect(dispatch).toHaveBeenCalledWith('slide.setBackground', {
+      slideIds: [SLIDE],
+      background: { color: '#336699' },
+      baseRevision: 412,
+    });
+    /* a value that is not a colour writes nothing */
+    dispatch.mockClear();
+    fireEvent.change(field, { target: { value: 'plum' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    await flush();
+    expect(dispatch).not.toHaveBeenCalled();
+    noTitles();
+  });
+
   it('Choose from this presentation inserts the picture object at the bottom of the stack through the editor’s handle when wired, else two writes', async () => {
     dispatch.mockClear();
     const insertBackgroundPicture = vi.fn();

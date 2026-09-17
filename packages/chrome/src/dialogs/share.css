@@ -275,6 +275,45 @@
   font-size: 12px;
 }
 
+/* the sentence naming the deployment's mode (docs/FOCUS.md rank 1): the same quiet colour */
+.ts-share-mode-sentence {
+  max-width: 62ch;
+}
+
+/* the three link rows of the focus round (docs/FOCUS.md 2.7), the plain addresses of a legacy
+   deck, the draft's sentence and the loading state: fixed heights, so the dialog does not move */
+.ts-share-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-share-rows .ts-dialog-row {
+  min-height: 40px;
+}
+
+.ts-share-legacy-sentence {
+  margin: 0;
+  font-size: 12px;
+}
+
+.ts-share-draft {
+  margin: 0;
+  min-height: 40px;
+  color: var(--pt-ink-2);
+  font-size: 13px;
+}
+
+.ts-share-loading {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 160px;
+  padding: 0 12px;
+  border: 1px solid var(--pt-hair-soft);
+  font-size: 12.5px;
+}
+
 /* ---- Publish to the web ---- */
 .ts-publish-state {
   display: flex;

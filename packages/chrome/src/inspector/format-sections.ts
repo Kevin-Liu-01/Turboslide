@@ -43,6 +43,13 @@ export type FormatSectionMeta = {
   title: string;
   icon: IconName;
   doc: string;
+  /**
+   * A parked section (docs/FOCUS.md 3.2, 3.3): drawn only while Tools > Advanced tools is on. The
+   * Dither, Drop shadow, Table, Chart data, Shape and Alt text sections belong to parked rows
+   * (`format.image.dither`, `format.dropShadow`, `format.table.*`, `format.editData`,
+   * `format.changeShape`, `format.altText`); `presentFormatSections` applies the flag.
+   */
+  advanced?: true;
 };
 
 /** The sections in the order the panel shows them (SPEC 3.9, 12 "Panels"; SPEC-2 section 5). */
@@ -90,24 +97,28 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     title: 'Dither',
     icon: 'adjustments',
     doc: 'The deck’s two tone screen over the picture, kept live',
+    advanced: true,
   },
   {
     id: 'shadow',
     title: 'Drop shadow',
     icon: 'square-2-stack',
     doc: 'Colour, transparency, angle, distance and blur',
+    advanced: true,
   },
   {
     id: 'table',
     title: 'Table',
     icon: 'table',
     doc: 'Header row, columns, fill, border and vertical alignment',
+    advanced: true,
   },
   {
     id: 'chart',
     title: 'Chart data',
     icon: 'chart-bar',
     doc: 'The categories and series of the chart',
+    advanced: true,
   },
   {
     id: 'line',
@@ -115,16 +126,35 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     icon: 'minus',
     doc: 'The line type, its ends, weight, dash and bend',
   },
-  { id: 'shape', title: 'Shape', icon: 'cube', doc: 'The shape and its adjustable sides' },
+  {
+    id: 'shape',
+    title: 'Shape',
+    icon: 'cube',
+    doc: 'The shape and its adjustable sides',
+    advanced: true,
+  },
   { id: 'list', title: 'List', icon: 'list-bullet', doc: 'The items and how the list draws them' },
   {
     id: 'altText',
     title: 'Alt text',
     icon: 'information-circle',
     doc: 'The description a screen reader reads',
+    advanced: true,
   },
   { id: 'block', title: 'Options', icon: 'adjustments', doc: 'The block’s own options' },
 ];
+
+/**
+ * The sections a panel draws (docs/FOCUS.md 3.1): every section while Tools > Advanced tools is
+ * on, the sections without the `advanced` flag while it is off. Pure, so the panel calls it over
+ * whatever block filter it already applies.
+ */
+export function presentFormatSections(
+  sections: ReadonlyArray<FormatSectionMeta>,
+  advancedTools: boolean,
+): FormatSectionMeta[] {
+  return sections.filter((section) => advancedTools || section.advanced !== true);
+}
 
 export const FORMAT_SECTION_BY_ID: Readonly<Record<FormatSectionId, FormatSectionMeta>> =
   Object.fromEntries(FORMAT_SECTIONS.map((section) => [section.id, section])) as Record<

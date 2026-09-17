@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Icon } from '@turboslide/chrome/icons';
+import { SETTINGS_STORAGE, readStoredSettings } from '@turboslide/chrome/editor-shell';
 import { Menu } from '@turboslide/chrome/Menu';
 import { detectPlatform } from '@turboslide/chrome/menus/keys';
 import { DEFAULT_MENU_CONTEXT, shortcut } from '@turboslide/chrome/menus/model';
@@ -478,7 +479,27 @@ export function Slideshow({
     closePopover(optionsAnchor);
   };
 
-  const context: MenuContext = useMemo(() => ({ ...DEFAULT_MENU_CONTEXT, platform }), [platform]);
+  /* Tools > Advanced tools is remembered per browser (docs/FOCUS.md 3.1); the show reads it once
+     it is on the client so its two Later stubs (Auto-play, More > Download as PDF) hide and show
+     with the editor's rows. The Options menu is built only when opened, so no server markup reads it. */
+  const [advancedTools, setAdvancedTools] = useState(false);
+  useMountEffect(() => {
+    try {
+      setAdvancedTools(
+        readStoredSettings(window.localStorage.getItem(SETTINGS_STORAGE)).advancedTools === true,
+      );
+    } catch {
+      // private mode or storage refused: the default view
+    }
+  });
+  const context: MenuContext = useMemo(
+    () => ({
+      ...DEFAULT_MENU_CONTEXT,
+      platform,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools },
+    }),
+    [platform, advancedTools],
+  );
 
   const classes = ['ts-slideshow'];
   if (laser) classes.push('is-laser');

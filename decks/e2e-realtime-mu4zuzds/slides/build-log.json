@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "build-log",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The build log"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The readme on /docs ends with the build log, six sections in reading order. Each engine runs on a plate under its heading, above its source path and the snippet that mounts it.",
+        "measure": 56
+      },
+      {
+        "id": "list",
+        "type": "plain",
+        "size": 22,
+        "items": [
+          {
+            "text": "The system under the system",
+            "icon": {
+              "name": "cog-6-tooth"
+            }
+          },
+          {
+            "text": "The line law and the auditors that hold it",
+            "icon": {
+              "name": "clipboard-document-check"
+            }
+          },
+          {
+            "text": "Rails, grounds, and seams",
+            "icon": {
+              "name": "view-columns"
+            }
+          },
+          {
+            "text": "Corners, spacers, and the second surface",
+            "icon": {
+              "name": "squares-2x2"
+            }
+          },
+          {
+            "text": "The libraries",
+            "icon": {
+              "name": "cube"
+            }
+          },
+          {
+            "text": "The moving type",
+            "icon": {
+              "name": "language"
+            }
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "proto-docs-entry",
+        "fit": "width",
+        "caption": "The horizon field entry: the heading, the prose, the plate running the lensing shader and the path of its source, src/lib/horizon-field.ts. The snippet that mounts the field follows under the path. The crop is cut at two times device scale and follows the deck theme.",
+        "captionSize": 16
+      }
+    ]
+  }
+}

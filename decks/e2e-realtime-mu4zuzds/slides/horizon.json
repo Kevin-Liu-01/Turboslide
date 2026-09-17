@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "horizon",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The horizon field"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The careers page hero is the horizon field, a WebGL gravitational-lensing shader. Thirty locale names orbit it once every 130 seconds, and it fades in from blur over 0.9 seconds. A static fallback disc renders if WebGL is unavailable or the shader has not loaded after 2.5 seconds, and reduced motion renders one frame. The ring keeps its colors in both themes. The prototemplate version exposes lens, dither, and redshift as toggles.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "gt-careers",
+        "fit": "width",
+        "aspect": "1440/864",
+        "crop": "top"
+      }
+    ]
+  }
+}

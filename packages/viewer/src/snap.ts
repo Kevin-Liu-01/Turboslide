@@ -367,21 +367,33 @@ export function snapToGrid(value: number, grid: number = FREE_GRID): number {
 
 type AxisSnap = { delta: number; line: SnapLine | null };
 
+/** True for the sheet's own centre line on its axis (sheetEdgeLines: x 800, y 450). */
+export function isSheetCentreLine(line: SnapLine): boolean {
+  return line.kind === 'sheet' && line.at === (line.axis === 'x' ? SHEET.width : SHEET.height) / 2;
+}
+
 /**
  * The best line snap for a set of moving positions on one axis: the smallest correction within
- * FREE_SNAP_PX, ties to the earlier line. With no line in range the first position (the leading
- * edge) lands on the grid.
+ * FREE_SNAP_PX, ties to the earlier line. The sheet's centre line outranks every other line in
+ * range (docs/FOCUS.md rank 33; audit-images row 16: a picture aimed 3 px off the slide's centre
+ * landed on the mood plate edge its right edge happened to touch), because centring on the slide
+ * is what the seller aims for and a plate edge or a column seam that is a pixel nearer is not.
+ * With no line in range the first position (the leading edge) lands on the grid.
  */
 function snapAxis(positions: number[], lines: SnapLine[], axis: SnapAxis, grid: boolean): AxisSnap {
   let best: AxisSnap | null = null;
+  let centre: AxisSnap | null = null;
   for (const line of lines) {
     if (line.axis !== axis) continue;
     for (const at of positions) {
       const delta = line.at - at;
       if (Math.abs(delta) > FREE_SNAP_PX) continue;
       if (best === null || Math.abs(delta) < Math.abs(best.delta)) best = { delta, line };
+      if (isSheetCentreLine(line) && (centre === null || Math.abs(delta) < Math.abs(centre.delta)))
+        centre = { delta, line };
     }
   }
+  if (centre) return centre;
   if (best) return best;
   const lead = positions[0];
   if (!grid || lead === undefined) return { delta: 0, line: null };

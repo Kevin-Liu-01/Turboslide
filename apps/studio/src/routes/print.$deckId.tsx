@@ -124,7 +124,16 @@ function PrintPage() {
     setPdf(
       `Preparing your PDF, about ${Math.max(1, Math.ceil(count / 12))} minute${count > 12 ? 's' : ''} for ${count} slide${count === 1 ? '' : 's'}`,
     );
-    const input = { format: 'pdf' as const, slideIds: slides.map((slide) => slide.id) };
+    /* the file follows the preview (docs/FOCUS.md rank 25, `export.print.download-pdf-follows-preview`):
+       the builder drops a skipped slide unless `includeSkipped` travels, whatever `slideIds` says
+       (packages/render/src/print.ts `renderPrintDocument`), and the notes layout asks for the notes
+       with `includeNotes` (the builder carries them once it draws the notes page) */
+    const input = {
+      format: 'pdf' as const,
+      slideIds: slides.map((slide) => slide.id),
+      ...(includeSkipped ? { includeSkipped: true } : {}),
+      ...(layout === 'notes' ? { includeNotes: true } : {}),
+    };
     try {
       const caps = await exportCapabilities();
       let url: string | null = null;

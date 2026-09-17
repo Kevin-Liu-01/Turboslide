@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-calligraphy",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-calligraphy",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "Karahisari's calligraphy"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A sixteenth-century practice sheet where the letterforms are the whole design. The design system makes the same choice: type carries the identity.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Calligraphy: Ahmed Karahisari, 16th century, public domain"
+      }
+    ]
+  }
+}

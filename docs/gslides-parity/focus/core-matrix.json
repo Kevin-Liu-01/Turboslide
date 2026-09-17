@@ -535,7 +535,7 @@
     {
       "id": "slides.delete.canvas-focus-undo",
       "feature": "slides",
-      "interaction": "Click the empty canvas, Delete, Cmd+Z; the slide returns in the tab and on the server after a reload",
+      "interaction": "Select a card in the filmstrip, Delete, wait for All changes saved, Cmd+Z; the slide returns in the tab and on the server after a reload (the canvas Delete with nothing selected removes no slide since rank 4)",
       "driver": "probe --core",
       "today": "flaky",
       "severity": 3,
@@ -987,15 +987,17 @@
     {
       "id": "text.title.single-click",
       "feature": "text",
-      "interaction": "A single click on Click to add title opens the editing session",
+      "interaction": "One click on Click to add title selects the placeholder as an object: the ring, the eight handles, the rotation handle and the chip show, no caret is placed and no text session opens (A1 rule 1)",
       "driver": "probe --core",
-      "today": "works",
-      "evidence": "audit-text row 1"
+      "today": "broken",
+      "evidence": "audit-text row 1 (a single click opened the session at ec61c6b); docs/gslides-parity/focus/AMENDMENTS.md A1",
+      "severity": 2,
+      "note": "Rewritten under A1 (the click model amendment): the audit passed the one click session, which A1 replaces with a one click selection; production at ec61c6b opens the session on one click, so the row reads broken until the click model lands."
     },
     {
       "id": "text.title.double-click",
       "feature": "text",
-      "interaction": "A double click on the title placeholder opens the session",
+      "interaction": "A double click on the title placeholder opens the session; the placeholder prompt stays Click to add title and the entry is the two step one of A1 rule 5",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-text row 2"
@@ -1009,9 +1011,33 @@
       "evidence": "audit-text row 3"
     },
     {
+      "id": "text.selected.typing-replaces",
+      "feature": "text",
+      "interaction": "With the title selected by one click and no session open, typing a printable character starts the session with the whole text selected, so the first character replaces the text; the run holds the typed sentence alone (A1 rule 4)",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/focus/AMENDMENTS.md A1 rule 4; no audit drove typing on a selected text object (a single click opened the session at ec61c6b)"
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "feature": "text",
+      "interaction": "With the title selected by one click and no session open, Enter starts the session with the caret at the end of the text; typing lands at the end (A1 rule 4)",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/focus/AMENDMENTS.md A1 rule 4; no audit drove Enter on a selected text object"
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "feature": "text",
+      "interaction": "With the title selected by one click (no caret), a double click on a word opens the session with the caret inside that word (A1 rule 3)",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-text row 2 saw the session open on a double click; the entry from the selected object and the caret position were not read; docs/gslides-parity/focus/AMENDMENTS.md A1 rule 3"
+    },
+    {
       "id": "text.caret.click-mid-word",
       "feature": "text",
-      "interaction": "Click mid word places the caret; typing lands there",
+      "interaction": "Inside an open session a click mid word places the caret there; typing lands there (a click on an unselected object selects it under A1 and places no caret)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-text row 4"
@@ -1081,6 +1107,14 @@
       "evidence": "audit-text row 12"
     },
     {
+      "id": "text.session.escape-twice",
+      "feature": "text",
+      "interaction": "Double click the title to open its session, Escape returns to the selected object (the handles and the chip, no caret, the text kept), a second Escape clears the selection (A1 rule 4)",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "audit-arrange row 78 (the two Escapes on a text box); audit-text rows 3 and 18 (Escape commits)"
+    },
+    {
       "id": "text.subtitle.double-click-type",
       "feature": "text",
       "interaction": "Double click the subtitle placeholder and type a line",
@@ -1126,7 +1160,8 @@
       "interaction": "Insert > Text box, one click on the sheet, type; the text is stored",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-text row 19"
+      "evidence": "audit-text row 19",
+      "note": "The tool's placement click makes the box and opens its session, as Google does; A1's one click rule is about a click on an object that exists."
     },
     {
       "id": "text.textbox.insert-drag",
@@ -1135,6 +1170,15 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-text row 20"
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "feature": "text",
+      "interaction": "One click on a text box selects it with no caret; a pointer down inside its text followed by a move drags the box to the new place, its text unchanged and no session opened (A1 rule 2)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "docs/gslides-parity/focus/AMENDMENTS.md A1 (Kevin's screenshot of a two object selection); VERIFICATION.md pass 1 F4 and F5: at ec61c6b a click inside the box opens the session and a drag from inside selects text"
     },
     {
       "id": "text.textbox.burst-reliability",
@@ -1407,7 +1451,9 @@
       "interaction": "Cmd+Shift+V pastes plain text into a box",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "audit-text row 57"
+      "evidence": "audit-text row 57",
+      "note": "Manual under ruling (3): the row's only obstacle is the headless browser, so it does not park the text feature; a run records it as not driven with the manual reason and never as passed.",
+      "manual": "headless Chromium does not synthesize Cmd+Shift+V as a paste (twelve runs: the chord pasted nothing while Cmd+V right after pasted the same clipboard); the step is docs/gslides-parity/focus/manual-checklist.md's"
     },
     {
       "id": "text.find-replace.replace-all",
@@ -1489,6 +1535,15 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "no audit drove the textSelection menu (model.ts 2687 to 2703)"
+    },
+    {
+      "id": "text.context.inside-session",
+      "feature": "text",
+      "interaction": "Right click inside an open text session with a collapsed caret (no word selected) opens the text box's object menu with the clipboard, arrange and Comment rows (A1 rule 6)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "VERIFICATION.md pass 1 F4: a right click inside a session showed no object menu at ec61c6b"
     },
     {
       "id": "text.format-menu.size-decrease",
@@ -1871,10 +1926,11 @@
     {
       "id": "arrange.select.click",
       "feature": "arrange",
-      "interaction": "Click an object: chip, eight handles, the ring",
+      "interaction": "Click an object anywhere on it, its text included: chip, eight handles, the ring, no caret (A1 rule 1)",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-arrange row 1"
+      "evidence": "audit-arrange row 1",
+      "note": "Driven on a text box placed as setup since the focus round; under A1 the click lands at the centre of the box, where ec61c6b opened a text session."
     },
     {
       "id": "arrange.select.shift-add",
@@ -1883,6 +1939,15 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-arrange row 2"
+    },
+    {
+      "id": "arrange.multi.drag-inside-moves-all",
+      "feature": "arrange",
+      "interaction": "With two text boxes selected, a pointer down inside one of them (its text, not its border) followed by a move drags both by the same distance and the third box stays (A1 rule 2)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "docs/gslides-parity/focus/AMENDMENTS.md A1 (Kevin's screenshot of a two object selection: a drag inside the selection did not move it)"
     },
     {
       "id": "arrange.select.shift-remove",
@@ -2296,18 +2361,18 @@
       "feature": "arrange",
       "interaction": "The ring and chip are #1a73e8 on the light theme",
       "driver": "probe --core",
-      "setup": "deck.set { path: \"/defaults/appearance\", value: \"light\" } through the window API before the driven steps, the write the Themes panel tile makes (packages/chrome/src/ThemesPanel.tsx 52 to 61 at ec61c6b); never a driven step, since slide.changeTheme and toolbar.theme are parked",
       "today": "works",
-      "evidence": "audit-arrange row 76"
+      "evidence": "audit-arrange row 76",
+      "setup": "deck.set { path: \"/defaults/appearance\", value: \"light\" } through the window API before the driven steps, the write the Themes panel tile makes (packages/chrome/src/ThemesPanel.tsx 52 to 61 at ec61c6b); never a driven step, since slide.changeTheme and toolbar.theme are parked"
     },
     {
       "id": "arrange.selection-colour.dark",
       "feature": "arrange",
       "interaction": "The ring and chip are #3d86f0 on the dark theme",
       "driver": "probe --core",
-      "setup": "none: a /new deck opens on the dark appearance (audit-arrange row 77); a deck.set of /defaults/appearance to dark through the window API restores it after the light row",
       "today": "works",
-      "evidence": "audit-arrange row 77"
+      "evidence": "audit-arrange row 77",
+      "setup": "none: a /new deck opens on the dark appearance (audit-arrange row 77); a deck.set of /defaults/appearance to dark through the window API restores it after the light row"
     },
     {
       "id": "arrange.escape.text-then-selection",
@@ -2689,7 +2754,7 @@
     {
       "id": "share.copy-view-link",
       "feature": "share",
-      "interaction": "Copy link on the View link row copies /deck/<id>",
+      "interaction": "Copy link on the View link row copies a link that opens /deck/<id> as a viewer (the copied address is <origin>/s/<token>)",
       "driver": "core/share.spec.ts",
       "today": "works",
       "evidence": "audit-present row 20"
@@ -2697,7 +2762,7 @@
     {
       "id": "share.copy-edit-link",
       "feature": "share",
-      "interaction": "Copy link on the Edit link row copies /edit/<id>",
+      "interaction": "Copy link on the Edit link row copies a link that opens /edit/<id> as an editor (the copied address is <origin>/s/<token>)",
       "driver": "core/share.spec.ts",
       "today": "works",
       "evidence": "audit-present row 22"
@@ -2815,7 +2880,7 @@
     {
       "id": "share.copy-present-link",
       "feature": "share",
-      "interaction": "Copy link on the Present link row copies /deck/<id>?present=1",
+      "interaction": "Copy link on the Present link row copies a link that opens /deck/<id>?present=1 as a viewer (the copied address is <origin>/s/<token>?present=1)",
       "driver": "core/share.spec.ts",
       "today": "works",
       "evidence": "audit-present row 21"
@@ -3055,7 +3120,8 @@
       "interaction": "Print calls the browser's print once",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-export row 33"
+      "evidence": "audit-export row 33",
+      "manual": "the OS print dialog and its Save as PDF are the browser's; the probe drives the window.print call and the checklist step covers the file"
     },
     {
       "id": "export.print.close-preview",
@@ -3160,9 +3226,9 @@
       "feature": "surface",
       "interaction": "A deck carrying a parked block (a chart, a table, a diagram, placed as setup) renders it on the sheet, in the viewer and in the PDF with the switch off",
       "driver": "core/surface.spec.ts",
-      "setup": "block.insert of a chart, a table and a diagram through the window API before the driven steps (the convention audit-arrange section 1 records for the rectangles' homes); never a driven step",
       "today": "not driven",
-      "evidence": "FOCUS.md section 3"
+      "evidence": "FOCUS.md section 3",
+      "setup": "block.insert of a chart, a table and a diagram through the window API before the driven steps (the convention audit-arrange section 1 records for the rectangles' homes); never a driven step"
     },
     {
       "id": "surface.cleanup",
@@ -3185,9 +3251,9 @@
       "feature": "surface",
       "interaction": "A parked block placed as setup is selected by a click, moved by a drag, resized by its se handle, sent to back, aligned left, duplicated with Cmd+D and deleted with Delete, with Undo after each, while the switch is off",
       "driver": "core/surface.spec.ts",
-      "setup": "block.insert of a chart through the window API before the driven steps; never a driven step",
       "today": "not driven",
-      "evidence": "the switch does not exist on production (FOCUS.md section 3)"
+      "evidence": "the switch does not exist on production (FOCUS.md section 3)",
+      "setup": "block.insert of a chart through the window API before the driven steps; never a driven step"
     }
   ]
 }

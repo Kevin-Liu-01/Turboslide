@@ -25,6 +25,8 @@ import {
   missingRecordMode,
   requestContext,
   roleOf,
+  shadowStanding,
+  withLinkGrants,
 } from './authorize';
 import type { AccessRecord, AuthContext, Capability } from './authorize';
 import { studioSessionSecret } from './auth/middleware';
@@ -103,10 +105,28 @@ describe('the mode', () => {
 });
 
 describe('the bound decide() (the identity package, SPEC-3 6.2)', () => {
-  it('reads a missing record as open: editor with the owner rows withheld, and 401 for nobody', () => {
+  it('reads a missing record as open: editor with the owner rows withheld; nobody may read it and nothing else', () => {
     expect(boundDecide(null, STRANGER, 'write')).toMatchObject({ ok: true, role: 'editor' });
     expect(boundDecide(null, STRANGER, 'remove')).toMatchObject({ ok: false, status: 403 });
-    expect(boundDecide(null, anonymousContext(), 'read')).toMatchObject({ ok: false, status: 401 });
+    // the focus round (the enforce preview; packages/identity/src/access.ts decide()): a caller with
+    // no identity at all (a browser's very first request, before the cookie the answer mints) reads
+    // an open deck as its general access role, the way the same caller reads it one request later
+    // with the cookie; before, the first visit to /deck/<id> of an open deck answered You need
+    // access and the reload answered the deck. Every write, and every read of a restricted or link
+    // mode deck, still needs an identity and stays 401 for nobody.
+    expect(boundDecide(null, anonymousContext(), 'read')).toMatchObject({
+      ok: true,
+      role: 'editor',
+      via: 'open',
+    });
+    expect(boundDecide(null, anonymousContext(), 'write')).toMatchObject({
+      ok: false,
+      status: 401,
+    });
+    expect(boundDecide(restricted(), anonymousContext(), 'read')).toMatchObject({
+      ok: false,
+      status: 401,
+    });
   });
 
   it('gives a stranger one 404 on a restricted deck and the owner everything', () => {
@@ -166,6 +186,10 @@ describe('authorize() in shadow and enforce mode (SPEC-3 11.5 R3)', () => {
     expect(decision.ok).toBe(true);
     if (decision.ok) {
       expect(decision.shadow).toEqual({ status: 404, code: 'not_found' });
+      // the floor of the focus round (docs/FOCUS.md rank 1): a stranger on a restricted deck is
+      // handed the viewer role in shadow mode, never the editor the parity rounds let through
+      expect(decision.role).toBe('viewer');
+      expect(decision.via).toBe('open');
     }
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatchObject({
@@ -244,6 +268,36 @@ describe('the shadow fallback role', () => {
     expect(roleOf(restricted(), OWNER)).toEqual({ role: 'owner', via: 'owner' });
     expect(roleOf(restricted(), anonymousContext())).toBeNull();
   });
+
+  it('hands a caller with no standing the viewer floor, and every other caller their standing (docs/FOCUS.md rank 1)', async () => {
+    expect(shadowStanding(null, STRANGER)).toEqual({ role: 'editor', via: 'open' });
+    expect(shadowStanding(restricted(), STRANGER)).toEqual({ role: 'viewer', via: 'open' });
+    expect(shadowStanding(restricted(), anonymousContext())).toEqual({
+      role: 'viewer',
+      via: 'open',
+    });
+    expect(shadowStanding(restricted(), OWNER)).toEqual({ role: 'owner', via: 'owner' });
+    const viewerByLink: AuthContext = {
+      ...STRANGER,
+      linkGrants: [{ linkId: 'lnk_view01', deckId: 'q4-review', role: 'viewer' }],
+    };
+    expect(shadowStanding(restricted(), viewerByLink)).toEqual({ role: 'viewer', via: 'link' });
+    // through authorize(): the viewer who changed /deck/ to /edit/ is refused `write` and handed
+    // the viewer role the record grants, so the editor opens in Viewing mode (audit-present row
+    // 29); the stranger is handed the floor (row 26); the editor refused `remove` keeps `editor`
+    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'shadow' });
+    const viewer = await authorize(viewerByLink, 'q4-review', 'write');
+    expect(viewer).toMatchObject({ ok: true, role: 'viewer', via: 'link' });
+    const stranger = await authorize(STRANGER, 'q4-review', 'read');
+    expect(stranger).toMatchObject({ ok: true, role: 'viewer', via: 'open' });
+    const editor: AuthContext = {
+      principal: { id: 'usr_editor', kind: 'account', admin: false },
+      linkGrants: [],
+    };
+    const refusedRemove = await authorize(editor, 'q4-review', 'remove');
+    expect(refusedRemove).toMatchObject({ ok: true, role: 'editor', via: 'grant' });
+    expect(lines.map((line) => line.shadow)).toEqual([true, true, true]);
+  });
 });
 
 describe('the request context and the derived author (SPEC-3 8.2)', () => {
@@ -281,6 +335,37 @@ describe('the request context and the derived author (SPEC-3 8.2)', () => {
     const ctx = await requestContext(withCookie);
     expect(ctx.principal?.id).toBe(STRANGER.principal!.id);
     expect(ctx.agent).toBeUndefined();
+  });
+
+  it('loads the link grants of a cookie principal for the server functions, and nothing for a stranger or a bearer (SPEC-3 6.4)', async () => {
+    const grants = [{ linkId: 'lnk_view01', deckId: 'q4-review', role: 'viewer' as const }];
+    const calls: string[] = [];
+    const load = async (id: string) => {
+      calls.push(id);
+      return grants;
+    };
+    const loaded = await withLinkGrants(STRANGER, load);
+    expect(loaded.linkGrants).toEqual(grants);
+    expect(calls).toEqual([STRANGER.principal!.id]);
+    /* the grants make the difference between 404 and the viewer role on a restricted deck */
+    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'enforce' });
+    expect(await authorize(loaded, 'q4-review', 'read')).toEqual({
+      ok: true,
+      role: 'viewer',
+      via: 'link',
+    });
+    expect(await authorize(STRANGER, 'q4-review', 'read')).toMatchObject({
+      ok: false,
+      status: 404,
+    });
+    /* a context that carries grants, a stranger and a bearer are not loaded again */
+    expect(await withLinkGrants(loaded, load)).toBe(loaded);
+    expect(await withLinkGrants(anonymousContext(), load)).toEqual(anonymousContext());
+    const bearer = bootstrapAgentContext('token');
+    expect(await withLinkGrants(bearer, load)).toBe(bearer);
+    expect(calls).toHaveLength(1);
+    /* a loader that finds nothing leaves the context as it was */
+    expect(await withLinkGrants(STRANGER, async () => [])).toBe(STRANGER);
   });
 
   it('derives the author from the identity, never from the body', () => {

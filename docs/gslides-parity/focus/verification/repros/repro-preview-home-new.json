@@ -1,0 +1,24 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "home-new",
+  "startedAt": "2026-09-16T11:10:51.492Z",
+  "steps": [
+    {
+      "name": "hero link",
+      "href": "/new",
+      "target": null,
+      "text": "New Presentation",
+      "rel": null,
+      "at": "2026-09-16T11:10:53.334Z"
+    },
+    {
+      "name": "after click",
+      "url": "https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252Fnew%26nonce%3Daaeaceff5f80079ef1a787236396baa175df85a1017b3ab5ad6a4243b0912877",
+      "pages": 1,
+      "before": 1,
+      "newPageUrl": null,
+      "at": "2026-09-16T11:10:56.670Z"
+    }
+  ],
+  "endedAt": "2026-09-16T11:10:56.688Z"
+}

@@ -1,0 +1,56 @@
+{
+  "n": 2,
+  "revision": 2,
+  "author": {
+    "kind": "human",
+    "name": "Boron 321",
+    "principalId": "anon_b632a2ec-844f-4aef-be12-f3bb1ef00e87"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T02:06:45.885Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 0,
+      "remove": 0,
+      "insert": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "at": 13,
+      "remove": 0,
+      "insert": "abcdefghijkl"
+    }
+  ],
+  "baseRevision": 1,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "at": 13,
+      "remove": 12,
+      "insert": ""
+    },
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 0,
+      "remove": 100,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 2,
+    "toSeq": 14
+  }
+}

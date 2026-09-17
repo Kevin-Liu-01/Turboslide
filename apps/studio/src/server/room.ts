@@ -48,12 +48,13 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
 import { validateDocument } from '@turboslide/schema/validate';
+import type { Issue } from '@turboslide/schema/validate';
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import { capabilitiesOf, effectiveAccess, readAccess } from './access';
 import { agentAuth } from './auth';
-import { authorize, bootstrapAgentContext, denialBody } from './authorize';
+import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
 import { studioSessionSecret } from './auth/middleware';
 import { selectPrincipalStore } from './auth/principal';
@@ -128,7 +129,9 @@ function buildChannel(selection: RealtimeSelection): {
           // since the version log carries no comment entries for the checkpointer to fold
           // (VERIFICATION-3 finding 6: without it every comment write answered 400)
           applyComments: async (deckId, entries) => {
-            await commentsApplierFor(deckId).apply(entries);
+            // strict: a comment op the sidecar refuses fails the append with its sentence, so
+            // the seller's action is refused instead of admitted and dropped (comments.ts)
+            await commentsApplierFor(deckId, { strict: true }).apply(entries);
           },
           onError: (error, context) =>
             log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
@@ -248,7 +251,10 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
     .touch(principal.id, new Date(), true)
     .catch(() => null);
   return {
-    ctx: { principal, linkGrants: record?.linkGrants ?? [] },
+    /* the link grants are the union of the principal record's and the deck index's, so a grant
+       exchanged on another instance admits the visitor on the ops, stream, presence and comments
+       routes too (b6 R1; authorize.ts linkGrantsFor) */
+    ctx: { principal, linkGrants: await linkGrantsFor(principal.id, record) },
     principalId: principal.id,
     identity: principal.id,
     kind: principal.kind === 'account' ? 'signedIn' : 'anonymous',
@@ -607,6 +613,43 @@ export async function roomFor(deckId: string): Promise<Room> {
   return room;
 }
 
+/**
+ * The live document of a deck whose room this instance holds, or null when no room is open here.
+ * The viewer, print and thumbnail payloads (`decks.ts` `getDeck`) read the store, which the
+ * checkpointer writes 2 s after the last op and 10 s at most under a burst, so a slide skipped or
+ * a fill written a moment before the page opened was missing from them (docs/FOCUS.md
+ * `export.print.include-skipped`, `shapes.reload-and-viewer`); a read here takes the room's
+ * document ahead of the store, and opens no room for a deck nobody is editing on this instance
+ * (the integrator at the cycle 2 merge, for b7).
+ */
+export async function liveIfOpen(deckId: string): Promise<LiveDocument | null> {
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (pending === undefined) return null;
+  try {
+    return await (await pending).live();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Forgets one deck's room on this instance and stops its checkpointer (the focus round, cycle 2;
+ * VERIFICATION C2-F19). Delete forever removes the deck's folder without the store's write lock
+ * (`@turboslide/store/templates` removeDeck), and a checkpoint run that loaded the document before
+ * the removal writes the slide files, the version record and the manifest after it, which brings
+ * the folder back with the changed slides alone and `/deck/<id>` answers 200 for a deck the
+ * seller deleted. The route closes the room first, so no run of this instance's checkpointer is
+ * in flight or pending when the folder goes.
+ */
+export async function closeRoom(deckId: string): Promise<void> {
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (s === undefined || pending === undefined) return;
+  s.rooms.delete(deckId);
+  await (await pending).close().catch(() => undefined);
+}
+
 /** Forgets every room on this instance (a test, a deck removal). */
 export async function closeRooms(): Promise<void> {
   const s = shared.__turboslideRoom;
@@ -805,6 +848,26 @@ type Candidate = {
   comment?: NewEntry['comment'];
 };
 
+/**
+ * The splices that undo a refused entry's text splices, by length alone (docs/FOCUS.md rank
+ * 13): the entries after a refused one in the same POST were written on a text that carried its
+ * insertion, so they are transformed past this undo before they are judged, the way they are
+ * transformed past what landed since their base. Before this the later splices of a burst met
+ * "text.splice: 10 plus 0 is outside a text of 7 characters" one after another (audit-text row
+ * 21). The characters a splice removed are not known here and do not matter to a transform,
+ * which reads lengths and offsets; a placeholder of the removed length stands in.
+ */
+export function undoOfSplices(mutations: readonly Mutation[]): Mutation[] {
+  const out: Mutation[] = [];
+  for (let i = mutations.length - 1; i >= 0; i -= 1) {
+    const mutation = mutations[i];
+    if (mutation === undefined || mutation.op !== 'text.splice') continue;
+    const { flags: _flags, ...rest } = mutation;
+    out.push({ ...rest, remove: mutation.insert.length, insert: 'x'.repeat(mutation.remove) });
+  }
+  return out;
+}
+
 /** Applies one candidate to the running document and validates; the reject reason when it cannot land. */
 function landCandidate(
   document: DeckDocument,
@@ -838,20 +901,50 @@ function landCandidate(
   }
   const validation = validateDocument(next);
   if (!validation.ok) {
-    const first = validation.issues.find((issue) => issue.severity === 3);
     const touched = touchedSlides(mutations);
+    const first = refusalIssue(validation.issues, touched);
     return {
       ok: false,
       rejected: {
         opId: candidate.opId,
         reason: 'invalid',
         ...(touched.every(canReadSlide) && first !== undefined
-          ? { message: `${first.pointer}: ${first.message}` }
+          ? { message: refusalMessage(first) }
           : {}),
       },
     };
   }
   return { ok: true, document: next, mutations };
+}
+
+/**
+ * The issue a refusal names (the focus round, cycle 2; VERIFICATION C2-F1). The validator sorts
+ * its issues by severity, then by file name, so on a document whose slide fails its own schema
+ * after the write the manifest's `reference` issue ("No slide file for X": a slide that does not
+ * validate is left out of the slide map, and the manifest still lists it) comes before the
+ * slide's own issue (`Unknown field "typography"` on a list block, the cause). The seller and
+ * the probe need the cause: the first severity 3 issue on a slide the write touched, else the
+ * first that is not a reference, else the first. Before this the reject card of a `block.set
+ * /typography` on a plain block read "No slide file for blank-1 (slides/blank-1.json)" and three
+ * passes read it as a store that had lost a slide body. Pure.
+ */
+export function refusalIssue(
+  issues: ReadonlyArray<Issue>,
+  touched: ReadonlyArray<string>,
+): Issue | undefined {
+  const blocking = issues.filter((issue) => issue.severity === 3);
+  const files = new Set(touched.map((slideId) => `slides/${slideId}.json`));
+  return (
+    blocking.find((issue) => files.has(issue.file)) ??
+    blocking.find((issue) => issue.code !== 'reference') ??
+    blocking[0]
+  );
+}
+
+/** The refusal's sentence: the slide file first when the issue is a slide's, then the pointer and the message. */
+export function refusalMessage(issue: Issue): string {
+  const file = issue.file.startsWith('slides/') ? `${issue.file} ` : '';
+  return `${file}${issue.pointer}: ${issue.message}`;
 }
 
 export type AdmitInput = {
@@ -951,6 +1044,8 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   };
   const landed =
     post.base.seq < head ? await channel.since(deckId, post.base.seq, head - post.base.seq) : [];
+  // what the later entries of this POST are transformed past: what landed since the base, then
+  // the undo of every entry refused before them (undoOfSplices)
   const landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
   // a retried POST (a fetch that failed after the server admitted it, a tab that resends its
   // persisted queue) carries the op ids of the first one: an id already in the stream's tail is
@@ -998,6 +1093,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
     );
     if (!placed.ok) {
       rejected.push(placed.rejected);
+      landedMutations.push(...undoOfSplices(transformed));
       continue;
     }
     running = placed.document;
@@ -1043,6 +1139,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       );
       if (!placed.ok) {
         rejected.push(placed.rejected);
+        moreMutations.push(...undoOfSplices(transformed));
         continue;
       }
       document = placed.document;
@@ -1084,14 +1181,86 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   };
 }
 
+/**
+ * The document the blob tier admits against (docs/FOCUS.md rank 3). The room's live document is
+ * this instance's mirror, synced within the store's window; a client whose base is above its
+ * revision has seen a commit this instance has not pulled yet, so the store is synced by force
+ * and the live document read again before anything is judged against it. Before this an
+ * instance that was one revision behind refused the undo of a saved delete as "Slide already
+ * exists" and the redo as "No slide", with the mutation shown to the seller (audit-slides rows
+ * 93, 95 and 96): the reducer ran on a document the client had never written against.
+ */
+async function liveForBase(room: Room, baseSeq: number): Promise<LiveDocument> {
+  return liveAtLeast(room, baseSeq);
+}
+
+/**
+ * The live document at or above a revision the caller knows (the focus round, cycle 2): on the
+ * blob tier the room's document is this instance's mirror within the store's sync window, so a
+ * reader that learned a revision from a write's answer (the editor's reload after a
+ * `version.restore`, a tab's resync at an external checkpoint) can land on an instance whose
+ * mirror is behind it; the store is synced by force, up to `attempts` times a short pause apart,
+ * until the mirror reaches the revision. Before this the reload after a restore read the
+ * document from before it and the tab kept that document while its revision moved
+ * (VERIFICATION F-versions). On the other tiers the live document is the stream's and is
+ * answered as it stands.
+ */
+export async function liveAtLeast(
+  room: Room,
+  revision: number | undefined,
+  attempts = 3,
+): Promise<LiveDocument> {
+  let live = await room.live();
+  if (room.tier !== 'blob') return live;
+  const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+  if (typeof store.sync !== 'function') return live;
+  if (revision === undefined) {
+    // no revision named: the head, read once past the sync window (a page load)
+    await store.sync(true);
+    return room.live();
+  }
+  for (let attempt = 0; attempt < attempts && revision > live.document.deck.revision; attempt++) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 250));
+    await store.sync(true);
+    live = await room.live();
+  }
+  return live;
+}
+
+/**
+ * A candidate the reducer refused on the blob tier is a real refusal only when the document it
+ * was judged against is the one the client wrote against (the base of the POST). Judged against
+ * a document at another revision, the refusal says nothing about the client's write: the
+ * answer is a resync at the head, and the client transforms and sends the write again.
+ */
+export function blobRefusal(
+  baseSeq: number,
+  liveRevision: number,
+  rejected: Rejected,
+): { kind: 'reject'; rejected: Rejected } | { kind: 'resync' } {
+  if (baseSeq !== liveRevision && rejected.reason === 'invalid') return { kind: 'resync' };
+  return {
+    kind: 'reject',
+    rejected:
+      rejected.message === undefined
+        ? rejected
+        : {
+            ...rejected,
+            message: `${rejected.message} (this instance's document is at revision ${liveRevision}; the write's base was ${baseSeq})`,
+          },
+  };
+}
+
 /** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. */
 async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
-  const live = await room.live();
+  const live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
   const rejected: Rejected[] = [];
   const candidates: NewEntry[] = [];
   let running = live.document;
+  // the undo of every entry refused so far, which the later entries are transformed past
+  const refusedUndo: Mutation[] = [];
   for (const entry of post.entries) {
     if (entry.kind === 'comment') {
       if (entry.comment !== undefined)
@@ -1106,13 +1275,32 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
         });
       continue;
     }
+    const mutations =
+      refusedUndo.length === 0
+        ? (entry.mutations ?? [])
+        : transformEntry(entry.mutations ?? [], refusedUndo);
+    if (mutations === null) {
+      rejected.push({ opId: entry.opId, reason: 'stale' });
+      continue;
+    }
     const placed = landCandidate(
       running,
-      { opId: entry.opId, kind: 'edit', mutations: entry.mutations ?? [] },
+      { opId: entry.opId, kind: 'edit', mutations },
       () => true,
     );
     if (!placed.ok) {
-      rejected.push(placed.rejected);
+      refusedUndo.push(...undoOfSplices(mutations));
+      const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
+      if (refusal.kind === 'resync') {
+        return {
+          ok: false,
+          status: 409,
+          code: 'resync',
+          message: `The deck is at revision ${live.document.deck.revision} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
+          head: live.document.deck.revision,
+        };
+      }
+      rejected.push(refusal.rejected);
       continue;
     }
     running = placed.document;
@@ -1735,7 +1923,14 @@ export async function admitServerWrite(
           since: records.filter((record) => record.revision > input.baseRevision),
         };
       }
-      return { ok: false, code: 'invalid', message: outcome.message };
+      // the refusal names the two revisions (docs/FOCUS.md rank 3): the instance's document and
+      // the write's base, so a probe records both on every refused write
+      const current = await store.revision().catch(() => input.baseRevision);
+      return {
+        ok: false,
+        code: 'invalid',
+        message: `${outcome.message} (this instance's document is at revision ${current}; the write's base was ${input.baseRevision})`,
+      };
     }
     // the follower turns the record into stream entries or an external checkpoint at once
     await room.follow();

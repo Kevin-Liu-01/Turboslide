@@ -158,9 +158,11 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const box = await heading.boundingBox();
     expect(box).not.toBeNull();
-    /* a single click inside the text places the caret there: the run is editable at once. The
-       click lands inside the first word, so the offset is neither the start nor the end */
-    await page.mouse.click(box!.x + 24, box!.y + box!.height / 2);
+    /* a double click inside the text opens the session with the caret at the point (the click
+       model of docs/gslides-parity/focus/AMENDMENTS.md A1: one click selects the object, the
+       double click enters). The point lands inside the first word, so the offset is neither the
+       start nor the end */
+    await page.mouse.dblclick(box!.x + 24, box!.y + box!.height / 2);
     await expect(heading).toHaveAttribute('contenteditable', 'true');
     await expect(heading).toHaveAttribute('spellcheck', 'true');
     const caretInside = await page.evaluate(() => {
@@ -220,7 +222,8 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const paragraph = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="p/text"]');
     const box = await paragraph.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + 8, box!.y + 8);
+    /* the session opens on a double click (AMENDMENTS.md A1; one click selects the object) */
+    await page.mouse.dblclick(box!.x + 8, box!.y + 8);
     await expect(paragraph).toHaveAttribute('contenteditable', 'true');
     /* a triple click selects the paragraph (R09 A1, the browser's own gesture); typing replaces it */
     await page.mouse.click(box!.x + 8, box!.y + 8, { clickCount: 3 });
@@ -240,7 +243,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const hbox = await heading.boundingBox();
     const beforeHeading = await revision(page);
-    await page.mouse.click(hbox!.x + 8, hbox!.y + hbox!.height / 2);
+    await page.mouse.dblclick(hbox!.x + 8, hbox!.y + hbox!.height / 2);
     await expect(heading).toHaveAttribute('contenteditable', 'true', { timeout: 30_000 });
     await page.keyboard.press('End');
     await page.keyboard.type(' A', { delay: 20 });
@@ -261,7 +264,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const first = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/0/text"]');
     const box = await first.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + box!.width - 20, box!.y + box!.height / 2);
+    await page.mouse.dblclick(box!.x + box!.width - 20, box!.y + box!.height / 2);
     await expect(first).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
@@ -299,7 +302,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
       page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="table/rows/${r}/cells/${c}"]`);
     const box = await cell(1, 0).boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + 8, box!.y + box!.height / 2);
+    await page.mouse.dblclick(box!.x + 8, box!.y + box!.height / 2);
     await expect(cell(1, 0)).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('End');
     await page.keyboard.press('Shift+Home');

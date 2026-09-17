@@ -439,8 +439,17 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
             />
           ) : null}
         </span>
-        <span className="ts-title-slot ts-title-inbox-slot" data-control="title.inbox.slot">
-          <InboxPlate />
+        {/* docs/FOCUS.md 3.2 parks title.inbox: the plate is drawn only while Tools > Advanced tools
+            is on; the 60 px slot stays so the row's five slots keep their geometry at first paint
+            (SPEC-3 4.2, 9.2) */}
+        <span
+          className={cn(
+            'ts-title-slot ts-title-inbox-slot',
+            !isPresent(itemById('title.inbox'), shell.menuContext) && 'is-empty',
+          )}
+          data-control="title.inbox.slot"
+        >
+          {isPresent(itemById('title.inbox'), shell.menuContext) ? <InboxPlate /> : null}
         </span>
         <Slideshow />
         <span

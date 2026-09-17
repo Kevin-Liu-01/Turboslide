@@ -1,0 +1,38 @@
+{
+  "n": 2,
+  "revision": 2,
+  "author": {
+    "kind": "human",
+    "name": "Enamel 958",
+    "principalId": "anon_458c20e0-c5db-40c2-b052-d412fe0124a6"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T07:39:37.061Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 392,
+      "remove": 0,
+      "insert": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    }
+  ],
+  "baseRevision": 1,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 392,
+      "remove": 100,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 2,
+    "toSeq": 2
+  }
+}

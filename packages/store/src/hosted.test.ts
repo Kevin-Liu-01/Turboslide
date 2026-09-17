@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Asset } from '@turboslide/schema/assets';
+import type { DeckDocument } from '@turboslide/schema/deck';
 import { MOOD_EARTH, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
@@ -17,7 +18,11 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import {
+  BlobExistsError,
+  BlobTimeoutError,
+  boundedBlobClient,
   isMirroredDocument,
+  manifestSlideIds,
   openBlobStore,
   parseThumbPathname,
   pruneThumbs,
@@ -26,7 +31,7 @@ import {
   thumbPathname,
   thumbsPrefix,
 } from './blob-store.ts';
-import type { BlobStore } from './blob-store.ts';
+import type { BlobClient, BlobStore } from './blob-store.ts';
 import { digestAssetName, openFileStore } from './file-store.ts';
 import { openHostedDecks } from './hosted.ts';
 import type { HostedDecks } from './hosted.ts';
@@ -500,13 +505,14 @@ describe('hosted stores', () => {
       expect(snapshotKey(fake.blobs.get('decks/gt-brand/deck.json')!.bytes)).toBe(key);
       expect(outcome.entry.snapshot).toBe(key);
       expect(fake.blobs.has(`decks/gt-brand/${snapshotPath(key)}`)).toBe(true);
-      // the write order: the snapshot, then the manifest, then the slides and the record
+      // the write order: the snapshot and the record before the manifest, the slides beside them
+      // (the focus round moved the record before the commit, docs/FOCUS.md ranks 20 and 21)
       const puts = fake.calls.filter((c) => c.op === 'put').map((c) => c.pathname);
       expect(puts.indexOf(`decks/gt-brand/${snapshotPath(key)}`)).toBeLessThan(
         puts.indexOf('decks/gt-brand/deck.json'),
       );
-      expect(puts.indexOf('decks/gt-brand/deck.json')).toBeLessThan(
-        puts.indexOf('decks/gt-brand/versions/1.json'),
+      expect(puts.indexOf('decks/gt-brand/versions/1.json')).toBeLessThan(
+        puts.indexOf('decks/gt-brand/deck.json'),
       );
       // the stored record carries the key, so the peer reads it back
       const records = await b.records();
@@ -741,7 +747,11 @@ describe('hosted stores', () => {
   // Round four (gslides-parity SPEC-4 0.29, 0.31, 0.33, 0.35; MILESTONES-4 B4 item 1)
 
   describe('round four store seams', () => {
-    it('writes in four rounds: the head with the leases, the snapshot with the changed bodies, the commit alone, the record last', async () => {
+    it('writes in four rounds: the head with the leases, the snapshot with the changed bodies and the record claim, the commit alone, the removals', async () => {
+      // the focus round moved the record from the fourth round into the second, as a claim on its
+      // number put with overwrite refused (docs/FOCUS.md ranks 20 and 21): a record stored after
+      // the commit was invisible to every other instance until the next commit, since a pull
+      // fetches records by number only when the manifest's etag moves
       const { fake, a } = await blobPair();
       await a.sync();
       fake.calls.length = 0;
@@ -761,26 +771,32 @@ describe('hosted stores', () => {
       expect(at('get decks/gt-brand/leases.json')).toBeGreaterThanOrEqual(0);
       expect(at('head decks/gt-brand/deck.json')).toBeLessThan(firstPut);
       expect(at('get decks/gt-brand/leases.json')).toBeLessThan(firstPut);
-      // round two: the snapshot and the changed slide body both precede the manifest
+      // round two: the snapshot, the changed slide body and the record all precede the manifest
       const commit = at('put decks/gt-brand/deck.json');
       expect(at(`put decks/gt-brand/${snapshotPath(key)}`)).toBeLessThan(commit);
       expect(at('put decks/gt-brand/slides/content-rule.json')).toBeLessThan(commit);
-      // round three is the commit alone, round four the record: the puts are the two bodies of
-      // round two in either order, then the manifest, then the record and nothing else
+      expect(at('put decks/gt-brand/versions/1.json')).toBeLessThan(commit);
+      // round three is the commit alone: the puts are the three bodies of round two in any
+      // order, then the manifest and nothing else
       const puts = ops.filter((op) => op.startsWith('put '));
-      expect(puts.slice(0, -2).sort()).toEqual(
+      expect(puts.slice(0, -1).sort()).toEqual(
         [
           `put decks/gt-brand/${snapshotPath(key)}`,
           'put decks/gt-brand/slides/content-rule.json',
+          'put decks/gt-brand/versions/1.json',
         ].sort(),
       );
-      expect(puts[puts.length - 2]).toBe('put decks/gt-brand/deck.json');
-      expect(puts[puts.length - 1]).toBe('put decks/gt-brand/versions/1.json');
-      expect(at('put decks/gt-brand/versions/1.json')).toBeGreaterThan(commit);
-      expect(ops.filter((op) => op.startsWith('del '))).toEqual([]);
+      expect(puts[puts.length - 1]).toBe('put decks/gt-brand/deck.json');
+      // nothing of the deck is deleted by the write; the retention that follows the answer may
+      // prune the seed's snapshot, which no record names (the upload stores one since the focus round)
+      expect(ops.filter((op) => op.startsWith('del ') && !op.includes('/snapshots/'))).toEqual([]);
+      // the record is a claim: a second put of the same name is refused by the store
+      await expect(
+        fake.put('decks/gt-brand/versions/1.json', new Uint8Array([1]), { overwrite: false }),
+      ).rejects.toBeInstanceOf(BlobExistsError);
     });
 
-    it('deletes a removed slide body after the commit and before the record', async () => {
+    it('deletes a removed slide body after the commit, with the record already stored', async () => {
       const { fake, a, b } = await blobPair();
       await a.sync();
       fake.calls.length = 0;
@@ -796,7 +812,7 @@ describe('hosted stores', () => {
       const record = ops.indexOf('put decks/gt-brand/versions/1.json');
       expect(commit).toBeGreaterThanOrEqual(0);
       expect(del).toBeGreaterThan(commit);
-      expect(record).toBeGreaterThan(del);
+      expect(record).toBeLessThan(commit);
       expect(fake.blobs.has('decks/gt-brand/slides/thesis.json')).toBe(false);
       // the peer reads the document without the slide
       const seen = await b.read();
@@ -838,7 +854,8 @@ describe('hosted stores', () => {
         updatedAt: WORKED_DECK.updatedAt,
         createdAt: WORKED_DECK.createdAt,
       });
-      // one folders call and one origin read per deck; no head, no list of a deck prefix
+      // one folders call, one head and one origin read per deck (the focus round added the head,
+      // docs/FOCUS.md rank 7: the body is proven against it); no list of a deck prefix
       const ops = fake.calls.map((call) => call.op);
       expect(ops.filter((op) => op === 'folders')).toHaveLength(1);
       expect(
@@ -847,8 +864,13 @@ describe('hosted stores', () => {
           .map((call) => call.pathname)
           .sort(),
       ).toEqual(['decks/gt-brand/deck.json', 'decks/second-deck/deck.json']);
+      expect(
+        fake.calls
+          .filter((call) => call.op === 'head')
+          .map((call) => call.pathname)
+          .sort(),
+      ).toEqual(['decks/gt-brand/deck.json', 'decks/second-deck/deck.json']);
       expect(ops).not.toContain('list');
-      expect(ops).not.toContain('head');
       // no mirror was written for the listed decks on this instance
       expect(existsSync(join(second.decksDir, 'second-deck'))).toBe(false);
       // the trash filter reads the manifest's stamp
@@ -1304,6 +1326,382 @@ describe('hosted stores', () => {
       // the instance that asked before the removal keeps the old address in its URL cache; the
       // store answers 404 there, as it does for any deleted file, and digest names never return
       expect(await second.assetUrl('second-deck', twin.slice('assets/'.length))).toBe(put.url);
+    });
+  });
+
+  // -------------------------------------------------------------------------------------------
+  // The focus round (docs/FOCUS.md section 5 ranks 3, 7, 20 and 21): every write applies against
+  // the store's head document, the record is claimed before the commit, and the listing reads
+  // the head
+
+  describe('the focus round: the head, the record claim and the listing', () => {
+    const newSlide = (id: string): Mutation => ({
+      op: 'slide.insert',
+      sectionId: 'brand',
+      after: 'thesis',
+      slide: { schemaVersion: 1, id, kind: 'statement', big: `Slide ${id}`, measure: 22 },
+    });
+
+    it('reads the slide ids a manifest names, in section order, and nothing from bytes that are not one', () => {
+      expect(manifestSlideIds(new TextEncoder().encode(canonicalJson(WORKED_DECK)))).toEqual(
+        WORKED_DECK.sections.flatMap((section) => section.slideIds),
+      );
+      expect(manifestSlideIds(new TextEncoder().encode('not json'))).toEqual([]);
+      expect(manifestSlideIds(new TextEncoder().encode('{"sections":[{"slideIds":[1]}]}'))).toEqual(
+        [],
+      );
+    });
+
+    it('proves a document from the bodies its manifest names when the listing lags and the snapshot is gone (rank 3: the redo of a delete met "No slide")', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // the listing freezes before a adds a slide; the reader then has neither the snapshot nor
+      // the record to prove the document, the case the fresh path is for
+      fake.holdList();
+      const added = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [newSlide('added')],
+      });
+      expect(added.ok).toBe(true);
+      if (!added.ok) return;
+      fake.blobs.delete(`decks/gt-brand/${snapshotPath(added.entry.snapshot!)}`);
+      fake.blobs.delete('decks/gt-brand/versions/1.json');
+      // b's document at 413 carries the added slide, which the listing does not name
+      const seen = await b.read();
+      expect(seen.document.deck.revision).toBe(413);
+      expect(seen.document.slides['added']).toBeDefined();
+      expect(seen.document.deck.sections[0]?.slideIds).toContain('added');
+      // so the write that removes it again (the redo of a delete) applies
+      const removed = await b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [{ op: 'slide.remove', slideId: 'added' }],
+      });
+      expect(removed.ok).toBe(true);
+      fake.releaseList();
+    });
+
+    it('never answers a document at the manifest revision with a stale slide set: a body the CDN lags on leaves it unproven (rank 3: the undo of a delete met "Slide already exists")', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // the CDN keeps serving the bodies of 412 (the manifest that lists thesis, thesis itself)
+      // while a removes thesis; the reader finds no snapshot and no record either, so nothing
+      // proves the head's document: it keeps what it has and refuses to commit on it rather
+      // than take the served bodies for the head's
+      fake.holdGet();
+      const removed = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [{ op: 'slide.remove', slideId: 'thesis' }],
+      });
+      expect(removed.ok).toBe(true);
+      if (!removed.ok) return;
+      fake.blobs.delete(`decks/gt-brand/${snapshotPath(removed.entry.snapshot!)}`);
+      fake.blobs.delete('decks/gt-brand/versions/1.json');
+      const kept = await b.read();
+      expect(kept.document.deck.revision).toBe(412);
+      // the write is refused as a race the caller retries (the room answers it as a conflict),
+      // never applied against the served document and never the reducer's "already exists"
+      await expect(
+        b.write({
+          baseRevision: 413,
+          author: agentB,
+          mutations: [
+            { op: 'slide.insert', sectionId: 'brand', after: 'title', slide: WORKED_SLIDES[2]! },
+          ],
+        }),
+      ).rejects.toThrow(/behind the store/);
+      fake.releaseGet();
+      // once the store serves the current bodies the document proves and the undo applies
+      const undone = await b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [
+          { op: 'slide.insert', sectionId: 'brand', after: 'title', slide: WORKED_SLIDES[2]! },
+        ],
+      });
+      expect(undone.ok).toBe(true);
+      expect((await a.read()).document.slides['thesis']).toBeDefined();
+    });
+
+    it('claims the record number before the commit and stops when another writer holds it (rank 21: the version log broke where a record was overwritten)', async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      // another instance's claim in flight from the same base: revision 413 from 412, this clock
+      const foreign: VersionRecord = {
+        n: 1,
+        revision: 413,
+        baseRevision: 412,
+        author: agentB,
+        note: '',
+        createdAt: clock,
+        mutations: [setSize(30)],
+        inverse: [setSize(24)],
+      };
+      await fake.put(
+        'decks/gt-brand/versions/1.json',
+        new TextEncoder().encode(canonicalJson(foreign)),
+        { overwrite: false },
+      );
+      fake.calls.length = 0;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(false);
+      if (!outcome.ok && outcome.code === 'conflict') expect(outcome.currentRevision).toBe(412);
+      else expect.fail('the write was not answered as a conflict');
+      // the foreign record stands untouched, the manifest never moved and no snapshot was committed
+      expect(fake.blobs.get('decks/gt-brand/versions/1.json')!.bytes).toEqual(
+        new TextEncoder().encode(canonicalJson(foreign)),
+      );
+      expect(
+        fake.calls.some(
+          (call) => call.op === 'put' && call.pathname === 'decks/gt-brand/deck.json',
+        ),
+      ).toBe(false);
+      expect((await a.read()).document.deck.revision).toBe(412);
+      // the claim in flight is not in the mirror's log while the deck is at 412
+      expect((await a.records()).map((r) => r.n)).toEqual([]);
+      // a claim older than the grace is the leftover of a writer that stopped: the number is taken over
+      const old = { ...foreign, createdAt: '2026-09-11T08:00:00.000Z' };
+      await fake.put(
+        'decks/gt-brand/versions/1.json',
+        new TextEncoder().encode(canonicalJson(old)),
+        { overwrite: true },
+      );
+      const taken = await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(22)] });
+      expect(taken.ok).toBe(true);
+      if (taken.ok) expect(taken.entry.n).toBe(1);
+      const stored = JSON.parse(
+        new TextDecoder().decode(fake.blobs.get('decks/gt-brand/versions/1.json')!.bytes),
+      ) as VersionRecord;
+      expect(stored.author).toEqual(agentA);
+      expect(stored.revision).toBe(413);
+    });
+
+    it('keeps the version log whole across two instances that write in turn, so a restore rebuilds every version (rank 21)', async () => {
+      const { a, b } = await blobPair();
+      await b.sync();
+      expect(
+        (await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(20)] })).ok,
+      ).toBe(true);
+      expect(
+        (await b.write({ baseRevision: 413, author: agentB, mutations: [setSize(22)] })).ok,
+      ).toBe(true);
+      expect(
+        (await a.write({ baseRevision: 414, author: agentA, mutations: [setSize(24)] })).ok,
+      ).toBe(true);
+      expect(
+        (await b.write({ baseRevision: 415, author: agentB, mutations: [setSize(22)] })).ok,
+      ).toBe(true);
+      for (const store of [a, b]) {
+        const records = await store.records();
+        expect(records.map((r) => [r.n, r.baseRevision, r.revision])).toEqual([
+          [1, 412, 413],
+          [2, 413, 414],
+          [3, 414, 415],
+          [4, 415, 416],
+        ]);
+        // the restore path walks the whole chain from the head back to the first version
+        const first = await store.documentAt(1);
+        const list = first.slides['content-rule'];
+        expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
+      }
+    });
+
+    it('lists the head of every deck while the CDN serves overwritten manifests: a rename, a trash and a restore show on another instance at once (rank 7)', async () => {
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-list-a'), fake);
+      await first.ready();
+      clock = '2026-09-15T11:00:00.000Z';
+      const created = await first.create({ name: 'Second deck', from: 'blank' });
+      // the upload of a new deck stores the snapshot its manifest names
+      const manifestBytes = fake.blobs.get(`decks/${created.deckId}/deck.json`)!.bytes;
+      expect(
+        fake.blobs.has(`decks/${created.deckId}/${snapshotPath(snapshotKey(manifestBytes))}`),
+      ).toBe(true);
+      const second = collection('blob', join(root, 'overlay-list-b'), fake);
+      await second.ready();
+      expect((await second.list()).map((head) => [head.id, head.title])).toEqual([
+        [created.deckId, 'Second deck'],
+        ['gt-brand', WORKED_DECK.title],
+      ]);
+      // from here on get() serves the bodies as they are now
+      fake.holdGet();
+      clock = '2026-09-15T11:01:00.000Z';
+      const renamed = await (
+        await first.open(created.deckId)
+      ).write({
+        baseRevision: 0,
+        author: kevin,
+        mutations: [{ op: 'deck.set', path: '/title', value: 'Acme renewal' }],
+      });
+      expect(renamed.ok).toBe(true);
+      await first.trash('gt-brand');
+      // the writing instance lists from its mirror, the other from the snapshots the heads name
+      for (const instance of [first, second]) {
+        const heads = await instance.list();
+        expect(heads.map((head) => [head.id, head.title, head.revision])).toEqual([
+          [created.deckId, 'Acme renewal', 1],
+        ]);
+        const trashed = await instance.list({ includeTrashed: true });
+        expect(trashed.find((head) => head.id === 'gt-brand')?.trashedAt).toBe(clock);
+      }
+      clock = '2026-09-15T11:02:00.000Z';
+      await second.restore('gt-brand');
+      for (const instance of [first, second]) {
+        expect((await instance.list()).map((head) => head.id).sort()).toEqual(
+          [created.deckId, 'gt-brand'].sort(),
+        );
+        expect(
+          (await instance.list({ includeTrashed: true })).find((h) => h.id === 'gt-brand')
+            ?.trashedAt,
+        ).toBeUndefined();
+      }
+      fake.releaseGet();
+    });
+
+    it('a restore on the instance that trashed is three round trips: the manifest head, the snapshot put and the manifest put (the fix round, F12)', async () => {
+      // the trash page's Restore is optimistic and a reload of /decks follows it at once, so
+      // the stamp's flight time is the window in which a fresh listing still reads the trash
+      // stamp (VERIFICATION F12, reproduced on the preview: the restore answered 665 ms after
+      // the click and the /decks load had read the store before it). A restore returns the
+      // manifest to the last push's bytes, whose snapshot that push stored, so the existing
+      // snapshot stands without a head that proves it
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-stamp-a'), fake);
+      await first.ready();
+      clock = '2026-09-15T12:00:00.000Z';
+      await first.trash('gt-brand');
+      clock = '2026-09-15T12:00:01.000Z';
+      const before = fake.calls.length;
+      const restored = await first.restore('gt-brand');
+      const calls = fake.calls.slice(before);
+      expect(restored.trashedAt).toBeNull();
+      const manifest = 'decks/gt-brand/deck.json';
+      const key = snapshotKey(fake.blobs.get(manifest)!.bytes);
+      const snapshot = `decks/gt-brand/${snapshotPath(key)}`;
+      expect(calls).toEqual([
+        { op: 'head', pathname: manifest },
+        { op: 'put', pathname: snapshot },
+        { op: 'put', pathname: manifest },
+      ]);
+      // the snapshot under the key is the upload's, untouched, and every instance lists the deck
+      expect(fake.blobs.has(snapshot)).toBe(true);
+      const second = collection('blob', join(root, 'overlay-stamp-b'), fake);
+      await second.ready();
+      for (const instance of [first, second]) {
+        expect((await instance.list()).map((head) => head.id)).toContain('gt-brand');
+        expect(
+          (await instance.list({ includeTrashed: true })).find((h) => h.id === 'gt-brand')
+            ?.trashedAt,
+        ).toBeUndefined();
+      }
+    });
+
+    it('restores a version on one instance while another wrote the history, and both read the restored document and rebuild every version (cycle 2, VERIFICATION F-versions)', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // a writes the history: size 20 at 413, size 24 at 414
+      expect(
+        (await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(20)] })).ok,
+      ).toBe(true);
+      expect(
+        (await a.write({ baseRevision: 413, author: agentA, mutations: [setSize(24)] })).ok,
+      ).toBe(true);
+      // b restores version 1 (the document after the first write) as the server does it: a
+      // forced write of the restore mutation, resolved from the log b pulled
+      const restored = await b.write(
+        {
+          baseRevision: 414,
+          author: kevin,
+          mutations: [{ op: 'version.restore', n: 1 }],
+        },
+        { force: true },
+      );
+      expect(restored.ok).toBe(true);
+      if (!restored.ok) return;
+      expect(restored.revision).toBe(415);
+      expect(restored.entry.mutations).toEqual([{ op: 'version.restore', n: 1 }]);
+      const sizeOn = (document: DeckDocument): unknown => {
+        const list = document.slides['content-rule'];
+        return list?.kind === 'content' ? list.slots.right?.[0] : undefined;
+      };
+      expect(sizeOn(restored.document)).toMatchObject({ size: 20 });
+      // a, which wrote the history, reads the restored document at the head
+      const onA = await a.read();
+      expect(onA.document.deck.revision).toBe(415);
+      expect(sizeOn(onA.document)).toMatchObject({ size: 20 });
+      // the log is whole on both and every version rebuilds, the restore's own included
+      for (const store of [a, b]) {
+        const records = await store.records();
+        expect(records.map((r) => [r.n, r.baseRevision, r.revision])).toEqual([
+          [1, 412, 413],
+          [2, 413, 414],
+          [3, 414, 415],
+        ]);
+        expect(sizeOn(await store.documentAt(1))).toMatchObject({ size: 20 });
+        expect(sizeOn(await store.documentAt(2))).toMatchObject({ size: 24 });
+        expect(sizeOn(await store.documentAt(3))).toMatchObject({ size: 20 });
+      }
+      // the restore's record names its snapshot like any write's
+      expect(fake.blobs.has(`decks/gt-brand/${snapshotPath(restored.entry.snapshot!)}`)).toBe(true);
+    });
+
+    it('lists a deck made on this instance while the folder listing of the store lags (cycle 2, VERIFICATION F-share-404)', async () => {
+      const fake = memoryBlobClient();
+      // a client whose folder listing never shows the new deck: Vercel Blob's listing lags the
+      // store by up to a minute, and the share link exchange runs over list()
+      let hidden = '';
+      const lagging = {
+        ...fake,
+        folders: async (prefix: string) =>
+          (await fake.folders(prefix)).filter((folder) => !folder.includes(hidden)),
+      };
+      const first = collection('blob', join(root, 'overlay-lag-a'), lagging);
+      await first.ready();
+      clock = '2026-09-16T12:00:00.000Z';
+      const created = await first.create({ name: 'Fresh deck', from: 'blank' });
+      hidden = created.deckId;
+      expect(await lagging.folders('decks/')).not.toContain(`decks/${created.deckId}/`);
+      // the instance that made the deck lists it from its mirror at once
+      expect((await first.list()).map((head) => head.id)).toContain(created.deckId);
+      // a deck deleted forever elsewhere leaves the listing once its manifest is gone, whatever
+      // mirror folder this instance still holds
+      await fake.del([`decks/${created.deckId}/deck.json`]);
+      expect((await first.list()).map((head) => head.id)).not.toContain(created.deckId);
+    });
+
+    it('answers a call the store never answers with a BlobTimeoutError inside the deadline and moves on (cycle 2, VERIFICATION F-stall)', async () => {
+      const fake = memoryBlobClient();
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      let hang = false;
+      const hanging: BlobClient = {
+        ...fake,
+        head: (pathname) => (hang ? new Promise(() => undefined) : fake.head(pathname)),
+      };
+      const store = openBlobStore({
+        client: hanging,
+        deckId: 'gt-brand',
+        dir: join(root, 'mirror-hang', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { readMs: 60 },
+      });
+      expect((await store.read()).document.deck.revision).toBe(412);
+      hang = true;
+      const started = Date.now();
+      await expect(store.read()).rejects.toBeInstanceOf(BlobTimeoutError);
+      expect(Date.now() - started).toBeLessThan(2000);
+      // the queue is free: the next call answers once the store does
+      hang = false;
+      expect((await store.read()).document.deck.revision).toBe(412);
+      // a client wrapped once is not wrapped again
+      const bounded = boundedBlobClient(fake);
+      expect(boundedBlobClient(bounded)).toBe(bounded);
     });
   });
 });

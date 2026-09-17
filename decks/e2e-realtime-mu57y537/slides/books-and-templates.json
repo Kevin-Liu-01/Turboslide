@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "books-and-templates",
+  "ext": {
+    "import": {
+      "css": ".ts-x-books-and-templates .pair img { display: block; background: var(--plate); }",
+      "scope": "s57b"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 32,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Books and templates"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Two of the fifteen tools produce finished documents from the identity alone. Both are shown here on the starter identity, and both follow the studio's own light and dark themes.",
+        "marginTop": 10
+      }
+    ],
+    "body": [
+      {
+        "id": "pair",
+        "type": "pair",
+        "gap": 40,
+        "captionSize": 15,
+        "figures": [
+          {
+            "assets": [
+              "detail-glyph-book-bar",
+              "detail-glyph-book"
+            ],
+            "caption": "The brand book tool generates a book of 51 pages in eight chapters from the active identity. The index lists the chapters, and the toolbar exports the book as a PDF."
+          },
+          {
+            "assets": [
+              "detail-glyph-slides-bar",
+              "detail-glyph-slides"
+            ],
+            "caption": "Slide templates build a 16:9 system from fourteen layouts on a direct-manipulation canvas. The library holds the layouts, and each renders as SVG through the API."
+          }
+        ]
+      }
+    ]
+  }
+}

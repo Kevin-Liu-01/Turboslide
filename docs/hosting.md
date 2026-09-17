@@ -146,10 +146,42 @@ to its cache max-age, one minute at least), then removes the local documents the
 has. Syncs closer than 750 ms apart share one result. Measured against the in-memory fake: an
 unchanged deck costs one `head` per read and no download.
 
+The focus round's second cycle (`docs/gslides-parity/focus/build/b7.md` Cycle 2, `b6.md` Cycle 2)
+added four rules to the reads. Every call of the Blob client meets a deadline (`boundedBlobClient`
+in `blob-store.ts`: `BLOB_READ_TIMEOUT_MS` 20 s, `BLOB_WRITE_TIMEOUT_MS` 90 s; a call past it
+settles as a `BlobTimeoutError` and the deck's serial queue on the instance moves on, since one
+`head`, `get` or `put` that never answered held every request of that deck on the instance; the
+SDK call itself is not cancelled). `list()` enumerates the folder listing joined with the mirrors
+this instance holds, so a deck made or opened here lists while the folder listing lags, and a
+mirror whose manifest is gone leaves the listing. A `version.restore` record travels on the blob
+channel as an external checkpoint at its revision and never as an op, so every tab reloads at that
+revision instead of failing to apply a mutation only the store can replay. `readEditorDeck` (the
+editor's and the show's loaders, a tab's reload, an access refresh) reads the head on the blob tier
+past the sync window and lands at or above the revision a write's answer named
+(`apps/studio/src/server/room.ts` `liveAtLeast`); every other read keeps the window. The access
+record, the link hash index and the per identity deck index are read proven
+(`access-store.ts` `provenGet`: `head()` first, a body accepted when its md5 is the head's version,
+else the url read again with a cache busting query, else the last body under its own version so a
+write on it is refused as stale), a missing record is never cached on this tier, a link grant is
+written on the visitor's deck index so every instance sees it, and the comments sidecar is read by
+its index rows and never by the prefix listing.
+
 ### Writes
 
 A write pulls first, then applies through `FileStore.write` on the mirror (the same `applyWrite`,
-lease check and version record as on disk), then pushes in this order:
+lease check and version record as on disk), then pushes in this order. The focus round
+(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed
+the order that follows: the version record travels in the second round, before the commit, as a
+claim on its number (`overwrite` refused; a number another instance holds is `RecordTakenError`
+and the write runs once more from the store's current document; a claim older than 60 s is a
+stopped writer's and is taken over), so a record is never invisible to the other instances until
+the next commit; the fourth round is the removed bodies alone; every push of `deck.json` (the
+seed, `create`, `copy`, `trash`, `restore`) stores its snapshot first; `pull()` fetches the bodies
+the manifest names and proves each against its own head, and a lagging body leaves the document
+unproven (`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the
+mirror when its manifest row names the head's etag, else the origin body when its md5 is the etag,
+else the snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within
+its own refresh. The steps as they were, for the record of round two:
 
 1. `snapshots/<md5>.json`, the whole document as canonical JSON under the md5 of the `deck.json`
    bytes about to be pushed, with overwrite refused (the subsection below; gslides-parity SPEC-2

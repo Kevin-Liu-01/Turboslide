@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "opener-prototemplate",
+  "kind": "opener",
+  "sectionId": "prototemplate-and-glyphfield",
+  "picture": {
+    "asset": "opener-prototemplate",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-left",
+    "maxWidth": 740,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "big",
+        "text": "Prototemplate and Glyphfield"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "This section covers prototemplate.com, the design lab and knowledge base, and glyphfield.com, the tooling behind it.",
+        "measure": 56,
+        "marginTop": 14
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Material: liquid metal, Paper Shaders, rendered in Glyphfield"
+      }
+    ]
+  }
+}

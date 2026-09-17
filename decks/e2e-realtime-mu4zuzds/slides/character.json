@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "character",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Brand personality"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The brand is both creative and technically rigorous. It delivers on time, exceeds the specification, and stays aware of what customers value.",
+        "measure": 56
+      },
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "These readings come from the shipped system and will be confirmed or adjusted in the identity project.",
+        "role": "cap",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "scales",
+        "type": "scales",
+        "centerTick": true,
+        "items": [
+          {
+            "left": "Classic",
+            "right": "*Modern*",
+            "value": 78
+          },
+          {
+            "left": "*Reserved*",
+            "right": "Playful",
+            "value": 22
+          },
+          {
+            "left": "*Minimal*",
+            "right": "Expressive",
+            "value": 18
+          },
+          {
+            "left": "*Rational*",
+            "right": "Quirky",
+            "value": 14
+          },
+          {
+            "left": "Understated",
+            "right": "*Confident*",
+            "value": 70
+          },
+          {
+            "left": "*Serious*",
+            "right": "Witty",
+            "value": 30
+          },
+          {
+            "left": "*Light*",
+            "right": "Dark",
+            "value": 35
+          },
+          {
+            "left": "*Geometric*",
+            "right": "Organic",
+            "value": 15
+          }
+        ]
+      }
+    ]
+  }
+}

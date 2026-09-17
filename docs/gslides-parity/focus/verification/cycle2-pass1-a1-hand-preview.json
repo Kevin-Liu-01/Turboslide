@@ -1,0 +1,178 @@
+{
+  "base": "https://turboslide-fqpj83rq5-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-17T03:33:25.697Z",
+  "finishedAt": "2026-09-17T03:34:20.998Z",
+  "deckId": "untitled-20260917-4675",
+  "cleanup": "/edit/untitled-20260917-4675 answers 404",
+  "passed": 18,
+  "failed": 0,
+  "notDriven": 0,
+  "facts": [
+    {
+      "n": 1,
+      "rule": "A1.5+1",
+      "name": "placeholder one click selects no caret",
+      "ok": true,
+      "observed": "prompt before \"Click to add title\"; move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; block heading",
+      "ms": 689,
+      "shot": "01-placeholder-one-click-selects-no-caret.png"
+    },
+    {
+      "n": 2,
+      "rule": "A1.4",
+      "name": "typing on selected title replaces (first write)",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; session after typing true; run \"Quarterly review: Q3, 2026!\"; stored true; url /edit/untitled-20260917-4675",
+      "ms": 3641,
+      "shot": "02-typing-on-selected-title-replaces-first-write-.png"
+    },
+    {
+      "n": 3,
+      "rule": "A1.4",
+      "name": "typing on selected title replaces the existing text",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; \"Quarterly review: Q3, 2026!\" -> \"Renewal review for Acme\" (session true); stored true; restored \"Quarterly review: Q3, 2026!\"",
+      "ms": 6041,
+      "shot": "03-typing-on-selected-title-replaces-the-existing-text.png"
+    },
+    {
+      "n": 4,
+      "rule": "A1.4",
+      "name": "Enter on selected title appends",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; session true; caret inside true offset 27 of 27 at end true; \"Quarterly review: Q3, 2026!\" -> \"Quarterly review: Q3, 2026! now\"; restored \"Quarterly review: Q3, 2026!\"",
+      "ms": 3066,
+      "shot": "04-Enter-on-selected-title-appends.png"
+    },
+    {
+      "n": 5,
+      "rule": "A1.3",
+      "name": "double click on selected title enters at the word",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; session true; caret offset 14 inside \"review:\" [10, 17] true; selection \"\"",
+      "ms": 1669,
+      "shot": "05-double-click-on-selected-title-enters-at-the-word.png"
+    },
+    {
+      "n": 6,
+      "rule": "A1.3",
+      "name": "double click inside the session selects the word",
+      "ok": true,
+      "observed": "session true; selection \"Quarterly\" for the word \"Quarterly\"",
+      "ms": 731,
+      "shot": "06-double-click-inside-the-session-selects-the-word.png"
+    },
+    {
+      "n": 7,
+      "rule": "A1.4",
+      "name": "Escape twice",
+      "ok": true,
+      "observed": "after one Escape move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; after two: handles 0, ring false, chip null, session false",
+      "ms": 657,
+      "shot": "07-Escape-twice.png"
+    },
+    {
+      "n": 8,
+      "rule": "A1.6",
+      "name": "right click on the title outside a session",
+      "ok": true,
+      "observed": "menu true; 12 rows: edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.centerOnPage, arrange.align",
+      "ms": 1917,
+      "shot": "08-right-click-on-the-title-outside-a-session.png"
+    },
+    {
+      "n": 9,
+      "rule": "A1.6",
+      "name": "right click inside the session",
+      "ok": true,
+      "observed": "session true; menu true; 12 rows: edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.centerOnPage, arrange.align",
+      "ms": 2016,
+      "shot": "09-right-click-inside-the-session.png"
+    },
+    {
+      "n": 10,
+      "rule": "setup",
+      "name": "a blank slide through the window API",
+      "ok": true,
+      "observed": "slide blank-1",
+      "ms": 29,
+      "shot": "10-a-blank-slide-through-the-window-API.png"
+    },
+    {
+      "n": 11,
+      "rule": "setup",
+      "name": "text box 1 inserted",
+      "ok": true,
+      "observed": "text at 200,200 440x130",
+      "ms": 27,
+      "shot": "11-text-box-1-inserted.png"
+    },
+    {
+      "n": 12,
+      "rule": "setup",
+      "name": "text box 2 inserted",
+      "ok": true,
+      "observed": "text-2 at 800,200 440x130",
+      "ms": 27,
+      "shot": "12-text-box-2-inserted.png"
+    },
+    {
+      "n": 13,
+      "rule": "setup",
+      "name": "text box 3 inserted",
+      "ok": true,
+      "observed": "text-3 at 200,600 440x130",
+      "ms": 22,
+      "shot": "13-text-box-3-inserted.png"
+    },
+    {
+      "n": 14,
+      "rule": "A1.1+2",
+      "name": "one click on a text box then a drag from inside its text",
+      "ok": true,
+      "observed": "after the click move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; drag 200,200 440x130 -> 324,265 440x130 (dx 124, dy 65); during: session false, text selection \"\"; after: move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; text same true",
+      "ms": 3787,
+      "shot": "14-one-click-on-a-text-box-then-a-drag-from-inside-its-text.png"
+    },
+    {
+      "n": 15,
+      "rule": "A1.1+2",
+      "name": "Shift click at a second box centre adds it; a drag from inside moves both",
+      "ok": true,
+      "observed": "Shift click centre: chip \"2 objects\"; a moved {\"x\":100,\"y\":80}, b {\"x\":100,\"y\":80}, c {\"x\":0,\"y\":0}; during: session false; chip after \"2 objects\"",
+      "ms": 4121,
+      "shot": "15-Shift-click-at-a-second-box-centre-adds-it-a-drag-from-inside-moves-both.png"
+    },
+    {
+      "n": 16,
+      "rule": "A1.1",
+      "name": "a click on a member of a two object selection keeps the selection",
+      "ok": true,
+      "observed": "chip before \"2 objects\", after the click \"2 objects\"; session false",
+      "ms": 2159,
+      "shot": "16-a-click-on-a-member-of-a-two-object-selection-keeps-the-selection.png"
+    },
+    {
+      "n": 17,
+      "rule": "A1.3+4",
+      "name": "double click on a text box enters; Escape twice",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; double click: session true, caret inside true offset 7; Escape: move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; Escape: handles 0, session false",
+      "ms": 2399,
+      "shot": "17-double-click-on-a-text-box-enters-Escape-twice.png"
+    },
+    {
+      "n": 18,
+      "rule": "A1.3",
+      "name": "double click on a picture opens crop",
+      "ok": true,
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Image\"; session false; caret false; crop mode after the double click true",
+      "ms": 4035,
+      "shot": "18-double-click-on-a-picture-opens-crop.png"
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

@@ -21,7 +21,14 @@ const ROOT = join(import.meta.dirname, '..', '..', '..');
    builders' servers run shadow mode by default, where a stranger is admitted as the legacy editor
    and the denial is logged (VERIFICATION-3 section 4: "shadow admits the stranger by design"), so
    those rows read the mode the server was started with, as security.spec.ts does */
-const ENFORCE = process.env.TURBOSLIDE_AUTHORIZE === 'enforce';
+/* since the focus round the mode is read from the deployment itself, `GET /api/access/<id>`
+   answers `authorize: 'shadow' | 'enforce'` (b6.md: roles.spec.ts and security.spec.ts read it the
+   same way), so a run against a preview records the preview's mode and never the runner's */
+async function authorizeMode(page: Page, deckId: string): Promise<'shadow' | 'enforce'> {
+  const response = await page.request.get(`/api/access/${deckId}`);
+  const body = (await response.json().catch(() => ({}))) as { authorize?: string };
+  return body.authorize === 'enforce' ? 'enforce' : 'shadow';
+}
 const SOURCE = 'gt-brand';
 const COPY = `e2e-share-${Date.now().toString(36)}`;
 const FOOTER = 'Speaker notes and skipped slides never travel with a view or comment link';
@@ -151,6 +158,10 @@ test('a stranger receives the You need access page on four routes and 403 on the
   await openDeck(pageO, `/edit/${COPY}`);
   const stranger = await browser.newContext();
   const pageS = await stranger.newPage();
+  /* the stranger's first request carries a cookie: a cookieless first request on a
+     TURBOSLIDE_LOCAL_OPEN dev server is admitted as the checkout holder (b6.md R11) */
+  await pageS.goto('/decks');
+  const ENFORCE = (await authorizeMode(pageO, COPY)) === 'enforce';
   if (ENFORCE) {
     for (const path of [`/edit/${COPY}`, `/deck/${COPY}`, `/present/${COPY}`, `/print/${COPY}`]) {
       const response = await pageS.goto(path);
@@ -326,7 +337,47 @@ test('request access shows the dot on Share, the banner and Approve as commenter
   await openDeck(pageO, `/edit/${COPY}`);
   const stranger = await browser.newContext();
   const pageS = await stranger.newPage();
-  await pageS.goto(`/deck/${COPY}`);
+  await pageS.goto('/decks');
+  /* the request access form stands on the You need access page, an enforce mode surface: in
+     shadow mode the stranger is admitted as a viewer and the form is not there (b6.md R11) */
+  const mode = await authorizeMode(pageO, COPY);
+  if (mode === 'enforce') {
+    await pageS.goto(`/deck/${COPY}`);
+    await requestAccessRows(pageS, pageO);
+  } else {
+    const response = await pageS.goto(`/deck/${COPY}`);
+    expect(response?.status(), 'shadow mode admits the stranger as a viewer').toBe(200);
+    await expect(pageS.locator('[data-control="access.request"]')).toHaveCount(0);
+  }
+  await stranger.close();
+
+  /* the legacy deck: a synthesized record, the claim sentence in the dialog */
+  await openDeck(pageO, `/edit/${SOURCE}`);
+  const legacy = await state<Access & { claimable?: boolean; generalAccess: { mode: string } }>(
+    pageO,
+    'access',
+  );
+  expect(legacy?.generalAccess.mode).toBe('open');
+  await pageO.locator('[data-control="share.open"]').click();
+  await expect(pageO.locator('[data-control="dialog.share.legacy"]')).toContainText(
+    'Anyone with the address can view (legacy)',
+  );
+  /* the claim block ("This presentation has no owner yet") is a signed in principal's (SPEC-3 6.1
+     and its actions table: `share.claim` is "a signed in principal claims an unowned deck"; the
+     view's `claimable` reads `owner === null && identity.kind === 'account'` in EditorRoot.tsx and
+     the controller, and share-dialog.test.tsx pins both the rule and the block's sentence). The
+     owner context here is the anonymous cookie that made the copy, so the dialog shows the legacy
+     row and no claim block. The earlier assertion of the sentence was never reached in a chain run
+     (build-4 integrator.md step 26: share.spec.ts:320 failed before it, at the request access
+     form) and could not hold for an anonymous principal; the focus round's fixer moved it to the
+     rule */
+  expect(legacy?.claimable ?? false).toBe(false);
+  await expect(pageO.locator('[data-control="dialog.share.claim"]')).toHaveCount(0);
+  await owner.close();
+});
+
+/** The request access rows of the fourth test, in enforce mode: the dot, the review, Approve as commenter. */
+async function requestAccessRows(pageS: Page, pageO: Page): Promise<void> {
   await pageS.locator('[data-control="access.role"]').selectOption('commenter');
   await pageS.locator('[data-control="access.email"]').fill('reviewer@example.test');
   await pageS.locator('[data-control="access.request"]').click();
@@ -348,21 +399,4 @@ test('request access shows the dot on Share, the banner and Approve as commenter
   await expect(dialog.locator('[data-control^="dialog.share.grant."]')).toHaveCount(1);
   await expect(dialog.locator('[data-control^="dialog.share.grant."]')).toContainText('Pending');
   await dialog.locator('[data-control="dialog.share.done"]').click();
-  await stranger.close();
-
-  /* the legacy deck: a synthesized record, the claim sentence in the dialog */
-  await openDeck(pageO, `/edit/${SOURCE}`);
-  const legacy = await state<Access & { claimable?: boolean; generalAccess: { mode: string } }>(
-    pageO,
-    'access',
-  );
-  expect(legacy?.generalAccess.mode).toBe('open');
-  await pageO.locator('[data-control="share.open"]').click();
-  await expect(pageO.locator('[data-control="dialog.share.legacy"]')).toContainText(
-    'Anyone with the address can view (legacy)',
-  );
-  await expect(pageO.locator('[data-control="dialog.share.claim"]')).toContainText(
-    'This presentation has no owner yet',
-  );
-  await owner.close();
-});
+}

@@ -1,0 +1,38 @@
+{
+  "n": 4,
+  "revision": 4,
+  "author": {
+    "kind": "human",
+    "name": "Boron 321",
+    "principalId": "anon_b632a2ec-844f-4aef-be12-f3bb1ef00e87"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T02:06:45.977Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 492,
+      "remove": 0,
+      "insert": " drag"
+    }
+  ],
+  "baseRevision": 3,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 492,
+      "remove": 5,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 16,
+    "toSeq": 16
+  }
+}

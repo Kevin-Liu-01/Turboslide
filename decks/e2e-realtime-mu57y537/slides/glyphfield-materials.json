@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "glyphfield-materials",
+  "ext": {
+    "import": {
+      "css": ".ts-x-glyphfield-materials .mats img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--plate); }\n.ts-x-glyphfield-materials .mats figcaption { line-height: 1.4; min-height: 45px; color: var(--ink-2); }\n.ts-x-glyphfield-materials .pair figure { gap: 6px; }",
+      "scope": "s77x"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": {
+      "right": 568
+    },
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "134 live materials"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The shader library is one quality-sorted catalog shared by the Design Lab and the animation tool. Brand colors seed every material; a new composition opens on gem smoke, the material behind the blog covers and the reel. The six tiles are live renders from the library.",
+        "measure": 56
+      },
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 150,
+        "tight": true,
+        "items": [
+          {
+            "key": "Paper Shaders",
+            "value": "112 presets in 29 families, gem smoke, liquid metal, god rays and smoke ring among them."
+          },
+          {
+            "key": "Studies",
+            "value": "Nine Shaders.com studies, six original design studies and four house renderers."
+          },
+          {
+            "key": "Single engines",
+            "value": "One each from ShaderGradient, the WebGL fluid simulation and the holo cloth material."
+          },
+          {
+            "key": "Categories",
+            "value": "Fluid 28, light 22, metal 16, gradient 33 and graphic 35; 15 palettes and 9 look presets."
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "pair",
+        "ext": {
+          "import": {
+            "style": "gap:10px 24px",
+            "classes": [
+              "mats"
+            ]
+          }
+        },
+        "type": "pair",
+        "captionSize": 16,
+        "figures": [
+          {
+            "assets": [
+              "glyph-material-gem-smoke"
+            ],
+            "caption": "Gem smoke is a Paper Shaders material in the brand blue."
+          },
+          {
+            "assets": [
+              "glyph-material-liquid-metal"
+            ],
+            "caption": "Liquid metal is a Paper Shaders material."
+          },
+          {
+            "assets": [
+              "glyph-material-god-rays"
+            ],
+            "caption": "God rays is a Paper Shaders material."
+          },
+          {
+            "assets": [
+              "glyph-material-smoke-ring"
+            ],
+            "caption": "Smoke ring is a Paper Shaders material."
+          },
+          {
+            "assets": [
+              "glyph-material-chroma-flow"
+            ],
+            "caption": "Chroma flow is a Shaders.com study."
+          },
+          {
+            "assets": [
+              "glyph-material-grain-gradient"
+            ],
+            "caption": "Grain gradient is a house renderer."
+          }
+        ]
+      }
+    ]
+  }
+}

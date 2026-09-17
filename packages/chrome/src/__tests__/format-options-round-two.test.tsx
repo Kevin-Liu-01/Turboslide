@@ -270,9 +270,11 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(lineSpacingOption(1.33)).toBe('custom');
   });
 
-  it('the Line section writes line.set and offers Detach for an attached end; the Shape section changes the shape', () => {
+  it('the Line section writes line.set and offers Detach for an attached end; the Shape section changes the shape behind Tools > Advanced tools', () => {
     dispatch.mockClear();
-    panel('ln');
+    /* the Shape section is parked (docs/FOCUS.md 3.2 Format: Change shape), so the panel draws it
+       with the switch on; the Line section is core and draws either way */
+    panel('ln', { advancedTools: true });
     expect(screen.getByRole('button', { name: 'Line' })).toBeTruthy();
     fireEvent.change(control('formatOptions.line.end'), { target: { value: 'fillCircle' } });
     expect(dispatch).toHaveBeenLastCalledWith('line.set', {
@@ -291,7 +293,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(document.querySelector('[data-section="shape"]')).toBeNull();
     cleanup();
     dispatch.mockClear();
-    panel('s');
+    panel('s', { advancedTools: true });
     expect(document.querySelector('[data-section="line"]')).toBeNull();
     fireEvent.click(control('formatOptions.shape.change'));
     fireEvent.click(control('formatOptions.shape.change.pick.hexagon'));
@@ -304,9 +306,10 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     });
   });
 
-  it('Drop shadow enables with the defaults, Adjustments write block.adjust, Alt text writes block.setAlt on every block', () => {
+  it('Drop shadow enables with the defaults, Adjustments write block.adjust, Alt text writes block.setAlt on every block, behind Tools > Advanced tools', () => {
     dispatch.mockClear();
-    panel('s');
+    /* Drop shadow and Alt text are parked sections (docs/FOCUS.md 3.2 Format), drawn with the switch on */
+    panel('s', { advancedTools: true });
     fireEvent.click(control('formatOptions.shadow.enable'));
     expect(dispatch).toHaveBeenLastCalledWith('block.shadow', {
       slideId: 'cv',
@@ -338,8 +341,20 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(control('formatOptions.picture.reset').getAttribute('aria-disabled')).toBe('true');
   });
 
+  it('draws no parked section with the switch off: Drop shadow, Shape, Alt text, Dither, Table and Chart data leave (docs/FOCUS.md 3.2)', () => {
+    panel('s');
+    const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
+      el.getAttribute('data-section'),
+    );
+    for (const parked of ['shadow', 'shape', 'altText', 'dither', 'table', 'chart'])
+      expect(sections, parked).not.toContain(parked);
+    expect(sections).toContain('size');
+    expect(sections).toContain('position');
+    expect(document.querySelector('[data-control="formatOptions.shadow.enable"]')).toBeNull();
+  });
+
   it('opens at the section a menu row names and puts the sections in Google’s order', () => {
-    panel('s', { openSection: 'shadow' });
+    panel('s', { openSection: 'shadow', advancedTools: true });
     const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
       el.getAttribute('data-section'),
     );

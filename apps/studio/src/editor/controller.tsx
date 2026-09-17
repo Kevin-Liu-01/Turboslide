@@ -3,6 +3,7 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { createEditHistory } from '@turboslide/agent/window/history';
 import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history';
+import { awaitAcknowledged } from './ack-wait';
 import { resyncBroughtUnseen } from './resync-history';
 import { typingKeyOf } from './typing-key';
 import { windowActionIds } from '@turboslide/agent/window/registry';
@@ -188,8 +189,12 @@ import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
-import { SERVER_SIDE_WINDOW_ACTIONS_GS3, runDeckAction } from '../server/agent-actions';
-import type { ServerSideWindowAction } from '../server/agent-actions';
+import {
+  SERVER_SIDE_WINDOW_ACTIONS_GS3,
+  runDeckAction,
+  runDeckActionDetailed,
+} from '../server/agent-actions';
+import type { RunDeckActionAnswer, ServerSideWindowAction } from '../server/agent-actions';
 import { createNewDeck } from '../server/decks';
 import {
   EXPORT_POLL_MS,
@@ -206,6 +211,7 @@ import { lintSlides } from '../server/lint';
 import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
 import {
+  DECK_CREATED_EVENT,
   autoTitleMutations,
   leaseSlide,
   listVersions,
@@ -213,7 +219,7 @@ import {
   saveVersion,
   writeDeck,
 } from '../server/write';
-import type { EditorDeck, EditorIdentity } from '../server/write';
+import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
 import { partitionRoster, readClientIds, rememberClientId } from './client-ids';
 
 /**
@@ -329,11 +335,26 @@ function sseTransport(deckId: string): RoomTransport {
       return { close: () => source.close() };
     },
     async postOps(body: OpsPost): Promise<OpsResponse> {
-      const response = await fetch(`${base}/ops`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(body),
-      });
+      // a deadline on the write (the focus round, cycle 2): a POST that never answers (an
+      // instance whose deck queue is held, VERIFICATION F-stall; a dev server that reloaded its
+      // program under the request) left the room client's `posting` unsettled, so `flush()`
+      // and every `idle()` caller after it (a version.restore, a named version, an asset
+      // action) waited for good with no sentence anywhere (VERIFICATION F-versions, "restore
+      // changed the deck false"). A timed out POST throws, the client marks itself offline and
+      // resends with its op ids, which the room deduplicates against the stream's tail
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), OPS_POST_TIMEOUT_MS);
+      let response: Response;
+      try {
+        response = await fetch(`${base}/ops`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
       const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       if (response.ok && json.ok === true) return json as unknown as OpsResponse;
       const retry = response.headers.get('retry-after');
@@ -382,8 +403,13 @@ class StaleBaseError extends ConflictError {
 
 /** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
 const EXTERNAL_BANNER_MS = 8000;
-/** How long a write's answer waits for the acknowledgement that moves the revision above its base (the ops POST's latency: about 100 ms on the memory tier, up to a second on blob). */
-const ACK_WAIT_MS = 5000;
+/**
+ * How long one ops POST may take before the room client treats it as failed and resends (the
+ * focus round, cycle 2; the transport's `postOps` says what a POST that never answered did).
+ * Above the room's own admission time under load (the memory tier's checkpoint at its 10 s hard
+ * limit, the blob tier's one second write spacing per deck) and under the browser's own limits.
+ */
+const OPS_POST_TIMEOUT_MS = 30_000;
 
 export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
 
@@ -722,6 +748,8 @@ export type EditorController = {
   setExportSync: (enabled: boolean, batchSize?: number) => void;
   /** what the shell shows, from ShellBridge */
   setView: (view: EditorView) => void;
+  /** the editor shell's stored settings (Tools > Advanced tools among them), for describe().state.settings (docs/FOCUS.md 3.1) */
+  setShellSettings: (settings: Readonly<Record<string, boolean | string>>) => void;
   /** the shell's toast */
   say: (message: string) => void;
   /** the validator behind every applySource: the slide, or a RangeError (unknown slide) or TypeError */
@@ -896,6 +924,8 @@ export function createEditorController(init: {
   const listeners = new Set<() => void>();
   let alive = false;
   let shell: ShellState | null = null;
+  /* the editor shell's stored settings, for describe().state.settings (docs/FOCUS.md 3.1) */
+  let shellSettings: Readonly<Record<string, boolean | string>> = {};
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
   let room: RoomClient | null = null;
   let draftChain: Promise<unknown> = Promise.resolve();
@@ -1465,7 +1495,15 @@ export function createEditorController(init: {
         });
       },
       onResync: async (revision) => {
-        const payload = await readEditorDeck({ deckId });
+        // the reload lands at or above the revision the room named (the focus round, cycle 2):
+        // on the blob tier the instance that answers may hold a mirror behind the write this
+        // tab just learned of (its own restore, another tab's write announced as an external
+        // checkpoint), and a document from before it left the tab on the old slides while its
+        // revision moved (VERIFICATION F-versions); write.ts syncs the store by force when behind
+        const payload = await readEditorDeck({
+          deckId,
+          ...(revision > 0 ? { atLeast: revision } : {}),
+        });
         if (payload === null) return null;
         const fresh = payload.document.deck.revision;
         // a reload that lands at or below the revision this tab acknowledged brought nothing the
@@ -1481,9 +1519,10 @@ export function createEditorController(init: {
         publish({
           versions: payload.versions,
           leases: payload.leases,
-          serverRevision: fresh,
+          // never behind what this tab acknowledged: the answer of its own write (a restore)
+          // stands when a reload lands below it
+          serverRevision: Math.max(fresh, latest().serverRevision),
         });
-        void revision;
         return payload.document;
       },
       onPersisted: (offer) => {
@@ -1620,18 +1659,16 @@ export function createEditorController(init: {
    * acknowledged revision (`serverRevision` through `onStatus`), so an answer read at the settle
    * carried the revision before its own write and the next write based on it was refused as
    * stale (VERIFICATION-4 finding 1, the three step 21 rows; the round four fixer round). The
-   * answer waits for the acknowledgement above the base the write was made on, capped: a write
-   * the room admitted moved the document past its base, so the floor after the cap is the base
-   * plus one.
+   * answer waits for the acknowledgement above the base the write was made on, capped at
+   * ACK_WAIT_MS (ack-wait.ts: past the memory tier's checkpoint hard limit), and at the cap it
+   * is the revision the page reports, never the floor `base + 1` the round four fixer answered:
+   * `checkBase` compares the next write's base against `reportedRevision()`, so a floor the page
+   * had not reached refused the very base this answer handed out ("baseRevision 9 is stale; the
+   * document is at revision 8", VERIFICATION F22, the two chains of gslides-actions.spec.ts on
+   * a loaded dev server whose checkpoint took longer than the old 5 s cap).
    */
-  const acknowledgedAbove = async (base: number): Promise<number> => {
-    const until = Date.now() + ACK_WAIT_MS;
-    while (latest().serverRevision <= base) {
-      if (Date.now() > until) return Math.max(latest().serverRevision, base + 1);
-      await sleep(20);
-    }
-    return latest().serverRevision;
-  };
+  const acknowledgedAbove = (base: number): Promise<number> =>
+    awaitAcknowledged(reportedRevision, base);
 
   const rejectDraftQueue = (error: Error): void => {
     const queued = draftQueue.splice(0);
@@ -1710,6 +1747,11 @@ export function createEditorController(init: {
           answer.seq ?? answer.revision,
           init.payload.room?.tier ?? 'memory',
         );
+        // the first write created the deck and its access record (restricted, the creator as the
+        // owner; docs/FOCUS.md rank 1, ruling 2): the /new page keeps its draft payload, so the
+        // record and the role are read once here and every reader of `snap.access` sees them
+        // without a reload (b6.md R1)
+        void refreshAccess().catch(() => undefined);
       }
       draftInFlight = false;
       replayDraftQueue();
@@ -1909,7 +1951,9 @@ export function createEditorController(init: {
     const { baseRevision: _base, inverse: _inverse, ...version } = result.entry;
     publish({ serverRevision: result.revision, versions: [...snapshot.versions, version] });
     if (result.document) {
-      if (room !== null) await room.resync();
+      // the room reloads at the revision the write made, so the document it hands every view
+      // is the restored one whichever instance answers the reload (onResync, write.ts atLeast)
+      if (room !== null) await room.resync(result.revision);
       else setDocument(result.document, 'all');
     }
     return { revision: result.revision, entry: result.entry };
@@ -2172,13 +2216,111 @@ export function createEditorController(init: {
     }
     return true;
   };
+  /**
+   * A server side action created the deck (docs/FOCUS.md rank 6: a picture as the first action
+   * on a /new draft): the server's document is the room's base, exactly as after the draft's
+   * first `writeDeck` (draftCommit), the page learns the deck exists (DECK_CREATED_EVENT moves
+   * the address to /edit/<id> and changes the save words) and the edits typed during the upload
+   * follow through the room.
+   */
+  const adoptCreatedDeck = async (known?: EditorDeck): Promise<void> => {
+    let payload: EditorDeck | null;
+    try {
+      payload = known ?? (await readEditorDeck({ deckId }));
+    } catch (error) {
+      draftInFlight = false;
+      rejectDraftQueue(error instanceof Error ? error : new TypeError(String(error)));
+      throw error;
+    }
+    draftInFlight = false;
+    if (payload === null) {
+      const failure = new TypeError('The deck was created but could not be read back');
+      rejectDraftQueue(failure);
+      throw failure;
+    }
+    publish({
+      serverRevision: Math.max(latest().serverRevision, payload.document.deck.revision),
+      versions: payload.versions,
+      leases: payload.leases,
+      error: null,
+    });
+    warmHomeCard();
+    if (room === null) {
+      setDocument(payload.document, 'all');
+      attachRoom(
+        payload.document,
+        payload.room?.seq ?? payload.document.deck.revision,
+        payload.room?.tier ?? init.payload.room?.tier ?? 'memory',
+      );
+      // the record the server side create wrote, read once (b6.md R1, as after draftCommit)
+      void refreshAccess().catch(() => undefined);
+    }
+    if (typeof window !== 'undefined') {
+      const detail: DeckCreatedDetail = { deckId, revision: payload.document.deck.revision };
+      window.dispatchEvent(new CustomEvent(DECK_CREATED_EVENT, { detail }));
+    }
+    replayDraftQueue();
+    refreshVersionsSoon();
+  };
+
   /* asset.add, asset.dither, material.capture and material.list run on the server (sharp, the
      capture browser, the catalog); the write they end in comes back over the watch channel, and
      the handler waits for that revision before it answers */
   const serverSide = (id: ServerSideWindowAction, options: { announce?: boolean } = {}): void => {
     on<unknown>(id, async (input) => {
       const before = latest().document.deck.revision;
-      const output = await runDeckAction({ deckId, action: id, input, author });
+      const writesDeck = options.announce === true;
+      let request = input;
+      if (writesDeck) {
+        // the write behind an asset action bases on the revision the room acknowledged, once
+        // the pending writes have landed (docs/FOCUS.md rank 5): the page's own count runs one
+        // ahead of the store while a write is in flight and one behind while another tab's
+        // write is, and the store refused either as stale (audit-images rows 6 to 8, 57, 61).
+        // asset.add commits its record against the store's head whatever base the tab sends
+        // (packages/materials/src/actions.ts commitAssetsAtHead), so it waits for the draft
+        // chain alone and not for the room's pending writes: a second picture no longer waits
+        // for the first insert's acknowledgement (b3.md R21; images.insert.upload-while-pending
+        // sat on its 5 s budget on the blob tier). asset.dither and material.capture change a
+        // record and keep the wait.
+        if (id === 'asset.add') await draftChain.catch(() => undefined);
+        else await idle();
+        if (typeof input === 'object' && input !== null && 'baseRevision' in input) {
+          request = { ...(input as Record<string, unknown>), baseRevision: reportedRevision() };
+        }
+      }
+      // a draft's first action: the bursts typed during the upload queue for the room (hotfix 2
+      // cause A1), which attaches on the answer
+      const draft = writesDeck && room === null && init.payload.draft === true;
+      if (draft) draftInFlight = true;
+      let answer: RunDeckActionAnswer;
+      try {
+        answer = await runDeckActionDetailed({ deckId, action: id, input: request, author });
+      } catch (error) {
+        if (draft) {
+          // the action may have created the deck before it failed (a picture sharp refused):
+          // the deck is adopted the same way, so the address moves and the room attaches, and
+          // the bursts typed meanwhile follow; otherwise they return to their author
+          const stored = await readEditorDeck({ deckId }).catch(() => null);
+          if (stored !== null) await adoptCreatedDeck(stored).catch(() => undefined);
+          else {
+            draftInFlight = false;
+            rejectDraftQueue(error instanceof Error ? error : new TypeError(String(error)));
+          }
+        }
+        // a refusal is shown, never swallowed (rank 5: "the seller sees nothing")
+        if (writesDeck) {
+          const message = `${id}: ${errorMessage(error)}`;
+          publish({ error: message });
+          say(message);
+        }
+        throw error;
+      }
+      if (answer.created) await adoptCreatedDeck();
+      else if (draft) {
+        draftInFlight = false;
+        replayDraftQueue();
+      }
+      const output = answer.output;
       const outputs = Array.isArray(output) ? output : [output];
       const ids = outputs
         .map((entry) => (entry as { id?: string } | null)?.id)
@@ -2194,6 +2336,18 @@ export function createEditorController(init: {
           (typeof revision === 'number' && latest().document.deck.revision >= revision) ||
           (ids.length > 0 &&
             ids.every((asset) => latest().document.deck.assets[asset] !== undefined));
+        // on the blob tier the write comes back through the channel's one second head poll and
+        // a resync (packages/realtime/src/blob.ts); the answer says the write committed, so the
+        // tab reloads at once instead of waiting for the poll (b3.md R21). The memory tier's
+        // follower streams the write within milliseconds, and a resync there would clear the
+        // undo history (onResync), so it keeps the wait alone
+        if (
+          !landed() &&
+          room !== null &&
+          (latest().sync?.tier ?? init.payload.room?.tier) === 'blob'
+        ) {
+          await room.resync().catch(() => undefined);
+        }
         const until = Date.now() + 15_000;
         while (!landed() && Date.now() < until) await sleep(40);
         if (ids.length > 0) say(`${id}: ${ids.join(', ')}`);
@@ -2993,6 +3147,9 @@ export function createEditorController(init: {
       mode: shell?.mode ?? 'slide',
       theme: readTheme(),
       zoom: snapshot.zoom,
+      // the focus round (docs/FOCUS.md 3.1): the shell's stored settings as the rows read them,
+      // Tools > Advanced tools among them (`advancedTools`), so a driver reads the switch here
+      settings: { ...shellSettings },
       author: authorLabel(author),
       // round three (SPEC-3 3.10): the room's facts beside the document's
       sync: {
@@ -3245,6 +3402,9 @@ export function createEditorController(init: {
     setView(view) {
       if (view.mode === snapshot.view.mode && view.present === snapshot.view.present) return;
       publish({ view });
+    },
+    setShellSettings(settings) {
+      shellSettings = settings;
     },
     say,
     assertSource,

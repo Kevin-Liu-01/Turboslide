@@ -1,0 +1,250 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "reload-role",
+  "startedAt": "2026-09-16T11:07:33.500Z",
+  "steps": [
+    {
+      "name": "after first write",
+      "revision": 1,
+      "access": {
+        "role": null,
+        "via": null,
+        "capabilities": [],
+        "mode": "open"
+      },
+      "sync": {
+        "seq": 0,
+        "revision": 1,
+        "pending": 0,
+        "retained": 0,
+        "tier": "memory",
+        "transport": "poll",
+        "connected": false
+      },
+      "cookies": [
+        {
+          "name": "ts-recent",
+          "secure": false,
+          "sameSite": "Lax",
+          "expires": 1821092857.56887,
+          "httpOnly": false
+        },
+        {
+          "name": "__vdpl",
+          "secure": true,
+          "sameSite": "Lax",
+          "expires": -1,
+          "httpOnly": true
+        },
+        {
+          "name": "__Host-ts_id",
+          "secure": true,
+          "sameSite": "Lax",
+          "expires": 1824116853.788711,
+          "httpOnly": true
+        }
+      ],
+      "at": "2026-09-16T11:07:37.578Z"
+    },
+    {
+      "name": "after the text box",
+      "revision": 3,
+      "serverRevision": 3,
+      "pending": 0,
+      "objects": [
+        {
+          "id": "mark",
+          "text": ""
+        },
+        {
+          "id": "heading",
+          "text": "Reload role repro"
+        },
+        {
+          "id": "lead",
+          "text": "Click to add text"
+        },
+        {
+          "id": "text",
+          "text": "Kickoff plan for the reload repro"
+        }
+      ],
+      "at": "2026-09-16T11:07:41.370Z"
+    },
+    {
+      "name": "after reload",
+      "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/edit/untitled-20260916-v3e7",
+      "revision": 3,
+      "access": {
+        "deckId": "untitled-20260916-v3e7",
+        "revision": 0,
+        "owner": "anon_81bba56e-d39e-47fc-a8bf-40799bfd7ad3",
+        "pendingOwner": null,
+        "generalAccess": {
+          "mode": "restricted",
+          "role": "viewer"
+        },
+        "links": [],
+        "publish": null,
+        "grants": [],
+        "requests": [],
+        "settings": {
+          "editorsCanShare": true,
+          "viewersCanDownload": true,
+          "viewersCanSeeComments": false,
+          "showNamesToLinkVisitors": false,
+          "allowHtmlBlocks": false
+        },
+        "claimable": false,
+        "role": "owner",
+        "via": "owner",
+        "capabilities": [
+          "read",
+          "presence",
+          "readSkipped",
+          "comment",
+          "readComments",
+          "readNotes",
+          "write",
+          "history",
+          "export",
+          "exportNotes",
+          "rename",
+          "copy",
+          "trash",
+          "restore",
+          "publish",
+          "follow",
+          "share",
+          "settings",
+          "remove",
+          "transfer"
+        ],
+        "mode": "restricted"
+      },
+      "sync": {
+        "seq": 3,
+        "revision": 3,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "poll",
+        "connected": false
+      },
+      "objects2": [
+        {
+          "id": "mark",
+          "text": ""
+        },
+        {
+          "id": "heading",
+          "text": "Reload role repro"
+        },
+        {
+          "id": "lead",
+          "text": "Click to add text"
+        },
+        {
+          "id": "text",
+          "text": "Kickoff plan for the reload repro"
+        }
+      ],
+      "sameSlideJson": true,
+      "textPersisted": true,
+      "chrome": {
+        "viewOnly": false,
+        "viewOnlyText": null,
+        "menubar": [
+          "menubar.file",
+          "menubar.edit",
+          "menubar.view",
+          "menubar.insert",
+          "menubar.format",
+          "menubar.slide",
+          "menubar.arrange",
+          "menubar.tools",
+          "menubar.help"
+        ],
+        "toolbarCount": 19,
+        "body": "Reload role repro\nAll changes saved\nB\nSlideshow\nShare\nFile\nEdit\nView\nInsert\nFormat\nSlide\nArrange\nTools\nHelp\nT\nBackground\nLayout\n1\nReload role repro\n\nKickoff plan for the reload repro\n\n01 / 01\nReload role repro\n\nClick to add text\n\nKickoff plan for the reload repro\n\n1 unsaved change from this browser\n"
+      },
+      "at": "2026-09-16T11:07:42.501Z"
+    },
+    {
+      "name": "click after reload",
+      "selected": "text",
+      "handles": 0,
+      "at": "2026-09-16T11:07:42.938Z"
+    },
+    {
+      "name": "image menu after reload",
+      "rows": [],
+      "at": "2026-09-16T11:08:13.442Z"
+    },
+    {
+      "name": "after second reload",
+      "access": {
+        "deckId": "untitled-20260916-v3e7",
+        "revision": 0,
+        "owner": "anon_81bba56e-d39e-47fc-a8bf-40799bfd7ad3",
+        "pendingOwner": null,
+        "generalAccess": {
+          "mode": "restricted",
+          "role": "viewer"
+        },
+        "links": [],
+        "publish": null,
+        "grants": [],
+        "requests": [],
+        "settings": {
+          "editorsCanShare": true,
+          "viewersCanDownload": true,
+          "viewersCanSeeComments": false,
+          "showNamesToLinkVisitors": false,
+          "allowHtmlBlocks": false
+        },
+        "claimable": false,
+        "role": "owner",
+        "via": "owner",
+        "capabilities": [
+          "read",
+          "presence",
+          "readSkipped",
+          "comment",
+          "readComments",
+          "readNotes",
+          "write",
+          "history",
+          "export",
+          "exportNotes",
+          "rename",
+          "copy",
+          "trash",
+          "restore",
+          "publish",
+          "follow",
+          "share",
+          "settings",
+          "remove",
+          "transfer"
+        ],
+        "mode": "restricted"
+      },
+      "revision": 3,
+      "at": "2026-09-16T11:08:14.907Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-v3e7",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:08:21.980Z"
+}

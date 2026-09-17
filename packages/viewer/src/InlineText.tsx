@@ -35,7 +35,17 @@ import {
 } from '@turboslide/schema/text';
 import type { Run, RunMarks, Text as Markup } from '@turboslide/schema/text';
 
-import { colorFromCss, colorRange, marksOf, toggleMark, wordRangeAt } from './marks';
+import {
+  colorFromCss,
+  colorRange,
+  linkExtentAt,
+  linkOfRange,
+  linkRange,
+  marksOf,
+  normalizeLinkInput,
+  toggleMark,
+  wordRangeAt,
+} from './marks';
 import type { ToggleMark } from './marks';
 import { blockById, cellPointer, listItemPointer } from './Selection';
 
@@ -421,6 +431,178 @@ export function keepsCaretOnRepeatClick(input: {
   insideEditable: boolean;
 }): boolean {
   return !input.ended && input.detail >= 2 && !input.insideEditable;
+}
+
+/** What a press on the stage does to a session that holds the focus, by where the press lands. */
+export type SessionPressVerdict = 'caret' | 'keep' | 'end' | 'end-and-select';
+
+/**
+ * The verdict for a press on the stage while a session holds the focus (pure; the Editor's pointer
+ * handlers read the target). Inside the run the press is the browser's and places the caret. On
+ * the edited block outside its run (its padding) the session stays: the blur the press causes
+ * lands on an element the run sits in and the focus comes back (onBlur's park-and-refocus). On
+ * another object the session ends first and the press runs as that object's selection press, so
+ * a plain click selects it and a Shift or Cmd click adds it to the edited block, as in Google
+ * Slides (focus verification finding F5: the stage root is focusable and holds the run, so the
+ * park rule alone kept the session alive on every press on the sheet). Anywhere else on the
+ * stage the session ends and the edited block stays selected, as the blur ended it before the
+ * park rule (2b12e31).
+ */
+export function sessionPressVerdict(input: {
+  insideRun: boolean;
+  under: string | null;
+  blockId: string;
+}): SessionPressVerdict {
+  if (input.insideRun) return 'caret';
+  if (input.under === input.blockId) return 'keep';
+  return input.under === null ? 'end' : 'end-and-select';
+}
+
+/**
+ * What a click on an object does when no session holds its run (AMENDMENTS.md A1, the click model
+ * of the canvas): `select` selects it and arms the move (rules 1 and 2), `text` opens the text
+ * session with the caret at the click (rule 3), `word` leaves a double click inside an open
+ * session to the browser's word selection (rule 3), `crop` opens crop on a picture, `member`
+ * selects a group's member, `none` does nothing more than the click already did.
+ */
+export type ClickEntry = 'select' | 'text' | 'word' | 'crop' | 'member' | 'none';
+
+/** What the Editor's pointer and double click handlers read about the object under the click. */
+export type ClickEntryInput = {
+  /** 1 for a click, 2 for the double click event */
+  clicks: 1 | 2;
+  /** a session is open on this object */
+  editing: boolean;
+  /** the object's kind, as the Editor tells a picture and a line from the rest */
+  kind: 'picture' | 'line' | 'text' | 'shape' | 'other';
+  /** the object belongs to a group that has not been entered */
+  groupMember: boolean;
+  /** the object renders a text run a session can open */
+  hasRun: boolean;
+};
+
+/**
+ * The click model of the canvas for every object kind, text boxes and the title, subtitle and body
+ * placeholders included (docs/gslides-parity/focus/AMENDMENTS.md A1, binding above FOCUS.md 2.3
+ * and gslides-parity SPEC 10.2's single click caret; Kevin: "when you click and drag in the
+ * selection area, it should drag, and double clicking is what goes inside"). One click selects
+ * and never opens a session or places a caret, whatever the object holds, so the press that
+ * follows it drags the object from anywhere inside its area (rule 2, the move gesture's). The
+ * double click is the entry: inside an open session it is the browser's word selection; on a
+ * group's member it selects the member; on a picture it opens crop; on a text object or a shape
+ * with text it opens the session with the caret at the double click; a line and an object without
+ * a run take nothing. The verifier's F5-standing and F4 saw the single click session from both
+ * sides: a Shift click at a second box's centre moved the session instead of adding the box, and
+ * a caret was the common state of every right click.
+ */
+export function clickEntry(input: ClickEntryInput): ClickEntry {
+  if (input.clicks === 1) return 'select';
+  if (input.editing) return 'word';
+  if (input.groupMember) return 'member';
+  if (input.kind === 'picture') return 'crop';
+  if (input.kind === 'line') return 'none';
+  return input.hasRun ? 'text' : 'none';
+}
+
+/** How a session is entered (A1 rules 3 and 4): the double click, a printable key, Enter. */
+export type SessionEntry = 'double-click' | 'typing' | 'enter';
+
+/**
+ * Where the caret lands for each entry (A1 rules 3 and 4): the double click's point, so the caret
+ * sits where the seller pointed; everything selected for a printable key, so the first character
+ * replaces the text as in Google Slides; the end for Enter. A double click with no point (the
+ * padding of the box, a synthetic entry) lands at the end.
+ */
+export function entryCaret(
+  entry: SessionEntry,
+  point: { x: number; y: number } | null,
+): CaretPlacement {
+  if (entry === 'typing') return 'all';
+  if (entry === 'double-click' && point !== null) return point;
+  return 'end';
+}
+
+/** The right click target inside a session, by what the caret holds. */
+export type SessionContextTarget = 'textSelection' | 'tableCell' | 'object';
+
+/**
+ * A right click inside the run being edited (focus verification finding F4): selected text keeps
+ * the session and opens the Text menu; a collapsed caret ends the session and opens the edited
+ * object's own menu on the block (a table cell's run the Table menu on its cell), so Cut, Copy,
+ * Paste and the object rows show as Google Slides shows them on a caret and every row runs as it
+ * does from the frame edge. The session ends because its rows are block writes: block.duplicate
+ * and its kin run through the store action and come back over the watch channel, which the
+ * editor adopts only once no session is open, so a row picked over a parked session landed at
+ * the next Escape (measured on 4362). Nothing falls through to the browser's menu.
+ */
+export function sessionContextTarget(input: {
+  selected: boolean;
+  cell: boolean;
+}): SessionContextTarget {
+  if (input.selected) return 'textSelection';
+  return input.cell ? 'tableCell' : 'object';
+}
+
+/**
+ * The chrome surfaces a focus move into keeps the session alive on (docs/FOCUS.md section 5 rank
+ * 10): the toolbar and its tails, an anchored plate (the swatches, the align list), the layout
+ * plate and the right click menu. A button in one of them takes the focus on its mousedown before
+ * its click runs; today that blur ended the session, the Editor dropped the caret facts, and the
+ * shell's `text.style` fell back to the whole text ("[Renewal terms apply]{i}", audit-text row
+ * 28). Parked, the session keeps its range and the Italic marks the word. A field anywhere (the
+ * font size box, a dialog's input) still ends the session, and so does the menu bar: the menus'
+ * rows read the focus as the caret's while a session is parked, and Insert > Text box (a
+ * `block.insert` plan) refused itself under that focus (measured on the dev server), where the
+ * blur had ended the session before the row ran; the Format menu rows therefore keep acting on the
+ * selected box, which is what the matrix drives them with.
+ */
+export const CHROME_TRANSIENT_SELECTOR =
+  '[role="toolbar"], .ts-tb-tail, .ts-plate-anchored, .ts-layout-plate, .ts-context-menu';
+
+/** What a blur does to the session: end it, park it, or park it and take the focus back on the next tick. */
+export type BlurVerdict = 'end' | 'park' | 'park-and-refocus';
+
+/**
+ * The verdict for a focus move (pure; `blurVerdictOf` reads the DOM): a field ends the session
+ * wherever it sits; a button of the toolbar or a plate parks it and the run takes the focus back
+ * once the button's click has run, so the next keystroke lands in the text as it does in Google
+ * Slides; any other element of a transient surface (a menu row, the menu container) parks it and
+ * leaves the focus there for the keyboard's menu walk; everything else ends it.
+ */
+export function blurVerdict(input: {
+  field: boolean;
+  transient: boolean;
+  button: boolean;
+}): BlurVerdict {
+  if (input.field || !input.transient) return 'end';
+  return input.button ? 'park-and-refocus' : 'park';
+}
+
+/** True for an element the browser's own editing keys belong to (the chrome's fields). */
+function isFieldElement(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const name = target.tagName;
+  return name === 'INPUT' || name === 'TEXTAREA' || name === 'SELECT' || target.isContentEditable;
+}
+
+/** True for an element inside one of the transient chrome surfaces. */
+function isTransientTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(CHROME_TRANSIENT_SELECTOR) !== null;
+}
+
+/** The menus among the transient surfaces: their rows keep the focus for the keyboard's walk, so a row that is a button parks without the refocus. */
+const MENU_SELECTOR = '[role="menu"], [role="menubar"], .ts-context-menu, .ts-menu-root';
+
+/** The verdict for the element a blur handed the focus to. */
+export function blurVerdictOf(to: EventTarget | null): BlurVerdict {
+  if (!(to instanceof Element)) return 'end';
+  return blurVerdict({
+    field: isFieldElement(to),
+    transient: isTransientTarget(to),
+    button:
+      (to.tagName === 'BUTTON' || to.getAttribute('role') === 'button') &&
+      to.closest(MENU_SELECTOR) === null,
+  });
 }
 
 /* the markup a session absorbed from a collaborator since its last burst, per run; the next burst
@@ -1014,6 +1196,8 @@ export type InlineTextHandle = {
   insertText: (text: string) => void;
   /** the plain range of the selection */
   range: () => [number, number] | null;
+  /** ends the session with a reason, before the browser moves the focus (the Editor's pointer handlers) */
+  end: (reason: InlineTextEndReason) => void;
 };
 
 /** The link popover sits this many CSS pixels above the run; below it when the run is at the sheet's top. */
@@ -1059,6 +1243,15 @@ export function InlineText({
   const linkField = useRef<HTMLInputElement>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkValue, setLinkValue] = useState('');
+  const linkOpenRef = useRef(false);
+  linkOpenRef.current = linkOpen;
+  /* the plain range the link popover writes on: captured before the field takes the focus and
+     the browser's selection with it (docs/FOCUS.md rank 2) */
+  const linkTarget = useRef<[number, number] | null>(null);
+  /* parked: the focus sits on a transient chrome control (a toolbar button, a swatch, a menu row)
+     and the session waits with its range (blurVerdict) */
+  const parked = useRef(false);
+  const parkedRange = useRef<[number, number] | null>(null);
   /* the latest callbacks, so the listeners bound once see them */
   const callbacks = useRef({
     onBurst,
@@ -1098,7 +1291,14 @@ export function InlineText({
     if (done.current) return;
     const range = selectionOffsets(element, options.current.multiline);
     if (range === null) return;
-    callbacks.current.onCaret?.({ range, marks: marksOf(readText(), range) });
+    /* selectionOffsets counts the untrimmed DOM, marksOf reads the trimmed canonical text
+       (readText). A Cmd+A over a run with trailing white space returns a range past that text,
+       and marksOf then threw "The range 0:30 is outside a text of 27 characters" (VERIFICATION.md
+       C2-F22). Clamp the range to the text as applyMark already does before it reads marks. */
+    const text = readText();
+    const length = plainLength(text);
+    const clamped: [number, number] = [Math.min(range[0], length), Math.min(range[1], length)];
+    callbacks.current.onCaret?.({ range: clamped, marks: marksOf(text, clamped) });
   };
 
   /**
@@ -1136,11 +1336,30 @@ export function InlineText({
     callbacks.current.onBurst?.(text);
   };
 
+  /** The selection's plain range, or the range the session parked with when the focus sits on a chrome control. */
+  const currentRange = (): [number, number] | null =>
+    selectionOffsets(element, options.current.multiline) ??
+    (parked.current ? parkedRange.current : null);
+
+  /**
+   * The focus comes back to the run after a parked session's control ran (a toolbar button, a
+   * swatch, a menu row that changed this text): the next keystroke lands in the text, as in
+   * Google Slides. A field that holds the focus keeps it.
+   */
+  const resumeFocus = (range: [number, number] | null) => {
+    if (done.current) return;
+    if (isFieldElement(document.activeElement) && document.activeElement !== element) return;
+    parked.current = false;
+    parkedRange.current = null;
+    if (document.activeElement !== element) element.focus({ preventScroll: true });
+    if (range !== null) restoreSelection(element, options.current.multiline, range);
+  };
+
   /** One mark toggled over the selection, or the word at the caret (SPEC-2 6.2 "Text marks"). */
   const applyMark = (mark: ToggleMark) => {
     if (done.current) return;
     const text = readText();
-    const selected = selectionOffsets(element, options.current.multiline);
+    const selected = currentRange();
     if (selected === null) return;
     const range: [number, number] =
       selected[0] === selected[1]
@@ -1154,7 +1373,7 @@ export function InlineText({
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
       m.contentEditable = 'false';
     });
-    restoreSelection(element, options.current.multiline, keep);
+    resumeFocus(keep);
     callbacks.current.onInput?.();
     reportCaret();
     scheduleBurst();
@@ -1163,7 +1382,7 @@ export function InlineText({
   const applyColor = (which: 'color' | 'highlight', color: Color | null) => {
     if (done.current) return;
     const text = readText();
-    const selected = selectionOffsets(element, options.current.multiline);
+    const selected = currentRange();
     if (selected === null) return;
     const range: [number, number] =
       selected[0] === selected[1] ? wordRangeAt(plainOf(text), selected[0]) : selected;
@@ -1174,7 +1393,7 @@ export function InlineText({
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
       m.contentEditable = 'false';
     });
-    restoreSelection(element, options.current.multiline, selected);
+    resumeFocus(selected);
     callbacks.current.onInput?.();
     reportCaret();
     scheduleBurst();
@@ -1203,17 +1422,22 @@ export function InlineText({
     if (done.current) return;
     if (remote === lastBurst.current) return;
     const dom = readText();
-    const selection = selectionOffsets(element, options.current.multiline);
+    const wasParked = parked.current;
+    const selection = currentRange();
     const next = absorbedText(lastBurst.current, dom, remote, selection);
     element.innerHTML = editableHtml(next.text, options.current.multiline);
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
       mark.contentEditable = 'false';
     });
-    if (next.selection !== null && document.activeElement === element) {
+    /* a parked session whose text a chrome control changed (the toolbar's Italic, a swatch, a
+       Format menu row) takes the focus back with its range: the control's work is done */
+    if (wasParked) resumeFocus(next.selection);
+    else if (next.selection !== null && document.activeElement === element) {
       restoreSelection(element, options.current.multiline, next.selection);
     }
     lastBurst.current = remote;
     callbacks.current.onInput?.();
+    reportCaret();
     if (next.text !== remote) scheduleBurst();
   };
 
@@ -1244,9 +1468,29 @@ export function InlineText({
     callbacks.current.onEnd(text, reason);
   };
 
+  /**
+   * The link popover (Cmd K, the toolbar's Insert link, Insert > Link): the range it writes on is
+   * read now, before the field takes the focus and the browser's selection with it (audit-text
+   * row 43 saw the address land as text at the collapsed caret). A selection is the range; a caret
+   * inside a link takes that link's whole extent; a caret elsewhere takes the word around it, as
+   * Google's Insert link does. The field shows the range's link when it has one.
+   */
   const openLink = () => {
-    const link = linkAtCaret(element);
-    setLinkValue(link?.getAttribute('href') ?? '');
+    if (done.current) return;
+    const text = readText();
+    const selected = currentRange();
+    let range: [number, number] | null = null;
+    if (selected !== null) {
+      range =
+        selected[0] === selected[1]
+          ? (linkExtentAt(text, selected[0]) ?? wordRangeAt(plainOf(text), selected[0]))
+          : [selected[0], Math.min(selected[1], plainLength(text))];
+      if (range[0] >= range[1]) range = null;
+    }
+    linkTarget.current = range;
+    const existing =
+      range === null ? linkAtCaret(element)?.getAttribute('href') : linkOfRange(text, range);
+    setLinkValue(existing ?? '');
     setLinkOpen(true);
     window.setTimeout(() => linkField.current?.focus(), 0);
   };
@@ -1416,11 +1660,52 @@ export function InlineText({
       setColor: applyColor,
       insertText: insertAtCaret,
       range: () => selectionOffsets(element, options.current.multiline),
+      end: finish,
     });
     reportCaret();
     const onBlur = (e: FocusEvent) => {
       const to = e.relatedTarget;
       if (to instanceof Node && popover.current?.contains(to)) return;
+      /* the focus moved to an element the run sits inside (a closing menu returning it to the
+         block, a press on the block's own padding): it comes back to the text on the next tick */
+      const verdict =
+        to instanceof Node && to.contains(element) ? 'park-and-refocus' : blurVerdictOf(to);
+      if (verdict === 'end') {
+        finish('blur');
+        return;
+      }
+      /* parked (blurVerdict): the range waits for the control's click; a button gives the focus
+         back on the next tick, once its click has read the range, unless something else took it
+         (a plate that opened and focused its first swatch, a dialog) */
+      parked.current = true;
+      parkedRange.current = selectionOffsets(element, options.current.multiline);
+      if (verdict === 'park-and-refocus') {
+        window.setTimeout(() => {
+          if (done.current || !parked.current) return;
+          if (document.activeElement !== to) return;
+          resumeFocus(parkedRange.current);
+        }, 0);
+      }
+    };
+    const onFocus = () => {
+      /* the focus came back by itself (a click in the run, the shell returning it): unparked */
+      parked.current = false;
+      parkedRange.current = null;
+    };
+    /* while parked, the focus settling anywhere but the run, the popover or a transient chrome
+       surface ends the session (a dialog's field, the notes pane, a filmstrip card) */
+    const onDocFocusIn = (e: FocusEvent) => {
+      if (!parked.current || done.current) return;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (element.contains(target) || popover.current?.contains(target)) return;
+      if (isTransientTarget(target) && !isFieldElement(target)) return;
+      /* a closing menu returns the focus to the block it opened on (ContextMenu returnFocusTo);
+         the run is inside it, so the session takes the focus back rather than ending */
+      if (target.contains(element)) {
+        resumeFocus(parkedRange.current);
+        return;
+      }
       finish('blur');
     };
     // The second click of a double click that opened this session keeps the caret (SPEC 6.4:
@@ -1435,7 +1720,27 @@ export function InlineText({
       const insideEditable = e.target instanceof Node && element.contains(e.target);
       if (keepsCaretOnRepeatClick({ ended: done.current, detail: e.detail, insideEditable })) {
         e.preventDefault();
+        return;
       }
+      /* a parked session ends on a press anywhere but the run, the popover or a transient chrome
+         surface, the way the blur ended it before the park (the run is not focused, so no blur
+         will come); the Editor's own pointer handler reads the session as open for this press
+         and yields, as it does for the blur */
+      if (parked.current && !done.current && !insideEditable) {
+        const inPopover =
+          e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
+        if (!inPopover && !isTransientTarget(e.target)) finish('blur');
+      }
+    };
+    /* the same end on the pointer event, which the browser fires before the mouse event: the
+       Editor's pointer handlers read the session in that earlier event, and a tool armed from a
+       menu while the run was parked (Insert > Text box) must find the stage free on the press
+       that places the box */
+    const onDocPointerDown = (e: PointerEvent) => {
+      if (!parked.current || done.current) return;
+      if (e.target instanceof Node && element.contains(e.target)) return;
+      const inPopover = e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
+      if (!inPopover && !isTransientTarget(e.target)) finish('blur');
     };
     const onPaste = (e: ClipboardEvent) => {
       // pasted text lands as plain text; a line break is a paragraph break on a multiline
@@ -1450,15 +1755,21 @@ export function InlineText({
     element.addEventListener('keydown', onKey);
     element.addEventListener('input', onInputEvent);
     element.addEventListener('blur', onBlur);
+    element.addEventListener('focus', onFocus);
     element.addEventListener('paste', onPaste);
     document.addEventListener('mousedown', onDocMouseDown, true);
+    document.addEventListener('pointerdown', onDocPointerDown, true);
+    document.addEventListener('focusin', onDocFocusIn);
     window.addEventListener(TEXT_CHANGED_EVENT, onTextChanged);
     listeners.current = () => {
       element.removeEventListener('keydown', onKey);
       element.removeEventListener('input', onInputEvent);
       element.removeEventListener('blur', onBlur);
+      element.removeEventListener('focus', onFocus);
       element.removeEventListener('paste', onPaste);
       document.removeEventListener('mousedown', onDocMouseDown, true);
+      document.removeEventListener('pointerdown', onDocPointerDown, true);
+      document.removeEventListener('focusin', onDocFocusIn);
       window.removeEventListener(TEXT_CHANGED_EVENT, onTextChanged);
       document.removeEventListener('selectionchange', onSelectionChange);
       callbacks.current.onHandle?.(null);
@@ -1467,23 +1778,36 @@ export function InlineText({
     // one element is one session; finish and openLink read refs and state setters only
   }, [element]);
 
+  /**
+   * The popover's write (docs/FOCUS.md rank 2): the link goes on the run model over the range
+   * `openLink` captured (a link mark through `linkRange`), the editable is rewritten from the
+   * canonical runs with that range selected again, and the next burst carries it as one
+   * `text.replace` of the markup span. An empty field removes the range's link. Never
+   * execCommand('createLink'), which wrote the address as text at the collapsed caret.
+   */
   const applyLink = () => {
+    if (!linkOpenRef.current) return;
     setLinkOpen(false);
-    element.focus();
-    const url = linkValue.trim();
-    const existing = linkAtCaret(element);
-    if (url === '') {
-      if (existing) {
-        const parent = existing.parentNode;
-        while (existing.firstChild) parent?.insertBefore(existing.firstChild, existing);
-        existing.remove();
+    if (done.current) return;
+    const url = normalizeLinkInput(linkValue);
+    const range = linkTarget.current;
+    linkTarget.current = null;
+    if (range !== null) {
+      const text = readText();
+      const next = canonicalText(linkRange(text, range, url));
+      if (next !== text) {
+        element.innerHTML = editableHtml(next, options.current.multiline);
+        element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
+          m.contentEditable = 'false';
+        });
       }
-    } else if (existing) {
-      existing.setAttribute('href', url);
-    } else {
-      document.execCommand('createLink', false, url);
     }
+    parked.current = false;
+    parkedRange.current = null;
+    element.focus({ preventScroll: true });
+    if (range !== null) restoreSelection(element, options.current.multiline, range);
     callbacks.current.onInput?.();
+    reportCaret();
     scheduleBurst();
   };
 
@@ -1494,8 +1818,13 @@ export function InlineText({
     } else if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();
+      const range = linkTarget.current;
+      linkTarget.current = null;
       setLinkOpen(false);
-      element.focus();
+      parked.current = false;
+      parkedRange.current = null;
+      element.focus({ preventScroll: true });
+      if (range !== null) restoreSelection(element, options.current.multiline, range);
     }
   };
 

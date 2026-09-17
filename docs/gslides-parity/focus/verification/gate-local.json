@@ -1,0 +1,4255 @@
+{
+  "base": "http://localhost:4368",
+  "startedAt": "2026-09-16T12:49:37.698Z",
+  "ms": 3270949,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 1401166,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver/gate-local/core-walk.json",
+    "deckId": "untitled-20260916-vg3p",
+    "steps": 303
+  },
+  "specs": {
+    "exit": 1,
+    "ms": 1869779,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ver/gate-local/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "rows": 390,
+  "passed": 254,
+  "failed": 119,
+  "notDriven": 17,
+  "manual": ["text.clipboard.paste-without-formatting"],
+  "noStep": [],
+  "commit": "2b12e31",
+  "origin": "http://localhost:4368",
+  "date": "2026-09-16",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.editor.move-to-trash": "passed",
+    "slides.new.toolbar": "passed",
+    "slides.new.arrow-layout": "passed",
+    "slides.new.menu": "passed",
+    "slides.new.ctrl-m-card": "passed",
+    "slides.new.ctrl-m-canvas": "passed",
+    "slides.new.context": "passed",
+    "slides.new.undo": "passed",
+    "slides.duplicate.context": "failed",
+    "slides.duplicate.menu": "passed",
+    "slides.duplicate.cmd-d": "passed",
+    "slides.duplicate.undo-toolbar": "passed",
+    "slides.duplicate.undo-redo-keys": "passed",
+    "slides.duplicate.two-selected-cmd-d": "passed",
+    "slides.duplicate.two-selected-menu": "failed",
+    "slides.delete.key": "passed",
+    "slides.delete.undo-snackbar": "passed",
+    "slides.delete.context": "passed",
+    "slides.delete.undo-cmd-z": "passed",
+    "slides.delete.menu-undo-redo": "passed",
+    "slides.delete.two-selected-key-undo": "passed",
+    "slides.delete.two-selected-menu": "passed",
+    "slides.delete.two-selected-edit-menu": "passed",
+    "slides.delete.canvas-focus-undo": "passed",
+    "slides.delete.undo-redo-saved": "passed",
+    "slides.select.click": "passed",
+    "slides.select.arrows-shift": "passed",
+    "slides.select.shift-cmd-click": "passed",
+    "slides.select.cmd-click-toggle": "passed",
+    "slides.reorder.drag-above": "passed",
+    "slides.reorder.drag-below": "passed",
+    "slides.reorder.cmd-up-down": "passed",
+    "slides.reorder.menu-to-end-undo": "passed",
+    "slides.reorder.undo-drag": "passed",
+    "slides.reorder.two-selected-drag": "passed",
+    "slides.skip.context": "passed",
+    "slides.skip.context-two": "passed",
+    "slides.skip.menu-unskip": "passed",
+    "slides.skip.menu-two": "passed",
+    "slides.layout.picker-open-escape": "passed",
+    "slides.layout.apply.title": "passed",
+    "slides.layout.apply.opener": "passed",
+    "slides.layout.apply.split": "passed",
+    "slides.layout.apply.cols": "passed",
+    "slides.layout.apply.title-only": "passed",
+    "slides.layout.apply.one-column": "passed",
+    "slides.layout.apply.statement": "passed",
+    "slides.layout.apply.section-description": "passed",
+    "slides.layout.apply.mood": "passed",
+    "slides.layout.apply.big-number": "passed",
+    "slides.layout.apply.blank": "passed",
+    "slides.layout.apply.rows": "passed",
+    "slides.layout.apply.plain": "passed",
+    "slides.layout.apply.table": "passed",
+    "slides.layout.apply.figure": "passed",
+    "slides.layout.apply.pair": "passed",
+    "slides.layout.apply.tiles": "passed",
+    "slides.layout.apply.details": "passed",
+    "slides.layout.apply.board": "passed",
+    "slides.layout.apply.matrix": "passed",
+    "slides.layout.apply.closing": "passed",
+    "slides.layout.reopen-ring": "passed",
+    "slides.layout.context-apply": "passed",
+    "slides.layout.menu-apply-undo": "passed",
+    "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+    "slides.layout.typed-title-round-trip": "passed",
+    "slides.layout.snackbar-counts-typed-only": "passed",
+    "slides.layout.undo-typed": "passed",
+    "slides.notes.type": "passed",
+    "slides.notes.per-slide": "passed",
+    "slides.notes.resize-handle": "passed",
+    "slides.notes.reload": "passed",
+    "slides.counter.footer-and-cards": "passed",
+    "slides.hash.click-and-reload": "passed",
+    "slides.reorder.menu-up-down-beginning": "passed",
+    "slides.reorder.cmd-shift-up-down": "passed",
+    "slides.notes.view-menu-toggle": "passed",
+    "slides.context.empty-canvas": "passed",
+    "text.title.single-click": "passed",
+    "text.title.double-click": "failed",
+    "text.title.type-escape": "failed",
+    "text.caret.click-mid-word": "failed",
+    "text.caret.home-end": "failed",
+    "text.caret.shift-arrow-replace": "failed",
+    "text.caret.shift-home-end": "failed",
+    "text.caret.backspace-word": "failed",
+    "text.caret.option-backspace": "failed",
+    "text.caret.delete": "failed",
+    "text.caret.cmd-a": "failed",
+    "text.title.enter-commits": "failed",
+    "text.subtitle.double-click-type": "failed",
+    "text.subtitle.enter-new-line": "failed",
+    "text.subtitle.shift-enter": "failed",
+    "text.subtitle.arrows-backspace-join": "failed",
+    "text.subtitle.escape-commits": "failed",
+    "text.textbox.insert-click-type": "passed",
+    "text.textbox.insert-drag": "passed",
+    "text.textbox.burst-reliability": "passed",
+    "text.toolbar.swaps-on-select": "passed",
+    "text.fontsize.type-enter": "passed",
+    "text.fontsize.plus-minus": "passed",
+    "text.bold.toolbar": "passed",
+    "text.bold.cmd-b-word": "passed",
+    "text.italic.toolbar-word": "passed",
+    "text.italic.cmd-i-word": "passed",
+    "text.underline.cmd-u-word": "passed",
+    "text.underline.toolbar": "passed",
+    "text.strikethrough.cmd-shift-x": "passed",
+    "text.strikethrough.menu": "passed",
+    "text.color.swatch-on-word": "passed",
+    "text.align.toolbar-and-key": "passed",
+    "text.spacing.toolbar": "passed",
+    "text.list.bulleted-toolbar": "passed",
+    "text.list.numbered-toolbar": "passed",
+    "text.list.bulleted-menu-preset": "passed",
+    "text.indent.toolbar": "passed",
+    "text.indent.keys": "passed",
+    "text.link.cmd-k-enter": "passed",
+    "text.clear-formatting": "passed",
+    "text.format-menu.rows-enabled": "passed",
+    "text.format-menu.size-increase": "failed",
+    "text.format-menu.align-left": "passed",
+    "text.format-menu.spacing-double": "failed",
+    "text.format-menu.text-fitting": "failed",
+    "text.autofit.title-wraps": "passed",
+    "text.autofit.textbox-grow": "failed",
+    "text.clipboard.within-box": "passed",
+    "text.clipboard.between-boxes": "passed",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "passed",
+    "text.find-replace.shortcut": "passed",
+    "text.persistence.reload": "failed",
+    "text.list.numbered-menu-preset": "passed",
+    "text.list.chords": "passed",
+    "text.link.toolbar-button": "passed",
+    "text.format-options.panel": "passed",
+    "text.layout-runs.type": "failed",
+    "text.context.text-block": "passed",
+    "text.context.text-selection": "passed",
+    "text.format-menu.size-decrease": "failed",
+    "text.format-menu.spacing-single-1-15": "failed",
+    "text.format-menu.align-indent-rows": "failed",
+    "text.textbox.toolbar-button": "passed",
+    "images.insert.toolbar-sources": "failed",
+    "images.select.chip-handles-tail": "passed",
+    "images.delete.key": "passed",
+    "images.move.drag-frame": "passed",
+    "images.guides.edge-snap": "passed",
+    "images.guides.centre-y": "passed",
+    "images.guides.centre-x": "passed",
+    "images.nudge.arrows": "passed",
+    "images.resize.eight-handles": "passed",
+    "images.resize.eight-handles-shift": "passed",
+    "images.resize.edge-fill": "passed",
+    "images.resize.alt-centre": "passed",
+    "images.rotate.ring": "passed",
+    "images.crop.double-click": "passed",
+    "images.crop.east-edge": "passed",
+    "images.crop.south-edge": "passed",
+    "images.crop.enter": "passed",
+    "images.crop.undo": "passed",
+    "images.crop.redo": "passed",
+    "images.crop.menu-escape": "failed",
+    "images.crop.toolbar-escape-cancels": "passed",
+    "images.options.panel": "failed",
+    "images.options.transparency": "failed",
+    "images.options.reset": "failed",
+    "images.reset-image.menu": "failed",
+    "images.background.colour": "failed",
+    "images.background.toolbar": "failed",
+    "images.background.reset": "failed",
+    "images.present.picture-and-ground": "failed",
+    "images.context.image": "failed",
+    "images.options.menu-row": "failed",
+    "images.background.hex-field": "failed",
+    "arrange.select.click": "failed",
+    "arrange.select.shift-add": "failed",
+    "arrange.select.shift-remove": "failed",
+    "arrange.select.marquee": "passed",
+    "arrange.select.marquee-partial": "passed",
+    "arrange.select.click-away": "passed",
+    "arrange.select.cmd-a": "passed",
+    "arrange.select.escape": "passed",
+    "arrange.order.bring-to-front": "failed",
+    "arrange.order.send-to-back": "failed",
+    "arrange.order.bring-forward": "failed",
+    "arrange.order.send-backward": "failed",
+    "arrange.order.keys": "failed",
+    "arrange.align.left": "failed",
+    "arrange.align.center": "failed",
+    "arrange.align.right": "failed",
+    "arrange.align.top": "failed",
+    "arrange.align.middle": "failed",
+    "arrange.align.bottom": "failed",
+    "arrange.align.single-to-slide": "failed",
+    "arrange.center.horizontal": "failed",
+    "arrange.center.vertical": "failed",
+    "arrange.undo.toolbar-on-arrange": "passed",
+    "arrange.undo.menu-on-arrange": "passed",
+    "arrange.clipboard.copy-paste": "passed",
+    "arrange.clipboard.delete": "passed",
+    "arrange.clipboard.undo-redo-delete": "passed",
+    "arrange.clipboard.cut-paste-undo": "passed",
+    "arrange.clipboard.menu-copy-paste": "failed",
+    "arrange.clipboard.paste-after-new-slide-button": "failed",
+    "arrange.clipboard.paste-with-filmstrip-focus": "failed",
+    "arrange.clipboard.paste-keeps-position": "failed",
+    "arrange.duplicate.cmd-d": "passed",
+    "arrange.duplicate.menu-selects-copy": "passed",
+    "arrange.duplicate.nothing-selected": "passed",
+    "arrange.redo.after-undone-duplicate": "passed",
+    "arrange.keys.backspace-empty-selection": "passed",
+    "arrange.nudge.arrows": "failed",
+    "arrange.nudge.shift": "failed",
+    "arrange.nudge.undo": "failed",
+    "arrange.zoom.box-reads": "passed",
+    "arrange.zoom.menu-in": "failed",
+    "arrange.zoom.cmd-minus": "passed",
+    "arrange.zoom.cmd-plus": "passed",
+    "arrange.zoom.fit": "failed",
+    "arrange.zoom.type-percent": "passed",
+    "arrange.zoom.arrow-menu": "passed",
+    "arrange.zoom.cmd-0": "passed",
+    "arrange.zoom.menu-out": "failed",
+    "arrange.readout.fit": "failed",
+    "arrange.readout.200": "failed",
+    "arrange.selection-colour.light": "failed",
+    "arrange.selection-colour.dark": "failed",
+    "arrange.escape.text-then-selection": "failed",
+    "arrange.zoom.menu-presets": "failed",
+    "arrange.toolbar.select": "failed",
+    "shapes.insert.rectangle-click": "failed",
+    "shapes.insert.rounded-click": "failed",
+    "shapes.insert.ellipse-click": "failed",
+    "shapes.insert.rectangle-drag": "failed",
+    "shapes.insert.ellipse-drag": "failed",
+    "shapes.insert.named-rows": "failed",
+    "shapes.default-look": "not driven",
+    "shapes.select": "not driven",
+    "shapes.move": "not driven",
+    "shapes.resize.eight-handles": "not driven",
+    "shapes.rotate": "not driven",
+    "shapes.fill.colour": "not driven",
+    "shapes.border.colour-weight-dash": "not driven",
+    "shapes.text.type-align-bold": "not driven",
+    "shapes.duplicate-delete-undo-redo": "not driven",
+    "shapes.format-options.size-position": "not driven",
+    "shapes.reload-and-viewer": "not driven",
+    "shapes.context.shape": "not driven",
+    "lines.insert.line-drag": "not driven",
+    "lines.insert.arrow-drag": "failed",
+    "lines.end-handle": "not driven",
+    "lines.tail.colour-weight-dash-ends": "not driven",
+    "lines.context.line": "not driven",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "failed",
+    "versions.undo-restore": "failed",
+    "export.download-submenu": "passed",
+    "export.pdf.dialog": "passed",
+    "export.pdf.skipped-check": "passed",
+    "export.pdf.close-paths": "passed",
+    "export.pptx.dialog": "failed",
+    "export.print.preview-page": "passed",
+    "export.print.layout-with-notes": "passed",
+    "export.print.include-skipped": "failed",
+    "export.print.print-button": "passed",
+    "export.print.close-preview": "passed",
+    "export.print.file-menu-after-close": "passed",
+    "export.print.menu-row": "passed",
+    "export.print.cmd-p": "passed",
+    "help.help-dialog": "passed",
+    "help.documentation-link": "passed",
+    "help.keyboard-shortcuts": "passed",
+    "help.search-the-menus": "passed",
+    "surface.menus.open-close-escape": "passed",
+    "surface.cleanup": "passed",
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.card.download": "passed",
+    "decks.file.make-a-copy": "failed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-enter": "failed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "passed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "failed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "failed",
+    "shapes.export.pptx": "failed",
+    "export.print.download-pdf-follows-preview": "failed",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "failed",
+    "images.replace.upload": "passed",
+    "images.replace.drop-on-picture": "passed",
+    "images.background.upload-picture": "passed",
+    "images.background.remove-picture": "failed",
+    "present.slideshow.button": "passed",
+    "present.slideshow.cmd-enter": "passed",
+    "present.presenter-view.arrow": "passed",
+    "present.presenter-view.s-key": "passed",
+    "present.notes-in-presenter": "passed",
+    "present.slideshow.from-beginning": "passed",
+    "present.skipped-left-out": "passed",
+    "text.link.present-click": "failed",
+    "comments.on-slide": "passed",
+    "comments.on-object": "failed",
+    "comments.on-title-placeholder": "failed",
+    "comments.reply": "failed",
+    "comments.resolve": "failed",
+    "comments.toolbar-and-menu-routes": "passed",
+    "present.keys.arrow-right": "passed",
+    "present.keys.arrow-left": "passed",
+    "present.keys.space": "passed",
+    "present.keys.digit-enter": "passed",
+    "present.keys.home": "passed",
+    "present.keys.end": "passed",
+    "present.click-advances": "passed",
+    "present.counter": "passed",
+    "present.laser": "passed",
+    "present.escape": "passed",
+    "present.keys.blank-black-white": "passed",
+    "share.dialog.open": "failed",
+    "share.copy-view-link": "failed",
+    "share.copy-present-link": "failed",
+    "share.copy-edit-link": "failed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "failed",
+    "share.edit-link-lands-editor": "failed",
+    "share.view-link-cannot-edit": "failed",
+    "share.stranger-cannot-edit": "failed",
+    "collab.edit-from-second-browser": "failed",
+    "collab.edit-from-owner": "failed",
+    "collab.slide-added-appears": "failed",
+    "collab.presence-chips": "failed",
+    "collab.rename-reaches-second-browser": "failed",
+    "share.view-link-excludes-skipped-and-notes": "failed",
+    "share.present-link-excludes-skipped": "failed",
+    "comments.reaches-second-browser": "failed",
+    "versions.restore": "failed",
+    "slides.clipboard.copy-paste-card": "failed",
+    "surface.advanced.off-by-default": "failed",
+    "surface.advanced.on-shows-parked": "passed",
+    "surface.advanced.remembered": "passed",
+    "surface.parked-blocks-render": "failed",
+    "surface.parked-shortcut-unbound": "failed",
+    "surface.parked-block-core-rows": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.trash.delete-forever-enter",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.file.make-a-copy",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "slides.duplicate.context",
+        "feature": "slides",
+        "result": "failed"
+      },
+      {
+        "id": "slides.duplicate.two-selected-menu",
+        "feature": "slides",
+        "result": "failed"
+      },
+      {
+        "id": "slides.clipboard.copy-paste-card",
+        "feature": "slides",
+        "result": "failed"
+      },
+      {
+        "id": "text.title.double-click",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.title.type-escape",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.click-mid-word",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.home-end",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.shift-arrow-replace",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.shift-home-end",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.backspace-word",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.option-backspace",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.delete",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.caret.cmd-a",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.title.enter-commits",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.subtitle.double-click-type",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.subtitle.enter-new-line",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.subtitle.shift-enter",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.subtitle.arrows-backspace-join",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.subtitle.escape-commits",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.link.present-click",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.size-increase",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.spacing-double",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.text-fitting",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.autofit.textbox-grow",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.persistence.reload",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.layout-runs.type",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.size-decrease",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.spacing-single-1-15",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.format-menu.align-indent-rows",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "images.insert.paste",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.insert.toolbar-sources",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.crop.menu-escape",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.options.panel",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.options.transparency",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.options.reset",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.reset-image.menu",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.colour",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.toolbar",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.remove-picture",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.reset",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.present.picture-and-ground",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.context.image",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.options.menu-row",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.background.hex-field",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.select.click",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.select.shift-add",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.select.shift-remove",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.order.bring-to-front",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.order.send-to-back",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.order.bring-forward",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.order.send-backward",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.order.keys",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.left",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.center",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.right",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.top",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.middle",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.bottom",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.align.single-to-slide",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.center.horizontal",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.center.vertical",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.clipboard.menu-copy-paste",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.clipboard.paste-after-new-slide-button",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.clipboard.paste-with-filmstrip-focus",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.clipboard.paste-keeps-position",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.nudge.arrows",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.nudge.shift",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.nudge.undo",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.zoom.menu-in",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.zoom.fit",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.zoom.menu-out",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.readout.fit",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.readout.200",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.selection-colour.light",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.selection-colour.dark",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.escape.text-then-selection",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.zoom.menu-presets",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.toolbar.select",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.rectangle-click",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.rounded-click",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.ellipse-click",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.rectangle-drag",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.ellipse-drag",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.insert.named-rows",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.default-look",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.select",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.move",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.resize.eight-handles",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.rotate",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.fill.colour",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.border.colour-weight-dash",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.text.type-align-bold",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.duplicate-delete-undo-redo",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.format-options.size-position",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.export.pdf",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.export.pptx",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.reload-and-viewer",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "shapes.context.shape",
+        "feature": "shapes",
+        "result": "not driven"
+      },
+      {
+        "id": "lines.insert.line-drag",
+        "feature": "lines",
+        "result": "not driven"
+      },
+      {
+        "id": "lines.insert.arrow-drag",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "lines.end-handle",
+        "feature": "lines",
+        "result": "not driven"
+      },
+      {
+        "id": "lines.tail.colour-weight-dash-ends",
+        "feature": "lines",
+        "result": "not driven"
+      },
+      {
+        "id": "lines.context.line",
+        "feature": "lines",
+        "result": "not driven"
+      },
+      {
+        "id": "share.dialog.open",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.copy-view-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.copy-edit-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.view-link-lands-viewer",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.edit-link-lands-editor",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.view-link-cannot-edit",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.stranger-cannot-edit",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.edit-from-second-browser",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.edit-from-owner",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.slide-added-appears",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.presence-chips",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.rename-reaches-second-browser",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.view-link-excludes-skipped-and-notes",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.present-link-excludes-skipped",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.copy-present-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "comments.on-title-placeholder",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "comments.on-object",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "comments.reply",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "comments.resolve",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "comments.reaches-second-browser",
+        "feature": "comments",
+        "result": "failed"
+      },
+      {
+        "id": "versions.name-current",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "versions.restore",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "versions.undo-restore",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "export.pdf.notes-honest",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.pptx.dialog",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.print.include-skipped",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.print.download-pdf-follows-preview",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "surface.advanced.off-by-default",
+        "feature": "surface",
+        "result": "failed"
+      },
+      {
+        "id": "surface.parked-blocks-render",
+        "feature": "surface",
+        "result": "failed"
+      },
+      {
+        "id": "surface.parked-shortcut-unbound",
+        "feature": "surface",
+        "result": "failed"
+      }
+    ]
+  },
+  "wouldPark": [
+    "decks",
+    "slides",
+    "text",
+    "images",
+    "arrange",
+    "shapes",
+    "lines",
+    "share",
+    "comments",
+    "versions",
+    "export"
+  ],
+  "blocking": [
+    {
+      "id": "surface.advanced.off-by-default",
+      "result": "failed"
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "result": "failed"
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.root.redirect",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.draft",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.first-write",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.save-words",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.file-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.read",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.search",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-title",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-recent",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.present",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: Enter deletes (the button's tooltip: \"Delete forever\")"
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.paint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.page",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: page.waitForURL: Target page, context or browser has been closed"
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "right click the title card > Duplicate slide: new split-2-2 after title; heading \"\" (source \"\")"
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "two cards selected, Slide > Duplicate slide: selected split-2,split-2-2-2; 13 -> 14"
+    },
+    {
+      "id": "slides.delete.key",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.type",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.clipboard.copy-paste-card",
+      "feature": "slides",
+      "driver": "core/slides.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "a double click on the title: editing false"
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Cmd+A, type a sentence with spaces, punctuation and a number, Escape: error: no run heading/text on the stage"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "click mid word and type: error: Cannot read properties of null (reading 'x')"
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Home then type, End then type: \"\""
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "ArrowLeft four times, Shift+ArrowLeft three times, type Z: selected \"\n\n\"; \"\" -> \"\""
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Shift+Home then Shift+End: to start \"\n\n\"; to end \"\n\n\"; text \"\""
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Backspace across a word: \"\" -> \"\""
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Option+Backspace: \"\" -> \"\""
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Home then Delete: \"\" -> \"\""
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Cmd+A: selected 7 of 0; editing false"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Enter on the single line title: editing true; \"\" -> \"\""
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "double click the subtitle placeholder and type a line: error: no run lead/text on the stage"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Enter, then type: error: Cannot read properties of null (reading 'lines')"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Shift+Enter, then type: error: no run lead/text on the stage"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "ArrowUp, ArrowDown, then Home and Backspace on the last line: error: no run lead/text on the stage"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Escape: revision 54; stored false"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.present-click",
+      "feature": "text",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Format > Text > Size > Increase font size: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Format > Line & paragraph spacing > Double: leading null"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Format > Text fitting with the text box selected: error: locator.boundingBox: Timeout 30000ms exceeded."
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "type a long paragraph into a text box: pos.h 140 -> 140; content 132 css px in a frame of 98.699951171875"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "reload the text box slide and the title slide: box A holds Kickoff false; box B is a list false; title false; subtitle false"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "type into a table cell, a Ruled rows value, a Status board row name and the Big number; reload: error: locator.waitFor: Timeout 8000ms exceeded."
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Format > Text > Size > Decrease font size: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Format > Line & paragraph spacing > Single, then 1.15: single default; 1.15 null"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Format > Align & indent > Center, Right, Increase indent, Decrease indent: center null; right null; indent in false, out false"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "images.insert.toolbar-sources",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "click the toolbar Image button: rows "
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.delete.key",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.move.drag-frame",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.guides.centre-y",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.guides.centre-x",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.nudge.arrows",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.rotate.ring",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.double-click",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.east-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.south-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.enter",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.undo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.redo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Format > Image > Crop image, then Escape: crop on false; off after Escape true; revision 115 -> 116"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.options.panel",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "the toolbar Image options button: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.options.transparency",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "drag the Transparency slider: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.options.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Adjustments > Reset: no Reset button in the Adjustments section"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Format > Image > Reset image: stored crop true; 400,250 190x130"
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.colour",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Slide > Change background, a colour swatch, Done: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.background.toolbar",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "the toolbar Background button: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "images.background.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Change background > Reset to theme: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Slideshow, then Escape: show true; picture false; ground in the editor null, in the show null; back in the editor true"
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.context.image",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "right click the picture, read the rows, Crop image from it: rows ; missing edit.cut, edit.copy, edit.paste, arrange.order, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, insert.comment; crop mode false"
+    },
+    {
+      "id": "images.options.menu-row",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Format > Image > Image options: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "images.background.hex-field",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Change background, type a hex colour in the field, Enter, Done: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "arrange.select.click",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "click an object: chip \"null\"; handles "
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Shift click a second object: chip \"Text box\""
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Shift click the selected object again: chip \"null\"; selected "
+    },
+    {
+      "id": "arrange.select.marquee",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.click-away",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.escape",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Order > Bring to front on a1; Cmd+Z; Cmd+Shift+Z: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Order > Send to back on a1; the toolbar Undo and Redo: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Order > Bring forward on a1; Edit > Undo and Edit > Redo: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Order > Send backward on a1: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "arrange.order.keys",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Cmd+Shift+Up then Cmd+Down on a1: z {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":0,\"a2\":1001,\"a3\":2002}"
+    },
+    {
+      "id": "arrange.align.left",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Align > Left: l 152, 600, 1100 -> 152, 600, 1100"
+    },
+    {
+      "id": "arrange.align.center",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Align > Center: cx 272, 720, 1220 -> 272, 720, 1220"
+    },
+    {
+      "id": "arrange.align.right",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Arrange > Align > Right: r 392, 840, 1340 -> 392, 840, 1340"
+    },
+    {
+      "id": "arrange.align.top",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Arrange > Align > Top: t 150, 240, 500 -> 150, 240, 500"
+    },
+    {
+      "id": "arrange.align.middle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Align > Middle: cy 225, 315, 575 -> 225, 315, 575"
+    },
+    {
+      "id": "arrange.align.bottom",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Arrange > Align > Bottom: b 300, 390, 650 -> 300, 390, 650"
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "one object, Align > Left: x 600 -> 600"
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Center on page > Horizontally: centre x 720"
+    },
+    {
+      "id": "arrange.center.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Center on page > Vertically: centre y 315"
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Edit > Copy then Edit > Paste on a clean stage: 3 -> 3"
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "copy an object, click New slide in the toolbar, Cmd+V: objects on the new slide 0 -> 0; focus before the paste summary"
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "copy an object, click another slide's card, Cmd+V: objects on the other slide 2 -> 2"
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "copy a1, paste onto another slide from its stage: no copy"
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "ArrowRight and ArrowDown on a selected object: dx 0; dy 0"
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Shift+ArrowRight: dx 0"
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Cmd+Z three times: steps 0,0 | 0,0 | 0,0; final 152,150 240x150"
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "View > Zoom > Zoom in from Fit: stage 100% -> 100% (expected 125); box \"100%\""
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "View > Zoom > Fit from 150 on its first click: stage 150% -> 150%; sheet inside the stage false; box \"150%\""
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "View > Zoom > Zoom out: stage 100% -> 100% (expected 75); box \"100%\""
+    },
+    {
+      "id": "arrange.readout.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "drag the se handle of a1 at fit: error: Cannot read properties of null (reading 'x')"
+    },
+    {
+      "id": "arrange.readout.200",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "drag the se handle of a1 at 200: error: Cannot read properties of null (reading 'x')"
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "a setup write of the light appearance, then select an object: chip null on the light appearance; dark restored"
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "select an object on the dark appearance (the /new default): theme dark; chip null"
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "double click a text box, Escape, Escape: editing false -> false; selected  -> none"
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "View > Zoom > 50%, 100% and 200%: 50: stage 200%, checked false; 100: stage 200%, checked false; 200: stage 200%, checked true"
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "arm the Text box tool, click the toolbar Select button, click an object: tool armed text; after Select null; a click selected a2 false; objects 5 -> 5"
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Insert > Shape > Rectangle, one click on the sheet: nothing inserted: neither route: locator.waitFor: Timeout 6000ms exceeded.; locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Insert > Shape > Rounded rectangle, one click: nothing inserted: neither route: locator.waitFor: Timeout 6000ms exceeded.; locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Insert > Shape > Ellipse, one click: nothing inserted: neither route: locator.waitFor: Timeout 6000ms exceeded.; locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Rectangle drawn by a drag: nothing inserted: neither route: locator.waitFor: Timeout 6000ms exceeded.; locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Ellipse drawn by a drag: nothing inserted: neither route: locator.waitFor: Timeout 6000ms exceeded.; locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "open Insert > Shape > Shapes and the toolbar Shape arrow: menu rows none; plate drawn false; arrow rows none"
+    },
+    {
+      "id": "shapes.default-look",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.select",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.move",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.rotate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.fill.colour",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the filled shape survives into the PDF paint"
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 200000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "shapes.context.shape",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a rectangle to drive"
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "menu: nothing (no new object within 20 s); toolbar: nothing"
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Insert > Line > Arrow drawn by a drag: nothing inserted: no new object within 20 s"
+    },
+    {
+      "id": "lines.end-handle",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a line to drive"
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a line to drive"
+    },
+    {
+      "id": "lines.context.line",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a line to drive"
+    },
+    {
+      "id": "present.slideshow.button",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.space",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.home",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.end",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.click-advances",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.counter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.laser",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.escape",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.skipped-left-out",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: mode editing, Edit menu 1, a write answered 409"
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "comments.on-slide",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-object",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeAttached\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "comments.reply",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "comments.resolve",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Name current version, type a name, Save: error: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Restore an earlier version, then Cmd+Z: restore changed the deck false (versionHistory.1.restore; snackbar none); Cmd+Z brought the current version back false"
+    },
+    {
+      "id": "export.download-submenu",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.dialog",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.skipped-check",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.close-paths",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 150000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.pptx.dialog",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "File > Download > Microsoft PowerPoint: Perfect checked null; Editable text checked null; labels PerfectEvery slide looks exactly like the screen; the text is there but not editable | Editable textText boxes you can edit in PowerPoint; layout within a few pixels | Include speaker notes | Include skipped slides | AppearanceLightDarkBoth | FontsExactStandard | Embed fonts | Headings as pictures"
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.preview-page",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.layout-with-notes",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.include-skipped",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Include skipped slides: pages 12 -> 12; marked 0"
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the file has the page the preview shows for the skipped slide"
+    },
+    {
+      "id": "export.print.print-button",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.close-preview",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.file-menu-after-close",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.menu-row",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.cmd-p",
+      "feature": "export",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.help-dialog",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.documentation-link",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.keyboard-shortcuts",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.search-the-menus",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.menus.open-close-escape",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.advanced.off-by-default",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "surface.advanced.on-shows-parked",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.advanced.remembered",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.parked-blocks-render",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: page.evaluate: TypeError: block.insert: invalid input at /block/columns/0/key: Unrecognized keys: \"key\", \"label\""
+    },
+    {
+      "id": "surface.cleanup",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.parked-shortcut-unbound",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "surface.parked-block-core-rows",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

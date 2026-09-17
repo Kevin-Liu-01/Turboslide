@@ -79,13 +79,32 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     const comment = await decideFor(identity, deckId, 'comment', 'ops');
     if (!comment.ok) return jsonResponse(denialBody(comment, 'comment'), comment.status);
   }
-  const result = await admitOps(room, {
-    post: parsed.data,
-    bytes: body.bytes,
-    identity,
-    author: authorOf(identity),
-    role: decision.role,
-  });
+  let result: Awaited<ReturnType<typeof admitOps>>;
+  try {
+    result = await admitOps(room, {
+      post: parsed.data,
+      bytes: body.bytes,
+      identity,
+      author: authorOf(identity),
+      role: decision.role,
+    });
+  } catch (error) {
+    // the store did not answer within its deadline (packages/store blob-store.ts
+    // BlobTimeoutError, the focus round's cycle 2): a transient answer the client resends after
+    // `retry-after`, never the framework's 500 the client read as a refusal of the change (the
+    // cycle 2 enforce preview: "A change was not applied HTTPError" on every row after a stalled
+    // head; the integrator at the merge, for b7). The error's name is read, since a bundle can
+    // carry two copies of the store module
+    if (error instanceof Error && error.name === 'BlobTimeoutError') {
+      return jsonResponse({ error: 'store_timeout', message: error.message }, 503, {
+        'retry-after': '1',
+      });
+    }
+    throw error;
+  }
+  /* every write answer names the instance's document revision in `x-turboslide-revision` beside
+     the request's `baseRevision` (docs/FOCUS.md rank 3, the reproduction step): a probe records
+     both on every refused write, so an instance behind the client is read from the wire */
   if (!result.ok) {
     return jsonResponse(
       {
@@ -94,16 +113,23 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         ...(result.head === undefined ? {} : { head: result.head }),
       },
       result.status,
-      result.retryAfterMs === undefined
-        ? {}
-        : { 'retry-after': String(Math.max(1, Math.ceil(result.retryAfterMs / 1000))) },
+      {
+        'x-turboslide-revision': String(result.head ?? ''),
+        ...(result.retryAfterMs === undefined
+          ? {}
+          : { 'retry-after': String(Math.max(1, Math.ceil(result.retryAfterMs / 1000))) }),
+      },
     );
   }
-  return jsonResponse({
-    ok: true,
-    entries: result.entries,
-    rejected: result.rejected,
-    head: result.head,
-    revision: result.revision,
-  });
+  return jsonResponse(
+    {
+      ok: true,
+      entries: result.entries,
+      rejected: result.rejected,
+      head: result.head,
+      revision: result.revision,
+    },
+    200,
+    { 'x-turboslide-revision': String(result.revision ?? result.head ?? '') },
+  );
 }

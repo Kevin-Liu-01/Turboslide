@@ -458,12 +458,28 @@ describe('the published player', () => {
 });
 
 describe('the denial shapes and the legacy record', () => {
-  test('no principal and no agent is 401', () => {
+  test('no principal and no agent is 401 on a restricted deck, and on every capability but read of an open one', () => {
     expect(decide(record(), ctx(null), 'read')).toEqual({
       ok: false,
       status: 401,
       code: 'unauthorized',
     });
+    /* the focus round (the enforce preview): a caller with no identity yet reads an open deck as
+       its general access role, the way the same caller reads it with the cookie the response mints;
+       a link mode deck without a token, and every write, stay 401 */
+    const open = record({ generalAccess: { mode: 'open', role: 'viewer' } });
+    expect(decide(open, ctx(null), 'read')).toEqual({ ok: true, role: 'viewer', via: 'open' });
+    expect(decide(open, ctx(null), 'write').ok).toBe(false);
+    expect(decide(open, ctx(null), 'readNotes').ok).toBe(false);
+    const link = record({ generalAccess: { mode: 'link', role: 'viewer' } });
+    expect(decide(link, ctx(null), 'read')).toEqual({
+      ok: false,
+      status: 401,
+      code: 'unauthorized',
+    });
+    /* a legacy deck with no record is the open editor deck: a read without identity is admitted */
+    expect(decide(null, ctx(null), 'read', { now: NOW })).toMatchObject({ ok: true, via: 'open' });
+    expect(decide(null, ctx(null), 'read', { now: NOW, missingRecord: 'notFound' }).ok).toBe(false);
   });
 
   test('a null record is the open editor deck until R8, then a 404', () => {

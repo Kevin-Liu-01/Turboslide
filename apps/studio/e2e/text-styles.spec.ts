@@ -96,12 +96,16 @@ async function logLength(page: Page): Promise<number> {
   return (await versions(page)).length;
 }
 
-/** Places the caret in the heading's text and selects its first word with Shift Home. */
+/**
+ * Places the caret in the heading's text and selects its first word with Shift Home. The session
+ * opens on a double click (docs/gslides-parity/focus/AMENDMENTS.md A1: one click selects the
+ * object; the double click enters with the caret at the point).
+ */
 async function selectFirstWord(page: Page): Promise<void> {
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const box = await run.boundingBox();
   if (!box) throw new Error('no heading');
-  await page.mouse.click(box.x + 8, box.y + box.height / 2);
+  await page.mouse.dblclick(box.x + 8, box.y + box.height / 2);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   await page.keyboard.press('Shift+ArrowRight');
@@ -229,7 +233,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const item = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/1/text"]');
   const ibox = await item.boundingBox();
   if (!ibox) throw new Error('no list item');
-  await page.mouse.click(ibox.x + 4, ibox.y + ibox.height / 2);
+  await page.mouse.dblclick(ibox.x + 4, ibox.y + ibox.height / 2);
   await expect(item).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   log = await logLength(page);
@@ -242,7 +246,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const abox = await again.boundingBox();
   if (!abox) throw new Error('no list item');
   if ((await again.getAttribute('contenteditable')) !== 'true') {
-    await page.mouse.click(abox.x + 4, abox.y + abox.height / 2);
+    await page.mouse.dblclick(abox.x + 4, abox.y + abox.height / 2);
     await expect(again).toHaveAttribute('contenteditable', 'true');
   }
   await page.keyboard.press('Home');
@@ -265,7 +269,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const nine = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/1/text"]');
   const nbox = await nine.boundingBox();
   if (!nbox) throw new Error('no list item');
-  await page.mouse.click(nbox.x + 4, nbox.y + nbox.height / 2);
+  await page.mouse.dblclick(nbox.x + 4, nbox.y + nbox.height / 2);
   await expect(nine).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   log = await logLength(page);
@@ -311,7 +315,7 @@ test('the special characters insert lands at the caret as one text.insert, and p
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const hbox = await run.boundingBox();
   if (!hbox) throw new Error('no heading');
-  await page.mouse.click(hbox.x + 8, hbox.y + hbox.height / 2);
+  await page.mouse.dblclick(hbox.x + 8, hbox.y + hbox.height / 2);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('ControlOrMeta+a');
   log = await logLength(page);

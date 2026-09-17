@@ -1,0 +1,84 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-16T15:39:58.988Z",
+  "scenarios": {
+    "setup": [
+      {
+        "name": "deck",
+        "deck": "untitled-20260916-h6jn",
+        "slides": ["title", "split-1", "split-2", "split-3"],
+        "at": "2026-09-16T15:40:18.122Z"
+      },
+      {
+        "name": "done",
+        "ms": 18988,
+        "at": "2026-09-16T15:40:18.123Z"
+      }
+    ],
+    "format-size": [
+      {
+        "name": "probe-left-20",
+        "isList": true,
+        "sizeVisible": true,
+        "startPointUnder": "DIV[menu.format.image] in ts-menu-format",
+        "increaseAppeared": true,
+        "menusOpen": [
+          "ts-menu-format",
+          "ts-menu-format-format.text",
+          "ts-menu-format-format.text-format.text.size"
+        ],
+        "at": "2026-09-16T15:40:28.601Z"
+      },
+      {
+        "name": "horizontal-inside",
+        "isList": true,
+        "sizeVisible": true,
+        "startPointUnder": "DIV[menu.format.text.size] in ts-menu-format-format.text",
+        "increaseAppeared": true,
+        "menusOpen": [
+          "ts-menu-format",
+          "ts-menu-format-format.text",
+          "ts-menu-format-format.text-format.text.size"
+        ],
+        "at": "2026-09-16T15:40:30.269Z"
+      },
+      {
+        "name": "probe-left-20-again",
+        "isList": true,
+        "sizeVisible": true,
+        "startPointUnder": "DIV[menu.format.image] in ts-menu-format",
+        "increaseAppeared": true,
+        "menusOpen": [
+          "ts-menu-format",
+          "ts-menu-format-format.text",
+          "ts-menu-format-format.text-format.text.size"
+        ],
+        "at": "2026-09-16T15:40:31.934Z"
+      },
+      {
+        "name": "done",
+        "ms": 14018,
+        "at": "2026-09-16T15:40:32.141Z"
+      }
+    ],
+    "teardown": [
+      {
+        "name": "untitled-20260916-h6jn",
+        "status": 404,
+        "at": "2026-09-16T15:40:34.187Z"
+      },
+      {
+        "name": "done",
+        "ms": 2046,
+        "at": "2026-09-16T15:40:34.187Z"
+      }
+    ]
+  },
+  "decks": ["untitled-20260916-h6jn"],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "endedAt": "2026-09-16T15:40:34.187Z"
+}

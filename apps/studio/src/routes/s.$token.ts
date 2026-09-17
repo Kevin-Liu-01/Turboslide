@@ -9,6 +9,7 @@ import {
   fileLinkLookup,
   notNavigationSentence,
 } from '../server/auth/links';
+import { noteLinkGrant } from '../server/access';
 import { deckDir, ensureDecks } from '../server/root';
 
 // GET /s/:token (gslides-parity SPEC-3 0.13, 0.15, 6.4): the one time exchange of a share link.
@@ -48,6 +49,23 @@ function page(
   });
 }
 
+/**
+ * The Present link of the Share dialog (docs/FOCUS.md 2.7, the row `share.copy-present-link`):
+ * a viewer link minted with `?present=1` on its address lands on `/deck/<id>?present=1`, the show,
+ * instead of the viewer. The flag travels only to a `/deck/` landing; a commenter or an editor
+ * link lands in the editor whatever the address carried, and no other query key is forwarded.
+ */
+export function withPresent(location: string, request: Request): string {
+  let present = false;
+  try {
+    present = new URL(request.url).searchParams.get('present') === '1';
+  } catch {
+    present = false;
+  }
+  if (!present || !location.startsWith('/deck/') || location.includes('?')) return location;
+  return `${location}?present=1`;
+}
+
 async function serve(request: Request, token: string): Promise<Response> {
   const runtime = identityRuntime();
   const identity = await requestIdentity(request, runtime);
@@ -60,14 +78,25 @@ async function serve(request: Request, token: string): Promise<Response> {
             dir: deckDir(head.id),
           })),
         );
-  const outcome = await exchangeShareToken(token, request, { runtime, identity, lookup });
+  // the grant lands on the principal record (this instance) and on the principal's deck index
+  // (the Blob store, every instance): cycle 2, VERIFICATION.md pass 2 F-share-404
+  const outcome = await exchangeShareToken(token, request, {
+    runtime,
+    identity,
+    lookup,
+    noteGrant: (principalId, grant, now) => noteLinkGrant(principalId, grant, now),
+  });
   const cookie: Record<string, string> =
     identity.minted?.setCookie !== undefined ? { 'set-cookie': identity.minted.setCookie } : {};
   switch (outcome.kind) {
     case 'redirect':
       return new Response(null, {
         status: 303,
-        headers: { location: outcome.location, ...EXCHANGE_HEADERS, ...cookie },
+        headers: {
+          location: withPresent(outcome.location, request),
+          ...EXCHANGE_HEADERS,
+          ...cookie,
+        },
       });
     case 'not_navigation':
       return new Response(

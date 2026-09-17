@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // B5's table spec (gslides-parity SPEC-2 11.6 `tables.spec.ts`; MILESTONES-2 B5 item 5): the
 // Insert > Table hover grid inserts 4 by 3 on a blank slide; a cell range; Merge cells and
 // Unmerge cells; a cell fill; Distribute rows; insert two rows below. The spec runs against the
@@ -159,6 +161,9 @@ test('Insert > Table opens the hover grid, the caption follows the pointer and a
 }) => {
   test.setTimeout(120_000);
   const slideId = await blankSlide(page);
+  /* Insert > Table, the table tail and the Table section are parked (docs/FOCUS.md 3.2, 3.3): the
+     rows are asserted behind Tools > Advanced tools, never in the default view */
+  await setAdvancedTools(page, true);
   await page.locator('[data-control="menubar.insert"]').click();
   const row = page.locator('[data-menu-item="insert.table"]');
   await expect(row).toBeVisible();
@@ -191,6 +196,8 @@ test('Insert > Table opens the hover grid, the caption follows the pointer and a
 test('a cell range, Merge cells and Unmerge cells', async ({ page }) => {
   test.setTimeout(120_000);
   const slideId = await blankSlide(page);
+  /* the table tail and the Table section are parked (docs/FOCUS.md 3.2, 3.3) */
+  await setAdvancedTools(page, true);
   await invoke(page, 'block.insert', {
     slideId,
     slot: 'main',
@@ -280,6 +287,8 @@ test('a cell range, Merge cells and Unmerge cells', async ({ page }) => {
 test('a cell fill, Distribute rows and two rows inserted below', async ({ page }) => {
   test.setTimeout(120_000);
   const slideId = await blankSlide(page);
+  /* the table tail and the Table section are parked (docs/FOCUS.md 3.2, 3.3) */
+  await setAdvancedTools(page, true);
   await invoke(page, 'block.insert', {
     slideId,
     slot: 'main',

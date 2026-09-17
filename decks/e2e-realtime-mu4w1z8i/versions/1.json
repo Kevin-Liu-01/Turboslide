@@ -1,0 +1,38 @@
+{
+  "n": 1,
+  "revision": 1,
+  "author": {
+    "kind": "human",
+    "name": "Cement 439",
+    "principalId": "anon_799b4dda-8fbd-40e1-b4a3-32d0f666c9d0"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T02:06:45.839Z",
+  "mutations": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 292,
+      "remove": 0,
+      "insert": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    }
+  ],
+  "baseRevision": 0,
+  "inverse": [
+    {
+      "op": "text.splice",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "at": 292,
+      "remove": 100,
+      "insert": ""
+    }
+  ],
+  "ops": {
+    "fromSeq": 1,
+    "toSeq": 1
+  }
+}

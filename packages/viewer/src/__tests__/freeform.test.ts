@@ -268,26 +268,53 @@ describe('toFreeform and toGrammar', () => {
 describe('arrange', () => {
   const ids = ['a', 'b', 'c'];
 
-  it('aligns on the group box with the shared line snapped, writing only what moves', () => {
-    // the group spans x 200 to 1100 and y 200 to 500; 200 is on the grid, 1100 rounds to 1104
+  it('aligns on the group box with the extreme object holding its edge, writing only what moves', () => {
+    // the group spans x 200 to 1100 and y 200 to 500; the shared line is the extreme object's own
+    // edge, never snapped to the grid (docs/FOCUS.md rank 14: tops 150, 240, 500 landed on 152)
     expect(sets(alignMutations(freeSlide(), ids, freeBoxes, 'left'))).toEqual([
       ['b', { x: 200, y: 240, w: 200, h: 60, z: 1 }],
       ['c', { x: 200, y: 300, w: 100, h: 200, z: 2 }],
     ]);
+    // the right edge of c (1100) is off the 8 px grid and holds; a and b land on it exactly
     expect(sets(alignMutations(freeSlide(), ids, freeBoxes, 'right'))).toEqual([
-      ['a', { x: 804, y: 200, w: 300, h: 100, z: 0 }],
-      ['b', { x: 904, y: 240, w: 200, h: 60, z: 1 }],
-      ['c', { x: 1004, y: 300, w: 100, h: 200, z: 2 }],
+      ['a', { x: 800, y: 200, w: 300, h: 100, z: 0 }],
+      ['b', { x: 900, y: 240, w: 200, h: 60, z: 1 }],
     ]);
-    // the middle at 350 rounds to 352 on the grid
+    // the middle of the union is 350 and stays 350
     expect(
       alignMutations(freeSlide(), ids, freeBoxes, 'middle').map(
         (m) => m.op === 'block.set' && (m.value as Position).y,
       ),
-    ).toEqual([302, 322, 252]);
+    ).toEqual([300, 320, 250]);
     expect(alignMutations(freeSlide(), ids, freeBoxes, 'top')).toHaveLength(2);
-    // the bottom at 500 rounds to 504, so every block moves
-    expect(alignMutations(freeSlide(), ids, freeBoxes, 'bottom')).toHaveLength(3);
+    // the bottom of the union is c's 500 and holds, so c does not move
+    expect(sets(alignMutations(freeSlide(), ids, freeBoxes, 'bottom'))).toEqual([
+      ['a', { x: 200, y: 400, w: 300, h: 100, z: 0 }],
+      ['b', { x: 600, y: 440, w: 200, h: 60, z: 1 }],
+    ]);
+  });
+
+  it('lands every top on the topmost object’s off grid top (audit-arrange row 23)', () => {
+    const slide = freeSlide();
+    const boxes: MeasuredBoxes = {
+      ...freeBoxes,
+      blocks: { a: [200, 150, 300, 100], b: [600, 240, 200, 60], c: [1000, 500, 100, 200] },
+    };
+    for (const block of slide.slots.main ?? []) {
+      const box = boxes.blocks[block.id];
+      if (block.pos && box) block.pos = { ...block.pos, x: box[0], y: box[1] };
+    }
+    expect(
+      alignMutations(slide, ids, boxes, 'top').map(
+        (m) => m.op === 'block.set' && (m.value as Position).y,
+      ),
+    ).toEqual([150, 150]);
+    // bottoms 250, 300, 700: the lowest is c at 700 and holds
+    expect(
+      alignMutations(slide, ids, boxes, 'bottom').map(
+        (m) => m.op === 'block.set' && (m.value as Position).y,
+      ),
+    ).toEqual([600, 640]);
   });
 
   it('centers a lone block on the content box, on the content center guide', () => {

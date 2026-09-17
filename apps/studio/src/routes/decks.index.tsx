@@ -18,6 +18,13 @@ import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { useMountEffect } from '../components/useMountEffect';
+import {
+  RESTORING_STEP_MS,
+  clearRestoringMarker,
+  readRestoringMarker,
+  restoringStep,
+  sessionMarkerStorage,
+} from './-restoring';
 import { bundleDownloadTicket } from '../server/bundle';
 import {
   copyStoredDeck,
@@ -335,7 +342,12 @@ export function Dialog({
 
   useMountEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const first = root.current?.querySelector<HTMLElement>('[data-autofocus], ' + FOCUSABLE);
+    /* the marked control first, wherever it sits, else the first focusable: a selector list
+       answers in document order, so the trash dialog's Delete forever button (docs/FOCUS.md rank
+       29) would lose the initial focus to the Cancel button before it */
+    const first =
+      root.current?.querySelector<HTMLElement>('[data-autofocus]') ??
+      root.current?.querySelector<HTMLElement>(FOCUSABLE);
     first?.focus();
     if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
     return () => opener?.focus();
@@ -444,6 +456,10 @@ function HomePage() {
   const [mounted, setMounted] = useState(false);
   /* decks moved to the trash from this page and not yet reloaded: hidden at once, Undo shows them */
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
+  /* a rename the store answered and the listing has not caught up with: the card shows the new
+     name at once and the overlay stands until the loader's card reaches the answered revision
+     (docs/FOCUS.md rank 7: the /decks listing lags the store by up to a minute on the blob tier) */
+  const [renamed, setRenamed] = useState<Readonly<Record<string, RenamedCard>>>({});
   const [creating, setCreating] = useState(false);
 
   useMountEffect(() => {
@@ -456,6 +472,43 @@ function HomePage() {
     if (stored.length > 0) setRecentRow(stored);
     setMounted(true);
     page.current?.setAttribute('data-hydrated', '');
+  });
+
+  /* a restore the trash page requested moments ago (docs/FOCUS.md rank 7; build/b7.md R9,
+     routes/-restoring.ts): while its marker is young and the listing does not hold the deck, the
+     listing is asked for again once a second, up to three times, then the marker leaves */
+  const decksRef = useRef(decks);
+  decksRef.current = decks;
+  useMountEffect(() => {
+    const storage = sessionMarkerStorage();
+    const marker = readRestoringMarker(storage);
+    if (marker === null) return undefined;
+    let stopped = false;
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const tick = async () => {
+      const list = await decksRef.current.catch((): DeckCard[] => []);
+      if (stopped) return;
+      if (
+        restoringStep(
+          marker,
+          list.map((card) => card.id),
+          tries,
+        ) === 'done'
+      ) {
+        clearRestoringMarker(storage);
+        return;
+      }
+      tries += 1;
+      await router.invalidate();
+      if (stopped) return;
+      timer = setTimeout(() => void tick(), RESTORING_STEP_MS);
+    };
+    timer = setTimeout(() => void tick(), RESTORING_STEP_MS);
+    return () => {
+      stopped = true;
+      if (timer !== null) clearTimeout(timer);
+    };
   });
 
   const choose = (patch: Partial<HomeSettings>) => {
@@ -498,7 +551,8 @@ function HomePage() {
   const moveToTrash = async (card: DeckCard) => {
     setHidden((current) => new Set([...current, card.id]));
     try {
-      await trashStoredDeck({ deckId: card.id, baseRevision: card.revision });
+      /* no revision from the listing (it lags the store, rank 7): the store takes its current one */
+      await trashStoredDeck({ deckId: card.id });
     } catch (error) {
       setHidden((current) => {
         const next = new Set(current);
@@ -532,15 +586,18 @@ function HomePage() {
     const title = name.trim();
     if (title === '' || title === card.title) return;
     try {
-      const result = await renameStoredDeck({
-        deckId: card.id,
-        name: title,
-        baseRevision: card.revision,
-      });
+      /* no revision from the listing: the server function takes the store's current revision
+         when none is sent (server/decks.ts renameDeckFn), so a card the list drew one revision
+         behind is never refused as stale (rank 7, audit-decks rows 34 and 36) */
+      const result = await renameStoredDeck({ deckId: card.id, name: title });
       if (!result.ok) {
         snackbar.show(`Rename: ${result.message}`);
         return;
       }
+      setRenamed((current) => ({
+        ...current,
+        [card.id]: { title: result.title, revision: result.revision },
+      }));
       await refresh();
     } catch (error) {
       snackbar.show(`Rename: ${errorMessage(error)}`);
@@ -572,6 +629,7 @@ function HomePage() {
     mounted,
     now,
     hidden,
+    renamed,
     onOpen: open,
     onPresent: present,
     onDownload: (deckId) => void download(deckId),
@@ -957,6 +1015,22 @@ function StoreList({ promise, ...props }: ListProps & { promise: Promise<DeckCar
   return <DeckList list={list} {...props} />;
 }
 
+/** A rename the store answered: the title and the revision the card shows until the listing agrees. */
+type RenamedCard = { title: string; revision: number };
+
+/** The listing with the answered renames applied where the listing is still behind them. */
+export function applyRenames(
+  list: ReadonlyArray<DeckCard>,
+  renamed: Readonly<Record<string, RenamedCard>>,
+): DeckCard[] {
+  return list.map((card) => {
+    const over = renamed[card.id];
+    return over !== undefined && card.revision < over.revision
+      ? { ...card, title: over.title, revision: over.revision }
+      : card;
+  });
+}
+
 type ListProps = {
   query: string;
   settings: HomeSettings;
@@ -964,6 +1038,8 @@ type ListProps = {
   mounted: boolean;
   now: Date;
   hidden: ReadonlySet<string>;
+  /** the renames the store answered, applied over the listing until it catches up (rank 7) */
+  renamed: Readonly<Record<string, RenamedCard>>;
   onOpen: (card: DeckCard, newTab?: boolean) => void;
   onPresent: (card: DeckCard) => void;
   onDownload: (deckId: string) => void;
@@ -974,13 +1050,14 @@ type ListProps = {
 };
 
 function DeckList({
-  list,
+  list: listed,
   query,
   settings,
   opened,
   mounted,
   now,
   hidden,
+  renamed,
   onOpen,
   onPresent,
   onDownload,
@@ -989,6 +1066,7 @@ function DeckList({
   onCopied,
   onError,
 }: ListProps & { list: ReadonlyArray<DeckCard> }) {
+  const list = useMemo(() => applyRenames(listed, renamed), [listed, renamed]);
   const [menu, setMenu] = useState<CardMenuState | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [copying, setCopying] = useState<DeckCard | null>(null);
@@ -1410,11 +1488,12 @@ function CopyDialog({
     // through; it is pointed at the copy once the store answers
     const tab = window.open('', '_blank');
     try {
+      /* no revision from the listing (rank 7, audit-decks row 37: the copy failed three times
+         on a stale card and worked on a fresh one) */
       const copy = await copyStoredDeck({
         deckId: card.id,
         name: name.trim(),
         removeNotes,
-        baseRevision: card.revision,
       });
       recordDeckOpened(copy.deckId, {
         title: name.trim(),

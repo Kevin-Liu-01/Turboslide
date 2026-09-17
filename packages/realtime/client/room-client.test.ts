@@ -226,6 +226,43 @@ describe('createRoomClient', () => {
     await a.room.stop();
   });
 
+  it('resends the batch after a 5xx from the room instead of returning the ops as refused (the cycle 2 preview: a stalled store head)', async () => {
+    const h = harness();
+    const base = reconnectingTransport(h.server, kevin);
+    let failures = 2;
+    const rejects: unknown[] = [];
+    const flaky: typeof base = {
+      ...base,
+      async postOps(body) {
+        if (failures > 0) {
+          failures -= 1;
+          return {
+            ok: false,
+            status: 503,
+            code: 'store_timeout',
+            message: 'The Blob store did not answer head decks/gt-brand/deck.json within 20 s',
+            retryAfterMs: 50,
+          };
+        }
+        return base.postOps(body);
+      },
+    };
+    const a = h.client(kevin, { transport: flaky, onReject: (notice) => rejects.push(notice) });
+    a.room.start();
+    await until(() => a.room.status().connected);
+    a.room.apply([splice(0, 0, 'q')], 'type', 'now');
+    // the 503 puts the client offline with the op still pending; nothing is refused
+    await until(() => a.room.status().offline, 3000);
+    expect(a.room.status().pending).toBe(1);
+    expect(rejects).toHaveLength(0);
+    // the resend lands once the room answers
+    await until(() => a.room.status().pending === 0, 10_000);
+    expect(a.room.status().offline).toBe(false);
+    expect(rejects).toHaveLength(0);
+    expect(textOf(h.server.document())).toContain('q');
+    await a.room.stop();
+  });
+
   it('reconnects after a killed stream, replays what landed and resends what was pending', async () => {
     const h = harness();
     const a = h.client(kevin);
@@ -737,6 +774,149 @@ describe('createRoomClient', () => {
     expect(room.status().revision).toBe(base + 2);
     expect(room.document().deck.revision).toBe(base + 2);
     expect(revisions.every((revision, i) => i === 0 || revision >= revisions[i - 1]!)).toBe(true);
+    await room.stop();
+  });
+
+  it('reloads at an entry’s revision when this copy cannot apply it (a restore record on the blob tier), instead of taking the checkpoint on the old document (VERIFICATION F-versions)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const restoredAt = base + 1;
+    const transport = blobTransport({ author: kevin.author, head: base });
+    const restored: DeckDocument = {
+      deck: { ...document.deck, revision: restoredAt, title: 'Restored title' },
+      slides: document.slides,
+    };
+    const resyncs: number[] = [];
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      onResync: async (at) => {
+        resyncs.push(at);
+        return restored;
+      },
+    });
+    room.start();
+    transport.fire(hello(CLIENT_A, base, base));
+    // the record of another tab's version.restore, as the channel announced it before the fix:
+    // an op whose mutation needs the version log, which no tab holds
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: restoredAt,
+        rev: base,
+        kind: 'edit',
+        author: maya.author,
+        clientId: 'store',
+        opId: 'store:9',
+        mutations: [{ op: 'version.restore', n: 1 }],
+        at: new Date().toISOString(),
+      },
+    });
+    transport.fire({
+      type: 'checkpoint',
+      revision: restoredAt,
+      fromSeq: restoredAt,
+      toSeq: restoredAt,
+      author: maya.author,
+      note: '',
+    });
+    await until(() => changes.some((change) => change.reason === 'resync'), 3000);
+    // one reload, at the entry's revision, and the document is the reloaded one
+    expect(resyncs).toEqual([restoredAt]);
+    expect(room.document().deck.title).toBe('Restored title');
+    expect(room.document().deck.revision).toBe(restoredAt);
+    expect(room.status().revision).toBe(restoredAt);
+    expect(room.status().seq).toBe(restoredAt);
+    // a second entry this copy cannot apply while the reload is in flight is one reload, not two
+    await room.stop();
+  });
+
+  it('moves the ops typed after a refused splice past its inverse, so they are folded and sent at the offsets the server holds (docs/FOCUS.md rank 13)', async () => {
+    const document = normalized();
+    const base = document.deck.revision;
+    const before = textOf(document);
+    const posts: OpsPost[] = [];
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    let release: (() => void) | null = null;
+    let head = base;
+    // the first POST is held, then answered with its op refused (the way an instance refuses a
+    // splice it cannot place); every later POST is admitted as sent
+    const transport: RoomTransport & { fire: (event: RoomEvent) => void } = {
+      fire(event) {
+        onEvent?.(event);
+      },
+      open(o) {
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        if (posts.length === 1) {
+          await new Promise<void>((resolve) => (release = resolve));
+          return {
+            ok: true,
+            entries: [],
+            rejected: body.entries.map((entry) => ({
+              opId: entry.opId,
+              reason: 'invalid' as const,
+              message: 'text.splice: 0 plus 0 is outside a text of 7 characters',
+            })),
+            head,
+            revision: head,
+          };
+        }
+        head += 1;
+        const entries: Entry[] = body.entries.map((entry) => ({
+          seq: head,
+          rev: head - 1,
+          kind: 'edit',
+          author: kevin.author,
+          clientId: body.clientId,
+          opId: entry.opId,
+          mutations: (entry as { mutations?: Mutation[] }).mutations ?? [],
+          at: new Date().toISOString(),
+        }));
+        return { ok: true, entries, rejected: [], head, revision: head };
+      },
+      async postPresence() {
+        return undefined;
+      },
+    };
+    const rejected: { opId: string; reason: string }[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: base,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: () => undefined,
+      onReject: (r) => rejected.push(r),
+    });
+    room.start();
+    transport.fire(hello(CLIENT_A, base, base));
+    // the burst: a word the server refuses, then a character typed while the word is in flight
+    room.apply([splice(0, 0, 'Onboarding ')], 'type', 'now');
+    await until(() => posts.length === 1, 1000);
+    room.apply([splice(11, 0, 'X')], 'type', 'now');
+    expect(textOf(room.document())).toBe(`Onboarding X${before}`);
+    (release as (() => void) | null)?.();
+    await until(() => rejected.length === 1, 1000);
+    // the refused word leaves; the character keeps its place in the text the server holds
+    await until(() => textOf(room.document()) === `X${before}`, 1000);
+    await until(() => posts.length === 2, 1000);
+    expect(posts[1]!.entries).toHaveLength(1);
+    expect((posts[1]!.entries[0] as { mutations: Mutation[] }).mutations).toEqual([
+      splice(0, 0, 'X'),
+    ]);
+    await until(() => room.status().pending === 0, 1000);
+    expect(textOf(room.document())).toBe(`X${before}`);
     await room.stop();
   });
 

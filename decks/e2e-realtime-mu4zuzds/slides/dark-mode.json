@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "dark-mode",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "5/7"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Dark mode"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Dark mode is a token remap. Background tokens map to black, text tokens map to white, and hairline opacity increases so a 1px seam stays visible between two black surfaces. Both captures below are fixed files and do not follow the deck theme."
+      }
+    ],
+    "body": [
+      {
+        "id": "pair",
+        "type": "pair",
+        "figures": [
+          {
+            "assets": [
+              "site-home-light"
+            ],
+            "caption": "The home page in the light theme separates sections with hairline seams."
+          },
+          {
+            "assets": [
+              "site-home-dark"
+            ],
+            "caption": "The same page in the dark theme keeps the seams visible on black."
+          }
+        ]
+      }
+    ]
+  }
+}

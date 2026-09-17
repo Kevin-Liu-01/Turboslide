@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "language-as-material",
+  "ext": {
+    "import": {
+      "css": ".ts-x-language-as-material .rows > div { gap: 24px; }",
+      "scope": "s22"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Animated text"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Text is the primary animated element. The signature animations are built from characters. A headline breaks into individual glyphs and reassembles as the same sentence in the next language, using the same number of particles. A particle field of characters from eight writing systems resolves into the word for language in each script in turn.",
+        "measure": 56
+      },
+      {
+        "id": "dia1",
+        "alt": "The word for language breaks into eight particles and reassembles as the Japanese word",
+        "type": "dia",
+        "fit": {
+          "viewBox": [
+            0,
+            0,
+            600,
+            140
+          ]
+        },
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 600 140\" aria-label=\"The word for language breaks into eight particles and reassembles as the Japanese word\">\n            <text class=\"lab\" x=\"100\" y=\"80\" text-anchor=\"middle\">Language</text>\n            <g fill=\"var(--ink)\">\n              <rect x=\"256\" y=\"50\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"268\" y=\"72\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"278\" y=\"92\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"296\" y=\"42\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"312\" y=\"98\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"322\" y=\"78\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"330\" y=\"62\" width=\"6\" height=\"6\"></rect>\n              <rect x=\"346\" y=\"88\" width=\"6\" height=\"6\"></rect>\n            </g>\n            <text class=\"lab\" x=\"500\" y=\"80\" text-anchor=\"middle\" lang=\"ja\">言語</text>\n            <path d=\"M170 74 H230\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n            <path d=\"M370 74 H430\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n            <path d=\"M170 74 H230\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n            <path d=\"M370 74 H430\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n            <text x=\"100\" y=\"130\" text-anchor=\"middle\">English</text>\n            <text x=\"300\" y=\"130\" text-anchor=\"middle\">Same number of particles</text>\n            <text x=\"500\" y=\"130\" text-anchor=\"middle\">Japanese</text>\n          </svg>"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 150,
+        "tight": true,
+        "items": [
+          {
+            "key": "Text node",
+            "icon": {
+              "name": "language"
+            },
+            "value": "The morphing unit is one shaped text node. Per-⁠character spans break Arabic joining."
+          },
+          {
+            "key": "Width",
+            "icon": {
+              "name": "arrows-right-left"
+            },
+            "value": "A hidden probe in the word's language sets the width. Only container width animates."
+          },
+          {
+            "key": "Clock",
+            "icon": {
+              "name": "clock"
+            },
+            "value": "The component has no timer. The host page drives it, so every animation shares one clock."
+          }
+        ]
+      }
+    ]
+  }
+}

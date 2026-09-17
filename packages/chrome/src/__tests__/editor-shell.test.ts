@@ -27,6 +27,7 @@ import {
   readStoredSettings,
   retiredKeySentence,
   stepLadder,
+  stepPlainSize,
   tailKindOf,
   writeStoredSettings,
 } from '../editor-shell';
@@ -101,7 +102,11 @@ describe('buildMenuContext', () => {
       'mac',
     );
     expect(ctx.selection.blocks).toBe(1);
-    expect(ctx.selection.block).toBe('other');
+    /* a list is text to the menus since the focus round (docs/FOCUS.md `text.list.chords`,
+       `text.indent.toolbar`): a box turned into a list keeps the text family, the text tail and
+       the Format > Text rows; before it read as `other` and lost them on the conversion */
+    expect(ctx.selection.block).toBe('text');
+    expect(ctx.selection.textBlock).toBe(true);
     expect(ctx.selection.listItem).toBe(true);
     expect(ctx.focus).toBe('canvas');
     const heading = firstBlockOf(slide, 'heading');
@@ -134,8 +139,8 @@ describe('tailKindOf', () => {
     expect(tailKindOf(slide, { blockId: firstBlockOf(slide, 'heading')?.id })).toBe('text');
     expect(tailKindOf(slide, { text: true })).toBe('text');
   });
-  it('is the other tail for a list and the image tail for a shot', () => {
-    expect(tailKindOf(slide, { blockId: firstBlockOf(slide, 'plain')?.id })).toBe('other');
+  it('is the text tail for a list (the focus round) and the image tail for a shot', () => {
+    expect(tailKindOf(slide, { blockId: firstBlockOf(slide, 'plain')?.id })).toBe('text');
     const shot: Slide = {
       schemaVersion: 1,
       id: 'x',
@@ -192,6 +197,29 @@ describe('menuActionPlan', () => {
     });
     const skip = menuActionPlan(itemById('slide.skipSlide'), facts(RULE));
     expect(skip).toMatchObject({ action: 'slide.skip', input: { slideIds: [RULE], skip: true } });
+    /* Slide > Delete slide removes every selected slide, one write each (docs/FOCUS.md rank 22:
+       the menu removed one of two selected cards); one card is one write and no batch */
+    const removeTwo = menuActionPlan(
+      itemById('slide.deleteSlide'),
+      facts(RULE, undefined, { selectedSlideIds: [RULE, FIRST] }),
+    );
+    expect(removeTwo).toMatchObject({
+      action: 'slide.remove',
+      input: { slideId: RULE, baseRevision: 412 },
+      batch: [
+        { slideId: RULE, baseRevision: 412 },
+        { slideId: FIRST, baseRevision: 412 },
+      ],
+      snackbar: 'Deleted 2 slides',
+      undo: true,
+    });
+    const removeOne = menuActionPlan(itemById('slide.deleteSlide'), facts(RULE));
+    expect(removeOne).toMatchObject({
+      action: 'slide.remove',
+      input: { slideId: RULE },
+      snackbar: 'Slide deleted',
+    });
+    expect('batch' in removeOne).toBe(false);
     /* Edit > Duplicate is a client item (Cmd+D); with no block selected it plans slide.duplicate
        (measured on the dev server: the plan refused it as having no action, integrator merge 2) */
     const edit = menuActionPlan(itemById('edit.duplicate'), facts(RULE));
@@ -237,6 +265,45 @@ describe('menuActionPlan', () => {
       action: 'block.set',
       input: { path: '/typography', value: { align: 'right' } },
     });
+  });
+
+  it('Increase and Decrease font size on a list write /size on the ladder 20, 22, 24 (F-list-size, b1 R22)', () => {
+    /* a `plain` block has no typography field, so the `/typography` write the text branch made
+       was dropped by the schema and the row wrote nothing (docs/FOCUS.md
+       `text.format-menu.size-increase` on a list); the list's size lives at /size */
+    const slide = document.slides[RULE] as Slide;
+    const list = firstBlockOf(slide, 'plain') as Block;
+    const bigger = menuActionPlan(
+      itemById('format.text.size.increase'),
+      facts(RULE, { blockId: list.id }),
+    );
+    expect(bigger).toMatchObject({
+      action: 'block.set',
+      input: { blockId: list.id, path: '/size', value: 22 },
+    });
+    const smaller = menuActionPlan(
+      itemById('format.text.size.decrease'),
+      facts(RULE, { blockId: list.id }),
+    );
+    expect(smaller).toMatchObject({
+      action: 'block.set',
+      input: { blockId: list.id, path: '/size', value: 20 },
+    });
+    expect(stepPlainSize(undefined, 1)).toBe(22);
+    expect(stepPlainSize(22, 1)).toBe(24);
+    expect(stepPlainSize(24, 1)).toBe(24);
+    expect(stepPlainSize(22, -1)).toBe(20);
+    expect(stepPlainSize(20, -1)).toBe(20);
+  });
+
+  it('a zoom step from Fit starts at the stage scale, not at 100 (F-zoom-fit, b1 R20)', () => {
+    /* at Fit the controller reports no number; the shell reads the stage's live scale through
+       the handle's `scale()` and steps from it: 0.705 is 71 percent, whose next rung is 75 and
+       whose previous is 50 (docs/FOCUS.md `arrange.zoom.menu-in`: "71% -> 125%, expected 75") */
+    expect(zoomStepFrom(effectiveZoomPercent('fit', 0.705), 1)).toBe(75);
+    expect(zoomStepFrom(effectiveZoomPercent('fit', 0.705), -1)).toBe(50);
+    /* without a scale the effective percent stays 100 (a route with no stage) */
+    expect(zoomStepFrom(effectiveZoomPercent('fit', undefined), 1)).toBe(125);
   });
 
   it('Bulleted list is one text.list with the first bullet preset; on a bulleted list it returns to the ruled form (SPEC-2 0.4)', () => {
@@ -653,6 +720,13 @@ describe('the retired letters, the ladder and the stored settings', () => {
     expect(readStoredSettings('not json')).toEqual({});
     expect(readStoredSettings(null)).toEqual({});
   });
+  it('keeps Tools > Advanced tools off by default and remembers it with the other stored settings (docs/FOCUS.md 3.1)', () => {
+    expect(DEFAULT_SETTINGS.advancedTools).toBe(false);
+    expect(STORED_SETTINGS).toContain('advancedTools');
+    const written = writeStoredSettings({ ...DEFAULT_SETTINGS, advancedTools: true });
+    expect(readStoredSettings(written).advancedTools).toBe(true);
+    expect(readStoredSettings(writeStoredSettings(DEFAULT_SETTINGS)).advancedTools).toBe(false);
+  });
 });
 
 describe('panel and dialog ids', () => {
@@ -695,6 +769,49 @@ describe('Arrange > Order on a grammar slide (SPEC-2 6.1 row 13)', () => {
     expect(menuActionPlan(itemById('arrange.order.sendToBack'), facts(RULE))).toEqual({
       refused: 'Select an object on the slide first',
     });
+  });
+
+  it('reads the rows from the rank in the paint order on a canvas, a missing z sorting as 0 (b4 C2-R3)', () => {
+    /* the walk placed three text boxes through block.insert; the first got no z and the store
+       gave the next two 1 and 2: the four Order rows were drawn disabled for the first box while
+       Cmd+Shift+Up moved it. The rank in `sortByZ` is the fact, not the z alone */
+    const box = (id: string, z?: number): Block =>
+      ({
+        id,
+        type: 'text',
+        text: id,
+        pos: { x: 100, y: 100, w: 200, h: 100, ...(z === undefined ? {} : { z }) },
+      }) as unknown as Block;
+    const canvas: Slide = {
+      schemaVersion: 1,
+      id: 'cv',
+      kind: 'content',
+      layout: { type: 'freeform' },
+      slots: { main: [box('a1'), box('a2', 1), box('a3', 2)] },
+    };
+    const doc: DeckDocument = { deck: document.deck, slides: { cv: canvas } };
+    const orderOf = (blockId: string) =>
+      buildMenuContext(
+        { document: doc, slideId: 'cv', selection: { blockId } },
+        DEFAULT_SETTINGS,
+        'mac',
+      ).selection.order;
+    expect(orderOf('a1')).toEqual({ forward: true, front: true, backward: false, back: false });
+    expect(orderOf('a2')).toEqual({ forward: true, front: true, backward: true, back: true });
+    expect(orderOf('a3')).toEqual({ forward: false, front: false, backward: true, back: true });
+    /* two boxes with no z at all: document order breaks the tie, so each can move one way */
+    const tied: DeckDocument = {
+      ...doc,
+      slides: { cv: { ...canvas, slots: { main: [box('b1'), box('b2')] } } },
+    };
+    const tiedOrder = (blockId: string) =>
+      buildMenuContext(
+        { document: tied, slideId: 'cv', selection: { blockId } },
+        DEFAULT_SETTINGS,
+        'mac',
+      ).selection.order;
+    expect(tiedOrder('b1')).toEqual({ forward: true, front: true, backward: false, back: false });
+    expect(tiedOrder('b2')).toEqual({ forward: false, front: false, backward: true, back: true });
   });
 
   it('keeps the paint order on a freeform slide', () => {
@@ -991,8 +1108,14 @@ describe('the round two plans (SPEC-2 sections 3, 4, 6)', () => {
     expect(ZOOM_LADDER).toEqual([25, 50, 75, 100, 125, 150, 200, 300, 400, 800, 1600]);
     expect(zoomStepFrom(100, 1)).toBe(125);
     expect(zoomStepFrom(100, -1)).toBe(75);
-    expect(zoomStepFrom(63, 1)).toBe(100);
+    /* an off ladder percent steps to the next rung on either side (docs/FOCUS.md rank 23 and the
+       row arrange.zoom.menu-in: the fit's 71 percent zooms in to 75; before the focus round the
+       nearest rung's neighbour was taken, 63 up landed on 100) */
+    expect(zoomStepFrom(63, 1)).toBe(75);
     expect(zoomStepFrom(63, -1)).toBe(50);
+    expect(zoomStepFrom(71, 1)).toBe(75);
+    expect(zoomStepFrom(71, -1)).toBe(50);
+    expect(zoomStepFrom(150, 1)).toBe(200);
     expect(zoomStepFrom(1600, 1)).toBe(1600);
     expect(zoomStepFrom(25, -1)).toBe(25);
     expect(clampZoomPercent(9999)).toBe(1600);

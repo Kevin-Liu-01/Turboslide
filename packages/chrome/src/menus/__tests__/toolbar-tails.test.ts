@@ -76,6 +76,10 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
         TOOLBAR_TAILS.shape.find((each) => each.control === control)?.enabled,
         control,
       ).toBeUndefined();
+    /* cycle 2 of the focus round (docs/FOCUS.md section 4 under ruling (1), build/b3.md R14): the
+       tail is parked whole with Insert > Shape, every control flagged, so a shape a deck carries
+       takes the default tail with the switch off and this tail with it on */
+    for (const control of TOOLBAR_TAILS.shape) expect(control.advanced, control.control).toBe(true);
   });
 
   it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset, Dither (3.4; SPEC-3 13.2)', () => {
@@ -151,6 +155,9 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       'Format options',
     ]);
     for (const control of TOOLBAR_TAILS.line) expect(control.status, control.control).toBe('now');
+    /* cycle 2 (docs/FOCUS.md section 4 under ruling (1), build/b3.md R14): parked whole with
+       Insert > Line, every control flagged and still a `now` control */
+    for (const control of TOOLBAR_TAILS.line) expect(control.advanced, control.control).toBe(true);
   });
 
   it('a table cell: border first, then the fill, the merge buttons, then the text controls (3.6)', () => {
@@ -213,13 +220,19 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       ),
     );
     expect(TOOLBAR_TAIL_DEFAULT.at(-1)?.control).toBe(HIDE_MENUS_CONTROL);
-    /* the Insert shape and Insert line dropdowns open the categories and kinds of SPEC-2 4.1 */
-    expect(
-      TOOLBAR_TAILS.default.find((control) => control.control === 'toolbar.insertShape')?.arrow,
-    ).toBe('insert.shape');
-    expect(
-      TOOLBAR_TAILS.default.find((control) => control.control === 'toolbar.insertLine')?.arrow,
-    ).toBe('insert.line');
+    /* the Insert shape and Insert line dropdowns open the categories and kinds of SPEC-2 4.1;
+       since cycle 2 of the focus round both buttons are parked with their menus (docs/FOCUS.md
+       section 4 under ruling (1), build/b3.md R14) and draw with the switch on alone */
+    const insertShape = TOOLBAR_TAILS.default.find(
+      (control) => control.control === 'toolbar.insertShape',
+    );
+    const insertLine = TOOLBAR_TAILS.default.find(
+      (control) => control.control === 'toolbar.insertLine',
+    );
+    expect(insertShape?.arrow).toBe('insert.shape');
+    expect(insertLine?.arrow).toBe('insert.line');
+    expect(insertShape?.advanced).toBe(true);
+    expect(insertLine?.advanced).toBe(true);
   });
 
   it('other blocks: Format options and Replace image (3.8)', () => {

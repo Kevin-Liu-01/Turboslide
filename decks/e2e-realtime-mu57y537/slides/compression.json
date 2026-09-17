@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "compression",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Small sizes"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Developers see the brand in a terminal as often as on the website. The mark has to work as a favicon, in a CLI banner, in a README header, on an npm page, and on the website.",
+        "measure": 56,
+        "marginTop": 18
+      }
+    ],
+    "body": [
+      {
+        "id": "sizes",
+        "type": "markSizes",
+        "sizes": [
+          16,
+          32,
+          64,
+          128,
+          256
+        ]
+      }
+    ]
+  }
+}

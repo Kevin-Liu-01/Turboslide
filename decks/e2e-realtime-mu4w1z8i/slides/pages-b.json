@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "pages-b",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Contact and report card"
+      }
+    ],
+    "body": [
+      {
+        "id": "pair",
+        "type": "pair",
+        "figures": [
+          {
+            "assets": [
+              "site-contact"
+            ],
+            "caption": "The contact page sets the dashed mark and two support rows in the left column and the form in the right column, with one hairline dividing them."
+          },
+          {
+            "assets": [
+              "site-report-card"
+            ],
+            "caption": "The report card page places the URL field under the headline, the dithered globe on the right, and the graded results in hairline cells below."
+          }
+        ]
+      }
+    ]
+  }
+}

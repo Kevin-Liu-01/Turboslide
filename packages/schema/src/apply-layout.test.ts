@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { applyLayout, extractContent } from './apply-layout.ts';
+import { applyLayout, extractContent, untouchedPlaceholders } from './apply-layout.ts';
 import type { Block } from './blocks.ts';
 import type { ContentSlide, Deck, Slide } from './deck.ts';
 import { LAYOUT_IDS, slideBlocks } from './deck.ts';
@@ -428,5 +428,118 @@ describe('applyLayout', () => {
     const title = extractContent(filled('title'));
     expect(title.title).toBe('heading 1');
     expect(title.body).toEqual([{ text: 'lead 2', from: 'lead' }]);
+  });
+});
+
+describe('untouched placeholders leave with the layout (docs/FOCUS.md section 5 ranks 8 and 31)', () => {
+  /** A slide as New slide with a layout makes it: the fresh placeholders, nothing typed. */
+  function fresh(layout: (typeof LAYOUT_IDS)[number], id = 'fresh'): Slide {
+    const slide = layoutEntry(layout).make(id, blankDeck, 'deck');
+    if (slide === null) throw new Error(`${layout} needs a picture`);
+    return { ...slide, template: layout };
+  }
+
+  function apply(slide: Slide, layout: (typeof LAYOUT_IDS)[number]) {
+    return applyLayout({ slide, layout, deck: blankDeck, sectionId: 'deck' });
+  }
+
+  it('Section header then Title and body on a fresh slide leaves the second layout alone: no starter figure (audit-slides rows 59 to 61)', () => {
+    const opener = apply(fresh('split'), 'opener').slide;
+    expect(opener.kind).toBe('opener');
+    const back = apply(opener, 'split');
+    expect(back.dropped).toEqual([]);
+    const blocks = slideBlocks(back.slide).map(({ block }) => block);
+    const made = fresh('split');
+    expect(blocks.length).toBe(slideBlocks(made).length);
+    expect(blocks.map((block) => block.type)).toEqual(
+      slideBlocks(made).map(({ block }) => block.type),
+    );
+    expect(blocks.some((block) => block.type === 'shot')).toBe(false);
+  });
+
+  it('Ruled statement list then Title and table on a fresh slide carries no empty list rows (audit-slides rows 62 to 64)', () => {
+    const plain = apply(fresh('split'), 'plain').slide;
+    const table = apply(plain, 'table').slide;
+    const types = slideBlocks(table).map(({ block }) => block.type);
+    expect(types).toEqual(slideBlocks(fresh('table')).map(({ block }) => block.type));
+    expect(types).not.toContain('plain');
+  });
+
+  it('Title slide on an untouched Title and body counts nothing as dropped (audit-slides rows 68 to 70)', () => {
+    const title = apply(fresh('split'), 'title');
+    expect(title.dropped).toEqual([]);
+    expect(title.slide).toMatchObject({ kind: 'title', heading: '', lead: '' });
+    const statement = apply(fresh('split'), 'statement');
+    expect(statement.dropped).toEqual([]);
+  });
+
+  it('a typed title survives Main point and Title and body, and the untouched paragraphs are not counted (audit-slides rows 65 to 67)', () => {
+    const source = fresh('split');
+    if (source.kind !== 'content') throw new Error('kind');
+    const heading = slideBlocks(source).find(({ block }) => block.type === 'heading')?.block;
+    if (heading === undefined || heading.type !== 'heading') throw new Error('heading');
+    heading.text = 'Agenda for today';
+    const statement = apply(source, 'statement');
+    expect(statement.slide).toMatchObject({ kind: 'statement', big: 'Agenda for today' });
+    expect(statement.dropped).toEqual([]);
+    const back = apply(statement.slide, 'split');
+    expect(back.dropped).toEqual([]);
+    const texts = slideBlocks(back.slide).map(({ block }) =>
+      'text' in block && typeof block.text === 'string' ? block.text : '',
+    );
+    expect(texts[0]).toBe('Agenda for today');
+    expect(texts.slice(1).every((text) => text === '')).toBe(true);
+    expect(slideBlocks(back.slide).length).toBe(slideBlocks(fresh('split')).length);
+  });
+
+  it('a slide someone typed on keeps its starter picture as a figure, since the deck cannot tell it from a figure that person brought', () => {
+    const opener = apply(fresh('split'), 'opener').slide;
+    if (opener.kind !== 'opener') throw new Error('kind');
+    const heading = opener.plate.blocks.find((block) => block.type === 'heading');
+    if (heading === undefined || heading.type !== 'heading') throw new Error('heading');
+    heading.text = 'Pipeline';
+    const back = apply(opener, 'split').slide;
+    expect(slideBlocks(back).some(({ block }) => block.type === 'shot')).toBe(true);
+    expect(slideBlocks(back)[0]?.block).toMatchObject({ type: 'heading', text: 'Pipeline' });
+  });
+
+  it('reads the untouched set from the slide shape when template is absent, and a moved placeholder is still untouched', () => {
+    const made = layoutEntry('split').make('shape', blankDeck, 'deck');
+    if (made === null || made.kind !== 'content') throw new Error('kind');
+    const first = slideBlocks(made)[0]?.block;
+    if (first === undefined) throw new Error('block');
+    first.pos = { x: 40, y: 40, w: 600, h: 120 };
+    const untouched = untouchedPlaceholders(made, blankDeck, 'deck');
+    expect(untouched.blocks.has(first.id)).toBe(true);
+    expect(untouched.blocks.size).toBe(slideBlocks(made).length);
+    expect(untouched.picture).toBe(false);
+  });
+
+  it('a typed placeholder is content and an empty text placeholder is never a title', () => {
+    const extracted = extractContent({
+      ...CONTENT_RULE,
+      slots: {
+        left: [
+          { id: 'h', type: 'heading', level: 'h2', text: '' },
+          { id: 'p1', type: 'paragraph', text: 'Typed', measure: 56 },
+        ],
+      },
+    });
+    expect(extracted.title).toBeUndefined();
+    expect(extracted.body).toEqual([{ text: 'Typed', from: 'p1' }]);
+    const statement = apply(
+      {
+        ...CONTENT_RULE,
+        slots: {
+          left: [
+            { id: 'h', type: 'heading', level: 'h2', text: '' },
+            { id: 'p1', type: 'paragraph', text: 'Typed', measure: 56 },
+          ],
+        },
+      },
+      'statement',
+    );
+    expect(statement.slide).toMatchObject({ big: 'Typed' });
+    expect(statement.dropped).toEqual([]);
   });
 });

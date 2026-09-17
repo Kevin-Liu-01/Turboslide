@@ -29,7 +29,7 @@ import { SHADOW_DEFAULTS, paddingSides } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { colorCss } from '@turboslide/schema/color';
 import { iconSymbolId } from '@turboslide/schema/icons';
-import type { Dash, LineEnd } from '@turboslide/schema/shapes';
+import type { Box, Dash, LineEnd } from '@turboslide/schema/shapes';
 import {
   LEGACY_PRESETS,
   dashArray,
@@ -310,6 +310,16 @@ export function catmullRomPath(points: ReadonlyArray<Point>, closed: boolean): s
 }
 
 /**
+ * The text rectangle of a shape block at its box (SPEC-2 2.2.17): `textInset` of shapes.ts through
+ * the legacy id's preset, which is the whole box for every kind today (its docblock names the
+ * exporter's reason), so the layer and the PPTX body insets agree.
+ */
+export function shapeTextRect(block: BlockOf<'shape'>, w: number, h: number): Box {
+  const presetKind = LEGACY_PRESETS[block.shape as keyof typeof LEGACY_PRESETS] ?? block.shape;
+  return textInset(presetKind, w, h, block.adjust ?? []);
+}
+
+/**
  * `shape`: inline SVG at the box's size. A closed shape is inset by half its stroke so the
  * outline stays inside the box; a line or arrow runs between the ends `lineEnds` gives it, on the
  * half-pixel grid, with `stroke-linecap="square"` and no joins (DECK-GRAMMAR.md:44). An arrow
@@ -495,9 +505,9 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
   }
   const svg = `${open}>${body}</svg>`;
   if (!withText) return svg;
-  // the text layer over the svg inside the preset's text rectangle (SPEC-2 2.2.17)
-  const presetKind = LEGACY_PRESETS[kind as keyof typeof LEGACY_PRESETS] ?? kind;
-  const rect = textInset(presetKind, w, h, block.adjust ?? []);
+  // the text layer over the svg inside the kind's text rectangle (SPEC-2 2.2.17, shapeTextRect)
+  const rect = shapeTextRect(block, w, h);
+  const empty = block.text === '';
   const textStyle = style(
     `left:${px(rect.x)}px`,
     `top:${px(rect.y)}px`,
@@ -509,10 +519,17 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
     ...paraSpacingDeclarations(block.typography),
     ...valignDeclarations(block.valign),
   );
+  // an empty text (a fresh shape, docs/FOCUS.md section 4) keeps its run so Enter and a double
+  // click open it, draws no prompt (a shape is not a placeholder) and is marked `is-empty` so the
+  // canvas CSS lets a click through to the shape until the session takes the focus
   const text = el(
     'div',
-    { class: 'shape-text', style: textStyle, 'data-run': runAttr(ctx, block.id, 'text') },
-    renderMultiline(block.text ?? '', ctx, block, '/text'),
+    {
+      class: classes('shape-text', empty && 'is-empty'),
+      style: textStyle,
+      'data-run': runAttr(ctx, block.id, 'text'),
+    },
+    empty ? '' : renderMultiline(block.text ?? '', ctx, block, '/text'),
   );
   return el(
     'div',

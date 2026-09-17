@@ -119,21 +119,23 @@ export function BackgroundDialog() {
 
   const fail = (err: unknown) => setError(err instanceof Error ? err.message : String(err));
 
-  const done = () => {
+  /** Writes `chosen` as the slide's colour and closes; nothing to write closes at once. */
+  const apply = (chosen: Color | undefined) => {
     if (slide === undefined) return;
-    if (color === current) {
+    if (chosen === current) {
       shell.closeDialog();
       return;
     }
     input
       .dispatch('slide.setBackground', {
         slideIds: [slide.id],
-        background: color === undefined ? null : { color },
+        background: chosen === undefined ? null : { color: chosen },
         baseRevision: input.revision,
       })
       .then(() => shell.closeDialog())
       .catch(fail);
   };
+  const done = () => apply(color);
 
   const addToTheme = () => {
     if (color === undefined) {
@@ -382,7 +384,13 @@ export function BackgroundDialog() {
               if (event.key !== 'Enter') return;
               event.preventDefault();
               const value = hex.trim().startsWith('#') ? hex.trim() : `#${hex.trim()}`;
-              if (isHexColor(value)) setColor(value);
+              /* Enter writes the typed colour and closes, as Google's field does (docs/FOCUS.md
+                 `images.background.hex-field`; b1 R21): before, the key set the state alone and
+                 the Dialog's Enter ran Done from the render that had not seen the colour */
+              if (isHexColor(value)) {
+                setColor(value);
+                apply(value);
+              }
             }}
           />
         </label>

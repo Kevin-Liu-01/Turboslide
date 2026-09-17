@@ -1,0 +1,61 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "shift-select",
+  "startedAt": "2026-09-16T11:10:34.547Z",
+  "steps": [
+    {
+      "name": "a1 clicked",
+      "selected": "a1",
+      "chip": "Text box",
+      "handles": 0,
+      "at": "2026-09-16T11:10:41.050Z"
+    },
+    {
+      "name": "a2 shift clicked",
+      "selected": "a1",
+      "chip": "Text box",
+      "selection": null,
+      "at": "2026-09-16T11:10:41.576Z"
+    },
+    {
+      "name": "a2 shift clicked by mouse",
+      "chip": "Text box",
+      "at": "2026-09-16T11:10:42.085Z"
+    },
+    {
+      "name": "right click on the empty sheet",
+      "ctx": [
+        "menu.edit.paste",
+        "menu.slide.newSlide",
+        "menu.slide.duplicateSlide",
+        "menu.slide.deleteSlide",
+        "menu.slide.skipSlide",
+        "menu.slide.changeBackground",
+        "menu.slide.applyLayout",
+        "menu.insert.comment"
+      ],
+      "menus": 2,
+      "at": "2026-09-16T11:10:42.800Z"
+    },
+    {
+      "name": "right click on a1 by mouse",
+      "menus": 0,
+      "canvasMenu": false,
+      "consoleErrors": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "at": "2026-09-16T11:10:44.051Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-q2tf",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:10:51.254Z"
+}

@@ -101,6 +101,12 @@ async function goTo(page: Page, slideId: string): Promise<void> {
   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
 }
 
+/* the copy is restricted to the context that made it since the focus round (docs/FOCUS.md rank 1,
+   ruling 2: a new deck's general access defaults to restricted), and a fresh context is a viewer of
+   it; so the copying context mints one editor link and every other context opens the link first,
+   which gives it its own identity and the editor role (comments.spec.ts's pattern; b6.md R9) */
+let editLink = '';
+
 async function scratchDeck(browser: Browser): Promise<void> {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -112,7 +118,46 @@ async function scratchDeck(browser: Browser): Promise<void> {
     newId: COPY,
     baseRevision: info.revision,
   });
+  await openDeck(page, COPY);
+  const access = await state<{ revision: number }>(page, 'access');
+  const link = await invoke<{ url: string }>(page, 'share.createLink', {
+    id: COPY,
+    role: 'editor',
+    label: 'Edit link',
+    baseRevision: access?.revision ?? 0,
+  });
+  editLink = link.url;
   await context.close();
+}
+
+/**
+ * Tools > Advanced tools, flipped through the product's own row (docs/FOCUS.md 3.1) and read back
+ * from describe().state.settings; the roster's Go to slide is a parked row since the focus round
+ * (3.2: `title.presence.goTo` carries `advanced: true`), so it is asserted behind the switch.
+ */
+async function setAdvancedTools(page: Page, on: boolean): Promise<void> {
+  const read = () =>
+    page.evaluate(
+      () =>
+        (window.turboslide!.studio.describe().state as { settings?: Record<string, unknown> })
+          .settings?.['advancedTools'] === true,
+    );
+  if ((await read()) === on) return;
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-control="menu.tools.advancedTools"]').click();
+  await expect.poll(read, { timeout: 5000 }).toBe(on);
+  if ((await page.locator('#ts-menu-tools').count()) > 0) await page.keyboard.press('Escape');
+  await expect(page.locator('#ts-menu-tools')).toHaveCount(0);
+}
+
+/** A context of its own identity holding the editor role on the copy, through the owner's link. */
+async function editorContext(browser: Browser): Promise<BrowserContext> {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(editLink);
+  await page.waitForURL((url) => url.pathname === `/edit/${COPY}`);
+  await page.close();
+  return context;
 }
 
 test.describe.configure({ mode: 'serial' });
@@ -126,7 +171,7 @@ test('the five fixed slots exist at first paint with nobody present and the page
   browser,
 }) => {
   await scratchDeck(browser);
-  const context = await browser.newContext();
+  const context = await editorContext(browser);
   await armLayoutShift(context);
   const page = await context.newPage();
   await openDeck(page, COPY);
@@ -159,7 +204,7 @@ test('a second person appears as a chip without moving the row; the roster lists
   browser,
 }) => {
   test.setTimeout(180_000);
-  const a = await browser.newContext();
+  const a = await editorContext(browser);
   await armLayoutShift(a);
   const pageA = await a.newPage();
   await openDeck(pageA, COPY);
@@ -172,7 +217,7 @@ test('a second person appears as a chip without moving the row; the roster lists
   const slotBefore = await pageA.locator('[data-control="title.presence"]').boundingBox();
   const shareBefore = await pageA.locator('[data-control="share.open"]').boundingBox();
 
-  const b = await browser.newContext();
+  const b = await editorContext(browser);
   const pageB = await b.newPage();
   await openDeck(pageB, COPY);
   await goTo(pageB, SLIDE);
@@ -189,7 +234,12 @@ test('a second person appears as a chip without moving the row; the roster lists
   expect(others).toHaveLength(1);
   const bClient = others[0]!.clientId;
 
-  /* the roster: B's row with Go to slide (a label cannot be followed, 4.4), the own row, Join chat disabled */
+  /* the roster: B's row with Go to slide (a label cannot be followed, 4.4), the own row, Join chat
+     disabled. Since the focus round the roster's rows `title.presence.goTo` and `title.presence.me`
+     and the Later stub `title.presence.joinChat` are parked (docs/FOCUS.md 3.2, 3.1) and so is the
+     pointer toggle `toolbar.pointer` of the tail's end (3.3), so this part and the toggle run
+     behind Tools > Advanced tools; the switch goes back off before the default view rows below */
+  await setAdvancedTools(pageA, true);
   await pageA.locator('[data-control="presence.more"]').click();
   const roster = pageA.locator('#ts-menu-roster');
   await expect(roster).toBeVisible();
@@ -215,12 +265,14 @@ test('a second person appears as a chip without moving the row; the roster lists
   expect(Math.round(flagBox?.width ?? 0)).toBe(120);
   expect(Math.round(flagBox?.height ?? 0)).toBe(18);
 
-  /* the pointer toggle at the tail's end flips aria-pressed */
+  /* the pointer toggle at the tail's end flips aria-pressed (a parked control, 3.3: drawn while
+     the switch is on) */
   const pointer = pageA.locator('[data-control="toolbar.pointer"]');
   await expect(pointer).toHaveAttribute('aria-pressed', 'false');
   await pointer.click();
   await expect(pointer).toHaveAttribute('aria-pressed', 'true');
   await pointer.click();
+  await setAdvancedTools(pageA, false);
 
   /* Shift+Tab from the File menu focuses the roster (0.42): the menu closes, focus lands on the
      roster's first row and never returns to the File title (VERIFICATION-3 finding 13) */
@@ -246,7 +298,7 @@ test('a second person appears as a chip without moving the row; the roster lists
     'aria-live',
     'polite',
   );
-  const c = await browser.newContext();
+  const c = await editorContext(browser);
   const pageC = await c.newPage();
   await openDeck(pageC, COPY);
   await expect(pageA.locator('[data-control="presence.announcements"]')).toContainText('joined', {
@@ -255,7 +307,8 @@ test('a second person appears as a chip without moving the row; the roster lists
   await c.close();
 
   /* 4.10: the words B types in the heading arrive in A as B types them */
-  await pageB.locator('.ts-stagewrap.ts-editor [data-block="h"] [data-run]').first().click();
+  /* the session opens on a double click (AMENDMENTS.md A1; one click selects the block) */
+  await pageB.locator('.ts-stagewrap.ts-editor [data-block="h"] [data-run]').first().dblclick();
   await pageB.keyboard.press('End');
   await pageB.keyboard.type(' live', { delay: 40 });
   await expect(pageA.locator('.ts-stagewrap.ts-editor [data-block="h"]')).toContainText('live', {
@@ -274,7 +327,7 @@ test('twenty simulated participants fill four chips and +16, the filmstrip chips
   browser,
 }) => {
   test.setTimeout(180_000);
-  const a = await browser.newContext();
+  const a = await editorContext(browser);
   await armLayoutShift(a);
   const pageA = await a.newPage();
   await openDeck(pageA, COPY);

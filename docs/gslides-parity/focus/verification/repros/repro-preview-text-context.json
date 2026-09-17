@@ -1,0 +1,35 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "text-context",
+  "startedAt": "2026-09-16T11:07:17.858Z",
+  "steps": [
+    {
+      "name": "right click on the box",
+      "selected": "box-a",
+      "ctxRows": [],
+      "anyMenu": {
+        "contextMenus": 0,
+        "menuRoots": 0
+      },
+      "at": "2026-09-16T11:07:26.826Z"
+    },
+    {
+      "name": "right click on a selected word",
+      "run": "box-a/text",
+      "selText": "",
+      "ctxRows2": [],
+      "at": "2026-09-16T11:07:28.066Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-fgm5",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:07:33.263Z"
+}

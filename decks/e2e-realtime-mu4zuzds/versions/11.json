@@ -1,0 +1,80 @@
+{
+  "n": 11,
+  "revision": 11,
+  "author": {
+    "kind": "human",
+    "name": "Cork 108",
+    "principalId": "anon_c9e5ebb5-0f46-4eff-a0fc-79bf17151fd4"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T03:53:27.648Z",
+  "mutations": [
+    {
+      "op": "block.remove",
+      "slideId": "content-rule",
+      "blockId": "list"
+    }
+  ],
+  "baseRevision": 10,
+  "inverse": [
+    {
+      "op": "block.insert",
+      "slideId": "content-rule",
+      "slot": "right",
+      "block": {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Legacy i18n: 12 weeks.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "With GT: one pull request.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "Eight locales from one build.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "Numbers, currency, and dates localize too.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "That market is yours to gain.",
+            "icon": {
+              "name": "x-circle",
+              "color": "no"
+            },
+            "no": true
+          },
+          {
+            "text": "Localization is a growth lever.",
+            "icon": {
+              "name": "x-circle",
+              "color": "no"
+            },
+            "no": true
+          }
+        ]
+      }
+    }
+  ],
+  "ops": {
+    "fromSeq": 23,
+    "toSeq": 23
+  }
+}

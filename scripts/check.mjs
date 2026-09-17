@@ -32,6 +32,12 @@
 // fake download secret for the tmp store rule of server/tokens.ts.
 //
 // Round four (gslides-parity SPEC-4 6.1, 0.46): three steps join, 29 to 31, so `--list` prints 31.
+//
+// The focus round (docs/FOCUS.md section 6; the drivers lane): step 32 is the core gate against
+// the runner's dev server, `scripts/probes/core-gate.mjs`: the walk probe in --core mode and the
+// seven core specs under apps/studio/e2e/core/, every matrix row judged by its id, exit 1 on any
+// failed or not driven driven row. The runs that count are on the preview and on production
+// (6.2); this step proves the drivers run. `--list` prints 32.
 // Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
 // Chrome for Testing once for the card compare when chromium-1217 is present and the fonts venv's
@@ -85,7 +91,10 @@ const WARM_CONCURRENCY = 8;
 // (packages/headless/src/shell.ts SHELL_STATES; the toolbar's Theme button collapses into More at
 // 390 px and the bottom bar's panel button sits under the dev server's devtools trigger). The
 // home page has no states.
-const EDITOR_STATES = 'editorGrid,editorMenu,editorPanel';
+/* the grid view is parked (docs/FOCUS.md 3.2); its `editorGrid` state runs only with Tools >
+   Advanced tools on, so the chain's chrome lint takes the two states the default view draws
+   (the focus round, b1 R10) */
+const EDITOR_STATES = 'editorMenu,editorPanel';
 // Step 20 (gslides-parity SPEC 14.1): the Google parity audit once the verifier has written it;
 // until then the menu model tests stand in, so the step is never a silent pass.
 const PARITY_AUDIT = 'scripts/gslides-parity-audit.mjs';
@@ -259,7 +268,9 @@ const steps = [
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
   // not touched: the tree is prettier-clean (AGENTS.md code rules). Last, so the M1 step numbers
   // that AGENTS.md and the status documents cite stay valid.
-  { cmd: 'pnpm format:check' },
+  // the focus round (docs/FOCUS.md 7, "rendered, never typed"): the README section "What works
+  // today" is what docs/readme/what-works.mjs renders from core-matrix.json; a stale one fails here
+  { cmd: 'pnpm format:check && node docs/readme/what-works.mjs --check' },
   // gslides-parity SPEC 14.1, steps 20 and 21: the Google parity audit (the verifier's script;
   // the menu model tests until it exists) and the parity round's end to end specs, the ten tasks
   // of SPEC 11.2 first. The report lands in the current round's folder (SPEC-3 16.2 names
@@ -332,6 +343,12 @@ const steps = [
     // read the same server's heads against the node-server build's client output.
     cmd: `node ${PERF_BUDGET} --base ${STUDIO_URL} --profile local --write --runs 3 --json .turboslide/perf-budget.json${process.env.CI ? ' --report' : ''} && node ${CLIENT_BUNDLE_CHECK} apps/studio/dist --base ${STUDIO_URL} --client ${NODE_SERVER_CLIENT}`,
     needs: 'node-server',
+  },
+  // the focus round (docs/FOCUS.md section 6, 6.2): the core gate, every driver of the matrix
+  // against the runner's dev server, judged by row id; the gate takes .turboslide/e2e.lock itself
+  {
+    cmd: `node scripts/probes/core-gate.mjs --base ${STUDIO_URL} --out .turboslide/core-gate`,
+    needs: 'server',
   },
 ];
 

@@ -1,0 +1,30 @@
+{
+  "n": 5,
+  "revision": 5,
+  "author": {
+    "kind": "agent",
+    "name": "agent",
+    "runId": "e2e-room"
+  },
+  "note": "",
+  "createdAt": "2026-09-17T03:53:15.228Z",
+  "mutations": [
+    {
+      "op": "block.set",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "value": "Agent heading"
+    }
+  ],
+  "baseRevision": 4,
+  "inverse": [
+    {
+      "op": "block.set",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "value": "The copy testabcdefghijkl"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
-import type { Browser, Page } from '@playwright/test';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 // Version history by author (gslides-parity SPEC-3 0.44, 0.45, 5.7, 16.3
 // `versions-by-author.spec.ts`; research 08 section 6): two browser contexts with two labels edit
@@ -57,6 +57,11 @@ async function settled(page: Page): Promise<void> {
   });
 }
 
+/* the copy is restricted to the context that made it (docs/FOCUS.md rank 1, ruling 2), so the
+   copying context mints one editor link and the two labels below join through it, each with its
+   own identity and the editor role (comments.spec.ts's pattern; b6.md R9) */
+let editLink = '';
+
 async function scratchDeck(browser: Browser): Promise<void> {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -68,10 +73,36 @@ async function scratchDeck(browser: Browser): Promise<void> {
     newId: COPY,
     baseRevision: info.revision,
   });
+  await openDeck(page, `/edit/${COPY}`);
+  const access = await page.evaluate(
+    () => (window.turboslide!.studio.describe().state as { access?: { revision?: number } }).access,
+  );
+  const link = await invoke<{ url: string }>(page, 'share.createLink', {
+    id: COPY,
+    role: 'editor',
+    label: 'Edit link',
+    baseRevision: access?.revision ?? 0,
+  });
+  editLink = link.url;
   await context.close();
 }
 
-/** Types a word at the end of the slide's heading run and leaves the caret. */
+/** A context of its own identity holding the editor role on the copy, through the owner's link. */
+async function editorContext(browser: Browser): Promise<BrowserContext> {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(editLink);
+  await page.waitForURL((url) => url.pathname === `/edit/${COPY}`);
+  await page.close();
+  return context;
+}
+
+/**
+ * Types a word at the end of the slide's heading run and leaves the caret. The session opens on
+ * a double click (AMENDMENTS.md A1); a slide field rendered as one element (a title slide's
+ * heading, a statement slide's big text) carries `data-block` and `data-run` on the same element,
+ * so the selector takes that form beside the slot block's descendant run (b6 FR3).
+ */
 async function typeInHeading(
   page: Page,
   slideId: string,
@@ -79,7 +110,12 @@ async function typeInHeading(
   word: string,
 ): Promise<void> {
   await goTo(page, slideId);
-  await page.locator(`.ts-stagewrap.ts-editor [data-block="${block}"] [data-run]`).first().click();
+  await page
+    .locator(
+      `.ts-stagewrap.ts-editor [data-block="${block}"][data-run], .ts-stagewrap.ts-editor [data-block="${block}"] [data-run]`,
+    )
+    .first()
+    .dblclick();
   await page.keyboard.press('End');
   await page.keyboard.type(word, { delay: 30 });
   await page.keyboard.press('Escape');
@@ -98,8 +134,8 @@ test('two labels editing two slides make one window with two marks; Show changes
 }) => {
   test.setTimeout(300_000);
   await scratchDeck(browser);
-  const a = await browser.newContext();
-  const b = await browser.newContext();
+  const a = await editorContext(browser);
+  const b = await editorContext(browser);
   const pageA = await a.newPage();
   const pageB = await b.newPage();
   await openDeck(pageA, `/edit/${COPY}`);

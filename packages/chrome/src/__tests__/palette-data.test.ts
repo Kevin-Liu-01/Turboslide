@@ -7,6 +7,7 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Version } from '@turboslide/schema/mutations';
 
 import type { PaletteContext } from '../palette-data';
+import type { PaletteEntry } from '../palette-data';
 import {
   PALETTE_GROUPS,
   buildPaletteEntries,
@@ -14,6 +15,7 @@ import {
   insertionSlot,
   matchScore,
   parsePaletteQuery,
+  presentPaletteEntries,
 } from '../palette-data';
 import { LAYOUTS } from '@turboslide/schema/layouts';
 
@@ -55,7 +57,10 @@ const ctx: PaletteContext = {
 };
 
 describe('buildPaletteEntries', () => {
-  const entries = buildPaletteEntries(ctx);
+  /* the whole list is behind Tools > Advanced tools (docs/FOCUS.md 3.1): a grammar block's entry
+     is parked with its missing menu row; the default view's list is asserted under
+     presentPaletteEntries below */
+  const entries = buildPaletteEntries({ ...ctx, advancedTools: true });
 
   it('has the groups in order: the five of the full palette plus the two of Search the menus', () => {
     expect(PALETTE_GROUPS.map((group) => group.id)).toEqual([
@@ -165,6 +170,83 @@ describe('buildPaletteEntries', () => {
   });
 });
 
+describe('presentPaletteEntries', () => {
+  const plain: PaletteEntry = {
+    id: 'insert:block:text',
+    group: 'insert',
+    title: 'Text',
+    icon: 'document',
+    run: { kind: 'dispatch', action: 'block.insert', input: {} },
+  };
+  const parked: PaletteEntry = {
+    ...plain,
+    id: 'insert:block:chart',
+    title: 'Chart',
+    advanced: true,
+  };
+
+  it('lists a parked entry only while Tools > Advanced tools is on (docs/FOCUS.md 3.1)', () => {
+    expect(presentPaletteEntries([plain, parked], {}).map((entry) => entry.id)).toEqual([plain.id]);
+    expect(
+      presentPaletteEntries([plain, parked], { advancedTools: false }).map((entry) => entry.id),
+    ).toEqual([plain.id]);
+    expect(
+      presentPaletteEntries([plain, parked], { advancedTools: true }).map((entry) => entry.id),
+    ).toEqual([plain.id, parked.id]);
+    /* the parked entry keeps its action: hidden, not removed */
+    expect(parked.run).toEqual(plain.run);
+  });
+
+  it('is what buildPaletteEntries applies: the switch adds exactly the parked Insert entries', () => {
+    const off = buildPaletteEntries(ctx);
+    const on = buildPaletteEntries({ ...ctx, advancedTools: true });
+    const offIds = new Set(off.map((entry) => entry.id));
+    expect(off.every((entry) => entry.advanced !== true)).toBe(true);
+    for (const entry of off)
+      expect(
+        on.some((each) => each.id === entry.id),
+        entry.id,
+      ).toBe(true);
+    const added = on.filter((entry) => !offIds.has(entry.id));
+    expect(added.length).toBeGreaterThan(0);
+    for (const entry of added) {
+      expect(entry.advanced, entry.id).toBe(true);
+      expect(entry.group, entry.id).toBe('insert');
+    }
+    /* the default view's Insert group: the entries whose menu row is core (docs/FOCUS.md 2.3,
+       2.4), then the 21 New slide rows; the five shape and line entries of 2.6 left with their
+       rows in cycle 2 (section 4 under ruling (1), build/b3.md R14) and stand behind the switch */
+    const insert = off.filter((entry) => entry.group === 'insert');
+    expect(insert.filter((entry) => entry.insert !== 'slide').map((entry) => entry.id)).toEqual([
+      'insert:block:text',
+      'insert:block:image',
+    ]);
+    expect(insert.filter((entry) => entry.insert === 'slide')).toHaveLength(LAYOUTS.length);
+    for (const entry of insert) expect(entry.row, entry.id).toBeDefined();
+    for (const [id, row] of [
+      ['insert:block:shape:rectangle', 'insert.shape.shapes.rectangle'],
+      ['insert:block:shape:rounded', 'insert.shape.shapes.rounded'],
+      ['insert:block:shape:ellipse', 'insert.shape.shapes.ellipse'],
+      ['insert:block:shape:line', 'insert.line.line'],
+      ['insert:block:shape:arrow', 'insert.line.arrow'],
+    ]) {
+      const entry = on.find((each) => each.id === id);
+      expect(entry?.row, id).toBe(row);
+      expect(entry?.advanced, id).toBe(true);
+    }
+    /* the parked entries name the row they leave with, or none for a grammar block */
+    const byId = new Map(on.map((entry) => [entry.id, entry]));
+    expect(byId.get('insert:block:chart')?.row).toBe('insert.chart');
+    expect(byId.get('insert:block:table')?.row).toBe('insert.table');
+    expect(byId.get('insert:block:dia')?.row).toBe('insert.diagram');
+    expect(byId.get('insert:block:icon')?.row).toBe('insert.icon');
+    expect(byId.get('insert:block:material')?.row).toBe('insert.material');
+    expect(byId.get('insert:block:rule')?.row).toBe('insert.line.rule');
+    expect(byId.get('insert:block:plain')?.row).toBeUndefined();
+    expect(byId.get('insert:block:plain')?.advanced).toBe(true);
+  });
+});
+
 describe('parsePaletteQuery and matchScore', () => {
   it('reads the three prefixes', () => {
     expect(parsePaletteQuery('>lint')).toEqual({ group: 'actions', needle: 'lint' });
@@ -183,7 +265,8 @@ describe('parsePaletteQuery and matchScore', () => {
 });
 
 describe('filterPalette', () => {
-  const entries = buildPaletteEntries(ctx);
+  /* the filter is exercised over the whole list, behind Tools > Advanced tools (docs/FOCUS.md 3.1) */
+  const entries = buildPaletteEntries({ ...ctx, advancedTools: true });
 
   it('shows every group for an empty query', () => {
     const groups = filterPalette(entries, '');

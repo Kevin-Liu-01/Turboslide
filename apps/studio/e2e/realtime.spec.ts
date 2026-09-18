@@ -104,12 +104,15 @@ async function settled(page: Page, timeout = 15_000): Promise<void> {
   await expect.poll(async () => (await status(page)).pending, { timeout }).toBe(0);
 }
 
-/** A click at the start or the end of a run's text opens the inline session there. */
+/**
+ * A double click on a run's text opens the inline session (AMENDMENTS.md A1: one click selects
+ * the object, the double click enters); the caret is then placed at the start or the end.
+ */
 async function caretIn(page: Page, blockId: string, where: 'start' | 'end'): Promise<void> {
   const run = page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="${blockId}/text"]`);
   const box = await run.boundingBox();
   expect(box).not.toBeNull();
-  await page.mouse.click(box!.x + 8, box!.y + 8);
+  await page.mouse.dblclick(box!.x + 8, box!.y + 8);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   // the caret at the very start or end of the run (Meta+End moves to the line's end in headless
   // Chromium on macOS, so the selection is placed by hand)
@@ -170,6 +173,24 @@ test.beforeAll(async ({ browser }) => {
     baseRevision: info.revision,
   });
   expect(copied.deckId).toBe(DECK);
+  /* the copy is restricted to A since the focus round (docs/FOCUS.md rank 1, ruling 2), so B
+     joins through one editor link A mints; B's first request is a page load, which mints B's own
+     anonymous cookie before any API call (a cookieless localhost request would be admitted as
+     the checkout holder, `agent:localhost`; b6.md R9) */
+  await pageA.goto(`/edit/${DECK}`);
+  await editorReady(pageA);
+  const access = await pageA.evaluate(
+    () => (window.turboslide!.studio.describe().state as { access?: { revision?: number } }).access,
+  );
+  const link = await invoke<{ url: string }>(pageA, 'share.createLink', {
+    id: DECK,
+    role: 'editor',
+    label: 'Edit link',
+    baseRevision: access?.revision ?? 0,
+  });
+  await pageB.goto('/decks');
+  await pageB.goto(link.url);
+  await pageB.waitForURL((url) => url.pathname === `/edit/${DECK}`);
 });
 
 test.afterAll(async () => {
@@ -177,7 +198,10 @@ test.afterAll(async () => {
     await pageA.goto(`/edit/${DECK}`);
     await editorReady(pageA);
     const info = await invoke<{ revision: number }>(pageA, 'deck.info');
-    await invoke(pageA, 'deck.remove', { id: DECK, baseRevision: info.revision });
+    // `confirm` is the action's input (schema/actions.ts deck.remove); without it the call was
+    // refused "invalid input at /confirm" and a failed run left its deck under decks/
+    // (VERIFICATION C3-F11)
+    await invoke(pageA, 'deck.remove', { id: DECK, confirm: true, baseRevision: info.revision });
   } catch {
     // the deck may be gone already
   }
@@ -402,7 +426,7 @@ test('a rejected op comes back to its author with its content', async () => {
   const item = pageA.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/0/text"]');
   const box = await item.boundingBox();
   expect(box).not.toBeNull();
-  await pageA.mouse.click(box!.x + 8, box!.y + 8);
+  await pageA.mouse.dblclick(box!.x + 8, box!.y + 8);
   await expect(item).toHaveAttribute('contenteditable', 'true');
   await pageA.keyboard.press('End');
   await pageA.keyboard.type(' kept words', { delay: 20 });
@@ -435,7 +459,6 @@ test('a rejected op comes back to its author with its content', async () => {
 });
 
 test('a position more than 2,000 entries behind resyncs and rebases the pending ops', async () => {
-  // 2,001 window API calls take 2.7 to 3 minutes on a loaded machine (one round trip each)
   test.setTimeout(480_000);
   await a.setOffline(true);
   await caretIn(pageA, PARA, 'end');
@@ -444,25 +467,38 @@ test('a position more than 2,000 entries behind resyncs and rebases the pending 
   await expect
     .poll(async () => (await status(pageA)).pending, { timeout: 5000 })
     .toBeGreaterThan(0);
-  // B lands 2,001 operations through the window API while A is away
+  // B lands 2,001 operations through the window API while A is away. A window API write answers
+  // the revision its checkpoint made (controller.tsx acknowledgedAbove, VERIFICATION F22), and on
+  // the memory tier that checkpoint comes 2 s after the last op, so 2,001 writes awaited one by
+  // one cost a checkpoint each (measured 2.2 s per write: 217 entries in the 480 s the test has;
+  // VERIFICATION C2-F17). The writes go in chunks of fifty issued together: every write of a
+  // chunk bases on the revision the page reports before the chunk, the room client flushes them
+  // as one batch of entries, and the chunk's answers arrive with its checkpoint. The entries
+  // are the same 2,001 text splices on one run, one stream entry each.
   await pageB.evaluate(async () => {
-    for (let i = 0; i < 2001; i += 1) {
+    const CHUNK = 50;
+    for (let done = 0; done < 2001; done += CHUNK) {
+      const count = Math.min(CHUNK, 2001 - done);
       const rev = window.turboslide!.studio.describe().state.revision as number;
-      await window.turboslide!.studio.invoke('slide.update', {
-        slideId: 'content-rule',
-        baseRevision: rev,
-        mutations: [
-          {
-            op: 'text.splice',
+      await Promise.all(
+        Array.from({ length: count }, () =>
+          window.turboslide!.studio.invoke('slide.update', {
             slideId: 'content-rule',
-            blockId: 'h',
-            path: '/text',
-            at: 0,
-            remove: 0,
-            insert: 'z',
-          },
-        ],
-      });
+            baseRevision: rev,
+            mutations: [
+              {
+                op: 'text.splice',
+                slideId: 'content-rule',
+                blockId: 'h',
+                path: '/text',
+                at: 0,
+                remove: 0,
+                insert: 'z',
+              },
+            ],
+          }),
+        ),
+      );
     }
   });
   await settled(pageB, 60_000);
@@ -507,6 +543,193 @@ test('a closed tab’s pending queue is offered on the next open and Apply lands
   await expect(plate).toBeHidden();
 });
 
+test('a refused stream (503 with retry-after) keeps the tab saving over POST, and the client reopens it after the wait with one roster row (C3-F1)', async () => {
+  test.setTimeout(120_000);
+  await openEditor(pageA, DECK);
+  await openEditor(pageB, DECK);
+  await settled(pageA);
+  await settled(pageB);
+  const clientIdOf = (page: Page) =>
+    page.evaluate(
+      () =>
+        (window.turboslide!.studio.describe().state as { presence?: { clientId?: string } })
+          .presence?.clientId ?? null,
+    );
+  const othersOf = (page: Page) =>
+    page.evaluate(
+      () =>
+        (
+          window.turboslide!.studio.describe().state as {
+            presence?: { others?: { clientId: string }[] };
+          }
+        ).presence?.others?.map((row) => row.clientId) ?? [],
+    );
+  const idBefore = await clientIdOf(pageA);
+  expect(idBefore).not.toBeNull();
+  // every open of A's stream is refused the way the instance's cap refuses a tab's fourth
+  // stream (routes/api/decks.$deckId.stream.ts), with a one second wait
+  const refusedAt: number[] = [];
+  const refusing = async (route: import('@playwright/test').Route): Promise<void> => {
+    refusedAt.push(Date.now());
+    await route.fulfill({
+      status: 503,
+      headers: { 'content-type': 'application/json', 'retry-after': '1' },
+      body: JSON.stringify({ error: 'too_many_streams', cap: 'identity' }),
+    });
+  };
+  await pageA.route(/\/api\/decks\/[^/?]+\/stream(\?|$)/, refusing);
+  // the stream A holds is cut for a moment, so the client's reopen meets the refusal
+  await a.setOffline(true);
+  await expect.poll(async () => (await status(pageA)).connected, { timeout: 10_000 }).toBe(false);
+  await a.setOffline(false);
+  await expect.poll(() => refusedAt.length, { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
+  // A writes while its stream is refused: the POST lands, the op is acknowledged, B reads it
+  const before = await runText(pageA, PARA);
+  await caretIn(pageA, PARA, 'end');
+  await pageA.keyboard.type(' refused', { delay: 20 });
+  await endEdit(pageA);
+  await expect.poll(async () => (await status(pageA)).pending, { timeout: 10_000 }).toBe(0);
+  expect((await status(pageA)).connected).toBe(false);
+  await expect.poll(() => runText(pageB, PARA), { timeout: 10_000 }).toBe(`${before} refused`);
+  // the reopens follow the wait the refusal named (about one second apart), never a burst
+  await expect.poll(() => refusedAt.length, { timeout: 10_000 }).toBeGreaterThanOrEqual(3);
+  const gaps = refusedAt.slice(1).map((at, i) => at - refusedAt[i]!);
+  for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(800);
+  // the cap frees a slot: the next reopen lands within the wait, with a new client id, and B's
+  // roster lists A once (the reopen retired the tab's earlier id)
+  await pageA.unroute(/\/api\/decks\/[^/?]+\/stream(\?|$)/, refusing);
+  await expect.poll(async () => (await status(pageA)).connected, { timeout: 10_000 }).toBe(true);
+  const idAfter = await clientIdOf(pageA);
+  expect(idAfter).not.toBeNull();
+  expect(idAfter).not.toBe(idBefore);
+  await expect.poll(() => othersOf(pageB), { timeout: 15_000 }).toEqual([idAfter]);
+  await settled(pageA);
+  await expect(pageA.locator('.ts-title-save')).toHaveAttribute('data-state', 'saved');
+});
+
+test('a page whose every stream open is refused from the start writes under the id the refusal minted, and joins once a slot frees (C3S-F2)', async () => {
+  test.setTimeout(120_000);
+  await openEditor(pageB, DECK);
+  await settled(pageB);
+  const clientIdOf = (page: Page) =>
+    page.evaluate(
+      () =>
+        (window.turboslide!.studio.describe().state as { presence?: { clientId?: string } })
+          .presence?.clientId ?? null,
+    );
+  // A's own stream of the last row leaves first: the navigation fires `pagehide`, the room
+  // client posts its leave with keepalive and the route closes the stream on it, so the
+  // identity's four slots are free for the holders below
+  await pageA.goto('/decks');
+  await pageA.waitForLoadState('domcontentloaded');
+  // A's identity holds its cap of four streams (raw fetches, held; the shape of C3S-F2's
+  // aborted opens the runtime never released), so the editor page's own open is refused at the
+  // identity cap by the real route. The fetches leave this process under A's own cookie, not
+  // the browser: on the HTTP/1.1 dev server the browser's six connections per host held the
+  // four streams and B's, and the editor page's own long lived open queued in the browser
+  // behind them, so the route never judged it while the cap was full (VERIFICATION C3S-F9);
+  // a preview is HTTP/2 and has no such queue
+  const base = test.info().project.use.baseURL ?? 'http://localhost:4321';
+  const cookie = (await a.cookies(base)).map((row) => `${row.name}=${row.value}`).join('; ');
+  expect(cookie, 'A holds its anonymous identity cookie').toMatch(/ts_id=/);
+  const holders: AbortController[] = [];
+  const held: number[] = [];
+  const holding = Date.now();
+  while (held.length < 4) {
+    const controller = new AbortController();
+    // the same origin headers a browser sends: the studio's cross site filter (start.ts
+    // `csrfFilter`) refuses a cookie carrying request of the stream route without them
+    const response = await fetch(`${base}/api/decks/${DECK}/stream?since=0`, {
+      headers: {
+        cookie,
+        accept: 'text/event-stream',
+        origin: base,
+        'sec-fetch-site': 'same-origin',
+      },
+      signal: controller.signal,
+    });
+    if (response.status !== 200) {
+      // the last row's stream has not left yet: its leave is on its way (the wait the refusal
+      // names is 5 s; the row gives it 30 s before it records the refusal)
+      controller.abort();
+      if (Date.now() - holding > 30_000) {
+        held.push(response.status);
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      continue;
+    }
+    const reader = response.body!.getReader();
+    // the hello (or the resync frame of a long log), then the stream is held open
+    await reader.read();
+    void (async () => {
+      try {
+        for (;;) {
+          const { done } = await reader.read();
+          if (done) break;
+        }
+      } catch {
+        // aborted below
+      }
+    })();
+    holders.push(controller);
+    held.push(response.status);
+  }
+  const refusals: { status: number; clientId: string | null }[] = [];
+  const onResponse = (response: import('@playwright/test').Response): void => {
+    if (/\/api\/decks\/[^/?]+\/stream(\?|$)/.test(response.url()) && response.status() === 503) {
+      void response
+        .json()
+        .then((body: { clientId?: string }) =>
+          refusals.push({ status: 503, clientId: body.clientId ?? null }),
+        )
+        .catch(() => refusals.push({ status: 503, clientId: null }));
+    }
+  };
+  pageA.on('response', onResponse);
+  try {
+    expect(held).toEqual([200, 200, 200, 200]);
+    await pageA.goto(`/edit/${DECK}`);
+    await editorReady(pageA);
+    // the open was refused with the id the route minted, and the page took it without a hello
+    await expect.poll(() => refusals.length, { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+    expect(refusals[0]?.clientId).toMatch(/^[0-9a-f]{32}$/);
+    await expect.poll(() => clientIdOf(pageA), { timeout: 10_000 }).toBe(refusals[0]?.clientId);
+    expect((await status(pageA)).connected).toBe(false);
+    // A writes with no stream ever opened: the POST lands under the minted id and B reads it
+    await pageA.evaluate(
+      (id) => window.turboslide!.studio.invoke('view.goto', { slideId: id }),
+      SLIDE,
+    );
+    const before = await runText(pageB, PARA);
+    await caretIn(pageA, PARA, 'end');
+    await pageA.keyboard.type(' minted', { delay: 20 });
+    await endEdit(pageA);
+    await expect.poll(async () => (await status(pageA)).pending, { timeout: 10_000 }).toBe(0);
+    expect((await status(pageA)).connected).toBe(false);
+    await expect.poll(() => runText(pageB, PARA), { timeout: 10_000 }).toBe(`${before} minted`);
+    // the held streams close (their holder aborts them, the abort the dev server reports) and
+    // the next reopen, after the wait the last refusal named, is admitted with a new id; B's
+    // roster lists A once (the reopen retired the minted id)
+    for (const controller of holders) controller.abort();
+    await expect.poll(async () => (await status(pageA)).connected, { timeout: 20_000 }).toBe(true);
+    const idAfter = await clientIdOf(pageA);
+    expect(idAfter).not.toBeNull();
+    expect(idAfter).not.toBe(refusals[0]?.clientId);
+    await expect
+      .poll(
+        async () => (await invoke<{ others: unknown[] }>(pageB, 'presence.list')).others.length,
+        { timeout: 15_000 },
+      )
+      .toBe(1);
+    await settled(pageA);
+    await expect(pageA.locator('.ts-title-save')).toHaveAttribute('data-state', 'saved');
+  } finally {
+    pageA.off('response', onResponse);
+    for (const controller of holders) controller.abort();
+  }
+});
+
 test('sync.status reads the same numbers through the window API and describe().state', async () => {
   await openEditor(pageA, DECK);
   await settled(pageA);
@@ -522,8 +745,10 @@ test('sync.status reads the same numbers through the window API and describe().s
   expect(viaAction.transport).toBe('sse');
   expect(viaAction.connected).toBe(true);
   // the stream's hello names the same head
-  const hello = await pageA.evaluate(async () => {
-    const response = await fetch(`/api/decks/${'e2e-realtime'}/stream?since=0`, {
+  // the row's own deck (one scratch deck per run since the focus round): a fixed name read a
+  // leftover deck of the shared tmp store and its hello (the seam step, run C on 4394)
+  const hello = await pageA.evaluate(async (deck) => {
+    const response = await fetch(`/api/decks/${deck}/stream?since=0`, {
       headers: { accept: 'text/event-stream' },
     });
     const reader = response.body!.getReader();
@@ -534,7 +759,7 @@ test('sync.status reads the same numbers through the window API and describe().s
     return line === undefined
       ? null
       : (JSON.parse(line.slice(6)) as { seq: number; revision: number });
-  });
+  }, DECK);
   expect(hello?.seq).toBe(viaAction.seq);
   expect(hello?.revision).toBe(viaAction.revision);
 });

@@ -1,0 +1,71 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-16T15:37:02.072Z",
+  "trials": [
+    {
+      "name": "abort speculative requests",
+      "abortSpeculative": true,
+      "stripRules": false,
+      "landed": false,
+      "url": "https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252F",
+      "requests": []
+    },
+    {
+      "name": "strip the speculation rules",
+      "abortSpeculative": false,
+      "stripRules": true,
+      "stripped": 1,
+      "landed": true,
+      "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/new",
+      "revision": 0,
+      "requests": [
+        {
+          "url": "https://vercel.com/sso-api?url=https%3A%2F%2Fturboslide-7o1m3892o-kl01s-projects.vercel.ap",
+          "type": "other",
+          "purpose": "prefetch"
+        },
+        {
+          "url": "https://vercel.com/sso-api?url=https%3A%2F%2Fturboslide-7o1m3892o-kl01s-projects.vercel.ap",
+          "type": "other",
+          "purpose": "prefetch"
+        },
+        {
+          "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/new",
+          "type": "document",
+          "purpose": null,
+          "status": 200
+        },
+        {
+          "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/assets/new-BMhd4qgC.js",
+          "type": "script",
+          "purpose": null,
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "abortSpeculative": true,
+      "stripRules": true,
+      "stripped": 1,
+      "landed": true,
+      "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/new",
+      "revision": 0,
+      "requests": [
+        {
+          "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/new",
+          "type": "document",
+          "purpose": null,
+          "status": 200
+        },
+        {
+          "url": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app/assets/new-BMhd4qgC.js",
+          "type": "script",
+          "purpose": null,
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "endedAt": "2026-09-16T15:37:23.727Z"
+}

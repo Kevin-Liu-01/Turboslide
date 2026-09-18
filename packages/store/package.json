@@ -19,6 +19,8 @@
     "./hosted": "./src/hosted.ts",
     "./access-store": "./src/access-store.ts",
     "./comments-store": "./src/comments-store.ts",
+    "./presence-store": "./src/presence-store.ts",
+    "./pulse": "./src/pulse.ts",
     "./inbox": "./src/inbox.ts",
     "./migrate": "./src/migrate.ts",
     "./tmp-store": "./src/tmp-store.ts",

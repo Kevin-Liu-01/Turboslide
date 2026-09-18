@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // MILESTONES M3 acceptance, editor.spec.ts: drags the key column edge of a rows block and asserts
 // block.set /key landed on a snap value, drags the column seam and asserts /layout/ratio, edits
 // text inline with a bare GT and asserts the mark rendered and the document kept the letters,
@@ -373,6 +375,8 @@ test('Apply in the source drawer and applySource produce identical mutation logs
   const editedText = `${JSON.stringify(edited, null, 2)}\n`;
 
   // 1. through the drawer's Apply button, with the text typed into CodeMirror
+  /* Tools > Advanced is parked (docs/FOCUS.md 3.2): the row is driven behind Tools > Advanced tools (b1 R12) */
+  await setAdvancedTools(page, true);
   /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
   await page.locator('[data-control="menubar.tools"]').click();
   await page.locator('[data-menu-item="tools.advanced"]').click();
@@ -397,6 +401,8 @@ test('Apply in the source drawer and applySource produce identical mutation logs
   );
 
   // back to the start through the same public API, then the same edit through applySource
+  /* Tools > Advanced is parked (docs/FOCUS.md 3.2): the row is driven behind Tools > Advanced tools (b1 R12) */
+  await setAdvancedTools(page, true);
   /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
   await page.locator('[data-control="menubar.tools"]').click();
   await page.locator('[data-menu-item="tools.advanced"]').click();
@@ -423,6 +429,8 @@ test("the lint panel's Fix applies the fix and clears the finding", async ({ pag
   expect((await source(page)).slots.left.find((b) => b.id === 'p')?.text).toContain('—');
   /* Tools > Check slides opens the suggestions panel (gslides-parity SPEC 2.8): one prose row
      per finding with Fix; the rule id is on the row's data attribute, never in its text */
+  /* Tools > Check slides is parked (docs/FOCUS.md 3.2): driven behind the switch (b1 R12) */
+  await setAdvancedTools(page, true);
   await page.locator('[data-control="menubar.tools"]').click();
   await page.locator('[data-menu-item="tools.checkSlides"]').click();
   const row = page.locator('[data-control="panel.checkSlides"] li[data-rule="copy/no-em-dash"]');

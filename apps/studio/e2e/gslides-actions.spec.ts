@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // The integrator's spec for the fourteen actions of the Google Slides parity round (gslides-parity
 // SPEC 7.5; MILESTONES Integrator item 2) and the thirty six of round two (SPEC-2 section 3;
 // MILESTONES-2 Integrator item 4): every one resolves through window.turboslide.studio.invoke in
@@ -19,7 +21,11 @@ import type { Page } from '@playwright/test';
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-gslides';
 const COPY = 'e2e-gslides-copy';
-const DECK_DIR = join(ROOT, 'decks', DECK);
+/* the folder the server reads decks from: a builder's tmp store names its overlay's decks folder
+   in TURBOSLIDE_E2E_DECKS_DIR (gslides-parity SPEC-2 0.43, as text-editing.spec.ts and
+   ten-tasks.spec.ts read it); the checkout's decks/ otherwise, the check's file store on 4321 */
+const DECKS = process.env['TURBOSLIDE_E2E_DECKS_DIR'] ?? join(ROOT, 'decks');
+const DECK_DIR = join(DECKS, DECK);
 
 function seedDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });
@@ -34,7 +40,7 @@ function seedDeck(): void {
 
 function removeDecks(): void {
   for (const id of [DECK, COPY]) {
-    rmSync(join(ROOT, 'decks', id), { recursive: true, force: true });
+    rmSync(join(DECKS, id), { recursive: true, force: true });
     rmSync(join(ROOT, '.turboslide', 'worker', 'cache', id), { recursive: true, force: true });
   }
 }
@@ -49,6 +55,10 @@ async function openEditor(page: Page): Promise<void> {
     }
   });
   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  /* the chains below read deck.info once and expect every answer at base plus one; a write the
+     editor has in flight at open (the page's count one ahead of the store's) would hand the
+     first write the revision the page already reported, so the open waits for the store first */
+  await settled(page);
 }
 
 type Info = {
@@ -218,7 +228,7 @@ test.describe('the fourteen actions of the parity round through the window API',
     );
     expect(copied.deckId).toBe(COPY);
     expect(copied.revision).toBe(0);
-    expect(existsSync(join(ROOT, 'decks', COPY, 'deck.json'))).toBe(true);
+    expect(existsSync(join(DECKS, COPY, 'deck.json'))).toBe(true);
     const trashed = await invoke<{ id: string; trashedAt: string | null }>(page, 'deck.trash', {
       id: COPY,
       baseRevision: 0,
@@ -330,7 +340,24 @@ test.describe('the thirty six actions of round two through the window API', () =
       input: object,
     ): Promise<T> => {
       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
-      expect(out.revision, action).toBe(revision + 1);
+      /* a stale answer names the page's counters, so the row's failure carries its evidence */
+      const counters =
+        out.revision === revision + 1
+          ? ''
+          : JSON.stringify(
+              await page.evaluate(() => {
+                const s = window.turboslide!.studio.describe().state as Record<string, unknown>;
+                return {
+                  revision: s['revision'],
+                  serverRevision: s['serverRevision'],
+                  pending: s['pending'],
+                  sync: s['sync'],
+                };
+              }),
+            );
+      expect(out.revision, `${action} (base ${revision}; the page reads ${counters})`).toBe(
+        revision + 1,
+      );
       revision = out.revision;
       return out;
     };
@@ -706,13 +733,33 @@ test.describe('the menus over the stage selection (VERIFICATION-2 findings 5 and
   }) => {
     test.setTimeout(120_000);
     await openEditor(page);
+    /* Group, Ungroup, Distribute and Change shape are parked (docs/FOCUS.md 3.2, 3.4): the rows are
+       asserted behind Tools > Advanced tools, never in the default view */
+    await setAdvancedTools(page, true);
     let revision = (await info(page)).revision;
     const write = async <T extends { revision: number }>(
       action: string,
       input: object,
     ): Promise<T> => {
       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
-      expect(out.revision, action).toBe(revision + 1);
+      /* a stale answer names the page's counters, so the row's failure carries its evidence */
+      const counters =
+        out.revision === revision + 1
+          ? ''
+          : JSON.stringify(
+              await page.evaluate(() => {
+                const s = window.turboslide!.studio.describe().state as Record<string, unknown>;
+                return {
+                  revision: s['revision'],
+                  serverRevision: s['serverRevision'],
+                  pending: s['pending'],
+                  sync: s['sync'],
+                };
+              }),
+            );
+      expect(out.revision, `${action} (base ${revision}; the page reads ${counters})`).toBe(
+        revision + 1,
+      );
       revision = out.revision;
       return out;
     };

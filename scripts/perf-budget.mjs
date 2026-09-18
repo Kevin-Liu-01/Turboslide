@@ -47,6 +47,18 @@
 //     is recorded per entry. The second visit goes through about:blank first: a navigation to the
 //     document's own URL is a reload in Chromium, and the row measures a second visit.
 //
+// The focus round, cycle 3 stream fix round's fix round (VERIFICATION C2-F18, F-check5; the
+// integrator's fixer), three changes recorded here:
+//   - The write path follows the click model amendment (docs/gslides-parity/focus/AMENDMENTS.md
+//     A1): the heading run is opened with a double click, as the core drivers do; the single
+//     click of the round four form selected the object and showed no caret under A1, and the
+//     check waited 15 s for a contenteditable that never came.
+//   - A check that throws is one failed row named after it (`<check> check did not complete`),
+//     never an uncaught exception: the rows before and after it are kept and the JSON is written.
+//     Before, the write path's timeout ended the process with no JSON and no row of any check.
+//   - Every sample records the scripts it counted (`js`: name, decoded and transfer bytes,
+//     response end) beside the images, so a `js decoded` miss in the JSON names its chunks.
+//
 //   node scripts/perf-budget.mjs --base http://localhost:4321 --profile local --write
 //   node scripts/perf-budget.mjs --base https://<preview>.vercel.app --profile deployment
 //   node scripts/perf-budget.mjs --base <origin> --only routes,transitions --runs 1 --report
@@ -701,6 +713,14 @@ async function resources(page) {
       jsTransfer: js.reduce((a, r) => a + (r.transferSize || 0), 0),
       largestJs: largest ? largest.decodedBodySize : null,
       largestJsName: largest ? largest.name.split('/').pop() : null,
+      // every script of the sample by name, so a `js decoded` miss names the chunks it counted
+      // (the focus round, cycle 3 stream fix round's fix round; VERIFICATION C2-F18)
+      js: js.map((r) => ({
+        name: r.name.replace(location.origin, ''),
+        decoded: r.decodedBodySize || 0,
+        transfer: r.transferSize || 0,
+        end: r.responseEnd,
+      })),
     };
   });
   return { ...summary, images };
@@ -1343,11 +1363,16 @@ async function writePath() {
   const savedLabel = ackMeansSaved
     ? 'saved revision (acknowledged; memory channel)'
     : 'saved revision';
-  // the first heading run: click into it, type, wait for the local commit and the saved write
+  // the first heading run: open its text session, type, wait for the local commit and the saved
+  // write. Under the click model of the focus round (docs/gslides-parity/focus/AMENDMENTS.md A1)
+  // one click selects the object and shows no caret; the double click opens the session with
+  // the caret at the click, which is what the core drivers do (e2e/core/surface.spec.ts). The
+  // single click this check made before A1 waited 15 s for a contenteditable that never came and
+  // the run died with no row and no JSON (the cycle 3 stream fix round's fix round).
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run]').first();
   await run.waitFor({ timeout: 30_000 });
   const box = await run.boundingBox();
-  await page.mouse.click(box.x + Math.min(24, box.width / 2), box.y + box.height / 2);
+  await page.mouse.dblclick(box.x + Math.min(24, box.width / 2), box.y + box.height / 2);
   await page.waitForFunction(
     () => Boolean(document.querySelector('.ts-stagewrap.ts-editor [contenteditable="true"]')),
     null,
@@ -1512,15 +1537,31 @@ async function writePath() {
 
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * Runs one check; a check that throws (a selector that never resolved, a page that closed) is
+ * recorded as one failed row named after it and the run goes on, so the rows before and after it
+ * and the JSON survive. Before this (the cycle 3 stream fix round's fix round) the write path's
+ * timeout was an uncaught exception: every row of the run was lost and no JSON was written.
+ */
+async function runCheck(check, fn) {
+  if (!wants(check)) return;
+  try {
+    await fn();
+  } catch (error) {
+    const message = String(error instanceof Error ? error.message : error).split('\n')[0];
+    assert(check, `${check} check did not complete (${message})`, null, 0, 'flag');
+  }
+}
+
 try {
-  if (wants('routes')) await routeLoads();
-  if (wants('transitions')) await transitions();
-  if (wants('filmstrip')) await filmstrip();
-  if (wants('idle')) await idle();
-  if (wants('twins')) await twins();
-  if (wants('cdn')) await cdnHits();
-  if (wants('vitals')) vitals();
-  if (wants('write') && args.write) await writePath();
+  await runCheck('routes', routeLoads);
+  await runCheck('transitions', transitions);
+  await runCheck('filmstrip', filmstrip);
+  await runCheck('idle', idle);
+  await runCheck('twins', twins);
+  await runCheck('cdn', cdnHits);
+  await runCheck('vitals', () => vitals());
+  if (args.write) await runCheck('write', writePath);
 } finally {
   await browser.close();
 }

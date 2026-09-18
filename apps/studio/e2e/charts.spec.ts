@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // B5's chart spec (gslides-parity SPEC-2 11.6 `charts.spec.ts`; MILESTONES-2 B5 item 5): Insert >
 // Chart > Bar; the data grid edits a value and adds a series; Chart type to Pie keeps the first
 // series; the legend; the TXT export lists the data. The spec runs against the builder's own dev
@@ -149,6 +151,9 @@ test('Insert > Chart > Bar lands a chart with the placeholder data, centred at 9
 }) => {
   test.setTimeout(120_000);
   const slideId = await blankSlide(page);
+  /* Insert > Chart and the Chart data section are parked (docs/FOCUS.md 3.2): the rows are
+     asserted behind Tools > Advanced tools, never in the default view */
+  await setAdvancedTools(page, true);
   const start = await invoke<Info>(page, 'deck.info');
   expect(start.counts.charts ?? 0).toBe(0);
   await page.locator('[data-control="menubar.insert"]').click();
@@ -206,6 +211,8 @@ test('the data grid edits a value and adds a series, Chart type to Pie keeps the
 }) => {
   test.setTimeout(150_000);
   const slideId = await blankSlide(page);
+  /* the chart tail and the Chart data section are parked (docs/FOCUS.md 3.2, 3.3) */
+  await setAdvancedTools(page, true);
   await invoke(page, 'block.insert', {
     slideId,
     slot: 'main',
@@ -216,7 +223,9 @@ test('the data grid edits a value and adds a series, Chart type to Pie keeps the
 
   /* the grid: a chart drawn on the stage selects on a click and Format options mounts the
      Chart data section; until B2 draws it and B3 mounts the slot, the same writes as actions */
-  const drawn = page.locator(`.pt-viewer [data-block="chart"]`);
+  /* the stage's chart, not the filmstrip thumbnail's clone of it, which sits first in the document
+     and intercepts a click (the run of 2026-09-16 on 4361: "ts-thumb intercepts pointer events") */
+  const drawn = page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="chart"]`);
   let section = null as Awaited<ReturnType<typeof chartSection>>;
   if ((await drawn.count()) > 0) {
     await drawn.first().click();

@@ -39,9 +39,13 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Mutation } from '@turboslide/schema/mutations';
 
+import type { ProvenReadOptions } from './access-store.ts';
+import { provenGet, putWithCopy } from './access-store.ts';
+import { HOSTED_POLL_MS, putPulse } from './pulse.ts';
 import type { BlobClient } from './blob-store.ts';
 import {
   COMMENTS_DIR,
+  boundedBlobClient,
   deckPrefix,
   isBlobExistsError,
   isBlobPreconditionError,
@@ -300,41 +304,76 @@ function quotedMd5(bytes: Uint8Array): string {
 }
 
 /**
- * Pulls the store's sidecar into a deck folder (uncached reads), replacing what the folder holds;
- * a local thread file the store does not hold is removed, so a failed push leaves nothing behind
- * that a re-apply would take for a redelivery.
+ * Pulls the store's sidecar into a deck folder, replacing what the folder holds; a local thread
+ * file the store's index does not name is removed, so a failed push leaves nothing behind that a
+ * re-apply would take for a redelivery. The reads are proven (`provenGet`, access-store.ts; the
+ * focus round, VERIFICATION.md pass 2 F-comments-reply): the index counts only when its bytes
+ * hash to the version `head()` names, and each thread is read by the index's rows, never by the
+ * prefix listing (which lags the store by up to a minute), and proven the same way, with the
+ * immutable copy under the head's version as the read that holds when the file's own url lags
+ * (`pushSidecar` stores it first). Before this a reply pushed by one instance was read back by
+ * another through the CDN's copy of the thread file from before the reply, and the reply stayed
+ * unlisted while the plain read kept answering it.
  */
 export async function pullSidecar(
   client: BlobClient,
   deckId: string,
   deckDir: string,
+  options: ProvenReadOptions = {},
 ): Promise<CommentsIndex | null> {
   const prefix = `${deckPrefix(deckId)}${COMMENTS_DIR}/`;
-  const entries = await client.list(prefix);
   const dir = commentsDir(deckDir);
-  const stored = new Set(entries.map((entry) => entry.pathname.slice(prefix.length)));
-  if (existsSync(dir)) {
-    for (const name of readdirSync(dir)) {
-      if (name.endsWith('.json') && !stored.has(name)) rmSync(join(dir, name), { force: true });
-    }
-  }
-  let index: CommentsIndex | null = null;
-  for (const entry of entries) {
-    const name = entry.pathname.slice(prefix.length);
-    if (!/^[A-Za-z0-9_.-]+\.json$/.test(name)) continue;
-    const fetched = await client.get(entry.pathname);
-    if (fetched === null) continue;
+  const write = (name: string, bytes: Uint8Array): void => {
     mkdirSync(dir, { recursive: true });
     const partial = join(dir, `${name}.${process.pid}.part`);
-    writeFileSync(partial, fetched.bytes);
+    writeFileSync(partial, bytes);
     renameSync(partial, join(dir, name));
-    if (name === INDEX_FILE) {
-      const parsed = commentsIndexSchema.safeParse(
-        JSON.parse(new TextDecoder().decode(fetched.bytes)),
-      );
-      if (parsed.success) index = parsed.data;
+  };
+  const remove = (keep: Set<string>): void => {
+    if (!existsSync(dir)) return;
+    for (const name of readdirSync(dir)) {
+      if (name.endsWith('.json') && !keep.has(name)) rmSync(join(dir, name), { force: true });
     }
+  };
+  const fetchedIndex = await provenGet(client, `${prefix}${INDEX_FILE}`, options);
+  if (fetchedIndex === null) {
+    // no sidecar in the store: the folder holds nothing the store does
+    remove(new Set());
+    return null;
   }
+  const parsed = commentsIndexSchema.safeParse(
+    JSON.parse(new TextDecoder().decode(fetchedIndex.bytes)),
+  );
+  if (!parsed.success) {
+    remove(new Set());
+    return null;
+  }
+  const index = parsed.data;
+  const keep = new Set<string>([INDEX_FILE, AUTHORS_FILE]);
+  for (const row of index.threads) {
+    if (!/^[A-Za-z0-9_.-]+$/.test(row.id)) continue;
+    const name = `${row.id}.json`;
+    // a thread file on disk that hashes to the etag the index names is the store's already
+    // (`pushSidecar` writes the etag beside each row it pushes): no read for it, so a pull of a
+    // deck with many threads costs the index and the changed threads alone (the focus round,
+    // cycle 3: the second browser's `comment.list` on the blob tier read every thread twice)
+    const local = join(dir, name);
+    if (row.etag !== undefined && existsSync(local)) {
+      if (quotedMd5(new Uint8Array(readFileSync(local))) === row.etag) {
+        keep.add(name);
+        continue;
+      }
+    }
+    const fetched = await provenGet(client, `${prefix}${name}`, options);
+    if (fetched === null) continue;
+    keep.add(name);
+    write(name, fetched.bytes);
+  }
+  const authors = await provenGet(client, `${prefix}${AUTHORS_FILE}`, options).catch(() => null);
+  if (authors !== null) write(AUTHORS_FILE, authors.bytes);
+  // the index last, once every thread it names is on disk (08 2.2: the index is the commit point)
+  write(INDEX_FILE, fetchedIndex.bytes);
+  remove(keep);
   return index;
 }
 
@@ -344,7 +383,12 @@ export type PushResult = { pushed: string[]; indexEtag: string };
  * Pushes a change to the store: every changed thread, `authors.json` when it changed, then
  * `index.json` conditional on the etag the store held before (`ifMatch`; no record yet means the
  * file must not exist). A precondition failure is the caller's to resolve by pulling and
- * re-applying (`applyAndPush`).
+ * re-applying (`applyAndPush`). Each thread file and the index go up with their immutable copy
+ * first (`putWithCopy`, access-store.ts; b7's C2-R12: `comments/index/<md5>` in its words, under
+ * the deck's `.turboslide/copies/` here so the mirror never pulls it), so a pull on another
+ * instance whose edge still serves the file from before this push reads the copy under the
+ * version `head()` names (the cycle 2 preview: the Insert menu route's thread was not listed for
+ * 20 s while the toolbar route's was, C2-F7).
  */
 export async function pushSidecar(
   client: BlobClient,
@@ -357,7 +401,7 @@ export async function pushSidecar(
   const pushed: string[] = [];
   for (const thread of change.threads) {
     const bytes = sidecarBytes(thread);
-    await client.put(`${prefix}${thread.id}.json`, bytes, {
+    await putWithCopy(client, `${prefix}${thread.id}.json`, bytes, {
       overwrite: true,
       contentType: 'application/json',
     });
@@ -374,12 +418,15 @@ export async function pushSidecar(
   }
   // the index with the etags of the thread files it names (08 2.2), rewritten locally too
   writeCanonical(join(commentsDir(deckDir), INDEX_FILE), change.index);
-  const entry = await client.put(`${prefix}${INDEX_FILE}`, sidecarBytes(change.index), {
+  const entry = await putWithCopy(client, `${prefix}${INDEX_FILE}`, sidecarBytes(change.index), {
     overwrite: indexEtag !== null,
     contentType: 'application/json',
     ...(indexEtag === null ? {} : { ifMatch: indexEtag }),
   });
   pushed.push(INDEX_FILE);
+  // the deck's pulse (pulse.ts): the one head every other instance's poll makes moves with
+  // this push, so its watcher reads the index (the focus round, cycle 3 fix round)
+  await putPulse(client, deckId, 'comments');
   return { pushed, indexEtag: entry.version };
 }
 
@@ -395,6 +442,7 @@ export async function applyAndPush(
   ops: readonly CommentOp[],
   now = new Date().toISOString(),
   attempts = 4,
+  options: ProvenReadOptions = {},
 ): Promise<SidecarChange & { indexEtag: string }> {
   const prefix = `${deckPrefix(deckId)}${COMMENTS_DIR}/`;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -402,7 +450,8 @@ export async function applyAndPush(
     const local = existsSync(join(commentsDir(deckDir), INDEX_FILE))
       ? quotedMd5(new Uint8Array(readFileSync(join(commentsDir(deckDir), INDEX_FILE))))
       : null;
-    if (stored !== null && stored.version !== local) await pullSidecar(client, deckId, deckDir);
+    if (stored !== null && stored.version !== local)
+      await pullSidecar(client, deckId, deckDir, options);
     const change = applyCommentOps(deckDir, deckId, ops, now);
     if (change.threads.length === 0 && change.authors === undefined) {
       return { ...change, indexEtag: stored?.version ?? '' };
@@ -422,4 +471,135 @@ export async function applyAndPush(
 export function localIndexEtag(deckDir: string): string | null {
   const path = join(commentsDir(deckDir), INDEX_FILE);
   return existsSync(path) ? quotedMd5(new Uint8Array(readFileSync(path))) : null;
+}
+
+/** What a poll of the sidecar's index announces: its version and the threads whose row changed. */
+export type SidecarIndexChange = {
+  version: string;
+  revision: number;
+  /** the rows new or changed since the last announced index; every row on the first change */
+  threadIds: string[];
+};
+
+/** The standalone watcher's interval, for a caller without the deck's pulse; the blob channel passes null. */
+export const SIDECAR_WATCH_POLL_MS = HOSTED_POLL_MS;
+
+export type SidecarWatchOptions = {
+  /**
+   * how often the index's head is read on the watcher's own timer; SIDECAR_WATCH_POLL_MS by
+   * default, null for no timer at all (the caller drives `poll`: the blob channel reads the
+   * index when the deck's pulse moved, so the watcher makes no timed call of its own; the focus
+   * round's cycle 3 fix round, VERIFICATION C3-F2)
+   */
+  pollMs?: number | null;
+  /**
+   * the etag of this instance's own copy of the index; a head that equals it is this instance's
+   * push, which its own append announced already, so it is not announced twice
+   */
+  localEtag?: () => string | null;
+  proven?: ProvenReadOptions;
+  onError?: (error: unknown, context: string) => void;
+};
+
+export type SidecarWatch = {
+  /** one poll now (the tests, a stream open) */
+  poll: () => Promise<void>;
+  stop: () => void;
+};
+
+/**
+ * Polls the head of a deck's `comments/index.json` and announces every version another instance
+ * pushed (the focus round, cycle 3; VERIFICATION.md C2-F28 `comments.reaches-second-browser`).
+ * On the blob tier a comment entry writes the sidecar inside the append and moves no deck
+ * revision, so the store's manifest poll behind the blob channel never fires for it: the writer's
+ * instance published the `op` to its own listeners and every tab streaming from another instance
+ * kept the threads it had. The watcher takes its position first (the current head is not
+ * announced), reads a moved index through `provenGet` (the immutable copy `pushSidecar` stores
+ * under the deck's state folder is the read that holds while the url lags) and hands the caller
+ * the revision and the changed thread ids; the blob channel turns them into the checkpoint frame
+ * with `comments` that the memory tier's checkpointer sends, which every tab answers with a
+ * `comment.list`.
+ */
+export function watchSidecarIndex(
+  rawClient: BlobClient,
+  deckId: string,
+  onChange: (change: SidecarIndexChange) => void,
+  options: SidecarWatchOptions = {},
+): SidecarWatch {
+  // every call meets a deadline (blob-store.ts boundedBlobClient): a hung head never holds the poll
+  const client = boundedBlobClient(rawClient);
+  const path = `${deckPrefix(deckId)}${COMMENTS_DIR}/${INDEX_FILE}`;
+  const onError = options.onError ?? (() => {});
+  let last: string | null | undefined;
+  let rows = new Map<string, string | undefined>();
+  let running: Promise<void> | null = null;
+  let stopped = false;
+  const pollNow = async (): Promise<void> => {
+    const head = await client.head(path);
+    const version = head?.version ?? null;
+    if (last === undefined) {
+      // the position: what is stored now was there before this watcher
+      last = version;
+      if (head !== null) {
+        const got = await provenGet(client, path, options.proven);
+        if (got !== null) rows = rowsOf(got.bytes);
+      }
+      return;
+    }
+    if (version === last) return;
+    if (version !== null && options.localEtag?.() === version) {
+      last = version;
+      const got = await provenGet(client, path, options.proven);
+      if (got !== null) rows = rowsOf(got.bytes);
+      return;
+    }
+    if (head === null) {
+      last = null;
+      rows = new Map();
+      return;
+    }
+    const got = await provenGet(client, path, options.proven);
+    if (got === null) return;
+    const parsed = commentsIndexSchema.safeParse(JSON.parse(new TextDecoder().decode(got.bytes)));
+    if (!parsed.success) return;
+    const next = new Map(parsed.data.threads.map((row) => [row.id, row.etag] as const));
+    const changed = [...next].filter(([id, etag]) => !rows.has(id) || rows.get(id) !== etag);
+    last = got.entry.version;
+    rows = next;
+    onChange({
+      version: got.entry.version,
+      revision: parsed.data.revision,
+      threadIds: changed.map(([id]) => id),
+    });
+  };
+  const poll = (): Promise<void> => {
+    if (stopped) return Promise.resolve();
+    running ??= pollNow()
+      .catch((error: unknown) => onError(error, `comments: polling the index of ${deckId}`))
+      .finally(() => {
+        running = null;
+      });
+    return running;
+  };
+  const pollMs = options.pollMs === undefined ? SIDECAR_WATCH_POLL_MS : options.pollMs;
+  const timer = pollMs === null ? null : setInterval(() => void poll(), pollMs);
+  timer?.unref();
+  return {
+    poll,
+    stop() {
+      stopped = true;
+      if (timer !== null) clearInterval(timer);
+    },
+  };
+}
+
+/** The thread rows of an index's bytes, id to etag; empty for bytes that are not an index. */
+function rowsOf(bytes: Uint8Array): Map<string, string | undefined> {
+  try {
+    const parsed = commentsIndexSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
+    if (!parsed.success) return new Map();
+    return new Map(parsed.data.threads.map((row) => [row.id, row.etag] as const));
+  } catch {
+    return new Map();
+  }
 }

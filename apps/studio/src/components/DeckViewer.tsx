@@ -28,6 +28,7 @@ import type { Theme } from '@turboslide/viewer/theme';
 import { getDeckSlides } from '../server/decks';
 import type { DeckPayload, DeckSlidesPayload, GetDeckInput } from '../server/decks';
 import { renderSlideImages } from '../server/render';
+import { deferredSlidesOf, mergeDeferredSlides } from './deferred-slides';
 import { Slideshow } from './Slideshow';
 import type { SlideshowState } from './Slideshow';
 import { useMountEffect } from './useMountEffect';
@@ -104,22 +105,6 @@ function postSlide(n: number): void {
   }
 }
 
-/** The deck with the streamed HTML merged in (SPEC-4 3.11); the same object when nothing arrived. */
-export function mergeDeferredSlides(
-  deck: ViewerDeck,
-  html: Readonly<Record<string, string>> | null,
-): ViewerDeck {
-  if (html === null || Object.keys(html).length === 0) return deck;
-  return {
-    ...deck,
-    slides: deck.slides.map((slide) =>
-      slide.html === '' && html[slide.id] !== undefined
-        ? { ...slide, html: html[slide.id]! }
-        : slide,
-    ),
-  };
-}
-
 /* the last request for the other slides and its answer (SPEC-4 3.11): the effect below runs
    twice on one mount in development (React's double invocation of effects) and again on a
    remount, and every run of it must cost one request at most, so the promise is kept by its
@@ -152,14 +137,16 @@ export function DeckViewer({
   const { sprite } = payload;
   /* the other slides once they arrive (SPEC-4 3.11); the server and the first client render agree
      on none, and the request leaves after the mount so the document is the shell and one slide */
-  const [deferred, setDeferred] = useState<Record<string, string> | null>(null);
+  const [deferred, setDeferred] = useState<Readonly<Record<string, string>> | null>(null);
   useEffect(() => {
     if (rest === undefined || rest === null || payload.partial !== true) return;
     let alive = true;
     fetchDeckSlides(rest)
       .then((answer) => {
-        if (alive && answer !== null && answer.revision === payload.deck.revision)
-          setDeferred(answer.html);
+        /* the answer at the payload's revision or a newer one is merged; a stale one is dropped
+           (deferred-slides.ts says why a newer answer is the same deck one checkpoint later) */
+        const html = deferredSlidesOf(payload.deck.revision, answer);
+        if (alive && html !== null) setDeferred(html);
       })
       .catch(() => undefined);
     return () => {

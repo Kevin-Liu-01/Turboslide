@@ -15,6 +15,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // Deck transfer in the studio's pages (docs/deck-transfer.md; gslides-parity SPEC 6.5): the home
 // card menu's Download downloads `<id>-r<revision>.zip` through the bundle route with a ticket from
 // the server function (no bearer in the page); the bundle route takes a zip `turboslide deck pack`
@@ -248,6 +250,9 @@ test('File > Download > Turboslide bundle (.zip) downloads the deck from the edi
 }) => {
   await page.goto(`/edit/${DECK}`);
   await editorReady(page);
+  /* File > Download > Turboslide bundle is parked (docs/FOCUS.md 3.2, `file.download.zip`): the row
+     is asserted behind Tools > Advanced tools, never in the default view */
+  await setAdvancedTools(page, true);
   // the menu bar of gslides-parity SPEC 2.1: File, then the Download submenu, then the bundle row
   await page
     .getByRole('menubar')

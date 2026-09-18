@@ -92,16 +92,38 @@ async function text(page: Page, id: string): Promise<string> {
   return (await blockOf(page, id))?.text ?? '';
 }
 
+/**
+ * The version log's length once it has caught up with the acknowledged revision. A record is
+ * written at the room's checkpoint, about two seconds after the last op on the memory tier, so
+ * the previous test's last write (the marks test ends on Cmd Z) lands as a record during the next
+ * test's first seconds; a baseline read before it lands counts that record against the next
+ * gesture (check step 21 read Cmd ] as two writes). The copy this spec makes starts at revision 0
+ * with no records, so the log and the revision agree once every record has landed; the wait is
+ * bounded at ten seconds and the count is returned as it stands after that.
+ */
 async function logLength(page: Page): Promise<number> {
-  return (await versions(page)).length;
+  await settled(page);
+  const until = Date.now() + 10_000;
+  for (;;) {
+    const length = (await versions(page)).length;
+    const serverRevision = await page.evaluate(
+      () => window.turboslide!.studio.describe().state.serverRevision as number,
+    );
+    if (length >= serverRevision || Date.now() > until) return length;
+    await page.waitForTimeout(150);
+  }
 }
 
-/** Places the caret in the heading's text and selects its first word with Shift Home. */
+/**
+ * Places the caret in the heading's text and selects its first word with Shift Home. The session
+ * opens on a double click (docs/gslides-parity/focus/AMENDMENTS.md A1: one click selects the
+ * object; the double click enters with the caret at the point).
+ */
 async function selectFirstWord(page: Page): Promise<void> {
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const box = await run.boundingBox();
   if (!box) throw new Error('no heading');
-  await page.mouse.click(box.x + 8, box.y + box.height / 2);
+  await page.mouse.dblclick(box.x + 8, box.y + box.height / 2);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   await page.keyboard.press('Shift+ArrowRight');
@@ -229,7 +251,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const item = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/1/text"]');
   const ibox = await item.boundingBox();
   if (!ibox) throw new Error('no list item');
-  await page.mouse.click(ibox.x + 4, ibox.y + ibox.height / 2);
+  await page.mouse.dblclick(ibox.x + 4, ibox.y + ibox.height / 2);
   await expect(item).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   log = await logLength(page);
@@ -242,7 +264,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const abox = await again.boundingBox();
   if (!abox) throw new Error('no list item');
   if ((await again.getAttribute('contenteditable')) !== 'true') {
-    await page.mouse.click(abox.x + 4, abox.y + abox.height / 2);
+    await page.mouse.dblclick(abox.x + 4, abox.y + abox.height / 2);
     await expect(again).toHaveAttribute('contenteditable', 'true');
   }
   await page.keyboard.press('Home');
@@ -265,7 +287,7 @@ test('Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s leve
   const nine = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/1/text"]');
   const nbox = await nine.boundingBox();
   if (!nbox) throw new Error('no list item');
-  await page.mouse.click(nbox.x + 4, nbox.y + nbox.height / 2);
+  await page.mouse.dblclick(nbox.x + 4, nbox.y + nbox.height / 2);
   await expect(nine).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('Home');
   log = await logLength(page);
@@ -311,7 +333,7 @@ test('the special characters insert lands at the caret as one text.insert, and p
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const hbox = await run.boundingBox();
   if (!hbox) throw new Error('no heading');
-  await page.mouse.click(hbox.x + 8, hbox.y + hbox.height / 2);
+  await page.mouse.dblclick(hbox.x + 8, hbox.y + hbox.height / 2);
   await expect(run).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('ControlOrMeta+a');
   log = await logLength(page);

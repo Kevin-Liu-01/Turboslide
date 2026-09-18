@@ -36,6 +36,7 @@ import {
   REPLAY_MAX_BYTES,
   REPLAY_MAX_ENTRIES,
 } from '@turboslide/realtime/protocol';
+import { STREAM_HEARTBEAT_MS } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import { selectRealtime } from '@turboslide/realtime/select';
 import type { RealtimeSelection } from '@turboslide/realtime/select';
@@ -48,12 +49,18 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
 import { validateDocument } from '@turboslide/schema/validate';
+import type { Issue } from '@turboslide/schema/validate';
+import { boundedBlobClient } from '@turboslide/store/blob-store';
+import type { BlobClient } from '@turboslide/store/blob-store';
+import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
+import { sharedPresence } from '@turboslide/store/presence-store';
+import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import { capabilitiesOf, effectiveAccess, readAccess } from './access';
 import { agentAuth } from './auth';
-import { authorize, bootstrapAgentContext, denialBody } from './authorize';
+import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
 import { studioSessionSecret } from './auth/middleware';
 import { selectPrincipalStore } from './auth/principal';
@@ -63,7 +70,14 @@ import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comm
 import type { CommentActionId, CommentCaller } from './comments';
 import type { Checkpointer } from './checkpoint';
 import { logSecurityEvent } from './log';
-import { hasStoredDeck, isHosted, openDeckStore, stateDir } from './root';
+import {
+  deckDir,
+  exportBlobClient,
+  hasStoredDeck,
+  isHosted,
+  openDeckStore,
+  stateDir,
+} from './root';
 
 /**
  * The room (gslides-parity SPEC-3 2.3, 3.2 to 3.8; MILESTONES-3 B2 day 3): one process wide
@@ -120,21 +134,80 @@ function buildChannel(selection: RealtimeSelection): {
         redis,
       };
     }
-    case 'blob':
-      return {
-        channel: blobChannel({
-          open: (deckId) => openDeckStore(deckId),
-          // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
-          // since the version log carries no comment entries for the checkpointer to fold
-          // (VERIFICATION-3 finding 6: without it every comment write answered 400)
-          applyComments: async (deckId, entries) => {
-            await commentsApplierFor(deckId).apply(entries);
-          },
-          onError: (error, context) =>
-            log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
-        }),
-        redis: null,
+    case 'blob': {
+      const onError = (error: unknown, context: string): void =>
+        log(`${context}: ${error instanceof Error ? error.message : String(error)}`);
+      // the roster every instance agrees on and the comments index other instances push, over
+      // the export Blob client (store/presence-store.ts, comments-store.ts `watchSidecarIndex`;
+      // the focus round cycle 3, VERIFICATION C2-F28), read when the deck's pulse moved
+      // (store/pulse.ts; the cycle 3 fix round's budget: one head per tick per open deck per
+      // instance, none without a stream). `channel` is assigned below; the sink runs only once a
+      // presence write reaches the room, so the reference is settled by then.
+      let channel: RealtimeChannel | undefined;
+      // every call of the shared half meets the store's deadlines (blob-store.ts boundedBlobClient)
+      let boundedExport: Promise<BlobClient | null> | undefined;
+      const exportClient = (): Promise<BlobClient | null> => {
+        boundedExport ??= exportBlobClient()
+          .then((client) => (client === null ? null : boundedBlobClient(client)))
+          .catch((error: unknown) => {
+            boundedExport = undefined;
+            throw error;
+          });
+        return boundedExport;
       };
+      const presence = sharedPresence<RosterEntry>({
+        client: exportClient,
+        publish: (deckId, event) => void channel?.publish(deckId, event),
+        onError,
+      });
+      channel = blobChannel({
+        open: (deckId) => openDeckStore(deckId),
+        // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
+        // since the version log carries no comment entries for the checkpointer to fold
+        // (VERIFICATION-3 finding 6: without it every comment write answered 400)
+        applyComments: async (deckId, entries) => {
+          // strict: a comment op the sidecar refuses fails the append with its sentence, so
+          // the seller's action is refused instead of admitted and dropped (comments.ts)
+          await commentsApplierFor(deckId, { strict: true }).apply(entries);
+        },
+        shared: {
+          presence,
+          pulse: async (deckId) => {
+            const client = await exportClient();
+            return client === null ? null : headPulse(client, deckId);
+          },
+          watchComments: (deckId, onChange) => {
+            let stopped = false;
+            let watch: { poll: () => Promise<void>; stop: () => void } | undefined;
+            const ready = exportClient()
+              .then((client) => {
+                if (client === null || stopped) return;
+                // this instance's own pushes carry the etag of its mirror's index and are not
+                // announced twice (its append published the op already); no timer of its own,
+                // the channel reads it when the pulse moved
+                watch = watchSidecarIndex(client, deckId, onChange, {
+                  pollMs: null,
+                  localEtag: () => localIndexEtag(deckDir(deckId)),
+                  onError,
+                });
+              })
+              .catch((error: unknown) => onError(error, 'comments: the Blob client'));
+            return {
+              poll: async () => {
+                await ready;
+                await watch?.poll();
+              },
+              stop: () => {
+                stopped = true;
+                watch?.stop();
+              },
+            };
+          },
+        },
+        onError,
+      });
+      return { channel, redis: null };
+    }
   }
 }
 
@@ -248,7 +321,10 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
     .touch(principal.id, new Date(), true)
     .catch(() => null);
   return {
-    ctx: { principal, linkGrants: record?.linkGrants ?? [] },
+    /* the link grants are the union of the principal record's and the deck index's, so a grant
+       exchanged on another instance admits the visitor on the ops, stream, presence and comments
+       routes too (b6 R1; authorize.ts linkGrantsFor) */
+    ctx: { principal, linkGrants: await linkGrantsFor(principal.id, record) },
     principalId: principal.id,
     identity: principal.id,
     kind: principal.kind === 'account' ? 'signedIn' : 'anonymous',
@@ -332,6 +408,15 @@ export type Room = {
   checkpointer: Checkpointer;
   /** the record's revision at the last checkpoint this instance knows */
   revision: () => number;
+  /**
+   * The last stream seq a checkpoint covered, as this instance knows it (the checkpointer's
+   * count, or the records' at the room's open; on the blob tier every seq is a commit, so the
+   * live seq). The stream's hello carries it so a tab trims the ops it retained while its stream
+   * was down (the focus round, cycle 3 stream fix round; VERIFICATION SEAM-F8: a checkpoint
+   * that fired while no stream carried it left an acknowledged op retained for good and the
+   * title row read Saving on a quiet deck). Never above what a checkpoint wrote.
+   */
+  covered: () => number;
   /** turns the records written outside the room since the live revision into stream entries now */
   follow: () => Promise<void>;
   /** stops the subscription, the follower and the checkpointer (tests) */
@@ -349,8 +434,9 @@ async function createRoom(deckId: string): Promise<Room> {
   const store = await openDeckStore(deckId);
   const read = await store.read();
   const records = await store.records();
+  const coveredAtOpen = coveredSeq(records);
   const live: Live = {
-    seq: coveredSeq(records),
+    seq: coveredAtOpen,
     document: read.document,
     chain: Promise.resolve(),
   };
@@ -418,34 +504,39 @@ async function createRoom(deckId: string): Promise<Room> {
     log,
   });
 
-  // every admitted op of every instance reaches the live document in stream order
-  const stopSubscription = channel.subscribe(deckId, (event) => {
-    if (event.type === 'op') {
-      void queued(async () => {
-        if (event.entry.seq <= live.seq) return;
-        if (event.entry.seq !== live.seq + 1) {
-          await syncLive();
-          return;
-        }
-        try {
-          live.document = applyEntries(live.document, [event.entry]);
-        } catch {
-          const current = await store.read();
-          live.document = current.document;
-        }
-        live.seq = event.entry.seq;
-      });
-    } else if (event.type === 'checkpoint') {
-      void queued(async () => {
-        if (event.external === true) {
-          const current = await store.read();
-          live.document = current.document;
-          return;
-        }
-        setRevision(event.revision, new Date().toISOString());
-      });
-    }
-  });
+  // every admitted op of every instance reaches the live document in stream order; the room's
+  // listener is passive, so it holds no poll of the store on the blob tier (a client stream does)
+  const stopSubscription = channel.subscribe(
+    deckId,
+    (event) => {
+      if (event.type === 'op') {
+        void queued(async () => {
+          if (event.entry.seq <= live.seq) return;
+          if (event.entry.seq !== live.seq + 1) {
+            await syncLive();
+            return;
+          }
+          try {
+            live.document = applyEntries(live.document, [event.entry]);
+          } catch {
+            const current = await store.read();
+            live.document = current.document;
+          }
+          live.seq = event.entry.seq;
+        });
+      } else if (event.type === 'checkpoint') {
+        void queued(async () => {
+          if (event.external === true) {
+            const current = await store.read();
+            live.document = current.document;
+            return;
+          }
+          setRevision(event.revision, new Date().toISOString());
+        });
+      }
+    },
+    { passive: true },
+  );
 
   /**
    * The follower (SPEC-3 0.48, 3.7 c): a record written outside the room (a CLI write beside the
@@ -533,7 +624,15 @@ async function createRoom(deckId: string): Promise<Room> {
                 author: record.author,
                 note: record.note,
               });
-              checkpointer.covered(admitted?.seq ?? head);
+              // the store entry is committed already and the checkpointer never commits a store
+              // entry again (checkpoint.ts isStoreEntry), so nothing here moves the checkpointer's
+              // `covered`: it used to be moved to this entry's seq, which skipped every client
+              // entry admitted since the last checkpoint and still uncommitted below it (a tab's
+              // five keystrokes typed just before an agent's strict write), so those ops never
+              // reached the store, every later checkpoint of that paragraph was refused at its
+              // offsets and the title row stayed at unsaved (the stream fix round two, t1.md
+              // T1-R4; realtime.spec.ts:546's last line after :315 and :359). The next checkpoint
+              // reads from the last covered seq, filters this entry and commits the rest
             } else {
               await announceExternal(record);
             }
@@ -583,6 +682,8 @@ async function createRoom(deckId: string): Promise<Room> {
     live: () => queued(syncLive),
     checkpointer,
     revision: () => live.document.deck.revision,
+    covered: () =>
+      selection.tier === 'blob' ? live.seq : Math.max(coveredAtOpen, checkpointer.state().covered),
     follow,
     async close() {
       stopSubscription();
@@ -605,6 +706,44 @@ export async function roomFor(deckId: string): Promise<Room> {
     rooms.set(deckId, room);
   }
   return room;
+}
+
+/**
+ * The live document of a deck whose room this instance holds, or null when no room is open here.
+ * The viewer, print and thumbnail payloads (`decks.ts` `getDeck`) read the store, which the
+ * checkpointer writes 2 s after the last op and 10 s at most under a burst, so a slide skipped or
+ * a fill written a moment before the page opened was missing from them (docs/FOCUS.md
+ * `export.print.include-skipped`, `shapes.reload-and-viewer`); a read here takes the room's
+ * document ahead of the store, and opens no room for a deck nobody is editing on this instance
+ * (the integrator at the cycle 2 merge, for b7).
+ */
+export async function liveIfOpen(deckId: string): Promise<LiveDocument | null> {
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (pending === undefined) return null;
+  try {
+    return await (await pending).live();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Forgets one deck's room on this instance and stops its checkpointer (the focus round, cycle 2;
+ * VERIFICATION C2-F19). Delete forever removes the deck's folder without the store's write lock
+ * (`@turboslide/store/templates` removeDeck), and a checkpoint run that loaded the document before
+ * the removal writes the slide files, the version record and the manifest after it, which brings
+ * the folder back with the changed slides alone and `/deck/<id>` answers 200 for a deck the
+ * seller deleted. The route closes the room first, so no run of this instance's checkpointer is
+ * in flight or pending when the folder goes.
+ */
+export async function closeRoom(deckId: string): Promise<void> {
+  forgetBlobAdmitted(deckId);
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (s === undefined || pending === undefined) return;
+  s.rooms.delete(deckId);
+  await (await pending).close().catch(() => undefined);
 }
 
 /** Forgets every room on this instance (a test, a deck removal). */
@@ -692,15 +831,96 @@ export async function commentCallerFor(
 export type Rejected = { opId: string; reason: RejectReason; message?: string };
 
 export type AdmissionResult =
-  | { ok: true; entries: Entry[]; rejected: Rejected[]; head: number; revision: number }
+  | {
+      ok: true;
+      entries: Entry[];
+      rejected: Rejected[];
+      head: number;
+      revision: number;
+      /**
+       * The entries between the POST's `base.seq` and the first admitted entry, oldest first
+       * (the focus round, cycle 3 stream fix round two; VERIFICATION C3S-F8): what other writers
+       * landed while the tab's stream had not delivered it, so the client settles the answered
+       * ops without a stream delivery under them (before this the answered entry sat above a gap
+       * for the gap watch's 8 s where the picture row allows 5 s). Absent when nothing sits
+       * between or the run is over BETWEEN_MAX_ENTRIES or BETWEEN_MAX_BYTES, when the reopen's
+       * replay stays the way.
+       */
+      between?: Entry[];
+    }
   | {
       ok: false;
-      status: 400 | 403 | 409 | 429;
+      status: 400 | 403 | 409 | 429 | 503;
       code: string;
       message: string;
       head?: number;
       retryAfterMs?: number;
     };
+
+/** The most entries an ops answer carries under the admitted ones (`between`); a longer run is the reopen's. */
+export const BETWEEN_MAX_ENTRIES = 256;
+/** The most bytes of `between` an ops answer carries, the ops body cap. */
+export const BETWEEN_MAX_BYTES = 256 * 1024;
+
+/**
+ * The entries strictly between a POST's base and the first admitted seq, for the answer's
+ * `between` (C3S-F8): the given entries filtered to that window and bounded; undefined when the
+ * window is empty or the run is over the bound, so the client falls back to the stream and its
+ * gap watch. Exported for its test.
+ */
+export function betweenEntries(
+  entries: readonly Entry[],
+  base: number,
+  upTo: number,
+): Entry[] | undefined {
+  const out: Entry[] = [];
+  let bytes = 0;
+  for (const entry of entries) {
+    if (entry.seq <= base || entry.seq >= upTo) continue;
+    bytes += JSON.stringify(entry).length;
+    if (out.length >= BETWEEN_MAX_ENTRIES || bytes > BETWEEN_MAX_BYTES) return undefined;
+    out.push(entry);
+  }
+  out.sort((a, b) => a.seq - b.seq);
+  return out.length === 0 ? undefined : out;
+}
+
+/**
+ * The answer to an ops POST the store refused (a 429, a 5xx, the deadline): 503 with the wait
+ * the store named, or one second; the room client keeps the ops pending and sends them again
+ * after it (room-client.ts, the 5xx branch).
+ */
+export function storeBusyResult(error: unknown): AdmissionResult {
+  const retryAfterMs = storeRetryAfterMs(error) ?? 1000;
+  return {
+    ok: false,
+    status: 503,
+    code: 'store_busy',
+    message: `The store did not answer; the change is sent again in ${Math.ceil(retryAfterMs / 1000)} s`,
+    retryAfterMs,
+  };
+}
+
+/**
+ * The store's refusal at a route's boundary (the ops and presence routes; the focus round, cycle
+ * 3 stream fix round, VERIFICATION C3S-F4: a Blob 403 on a fresh deck's file reached the tab as
+ * nine 500 answers with the SDK's sentence, against the budget's rule that nothing thrown by the
+ * store reaches the editor): an error the store threw anywhere under the route (the room's open,
+ * the mirror's pull, the presence record) is answered as the product's 503 `store_busy` with
+ * `retry-after`, which the room client resends after; every other error is the caller's to throw.
+ */
+export function storeRefusalOf(
+  error: unknown,
+): { status: 503; body: { error: string; message: string }; retryAfterS: number } | null {
+  if (!isStoreBusy(error)) return null;
+  const busy = storeBusyResult(error);
+  if (busy.ok) return null;
+  return {
+    status: 503,
+    body: { error: busy.code, message: busy.message },
+    retryAfterS: Math.max(1, Math.ceil((busy.retryAfterMs ?? 1000) / 1000)),
+  };
+}
 
 /** A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). */
 function slideBytes(slide: Slide): number {
@@ -805,6 +1025,26 @@ type Candidate = {
   comment?: NewEntry['comment'];
 };
 
+/**
+ * The splices that undo a refused entry's text splices, by length alone (docs/FOCUS.md rank
+ * 13): the entries after a refused one in the same POST were written on a text that carried its
+ * insertion, so they are transformed past this undo before they are judged, the way they are
+ * transformed past what landed since their base. Before this the later splices of a burst met
+ * "text.splice: 10 plus 0 is outside a text of 7 characters" one after another (audit-text row
+ * 21). The characters a splice removed are not known here and do not matter to a transform,
+ * which reads lengths and offsets; a placeholder of the removed length stands in.
+ */
+export function undoOfSplices(mutations: readonly Mutation[]): Mutation[] {
+  const out: Mutation[] = [];
+  for (let i = mutations.length - 1; i >= 0; i -= 1) {
+    const mutation = mutations[i];
+    if (mutation === undefined || mutation.op !== 'text.splice') continue;
+    const { flags: _flags, ...rest } = mutation;
+    out.push({ ...rest, remove: mutation.insert.length, insert: 'x'.repeat(mutation.remove) });
+  }
+  return out;
+}
+
 /** Applies one candidate to the running document and validates; the reject reason when it cannot land. */
 function landCandidate(
   document: DeckDocument,
@@ -838,20 +1078,50 @@ function landCandidate(
   }
   const validation = validateDocument(next);
   if (!validation.ok) {
-    const first = validation.issues.find((issue) => issue.severity === 3);
     const touched = touchedSlides(mutations);
+    const first = refusalIssue(validation.issues, touched);
     return {
       ok: false,
       rejected: {
         opId: candidate.opId,
         reason: 'invalid',
         ...(touched.every(canReadSlide) && first !== undefined
-          ? { message: `${first.pointer}: ${first.message}` }
+          ? { message: refusalMessage(first) }
           : {}),
       },
     };
   }
   return { ok: true, document: next, mutations };
+}
+
+/**
+ * The issue a refusal names (the focus round, cycle 2; VERIFICATION C2-F1). The validator sorts
+ * its issues by severity, then by file name, so on a document whose slide fails its own schema
+ * after the write the manifest's `reference` issue ("No slide file for X": a slide that does not
+ * validate is left out of the slide map, and the manifest still lists it) comes before the
+ * slide's own issue (`Unknown field "typography"` on a list block, the cause). The seller and
+ * the probe need the cause: the first severity 3 issue on a slide the write touched, else the
+ * first that is not a reference, else the first. Before this the reject card of a `block.set
+ * /typography` on a plain block read "No slide file for blank-1 (slides/blank-1.json)" and three
+ * passes read it as a store that had lost a slide body. Pure.
+ */
+export function refusalIssue(
+  issues: ReadonlyArray<Issue>,
+  touched: ReadonlyArray<string>,
+): Issue | undefined {
+  const blocking = issues.filter((issue) => issue.severity === 3);
+  const files = new Set(touched.map((slideId) => `slides/${slideId}.json`));
+  return (
+    blocking.find((issue) => files.has(issue.file)) ??
+    blocking.find((issue) => issue.code !== 'reference') ??
+    blocking[0]
+  );
+}
+
+/** The refusal's sentence: the slide file first when the issue is a slide's, then the pointer and the message. */
+export function refusalMessage(issue: Issue): string {
+  const file = issue.file.startsWith('slides/') ? `${issue.file} ` : '';
+  return `${file}${issue.pointer}: ${issue.message}`;
 }
 
 export type AdmitInput = {
@@ -931,7 +1201,17 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       retryAfterMs: over.retryAfterMs,
     };
   }
-  if (room.tier === 'blob') return admitOnBlob(room, input);
+  if (room.tier === 'blob') {
+    try {
+      return await admitOnBlob(room, input);
+    } catch (error) {
+      // the store refused (a 429, a 5xx, the deadline; pulse.ts isStoreBusy): a transient the
+      // client resends after `retry-after`, never a 500 the tab reads as a refusal and never a
+      // 404 of the room (the focus round, cycle 3 fix round; VERIFICATION C3-F2)
+      if (!isStoreBusy(error)) throw error;
+      return storeBusyResult(error);
+    }
+  }
   const live = await room.live();
   const head = live.seq;
   const windowCheck = checkBaseWindow(post.base.seq, head);
@@ -951,6 +1231,8 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   };
   const landed =
     post.base.seq < head ? await channel.since(deckId, post.base.seq, head - post.base.seq) : [];
+  // what the later entries of this POST are transformed past: what landed since the base, then
+  // the undo of every entry refused before them (undoOfSplices)
   const landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
   // a retried POST (a fetch that failed after the server admitted it, a tab that resends its
   // persisted queue) carries the op ids of the first one: an id already in the stream's tail is
@@ -998,6 +1280,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
     );
     if (!placed.ok) {
       rejected.push(placed.rejected);
+      landedMutations.push(...undoOfSplices(transformed));
       continue;
     }
     running = placed.document;
@@ -1043,6 +1326,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       );
       if (!placed.ok) {
         rejected.push(placed.rejected);
+        moreMutations.push(...undoOfSplices(transformed));
         continue;
       }
       document = placed.document;
@@ -1075,24 +1359,192 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
     room.checkpointer.schedule();
   }
   const revision = room.revision();
+  const entries = [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq);
+  // what landed between the tab's position and its own entries rides the answer (C3S-F8)
+  const between = betweenEntries(
+    landed,
+    post.base.seq,
+    entries[0]?.seq ?? Number.POSITIVE_INFINITY,
+  );
   return {
     ok: true,
-    entries: [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq),
+    entries,
     rejected,
     head: result.entries[result.entries.length - 1]?.seq ?? head,
     revision,
+    ...(between === undefined ? {} : { between }),
   };
 }
 
-/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. */
-async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
+/**
+ * The document the blob tier admits against (docs/FOCUS.md rank 3). The room's live document is
+ * this instance's mirror, synced within the store's window; a client whose base is above its
+ * revision has seen a commit this instance has not pulled yet, so the store is synced by force
+ * and the live document read again before anything is judged against it. Before this an
+ * instance that was one revision behind refused the undo of a saved delete as "Slide already
+ * exists" and the redo as "No slide", with the mutation shown to the seller (audit-slides rows
+ * 93, 95 and 96): the reducer ran on a document the client had never written against.
+ */
+async function liveForBase(room: Room, baseSeq: number): Promise<LiveDocument> {
+  return liveAtLeast(room, baseSeq);
+}
+
+/**
+ * The live document at or above a revision the caller knows (the focus round, cycle 2): on the
+ * blob tier the room's document is this instance's mirror within the store's sync window, so a
+ * reader that learned a revision from a write's answer (the editor's reload after a
+ * `version.restore`, a tab's resync at an external checkpoint) can land on an instance whose
+ * mirror is behind it; the store is synced by force, up to `attempts` times a short pause apart,
+ * until the mirror reaches the revision. Before this the reload after a restore read the
+ * document from before it and the tab kept that document while its revision moved
+ * (VERIFICATION F-versions). On the other tiers the live document is the stream's and is
+ * answered as it stands.
+ */
+export async function liveAtLeast(
+  room: Room,
+  revision: number | undefined,
+  attempts = 3,
+): Promise<LiveDocument> {
+  let live = await room.live();
+  if (room.tier !== 'blob') return live;
+  const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+  if (typeof store.sync !== 'function') return live;
+  // the store refused the forced sync (a 429, a 5xx, the deadline): the mirror's document as it
+  // stands answers the page instead of the store's error (the focus round, cycle 3 fix round;
+  // VERIFICATION C3-F3: a 429 of this head reached the editor's loader and the router replaced
+  // the editor with its default error page)
+  const syncOrKeep = async (): Promise<void> => {
+    try {
+      await store.sync?.(true);
+    } catch (error) {
+      if (!isStoreBusy(error)) throw error;
+    }
+  };
+  if (revision === undefined) {
+    // no revision named: the head, read once past the sync window (a page load)
+    await syncOrKeep();
+    return room.live();
+  }
+  for (let attempt = 0; attempt < attempts && revision > live.document.deck.revision; attempt++) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 250));
+    await syncOrKeep();
+    live = await room.live();
+  }
+  return live;
+}
+
+/**
+ * A candidate the reducer refused on the blob tier is a real refusal only when the document it
+ * was judged against is the one the client wrote against (the base of the POST). Judged against
+ * a document at another revision, the refusal says nothing about the client's write: the
+ * answer is a resync at the head, and the client transforms and sends the write again.
+ */
+export function blobRefusal(
+  baseSeq: number,
+  liveRevision: number,
+  rejected: Rejected,
+): { kind: 'reject'; rejected: Rejected } | { kind: 'resync' } {
+  if (baseSeq !== liveRevision && rejected.reason === 'invalid') return { kind: 'resync' };
+  return {
+    kind: 'reject',
+    rejected:
+      rejected.message === undefined
+        ? rejected
+        : {
+            ...rejected,
+            message: `${rejected.message} (this instance's document is at revision ${liveRevision}; the write's base was ${baseSeq})`,
+          },
+  };
+}
+
+/**
+ * The op ids this instance admitted on the blob tier lately, by deck, with the entry each made
+ * (the focus round, cycle 3; VERIFICATION C2-F24). A client that gave up on a POST after the
+ * room client's 30 s (controller.tsx OPS_POST_TIMEOUT_MS) resends its ops under the same ids
+ * while this instance may have committed the first POST after all; on the memory tier `admitOps`
+ * finds such an id in the stream's tail and answers the entry it made, but the blob tier's
+ * stream is the version log, whose records carry `clientId: 'store'` and no client op id, so a
+ * resend was admitted and committed a second time (a doubled word, a second copy of a slide).
+ * The memory is per instance and bounded; a resend that lands on another instance is not caught
+ * here (its record carries no id to match), and the room client's own match of a store echo
+ * against the POST it lost covers that side (room-client.ts `settleLostPost`).
+ */
+const BLOB_ADMITTED_MAX = 512;
+const blobAdmitted = new Map<string, Map<string, Entry>>();
+
+/** Remembers the entries one blob tier POST admitted, newest last, the oldest forgotten past the cap. */
+export function rememberBlobAdmitted(deckId: string, entries: readonly Entry[]): void {
+  let known = blobAdmitted.get(deckId);
+  if (known === undefined) {
+    known = new Map();
+    blobAdmitted.set(deckId, known);
+  }
+  for (const entry of entries) {
+    known.delete(entry.opId);
+    known.set(entry.opId, entry);
+  }
+  while (known.size > BLOB_ADMITTED_MAX) {
+    const oldest = known.keys().next().value;
+    if (oldest === undefined) break;
+    known.delete(oldest);
+  }
+}
+
+/** The entry an op id made on this instance, when this instance admitted it lately. */
+export function blobAdmittedBefore(deckId: string, opId: string): Entry | undefined {
+  return blobAdmitted.get(deckId)?.get(opId);
+}
+
+function forgetBlobAdmitted(deckId: string): void {
+  blobAdmitted.delete(deckId);
+}
+
+/** A refusal that names an asset the instance's document does not hold (the validator's sentence). */
+export function namesUnknownAsset(rejected: Rejected): boolean {
+  return rejected.reason === 'invalid' && /is not in deck\.json/.test(rejected.message ?? '');
+}
+
+/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for its test. */
+export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
-  const live = await room.live();
+  let live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
   const rejected: Rejected[] = [];
   const candidates: NewEntry[] = [];
+  // the entries of a resent POST this instance admitted already, answered as they were made
+  const replayed: Entry[] = [];
   let running = live.document;
+  // the undo of every entry refused so far, which the later entries are transformed past
+  const refusedUndo: Mutation[] = [];
+  /**
+   * A candidate that names an asset this instance's document lacks is judged once more on a
+   * mirror synced by force (the focus round, cycle 3 stream fix round; VERIFICATION C3S-F6,
+   * SEAM-F2: the `asset.add` answered on one instance and the `block.insert` naming the asset
+   * landed on another whose mirror at the same revision did not hold it yet, 3 of 213 burst
+   * calls). The sync is the store's forced one (`liveAtLeast`'s), once per POST.
+   */
+  let resynced = false;
+  const freshLive = async (): Promise<boolean> => {
+    if (resynced || candidates.length > 0) return false;
+    resynced = true;
+    const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+    if (typeof store.sync !== 'function') return false;
+    try {
+      await store.sync(true);
+    } catch (error) {
+      if (!isStoreBusy(error)) throw error;
+      return false;
+    }
+    live = await room.live();
+    running = live.document;
+    return true;
+  };
   for (const entry of post.entries) {
+    const already = blobAdmittedBefore(room.deckId, entry.opId);
+    if (already !== undefined) {
+      replayed.push(already);
+      continue;
+    }
     if (entry.kind === 'comment') {
       if (entry.comment !== undefined)
         candidates.push({
@@ -1106,13 +1558,31 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
         });
       continue;
     }
-    const placed = landCandidate(
-      running,
-      { opId: entry.opId, kind: 'edit', mutations: entry.mutations ?? [] },
-      () => true,
-    );
+    const mutations =
+      refusedUndo.length === 0
+        ? (entry.mutations ?? [])
+        : transformEntry(entry.mutations ?? [], refusedUndo);
+    if (mutations === null) {
+      rejected.push({ opId: entry.opId, reason: 'stale' });
+      continue;
+    }
+    let placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
+    if (!placed.ok && namesUnknownAsset(placed.rejected) && (await freshLive())) {
+      placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
+    }
     if (!placed.ok) {
-      rejected.push(placed.rejected);
+      refusedUndo.push(...undoOfSplices(mutations));
+      const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
+      if (refusal.kind === 'resync') {
+        return {
+          ok: false,
+          status: 409,
+          code: 'resync',
+          message: `The deck is at revision ${live.document.deck.revision} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
+          head: live.document.deck.revision,
+        };
+      }
+      rejected.push(refusal.rejected);
       continue;
     }
     running = placed.document;
@@ -1130,13 +1600,20 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
   if (candidates.length === 0)
     return {
       ok: true,
-      entries: [],
+      entries: replayed,
       rejected,
       head: live.seq,
       revision: live.document.deck.revision,
     };
   const result = await room.channel.append(room.deckId, live.document.deck.revision, candidates);
   if (!result.ok) {
+    if (result.head === live.document.deck.revision) {
+      // the store did not move and the write did not land (a claim in flight on another
+      // instance, a mirror the pull could not prove): a resync at the same revision would send
+      // the client round again with the same base, so the answer is the transient 503 and the
+      // client sends the ops again after a second (VERIFICATION C3-F1, `decks.access.paint`)
+      return storeBusyResult(null);
+    }
     return {
       ok: false,
       status: 409,
@@ -1145,8 +1622,34 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
       head: result.head,
     };
   }
+  rememberBlobAdmitted(room.deckId, result.entries);
   const revision = result.entries[0]?.seq ?? live.document.deck.revision;
-  return { ok: true, entries: result.entries, rejected, head: revision, revision };
+  const entries = [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq);
+  // the records other writers committed between the tab's position and this write ride the
+  // answer, so the tab settles its ops without a stream delivery under them (C3S-F8: the
+  // second picture's insert waited 8.4 s on the gap watch for the first's commit). The version
+  // log is the stream on this tier and the mirror holds it after the sync above: no store call
+  const first = entries[0]?.seq ?? revision;
+  const between =
+    first - post.base.seq > 1
+      ? betweenEntries(
+          await room.channel.since(
+            room.deckId,
+            post.base.seq,
+            Math.min(first - post.base.seq - 1, BETWEEN_MAX_ENTRIES + 1),
+          ),
+          post.base.seq,
+          first,
+        )
+      : undefined;
+  return {
+    ok: true,
+    entries,
+    rejected,
+    head: revision,
+    revision,
+    ...(between === undefined ? {} : { between }),
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1432,23 +1935,49 @@ export async function retireClients(
   identity: RequestIdentity,
   exceptClientId?: string,
 ): Promise<string[]> {
-  if (raw === null || raw === '') return [];
-  const seen = new Set<string>();
   const retired: string[] = [];
-  for (const candidate of raw.split(',')) {
-    const clientId = candidate.trim();
-    if (clientId === '' || clientId === exceptClientId || seen.has(clientId)) continue;
-    seen.add(clientId);
-    if (seen.size > RETIRE_MAX) break;
-    if (!clientIdMatches(room.deckId, clientId, identity.identity)) continue;
+  for (const clientId of retireCandidates(room.deckId, raw, identity, exceptClientId)) {
     await room.channel.presence.leave(room.deckId, clientId).catch(() => undefined);
     retired.push(clientId);
   }
   return retired;
 }
 
-export async function bindClient(room: Room, identity: RequestIdentity): Promise<string> {
-  const clientId = mintClientId(room.deckId, identity.identity);
+/**
+ * The ids of a stream open's `retire` query this identity may retire: trimmed, deduplicated,
+ * at most RETIRE_MAX, never the new stream's own id, and only an id whose MAC names this deck
+ * and this identity. Shared by `retireClients` (the roster rows) and the stream route's slot
+ * release (the stream counters), so both read the same list.
+ */
+export function retireCandidates(
+  deckId: string,
+  raw: string | null,
+  identity: RequestIdentity,
+  exceptClientId?: string,
+): string[] {
+  if (raw === null || raw === '') return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const candidate of raw.split(',')) {
+    const clientId = candidate.trim();
+    if (clientId === '' || clientId === exceptClientId || seen.has(clientId)) continue;
+    seen.add(clientId);
+    if (seen.size > RETIRE_MAX) break;
+    if (!clientIdMatches(deckId, clientId, identity.identity)) continue;
+    out.push(clientId);
+  }
+  return out;
+}
+
+/**
+ * Binds a client id to the identity on the channel; the stream route mints the id first (so
+ * its stream slot is counted under the id before the caps are judged) and hands it in.
+ */
+export async function bindClient(
+  room: Room,
+  identity: RequestIdentity,
+  clientId = mintClientId(room.deckId, identity.identity),
+): Promise<string> {
   await room.channel.presence.bind(room.deckId, clientId, identity.identity, CLIENT_BINDING_TTL_MS);
   return clientId;
 }
@@ -1487,49 +2016,332 @@ export async function replayFor(
 // ---------------------------------------------------------------------------------------------
 // Stream counters (report 10 F24): per identity, per address, per instance, on this instance
 
+export type StreamCap = 'identity' | 'ip' | 'instance';
+
+/** The counts a refusal is logged with (the focus round, cycle 3 stream fix round, S1 step 5). */
+export type StreamCounts = {
+  total: number;
+  identities: number;
+  /** open streams of one identity on this instance */
+  identity: number;
+  /** open streams behind one address on this instance; 0 when the address is unknown */
+  address: number;
+};
+
+export type StreamTakeOptions = {
+  /**
+   * The client id the stream is bound to, so a later open of the same tab can release this
+   * slot by name (`retire`). A slot without an id is released by its `release()` alone.
+   */
+  clientId?: string;
+  /**
+   * The client ids the opening tab held before (its own earlier pages and its earlier streams
+   * of this page: the stream open's `retire` query, filtered to this identity's ids by the
+   * route). Their slots on this instance are released before the caps are judged, so a reload
+   * or a reconnect never fills a tab's own cap while the runtime has not yet seen the earlier
+   * connection go (VERIFICATION.md C3-F1: a closed stream kept its slot for 73 s on the preview).
+   * Only a slot taken by the same identity is released this way.
+   */
+  retire?: readonly string[];
+  /**
+   * The opening tab's token (the stream open's `tab` query: 32 hex the tab keeps in its
+   * sessionStorage, so it survives a reload and dies with the tab). Every slot this instance
+   * still holds under the same tab and the same identity is released before the caps are
+   * judged, whatever deck it was for and whether or not its stream ever said hello. A tab holds
+   * one stream at a time, so an earlier slot under its token is a stream the tab has left
+   * behind (the focus round, cycle 3 stream fix round; VERIFICATION C3S-F2: three quick
+   * navigations left slots the tab could never name in `retire`, since their opens were
+   * aborted before their hello, and every later open of the tab was refused at the identity
+   * cap for the stream lifetime). Only a slot taken by the same identity is released this way.
+   */
+  tab?: string;
+};
+
+export type StreamSlot =
+  | { ok: true; release: () => void; retired: string[]; tabReleased: number }
+  | { ok: false; cap: StreamCap; counts: StreamCounts };
+
 export type StreamCounters = {
-  /** takes one slot; the refusal names the cap that is full */
+  /** takes one slot; the refusal names the cap that is full and the counts at the refusal */
   take: (
     identity: string,
     kind: IdentityKind,
     address: string | null,
-  ) => { ok: true; release: () => void } | { ok: false; cap: 'identity' | 'ip' | 'instance' };
-  counts: () => { total: number; identities: number };
+    options?: StreamTakeOptions,
+  ) => StreamSlot;
+  /** releases the slots the client ids name when `identity` took them; answers the ids released */
+  release: (identity: string, clientIds: readonly string[]) => string[];
+  /** releases every slot held under a tab token by `identity`; answers how many */
+  releaseTab: (identity: string, tab: string) => number;
+  counts: (identity?: string, address?: string | null) => StreamCounts;
 };
 
+/** The shape of a stream open's `tab` token: 32 hex, as a client id is shaped. */
+export const TAB_TOKEN_PATTERN = /^[0-9a-f]{32}$/;
+
+/** The tab token of a stream open's query, or undefined when absent or malformed. */
+export function tabTokenOf(raw: string | null): string | undefined {
+  if (raw === null) return undefined;
+  const token = raw.trim().toLowerCase();
+  return TAB_TOKEN_PATTERN.test(token) ? token : undefined;
+}
+
+/**
+ * The instance's open stream slots (report 10 F24; the focus round, cycle 3 stream fix round).
+ * Every slot is counted under its identity, its address and the instance, and, when the stream
+ * route names one, under its client id, so a later stream of the same tab can release it before
+ * its own cap is judged. A slot's `release()` is idempotent; a slot released by a `retire` list
+ * is gone when the route's own `close()` runs later.
+ */
 export function createStreamCounters(): StreamCounters {
   const byIdentity = new Map<string, number>();
   const byAddress = new Map<string, number>();
+  const byClient = new Map<string, { identity: string; release: () => void }>();
+  /** the slots held under a tab token, by token: a tab's earlier streams on this instance */
+  const byTab = new Map<string, Set<{ identity: string; release: () => void }>>();
   let total = 0;
   const bump = (map: Map<string, number>, key: string, by: number): void => {
     const next = (map.get(key) ?? 0) + by;
     if (next <= 0) map.delete(key);
     else map.set(key, next);
   };
+  const counts = (identity?: string, address?: string | null): StreamCounts => ({
+    total,
+    identities: byIdentity.size,
+    identity: identity === undefined ? 0 : (byIdentity.get(identity) ?? 0),
+    address: address === undefined || address === null ? 0 : (byAddress.get(address) ?? 0),
+  });
+  const release = (identity: string, clientIds: readonly string[]): string[] => {
+    const released: string[] = [];
+    for (const clientId of clientIds) {
+      const held = byClient.get(clientId);
+      if (held === undefined || held.identity !== identity) continue;
+      held.release();
+      released.push(clientId);
+    }
+    return released;
+  };
+  const releaseTab = (identity: string, tab: string): number => {
+    const held = byTab.get(tab);
+    if (held === undefined) return 0;
+    let released = 0;
+    for (const slot of [...held]) {
+      if (slot.identity !== identity) continue;
+      slot.release();
+      released += 1;
+    }
+    return released;
+  };
   return {
-    take(identity, kind, address) {
-      if (total >= CAPS.streams.instance) return { ok: false, cap: 'instance' };
+    take(identity, kind, address, options = {}) {
+      // the tab's earlier streams on this instance go first (hello or not, this deck or
+      // another), then the ids the tab names, then a slot already held under the new id
+      const tabReleased = options.tab === undefined ? 0 : releaseTab(identity, options.tab);
+      const retired = options.retire === undefined ? [] : release(identity, options.retire);
+      if (options.clientId !== undefined) release(identity, [options.clientId]);
+      if (total >= CAPS.streams.instance)
+        return { ok: false, cap: 'instance', counts: counts(identity, address) };
       if ((byIdentity.get(identity) ?? 0) >= CAPS.streams[kind])
-        return { ok: false, cap: 'identity' };
+        return { ok: false, cap: 'identity', counts: counts(identity, address) };
       if (address !== null && (byAddress.get(address) ?? 0) >= CAPS.streams.ip)
-        return { ok: false, cap: 'ip' };
+        return { ok: false, cap: 'ip', counts: counts(identity, address) };
       total += 1;
       bump(byIdentity, identity, 1);
       if (address !== null) bump(byAddress, address, 1);
       let released = false;
-      return {
-        ok: true,
-        release: () => {
-          if (released) return;
-          released = true;
-          total -= 1;
-          bump(byIdentity, identity, -1);
-          if (address !== null) bump(byAddress, address, -1);
-        },
+      const clientId = options.clientId;
+      const tab = options.tab;
+      const slot = { identity, release: (): void => slotRelease() };
+      const slotRelease = (): void => {
+        if (released) return;
+        released = true;
+        total -= 1;
+        bump(byIdentity, identity, -1);
+        if (address !== null) bump(byAddress, address, -1);
+        if (clientId !== undefined && byClient.get(clientId)?.release === slotRelease)
+          byClient.delete(clientId);
+        if (tab !== undefined) {
+          const held = byTab.get(tab);
+          held?.delete(slot);
+          if (held !== undefined && held.size === 0) byTab.delete(tab);
+        }
       };
+      if (clientId !== undefined) byClient.set(clientId, { identity, release: slotRelease });
+      if (tab !== undefined) {
+        const held = byTab.get(tab) ?? new Set();
+        held.add(slot);
+        byTab.set(tab, held);
+      }
+      return { ok: true, release: slotRelease, retired, tabReleased };
     },
-    counts: () => ({ total, identities: byIdentity.size }),
+    release,
+    releaseTab,
+    counts,
   };
+}
+
+/** How long a fresh stream may go without its reader's presence before it is judged (the first presence takes the hello, a POST and, across instances, a push and a poll). */
+export const STREAM_PRESENCE_GRACE_MS = 45_000;
+/**
+ * A reader whose presence has not reached this instance for this long is gone. A live tab's
+ * presence arrives every 5 s on its own instance and about every 15 s through the shared record;
+ * a tab hidden for five minutes has its timers aligned to the minute by the browser, so its
+ * heartbeat lands once a minute, which this covers with a margin.
+ */
+export const STREAM_PRESENCE_UNSEEN_MS = 75_000;
+
+export type ReaderLiveness = {
+  /** the reader's presence reached this instance (a `presence` event with its client id) */
+  seen: () => void;
+  /** the room's store refuses its poll (a `store` event); no judgement while it does */
+  storeOk: (ok: boolean) => void;
+  /** true when the reader is gone by the presence rule; never inside the grace or under a store outage */
+  gone: () => boolean;
+};
+
+/**
+ * The reader's liveness by its presence (the focus round, cycle 3 stream fix round; VERIFICATION
+ * SEAM-F4, C3S-F1: the preview's runtime reports neither the abort nor the cancel of a stream
+ * whose browser has gone and drains the queue for it, so the slot stayed until the lifetime and
+ * sixteen page loads from one address filled the address cap of an instance). The room client
+ * posts its presence every 5 s while it lives, and every instance learns of it (the memory
+ * tier's `set` publishes at once; the blob tier's shared record refreshes a live row about every
+ * 15 s and the pulse poll reads it within 2 s), so a stream whose reader's `presence` event has
+ * not reached this instance for STREAM_PRESENCE_UNSEEN_MS after the grace is a stream nobody
+ * reads, and the route closes it and releases its slot. While the room's store refuses its poll
+ * no presence arrives for anyone, so nothing is judged then (the budget: a backoff never turns
+ * into a reopen per stream). Reads the clock alone; the route calls `gone()` at its heartbeat.
+ */
+export function createReaderLiveness(
+  now: () => number = Date.now,
+  graceMs = STREAM_PRESENCE_GRACE_MS,
+  unseenMs = STREAM_PRESENCE_UNSEEN_MS,
+): ReaderLiveness {
+  const opened = now();
+  let seenAt = opened;
+  let storeOk = true;
+  return {
+    seen() {
+      seenAt = now();
+    },
+    storeOk(ok) {
+      storeOk = ok;
+      // the outage's end counts as seen: the reader gets the full window to show up again
+      if (ok) seenAt = now();
+    },
+    gone() {
+      if (!storeOk) return false;
+      const t = now();
+      if (t - opened < graceMs) return false;
+      return t - seenAt >= unseenMs;
+    },
+  };
+}
+
+/**
+ * How long a stream's queue may stay unpulled before its reader is taken as gone (two heartbeats
+ * and a margin; the route's heartbeat is STREAM_HEARTBEAT_MS).
+ */
+export const STREAM_READER_GONE_MS = 2 * STREAM_HEARTBEAT_MS + 5_000;
+
+export type StreamCloser = {
+  /** ends the stream once: the cleanup set so far, the release, the controller's close */
+  close: () => void;
+  closed: () => boolean;
+  /** enqueues text on the attached controller; a controller that refuses the bytes closes the stream */
+  write: (text: string) => void;
+  /** the stream's controller, once `start` has it; an aborted request closes at once */
+  attach: (controller: ReadableStreamDefaultController<Uint8Array>) => void;
+  /** what `close()` runs first (the timers and the subscription), set once they exist */
+  onClose: (cleanup: () => void) => void;
+};
+
+/**
+ * The one close of a stream (the stream route; the focus round, cycle 3 stream fix round,
+ * VERIFICATION.md C3-F1): whichever the runtime reports first, the request's abort, the body's
+ * `cancel()`, a write the controller refuses, the lifetime timer, an access recheck or an error
+ * while the stream is set up, runs the whole cleanup and releases the slot; every later report
+ * finds the stream closed. Before this the route's `write()` catch set `open = false` without
+ * releasing, `close()` returned early once `open` was false, and a stream whose bytes the runtime
+ * had refused kept its slot until the lifetime timer. `release` is the slot's release together
+ * with the roster row's leave; `signal` is the request's.
+ */
+export function createStreamCloser(
+  release: () => void,
+  signal?: AbortSignal,
+  now: () => number = Date.now,
+): StreamCloser {
+  let closed = false;
+  let controller: ReadableStreamDefaultController<Uint8Array> | null = null;
+  let cleanup: (() => void) | undefined;
+  const encoder = new TextEncoder();
+  /* the last write that found the queue drained (the reader had pulled everything before it) */
+  let drainedAt = now();
+  const close = (): void => {
+    if (closed) return;
+    closed = true;
+    try {
+      cleanup?.();
+    } catch {
+      // a timer or a subscription already gone: the release below still runs
+    }
+    release();
+    try {
+      controller?.close();
+    } catch {
+      // closed or cancelled by the reader already
+    }
+  };
+  signal?.addEventListener('abort', close, { once: true });
+  return {
+    close,
+    closed: () => closed,
+    write(text) {
+      if (closed || controller === null) return;
+      // the reader that stopped pulling (the seam step of the cycle 3 stream fix round; the
+      // preview's runtime reported neither the abort nor the cancel of a stream whose browser
+      // had closed it, and its writes were taken, for 73 s and more): a chunk still queued when
+      // the next write comes means nobody read the stream since; once nothing was pulled for
+      // STREAM_READER_GONE_MS the reader is gone and the stream closes, releasing its slot. A
+      // burst of frames drains within milliseconds and never trips this; the heartbeat every
+      // STREAM_HEARTBEAT_MS is the write that reads the queue on a quiet stream.
+      const desired = controller.desiredSize;
+      const at = now();
+      if (desired === null || desired > 0) drainedAt = at;
+      else if (at - drainedAt >= STREAM_READER_GONE_MS) {
+        close();
+        return;
+      }
+      try {
+        controller.enqueue(encoder.encode(text));
+      } catch {
+        close();
+      }
+    },
+    attach(next) {
+      controller = next;
+      if (signal?.aborted === true) close();
+    },
+    onClose(next) {
+      cleanup = next;
+      if (closed) next();
+    },
+  };
+}
+
+/** The one log line of a refused stream open (S1 step 5): the cap, the identity kind and the counts, never the identity itself. */
+export function streamRefusalLine(
+  deckId: string,
+  kind: IdentityKind,
+  refusal: { cap: StreamCap; counts: StreamCounts },
+): string {
+  const { cap, counts } = refusal;
+  return (
+    `stream refused on ${deckId}: cap ${cap} for ${kind}; ` +
+    `identity ${counts.identity}/${CAPS.streams[kind]}, ` +
+    `address ${counts.address}/${CAPS.streams.ip}, ` +
+    `instance ${counts.total}/${CAPS.streams.instance} (${counts.identities} identities)`
+  );
 }
 
 export function streamCounters(): StreamCounters {
@@ -1709,6 +2521,13 @@ export async function admitServerWrite(
         { force: true },
       );
     } catch (error) {
+      // the store refused (a 429, a 5xx, the deadline): the caller's card reads the product's
+      // sentence, never the SDK's (the focus round, cycle 3 fix round; VERIFICATION C3-F2 read
+      // "Vercel Blob: Too many requests" in the Share dialog)
+      if (isStoreBusy(error)) {
+        const wait = Math.ceil((storeRetryAfterMs(error) ?? 1000) / 1000);
+        throw new Error(`The store did not answer; try again in ${wait} s`);
+      }
       // a race the store reports as an error (a mirror behind the store, a named version taken
       // first) is a lost race, answered as the conflict of 6.2 (VERIFICATION-3 finding 19)
       if (!isLostRace(error)) throw error;
@@ -1735,7 +2554,14 @@ export async function admitServerWrite(
           since: records.filter((record) => record.revision > input.baseRevision),
         };
       }
-      return { ok: false, code: 'invalid', message: outcome.message };
+      // the refusal names the two revisions (docs/FOCUS.md rank 3): the instance's document and
+      // the write's base, so a probe records both on every refused write
+      const current = await store.revision().catch(() => input.baseRevision);
+      return {
+        ok: false,
+        code: 'invalid',
+        message: `${outcome.message} (this instance's document is at revision ${current}; the write's base was ${input.baseRevision})`,
+      };
     }
     // the follower turns the record into stream entries or an external checkpoint at once
     await room.follow();

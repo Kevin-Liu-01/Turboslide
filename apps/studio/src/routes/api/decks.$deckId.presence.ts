@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import { PRESENCE_MAX_BYTES, presencePostSchema } from '@turboslide/realtime/protocol';
+import type { PresencePost } from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { denialBody } from '../../server/authorize';
@@ -16,7 +17,9 @@ import {
   requestIdentity,
   roomFor,
   rosterEntryFor,
+  storeRefusalOf,
 } from '../../server/room';
+import type { RequestIdentity } from '../../server/room';
 
 /**
  * POST /api/decks/:id/presence (gslides-parity SPEC-3 3.3, 3.8; MILESTONES-3 B2 day 3): one
@@ -65,6 +68,25 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     );
   }
   const identity = await requestIdentity(request);
+  try {
+    return await serveState(request, deckId, identity, parsed.data);
+  } catch (error) {
+    // the store refused under the route (the room's open, the shared roster's record, a fresh
+    // deck's file the edge answers 403 for; VERIFICATION C3S-F4): the product's 503 with
+    // `retry-after`, which the room client's next batch follows, never the framework's 500
+    const busy = storeRefusalOf(error);
+    if (busy !== null)
+      return jsonResponse(busy.body, busy.status, { 'retry-after': String(busy.retryAfterS) });
+    throw error;
+  }
+}
+
+async function serveState(
+  request: Request,
+  deckId: string,
+  identity: RequestIdentity,
+  state: PresencePost,
+): Promise<Response> {
   let room;
   try {
     room = await roomFor(deckId);
@@ -72,7 +94,6 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     if (error instanceof RangeError) return jsonResponse({ error: 'not_found' }, 404);
     throw error;
   }
-  const state = parsed.data;
   // the binding: the channel's, or on a per instance tier the id's own signature (room.ts
   // clientBoundTo; VERIFICATION-3 finding 25: the presence POST answered 403 on the preview)
   if (!(await clientBoundTo(room, state.clientId, identity))) {

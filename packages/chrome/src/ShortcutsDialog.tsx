@@ -4,7 +4,8 @@ import { Dialog } from './Dialog';
 import { cn } from './lib/cn';
 import { buildKeyTable, shortcutLabels } from './menus/keys';
 import type { KeyBinding, ShortcutGroup } from './menus/keys';
-import type { Platform } from './menus/model';
+import { advancedToolsOn, findItem, isPresent } from './menus/model';
+import type { MenuContext, Platform } from './menus/model';
 import { DIALOGS, stubClause } from './menus/strings';
 import { tipProps } from './Tooltip';
 
@@ -17,10 +18,14 @@ import './ShortcutsDialog.css';
  * (R04 Part B): Common actions, Film strip actions, Navigation, Menus, Text, Move and arrange
  * objects, Presenting, then the groups whose rows are all Later. Built from `buildKeyTable()`,
  * so the dialog is always true for the editor. Replaces HelpCard.tsx for the editor; the view
- * route keeps the card.
+ * route keeps the card. Since the focus round (docs/FOCUS.md 3.1) the dialog takes the menu
+ * context and lists a binding only while its row is present: a parked row and a Later stub leave
+ * the list with Tools > Advanced tools off and return with it on.
  */
 export type ShortcutsDialogProps = {
   platform: Platform;
+  /** the shell's menu context; without it every binding of the table is listed */
+  context?: MenuContext;
   onClose: () => void;
 };
 
@@ -46,14 +51,26 @@ export type ShortcutRow = {
   reason?: string;
 };
 
-/** The rows of a group for a platform, one per binding, menu access keys included. */
+/**
+ * The rows of a group for a platform, one per binding, menu access keys included. With a menu
+ * context a binding whose menu row exists and is not present (parked or Later with the switch
+ * off, docs/FOCUS.md 3.1) is skipped; a binding with no menu row (the filmstrip and canvas keys)
+ * is always listed.
+ */
 export function shortcutRows(
   platform: Platform,
   table: ReadonlyArray<KeyBinding> = buildKeyTable(),
+  context?: MenuContext,
 ): Map<ShortcutGroup, ShortcutRow[]> {
   const out = new Map<ShortcutGroup, ShortcutRow[]>();
   const seen = new Set<string>();
   for (const binding of table) {
+    if (context !== undefined) {
+      const item = findItem(binding.id);
+      if (item !== undefined && !isPresent(item, context)) continue;
+      /* a Later binding with no menu row (the presenter's audience tools) hides with the stubs */
+      if (item === undefined && binding.status === 'later' && !advancedToolsOn(context)) continue;
+    }
     const keys = shortcutLabels(binding.key, platform, 'words');
     if (keys.length === 0) continue;
     const dedupe = `${binding.group}|${binding.label}|${keys.join(',')}`;
@@ -71,9 +88,9 @@ export function shortcutRows(
   return out;
 }
 
-export function ShortcutsDialog({ platform, onClose }: ShortcutsDialogProps) {
+export function ShortcutsDialog({ platform, context, onClose }: ShortcutsDialogProps) {
   const [query, setQuery] = useState('');
-  const rows = useMemo(() => shortcutRows(platform), [platform]);
+  const rows = useMemo(() => shortcutRows(platform, undefined, context), [platform, context]);
   const needle = query.trim().toLowerCase();
   const groups = GROUP_ORDER.map((group) => ({
     group,

@@ -427,3 +427,51 @@ test('the stream, ops and presence rows wait on the realtime routes', async ({ r
   test.skip(stream.status() === 404, 'the stream route is not in the tree yet (B2)');
   expect([200, 204, 401, 403]).toContain(stream.status());
 });
+
+test('the access route names the mode; a stranger on a restricted deck is 404 in enforce mode and the viewer floor in shadow mode (docs/FOCUS.md rank 1)', async ({
+  page,
+}) => {
+  /* the page's own cookie, a principal the restricted record never named */
+  await page.goto('/decks');
+  const answer = await page.evaluate(async (id) => {
+    const response = await fetch(`/api/access/${encodeURIComponent(id)}`, {
+      credentials: 'same-origin',
+      headers: { accept: 'application/json' },
+    });
+    return { status: response.status, body: (await response.json()) as Record<string, unknown> };
+  }, RESTRICTED);
+  if (ENFORCE) {
+    expect(answer.status).toBe(404);
+    expect(answer.body).toEqual({ error: 'not_found' });
+    const edit = await page.goto(`/edit/${RESTRICTED}`);
+    expect(edit?.status()).toBe(404);
+    await expect(page.locator('[data-control="access.page"]')).toBeVisible();
+  } else {
+    expect(answer.status).toBe(200);
+    expect(answer.body.authorize).toBe('shadow');
+    /* the floor: the stranger is handed the viewer role, never the editor, and the record is
+       shaped for a non holder (the owner and the general access, no links, no grants) */
+    expect(answer.body.role).toBe('viewer');
+    const record = answer.body.record as { owner: string; links?: unknown; grants?: unknown };
+    expect(record.owner).toBe('usr_e2eowner');
+    expect(record.links).toBeUndefined();
+    expect(JSON.stringify(answer.body)).not.toContain('sha256:');
+    await page.goto(`/edit/${RESTRICTED}`);
+    await editorReady(page);
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-edit-mode',
+      'viewing',
+    );
+    await expect(page.locator('[data-control="toolbar.viewOnly"]')).toHaveText('View only');
+  }
+  /* the open fixture deck keeps its legacy standing in either mode */
+  const open = await page.evaluate(async (id) => {
+    const response = await fetch(`/api/access/${encodeURIComponent(id)}`, {
+      credentials: 'same-origin',
+    });
+    return { status: response.status, body: (await response.json()) as Record<string, unknown> };
+  }, DECK);
+  expect(open.status).toBe(200);
+  expect(open.body.role).toBe('editor');
+  expect(['shadow', 'enforce']).toContain(open.body.authorize);
+});

@@ -32,6 +32,12 @@
 // fake download secret for the tmp store rule of server/tokens.ts.
 //
 // Round four (gslides-parity SPEC-4 6.1, 0.46): three steps join, 29 to 31, so `--list` prints 31.
+//
+// The focus round (docs/FOCUS.md section 6; the drivers lane): step 32 is the core gate against
+// the runner's dev server, `scripts/probes/core-gate.mjs`: the walk probe in --core mode and the
+// seven core specs under apps/studio/e2e/core/, every matrix row judged by its id, exit 1 on any
+// failed or not driven driven row. The runs that count are on the preview and on production
+// (6.2); this step proves the drivers run. `--list` prints 32.
 // Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
 // Chrome for Testing once for the card compare when chromium-1217 is present and the fonts venv's
@@ -85,7 +91,10 @@ const WARM_CONCURRENCY = 8;
 // (packages/headless/src/shell.ts SHELL_STATES; the toolbar's Theme button collapses into More at
 // 390 px and the bottom bar's panel button sits under the dev server's devtools trigger). The
 // home page has no states.
-const EDITOR_STATES = 'editorGrid,editorMenu,editorPanel';
+/* the grid view is parked (docs/FOCUS.md 3.2); its `editorGrid` state runs only with Tools >
+   Advanced tools on, so the chain's chrome lint takes the two states the default view draws
+   (the focus round, b1 R10) */
+const EDITOR_STATES = 'editorMenu,editorPanel';
 // Step 20 (gslides-parity SPEC 14.1): the Google parity audit once the verifier has written it;
 // until then the menu model tests stand in, so the step is never a silent pass.
 const PARITY_AUDIT = 'scripts/gslides-parity-audit.mjs';
@@ -191,6 +200,17 @@ const OVERWRITE_ALLOW = [
   // documents client (SPEC-3 8.9): record rewrites, never a public asset (the integrator, merge 2)
   'packages/store/src/comments-store.ts',
   'packages/store/src/migrate.ts',
+  // the shared presence roster of the blob tier (the focus round's cycle 3, b6):
+  // `decks/<id>/.turboslide/presence.json` rewritten under `ifMatch` on the version read, with
+  // an immutable copy per version beside it (`.turboslide/presence/<md5>.json`) as the read that
+  // holds; a state file under the deck's hidden folder, never a public asset (the integrator,
+  // cycle 3 merge; check step 6 named the two call sites)
+  'packages/store/src/presence-store.ts',
+  // the deck pulse of the blob tier budget (the focus round's cycle 3 fix round, b7):
+  // `decks/<id>/.turboslide/pulse.json`, a nonce body every writer of the deck overwrites after
+  // its own write landed, so one head per tick tells whether the manifest, the presence record
+  // or the comments index moved; a state file under the deck's hidden folder, never a public asset
+  'packages/store/src/pulse.ts',
   // the thumbnail cache's stamped objects `decks/<id>/.thumbs/<stamp>/<theme>@<w>/<slide>.png`
   // (gslides-parity SPEC-4 0.31; B4's day 3): the key carries the slide's content stamp, so a
   // second put writes the same pixels (two instances rendering one stamp), and the older stamps
@@ -201,6 +221,11 @@ const OVERWRITE_ALLOW = [
   // VERIFICATION-3 finding 34 F2): a record naming the deck a link hash belongs to, written with
   // an overwriting put so two instances indexing one link never conflict; never a public asset
   'packages/store/src/access-store.ts',
+  // the editor's queued export job record `exports/.jobs/<jobId>.json` (the stream fix round two,
+  // T1, VERIFICATION C3S-F7): written queued when the export starts and rewritten done or failed
+  // by the instance that ran the job, idempotently, so a poll on any instance answers from it; a
+  // state record beside the export prefixes, never a public asset (the seam step of the round)
+  'apps/studio/src/server/export-jobs.ts',
 ];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
@@ -259,7 +284,9 @@ const steps = [
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
   // not touched: the tree is prettier-clean (AGENTS.md code rules). Last, so the M1 step numbers
   // that AGENTS.md and the status documents cite stay valid.
-  { cmd: 'pnpm format:check' },
+  // the focus round (docs/FOCUS.md 7, "rendered, never typed"): the README section "What works
+  // today" is what docs/readme/what-works.mjs renders from core-matrix.json; a stale one fails here
+  { cmd: 'pnpm format:check && node docs/readme/what-works.mjs --check' },
   // gslides-parity SPEC 14.1, steps 20 and 21: the Google parity audit (the verifier's script;
   // the menu model tests until it exists) and the parity round's end to end specs, the ten tasks
   // of SPEC 11.2 first. The report lands in the current round's folder (SPEC-3 16.2 names
@@ -332,6 +359,17 @@ const steps = [
     // read the same server's heads against the node-server build's client output.
     cmd: `node ${PERF_BUDGET} --base ${STUDIO_URL} --profile local --write --runs 3 --json .turboslide/perf-budget.json${process.env.CI ? ' --report' : ''} && node ${CLIENT_BUNDLE_CHECK} apps/studio/dist --base ${STUDIO_URL} --client ${NODE_SERVER_CLIENT}`,
     needs: 'node-server',
+  },
+  // the focus round (docs/FOCUS.md section 6, 6.2): the core gate, every driver of the matrix
+  // against the runner's dev server, judged by row id; the gate takes .turboslide/e2e.lock itself.
+  // The gate refuses to start while scratch decks sit under decks/ (VERIFICATION C2-F29) and the
+  // chain passes no --allow-scratch (b4 cycle 3 C3-R2, decided at the cycle 3 merge): the runner
+  // stops at the first red step, so a spec of step 21 or 26 that failed before its afterAll has
+  // already stopped the chain, and a leftover from an earlier run is removed on purpose by the
+  // person running the chain (the gate prints the folders), never measured against or shipped.
+  {
+    cmd: `node scripts/probes/core-gate.mjs --base ${STUDIO_URL} --out .turboslide/core-gate`,
+    needs: 'server',
   },
 ];
 

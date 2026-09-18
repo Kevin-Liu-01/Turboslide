@@ -1,0 +1,4014 @@
+{
+  "base": "https://turboslide-eh39w16hp-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-18T03:59:21.237Z",
+  "parkedMenuIds": [
+    "title.presence.follow",
+    "title.presence.goTo",
+    "title.presence.joinChat",
+    "title.presence.me",
+    "title.inbox",
+    "title.slideshow.presentOnAnotherScreen",
+    "title.account",
+    "title.account.changeName",
+    "title.account.changeAvatar",
+    "title.account.forget",
+    "title.account.sessions",
+    "file.new.templateGallery",
+    "file.open",
+    "file.importSlides",
+    "file.makeCopy.selected",
+    "file.share.publish",
+    "file.email",
+    "file.email.collaborators",
+    "file.download.odp",
+    "file.download.txt",
+    "file.download.jpg",
+    "file.download.png",
+    "file.download.svg",
+    "file.download.html",
+    "file.download.zip",
+    "file.versionHistory.showChanges",
+    "file.versionHistory.deleteOlder",
+    "file.versionHistory.deleteHistory",
+    "file.details",
+    "file.pageSetup",
+    "edit.selectNone",
+    "view.gridView",
+    "view.showRuler",
+    "view.guides",
+    "view.guides.show",
+    "view.guides.addVertical",
+    "view.guides.addHorizontal",
+    "view.guides.edit",
+    "view.guides.clear",
+    "view.guides.delete",
+    "view.snapTo",
+    "view.snapTo.guides",
+    "view.snapTo.grid",
+    "view.comments",
+    "view.comments.showAll",
+    "view.comments.expand",
+    "view.comments.minimize",
+    "view.comments.hide",
+    "view.livePointers",
+    "view.livePointers.mine",
+    "view.livePointers.collaborators",
+    "view.showFilmstrip",
+    "view.mode",
+    "view.mode.editing",
+    "view.mode.commenting",
+    "view.mode.viewing",
+    "view.fullScreen",
+    "view.showSections",
+    "view.appearance",
+    "view.appearance.light",
+    "view.appearance.dark",
+    "view.appearance.match",
+    "insert.image.byUrl",
+    "insert.image.fromThisPresentation",
+    "insert.audio",
+    "insert.video",
+    "insert.shape",
+    "insert.shape.shapes",
+    "insert.shape.shapes.rectangle",
+    "insert.shape.shapes.rounded",
+    "insert.shape.shapes.ellipse",
+    "insert.shape.gallery",
+    "insert.shape.arrows",
+    "insert.shape.arrows.arrow",
+    "insert.shape.callouts",
+    "insert.shape.equation",
+    "insert.table",
+    "insert.chart",
+    "insert.chart.bar",
+    "insert.chart.column",
+    "insert.chart.line",
+    "insert.chart.pie",
+    "insert.chart.fromSheets",
+    "insert.diagram",
+    "insert.wordArt",
+    "insert.line",
+    "insert.line.line",
+    "insert.line.arrow",
+    "insert.line.rule",
+    "insert.line.elbowConnector",
+    "insert.line.curvedConnector",
+    "insert.line.curve",
+    "insert.line.polyline",
+    "insert.line.scribble",
+    "insert.specialCharacters",
+    "insert.slideNumbers",
+    "insert.templates",
+    "insert.buildingBlocks",
+    "insert.icon",
+    "insert.material",
+    "format.text.superscript",
+    "format.text.subscript",
+    "format.text.capitalization",
+    "format.text.capitalization.lower",
+    "format.text.capitalization.upper",
+    "format.text.capitalization.title",
+    "format.alignIndent.justified",
+    "format.alignIndent.indentationOptions",
+    "format.spacing.addBefore",
+    "format.spacing.addAfter",
+    "format.spacing.custom",
+    "format.bulletsNumbering.listOptions",
+    "format.bulletsNumbering.listOptions.restart",
+    "format.bulletsNumbering.listOptions.prefixSuffix",
+    "format.bulletsNumbering.listOptions.moreBullets",
+    "format.table",
+    "format.table.insertRowAbove",
+    "format.table.insertRowBelow",
+    "format.table.insertColumnLeft",
+    "format.table.insertColumnRight",
+    "format.table.deleteRow",
+    "format.table.deleteColumn",
+    "format.table.deleteTable",
+    "format.table.distributeRows",
+    "format.table.distributeColumns",
+    "format.table.mergeCells",
+    "format.table.unmergeCells",
+    "format.image.maskImage",
+    "format.image.replaceImage.byUrl",
+    "format.image.replaceImage.fromThisPresentation",
+    "format.image.dither",
+    "format.bordersLines",
+    "format.bordersLines.borderColor",
+    "format.bordersLines.borderWeight",
+    "format.bordersLines.borderDash",
+    "format.bordersLines.borderDash.solid",
+    "format.bordersLines.borderDash.dot",
+    "format.bordersLines.borderDash.dash",
+    "format.bordersLines.borderDash.dashDot",
+    "format.bordersLines.borderDash.longDash",
+    "format.bordersLines.borderDash.longDashDot",
+    "format.bordersLines.lineStart",
+    "format.bordersLines.lineStart.none",
+    "format.bordersLines.lineStart.fillArrow",
+    "format.bordersLines.lineStart.stealth",
+    "format.bordersLines.lineStart.fillCircle",
+    "format.bordersLines.lineStart.fillSquare",
+    "format.bordersLines.lineStart.fillDiamond",
+    "format.bordersLines.lineStart.openArrow",
+    "format.bordersLines.lineStart.openCircle",
+    "format.bordersLines.lineStart.openSquare",
+    "format.bordersLines.lineStart.openDiamond",
+    "format.bordersLines.lineEnd",
+    "format.bordersLines.lineEnd.none",
+    "format.bordersLines.lineEnd.fillArrow",
+    "format.bordersLines.lineEnd.stealth",
+    "format.bordersLines.lineEnd.fillCircle",
+    "format.bordersLines.lineEnd.fillSquare",
+    "format.bordersLines.lineEnd.fillDiamond",
+    "format.bordersLines.lineEnd.openArrow",
+    "format.bordersLines.lineEnd.openCircle",
+    "format.bordersLines.lineEnd.openSquare",
+    "format.bordersLines.lineEnd.openDiamond",
+    "format.altText",
+    "format.dropShadow",
+    "format.changeShape",
+    "format.editData",
+    "format.editHtml",
+    "format.chartType",
+    "format.chartType.bar",
+    "format.chartType.column",
+    "format.chartType.line",
+    "format.chartType.pie",
+    "slide.transition",
+    "slide.editTheme",
+    "slide.changeTheme",
+    "arrange.distribute",
+    "arrange.distribute.horizontally",
+    "arrange.distribute.vertically",
+    "arrange.rotate",
+    "arrange.rotate.clockwise",
+    "arrange.rotate.counterClockwise",
+    "arrange.rotate.flipHorizontally",
+    "arrange.rotate.flipVertically",
+    "arrange.group",
+    "arrange.ungroup",
+    "arrange.regroup",
+    "tools.spelling",
+    "tools.spelling.spellCheck",
+    "tools.spelling.underlineErrors",
+    "tools.spelling.personalDictionary",
+    "tools.notificationSettings",
+    "tools.preferences",
+    "tools.activityDashboard",
+    "tools.activityDashboard.viewers",
+    "tools.checkSlides",
+    "tools.advanced",
+    "tools.advanced.showSource",
+    "tools.advanced.sideBySide",
+    "tools.advanced.suggestionMarks",
+    "tools.advanced.showIds",
+    "tools.advanced.renderSlide",
+    "tools.advanced.changeHistory",
+    "tools.advanced.sectionsTree",
+    "tools.advanced.readAsBook",
+    "tools.advanced.picturesMaterials",
+    "tools.advanced.runAction",
+    "extensions.agentAccess",
+    "extensions.embedInSite",
+    "help.improve"
+  ],
+  "parkedToolbarDefault": [
+    "toolbar.paintFormat",
+    "toolbar.insertShape",
+    "toolbar.insertLine",
+    "toolbar.theme",
+    "toolbar.transition",
+    "toolbar.hideMenus",
+    "toolbar.pointer"
+  ],
+  "parkedToolbarText": [
+    "toolbar.paintFormat",
+    "toolbar.insertShape",
+    "toolbar.insertLine",
+    "toolbar.theme",
+    "toolbar.transition",
+    "toolbar.hideMenus",
+    "toolbar.pointer",
+    "toolbar.fillColor",
+    "toolbar.borderColor",
+    "toolbar.borderWeight",
+    "toolbar.borderDash",
+    "toolbar.highlightColor"
+  ],
+  "views": [
+    {
+      "name": "default",
+      "width": 1440,
+      "shot": "cycle3p2-default-1440.png",
+      "state": {
+        "setting": false,
+        "attr": null
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "help"
+      ],
+      "rowsRead": 92,
+      "uniqueRows": 92,
+      "parkedVisible": [],
+      "parkedVisibleCount": 0,
+      "parkedTotal": 210,
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout"
+      ],
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout"
+      ],
+      "blockSelected": true,
+      "parkedToolbarVisible": [],
+      "contextSheet": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "format.image.replaceImage",
+        "format.image.cropImage",
+        "format.image.resetImage",
+        "format.image.imageOptions",
+        "format.formatOptions",
+        "insert.comment",
+        "slide.changeBackground"
+      ],
+      "contextBlock": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "insert.link",
+        "format.textFitting",
+        "format.formatOptions",
+        "insert.comment"
+      ],
+      "parkedContextVisible": [],
+      "titleRow": [
+        "title.row",
+        "title.home",
+        "title.presence",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot"
+      ],
+      "forbiddenWordHits": [],
+      "menuRows": [
+        {
+          "id": "file.new",
+          "menu": "ts-menu-file",
+          "label": "New"
+        },
+        {
+          "id": "file.new.presentation",
+          "menu": "ts-menu-file>file.new",
+          "label": "Presentation"
+        },
+        {
+          "id": "file.makeCopy",
+          "menu": "ts-menu-file",
+          "label": "Make a copy"
+        },
+        {
+          "id": "file.makeCopy.entire",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Entire presentation"
+        },
+        {
+          "id": "file.share",
+          "menu": "ts-menu-file",
+          "label": "Share"
+        },
+        {
+          "id": "file.share.withOthers",
+          "menu": "ts-menu-file>file.share",
+          "label": "Share with others"
+        },
+        {
+          "id": "file.share.copyLink",
+          "menu": "ts-menu-file>file.share",
+          "label": "Copy link"
+        },
+        {
+          "id": "file.download",
+          "menu": "ts-menu-file",
+          "label": "Download"
+        },
+        {
+          "id": "file.download.pptx",
+          "menu": "ts-menu-file>file.download",
+          "label": "Microsoft PowerPoint (.pptx)"
+        },
+        {
+          "id": "file.download.pdf",
+          "menu": "ts-menu-file>file.download",
+          "label": "PDF Document (.pdf)"
+        },
+        {
+          "id": "file.rename",
+          "menu": "ts-menu-file",
+          "label": "Rename"
+        },
+        {
+          "id": "file.moveToTrash",
+          "menu": "ts-menu-file",
+          "label": "Move to trash"
+        },
+        {
+          "id": "file.versionHistory",
+          "menu": "ts-menu-file",
+          "label": "Version history"
+        },
+        {
+          "id": "file.versionHistory.nameCurrent",
+          "menu": "ts-menu-file>file.versionHistory",
+          "label": "Name current version"
+        },
+        {
+          "id": "file.versionHistory.see",
+          "menu": "ts-menu-file>file.versionHistory",
+          "label": "See version history⌥⇧⌘H"
+        },
+        {
+          "id": "file.printPreview",
+          "menu": "ts-menu-file",
+          "label": "Print settings and preview"
+        },
+        {
+          "id": "file.print",
+          "menu": "ts-menu-file",
+          "label": "Print⌘P"
+        },
+        {
+          "id": "edit.undo",
+          "menu": "ts-menu-edit",
+          "label": "Undo⌘Z"
+        },
+        {
+          "id": "edit.redo",
+          "menu": "ts-menu-edit",
+          "label": "Redo⌘Y"
+        },
+        {
+          "id": "edit.cut",
+          "menu": "ts-menu-edit",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "menu": "ts-menu-edit",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "menu": "ts-menu-edit",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.pasteWithoutFormatting",
+          "menu": "ts-menu-edit",
+          "label": "Paste without formatting⇧⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "menu": "ts-menu-edit",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "menu": "ts-menu-edit",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "edit.selectAll",
+          "menu": "ts-menu-edit",
+          "label": "Select all⌘A"
+        },
+        {
+          "id": "edit.findReplace",
+          "menu": "ts-menu-edit",
+          "label": "Find and replace⇧⌘H"
+        },
+        {
+          "id": "view.slideshow",
+          "menu": "ts-menu-view",
+          "label": "Slideshow⌘↩"
+        },
+        {
+          "id": "view.zoom",
+          "menu": "ts-menu-view",
+          "label": "Zoom"
+        },
+        {
+          "id": "view.zoom.in",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom in⌘+"
+        },
+        {
+          "id": "view.zoom.out",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom out⌘-"
+        },
+        {
+          "id": "view.zoom.fit",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Fit"
+        },
+        {
+          "id": "view.zoom.50",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "50%"
+        },
+        {
+          "id": "view.zoom.100",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "100%⌘0"
+        },
+        {
+          "id": "view.zoom.200",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "200%"
+        },
+        {
+          "id": "view.showSpeakerNotes",
+          "menu": "ts-menu-view",
+          "label": "Show speaker notes"
+        },
+        {
+          "id": "insert.image",
+          "menu": "ts-menu-insert",
+          "label": "Image"
+        },
+        {
+          "id": "insert.image.upload",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "Upload from computer"
+        },
+        {
+          "id": "insert.textBox",
+          "menu": "ts-menu-insert",
+          "label": "Text box"
+        },
+        {
+          "id": "insert.link",
+          "menu": "ts-menu-insert",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "insert.comment",
+          "menu": "ts-menu-insert",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "insert.newSlide",
+          "menu": "ts-menu-insert",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "format.text",
+          "menu": "ts-menu-format",
+          "label": "Text"
+        },
+        {
+          "id": "format.text.bold",
+          "menu": "ts-menu-format>format.text",
+          "label": "Bold⌘B"
+        },
+        {
+          "id": "format.text.italic",
+          "menu": "ts-menu-format>format.text",
+          "label": "Italic⌘I"
+        },
+        {
+          "id": "format.text.underline",
+          "menu": "ts-menu-format>format.text",
+          "label": "Underline⌘U"
+        },
+        {
+          "id": "format.text.strikethrough",
+          "menu": "ts-menu-format>format.text",
+          "label": "Strikethrough⇧⌘X"
+        },
+        {
+          "id": "format.text.size",
+          "menu": "ts-menu-format>format.text",
+          "label": "Size"
+        },
+        {
+          "id": "format.text.size.increase",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Increase font size⇧⌘>"
+        },
+        {
+          "id": "format.text.size.decrease",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Decrease font size⇧⌘<"
+        },
+        {
+          "id": "format.alignIndent",
+          "menu": "ts-menu-format",
+          "label": "Align & indent"
+        },
+        {
+          "id": "format.alignIndent.left",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Left⇧⌘L"
+        },
+        {
+          "id": "format.alignIndent.center",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Center⇧⌘E"
+        },
+        {
+          "id": "format.alignIndent.right",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Right⇧⌘R"
+        },
+        {
+          "id": "format.alignIndent.increaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Increase indent⌘]"
+        },
+        {
+          "id": "format.alignIndent.decreaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Decrease indent⌘["
+        },
+        {
+          "id": "format.spacing",
+          "menu": "ts-menu-format",
+          "label": "Line & paragraph spacing"
+        },
+        {
+          "id": "format.spacing.single",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Single"
+        },
+        {
+          "id": "format.spacing.1_15",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.15"
+        },
+        {
+          "id": "format.spacing.1_5",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.5"
+        },
+        {
+          "id": "format.spacing.double",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Double"
+        },
+        {
+          "id": "format.bulletsNumbering",
+          "menu": "ts-menu-format",
+          "label": "Bullets & numbering"
+        },
+        {
+          "id": "format.bulletsNumbering.numbered",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Numbered list"
+        },
+        {
+          "id": "format.bulletsNumbering.bulleted",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Bulleted list"
+        },
+        {
+          "id": "format.image",
+          "menu": "ts-menu-format",
+          "label": "Image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "menu": "ts-menu-format>format.image",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "menu": "ts-menu-format",
+          "label": "Format options"
+        },
+        {
+          "id": "format.clearFormatting",
+          "menu": "ts-menu-format",
+          "label": "Clear formatting⌘\\"
+        },
+        {
+          "id": "format.textFitting",
+          "menu": "ts-menu-format",
+          "label": "Text fitting"
+        },
+        {
+          "id": "slide.newSlide",
+          "menu": "ts-menu-slide",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "slide.duplicateSlide",
+          "menu": "ts-menu-slide",
+          "label": "Duplicate slide⌘D"
+        },
+        {
+          "id": "slide.deleteSlide",
+          "menu": "ts-menu-slide",
+          "label": "Delete slide"
+        },
+        {
+          "id": "slide.skipSlide",
+          "menu": "ts-menu-slide",
+          "label": "Skip slide"
+        },
+        {
+          "id": "slide.moveSlide",
+          "menu": "ts-menu-slide",
+          "label": "Move slide"
+        },
+        {
+          "id": "slide.moveSlide.up",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide up⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.down",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide down⌘↓"
+        },
+        {
+          "id": "slide.moveSlide.toBeginning",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to beginning⇧⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.toEnd",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to end⇧⌘↓"
+        },
+        {
+          "id": "slide.changeBackground",
+          "menu": "ts-menu-slide",
+          "label": "Change background"
+        },
+        {
+          "id": "slide.applyLayout",
+          "menu": "ts-menu-slide",
+          "label": "Apply layout"
+        },
+        {
+          "id": "arrange.order",
+          "menu": "ts-menu-arrange",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.align",
+          "menu": "ts-menu-arrange",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "menu": "ts-menu-arrange",
+          "label": "Center on page"
+        },
+        {
+          "id": "tools.accessibilitySettings",
+          "menu": "ts-menu-tools",
+          "label": "Accessibility settings"
+        },
+        {
+          "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+          "menu": "ts-menu-tools>tools.accessibilitySettings",
+          "label": "Turn on collaborator announcements"
+        },
+        {
+          "id": "tools.advancedTools",
+          "menu": "ts-menu-tools",
+          "label": "Advanced tools"
+        },
+        {
+          "id": "help.searchMenus",
+          "menu": "ts-menu-help",
+          "label": "Search the menus⌥/"
+        },
+        {
+          "id": "help.help",
+          "menu": "ts-menu-help",
+          "label": "Help"
+        },
+        {
+          "id": "help.keyboardShortcuts",
+          "menu": "ts-menu-help",
+          "label": "Keyboard shortcuts⌘/"
+        }
+      ]
+    },
+    {
+      "name": "advanced",
+      "width": 1440,
+      "shot": "cycle3p2-advanced-1440.png",
+      "state": {
+        "setting": true,
+        "attr": ""
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "extensions",
+        "help"
+      ],
+      "rowsRead": 232,
+      "uniqueRows": 232,
+      "parkedVisible": [
+        "file.new.templateGallery",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy.selected",
+        "file.share.publish",
+        "file.email",
+        "file.download.odp",
+        "file.download.txt",
+        "file.download.jpg",
+        "file.download.png",
+        "file.download.svg",
+        "file.download.html",
+        "file.download.zip",
+        "file.details",
+        "file.pageSetup",
+        "edit.selectNone",
+        "view.gridView",
+        "view.showRuler",
+        "view.guides",
+        "view.guides.show",
+        "view.guides.addVertical",
+        "view.guides.addHorizontal",
+        "view.guides.edit",
+        "view.guides.clear",
+        "view.snapTo",
+        "view.snapTo.guides",
+        "view.snapTo.grid",
+        "view.comments",
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide",
+        "view.livePointers",
+        "view.livePointers.mine",
+        "view.livePointers.collaborators",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.mode.editing",
+        "view.mode.commenting",
+        "view.mode.viewing",
+        "view.fullScreen",
+        "view.showSections",
+        "view.appearance",
+        "view.appearance.light",
+        "view.appearance.dark",
+        "view.appearance.match",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.audio",
+        "insert.video",
+        "insert.shape",
+        "insert.shape.shapes",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "insert.table",
+        "insert.chart",
+        "insert.chart.bar",
+        "insert.chart.column",
+        "insert.chart.line",
+        "insert.chart.pie",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.line.line",
+        "insert.line.arrow",
+        "insert.line.rule",
+        "insert.line.elbowConnector",
+        "insert.line.curvedConnector",
+        "insert.line.curve",
+        "insert.line.polyline",
+        "insert.line.scribble",
+        "insert.specialCharacters",
+        "insert.slideNumbers",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.capitalization",
+        "format.alignIndent.justified",
+        "format.alignIndent.indentationOptions",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.listOptions",
+        "format.table",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.bordersLines",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.transition",
+        "slide.editTheme",
+        "slide.changeTheme",
+        "arrange.distribute",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.spelling",
+        "tools.spelling.spellCheck",
+        "tools.spelling.underlineErrors",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.activityDashboard",
+        "tools.checkSlides",
+        "tools.advanced",
+        "tools.advanced.showSource",
+        "tools.advanced.sideBySide",
+        "tools.advanced.suggestionMarks",
+        "tools.advanced.showIds",
+        "tools.advanced.renderSlide",
+        "tools.advanced.changeHistory",
+        "tools.advanced.sectionsTree",
+        "tools.advanced.readAsBook",
+        "tools.advanced.picturesMaterials",
+        "tools.advanced.runAction",
+        "extensions.agentAccess",
+        "extensions.embedInSite",
+        "help.improve"
+      ],
+      "parkedVisibleCount": 140,
+      "parkedTotal": 210,
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertLine.arrow",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.changeShape",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "blockSelected": true,
+      "parkedToolbarVisible": [
+        "toolbar.paintFormat",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.pointer",
+        "toolbar.hideMenus",
+        "toolbar.paintFormat",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.highlightColor",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "contextSheet": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "format.image.replaceImage",
+        "format.image.cropImage",
+        "format.image.maskImage",
+        "format.image.resetImage",
+        "format.image.dither",
+        "format.image.imageOptions",
+        "format.formatOptions",
+        "format.altText",
+        "insert.comment",
+        "slide.changeBackground",
+        "view.guides"
+      ],
+      "contextBlock": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.group",
+        "arrange.ungroup",
+        "insert.link",
+        "format.textFitting",
+        "format.dropShadow",
+        "format.formatOptions",
+        "format.changeShape",
+        "format.altText",
+        "insert.comment"
+      ],
+      "parkedContextVisible": [
+        "arrange.rotate",
+        "arrange.group",
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.altText",
+        "view.guides",
+        "arrange.distribute",
+        "arrange.ungroup",
+        "format.dropShadow",
+        "format.changeShape"
+      ],
+      "titleRow": [
+        "title.row",
+        "title.home",
+        "title.presence",
+        "title.account",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot",
+        "title.inbox"
+      ],
+      "forbiddenWordHits": [
+        {
+          "id": "tools.advanced.showSource",
+          "word": "source",
+          "label": "Show source",
+          "tip": "Show source"
+        },
+        {
+          "id": "tools.advanced.runAction",
+          "word": "run",
+          "label": "Run an action…",
+          "tip": "Run an action…"
+        },
+        {
+          "id": "extensions.agentAccess",
+          "word": "agent",
+          "label": "Agent access",
+          "tip": "Agent access"
+        }
+      ],
+      "menuRows": [
+        {
+          "id": "file.new",
+          "menu": "ts-menu-file",
+          "label": "New"
+        },
+        {
+          "id": "file.new.presentation",
+          "menu": "ts-menu-file>file.new",
+          "label": "Presentation"
+        },
+        {
+          "id": "file.new.templateGallery",
+          "menu": "ts-menu-file>file.new",
+          "label": "From template gallery"
+        },
+        {
+          "id": "file.open",
+          "menu": "ts-menu-file",
+          "label": "Open…⌘O"
+        },
+        {
+          "id": "file.importSlides",
+          "menu": "ts-menu-file",
+          "label": "Import slides"
+        },
+        {
+          "id": "file.makeCopy",
+          "menu": "ts-menu-file",
+          "label": "Make a copy"
+        },
+        {
+          "id": "file.makeCopy.entire",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Entire presentation"
+        },
+        {
+          "id": "file.makeCopy.selected",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Selected slides"
+        },
+        {
+          "id": "file.share",
+          "menu": "ts-menu-file",
+          "label": "Share"
+        },
+        {
+          "id": "file.share.withOthers",
+          "menu": "ts-menu-file>file.share",
+          "label": "Share with others"
+        },
+        {
+          "id": "file.share.publish",
+          "menu": "ts-menu-file>file.share",
+          "label": "Publish to web"
+        },
+        {
+          "id": "file.share.copyLink",
+          "menu": "ts-menu-file>file.share",
+          "label": "Copy link"
+        },
+        {
+          "id": "file.email",
+          "menu": "ts-menu-file",
+          "label": "Email"
+        },
+        {
+          "id": "file.download",
+          "menu": "ts-menu-file",
+          "label": "Download"
+        },
+        {
+          "id": "file.download.pptx",
+          "menu": "ts-menu-file>file.download",
+          "label": "Microsoft PowerPoint (.pptx)"
+        },
+        {
+          "id": "file.download.odp",
+          "menu": "ts-menu-file>file.download",
+          "label": "ODP Document (.odp)"
+        },
+        {
+          "id": "file.download.pdf",
+          "menu": "ts-menu-file>file.download",
+          "label": "PDF Document (.pdf)"
+        },
+        {
+          "id": "file.download.txt",
+          "menu": "ts-menu-file>file.download",
+          "label": "Plain Text (.txt)"
+        },
+        {
+          "id": "file.download.jpg",
+          "menu": "ts-menu-file>file.download",
+          "label": "JPEG image (.jpg, current slide)"
+        },
+        {
+          "id": "file.download.png",
+          "menu": "ts-menu-file>file.download",
+          "label": "PNG image (.png, current slide)"
+        },
+        {
+          "id": "file.download.svg",
+          "menu": "ts-menu-file>file.download",
+          "label": "Scalable Vector Graphics (.svg, current slide)"
+        },
+        {
+          "id": "file.download.html",
+          "menu": "ts-menu-file>file.download",
+          "label": "Web page (.html)"
+        },
+        {
+          "id": "file.download.zip",
+          "menu": "ts-menu-file>file.download",
+          "label": "Turboslide bundle (.zip)"
+        },
+        {
+          "id": "file.rename",
+          "menu": "ts-menu-file",
+          "label": "Rename"
+        },
+        {
+          "id": "file.moveToTrash",
+          "menu": "ts-menu-file",
+          "label": "Move to trash"
+        },
+        {
+          "id": "file.versionHistory",
+          "menu": "ts-menu-file",
+          "label": "Version history"
+        },
+        {
+          "id": "file.versionHistory.nameCurrent",
+          "menu": "ts-menu-file>file.versionHistory",
+          "label": "Name current version"
+        },
+        {
+          "id": "file.versionHistory.see",
+          "menu": "ts-menu-file>file.versionHistory",
+          "label": "See version history⌥⇧⌘H"
+        },
+        {
+          "id": "file.details",
+          "menu": "ts-menu-file",
+          "label": "Details"
+        },
+        {
+          "id": "file.pageSetup",
+          "menu": "ts-menu-file",
+          "label": "Page setup"
+        },
+        {
+          "id": "file.printPreview",
+          "menu": "ts-menu-file",
+          "label": "Print settings and preview"
+        },
+        {
+          "id": "file.print",
+          "menu": "ts-menu-file",
+          "label": "Print⌘P"
+        },
+        {
+          "id": "edit.undo",
+          "menu": "ts-menu-edit",
+          "label": "Undo⌘Z"
+        },
+        {
+          "id": "edit.redo",
+          "menu": "ts-menu-edit",
+          "label": "Redo⌘Y"
+        },
+        {
+          "id": "edit.cut",
+          "menu": "ts-menu-edit",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "menu": "ts-menu-edit",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "menu": "ts-menu-edit",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.pasteWithoutFormatting",
+          "menu": "ts-menu-edit",
+          "label": "Paste without formatting⇧⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "menu": "ts-menu-edit",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "menu": "ts-menu-edit",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "edit.selectAll",
+          "menu": "ts-menu-edit",
+          "label": "Select all⌘A"
+        },
+        {
+          "id": "edit.selectNone",
+          "menu": "ts-menu-edit",
+          "label": "Select none"
+        },
+        {
+          "id": "edit.findReplace",
+          "menu": "ts-menu-edit",
+          "label": "Find and replace⇧⌘H"
+        },
+        {
+          "id": "view.slideshow",
+          "menu": "ts-menu-view",
+          "label": "Slideshow⌘↩"
+        },
+        {
+          "id": "view.gridView",
+          "menu": "ts-menu-view",
+          "label": "Grid view"
+        },
+        {
+          "id": "view.zoom",
+          "menu": "ts-menu-view",
+          "label": "Zoom"
+        },
+        {
+          "id": "view.zoom.in",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom in⌘+"
+        },
+        {
+          "id": "view.zoom.out",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom out⌘-"
+        },
+        {
+          "id": "view.zoom.fit",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Fit"
+        },
+        {
+          "id": "view.zoom.50",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "50%"
+        },
+        {
+          "id": "view.zoom.100",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "100%⌘0"
+        },
+        {
+          "id": "view.zoom.200",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "200%"
+        },
+        {
+          "id": "view.showRuler",
+          "menu": "ts-menu-view",
+          "label": "Show ruler"
+        },
+        {
+          "id": "view.guides",
+          "menu": "ts-menu-view",
+          "label": "Guides"
+        },
+        {
+          "id": "view.guides.show",
+          "menu": "ts-menu-view>view.guides",
+          "label": "Show guides"
+        },
+        {
+          "id": "view.guides.addVertical",
+          "menu": "ts-menu-view>view.guides",
+          "label": "Add vertical guide"
+        },
+        {
+          "id": "view.guides.addHorizontal",
+          "menu": "ts-menu-view>view.guides",
+          "label": "Add horizontal guide"
+        },
+        {
+          "id": "view.guides.edit",
+          "menu": "ts-menu-view>view.guides",
+          "label": "Edit guides"
+        },
+        {
+          "id": "view.guides.clear",
+          "menu": "ts-menu-view>view.guides",
+          "label": "Clear guides"
+        },
+        {
+          "id": "view.snapTo",
+          "menu": "ts-menu-view",
+          "label": "Snap to"
+        },
+        {
+          "id": "view.snapTo.guides",
+          "menu": "ts-menu-view>view.snapTo",
+          "label": "Guides"
+        },
+        {
+          "id": "view.snapTo.grid",
+          "menu": "ts-menu-view>view.snapTo",
+          "label": "Grid"
+        },
+        {
+          "id": "view.comments",
+          "menu": "ts-menu-view",
+          "label": "Comments"
+        },
+        {
+          "id": "view.comments.showAll",
+          "menu": "ts-menu-view>view.comments",
+          "label": "Show all comments"
+        },
+        {
+          "id": "view.comments.expand",
+          "menu": "ts-menu-view>view.comments",
+          "label": "Expand comments"
+        },
+        {
+          "id": "view.comments.minimize",
+          "menu": "ts-menu-view>view.comments",
+          "label": "Minimize comments"
+        },
+        {
+          "id": "view.comments.hide",
+          "menu": "ts-menu-view>view.comments",
+          "label": "Hide comments⌥⇧⌘J"
+        },
+        {
+          "id": "view.livePointers",
+          "menu": "ts-menu-view",
+          "label": "Live pointers"
+        },
+        {
+          "id": "view.livePointers.mine",
+          "menu": "ts-menu-view>view.livePointers",
+          "label": "Show my pointer"
+        },
+        {
+          "id": "view.livePointers.collaborators",
+          "menu": "ts-menu-view>view.livePointers",
+          "label": "Show collaborator pointers"
+        },
+        {
+          "id": "view.showSpeakerNotes",
+          "menu": "ts-menu-view",
+          "label": "Show speaker notes"
+        },
+        {
+          "id": "view.showFilmstrip",
+          "menu": "ts-menu-view",
+          "label": "Show filmstrip"
+        },
+        {
+          "id": "view.mode",
+          "menu": "ts-menu-view",
+          "label": "Mode"
+        },
+        {
+          "id": "view.mode.editing",
+          "menu": "ts-menu-view>view.mode",
+          "label": "Editing"
+        },
+        {
+          "id": "view.mode.commenting",
+          "menu": "ts-menu-view>view.mode",
+          "label": "Commenting"
+        },
+        {
+          "id": "view.mode.viewing",
+          "menu": "ts-menu-view>view.mode",
+          "label": "Viewing"
+        },
+        {
+          "id": "view.fullScreen",
+          "menu": "ts-menu-view",
+          "label": "Full screen⌃⇧F"
+        },
+        {
+          "id": "view.showSections",
+          "menu": "ts-menu-view",
+          "label": "Show sections"
+        },
+        {
+          "id": "view.appearance",
+          "menu": "ts-menu-view",
+          "label": "Appearance"
+        },
+        {
+          "id": "view.appearance.light",
+          "menu": "ts-menu-view>view.appearance",
+          "label": "Light"
+        },
+        {
+          "id": "view.appearance.dark",
+          "menu": "ts-menu-view>view.appearance",
+          "label": "Dark"
+        },
+        {
+          "id": "view.appearance.match",
+          "menu": "ts-menu-view>view.appearance",
+          "label": "Match the presentation"
+        },
+        {
+          "id": "insert.image",
+          "menu": "ts-menu-insert",
+          "label": "Image"
+        },
+        {
+          "id": "insert.image.upload",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "Upload from computer"
+        },
+        {
+          "id": "insert.image.byUrl",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "By URL"
+        },
+        {
+          "id": "insert.image.fromThisPresentation",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "From this presentation"
+        },
+        {
+          "id": "insert.textBox",
+          "menu": "ts-menu-insert",
+          "label": "Text box"
+        },
+        {
+          "id": "insert.audio",
+          "menu": "ts-menu-insert",
+          "label": "Audio"
+        },
+        {
+          "id": "insert.video",
+          "menu": "ts-menu-insert",
+          "label": "Video"
+        },
+        {
+          "id": "insert.shape",
+          "menu": "ts-menu-insert",
+          "label": "Shape"
+        },
+        {
+          "id": "insert.shape.shapes",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Shapes"
+        },
+        {
+          "id": "insert.shape.gallery",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "All shapes"
+        },
+        {
+          "id": "insert.shape.arrows",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Arrows"
+        },
+        {
+          "id": "insert.shape.callouts",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Callouts"
+        },
+        {
+          "id": "insert.shape.equation",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Equation"
+        },
+        {
+          "id": "insert.shape.shapes.rectangle",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Rectangle"
+        },
+        {
+          "id": "insert.shape.shapes.rounded",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Rounded rectangle"
+        },
+        {
+          "id": "insert.shape.shapes.ellipse",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Ellipse"
+        },
+        {
+          "id": "insert.table",
+          "menu": "ts-menu-insert",
+          "label": "Table"
+        },
+        {
+          "id": "insert.chart",
+          "menu": "ts-menu-insert",
+          "label": "Chart"
+        },
+        {
+          "id": "insert.chart.bar",
+          "menu": "ts-menu-insert>insert.chart",
+          "label": "Bar"
+        },
+        {
+          "id": "insert.chart.column",
+          "menu": "ts-menu-insert>insert.chart",
+          "label": "Column"
+        },
+        {
+          "id": "insert.chart.line",
+          "menu": "ts-menu-insert>insert.chart",
+          "label": "Line"
+        },
+        {
+          "id": "insert.chart.pie",
+          "menu": "ts-menu-insert>insert.chart",
+          "label": "Pie"
+        },
+        {
+          "id": "insert.diagram",
+          "menu": "ts-menu-insert",
+          "label": "Diagram"
+        },
+        {
+          "id": "insert.wordArt",
+          "menu": "ts-menu-insert",
+          "label": "Word art"
+        },
+        {
+          "id": "insert.line",
+          "menu": "ts-menu-insert",
+          "label": "Line"
+        },
+        {
+          "id": "insert.line.line",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Line"
+        },
+        {
+          "id": "insert.line.arrow",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Arrow"
+        },
+        {
+          "id": "insert.line.rule",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Rule"
+        },
+        {
+          "id": "insert.line.elbowConnector",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Elbow connector"
+        },
+        {
+          "id": "insert.line.curvedConnector",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Curved connector"
+        },
+        {
+          "id": "insert.line.curve",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Curve"
+        },
+        {
+          "id": "insert.line.polyline",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Polyline"
+        },
+        {
+          "id": "insert.line.scribble",
+          "menu": "ts-menu-insert>insert.line",
+          "label": "Scribble"
+        },
+        {
+          "id": "insert.specialCharacters",
+          "menu": "ts-menu-insert",
+          "label": "Special characters"
+        },
+        {
+          "id": "insert.link",
+          "menu": "ts-menu-insert",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "insert.comment",
+          "menu": "ts-menu-insert",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "insert.newSlide",
+          "menu": "ts-menu-insert",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "insert.slideNumbers",
+          "menu": "ts-menu-insert",
+          "label": "Slide numbers"
+        },
+        {
+          "id": "insert.templates",
+          "menu": "ts-menu-insert",
+          "label": "Templates"
+        },
+        {
+          "id": "insert.buildingBlocks",
+          "menu": "ts-menu-insert",
+          "label": "Building blocks"
+        },
+        {
+          "id": "insert.icon",
+          "menu": "ts-menu-insert",
+          "label": "Icon"
+        },
+        {
+          "id": "insert.material",
+          "menu": "ts-menu-insert",
+          "label": "Material"
+        },
+        {
+          "id": "format.text",
+          "menu": "ts-menu-format",
+          "label": "Text"
+        },
+        {
+          "id": "format.text.bold",
+          "menu": "ts-menu-format>format.text",
+          "label": "Bold⌘B"
+        },
+        {
+          "id": "format.text.italic",
+          "menu": "ts-menu-format>format.text",
+          "label": "Italic⌘I"
+        },
+        {
+          "id": "format.text.underline",
+          "menu": "ts-menu-format>format.text",
+          "label": "Underline⌘U"
+        },
+        {
+          "id": "format.text.strikethrough",
+          "menu": "ts-menu-format>format.text",
+          "label": "Strikethrough⇧⌘X"
+        },
+        {
+          "id": "format.text.superscript",
+          "menu": "ts-menu-format>format.text",
+          "label": "Superscript⌘."
+        },
+        {
+          "id": "format.text.subscript",
+          "menu": "ts-menu-format>format.text",
+          "label": "Subscript⌘,"
+        },
+        {
+          "id": "format.text.size",
+          "menu": "ts-menu-format>format.text",
+          "label": "Size"
+        },
+        {
+          "id": "format.text.capitalization",
+          "menu": "ts-menu-format>format.text",
+          "label": "Capitalization"
+        },
+        {
+          "id": "format.text.size.increase",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Increase font size⇧⌘>"
+        },
+        {
+          "id": "format.text.size.decrease",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Decrease font size⇧⌘<"
+        },
+        {
+          "id": "format.alignIndent",
+          "menu": "ts-menu-format",
+          "label": "Align & indent"
+        },
+        {
+          "id": "format.alignIndent.left",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Left⇧⌘L"
+        },
+        {
+          "id": "format.alignIndent.center",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Center⇧⌘E"
+        },
+        {
+          "id": "format.alignIndent.right",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Right⇧⌘R"
+        },
+        {
+          "id": "format.alignIndent.justified",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Justified⇧⌘J"
+        },
+        {
+          "id": "format.alignIndent.increaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Increase indent⌘]"
+        },
+        {
+          "id": "format.alignIndent.decreaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Decrease indent⌘["
+        },
+        {
+          "id": "format.alignIndent.indentationOptions",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Indentation options"
+        },
+        {
+          "id": "format.spacing",
+          "menu": "ts-menu-format",
+          "label": "Line & paragraph spacing"
+        },
+        {
+          "id": "format.spacing.single",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Single"
+        },
+        {
+          "id": "format.spacing.1_15",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.15"
+        },
+        {
+          "id": "format.spacing.1_5",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.5"
+        },
+        {
+          "id": "format.spacing.double",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Double"
+        },
+        {
+          "id": "format.spacing.addBefore",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Add space before paragraph"
+        },
+        {
+          "id": "format.spacing.addAfter",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Add space after paragraph"
+        },
+        {
+          "id": "format.spacing.custom",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Custom spacing"
+        },
+        {
+          "id": "format.bulletsNumbering",
+          "menu": "ts-menu-format",
+          "label": "Bullets & numbering"
+        },
+        {
+          "id": "format.bulletsNumbering.numbered",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Numbered list"
+        },
+        {
+          "id": "format.bulletsNumbering.bulleted",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Bulleted list"
+        },
+        {
+          "id": "format.bulletsNumbering.listOptions",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "List options"
+        },
+        {
+          "id": "format.table",
+          "menu": "ts-menu-format",
+          "label": "Table"
+        },
+        {
+          "id": "format.table.insertRowAbove",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert row above"
+        },
+        {
+          "id": "format.table.insertRowBelow",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert row below"
+        },
+        {
+          "id": "format.table.insertColumnLeft",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert column left"
+        },
+        {
+          "id": "format.table.insertColumnRight",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert column right"
+        },
+        {
+          "id": "format.table.deleteRow",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete row"
+        },
+        {
+          "id": "format.table.deleteColumn",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete column"
+        },
+        {
+          "id": "format.table.deleteTable",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete table"
+        },
+        {
+          "id": "format.table.distributeRows",
+          "menu": "ts-menu-format>format.table",
+          "label": "Distribute rows"
+        },
+        {
+          "id": "format.table.distributeColumns",
+          "menu": "ts-menu-format>format.table",
+          "label": "Distribute columns"
+        },
+        {
+          "id": "format.table.mergeCells",
+          "menu": "ts-menu-format>format.table",
+          "label": "Merge cells"
+        },
+        {
+          "id": "format.table.unmergeCells",
+          "menu": "ts-menu-format>format.table",
+          "label": "Unmerge cells"
+        },
+        {
+          "id": "format.image",
+          "menu": "ts-menu-format",
+          "label": "Image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.maskImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Mask image"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.dither",
+          "menu": "ts-menu-format>format.image",
+          "label": "Dither"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "menu": "ts-menu-format>format.image",
+          "label": "Image options"
+        },
+        {
+          "id": "format.bordersLines",
+          "menu": "ts-menu-format",
+          "label": "Borders & lines"
+        },
+        {
+          "id": "format.bordersLines.borderColor",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border color"
+        },
+        {
+          "id": "format.bordersLines.borderWeight",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border weight"
+        },
+        {
+          "id": "format.bordersLines.borderDash",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border dash"
+        },
+        {
+          "id": "format.bordersLines.lineStart",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Line start"
+        },
+        {
+          "id": "format.bordersLines.lineEnd",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Line end"
+        },
+        {
+          "id": "format.formatOptions",
+          "menu": "ts-menu-format",
+          "label": "Format options"
+        },
+        {
+          "id": "format.clearFormatting",
+          "menu": "ts-menu-format",
+          "label": "Clear formatting⌘\\"
+        },
+        {
+          "id": "format.textFitting",
+          "menu": "ts-menu-format",
+          "label": "Text fitting"
+        },
+        {
+          "id": "slide.newSlide",
+          "menu": "ts-menu-slide",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "slide.duplicateSlide",
+          "menu": "ts-menu-slide",
+          "label": "Duplicate slide⌘D"
+        },
+        {
+          "id": "slide.deleteSlide",
+          "menu": "ts-menu-slide",
+          "label": "Delete slide"
+        },
+        {
+          "id": "slide.skipSlide",
+          "menu": "ts-menu-slide",
+          "label": "Skip slide"
+        },
+        {
+          "id": "slide.moveSlide",
+          "menu": "ts-menu-slide",
+          "label": "Move slide"
+        },
+        {
+          "id": "slide.moveSlide.up",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide up⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.down",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide down⌘↓"
+        },
+        {
+          "id": "slide.moveSlide.toBeginning",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to beginning⇧⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.toEnd",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to end⇧⌘↓"
+        },
+        {
+          "id": "slide.changeBackground",
+          "menu": "ts-menu-slide",
+          "label": "Change background"
+        },
+        {
+          "id": "slide.applyLayout",
+          "menu": "ts-menu-slide",
+          "label": "Apply layout"
+        },
+        {
+          "id": "slide.transition",
+          "menu": "ts-menu-slide",
+          "label": "Transition"
+        },
+        {
+          "id": "slide.editTheme",
+          "menu": "ts-menu-slide",
+          "label": "Edit theme"
+        },
+        {
+          "id": "slide.changeTheme",
+          "menu": "ts-menu-slide",
+          "label": "Change theme"
+        },
+        {
+          "id": "arrange.order",
+          "menu": "ts-menu-arrange",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.align",
+          "menu": "ts-menu-arrange",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "menu": "ts-menu-arrange",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "menu": "ts-menu-arrange",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.rotate",
+          "menu": "ts-menu-arrange",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "menu": "ts-menu-arrange",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "menu": "ts-menu-arrange",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "arrange.regroup",
+          "menu": "ts-menu-arrange",
+          "label": "Regroup"
+        },
+        {
+          "id": "tools.spelling",
+          "menu": "ts-menu-tools",
+          "label": "Spelling"
+        },
+        {
+          "id": "tools.spelling.spellCheck",
+          "menu": "ts-menu-tools>tools.spelling",
+          "label": "Spell check"
+        },
+        {
+          "id": "tools.spelling.underlineErrors",
+          "menu": "ts-menu-tools>tools.spelling",
+          "label": "Underline errors"
+        },
+        {
+          "id": "tools.notificationSettings",
+          "menu": "ts-menu-tools",
+          "label": "Notification settings"
+        },
+        {
+          "id": "tools.preferences",
+          "menu": "ts-menu-tools",
+          "label": "Preferences"
+        },
+        {
+          "id": "tools.accessibilitySettings",
+          "menu": "ts-menu-tools",
+          "label": "Accessibility settings"
+        },
+        {
+          "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+          "menu": "ts-menu-tools>tools.accessibilitySettings",
+          "label": "Turn on collaborator announcements"
+        },
+        {
+          "id": "tools.activityDashboard",
+          "menu": "ts-menu-tools",
+          "label": "Activity dashboard"
+        },
+        {
+          "id": "tools.checkSlides",
+          "menu": "ts-menu-tools",
+          "label": "Check slides"
+        },
+        {
+          "id": "tools.advancedTools",
+          "menu": "ts-menu-tools",
+          "label": "Advanced tools"
+        },
+        {
+          "id": "tools.advanced",
+          "menu": "ts-menu-tools",
+          "label": "Advanced"
+        },
+        {
+          "id": "tools.advanced.showSource",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show source"
+        },
+        {
+          "id": "tools.advanced.sideBySide",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Light and dark side by side"
+        },
+        {
+          "id": "tools.advanced.suggestionMarks",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show suggestion marks on the slide"
+        },
+        {
+          "id": "tools.advanced.showIds",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show slide and block ids"
+        },
+        {
+          "id": "tools.advanced.renderSlide",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Render this slide"
+        },
+        {
+          "id": "tools.advanced.changeHistory",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Change history"
+        },
+        {
+          "id": "tools.advanced.sectionsTree",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show sections as a tree"
+        },
+        {
+          "id": "tools.advanced.readAsBook",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Read as a book"
+        },
+        {
+          "id": "tools.advanced.picturesMaterials",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Pictures and materials"
+        },
+        {
+          "id": "tools.advanced.runAction",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Run an action…"
+        },
+        {
+          "id": "extensions.agentAccess",
+          "menu": "ts-menu-extensions",
+          "label": "Agent access"
+        },
+        {
+          "id": "extensions.embedInSite",
+          "menu": "ts-menu-extensions",
+          "label": "Embed in a site"
+        },
+        {
+          "id": "help.searchMenus",
+          "menu": "ts-menu-help",
+          "label": "Search the menus⌥/"
+        },
+        {
+          "id": "help.help",
+          "menu": "ts-menu-help",
+          "label": "Help"
+        },
+        {
+          "id": "help.improve",
+          "menu": "ts-menu-help",
+          "label": "Help Turboslide improve"
+        },
+        {
+          "id": "help.keyboardShortcuts",
+          "menu": "ts-menu-help",
+          "label": "Keyboard shortcuts⌘/"
+        }
+      ]
+    },
+    {
+      "name": "advanced",
+      "width": 390,
+      "shot": "cycle3p2-advanced-390.png",
+      "state": {
+        "setting": true,
+        "attr": ""
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "extensions",
+        "help"
+      ],
+      "rowsRead": 176,
+      "uniqueRows": 176,
+      "parkedVisible": [
+        "file.new.templateGallery",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy.selected",
+        "file.email",
+        "file.details",
+        "file.pageSetup",
+        "view.gridView",
+        "view.showRuler",
+        "view.guides",
+        "view.snapTo",
+        "view.comments",
+        "view.livePointers",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.fullScreen",
+        "view.showSections",
+        "view.appearance",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.audio",
+        "insert.video",
+        "insert.shape",
+        "insert.shape.shapes",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "insert.table",
+        "insert.chart",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.specialCharacters",
+        "insert.slideNumbers",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.capitalization",
+        "format.alignIndent.justified",
+        "format.alignIndent.indentationOptions",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.listOptions",
+        "format.table",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.bordersLines",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.transition",
+        "slide.editTheme",
+        "slide.changeTheme",
+        "arrange.distribute",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.spelling",
+        "tools.spelling.spellCheck",
+        "tools.spelling.underlineErrors",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.activityDashboard",
+        "tools.checkSlides",
+        "tools.advanced",
+        "tools.advanced.showSource",
+        "tools.advanced.sideBySide",
+        "tools.advanced.suggestionMarks",
+        "tools.advanced.showIds",
+        "tools.advanced.renderSlide",
+        "tools.advanced.changeHistory",
+        "tools.advanced.sectionsTree",
+        "tools.advanced.readAsBook",
+        "tools.advanced.picturesMaterials",
+        "tools.advanced.runAction",
+        "extensions.agentAccess",
+        "extensions.embedInSite",
+        "help.improve"
+      ],
+      "parkedVisibleCount": 100,
+      "parkedTotal": 210,
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "blockSelected": true,
+      "parkedToolbarVisible": [
+        "toolbar.paintFormat",
+        "toolbar.pointer",
+        "toolbar.hideMenus",
+        "toolbar.paintFormat",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "contextSheet": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "format.image.replaceImage",
+        "format.image.cropImage",
+        "format.image.maskImage",
+        "format.image.resetImage",
+        "format.image.dither",
+        "format.image.imageOptions",
+        "format.formatOptions",
+        "format.altText",
+        "insert.comment",
+        "slide.changeBackground",
+        "view.guides"
+      ],
+      "contextBlock": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.group",
+        "arrange.ungroup",
+        "insert.link",
+        "format.textFitting",
+        "format.dropShadow",
+        "format.formatOptions",
+        "format.changeShape",
+        "format.altText",
+        "insert.comment"
+      ],
+      "parkedContextVisible": [
+        "arrange.rotate",
+        "arrange.group",
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.altText",
+        "view.guides",
+        "arrange.distribute",
+        "arrange.ungroup",
+        "format.dropShadow",
+        "format.changeShape"
+      ],
+      "titleRow": [
+        "title.row",
+        "title.home",
+        "title.presence",
+        "title.account",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot",
+        "title.inbox"
+      ],
+      "forbiddenWordHits": [
+        {
+          "id": "tools.advanced.showSource",
+          "word": "source",
+          "label": "Show source",
+          "tip": "Show source"
+        },
+        {
+          "id": "tools.advanced.runAction",
+          "word": "run",
+          "label": "Run an action…",
+          "tip": "Run an action…"
+        },
+        {
+          "id": "extensions.agentAccess",
+          "word": "agent",
+          "label": "Agent access",
+          "tip": "Agent access"
+        }
+      ],
+      "menuRows": [
+        {
+          "id": "file.new",
+          "menu": "ts-menu-file",
+          "label": "New"
+        },
+        {
+          "id": "file.new.presentation",
+          "menu": "ts-menu-file>file.new",
+          "label": "Presentation"
+        },
+        {
+          "id": "file.new.templateGallery",
+          "menu": "ts-menu-file>file.new",
+          "label": "From template gallery"
+        },
+        {
+          "id": "file.open",
+          "menu": "ts-menu-file",
+          "label": "Open…⌘O"
+        },
+        {
+          "id": "file.importSlides",
+          "menu": "ts-menu-file",
+          "label": "Import slides"
+        },
+        {
+          "id": "file.makeCopy",
+          "menu": "ts-menu-file",
+          "label": "Make a copy"
+        },
+        {
+          "id": "file.makeCopy.entire",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Entire presentation"
+        },
+        {
+          "id": "file.makeCopy.selected",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Selected slides"
+        },
+        {
+          "id": "file.share",
+          "menu": "ts-menu-file",
+          "label": "Share"
+        },
+        {
+          "id": "file.email",
+          "menu": "ts-menu-file",
+          "label": "Email"
+        },
+        {
+          "id": "file.download",
+          "menu": "ts-menu-file",
+          "label": "Download"
+        },
+        {
+          "id": "file.rename",
+          "menu": "ts-menu-file",
+          "label": "Rename"
+        },
+        {
+          "id": "file.moveToTrash",
+          "menu": "ts-menu-file",
+          "label": "Move to trash"
+        },
+        {
+          "id": "file.versionHistory",
+          "menu": "ts-menu-file",
+          "label": "Version history"
+        },
+        {
+          "id": "file.details",
+          "menu": "ts-menu-file",
+          "label": "Details"
+        },
+        {
+          "id": "file.pageSetup",
+          "menu": "ts-menu-file",
+          "label": "Page setup"
+        },
+        {
+          "id": "file.printPreview",
+          "menu": "ts-menu-file",
+          "label": "Print settings and preview"
+        },
+        {
+          "id": "file.print",
+          "menu": "ts-menu-file",
+          "label": "Print⌘P"
+        },
+        {
+          "id": "view.slideshow",
+          "menu": "ts-menu-view",
+          "label": "Slideshow⌘↩"
+        },
+        {
+          "id": "view.gridView",
+          "menu": "ts-menu-view",
+          "label": "Grid view"
+        },
+        {
+          "id": "view.zoom",
+          "menu": "ts-menu-view",
+          "label": "Zoom"
+        },
+        {
+          "id": "view.zoom.in",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom in⌘+"
+        },
+        {
+          "id": "view.zoom.out",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom out⌘-"
+        },
+        {
+          "id": "view.zoom.fit",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Fit"
+        },
+        {
+          "id": "view.zoom.50",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "50%"
+        },
+        {
+          "id": "view.zoom.100",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "100%⌘0"
+        },
+        {
+          "id": "view.zoom.200",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "200%"
+        },
+        {
+          "id": "view.showRuler",
+          "menu": "ts-menu-view",
+          "label": "Show ruler"
+        },
+        {
+          "id": "view.guides",
+          "menu": "ts-menu-view",
+          "label": "Guides"
+        },
+        {
+          "id": "view.snapTo",
+          "menu": "ts-menu-view",
+          "label": "Snap to"
+        },
+        {
+          "id": "view.comments",
+          "menu": "ts-menu-view",
+          "label": "Comments"
+        },
+        {
+          "id": "view.livePointers",
+          "menu": "ts-menu-view",
+          "label": "Live pointers"
+        },
+        {
+          "id": "view.showSpeakerNotes",
+          "menu": "ts-menu-view",
+          "label": "Show speaker notes"
+        },
+        {
+          "id": "view.showFilmstrip",
+          "menu": "ts-menu-view",
+          "label": "Show filmstrip"
+        },
+        {
+          "id": "view.mode",
+          "menu": "ts-menu-view",
+          "label": "Mode"
+        },
+        {
+          "id": "view.fullScreen",
+          "menu": "ts-menu-view",
+          "label": "Full screen⌃⇧F"
+        },
+        {
+          "id": "view.showSections",
+          "menu": "ts-menu-view",
+          "label": "Show sections"
+        },
+        {
+          "id": "view.appearance",
+          "menu": "ts-menu-view",
+          "label": "Appearance"
+        },
+        {
+          "id": "insert.image",
+          "menu": "ts-menu-insert",
+          "label": "Image"
+        },
+        {
+          "id": "insert.image.upload",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "Upload from computer"
+        },
+        {
+          "id": "insert.image.byUrl",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "By URL"
+        },
+        {
+          "id": "insert.image.fromThisPresentation",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "From this presentation"
+        },
+        {
+          "id": "insert.textBox",
+          "menu": "ts-menu-insert",
+          "label": "Text box"
+        },
+        {
+          "id": "insert.audio",
+          "menu": "ts-menu-insert",
+          "label": "Audio"
+        },
+        {
+          "id": "insert.video",
+          "menu": "ts-menu-insert",
+          "label": "Video"
+        },
+        {
+          "id": "insert.shape",
+          "menu": "ts-menu-insert",
+          "label": "Shape"
+        },
+        {
+          "id": "insert.shape.shapes",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Shapes"
+        },
+        {
+          "id": "insert.shape.gallery",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "All shapes"
+        },
+        {
+          "id": "insert.shape.arrows",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Arrows"
+        },
+        {
+          "id": "insert.shape.callouts",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Callouts"
+        },
+        {
+          "id": "insert.shape.equation",
+          "menu": "ts-menu-insert>insert.shape",
+          "label": "Equation"
+        },
+        {
+          "id": "insert.shape.shapes.rectangle",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Rectangle"
+        },
+        {
+          "id": "insert.shape.shapes.rounded",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Rounded rectangle"
+        },
+        {
+          "id": "insert.shape.shapes.ellipse",
+          "menu": "ts-menu-insert>insert.shape>insert.shape.shapes",
+          "label": "Ellipse"
+        },
+        {
+          "id": "insert.table",
+          "menu": "ts-menu-insert",
+          "label": "Table"
+        },
+        {
+          "id": "insert.chart",
+          "menu": "ts-menu-insert",
+          "label": "Chart"
+        },
+        {
+          "id": "insert.diagram",
+          "menu": "ts-menu-insert",
+          "label": "Diagram"
+        },
+        {
+          "id": "insert.wordArt",
+          "menu": "ts-menu-insert",
+          "label": "Word art"
+        },
+        {
+          "id": "insert.line",
+          "menu": "ts-menu-insert",
+          "label": "Line"
+        },
+        {
+          "id": "insert.specialCharacters",
+          "menu": "ts-menu-insert",
+          "label": "Special characters"
+        },
+        {
+          "id": "insert.link",
+          "menu": "ts-menu-insert",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "insert.comment",
+          "menu": "ts-menu-insert",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "insert.newSlide",
+          "menu": "ts-menu-insert",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "insert.slideNumbers",
+          "menu": "ts-menu-insert",
+          "label": "Slide numbers"
+        },
+        {
+          "id": "insert.templates",
+          "menu": "ts-menu-insert",
+          "label": "Templates"
+        },
+        {
+          "id": "insert.buildingBlocks",
+          "menu": "ts-menu-insert",
+          "label": "Building blocks"
+        },
+        {
+          "id": "insert.icon",
+          "menu": "ts-menu-insert",
+          "label": "Icon"
+        },
+        {
+          "id": "insert.material",
+          "menu": "ts-menu-insert",
+          "label": "Material"
+        },
+        {
+          "id": "format.text",
+          "menu": "ts-menu-format",
+          "label": "Text"
+        },
+        {
+          "id": "format.text.bold",
+          "menu": "ts-menu-format>format.text",
+          "label": "Bold⌘B"
+        },
+        {
+          "id": "format.text.italic",
+          "menu": "ts-menu-format>format.text",
+          "label": "Italic⌘I"
+        },
+        {
+          "id": "format.text.underline",
+          "menu": "ts-menu-format>format.text",
+          "label": "Underline⌘U"
+        },
+        {
+          "id": "format.text.strikethrough",
+          "menu": "ts-menu-format>format.text",
+          "label": "Strikethrough⇧⌘X"
+        },
+        {
+          "id": "format.text.superscript",
+          "menu": "ts-menu-format>format.text",
+          "label": "Superscript⌘."
+        },
+        {
+          "id": "format.text.subscript",
+          "menu": "ts-menu-format>format.text",
+          "label": "Subscript⌘,"
+        },
+        {
+          "id": "format.text.size",
+          "menu": "ts-menu-format>format.text",
+          "label": "Size"
+        },
+        {
+          "id": "format.text.capitalization",
+          "menu": "ts-menu-format>format.text",
+          "label": "Capitalization"
+        },
+        {
+          "id": "format.text.size.increase",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Increase font size⇧⌘>"
+        },
+        {
+          "id": "format.text.size.decrease",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Decrease font size⇧⌘<"
+        },
+        {
+          "id": "format.alignIndent",
+          "menu": "ts-menu-format",
+          "label": "Align & indent"
+        },
+        {
+          "id": "format.alignIndent.left",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Left⇧⌘L"
+        },
+        {
+          "id": "format.alignIndent.center",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Center⇧⌘E"
+        },
+        {
+          "id": "format.alignIndent.right",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Right⇧⌘R"
+        },
+        {
+          "id": "format.alignIndent.justified",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Justified⇧⌘J"
+        },
+        {
+          "id": "format.alignIndent.increaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Increase indent⌘]"
+        },
+        {
+          "id": "format.alignIndent.decreaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Decrease indent⌘["
+        },
+        {
+          "id": "format.alignIndent.indentationOptions",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Indentation options"
+        },
+        {
+          "id": "format.spacing",
+          "menu": "ts-menu-format",
+          "label": "Line & paragraph spacing"
+        },
+        {
+          "id": "format.spacing.single",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Single"
+        },
+        {
+          "id": "format.spacing.1_15",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.15"
+        },
+        {
+          "id": "format.spacing.1_5",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.5"
+        },
+        {
+          "id": "format.spacing.double",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Double"
+        },
+        {
+          "id": "format.spacing.addBefore",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Add space before paragraph"
+        },
+        {
+          "id": "format.spacing.addAfter",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Add space after paragraph"
+        },
+        {
+          "id": "format.spacing.custom",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Custom spacing"
+        },
+        {
+          "id": "format.bulletsNumbering",
+          "menu": "ts-menu-format",
+          "label": "Bullets & numbering"
+        },
+        {
+          "id": "format.bulletsNumbering.numbered",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Numbered list"
+        },
+        {
+          "id": "format.bulletsNumbering.bulleted",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Bulleted list"
+        },
+        {
+          "id": "format.bulletsNumbering.listOptions",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "List options"
+        },
+        {
+          "id": "format.table",
+          "menu": "ts-menu-format",
+          "label": "Table"
+        },
+        {
+          "id": "format.table.insertRowAbove",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert row above"
+        },
+        {
+          "id": "format.table.insertRowBelow",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert row below"
+        },
+        {
+          "id": "format.table.insertColumnLeft",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert column left"
+        },
+        {
+          "id": "format.table.insertColumnRight",
+          "menu": "ts-menu-format>format.table",
+          "label": "Insert column right"
+        },
+        {
+          "id": "format.table.deleteRow",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete row"
+        },
+        {
+          "id": "format.table.deleteColumn",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete column"
+        },
+        {
+          "id": "format.table.deleteTable",
+          "menu": "ts-menu-format>format.table",
+          "label": "Delete table"
+        },
+        {
+          "id": "format.table.distributeRows",
+          "menu": "ts-menu-format>format.table",
+          "label": "Distribute rows"
+        },
+        {
+          "id": "format.table.distributeColumns",
+          "menu": "ts-menu-format>format.table",
+          "label": "Distribute columns"
+        },
+        {
+          "id": "format.table.mergeCells",
+          "menu": "ts-menu-format>format.table",
+          "label": "Merge cells"
+        },
+        {
+          "id": "format.table.unmergeCells",
+          "menu": "ts-menu-format>format.table",
+          "label": "Unmerge cells"
+        },
+        {
+          "id": "format.image",
+          "menu": "ts-menu-format",
+          "label": "Image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.maskImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Mask image"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.dither",
+          "menu": "ts-menu-format>format.image",
+          "label": "Dither"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "menu": "ts-menu-format>format.image",
+          "label": "Image options"
+        },
+        {
+          "id": "format.bordersLines",
+          "menu": "ts-menu-format",
+          "label": "Borders & lines"
+        },
+        {
+          "id": "format.bordersLines.borderColor",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border color"
+        },
+        {
+          "id": "format.bordersLines.borderWeight",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border weight"
+        },
+        {
+          "id": "format.bordersLines.borderDash",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Border dash"
+        },
+        {
+          "id": "format.bordersLines.lineStart",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Line start"
+        },
+        {
+          "id": "format.bordersLines.lineEnd",
+          "menu": "ts-menu-format>format.bordersLines",
+          "label": "Line end"
+        },
+        {
+          "id": "format.formatOptions",
+          "menu": "ts-menu-format",
+          "label": "Format options"
+        },
+        {
+          "id": "format.clearFormatting",
+          "menu": "ts-menu-format",
+          "label": "Clear formatting⌘\\"
+        },
+        {
+          "id": "format.textFitting",
+          "menu": "ts-menu-format",
+          "label": "Text fitting"
+        },
+        {
+          "id": "slide.newSlide",
+          "menu": "ts-menu-slide",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "slide.duplicateSlide",
+          "menu": "ts-menu-slide",
+          "label": "Duplicate slide⌘D"
+        },
+        {
+          "id": "slide.deleteSlide",
+          "menu": "ts-menu-slide",
+          "label": "Delete slide"
+        },
+        {
+          "id": "slide.skipSlide",
+          "menu": "ts-menu-slide",
+          "label": "Skip slide"
+        },
+        {
+          "id": "slide.moveSlide",
+          "menu": "ts-menu-slide",
+          "label": "Move slide"
+        },
+        {
+          "id": "slide.moveSlide.up",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide up⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.down",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide down⌘↓"
+        },
+        {
+          "id": "slide.moveSlide.toBeginning",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to beginning⇧⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.toEnd",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to end⇧⌘↓"
+        },
+        {
+          "id": "slide.changeBackground",
+          "menu": "ts-menu-slide",
+          "label": "Change background"
+        },
+        {
+          "id": "slide.applyLayout",
+          "menu": "ts-menu-slide",
+          "label": "Apply layout"
+        },
+        {
+          "id": "slide.transition",
+          "menu": "ts-menu-slide",
+          "label": "Transition"
+        },
+        {
+          "id": "slide.editTheme",
+          "menu": "ts-menu-slide",
+          "label": "Edit theme"
+        },
+        {
+          "id": "slide.changeTheme",
+          "menu": "ts-menu-slide",
+          "label": "Change theme"
+        },
+        {
+          "id": "arrange.order",
+          "menu": "ts-menu-arrange",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.align",
+          "menu": "ts-menu-arrange",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "menu": "ts-menu-arrange",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "menu": "ts-menu-arrange",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.rotate",
+          "menu": "ts-menu-arrange",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "menu": "ts-menu-arrange",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "menu": "ts-menu-arrange",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "arrange.regroup",
+          "menu": "ts-menu-arrange",
+          "label": "Regroup"
+        },
+        {
+          "id": "tools.spelling",
+          "menu": "ts-menu-tools",
+          "label": "Spelling"
+        },
+        {
+          "id": "tools.spelling.spellCheck",
+          "menu": "ts-menu-tools>tools.spelling",
+          "label": "Spell check"
+        },
+        {
+          "id": "tools.spelling.underlineErrors",
+          "menu": "ts-menu-tools>tools.spelling",
+          "label": "Underline errors"
+        },
+        {
+          "id": "tools.notificationSettings",
+          "menu": "ts-menu-tools",
+          "label": "Notification settings"
+        },
+        {
+          "id": "tools.preferences",
+          "menu": "ts-menu-tools",
+          "label": "Preferences"
+        },
+        {
+          "id": "tools.accessibilitySettings",
+          "menu": "ts-menu-tools",
+          "label": "Accessibility settings"
+        },
+        {
+          "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+          "menu": "ts-menu-tools>tools.accessibilitySettings",
+          "label": "Turn on collaborator announcements"
+        },
+        {
+          "id": "tools.activityDashboard",
+          "menu": "ts-menu-tools",
+          "label": "Activity dashboard"
+        },
+        {
+          "id": "tools.checkSlides",
+          "menu": "ts-menu-tools",
+          "label": "Check slides"
+        },
+        {
+          "id": "tools.advancedTools",
+          "menu": "ts-menu-tools",
+          "label": "Advanced tools"
+        },
+        {
+          "id": "tools.advanced",
+          "menu": "ts-menu-tools",
+          "label": "Advanced"
+        },
+        {
+          "id": "tools.advanced.showSource",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show source"
+        },
+        {
+          "id": "tools.advanced.sideBySide",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Light and dark side by side"
+        },
+        {
+          "id": "tools.advanced.suggestionMarks",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show suggestion marks on the slide"
+        },
+        {
+          "id": "tools.advanced.showIds",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show slide and block ids"
+        },
+        {
+          "id": "tools.advanced.renderSlide",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Render this slide"
+        },
+        {
+          "id": "tools.advanced.changeHistory",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Change history"
+        },
+        {
+          "id": "tools.advanced.sectionsTree",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Show sections as a tree"
+        },
+        {
+          "id": "tools.advanced.readAsBook",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Read as a book"
+        },
+        {
+          "id": "tools.advanced.picturesMaterials",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Pictures and materials"
+        },
+        {
+          "id": "tools.advanced.runAction",
+          "menu": "ts-menu-tools>tools.advanced",
+          "label": "Run an action…"
+        },
+        {
+          "id": "extensions.agentAccess",
+          "menu": "ts-menu-extensions",
+          "label": "Agent access"
+        },
+        {
+          "id": "extensions.embedInSite",
+          "menu": "ts-menu-extensions",
+          "label": "Embed in a site"
+        },
+        {
+          "id": "help.searchMenus",
+          "menu": "ts-menu-help",
+          "label": "Search the menus⌥/"
+        },
+        {
+          "id": "help.help",
+          "menu": "ts-menu-help",
+          "label": "Help"
+        },
+        {
+          "id": "help.improve",
+          "menu": "ts-menu-help",
+          "label": "Help Turboslide improve"
+        },
+        {
+          "id": "help.keyboardShortcuts",
+          "menu": "ts-menu-help",
+          "label": "Keyboard shortcuts⌘/"
+        }
+      ]
+    },
+    {
+      "name": "default",
+      "width": 390,
+      "shot": "cycle3p2-default-390.png",
+      "state": {
+        "setting": false,
+        "attr": null
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "help"
+      ],
+      "rowsRead": 88,
+      "uniqueRows": 88,
+      "parkedVisible": [],
+      "parkedVisibleCount": 0,
+      "parkedTotal": 210,
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.more"
+      ],
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.more"
+      ],
+      "blockSelected": true,
+      "parkedToolbarVisible": [],
+      "contextSheet": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "format.image.replaceImage",
+        "format.image.cropImage",
+        "format.image.resetImage",
+        "format.image.imageOptions",
+        "format.formatOptions",
+        "insert.comment",
+        "slide.changeBackground"
+      ],
+      "contextBlock": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "arrange.order",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "insert.link",
+        "format.textFitting",
+        "format.formatOptions",
+        "insert.comment"
+      ],
+      "parkedContextVisible": [],
+      "titleRow": [
+        "title.row",
+        "title.home",
+        "title.presence",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot"
+      ],
+      "forbiddenWordHits": [],
+      "menuRows": [
+        {
+          "id": "file.new",
+          "menu": "ts-menu-file",
+          "label": "New"
+        },
+        {
+          "id": "file.new.presentation",
+          "menu": "ts-menu-file>file.new",
+          "label": "Presentation"
+        },
+        {
+          "id": "file.makeCopy",
+          "menu": "ts-menu-file",
+          "label": "Make a copy"
+        },
+        {
+          "id": "file.makeCopy.entire",
+          "menu": "ts-menu-file>file.makeCopy",
+          "label": "Entire presentation"
+        },
+        {
+          "id": "file.share",
+          "menu": "ts-menu-file",
+          "label": "Share"
+        },
+        {
+          "id": "file.share.withOthers",
+          "menu": "ts-menu-file>file.share",
+          "label": "Share with others"
+        },
+        {
+          "id": "file.share.copyLink",
+          "menu": "ts-menu-file>file.share",
+          "label": "Copy link"
+        },
+        {
+          "id": "file.download",
+          "menu": "ts-menu-file",
+          "label": "Download"
+        },
+        {
+          "id": "file.rename",
+          "menu": "ts-menu-file",
+          "label": "Rename"
+        },
+        {
+          "id": "file.moveToTrash",
+          "menu": "ts-menu-file",
+          "label": "Move to trash"
+        },
+        {
+          "id": "file.versionHistory",
+          "menu": "ts-menu-file",
+          "label": "Version history"
+        },
+        {
+          "id": "file.printPreview",
+          "menu": "ts-menu-file",
+          "label": "Print settings and preview"
+        },
+        {
+          "id": "file.print",
+          "menu": "ts-menu-file",
+          "label": "Print⌘P"
+        },
+        {
+          "id": "edit.undo",
+          "menu": "ts-menu-edit",
+          "label": "Undo⌘Z"
+        },
+        {
+          "id": "edit.redo",
+          "menu": "ts-menu-edit",
+          "label": "Redo⌘Y"
+        },
+        {
+          "id": "edit.cut",
+          "menu": "ts-menu-edit",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "menu": "ts-menu-edit",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "menu": "ts-menu-edit",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.pasteWithoutFormatting",
+          "menu": "ts-menu-edit",
+          "label": "Paste without formatting⇧⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "menu": "ts-menu-edit",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "menu": "ts-menu-edit",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "edit.selectAll",
+          "menu": "ts-menu-edit",
+          "label": "Select all⌘A"
+        },
+        {
+          "id": "edit.findReplace",
+          "menu": "ts-menu-edit",
+          "label": "Find and replace⇧⌘H"
+        },
+        {
+          "id": "view.slideshow",
+          "menu": "ts-menu-view",
+          "label": "Slideshow⌘↩"
+        },
+        {
+          "id": "view.zoom",
+          "menu": "ts-menu-view",
+          "label": "Zoom"
+        },
+        {
+          "id": "view.zoom.in",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom in⌘+"
+        },
+        {
+          "id": "view.zoom.out",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Zoom out⌘-"
+        },
+        {
+          "id": "view.zoom.fit",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "Fit"
+        },
+        {
+          "id": "view.zoom.50",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "50%"
+        },
+        {
+          "id": "view.zoom.100",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "100%⌘0"
+        },
+        {
+          "id": "view.zoom.200",
+          "menu": "ts-menu-view>view.zoom",
+          "label": "200%"
+        },
+        {
+          "id": "view.showSpeakerNotes",
+          "menu": "ts-menu-view",
+          "label": "Show speaker notes"
+        },
+        {
+          "id": "insert.image",
+          "menu": "ts-menu-insert",
+          "label": "Image"
+        },
+        {
+          "id": "insert.image.upload",
+          "menu": "ts-menu-insert>insert.image",
+          "label": "Upload from computer"
+        },
+        {
+          "id": "insert.textBox",
+          "menu": "ts-menu-insert",
+          "label": "Text box"
+        },
+        {
+          "id": "insert.link",
+          "menu": "ts-menu-insert",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "insert.comment",
+          "menu": "ts-menu-insert",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "insert.newSlide",
+          "menu": "ts-menu-insert",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "format.text",
+          "menu": "ts-menu-format",
+          "label": "Text"
+        },
+        {
+          "id": "format.text.bold",
+          "menu": "ts-menu-format>format.text",
+          "label": "Bold⌘B"
+        },
+        {
+          "id": "format.text.italic",
+          "menu": "ts-menu-format>format.text",
+          "label": "Italic⌘I"
+        },
+        {
+          "id": "format.text.underline",
+          "menu": "ts-menu-format>format.text",
+          "label": "Underline⌘U"
+        },
+        {
+          "id": "format.text.strikethrough",
+          "menu": "ts-menu-format>format.text",
+          "label": "Strikethrough⇧⌘X"
+        },
+        {
+          "id": "format.text.size",
+          "menu": "ts-menu-format>format.text",
+          "label": "Size"
+        },
+        {
+          "id": "format.text.size.increase",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Increase font size⇧⌘>"
+        },
+        {
+          "id": "format.text.size.decrease",
+          "menu": "ts-menu-format>format.text>format.text.size",
+          "label": "Decrease font size⇧⌘<"
+        },
+        {
+          "id": "format.alignIndent",
+          "menu": "ts-menu-format",
+          "label": "Align & indent"
+        },
+        {
+          "id": "format.alignIndent.left",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Left⇧⌘L"
+        },
+        {
+          "id": "format.alignIndent.center",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Center⇧⌘E"
+        },
+        {
+          "id": "format.alignIndent.right",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Right⇧⌘R"
+        },
+        {
+          "id": "format.alignIndent.increaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Increase indent⌘]"
+        },
+        {
+          "id": "format.alignIndent.decreaseIndent",
+          "menu": "ts-menu-format>format.alignIndent",
+          "label": "Decrease indent⌘["
+        },
+        {
+          "id": "format.spacing",
+          "menu": "ts-menu-format",
+          "label": "Line & paragraph spacing"
+        },
+        {
+          "id": "format.spacing.single",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Single"
+        },
+        {
+          "id": "format.spacing.1_15",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.15"
+        },
+        {
+          "id": "format.spacing.1_5",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "1.5"
+        },
+        {
+          "id": "format.spacing.double",
+          "menu": "ts-menu-format>format.spacing",
+          "label": "Double"
+        },
+        {
+          "id": "format.bulletsNumbering",
+          "menu": "ts-menu-format",
+          "label": "Bullets & numbering"
+        },
+        {
+          "id": "format.bulletsNumbering.numbered",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Numbered list"
+        },
+        {
+          "id": "format.bulletsNumbering.bulleted",
+          "menu": "ts-menu-format>format.bulletsNumbering",
+          "label": "Bulleted list"
+        },
+        {
+          "id": "format.image",
+          "menu": "ts-menu-format",
+          "label": "Image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "menu": "ts-menu-format>format.image",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "menu": "ts-menu-format>format.image",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "menu": "ts-menu-format",
+          "label": "Format options"
+        },
+        {
+          "id": "format.clearFormatting",
+          "menu": "ts-menu-format",
+          "label": "Clear formatting⌘\\"
+        },
+        {
+          "id": "format.textFitting",
+          "menu": "ts-menu-format",
+          "label": "Text fitting"
+        },
+        {
+          "id": "slide.newSlide",
+          "menu": "ts-menu-slide",
+          "label": "New slide⌃M"
+        },
+        {
+          "id": "slide.duplicateSlide",
+          "menu": "ts-menu-slide",
+          "label": "Duplicate slide⌘D"
+        },
+        {
+          "id": "slide.deleteSlide",
+          "menu": "ts-menu-slide",
+          "label": "Delete slide"
+        },
+        {
+          "id": "slide.skipSlide",
+          "menu": "ts-menu-slide",
+          "label": "Skip slide"
+        },
+        {
+          "id": "slide.moveSlide",
+          "menu": "ts-menu-slide",
+          "label": "Move slide"
+        },
+        {
+          "id": "slide.moveSlide.up",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide up⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.down",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide down⌘↓"
+        },
+        {
+          "id": "slide.moveSlide.toBeginning",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to beginning⇧⌘↑"
+        },
+        {
+          "id": "slide.moveSlide.toEnd",
+          "menu": "ts-menu-slide>slide.moveSlide",
+          "label": "Move slide to end⇧⌘↓"
+        },
+        {
+          "id": "slide.changeBackground",
+          "menu": "ts-menu-slide",
+          "label": "Change background"
+        },
+        {
+          "id": "slide.applyLayout",
+          "menu": "ts-menu-slide",
+          "label": "Apply layout"
+        },
+        {
+          "id": "arrange.order",
+          "menu": "ts-menu-arrange",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.align",
+          "menu": "ts-menu-arrange",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "menu": "ts-menu-arrange",
+          "label": "Center on page"
+        },
+        {
+          "id": "tools.accessibilitySettings",
+          "menu": "ts-menu-tools",
+          "label": "Accessibility settings"
+        },
+        {
+          "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+          "menu": "ts-menu-tools>tools.accessibilitySettings",
+          "label": "Turn on collaborator announcements"
+        },
+        {
+          "id": "tools.advancedTools",
+          "menu": "ts-menu-tools",
+          "label": "Advanced tools"
+        },
+        {
+          "id": "help.searchMenus",
+          "menu": "ts-menu-help",
+          "label": "Search the menus⌥/"
+        },
+        {
+          "id": "help.help",
+          "menu": "ts-menu-help",
+          "label": "Help"
+        },
+        {
+          "id": "help.keyboardShortcuts",
+          "menu": "ts-menu-help",
+          "label": "Keyboard shortcuts⌘/"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "initial": {
+    "setting": false,
+    "attr": null
+  },
+  "afterOn": {
+    "setting": true,
+    "attr": ""
+  },
+  "afterReload": {
+    "setting": true,
+    "attr": "",
+    "ms": 909
+  },
+  "afterNavigation": {
+    "setting": true,
+    "attr": "",
+    "ms": 806
+  },
+  "freshContext": {
+    "setting": false,
+    "attr": null,
+    "ms": 1242
+  },
+  "atEnd": {
+    "setting": false,
+    "attr": null
+  },
+  "finishedAt": "2026-09-18T04:03:44.047Z"
+}

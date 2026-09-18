@@ -2,8 +2,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { isChromeControlTarget } from '../Editor';
-import { editorKeyAction, isBareCharacterKey, NUDGE_PX, NUDGE_SHIFT_PX } from '../keys';
-import type { EditorKeyContext } from '../keys';
+import {
+  editorKeyAction,
+  isBareCharacterKey,
+  NUDGE_PX,
+  NUDGE_SHIFT_PX,
+  typingEntry,
+} from '../keys';
+import type { EditorKeyContext, TypingEntryContext } from '../keys';
+import { escapeSelection } from '../Selection';
 
 // The stage's edit keys and the chrome's controls (this round): a key pressed on an inspector
 // button, a palette swatch, a field or a menu row is that control's, so Enter activates the
@@ -33,6 +40,81 @@ function tree(): { stage: HTMLElement; inspector: HTMLElement; overlay: HTMLElem
     overlay: document.getElementById('overlay') as HTMLElement,
   };
 }
+
+// The click model amendment (docs/gslides-parity/focus/AMENDMENTS.md A1 rule 4), the keyboard side:
+// a printable key on one selected text object is the first keystroke of its session (the Editor
+// opens the session over the whole text and inserts it), Enter opens the session with the caret at
+// the end, Escape inside a session returns to the object (InlineText finish 'escape', the Editor's
+// endEdit selects the block) and a second Escape clears the selection (escapeSelection).
+describe('typingEntry (AMENDMENTS.md A1 rule 4)', () => {
+  const one: TypingEntryContext = {
+    textObject: true,
+    several: false,
+    editing: false,
+    editable: false,
+  };
+
+  it('answers the character for a letter, a digit, Space and a Shift letter on one selected text object', () => {
+    expect(typingEntry({ key: 'a' }, one)).toBe('a');
+    expect(typingEntry({ key: 'Q', shiftKey: true }, one)).toBe('Q');
+    expect(typingEntry({ key: '7' }, one)).toBe('7');
+    expect(typingEntry({ key: ' ' }, one)).toBe(' ');
+    expect(typingEntry({ key: '!', shiftKey: true }, one)).toBe('!');
+  });
+
+  it('starts nothing for a named key or a chord: Enter and Escape have their own rules, Cmd letters are commands', () => {
+    for (const key of [
+      'Enter',
+      'Escape',
+      'Backspace',
+      'Delete',
+      'Tab',
+      'ArrowLeft',
+      'Home',
+      'F10',
+    ]) {
+      expect(typingEntry({ key }, one)).toBeNull();
+    }
+    expect(typingEntry({ key: 'a', metaKey: true }, one)).toBeNull();
+    expect(typingEntry({ key: 'a', ctrlKey: true }, one)).toBeNull();
+    expect(typingEntry({ key: 'a', altKey: true }, one)).toBeNull();
+  });
+
+  it('starts nothing with several objects selected, an object without a run, an open session, a field or a composition', () => {
+    expect(typingEntry({ key: 'a' }, { ...one, several: true })).toBeNull();
+    expect(typingEntry({ key: 'a' }, { ...one, textObject: false })).toBeNull();
+    expect(typingEntry({ key: 'a' }, { ...one, editing: true })).toBeNull();
+    expect(typingEntry({ key: 'a' }, { ...one, editable: true })).toBeNull();
+    expect(typingEntry({ key: 'a' }, { ...one, composing: true })).toBeNull();
+  });
+
+  it('leaves the stage table binding no bare letter (SPEC 0.28): the letter is a keystroke, not a command', () => {
+    for (const key of BARE) expect(editorKeyAction({ key }, selected)).toBeNull();
+  });
+});
+
+describe('Enter and the two Escapes (AMENDMENTS.md A1 rule 4)', () => {
+  it('Enter on a selected object is the entry with the caret at the end; the table answers enter for the Editor to open the first run', () => {
+    expect(editorKeyAction({ key: 'Enter' }, selected)).toEqual({ type: 'enter' });
+    expect(editorKeyAction({ key: 'Enter' }, nothing)).toBeNull();
+    /* inside a session Enter is the run's (InlineText onKey), never the table's */
+    expect(editorKeyAction({ key: 'Enter' }, { ...selected, editing: true })).toBeNull();
+  });
+
+  it('the first Escape leaves the session to the selected object and the second clears the selection', () => {
+    /* inside the session the run owns Escape (the table yields); InlineText ends the session
+       with 'escape' and the Editor's endEdit selects the block */
+    expect(editorKeyAction({ key: 'Escape' }, { ...selected, editing: true })).toBeNull();
+    const afterFirst = escapeSelection({ kind: 'run', blockId: 'a1', pointer: 'text' });
+    expect(afterFirst).toEqual({ kind: 'block', blockId: 'a1' });
+    /* the second Escape reaches the table with the block selected and clears it */
+    expect(editorKeyAction({ key: 'Escape' }, selected)).toEqual({ type: 'escape' });
+    expect(escapeSelection(afterFirst)).toBeNull();
+    expect(escapeSelection(null)).toBeNull();
+    /* with nothing selected a third Escape is nobody's on the stage */
+    expect(editorKeyAction({ key: 'Escape' }, nothing)).toBeNull();
+  });
+});
 
 describe('isChromeControlTarget', () => {
   it('is true for a button, a field, a menu row, a filmstrip card and anything inside the inspector', () => {
@@ -194,6 +276,25 @@ describe('editorKeyAction', () => {
     expect(editorKeyAction({ key: 'ArrowLeft', altKey: true }, nothing)).toBeNull();
     /* Option Up stays nothing: the arrow pair rotates, the vertical pair is free */
     expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, selected)).toBeNull();
+  });
+
+  it("matches nothing for the parked rows' chords while Tools > Advanced tools is off (surface.parked-shortcut-unbound)", () => {
+    const off: EditorKeyContext = { ...selected, advanced: false };
+    expect(editorKeyAction({ key: 'g', metaKey: true, altKey: true }, off)).toBeNull();
+    expect(
+      editorKeyAction({ key: 'G', metaKey: true, altKey: true, shiftKey: true }, off),
+    ).toBeNull();
+    expect(editorKeyAction({ key: 'c', metaKey: true, altKey: true }, off)).toBeNull();
+    expect(editorKeyAction({ key: 'v', metaKey: true, altKey: true }, off)).toBeNull();
+    /* the rotate aliases belong to no menu row and stand */
+    expect(editorKeyAction({ key: 'ArrowRight', metaKey: true, altKey: true }, off)).toEqual({
+      type: 'rotate',
+      by: 15,
+    });
+    /* on, or unstated (a stage outside the shell), the chords stand */
+    expect(
+      editorKeyAction({ key: 'g', metaKey: true, altKey: true }, { ...selected, advanced: true }),
+    ).toEqual({ type: 'group' });
   });
 
   it('groups with Cmd Option G and ungroups with Shift; the marks and the indents apply to a selected object', () => {

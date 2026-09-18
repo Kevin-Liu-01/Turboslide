@@ -158,9 +158,11 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const box = await heading.boundingBox();
     expect(box).not.toBeNull();
-    /* a single click inside the text places the caret there: the run is editable at once. The
-       click lands inside the first word, so the offset is neither the start nor the end */
-    await page.mouse.click(box!.x + 24, box!.y + box!.height / 2);
+    /* a double click inside the text opens the session with the caret at the point (the click
+       model of docs/gslides-parity/focus/AMENDMENTS.md A1: one click selects the object, the
+       double click enters). The point lands inside the first word, so the offset is neither the
+       start nor the end */
+    await page.mouse.dblclick(box!.x + 24, box!.y + box!.height / 2);
     await expect(heading).toHaveAttribute('contenteditable', 'true');
     await expect(heading).toHaveAttribute('spellcheck', 'true');
     const caretInside = await page.evaluate(() => {
@@ -220,7 +222,8 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const paragraph = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="p/text"]');
     const box = await paragraph.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + 8, box!.y + 8);
+    /* the session opens on a double click (AMENDMENTS.md A1; one click selects the object) */
+    await page.mouse.dblclick(box!.x + 8, box!.y + 8);
     await expect(paragraph).toHaveAttribute('contenteditable', 'true');
     /* a triple click selects the paragraph (R09 A1, the browser's own gesture); typing replaces it */
     await page.mouse.click(box!.x + 8, box!.y + 8, { clickCount: 3 });
@@ -240,7 +243,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const hbox = await heading.boundingBox();
     const beforeHeading = await revision(page);
-    await page.mouse.click(hbox!.x + 8, hbox!.y + hbox!.height / 2);
+    await page.mouse.dblclick(hbox!.x + 8, hbox!.y + hbox!.height / 2);
     await expect(heading).toHaveAttribute('contenteditable', 'true', { timeout: 30_000 });
     await page.keyboard.press('End');
     await page.keyboard.type(' A', { delay: 20 });
@@ -261,7 +264,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const first = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="list/items/0/text"]');
     const box = await first.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + box!.width - 20, box!.y + box!.height / 2);
+    await page.mouse.dblclick(box!.x + box!.width - 20, box!.y + box!.height / 2);
     await expect(first).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
@@ -274,9 +277,11 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect
       .poll(() => runText(page, 'content-rule', 'list', 'items/1/text'))
       .toBe('New item.');
-    /* Backspace on an emptied item removes it and moves the caret to the item before */
+    /* Backspace on an emptied item removes it and moves the caret to the item before. Escape left
+       the list selected as an object, so the session reopens on a double click (AMENDMENTS.md A1
+       rule 3; one click keeps the selection and places no caret) */
     const nbox = await second.boundingBox();
-    await page.mouse.click(nbox!.x + nbox!.width - 20, nbox!.y + nbox!.height / 2);
+    await page.mouse.dblclick(nbox!.x + nbox!.width - 20, nbox!.y + nbox!.height / 2);
     await expect(second).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('End');
     await page.keyboard.press('Shift+Home');
@@ -299,7 +304,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
       page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="table/rows/${r}/cells/${c}"]`);
     const box = await cell(1, 0).boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + 8, box!.y + box!.height / 2);
+    await page.mouse.dblclick(box!.x + 8, box!.y + box!.height / 2);
     await expect(cell(1, 0)).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('End');
     await page.keyboard.press('Shift+Home');
@@ -313,9 +318,11 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect(cell(1, 0)).toHaveAttribute('contenteditable', 'true', { timeout: 10_000 });
     await expect.poll(() => runText(page, 'table', 'table', 'rows/1/cells/1')).toBe('50');
     await page.keyboard.press('Escape');
-    /* the last cell: Tab adds a row and the caret lands in its first cell */
+    /* the last cell: Tab adds a row and the caret lands in its first cell. The table is selected
+       as an object after Escape, so the cell's session opens on a double click (AMENDMENTS.md A1
+       rule 3) */
     const last = await cell(3, 3).boundingBox();
-    await page.mouse.click(last!.x + 8, last!.y + last!.height / 2);
+    await page.mouse.dblclick(last!.x + 8, last!.y + last!.height / 2);
     await expect(cell(3, 3)).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.press('Tab');
     await expect(cell(4, 0)).toHaveAttribute('contenteditable', 'true', { timeout: 15_000 });
@@ -379,50 +386,42 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect.poll(() => ids(), { timeout: 15_000 }).toEqual(['h', 'h-2', 'p', 'list']);
   });
 
-  test('no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87)', async ({
+  test('the view letters change nothing with a block selected, a printable key starts the session over the whole text (AMENDMENTS.md A1 rule 4), and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87)', async ({
     page,
   }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(90_000);
     await openEditor(page, 'content-rule');
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="h"]');
-    /* select the block through its overlay chip path: Tab from the page selects the first block */
-    await page.locator('body').press('Tab');
+    const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
+    /* the heading selected as an object with one click (AMENDMENTS.md A1 rule 1: the ring and
+       the handles, no caret). Tab from the page is not used here: it lands on the title row's Home
+       link when the page holds no selection, and the arrows then walk the slides */
+    await heading.click();
     await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.blockId))
+      .toBe('h');
     /* the heading's words as this test finds them (an earlier test of this file commits ' A' into them) */
     const words = await runText(page, 'content-rule', 'h', 'text');
     const startRevision = await revision(page);
-    const before = await page.evaluate(() => ({
-      theme: document.documentElement.getAttribute('data-theme'),
-      sb: document.querySelector('.pt-viewer')?.getAttribute('data-sb'),
-      mode: document.querySelector('.pt-viewer')?.getAttribute('data-mode'),
-      editing: document
-        .querySelector('.ts-stagewrap.ts-editor')
-        ?.closest('[data-editing]')
-        ?.getAttribute('data-editing'),
-      active: document.querySelector('.pt-viewer')?.getAttribute('data-active'),
-    }));
-    for (const key of ['s', 'd', 'e', 'p', 'g', 'b', 'j', 'k', '?', 'ArrowDown', 'ArrowRight']) {
-      await page.keyboard.press(key);
-    }
-    await page.waitForTimeout(200);
-    const after = await page.evaluate(() => ({
-      theme: document.documentElement.getAttribute('data-theme'),
-      sb: document.querySelector('.pt-viewer')?.getAttribute('data-sb'),
-      mode: document.querySelector('.pt-viewer')?.getAttribute('data-mode'),
-      editing: document
-        .querySelector('.ts-stagewrap.ts-editor')
-        ?.closest('[data-editing]')
-        ?.getAttribute('data-editing'),
-      active: document.querySelector('.pt-viewer')?.getAttribute('data-active'),
-    }));
-    expect(after).toEqual(before);
-    /* the selection is unchanged: the arrows did not cycle the blocks, and no letter reached the text */
-    await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
-    expect(await heading.count()).toBe(1);
-    expect(await runText(page, 'content-rule', 'h', 'text')).toBe(words);
-    /* round two (gslides-parity SPEC-2 0.87, 1.6): the two arrows nudged the selected block 1 px
-       down and 1 px right, the first press converting the slide to the canvas in the same write;
-       round one held the arrows inert on a grammar slide */
+    /* the view: the theme, the sidebar, the mode and the current slide */
+    const view = () =>
+      page.evaluate(() => ({
+        theme: document.documentElement.getAttribute('data-theme'),
+        sb: document.querySelector('.pt-viewer')?.getAttribute('data-sb'),
+        mode: document.querySelector('.pt-viewer')?.getAttribute('data-mode'),
+        active: document.querySelector('.pt-viewer')?.getAttribute('data-active'),
+      }));
+    /* true while a text session is open on the stage (the stage's own data-editing attribute) */
+    const session = () =>
+      page.evaluate(() => document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null);
+    const before = await view();
+    expect(await session()).toBe(false);
+    /* round two (gslides-parity SPEC-2 0.87, 1.6): with the block selected and no session open,
+       the two arrows nudge it 1 px down and 1 px right, the first press converting the slide to
+       the canvas in the same write; round one held the arrows inert on a grammar slide */
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
     await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(startRevision);
     await settled(page);
     const slide = (await page.evaluate(() =>
@@ -437,5 +436,34 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     const h = slide.slide.slots?.main?.find((b) => b.id === 'h');
     expect(h?.pos).toBeDefined();
     expect(h!.pos!.x).toBe(138);
+    /* the arrows moved the block and placed no caret: the selection stands, no session opened and
+       the view is unchanged */
+    await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
+    expect(await session()).toBe(false);
+    expect(await view()).toEqual(before);
+    expect(await heading.count()).toBe(1);
+    expect(await runText(page, 'content-rule', 'h', 'text')).toBe(words);
+    /* the click model (docs/gslides-parity/focus/AMENDMENTS.md A1 rule 4): a printable key on a
+       selected text block starts the session with the whole text selected, so the first letter
+       replaces the words and the rest follow. The view letters (s the sidebar, d the theme, e edit,
+       p present, g the grid, b, j, k and ?) are text here and change nothing of the view. Round
+       one held every bare letter inert with a block selected; the row is rewritten to A1 */
+    for (const key of ['s', 'd', 'e', 'p', 'g', 'b', 'j', 'k', '?']) {
+      await page.keyboard.press(key);
+    }
+    await expect(run).toHaveAttribute('contenteditable', 'true');
+    expect(await view()).toEqual(before);
+    await expect
+      .poll(() => runText(page, 'content-rule', 'h', 'text'), { timeout: 15_000 })
+      .toBe('sdepgbjk?');
+    /* Escape returns to the selected block (A1 rule 4) and one Cmd Z takes the burst back */
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
+    expect(await session()).toBe(false);
+    await settled(page);
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect
+      .poll(() => runText(page, 'content-rule', 'h', 'text'), { timeout: 15_000 })
+      .toBe(words);
   });
 });

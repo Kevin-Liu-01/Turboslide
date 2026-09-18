@@ -4,6 +4,7 @@ import type {
   ReactNode,
 } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Icon } from './icons';
 import { cn } from './lib/cn';
@@ -671,7 +672,21 @@ export function Menu({
     };
   }, [close, returnFocusTo]);
 
-  return (
+  /* The root list is a fixed box at z-index 30, but z-index counts inside the nearest stacking
+     context, and the stage (`.pt-stagewrap`) is one: its `view-transition-name` makes it so. A
+     right click menu rendered under the stage was therefore painted under the notes slot
+     (z-index 5, a later sibling of the stage) wherever it ran past the stage's bottom edge, so
+     its lower rows could not be hovered or clicked: the matrix row `lines.context.line` failed
+     on every origin because Line end sat under "Click to add speaker notes" (docs/FOCUS.md 6.4;
+     VERIFICATION C2-F11; measured on the enforce preview of 2026-09-17: the row's hover raised
+     the notes pane's tooltip and `aria-expanded` stayed false). Every menu therefore renders
+     through a portal into `document.body`, at the root stacking context, above the panes (the
+     notes slot 5, the inspector 4 and 6, the palette 16, the snackbar 21) and under the dialogs
+     (34, 40), the tooltip (40) and the pickers (60). Placement reads the anchor's viewport box,
+     the outside press reads `container`, and the editor recognises a menu by its role and
+     classes (`[role="menu"]`, `.ts-context-menu`, `.ts-menu-root`), so nothing depends on the
+     menu sitting inside its trigger's subtree. */
+  const node = (
     <div ref={container} className="ts-menu-root" data-control={`menu.${rootId}`}>
       <MenuList
         items={items}
@@ -694,6 +709,8 @@ export function Menu({
       />
     </div>
   );
+  if (typeof document === 'undefined') return node;
+  return createPortal(node, document.body);
 }
 
 export { DIVIDER };

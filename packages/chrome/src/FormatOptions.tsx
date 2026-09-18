@@ -23,6 +23,7 @@ import type { SectionWrite } from './inspector/fields';
 import { TextFittingSection } from './inspector/fitting';
 import {
   FORMAT_SECTIONS,
+  presentFormatSections,
   FORMAT_SECTION_BY_ID,
   formatSectionOfBlockControl,
   formatSectionOfSlideControl,
@@ -125,6 +126,8 @@ export type FormatOptionsProps = {
   /** the section to open and scroll to when the panel opens from a menu row */
   openSection?: FormatSectionId | null;
   slots?: FormatOptionsSlots;
+  /** Tools > Advanced tools: the parked sections (Dither, Drop shadow, Table, Chart data, Shape, Alt text) draw only while on (docs/FOCUS.md 3.2) */
+  advancedTools?: boolean;
 };
 
 function routeSlide(spec: ControlSpec): FormatSectionId | null {
@@ -203,6 +206,7 @@ export function FormatOptions({
   say,
   openSection = null,
   slots,
+  advancedTools = false,
 }: FormatOptionsProps) {
   const [closed, setClosed] = useState<ReadonlySet<FormatSectionId>>(() => new Set());
   const [notice, setNotice] = useState<string | null>(null);
@@ -452,7 +456,7 @@ export function FormatOptions({
       selected.type === 'table' ||
       (selected.type === 'shape' && !isLineKind(selected.shape)));
 
-  const sectionsShown = FORMAT_SECTIONS.filter((section) => {
+  const sectionsShown = presentFormatSections(FORMAT_SECTIONS, advancedTools).filter((section) => {
     switch (section.id) {
       case 'size':
       case 'position':

@@ -25,13 +25,17 @@ import {
   applyAndPush,
   applyCommentOps,
   fileCommentsOnWrite,
+  localIndexEtag,
   pullSidecar,
   readIndex,
   readSidecar,
   readThread,
   shiftOps,
+  watchSidecarIndex,
 } from './comments-store.ts';
+import type { SidecarIndexChange } from './comments-store.ts';
 import { openFileStore, slidePath } from './file-store.ts';
+import { pulsePath } from './pulse.ts';
 
 const DECK = 'gt-brand';
 const NOW = '2026-09-13T10:00:00.000Z';
@@ -313,5 +317,291 @@ describe('the comments sidecar', () => {
         readFileSync(join(dirB, 'comments', `${T2}.json`)),
       ),
     ).toBe(0);
+  });
+});
+
+// The proven pull (the focus round, VERIFICATION.md pass 2 F-comments-reply): a reply pushed by
+// one instance overwrites the thread file and the index; another instance that pulls through the
+// CDN's copy of those files reads the thread from before the reply and lists no reply. The pull
+// proves the index against `head()` and reads each thread by the index's rows, never by the prefix
+// listing (which lags by up to a minute); the fake's `holdGet()` is the CDN and `holdList()` the
+// listing.
+describe('the proven pull (pass 2)', () => {
+  let root: string;
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'turboslide-comments-pull-'));
+  });
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
+
+  const freshFrom = (client: ReturnType<typeof memoryBlobClient>) => async (url: string) => {
+    const pathname = url.slice(client.base.length + 1).split('?')[0] ?? '';
+    const stored = client.blobs.get(pathname);
+    return stored === undefined ? null : new Uint8Array(stored.bytes);
+  };
+  const noSleep = async (): Promise<void> => undefined;
+
+  it('lists the reply another instance pushed while the plain reads still answer the thread from before it', async () => {
+    const client = memoryBlobClient();
+    const options = { fetchFresh: freshFrom(client), sleep: noSleep };
+    const dirA = join(root, 'a', DECK);
+    const dirB = join(root, 'b', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, options);
+    // B read the sidecar once (the add's read back); the CDN now holds these bodies
+    expect((await pullSidecar(client, DECK, dirB, options))?.revision).toBe(1);
+    expect(readSidecar(dirB, DECK).threads.get(T1)?.replies).toHaveLength(0);
+    client.holdGet();
+    client.holdList();
+    const reply: CommentOp = {
+      op: 'reply',
+      threadId: T1,
+      comment: {
+        id: T2,
+        author: { principalId: maya.principalId as string, label: 'Maya', kind: 'human' },
+        createdAt: LATER,
+        body: { text: 'Done', mentions: [] },
+      },
+    };
+    await applyAndPush(client, DECK, dirA, [reply], LATER, 4, options);
+    // the plain client still answers the index and the thread from before the reply
+    const plainIndex = await client.get(`${deckPrefix(DECK)}comments/index.json`);
+    expect(
+      (JSON.parse(new TextDecoder().decode(plainIndex?.bytes)) as { revision: number }).revision,
+    ).toBe(1);
+    // B pulls: the proven reads answer the reply
+    const pulled = await pullSidecar(client, DECK, dirB, options);
+    expect(pulled?.revision).toBe(2);
+    const thread = readSidecar(dirB, DECK).threads.get(T1);
+    expect(thread?.replies.map((r) => r.body.text)).toEqual(['Done']);
+    expect(
+      Buffer.compare(
+        readFileSync(join(dirB, 'comments', `${T1}.json`)),
+        readFileSync(join(dirA, 'comments', `${T1}.json`)),
+      ),
+    ).toBe(0);
+    client.releaseGet();
+    client.releaseList();
+  });
+
+  it('lists the thread another instance pushed from the immutable copies when the plain reads and the url read all lag (C2-F7)', async () => {
+    const client = memoryBlobClient();
+    // the url read with the query lags like the plain read (the cycle 2 preview's function edge)
+    const options = { fetchFresh: async () => null, retries: 0, sleep: noSleep };
+    const dirA = join(root, 'e', DECK);
+    const dirB = join(root, 'f', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, options);
+    expect((await pullSidecar(client, DECK, dirB, options))?.revision).toBe(1);
+    client.holdGet();
+    client.holdList();
+    // the Insert menu route's thread, added on instance A after B read the sidecar once
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, options);
+    const plainIndex = await client.get(`${deckPrefix(DECK)}comments/index.json`);
+    expect(
+      (JSON.parse(new TextDecoder().decode(plainIndex?.bytes)) as { revision: number }).revision,
+    ).toBe(1);
+    // B pulls: the index and the new thread come from their copies under the deck's state folder
+    const pulled = await pullSidecar(client, DECK, dirB, options);
+    expect(pulled?.revision).toBe(2);
+    expect([...readSidecar(dirB, DECK).threads.keys()].sort()).toEqual([T1, T2].sort());
+    expect(
+      [...client.blobs.keys()].filter((key) =>
+        key.startsWith(`${deckPrefix(DECK)}.turboslide/copies/`),
+      ).length,
+    ).toBeGreaterThanOrEqual(4);
+    client.releaseGet();
+    client.releaseList();
+  });
+
+  it('removes a local thread the store does not name and answers null when the store holds no sidecar', async () => {
+    const client = memoryBlobClient();
+    const options = { fetchFresh: freshFrom(client), sleep: noSleep };
+    const dir = join(root, 'c', DECK);
+    writeRawDeck(dir);
+    mkdirSync(join(dir, 'comments'), { recursive: true });
+    writeFileSync(join(dir, 'comments', `${T3}.json`), '{}');
+    expect(await pullSidecar(client, DECK, dir, options)).toBeNull();
+    expect(readSidecar(dir, DECK).threads.size).toBe(0);
+    await applyAndPush(
+      client,
+      DECK,
+      join(root, 'd', DECK),
+      [add(blockThread(T1))],
+      NOW,
+      4,
+      options,
+    );
+    writeFileSync(join(dir, 'comments', `${T3}.json`), '{}');
+    expect((await pullSidecar(client, DECK, dir, options))?.threads.map((r) => r.id)).toEqual([T1]);
+    expect(readSidecar(dir, DECK).threads.has(T3)).toBe(false);
+  });
+});
+
+describe('the sidecar index watcher, two instances over one Blob store (cycle 3, C2-F28)', () => {
+  let root: string;
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'turboslide-comments-watch-'));
+  });
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
+  const noSleep = async (): Promise<void> => undefined;
+  const proven = { fetchFresh: async () => null, retries: 0, sleep: noSleep };
+
+  const reply = (threadId: string, id: string, text: string, at: string): CommentOp => ({
+    op: 'reply',
+    threadId,
+    comment: {
+      id,
+      author: { principalId: maya.principalId as string, label: 'Maya', kind: 'human' },
+      createdAt: at,
+      body: { text, mentions: [] },
+    },
+  });
+
+  it("announces the index another instance pushed with its revision and the changed threads, and never this instance's own push", async () => {
+    const client = memoryBlobClient();
+    const dirA = join(root, 'a', DECK);
+    const dirB = join(root, 'b', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
+    const seenB: SidecarIndexChange[] = [];
+    const seenA: SidecarIndexChange[] = [];
+    const watchB = watchSidecarIndex(client, DECK, (change) => seenB.push(change), {
+      pollMs: 60_000,
+      localEtag: () => localIndexEtag(dirB),
+      proven,
+    });
+    const watchA = watchSidecarIndex(client, DECK, (change) => seenA.push(change), {
+      pollMs: 60_000,
+      localEtag: () => localIndexEtag(dirA),
+      proven,
+    });
+    // the position: what the store holds now is not announced
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB).toEqual([]);
+    expect(seenA).toEqual([]);
+    // A adds a thread: B's watcher announces it, A's does not (its own copy carries the etag)
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
+    expect(seenA).toEqual([]);
+    // the same head twice announces nothing twice
+    await watchB.poll();
+    expect(seenB).toHaveLength(1);
+    // a reply on T1 names T1 alone; A's watcher takes its own push as its new position
+    await applyAndPush(client, DECK, dirA, [reply(T1, C2, 'Done', LATER)], LATER, 4, proven);
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB[1]).toMatchObject({ revision: 3, threadIds: [T1] });
+    expect(seenA).toEqual([]);
+    // B pulls what the announcement named and lists the reply
+    await pullSidecar(client, DECK, dirB, proven);
+    expect(
+      readSidecar(dirB, DECK)
+        .threads.get(T1)
+        ?.replies.map((r) => r.body.text),
+    ).toEqual(['Done']);
+    // B's own push is not announced to B
+    await applyAndPush(client, DECK, dirB, [add(blockThread(T3))], LATER, 4, proven);
+    await watchB.poll();
+    expect(seenB).toHaveLength(2);
+    await watchA.poll();
+    expect(seenA).toEqual([{ version: localIndexEtag(dirB), revision: 4, threadIds: [T3] }]);
+    watchA.stop();
+    watchB.stop();
+  });
+
+  it('runs no timer of its own with pollMs null (the blob channel drives it on the deck pulse), and a push moves the pulse (the cycle 3 fix round)', async () => {
+    const client = memoryBlobClient();
+    const dirA = join(root, 'e', DECK);
+    const dirB = join(root, 'f', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    expect(client.blobs.has(pulsePath(DECK))).toBe(false);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
+    const first = client.blobs.get(pulsePath(DECK))?.version;
+    expect(first).toBeDefined();
+    const seen: SidecarIndexChange[] = [];
+    const watch = watchSidecarIndex(client, DECK, (change) => seen.push(change), {
+      pollMs: null,
+      localEtag: () => localIndexEtag(dirB),
+      proven,
+    });
+    await watch.poll();
+    const heads = (): number => client.calls.filter((call) => call.op === 'head').length;
+    const before = heads();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(heads()).toBe(before);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
+    expect(client.blobs.get(pulsePath(DECK))?.version).not.toBe(first);
+    expect(seen).toEqual([]);
+    await watch.poll();
+    expect(seen).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
+    watch.stop();
+  });
+
+  it('reads a moved index through its immutable copy while the plain read and the url read lag', async () => {
+    const client = memoryBlobClient();
+    const dirA = join(root, 'c', DECK);
+    const dirB = join(root, 'd', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
+    const seen: SidecarIndexChange[] = [];
+    const watch = watchSidecarIndex(client, DECK, (change) => seen.push(change), {
+      pollMs: 60_000,
+      localEtag: () => localIndexEtag(dirB),
+      proven,
+    });
+    await watch.poll();
+    client.holdGet();
+    client.holdList();
+    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
+    const plain = await client.get(`${deckPrefix(DECK)}comments/index.json`);
+    expect(
+      (JSON.parse(new TextDecoder().decode(plain?.bytes)) as { revision: number }).revision,
+    ).toBe(1);
+    await watch.poll();
+    expect(seen).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
+    client.releaseGet();
+    client.releaseList();
+    watch.stop();
+  });
+
+  it('pulls the index and the changed thread alone when the other threads are on disk at the etag the index names', async () => {
+    const client = memoryBlobClient();
+    const dirA = join(root, 'e', DECK);
+    const dirB = join(root, 'f', DECK);
+    writeRawDeck(dirA);
+    writeRawDeck(dirB);
+    await applyAndPush(
+      client,
+      DECK,
+      dirA,
+      [add(blockThread(T1)), add(blockThread(T2))],
+      NOW,
+      4,
+      proven,
+    );
+    expect((await pullSidecar(client, DECK, dirB, proven))?.revision).toBe(2);
+    await applyAndPush(client, DECK, dirA, [reply(T1, C2, 'Done', LATER)], LATER, 4, proven);
+    const before = client.calls.length;
+    expect((await pullSidecar(client, DECK, dirB, proven))?.revision).toBe(3);
+    const reads = client.calls
+      .slice(before)
+      .filter((call) => call.op === 'get' || call.op === 'head')
+      .map((call) => call.pathname.slice(deckPrefix(DECK).length));
+    expect(reads.some((path) => path === `comments/${T1}.json`)).toBe(true);
+    expect(reads.some((path) => path === `comments/${T2}.json`)).toBe(false);
+    expect(readSidecar(dirB, DECK).threads.get(T1)?.replies).toHaveLength(1);
+    expect(readSidecar(dirB, DECK).threads.has(T2)).toBe(true);
   });
 });

@@ -10,6 +10,7 @@ Use the supported `window.turboslide.studio` adapter, never private component st
 ## Connect
 
 1. Open the studio at `http://localhost:4321/edit/<deckId>` (viewer at `/deck/<deckId>`, presenter at `/present/<deckId>`). `/home` is the product page and installs no adapter; it links to `/new`, `/decks` and `/deck/gt-brand`, and `/llms.txt` on the same origin is the agent guide.
+   The editor's default view shows the core menu rows alone (docs/FOCUS.md section 2); the rest are behind the check row Tools > Advanced tools, remembered in the browser. `describe().state.settings.advancedTools` reads the switch and `.pt-viewer[data-advanced-tools]` is present while it is on. A parked row is absent, not disabled, so `activate(label)` on its label finds nothing with the switch off; flip the switch through the product (`data-control="menu.tools.advancedTools"`) or run the action through `invoke`, which the switch never gates.
 2. Wait for `window.turboslide.studio` or the `turboslide:studio-api-ready` event; its detail is `describe()`.
 3. Call `describe()` and `controls()` before relying on actions or labels. Re-read the global after changing owner: the editor, the viewer per mode, the source drawer and the presenter each install an adapter. `describe().owner` says which one is active and `describe().state` carries the deck id, the revision, the slide and the theme.
 

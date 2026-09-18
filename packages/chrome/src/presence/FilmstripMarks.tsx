@@ -37,7 +37,6 @@ export function FilmstripMarks({
       aria-label={here.map(nameOf).join(', ')}
       data-count={here.length}
     >
-      {more > 0 ? <span className="ts-card-marks-more">{PRESENCE.more(more)}</span> : null}
       {shown.map((participant) => (
         <IdentityChip
           key={participant.clientId}
@@ -49,6 +48,10 @@ export function FilmstripMarks({
           presenter={participant.presenting === true}
         />
       ))}
+      {/* the +N chip last, so the row-reverse box places it at the left end of the three chips (4.3:
+          "at most three then a +N chip", stacking leftwards) and its arrival moves no chip; as the
+          first child it took the right edge and pushed the three chips 18 px left (b6's fix round R1) */}
+      {more > 0 ? <span className="ts-card-marks-more">{PRESENCE.more(more)}</span> : null}
     </span>
   );
 }

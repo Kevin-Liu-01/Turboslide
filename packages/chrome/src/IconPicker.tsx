@@ -1,8 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { ICON_COLORS, ICON_NAMES, iconSymbolId } from '@turboslide/schema/icons';
-import type { IconColor, IconName } from '@turboslide/schema/icons';
+import { ICON_COLORS, ICON_NAMES, iconSymbolId } from '@turboslide/schema/icon-names';
+import type { IconColor, IconName } from '@turboslide/schema/icon-names';
 
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';

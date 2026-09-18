@@ -237,6 +237,11 @@ describe('entries and events', () => {
       { type: 'resync', revision: 26 },
     ];
     for (const event of events) expect(roomEventSchema.parse(event), event.type).toEqual(event);
+    // the hello's `covered` (the cycle 3 stream fix round, fix round; SEAM-F8): optional, so an
+    // older server's hello still parses, and a non negative seq when present
+    const hello = events[0] as Extract<RoomEvent, { type: 'hello' }>;
+    expect(roomEventSchema.parse({ ...hello, covered: 4100 })).toEqual({ ...hello, covered: 4100 });
+    expect(roomEventSchema.safeParse({ ...hello, covered: -1 }).success).toBe(false);
     expect(
       roomEventSchema.safeParse({ type: 'reject', opId: 'x', reason: 'because' }).success,
     ).toBe(false);

@@ -1,4 +1,4 @@
-import type { DeckDocument } from '@turboslide/schema/deck';
+import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideOrder } from '@turboslide/schema/deck';
 import type { Box } from '@turboslide/schema/render';
 
@@ -26,14 +26,42 @@ import { COMMENTS } from '../menus/strings';
 export type CommentsFilter = 'all' | 'open' | 'resolved';
 export type CommentsOrder = 'activity' | 'slide';
 
-/** The anchor a new comment takes from the selection (5.3): block, text range, cell, else the slide. */
+/**
+ * True when `blockId` names a block a comment can anchor on, by the rule of the schema's
+ * `resolveAnchor` (`locateTopBlock`): a slot block of a content slide or a plate block of an
+ * opener, mood or closing slide. A title or a statement slide's runs (the heading and lead of the
+ * blank template's one slide, the big number) are slide fields, not blocks, so a selection there
+ * names no block at all; without the slide the answer is true, the parity rounds' reading.
+ */
+export function slideHasBlock(slide: Slide | undefined, blockId: string): boolean {
+  if (slide === undefined) return true;
+  if (slide.kind === 'content') {
+    return Object.values(slide.slots).some(
+      (list) => list !== undefined && list.some((block) => block.id === blockId),
+    );
+  }
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    return slide.plate.blocks.some((block) => block.id === blockId);
+  }
+  return false;
+}
+
+/**
+ * The anchor a new comment takes from the selection (5.3): block, text range, cell, else the
+ * slide. With the slide given, a selection whose block id names no block of it (a placeholder run
+ * of a title or statement slide, `audit-present` row 35: "the anchor names nothing on the current
+ * document (block removed)" three times of three on the title placeholder) anchors on the slide
+ * instead (docs/FOCUS.md section 5 rank 19), so the comment lands where the seller wrote it.
+ */
 export function anchorAtSelection(
   slideId: string,
   selection: EditorSelection | null | undefined,
   quote?: string,
+  slide?: Slide,
 ): CommentAnchorView {
   if (selection?.blockId === undefined) return { kind: 'slide', slideId };
   const blockId = selection.blockId;
+  if (!slideHasBlock(slide, blockId)) return { kind: 'slide', slideId };
   if (selection.cell !== undefined && selection.text !== true)
     return { kind: 'cell', slideId, blockId, cell: selection.cell };
   if (selection.range !== undefined && selection.range[0] !== selection.range[1]) {

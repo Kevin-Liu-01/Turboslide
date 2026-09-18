@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // B4 acceptance of the Google Slides parity round (gslides-parity SPEC 14.3, filmstrip.spec):
 // the cards of SPEC 4.1 with the current ring and the skipped state, Shift and Cmd multi-select,
 // drag to reorder as one slide.move, Google's right-click menu in the order of SPEC 4.2 with Skip
@@ -29,7 +31,22 @@ const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-film';
 const DECK_DIR = join(ROOT, 'decks', DECK);
 
+/* the card menu of the default view (docs/FOCUS.md 3.4 parks Change theme and Transition) */
 const CARD_ORDER = [
+  'Cut',
+  'Copy',
+  'Paste',
+  'New slide',
+  'Duplicate slide',
+  'Delete',
+  'Skip slide',
+  'Change background',
+  'Apply layout',
+  'Move slide',
+  'Comment',
+];
+/* the same menu behind Tools > Advanced tools: SPEC 4.2's order with the two parked rows back */
+const CARD_ORDER_ADVANCED = [
   'Cut',
   'Copy',
   'Paste',
@@ -178,10 +195,9 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
       .allTextContents();
     expect(labels).toEqual(CARD_ORDER);
     await expect(menu(page).locator('[role="separator"]')).toHaveCount(4);
-    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveAttribute(
-      'aria-disabled',
-      'true',
-    );
+    /* the two parked rows are absent, not disabled (docs/FOCUS.md 3.1) */
+    await expect(menu(page).locator('[data-menu-item="slide.changeTheme"]')).toHaveCount(0);
+    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveCount(0);
     /* Comment on a thumbnail anchors a comment to that slide (SPEC-3 5.3, 13.1; the row was Later
        in round two and is enabled in Editing mode with the comment capability) */
     await expect(menu(page).locator('[data-menu-item="insert.comment"]')).not.toHaveAttribute(
@@ -193,6 +209,24 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     await page.keyboard.press('Escape');
     await expect(menu(page)).toHaveCount(0);
     await expect(card(page, 'content-rule')).toBeFocused();
+    /* behind Tools > Advanced tools the menu is SPEC 4.2's whole order, Transition disabled with
+       its stub sentence (docs/FOCUS.md 3.1: hidden while off, present while on) */
+    await setAdvancedTools(page, true);
+    await card(page, 'content-rule').click({ button: 'right' });
+    await expect(menu(page)).toBeVisible();
+    expect(
+      await menu(page)
+        .locator(':scope > .ts-menu-group > [role^="menuitem"] .ts-menu-label')
+        .allTextContents(),
+    ).toEqual(CARD_ORDER_ADVANCED);
+    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await page.keyboard.press('Escape');
+    await expect(menu(page)).toHaveCount(0);
+    await setAdvancedTools(page, false);
+    await card(page, 'content-rule').focus();
     /* Skip slide on the two selected cards: both dim, slide.list reports the flag, the label flips */
     await card(page, 'content-rule').click({ button: 'right' });
     await menu(page).locator('[data-menu-item="slide.skipSlide"]').click();
@@ -341,7 +375,8 @@ test.describe('the clone first filmstrip (SPEC-4 0.30, 0.41)', () => {
     const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const box = await run.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.click(box!.x + 8, box!.y + 8);
+    /* the session opens on a double click (AMENDMENTS.md A1; one click selects the block) */
+    await page.mouse.dblclick(box!.x + 8, box!.y + 8);
     await expect(run).toHaveAttribute('contenteditable', 'true');
     const from = await page.evaluate(
       () => window.turboslide!.studio.describe().state.revision as number,

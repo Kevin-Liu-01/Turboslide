@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import type { Finding } from '@turboslide/schema/findings';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
-import { ICON_NAMES } from '@turboslide/schema/icons';
+import { ICON_NAMES } from '@turboslide/schema/icon-names';
 import { isRuleId } from '@turboslide/schema/rules';
 import type { RuleId } from '@turboslide/schema/rules';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';

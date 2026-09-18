@@ -4,23 +4,43 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import { LAYOUTS } from '@turboslide/schema/layouts';
 
 import { PATH_SEPARATOR, finderRows, isFinderItem } from '../menus/finder';
-import { DEFAULT_MENU_CONTEXT, allItems } from '../menus/model';
+import type { MenuContext } from '../menus/model';
+import { DEFAULT_MENU_CONTEXT, allItems, isPresent } from '../menus/model';
 import { forbiddenWordsIn } from '../menus/strings';
 import { toolFinderEntries } from '../ToolFinder';
 
 // Search the menus (gslides-parity SPEC 2.10): every menu item of the model that is not omitted
 // and is a command is a row with its menu path and its key; the slides and the layouts stay as
-// groups; nothing in a row's words is an engineering term.
+// groups; nothing in a row's words is an engineering term. The focus round (docs/FOCUS.md 3.1):
+// a row the context does not draw (a parked row, a Later row while Tools > Advanced tools is off)
+// is not listed, so the Later rows are asserted behind the switch.
 const document = workedDocument();
 
+/** Tools > Advanced tools on: the Later rows and the parked rows are listed. */
+const ADVANCED: MenuContext = {
+  ...DEFAULT_MENU_CONTEXT,
+  settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+};
+
 describe('finderRows', () => {
-  const rows = finderRows(DEFAULT_MENU_CONTEXT);
+  const rows = finderRows(ADVANCED);
+  const plain = finderRows(DEFAULT_MENU_CONTEXT);
 
   it('lists every command of the model outside the omitted ones and the plain containers', () => {
-    const expected = allItems().filter(isFinderItem);
+    const expected = allItems()
+      .filter(isFinderItem)
+      .filter((item) => isPresent(item, ADVANCED));
     expect(rows.map((row) => row.item.id)).toEqual(expected.map((item) => item.id));
     expect(rows.length).toBeGreaterThan(100);
     expect(rows.some((row) => row.item.status === 'omit')).toBe(false);
+    /* with the switch off the same list without its Later rows and its parked rows */
+    expect(plain.map((row) => row.item.id)).toEqual(
+      expected
+        .filter((item) => item.status !== 'later' && item.advanced !== true)
+        .map((item) => item.id),
+    );
+    expect(plain.some((row) => row.later)).toBe(false);
+    expect(plain.some((row) => row.item.id === 'tools.advancedTools')).toBe(true);
   });
 
   it('gives every row its menu path and marks the Later rows', () => {
@@ -36,6 +56,8 @@ describe('finderRows', () => {
     expect(editGuides?.enabled).toBe(false);
     expect(editGuides?.doc?.startsWith('Not available in Turboslide yet')).toBe(true);
     expect(editGuides?.path).toBe(['View', 'Guides'].join(PATH_SEPARATOR));
+    /* the Later row is behind the switch: absent from the default list (docs/FOCUS.md 3.1) */
+    expect(plain.find((row) => row.item.id === 'view.guides.edit')).toBeUndefined();
     /* Insert > Table is listed (its plate is dynamic), the plain containers are not */
     expect(rows.some((row) => row.item.id === 'insert.table')).toBe(true);
     expect(rows.some((row) => row.item.id === 'view.guides')).toBe(false);
@@ -58,10 +80,12 @@ describe('toolFinderEntries', () => {
   it('has the menus, the slides and the 21 layouts as groups, and runs a menu row through the shell', () => {
     let ran: string | null = null;
     let picked: string | null = null;
+    /* File > Details is parked (docs/FOCUS.md 3.2): the run is asserted with the switch on, and
+       the default list is asserted without the row below */
     const entries = toolFinderEntries(
       document,
       'content-rule',
-      DEFAULT_MENU_CONTEXT,
+      ADVANCED,
       (item) => {
         ran = item.id;
       },
@@ -85,5 +109,21 @@ describe('toolFinderEntries', () => {
     /* a disabled row reports why instead of running */
     const undo = entries.find((entry) => entry.id === 'menu:edit.undo');
     expect(undo?.run.kind).toBe('needs');
+    /* with the switch off the parked row is not listed and a core row still runs */
+    let ranOff: string | null = null;
+    const plain = toolFinderEntries(
+      document,
+      'content-rule',
+      DEFAULT_MENU_CONTEXT,
+      (item) => {
+        ranOff = item.id;
+      },
+      () => undefined,
+    );
+    expect(plain.find((entry) => entry.id === 'menu:file.details')).toBeUndefined();
+    const rename = plain.find((entry) => entry.id === 'menu:file.rename');
+    expect(rename?.meta).toBe('File');
+    if (rename?.run.kind === 'call') rename.run.call();
+    expect(ranOff).toBe('file.rename');
   });
 });

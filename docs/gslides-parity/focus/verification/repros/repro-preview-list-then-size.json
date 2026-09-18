@@ -1,0 +1,97 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "list-then-size",
+  "startedAt": "2026-09-16T12:39:48.042Z",
+  "steps": [
+    {
+      "name": "tail with the box selected",
+      "tail": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions"
+      ],
+      "at": "2026-09-16T12:39:53.618Z"
+    },
+    {
+      "name": "after the toolbar list button",
+      "type": "plain",
+      "json": "{\"id\":\"box-a\",\"pos\":{\"x\":200,\"y\":300,\"w\":520,\"h\":140,\"z\":3},\"type\":\"plain\",\"marker\":\"bullet\",\"preset\":\"disc-circle-square\",\"items\":[{\"text\":\"Onboarding plan for Acme\"}]}",
+      "selected": "box-a",
+      "at": "2026-09-16T12:39:55.930Z"
+    },
+    {
+      "name": "Format > Text rows on the list block",
+      "rows": [
+        "format.text",
+        "format.text.bold",
+        "format.text.italic",
+        "format.text.underline",
+        "format.text.strikethrough",
+        "format.text.size"
+      ],
+      "at": "2026-09-16T12:39:56.917Z"
+    },
+    {
+      "name": "size row",
+      "visible": true,
+      "aria": null,
+      "haspopup": "menu",
+      "at": "2026-09-16T12:39:56.921Z"
+    },
+    {
+      "name": "after hovering Size",
+      "increase": true,
+      "rows": ["format.text.size", "format.text.size.increase", "format.text.size.decrease"],
+      "at": "2026-09-16T12:39:57.643Z"
+    },
+    {
+      "name": "plain box: after hovering Size",
+      "increase": true,
+      "at": "2026-09-16T12:40:00.684Z"
+    },
+    {
+      "name": "menus open after closeMenus",
+      "open": 0,
+      "at": "2026-09-16T12:40:00.892Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-xej2",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T12:40:06.023Z"
+}

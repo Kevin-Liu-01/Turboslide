@@ -225,6 +225,9 @@ export function ContextMenu({
     onLayout?.(picked);
     onClose('select');
   };
+  /* a target whose rows are all parked (a guide line while Tools > Advanced tools is off,
+     docs/FOCUS.md 3.4) draws no menu */
+  if (items.length === 0) return null;
   return (
     <Menu
       id={id}

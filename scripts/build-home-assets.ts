@@ -53,12 +53,13 @@ const MODULE_PATH = 'apps/studio/src/components/home/shots.ts';
  */
 const FACTS_PATH = 'packages/theme/brand/facts.json';
 const FACTS_MODULE_PATH = 'apps/studio/src/components/home/facts-data.ts';
+// `shapePresets` left with the focus round (docs/FOCUS.md section 4: the default view offers
+// three presets and no surface prints the count; b5.md R5)
 const COUNT_KEYS = [
   'actions',
   'mcpTools',
   'httpPaths',
   'layouts',
-  'shapePresets',
   'materials',
   'checkSteps',
   'parityRows',
@@ -202,7 +203,6 @@ type FactsData = {
   mcpTools: number;
   httpPaths: number;
   layouts: number;
-  shapePresets: number;
   materials: number;
   checkSteps: number;
   parityRows: number;

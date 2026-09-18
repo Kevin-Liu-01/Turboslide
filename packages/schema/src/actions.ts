@@ -1630,7 +1630,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.align': action({
     id: 'block.align',
     label: 'Align blocks',
-    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge snaps to the guides and the grid unless snap is false, while the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6).",
+    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6; docs/FOCUS.md rank 14).",
     group: 'block',
     mutates: true,
     transports: A,
@@ -1654,7 +1654,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe(
-          "Snap the selection's shared edge to the guides and the grid; on unless false, and never applied to the slide's or the content box's edges",
+          "Snap the selection's shared edge to the guides and the grid; off unless true, and never applied to the slide's or the content box's edges",
         ),
       baseRevision,
     }),

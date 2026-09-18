@@ -6,8 +6,6 @@ import { DOWNLOAD_PROGRESS } from '@turboslide/chrome/menus/strings';
 import { batchSize, leftWords, secondsLeft } from '@turboslide/export/batch/plan';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { ACTIONS } from '@turboslide/schema/actions';
-import type { ExportReport } from '@turboslide/schema/export';
-import { exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import type { Authorized } from './authorize';
@@ -16,6 +14,7 @@ import type {
   MergeExportResult,
   StartBatchedExportResult,
 } from './export-batch';
+import type { ExportJobDownload, ExportJobPoll } from './export-jobs';
 import type { jsonBody } from './export-sync';
 import type { QuotaContext } from './ratelimit';
 import { deckDir, ensureDeckAssets, isHosted, workerClientOptions } from './root';
@@ -36,8 +35,13 @@ const CANCEL_TOKEN_QUERY = 'ct';
  * startExport hands the action's validated input to the render worker facade (the same client
  * /api/export/:deckId uses: over HTTP when TURBOSLIDE_WORKER_URL is set, an in-process queue over
  * the turboslide CLI otherwise, so LibreOffice and Chromium never run in the web app, SPEC 3.3
- * item 7); pollExport reads the job back, with the worker's last log line while it runs and the
- * ExportReport plus signed one-time download URLs when it is done (tokens.ts); signDownload mints
+ * item 7) and writes the job's record where every instance reads it (export-jobs.ts; the focus
+ * round, cycle 3 stream fix round two, VERIFICATION C3S-F7: a poll routed to an instance that
+ * never held the job threw "No export job" and the page stopped polling); pollExport reads the
+ * job back, with the worker's last log line while it runs and the ExportReport plus the download
+ * URLs when it is done (the stored copies on a deployment, signed one-time job file URLs on a
+ * checkout, tokens.ts), from this process's job table or from the record, and answers a refusal
+ * in the product's words for a job no record names; signDownload mints
  * a fresh URL for a file the editor wants again; runBuild runs `turboslide build` as a child
  * process into the worker's builds folder; exportCapabilities says whether produced files can be
  * streamed back (the local worker) and whether the editor must export synchronously instead
@@ -180,7 +184,12 @@ const startExportFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<StartExportResult> => {
     await authorizeExport(data.deckId, data.input, 'export.run');
     await requireDeck(data.deckId);
-    const job = await (await worker()).submit('export', { deckId: data.deckId, ...data.input });
+    const client = await worker();
+    const job = await client.submit('export', { deckId: data.deckId, ...data.input });
+    // the job's record at queue time, and the job followed to its end after the response, so a
+    // poll on any instance reads the outcome (C3S-F7; loaded here for the reason worker() gives)
+    const { followExportJob } = await import('./export-batch');
+    await followExportJob(client, job, data.deckId, data.input.format);
     return { jobId: job.id, status: job.status };
   });
 
@@ -451,31 +460,10 @@ export async function runBatchedExport(
   }
 }
 
-export type ExportDownloadLink = { name: string; bytes: number; url: string };
+export type ExportDownloadLink = ExportJobDownload;
 
-export type ExportPoll = {
-  jobId: string;
-  status: 'queued' | 'running' | 'done' | 'failed';
-  /** the worker's last log line */
-  line?: string;
-  ms?: number;
-  report?: ExportReport;
-  error?: string;
-  /** one signed one-time URL per produced file; empty when the worker is remote */
-  downloads?: ExportDownloadLink[];
-};
-
-type ExportJobResultLike = {
-  report?: unknown;
-  outDir?: string;
-  ms?: number;
-};
-
-function jobStatus(status: string): ExportPoll['status'] {
-  return status === 'queued' || status === 'running' || status === 'done' || status === 'failed'
-    ? status
-    : 'failed';
-}
+/** The poll's answer (export-jobs.ts `ExportJobPoll`): the status, the worker's last line, and the report with its download URLs once done. */
+export type ExportPoll = ExportJobPoll;
 
 const pollExportFn = createServerFn({ method: 'POST' })
   .validator((raw: { jobId: string }) => {
@@ -484,47 +472,17 @@ const pollExportFn = createServerFn({ method: 'POST' })
     return raw;
   })
   .handler(async ({ data }): Promise<ExportPoll> => {
-    const job = await (await worker()).job(data.jobId);
-    // the job names its deck; the poll needs the export right on it
-    const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
-    if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob)) {
-      const { authorizeRequest } = await import('./authorize');
-      await authorizeRequest(deckOfJob, 'export', { action: 'export.poll' });
-    }
-    if (!job) throw new RangeError(`No export job ${data.jobId}`);
-    const status = jobStatus(job.status);
-    const line = job.log[job.log.length - 1];
-    const poll: ExportPoll = {
-      jobId: job.id,
-      status,
-      ...(line !== undefined ? { line } : {}),
-      ...(job.ms !== undefined ? { ms: job.ms } : {}),
-    };
-    if (status === 'failed') {
-      poll.error = job.error?.message ?? 'the export failed';
-      return poll;
-    }
-    if (status !== 'done') return poll;
-    const result = job.result as ExportJobResultLike | undefined;
-    const report = exportReportSchema.safeParse(result?.report);
-    if (!report.success) {
-      poll.status = 'failed';
-      poll.error = 'the export job finished without an export report';
-      return poll;
-    }
-    poll.report = report.data;
-    poll.downloads =
-      (await worker()).mode === 'local'
-        ? report.data.files.map((file) => {
-            const name = file.path.split('/').pop() ?? file.path;
-            return {
-              name,
-              bytes: file.bytes,
-              url: downloadUrl(signDownloadToken({ k: 'job', j: job.id, n: name })),
-            };
-          })
-        : [];
-    return poll;
+    // loaded here for the reason worker() gives; the job in this process, else the record any
+    // instance wrote, else the refusal the page shows (C3S-F7: never a thrown "No export job")
+    const { pollExportJob } = await import('./export-batch');
+    const { authorizeRequest } = await import('./authorize');
+    return pollExportJob(await worker(), data.jobId, {
+      // the job names its deck; the poll needs the export right on it
+      authorize: async (deckId) => {
+        await authorizeRequest(deckId, 'export', { action: 'export.poll' });
+      },
+      sign: (jobId, name) => downloadUrl(signDownloadToken({ k: 'job', j: jobId, n: name })),
+    });
   });
 
 /** export.run, step two: the job's state, and the report with its download URLs once done. */
@@ -555,6 +513,14 @@ const signDownloadFn = createServerFn({ method: 'POST' })
     if (data.kind === 'build')
       await authorizeRequest(data.deckId, 'export', { action: 'export.sign' });
     else {
+      // a deployment: the stored copy any instance serves (C3S-F7), under the export right on
+      // the deck the job's record names
+      const { storedExportDownload } = await import('./export-batch');
+      const stored = await storedExportDownload(data.jobId, data.name);
+      if (stored !== null) {
+        await authorizeRequest(stored.deckId, 'export', { action: 'export.sign' });
+        return { url: stored.download.url };
+      }
       const job = await (await worker()).job(data.jobId);
       const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
       if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob))

@@ -1,0 +1,2454 @@
+{
+  "base": "https://turboslide-1ew78vsd0-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-17T06:55:01.237Z",
+  "ms": 179611,
+  "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL",
+  "version": "147.0.7727.15",
+  "cells": 22,
+  "failures": [
+    {
+      "cell": "edit 1440 light",
+      "id": "?",
+      "why": "state panel: entries in 18 frames"
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0135 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet | section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture"
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0135 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet | section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture"
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0121 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet | section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture"
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0120 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1440 light F",
+      "id": "E3",
+      "why": "load entry 0.0005 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r | div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot | div.pt-slide > section.slide.is-on > div.in > div.center > div.big | div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title | div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title"
+    }
+  ],
+  "skipped": [
+    "edit 1440 light: filmstrip (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n)",
+    "edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:1859)\n    at Object.dispatch (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:2059)\n    at ft (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/EditorRoot-vYjS3QH0.js:21:26865)\n    at Object.<anonymous> (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:2724)\n    at nt (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:8958)\n    at Object.invoke (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30)",
+    "edit 1440 light: ditherDrag (control absent: [data-control=\"formatOptions.dither.black.slider\"])",
+    "edit 1440 light: share (control absent: [data-control=\"title.share\"])",
+    "edit 1440 light: inbox (control absent: [data-control=\"title.inbox\"])",
+    "edit 1440 light: signIn (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: profile (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: avatarBuilder (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: follow (control absent: [data-control=\"title.presence.more\"])",
+    "edit 1440 light: join20 (enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44))"
+  ],
+  "runs": [
+    {
+      "cell": "new 1440 light",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3781,
+      "unsupported": false,
+      "marks": {
+        "fonts": 166.39999997615814,
+        "first-paint": 428.60000002384186,
+        "hydrated": 670.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 565,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        }
+      ]
+    },
+    {
+      "cell": "new 1440 dark",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3691,
+      "unsupported": false,
+      "marks": {
+        "fonts": 210,
+        "first-paint": 337.5,
+        "hydrated": 580.6999999880791
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 479,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 light",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3573,
+      "unsupported": false,
+      "marks": {
+        "fonts": 241.10000002384186,
+        "first-paint": 315.30000001192093,
+        "hydrated": 475.10000002384186
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 470,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 dark",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3632,
+      "unsupported": false,
+      "marks": {
+        "fonts": 177.10000002384186,
+        "first-paint": 294.5,
+        "hydrated": 533.1000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 483,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 light",
+      "route": "/new",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3598,
+      "unsupported": false,
+      "marks": {
+        "fonts": 187.9000000357628,
+        "first-paint": 250.80000001192093,
+        "hydrated": 501.60000002384186
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 396,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 404,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 dark",
+      "route": "/new",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3557,
+      "unsupported": false,
+      "marks": {
+        "fonts": 151.79999995231628,
+        "first-paint": 214.5999999642372,
+        "hydrated": 458.2999999523163
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 352,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 358,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4103,
+      "unsupported": false,
+      "marks": {
+        "fonts": 650.5,
+        "first-paint": 721.3000000119209,
+        "hydrated": 1004.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 914,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "panel",
+          "skipped": null,
+          "entries": [
+            {
+              "startTime": 4097.5,
+              "value": 0.0000050004119245113174,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [826, 798, 44, 13],
+                  "currentRect": [813.40625, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 4105.300000011921,
+              "value": 0.016874168264130015,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 137, 1091.90625, 641],
+                  "currentRect": [281, 145, 1091.90625, 626]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1414.8125, 112, 25.1875, 756],
+                  "currentRect": [1372.90625, 112, 67.09375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [1397.90625, 115.5, 30, 32],
+                  "currentRect": [1402, 115.5, 30, 32]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [813.40625, 798, 44, 13],
+                  "currentRect": [792.453125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4113.900000035763,
+              "value": 0.01851831255626286,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 145, 1045.28125, 626],
+                  "currentRect": [281, 156, 1045.28125, 603]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1372.90625, 112, 67.09375, 756],
+                  "currentRect": [1326.28125, 112, 113.71875, 756]
+                },
+                {
+                  "path": "aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day > ul.ts-versions-list",
+                  "previousRect": [1327.28125, 352.890625, 102, 86.09375],
+                  "currentRect": [1327.28125, 340.890625, 108.71875, 86.09375]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > label.ts-versions-named.ts-versions-foot",
+                  "previousRect": [1343.28125, 450.984375, 90.46875, 44.78125],
+                  "currentRect": [1343.28125, 438.984375, 90.46875, 44.78125]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [1355.375, 115.5, 30, 32],
+                  "currentRect": [1402, 115.5, 30, 32]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4122.100000023842,
+              "value": 0.014414647332336676,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 156, 1008.0625, 603],
+                  "currentRect": [281, 170, 1008.0625, 576]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1326.28125, 112, 113.71875, 756],
+                  "currentRect": [1289.0625, 112, 150.9375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [769.140625, 798, 44, 13],
+                  "currentRect": [750.53125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4130.300000011921,
+              "value": 0.010912624280639147,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 170, 979, 576],
+                  "currentRect": [281, 180, 979, 556]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1289.0625, 112, 150.9375, 756],
+                  "currentRect": [1260, 112, 180, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [750.53125, 798, 44, 13],
+                  "currentRect": [736, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4137.699999988079,
+              "value": 0.007445347898716136,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 180, 958.71875, 556],
+                  "currentRect": [281, 188, 954, 539]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1260, 112, 180, 756],
+                  "currentRect": [1239.71875, 112, 200.28125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [736, 798, 44, 13],
+                  "currentRect": [725.859375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4147.199999988079,
+              "value": 0.007844681100099666,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 188, 936.984375, 539],
+                  "currentRect": [281, 194, 934, 528]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1239.71875, 112, 200.28125, 756],
+                  "currentRect": [1217.984375, 112, 222.015625, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [725.859375, 798, 44, 13],
+                  "currentRect": [714.984375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4155.199999988079,
+              "value": 0.00532475269458912,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 194, 922.078125, 528],
+                  "currentRect": [281, 200, 912, 516]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1217.984375, 112, 222.015625, 756],
+                  "currentRect": [1203.078125, 112, 236.921875, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [714.984375, 798, 44, 13],
+                  "currentRect": [707.53125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4163.600000023842,
+              "value": 0.004682227391372493,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 200, 908.8125, 516],
+                  "currentRect": [281, 204, 897, 507]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1203.078125, 112, 236.921875, 756],
+                  "currentRect": [1189.8125, 112, 250.1875, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [707.53125, 798, 44, 13],
+                  "currentRect": [700.90625, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4171.5,
+              "value": 0.003820087071799447,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 204, 897, 507],
+                  "currentRect": [281, 208, 884, 500]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1189.8125, 112, 250.1875, 756],
+                  "currentRect": [1178.890625, 112, 261.109375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [700.90625, 798, 44, 13],
+                  "currentRect": [695.4375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4180.300000011921,
+              "value": 0.003458770157509216,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 208, 884, 500],
+                  "currentRect": [281, 211, 873, 494]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1178.890625, 112, 261.109375, 756],
+                  "currentRect": [1168.921875, 112, 271.078125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [695.4375, 798, 44, 13],
+                  "currentRect": [690.453125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4188.600000023842,
+              "value": 0.002847022036956662,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 211, 873, 494],
+                  "currentRect": [281, 214, 863, 488]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1168.921875, 112, 271.078125, 756],
+                  "currentRect": [1160.65625, 112, 279.34375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [690.453125, 798, 44, 13],
+                  "currentRect": [686.328125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4196.400000035763,
+              "value": 0.0007842411747685185,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1160.65625, 112, 279.34375, 756],
+                  "currentRect": [1153.90625, 112, 286.09375, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [686.328125, 798, 44, 13],
+                  "currentRect": [682.953125, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4205.600000023842,
+              "value": 0.0008015221196764617,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1153.90625, 112, 286.09375, 756],
+                  "currentRect": [1147.171875, 112, 292.828125, 756]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [682.953125, 798, 44, 13],
+                  "currentRect": [679.578125, 798, 44, 13]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4213.699999988079,
+              "value": 0.002274772135416667,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1147.171875, 112, 292.828125, 756],
+                  "currentRect": [1141.921875, 112, 298.078125, 756]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day",
+                  "previousRect": [1142.921875, 312.890625, 287.828125, 114.09375],
+                  "currentRect": [1142.921875, 294.046875, 293.078125, 114.09375]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day",
+                  "previousRect": [1142.921875, 236.375, 287.828125, 76.515625],
+                  "currentRect": [1142.921875, 217.53125, 293.078125, 76.515625]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4220.800000011921,
+              "value": 0.0004893518518518518,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1141.921875, 112, 298.078125, 756],
+                  "currentRect": [1137.921875, 112, 302.078125, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4228.699999988079,
+              "value": 0.00046678059895833326,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1137.921875, 112, 302.078125, 756],
+                  "currentRect": [1134.15625, 112, 305.84375, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4238.900000035763,
+              "value": 0.0005219364872685186,
+              "hadRecentInput": true,
+              "lastInputTime": 4076.199999988079,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [1134.15625, 112, 305.84375, 756],
+                  "currentRect": [1130, 112, 310, 756]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 5030.100000023842,
+              "value": 0.000003909054770554698,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [668.390625, 798, 44, 13],
+                  "currentRect": [678.59375, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 5038.300000011921,
+              "value": 0.004483908570842979,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 226, 819, 463],
+                  "currentRect": [281, 220, 839, 475]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [678.59375, 798, 44, 13],
+                  "currentRect": [699.546875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5046.600000023842,
+              "value": 0.005491461340717164,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 220, 839, 475],
+                  "currentRect": [281, 209, 881, 498]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [699.546875, 798, 44, 13],
+                  "currentRect": [722.859375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5055.100000023842,
+              "value": 0.004919440928015689,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 209, 881, 498],
+                  "currentRect": [281, 195, 928, 525]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [722.859375, 798, 44, 13],
+                  "currentRect": [741.671875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5063,
+              "value": 0.003915718838413066,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 195, 928, 525],
+                  "currentRect": [281, 185, 965, 545]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [741.671875, 798, 44, 13],
+                  "currentRect": [755.546875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5071.699999988079,
+              "value": 0.003577343063459148,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 185, 965, 545],
+                  "currentRect": [281, 177, 993, 561]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [755.546875, 798, 44, 13],
+                  "currentRect": [767.515625, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5079.900000035763,
+              "value": 0.0029165517966606653,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 177, 993, 561],
+                  "currentRect": [281, 170, 1017, 575]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [767.515625, 798, 44, 13],
+                  "currentRect": [776.8125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5088.400000035763,
+              "value": 0.0025145339023919756,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 170, 1017, 575],
+                  "currentRect": [281, 165, 1036, 585]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [776.8125, 798, 44, 13],
+                  "currentRect": [784.546875, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5096.800000011921,
+              "value": 0.002192338739926269,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 165, 1036, 585],
+                  "currentRect": [281, 161, 1051, 594]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [784.546875, 798, 44, 13],
+                  "currentRect": [791.09375, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5105,
+              "value": 0.0019400745951753257,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 161, 1051, 594],
+                  "currentRect": [281, 157, 1064, 601]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [791.09375, 798, 44, 13],
+                  "currentRect": [796.75, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5112,
+              "value": 0.0014144973315329218,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 157, 1064, 601],
+                  "currentRect": [281, 154, 1076, 608]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [796.75, 798, 44, 13],
+                  "currentRect": [800.78125, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5122.100000023842,
+              "value": 0.0000017173065897205077,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [800.78125, 798, 44, 13],
+                  "currentRect": [805.8125, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 5130,
+              "value": 0.0012464455603245028,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [281, 152, 1084, 612],
+                  "currentRect": [281, 149, 1094, 618]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [805.8125, 798, 44, 13],
+                  "currentRect": [809.25, 798, 44, 13]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5138.400000035763,
+              "value": 0.0000010231133187585735,
+              "hadRecentInput": true,
+              "lastInputTime": 5005.699999988079,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [809.25, 798, 44, 13],
+                  "currentRect": [812.375, 798, 44, 13]
+                }
+              ],
+              "id": "E7"
+            }
+          ],
+          "frames": 18,
+          "unexpected": [],
+          "anchorMoves": [
+            {
+              "selector": ".ts-rpanel",
+              "t": 4096,
+              "from": [0, 0, 0, 0],
+              "to": [1440, 112, 0, 756]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4098,
+              "from": [256, 112, 1184, 756],
+              "to": [256, 112, 1158.81, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4098,
+              "from": [1440, 112, 0, 756],
+              "to": [1414.81, 112, 25.19, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4098,
+              "from": [256, 804, 1184, 64],
+              "to": [256, 804, 1158.81, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4105,
+              "from": [256, 112, 1158.81, 756],
+              "to": [256, 112, 1116.91, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4105,
+              "from": [1414.81, 112, 25.19, 756],
+              "to": [1372.91, 112, 67.09, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4105,
+              "from": [256, 804, 1158.81, 64],
+              "to": [256, 804, 1116.91, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4114,
+              "from": [256, 112, 1116.91, 756],
+              "to": [256, 112, 1070.28, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4114,
+              "from": [1372.91, 112, 67.09, 756],
+              "to": [1326.28, 112, 113.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4114,
+              "from": [256, 804, 1116.91, 64],
+              "to": [256, 804, 1070.28, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4122,
+              "from": [256, 112, 1070.28, 756],
+              "to": [256, 112, 1033.06, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4122,
+              "from": [1326.28, 112, 113.72, 756],
+              "to": [1289.06, 112, 150.94, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4122,
+              "from": [256, 804, 1070.28, 64],
+              "to": [256, 804, 1033.06, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4130,
+              "from": [256, 112, 1033.06, 756],
+              "to": [256, 112, 1004, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4130,
+              "from": [1289.06, 112, 150.94, 756],
+              "to": [1260, 112, 180, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4130,
+              "from": [256, 804, 1033.06, 64],
+              "to": [256, 804, 1004, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4137,
+              "from": [256, 112, 1004, 756],
+              "to": [256, 112, 983.72, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4137,
+              "from": [1260, 112, 180, 756],
+              "to": [1239.72, 112, 200.28, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4137,
+              "from": [256, 804, 1004, 64],
+              "to": [256, 804, 983.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4147,
+              "from": [256, 112, 983.72, 756],
+              "to": [256, 112, 961.98, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4147,
+              "from": [1239.72, 112, 200.28, 756],
+              "to": [1217.98, 112, 222.02, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4147,
+              "from": [256, 804, 983.72, 64],
+              "to": [256, 804, 961.98, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4155,
+              "from": [256, 112, 961.98, 756],
+              "to": [256, 112, 947.08, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4155,
+              "from": [1217.98, 112, 222.02, 756],
+              "to": [1203.08, 112, 236.92, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4155,
+              "from": [256, 804, 961.98, 64],
+              "to": [256, 804, 947.08, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4164,
+              "from": [256, 112, 947.08, 756],
+              "to": [256, 112, 933.81, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4164,
+              "from": [1203.08, 112, 236.92, 756],
+              "to": [1189.81, 112, 250.19, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4164,
+              "from": [256, 804, 947.08, 64],
+              "to": [256, 804, 933.81, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4171,
+              "from": [256, 112, 933.81, 756],
+              "to": [256, 112, 922.89, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4171,
+              "from": [1189.81, 112, 250.19, 756],
+              "to": [1178.89, 112, 261.11, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4171,
+              "from": [256, 804, 933.81, 64],
+              "to": [256, 804, 922.89, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4180,
+              "from": [256, 112, 922.89, 756],
+              "to": [256, 112, 912.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4180,
+              "from": [1178.89, 112, 261.11, 756],
+              "to": [1168.92, 112, 271.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4180,
+              "from": [256, 804, 922.89, 64],
+              "to": [256, 804, 912.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4189,
+              "from": [256, 112, 912.92, 756],
+              "to": [256, 112, 904.66, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4189,
+              "from": [1168.92, 112, 271.08, 756],
+              "to": [1160.66, 112, 279.34, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4189,
+              "from": [256, 804, 912.92, 64],
+              "to": [256, 804, 904.66, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4196,
+              "from": [256, 112, 904.66, 756],
+              "to": [256, 112, 897.91, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4196,
+              "from": [1160.66, 112, 279.34, 756],
+              "to": [1153.91, 112, 286.09, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4196,
+              "from": [256, 804, 904.66, 64],
+              "to": [256, 804, 897.91, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4205,
+              "from": [256, 112, 897.91, 756],
+              "to": [256, 112, 891.17, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4205,
+              "from": [1153.91, 112, 286.09, 756],
+              "to": [1147.17, 112, 292.83, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4205,
+              "from": [256, 804, 897.91, 64],
+              "to": [256, 804, 891.17, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4213,
+              "from": [256, 112, 891.17, 756],
+              "to": [256, 112, 885.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4213,
+              "from": [1147.17, 112, 292.83, 756],
+              "to": [1141.92, 112, 298.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4213,
+              "from": [256, 804, 891.17, 64],
+              "to": [256, 804, 885.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4221,
+              "from": [256, 112, 885.92, 756],
+              "to": [256, 112, 881.92, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4221,
+              "from": [1141.92, 112, 298.08, 756],
+              "to": [1137.92, 112, 302.08, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4221,
+              "from": [256, 804, 885.92, 64],
+              "to": [256, 804, 881.92, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4229,
+              "from": [256, 112, 881.92, 756],
+              "to": [256, 112, 878.16, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4229,
+              "from": [1137.92, 112, 302.08, 756],
+              "to": [1134.16, 112, 305.84, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4229,
+              "from": [256, 804, 881.92, 64],
+              "to": [256, 804, 878.16, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4239,
+              "from": [256, 112, 878.16, 756],
+              "to": [256, 112, 874, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4239,
+              "from": [1134.16, 112, 305.84, 756],
+              "to": [1130, 112, 310, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4239,
+              "from": [256, 804, 878.16, 64],
+              "to": [256, 804, 874, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4247,
+              "from": [256, 112, 874, 756],
+              "to": [256, 112, 871.36, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4247,
+              "from": [1130, 112, 310, 756],
+              "to": [1127.36, 112, 312.64, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4247,
+              "from": [256, 804, 874, 64],
+              "to": [256, 804, 871.36, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4255,
+              "from": [256, 112, 871.36, 756],
+              "to": [256, 112, 869.09, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4255,
+              "from": [1127.36, 112, 312.64, 756],
+              "to": [1125.09, 112, 314.91, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4255,
+              "from": [256, 804, 871.36, 64],
+              "to": [256, 804, 869.09, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4264,
+              "from": [256, 112, 869.09, 756],
+              "to": [256, 112, 867.3, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4264,
+              "from": [1125.09, 112, 314.91, 756],
+              "to": [1123.3, 112, 316.7, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4264,
+              "from": [256, 804, 869.09, 64],
+              "to": [256, 804, 867.3, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4272,
+              "from": [256, 112, 867.3, 756],
+              "to": [256, 112, 865.94, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4272,
+              "from": [1123.3, 112, 316.7, 756],
+              "to": [1121.94, 112, 318.06, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4272,
+              "from": [256, 804, 867.3, 64],
+              "to": [256, 804, 865.94, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4280,
+              "from": [256, 112, 865.94, 756],
+              "to": [256, 112, 864.94, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4280,
+              "from": [1121.94, 112, 318.06, 756],
+              "to": [1120.94, 112, 319.06, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4280,
+              "from": [256, 804, 865.94, 64],
+              "to": [256, 804, 864.94, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4288,
+              "from": [256, 112, 864.94, 756],
+              "to": [256, 112, 864.31, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4288,
+              "from": [1120.94, 112, 319.06, 756],
+              "to": [1120.31, 112, 319.69, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4288,
+              "from": [256, 804, 864.94, 64],
+              "to": [256, 804, 864.31, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4297,
+              "from": [256, 112, 864.31, 756],
+              "to": [256, 112, 864.03, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4297,
+              "from": [1120.31, 112, 319.69, 756],
+              "to": [1120.03, 112, 319.97, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4297,
+              "from": [256, 804, 864.31, 64],
+              "to": [256, 804, 864.03, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4305,
+              "from": [256, 112, 864.03, 756],
+              "to": [256, 112, 864, 756]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4305,
+              "from": [1120.03, 112, 319.97, 756],
+              "to": [1120, 112, 320, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4305,
+              "from": [256, 804, 864.03, 64],
+              "to": [256, 804, 864, 64]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 5013,
+              "from": [1120, 112, 320, 756],
+              "to": [0, 0, 0, 0]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5022,
+              "from": [256, 112, 864, 756],
+              "to": [256, 112, 868.78, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5022,
+              "from": [256, 804, 864, 64],
+              "to": [256, 804, 868.78, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5030,
+              "from": [256, 112, 868.78, 756],
+              "to": [256, 112, 889.2, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5030,
+              "from": [256, 804, 868.78, 64],
+              "to": [256, 804, 889.2, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5038,
+              "from": [256, 112, 889.2, 756],
+              "to": [256, 112, 931.11, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5038,
+              "from": [256, 804, 889.2, 64],
+              "to": [256, 804, 931.11, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5047,
+              "from": [256, 112, 931.11, 756],
+              "to": [256, 112, 977.73, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5047,
+              "from": [256, 804, 931.11, 64],
+              "to": [256, 804, 977.73, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5055,
+              "from": [256, 112, 977.73, 756],
+              "to": [256, 112, 1015.34, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5055,
+              "from": [256, 804, 977.73, 64],
+              "to": [256, 804, 1015.34, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5063,
+              "from": [256, 112, 1015.34, 756],
+              "to": [256, 112, 1043.09, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5063,
+              "from": [256, 804, 1015.34, 64],
+              "to": [256, 804, 1043.09, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5072,
+              "from": [256, 112, 1043.09, 756],
+              "to": [256, 112, 1067.05, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5072,
+              "from": [256, 804, 1043.09, 64],
+              "to": [256, 804, 1067.05, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5080,
+              "from": [256, 112, 1067.05, 756],
+              "to": [256, 112, 1085.63, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5080,
+              "from": [256, 804, 1067.05, 64],
+              "to": [256, 804, 1085.63, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5088,
+              "from": [256, 112, 1085.63, 756],
+              "to": [256, 112, 1101.11, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5088,
+              "from": [256, 804, 1085.63, 64],
+              "to": [256, 804, 1101.11, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5097,
+              "from": [256, 112, 1101.11, 756],
+              "to": [256, 112, 1114.2, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5097,
+              "from": [256, 804, 1101.11, 64],
+              "to": [256, 804, 1114.2, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5105,
+              "from": [256, 112, 1114.2, 756],
+              "to": [256, 112, 1125.5, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5105,
+              "from": [256, 804, 1114.2, 64],
+              "to": [256, 804, 1125.5, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5112,
+              "from": [256, 112, 1125.5, 756],
+              "to": [256, 112, 1133.56, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5112,
+              "from": [256, 804, 1125.5, 64],
+              "to": [256, 804, 1133.56, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5122,
+              "from": [256, 112, 1133.56, 756],
+              "to": [256, 112, 1143.64, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5122,
+              "from": [256, 804, 1133.56, 64],
+              "to": [256, 804, 1143.64, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5130,
+              "from": [256, 112, 1143.64, 756],
+              "to": [256, 112, 1150.52, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5130,
+              "from": [256, 804, 1143.64, 64],
+              "to": [256, 804, 1150.52, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5138,
+              "from": [256, 112, 1150.52, 756],
+              "to": [256, 112, 1156.77, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5138,
+              "from": [256, 804, 1150.52, 64],
+              "to": [256, 804, 1156.77, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5147,
+              "from": [256, 112, 1156.77, 756],
+              "to": [256, 112, 1162.16, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5147,
+              "from": [256, 804, 1156.77, 64],
+              "to": [256, 804, 1162.16, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5155,
+              "from": [256, 112, 1162.16, 756],
+              "to": [256, 112, 1166.72, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5155,
+              "from": [256, 804, 1162.16, 64],
+              "to": [256, 804, 1166.72, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5163,
+              "from": [256, 112, 1166.72, 756],
+              "to": [256, 112, 1170.61, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5163,
+              "from": [256, 804, 1166.72, 64],
+              "to": [256, 804, 1170.61, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5170,
+              "from": [256, 112, 1170.61, 756],
+              "to": [256, 112, 1173.34, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5170,
+              "from": [256, 804, 1170.61, 64],
+              "to": [256, 804, 1173.34, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5178,
+              "from": [256, 112, 1173.34, 756],
+              "to": [256, 112, 1176.16, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5178,
+              "from": [256, 804, 1173.34, 64],
+              "to": [256, 804, 1176.16, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5187,
+              "from": [256, 112, 1176.16, 756],
+              "to": [256, 112, 1178.67, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5187,
+              "from": [256, 804, 1176.16, 64],
+              "to": [256, 804, 1178.67, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5196,
+              "from": [256, 112, 1178.67, 756],
+              "to": [256, 112, 1180.55, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5196,
+              "from": [256, 804, 1178.67, 64],
+              "to": [256, 804, 1180.55, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5204,
+              "from": [256, 112, 1180.55, 756],
+              "to": [256, 112, 1182, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5204,
+              "from": [256, 804, 1180.55, 64],
+              "to": [256, 804, 1182, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5213,
+              "from": [256, 112, 1182, 756],
+              "to": [256, 112, 1183.09, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5213,
+              "from": [256, 804, 1182, 64],
+              "to": [256, 804, 1183.09, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5222,
+              "from": [256, 112, 1183.09, 756],
+              "to": [256, 112, 1183.7, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5222,
+              "from": [256, 804, 1183.09, 64],
+              "to": [256, 804, 1183.7, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5228,
+              "from": [256, 112, 1183.7, 756],
+              "to": [256, 112, 1183.95, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5228,
+              "from": [256, 804, 1183.7, 64],
+              "to": [256, 804, 1183.95, 64]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5238,
+              "from": [256, 112, 1183.95, 756],
+              "to": [256, 112, 1184, 756]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5238,
+              "from": [256, 804, 1183.95, 64],
+              "to": [256, 804, 1184, 64]
+            }
+          ],
+          "overBudget": true
+        },
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "theme",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "notesOpen",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "filmstrip",
+          "skipped": "enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "write",
+          "skipped": "enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:1859)\n    at Object.dispatch (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:2059)\n    at ft (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/EditorRoot-vYjS3QH0.js:21:26865)\n    at Object.<anonymous> (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:2724)\n    at nt (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:8958)\n    at Object.invoke (https://turboslide-1ew78vsd0-kl01s-projects.vercel.app/assets/useStudioSession-BvQ6IfwC.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "selectBlock",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "backgroundDialog",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherToggle",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherDrag",
+          "skipped": "control absent: [data-control=\"formatOptions.dither.black.slider\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "share",
+          "skipped": "control absent: [data-control=\"title.share\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "inbox",
+          "skipped": "control absent: [data-control=\"title.inbox\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "commentAdd",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "signIn",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "profile",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "avatarBuilder",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "follow",
+          "skipped": "control absent: [data-control=\"title.presence.more\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "join20",
+          "skipped": "enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        }
+      ]
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4195,
+      "unsupported": false,
+      "marks": {
+        "fonts": 623.9000000357628,
+        "first-paint": 839.3000000119209,
+        "hydrated": 1093.699999988079
+      },
+      "loadCls": 0.013515104166666665,
+      "loadEntries": [
+        {
+          "startTime": 1069,
+          "value": 0.013515104166666665,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [281, 137, 1134, 641],
+              "currentRect": [281, 170, 1134, 641]
+            },
+            {
+              "path": "section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture",
+              "previousRect": [284, 149.73500061035156, 1128, 634.5],
+              "currentRect": [284, 173, 1128, 634.5]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1067,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4224,
+      "unsupported": false,
+      "marks": {
+        "fonts": 643.1999999880791,
+        "first-paint": 767.8999999761581,
+        "hydrated": 1125.699999988079
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1034,
+          "from": [155, 139, 1131, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4307,
+      "unsupported": false,
+      "marks": {
+        "fonts": 744.8999999761581,
+        "first-paint": 864.3999999761581,
+        "hydrated": 1203.0999999642372
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1111,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3951,
+      "unsupported": false,
+      "marks": {
+        "fonts": 496,
+        "first-paint": 573.1000000238419,
+        "hydrated": 857
+      },
+      "loadCls": 0.013515104166666665,
+      "loadEntries": [
+        {
+          "startTime": 767.5,
+          "value": 0.013515104166666665,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [281, 137, 1134, 641],
+              "currentRect": [281, 170, 1134, 641]
+            },
+            {
+              "path": "section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture",
+              "previousRect": [284, 149.73500061035156, 1128, 634.5],
+              "currentRect": [284, 173, 1128, 634.5]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 766,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4236,
+      "unsupported": false,
+      "marks": {
+        "fonts": 608.3000000119209,
+        "first-paint": 723.5,
+        "hydrated": 1137.699999988079
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1045,
+          "from": [155, 139, 1131, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4035,
+      "unsupported": false,
+      "marks": {
+        "fonts": 472,
+        "first-paint": 603.3000000119209,
+        "hydrated": 935.0999999642372
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 843,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4242,
+      "unsupported": false,
+      "marks": {
+        "fonts": 784.3000000119209,
+        "first-paint": 919.2000000476837,
+        "hydrated": 1152.2000000476837
+      },
+      "loadCls": 0.012062994384765624,
+      "loadEntries": [
+        {
+          "startTime": 1135.1000000238419,
+          "value": 0.012062994384765624,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [290, 137, 957, 541],
+              "currentRect": [281, 165, 974, 551]
+            },
+            {
+              "path": "section.slide.is-on > div.in > div.freeform-sheet > div.free > div.picture",
+              "previousRect": [289.44500732421875, 151.05999755859375, 968.0000610351562, 544.5],
+              "currentRect": [284, 168, 968, 544.5]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1133,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4608,
+      "unsupported": false,
+      "marks": {
+        "fonts": 446.5999999642372,
+        "first-paint": 568.8000000119209,
+        "hydrated": 1478.0999999642372
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 983,
+          "from": [164, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3961,
+      "unsupported": false,
+      "marks": {
+        "fonts": 396.0999999642372,
+        "first-paint": 514.7999999523163,
+        "hydrated": 858.7999999523163
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 765,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4058,
+      "unsupported": false,
+      "marks": {
+        "fonts": 519.1000000238419,
+        "first-paint": 656,
+        "hydrated": 966.9000000357628
+      },
+      "loadCls": 0.012037017822265624,
+      "loadEntries": [
+        {
+          "startTime": 874.5,
+          "value": 0.012037017822265624,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [290, 137, 957, 541],
+              "currentRect": [281, 165, 974, 551]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 873,
+          "from": [292, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4400,
+      "unsupported": false,
+      "marks": {
+        "fonts": 369.2000000476837,
+        "first-paint": 450.10000002384186,
+        "hydrated": 1293
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 801,
+          "from": [164, 139, 953, 537],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 light",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4039,
+      "unsupported": false,
+      "marks": {
+        "fonts": 533.8000000119209,
+        "first-paint": 604.1999999880791,
+        "hydrated": 941.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 836,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 854,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 dark",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4268,
+      "unsupported": false,
+      "marks": {
+        "fonts": 710.8999999761581,
+        "first-paint": 872.0999999642372,
+        "hydrated": 1168.7999999523163
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 1058,
+          "from": [256, 112, 134, 700],
+          "to": [0, 112, 390, 700]
+        },
+        {
+          "selector": ".sheet",
+          "t": 1075,
+          "from": [11, 124, 368, 208],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light F",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "F",
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 5541,
+      "unsupported": false,
+      "marks": {
+        "fonts": 757.5,
+        "first-paint": 1096.2999999523163,
+        "hydrated": 2438.699999988079
+      },
+      "loadCls": 0.0005447908812099033,
+      "loadEntries": [
+        {
+          "startTime": 2410.099999964237,
+          "value": 0.0005447908812099033,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r",
+              "previousRect": [906.34375, 5.5, 521.65625, 32],
+              "currentRect": [901.46875, 5.5, 526.53125, 32]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot",
+              "previousRect": [566.8125, 75.5, 73.5, 32],
+              "currentRect": [569.859375, 75.5, 75.25, 32]
+            },
+            {
+              "path": "div.pt-slide > section.slide.is-on > div.in > div.center > div.big",
+              "previousRect": [
+                82.17985534667969, 425.3163757324219, 110.63832092285156, 20.3905029296875
+              ],
+              "currentRect": [
+                76.08900451660156, 429.984130859375, 122.82199096679688, 10.92938232421875
+              ]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title",
+              "previousRect": [323.1875, 44, 69.75, 28],
+              "currentRect": [333.09375, 44, 73.515625, 28]
+            },
+            {
+              "path": "div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title",
+              "previousRect": [204.84375, 44, 65.4375, 28],
+              "currentRect": [211.890625, 44, 67.015625, 28]
+            }
+          ],
+          "id": "E3"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1210,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        },
+        {
+          "selector": ".ts-title-clock",
+          "t": 2408,
+          "from": [479.33, 5.5, 32, 32],
+          "to": [498.78, 5.5, 32, 32]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light I",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "I",
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4040,
+      "unsupported": false,
+      "marks": {
+        "fonts": 485.30000001192093,
+        "first-paint": 607,
+        "hydrated": 943.0999999642372
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 852,
+          "from": [283, 139, 1130, 637],
+          "to": [37, 127, 201, 112.19]
+        }
+      ],
+      "errors": [],
+      "states": []
+    }
+  ]
+}

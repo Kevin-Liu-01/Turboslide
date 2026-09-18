@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // The objects spec (gslides-parity SPEC-2 11.6, MILESTONES-2 B4 item 12): on a scratch copy of the
 // GT deck (deck.copy through the window API) a text box is drawn on the Title slide (the draw
 // converts the slide), moved, rotated with the handle and the keys, flipped, grouped with a
@@ -260,6 +262,10 @@ test('a text box drawn on the Title slide converts it; move, rotate, flip, group
   await expectOneWrite(page, log);
   expect(objects(await slideGet(page, SLIDE)).find((b) => b.id === textId)!.pos!.rotate).toBe(44);
 
+  /* Arrange > Rotate, Group, Ungroup and Regroup and their chords are parked (docs/FOCUS.md 3.2;
+     a parked row's chord matches nothing while the switch is off): the rest of this walk runs
+     behind Tools > Advanced tools */
+  await setAdvancedTools(page, true);
   /* the flip through Arrange > Rotate > Flip horizontally */
   await select(textId);
   log = await logLength(page);
@@ -275,7 +281,15 @@ test('a text box drawn on the Title slide converts it; move, rotate, flip, group
   await page.locator('[data-control="menubar.insert"]').click();
   await page.locator('[data-menu-item="insert.shape"]').click();
   await page.locator('[data-menu-item="insert.shape.shapes"]').click();
-  await page.locator('[data-menu-item="insert.shape.shapes.rectangle"]').click();
+  /* the rectangle: the Shapes submenu's named row, or the gallery plate's tile where the switch
+     draws the plate instead (docs/FOCUS.md section 4, the `altEffect`; b1 R31). The core walk
+     takes the same two routes in this order (scripts/probes/core-walk/areas/shapes.mjs) */
+  await page
+    .locator(
+      '[data-menu-item="insert.shape.shapes.rectangle"], [data-control="insert.shape.shapes.pick.rect"]',
+    )
+    .first()
+    .click();
   await drag(page, at(1000, 500), 200 * k, 120 * k);
   await expectOneWrite(page, log);
   await settled(page);

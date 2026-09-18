@@ -7,7 +7,7 @@ import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { Menu } from './Menu';
 import { tooltipKey } from './menus/keys';
-import { TOOLBAR_HEAD, evaluate, itemById } from './menus/model';
+import { TOOLBAR_HEAD, evaluate, itemById, presentControls } from './menus/model';
 import type { MenuItem, ToolbarControl } from './menus/model';
 import { stubClause } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
@@ -90,11 +90,18 @@ export function ToolbarButton({
       aria-haspopup={chevron ? 'menu' : undefined}
       data-control={control.control}
       data-status={control.status}
+      {...tipProps(tip)}
+      onMouseDown={(event) => {
+        /* the focus round (docs/FOCUS.md section 5, rank 10): the pointer down never moves the
+           focus, so a text session and its selected range survive a click on Italic or Bold and
+           the stage keeps the paste after New slide (rank 15); Tab still reaches the button */
+        event.preventDefault();
+        tipProps(tip).onMouseDown?.(event);
+      }}
       onClick={(event) => {
         if (!enabled) return;
         onClick(event.currentTarget);
       }}
-      {...tipProps(tip)}
     >
       {children ??
         (control.control === 'toolbar.textBox' ? (
@@ -254,9 +261,11 @@ export function ZoomBox({ control }: { control: TailControl }) {
 
 export function ToolbarHead() {
   const shell = useEditorShell();
+  /* a parked control leaves the head while Tools > Advanced tools is off (docs/FOCUS.md 3.1, 3.3) */
+  const controls = presentControls(TOOLBAR_HEAD, shell.menuContext);
   return (
     <div className="ts-tb-head" data-control="toolbar.head">
-      {TOOLBAR_HEAD.map((control) => {
+      {controls.map((control) => {
         if (control.control === 'toolbar.zoom')
           return <ZoomBox key={control.control} control={control} />;
         if (control.control === 'toolbar.newSlide') {

@@ -51,8 +51,20 @@ export function timeAgo(iso: string | undefined, now: number = Date.now()): stri
   return `${days} day${days === 1 ? '' : 's'} ago`;
 }
 
-/** The save words of SPEC 2.0 and SPEC-3 15 for a state: five phrases in one cell. */
-export function saveWords(state: string, draft: boolean, offline = false): string {
+/**
+ * The save words of SPEC 2.0 and SPEC-3 15 for a state: six phrases in one cell. `offline` is
+ * the room client's word and wins (b1 R46); `reconnecting` is the stream's or the store's
+ * (EditorSync.streamDown, EditorSync.storeDegraded) and shows once every write is acknowledged:
+ * a write in flight keeps Saving, its refusal keeps the retry word, and the word replaces "All
+ * changes saved" alone (the focus round, cycle 3 stream fix round, C3-F1: a seller never reads
+ * Saving for a stream problem, and never reads All changes saved while the tab is cut off).
+ */
+export function saveWords(
+  state: string,
+  draft: boolean,
+  offline = false,
+  reconnecting = false,
+): string {
   if (draft && state === 'saved') return TITLE_ROW.notSaved;
   if (offline || state === 'offline') return TITLE_ROW.offline;
   switch (state) {
@@ -62,7 +74,7 @@ export function saveWords(state: string, draft: boolean, offline = false): strin
     case 'conflict':
       return TITLE_ROW.retrying;
     default:
-      return TITLE_ROW.saved;
+      return reconnecting ? TITLE_ROW.reconnecting : TITLE_ROW.saved;
   }
 }
 
@@ -187,13 +199,14 @@ function TitleField() {
   );
 }
 
-/** The longest of the five phrases: the cell is as wide as this one so the clock never moves (05 rule 4). */
+/** The longest of the six phrases: the cell is as wide as this one so the clock never moves (05 rule 4). */
 const LONGEST_SAVE_WORDS = [
   TITLE_ROW.saved,
   TITLE_ROW.saving,
   TITLE_ROW.retrying,
   TITLE_ROW.offline,
   TITLE_ROW.notSaved,
+  TITLE_ROW.reconnecting,
 ].reduce((a, b) => (b.length > a.length ? b : a));
 
 function SaveState() {
@@ -204,7 +217,11 @@ function SaveState() {
      or the server would paint the long sentence and the row would move when the stream connects
      (VERIFICATION-3 finding 26: the clock slot moved 158 px left after hydration) */
   const offline = shell.input.sync?.offline === true;
-  const words = saveWords(save.state, save.draft === true, offline);
+  /* the stream is down or the store refuses its poll and the client is reopening (C3-F1; R46):
+     Reconnecting once every write is acknowledged, while a write in flight keeps its own word */
+  const reconnecting =
+    !offline && (shell.input.sync?.streamDown === true || shell.input.sync?.storeDegraded === true);
+  const words = saveWords(save.state, save.draft === true, offline, reconnecting);
   const item = itemById('title.saveState');
   /* Google shows a viewer and a commenter no save words: the cell is absent below `write`
      (SPEC-3 13.4; VERIFICATION-3 finding 10) */
@@ -214,10 +231,17 @@ function SaveState() {
   return (
     <button
       type="button"
-      className={cn('ts-title-save', save.state !== 'saved' && 'is-busy', offline && 'is-offline')}
+      className={cn(
+        'ts-title-save',
+        save.state !== 'saved' && 'is-busy',
+        offline && 'is-offline',
+        words === TITLE_ROW.reconnecting && 'is-reconnecting',
+      )}
       data-control="deck.saveState"
       data-menu-item={item.id}
-      data-state={offline ? 'offline' : save.state}
+      data-state={
+        offline ? 'offline' : words === TITLE_ROW.reconnecting ? 'reconnecting' : save.state
+      }
       onClick={() => shell.runItem(item)}
       {...tipProps({ name: words, doc: item.doc })}
     >
@@ -439,8 +463,17 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
             />
           ) : null}
         </span>
-        <span className="ts-title-slot ts-title-inbox-slot" data-control="title.inbox.slot">
-          <InboxPlate />
+        {/* docs/FOCUS.md 3.2 parks title.inbox: the plate is drawn only while Tools > Advanced tools
+            is on; the 60 px slot stays so the row's five slots keep their geometry at first paint
+            (SPEC-3 4.2, 9.2) */}
+        <span
+          className={cn(
+            'ts-title-slot ts-title-inbox-slot',
+            !isPresent(itemById('title.inbox'), shell.menuContext) && 'is-empty',
+          )}
+          data-control="title.inbox.slot"
+        >
+          {isPresent(itemById('title.inbox'), shell.menuContext) ? <InboxPlate /> : null}
         </span>
         <Slideshow />
         <span

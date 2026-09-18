@@ -117,6 +117,14 @@ export type EditorKeyContext = {
   several?: boolean;
   /** the selection is a group: Cmd+Option+Shift+G ungroups it */
   grouped?: boolean;
+  /**
+   * Tools > Advanced tools (docs/FOCUS.md section 3): false while the switch is off, when the
+   * chords of the parked rows the stage also binds (Group and Ungroup, Paint format's copy and
+   * paste) match nothing, prevent nothing and run nothing, as the chrome's key table already does
+   * for every parked row (useEditorKeys isPresent; the matrix row surface.parked-shortcut-unbound).
+   * Absent or true, the chords stand: a stage outside the shell has no switch.
+   */
+  advanced?: boolean;
 };
 
 export type EditorKeyLike = KeyLike & { shiftKey?: boolean };
@@ -178,10 +186,15 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
   const key = e.key;
   if (meta && alt && !otherMod) {
     const low = key.toLowerCase();
-    if (low === 'c') return ctx.selected ? { type: 'paintCopy' } : null;
-    if (low === 'v') return ctx.selected ? { type: 'paintPaste' } : null;
+    /* the parked rows' chords (toolbar.paintFormat, arrange.group, arrange.ungroup) match nothing
+       while Tools > Advanced tools is off; the rotate aliases below belong to no menu row */
+    const parked = ctx.advanced === false;
+    if (low === 'c') return ctx.selected && !parked ? { type: 'paintCopy' } : null;
+    if (low === 'v') return ctx.selected && !parked ? { type: 'paintPaste' } : null;
     /* Group Cmd+Option+G, Ungroup Cmd+Option+Shift+G (R04 B7, SPEC-2 section 9) */
-    if (low === 'g' && ctx.selected) return shift ? { type: 'ungroup' } : { type: 'group' };
+    if (low === 'g' && ctx.selected && !parked)
+      return shift ? { type: 'ungroup' } : { type: 'group' };
+    if (low === 'g') return null;
     /* Cmd+Option+Left and Right: the 15 degree aliases when the browser lets them through (0.78) */
     if (key === 'ArrowLeft' && ctx.selected) return { type: 'rotate', by: -ROTATE_KEY_DEG };
     if (key === 'ArrowRight' && ctx.selected) return { type: 'rotate', by: ROTATE_KEY_DEG };
@@ -260,4 +273,36 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
 export function isBareCharacterKey(e: EditorKeyLike): boolean {
   if (e.metaKey || e.ctrlKey || e.altKey) return false;
   return e.key.length === 1;
+}
+
+/** What the stage reads before a printable key starts a text session (AMENDMENTS.md A1 rule 4). */
+export type TypingEntryContext = {
+  /** exactly one object is selected and it carries a text run */
+  textObject: boolean;
+  /** two or more objects are selected: typing does nothing */
+  several: boolean;
+  /** a text session is open: the run owns every key */
+  editing: boolean;
+  /** the event target is a field or a chrome control: that control's key */
+  editable: boolean;
+  /** an IME composition is under way: the browser's */
+  composing?: boolean;
+};
+
+/**
+ * The character a printable key types into a selected text object, or null when the key starts
+ * nothing (docs/gslides-parity/focus/AMENDMENTS.md A1 rule 4: "typing a printable character while
+ * a text object is selected and no session is open starts the session with the whole text
+ * selected, so the first character replaces the text", Google's behaviour). The table above still
+ * binds no bare letter (SPEC 0.28): the letter is not a command, it is the first keystroke of the
+ * session, and the Editor opens the session with the caret over everything and inserts it. A key
+ * with Cmd, Ctrl or Alt, a named key (Enter, Escape, the arrows, Backspace), a selection of
+ * several objects, an object without a run, an open session, a field or a composition all answer
+ * null. Space and a Shift letter are printable and count.
+ */
+export function typingEntry(e: EditorKeyLike, ctx: TypingEntryContext): string | null {
+  if (ctx.editing || ctx.editable || ctx.composing === true) return null;
+  if (!ctx.textObject || ctx.several) return null;
+  if (!isBareCharacterKey(e)) return null;
+  return e.key;
 }

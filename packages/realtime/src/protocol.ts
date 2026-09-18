@@ -265,6 +265,7 @@ export const roomEventSchema = z.discriminatedUnion('type', [
     clients: z.array(rosterEntrySchema),
     editing: nonNegativeInt,
     tier: z.enum(REALTIME_TIERS),
+    covered: nonNegativeInt.optional(),
   }),
   z.strictObject({ type: z.literal('ops'), entries: z.array(entrySchema) }),
   z.strictObject({ type: z.literal('op'), entry: entrySchema }),
@@ -291,6 +292,11 @@ export const roomEventSchema = z.discriminatedUnion('type', [
   }),
   z.strictObject({ type: z.literal('access'), revision: nonNegativeInt }),
   z.strictObject({ type: z.literal('resync'), revision: nonNegativeInt }),
+  z.strictObject({
+    type: z.literal('store'),
+    ok: z.boolean(),
+    retryAfterMs: nonNegativeInt.optional(),
+  }),
 ]) satisfies z.ZodType<RoomEvent>;
 
 // ---------------------------------------------------------------------------------------------

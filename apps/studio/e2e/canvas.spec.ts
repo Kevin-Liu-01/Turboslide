@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // The canvas walk (gslides-parity SPEC-2 11.8, MILESTONES-2 B4 item 12; Kevin's directive of
 // 2026-09-12: "we must, must must be able to drag and move around ANYTHING"). On a scratch copy of
 // the GT deck (deck.copy through the window API, so the committed deck is never written), one
@@ -535,12 +537,20 @@ test('the canvas walk: one slide of every kind, one write per gesture, the conve
   }
   expect(compared).toBeGreaterThan(50);
 
-  // 7. the copy validates and no finding above severity 2 on the converted slides
-  const validated = await invoke<{ ok?: boolean; issues?: unknown[]; valid?: boolean }>(
-    page,
-    'validate.run',
-    {},
-  );
+  // 7. the copy validates and no finding above severity 2 on the converted slides. validate.run
+  // has no handler on the window transport (the editor's dispatcher answers NotImplementedError
+  // for it; AGENTS.md "The agent surface"), so the read goes through the HTTP transport of the
+  // same server, which registers the agent readers over the stored document. On a checkout the
+  // route serves localhost without a token, and page.request sends no Origin header.
+  const validation = await page.request.post(`/api/actions/validate.run?deck=${COPY}`, {
+    data: {},
+  });
+  expect(validation.status(), 'validate.run over HTTP').toBe(200);
+  const validated = (await validation.json()) as {
+    ok?: boolean;
+    issues?: unknown[];
+    valid?: boolean;
+  };
   expect(
     validated.ok ??
       validated.valid ??
@@ -661,6 +671,9 @@ test('step 6: rulers, guides, zoom to 1600 and pan', async ({ page }) => {
   test.setTimeout(300_000);
   await openDeck(page, COPY);
   await goTo(page, 'title');
+  /* Show ruler and the Guides rows are parked (docs/FOCUS.md 3.2): the step runs behind Tools >
+     Advanced tools, never in the default view */
+  await setAdvancedTools(page, true);
   /* View > Show ruler draws two rulers whose numerals count 14 and 8 */
   await page.locator('[data-control="menubar.view"]').click();
   await page.locator('[data-menu-item="view.showRuler"]').click();
@@ -871,6 +884,9 @@ test('step 8: the fresh Title slide’s empty heading drags before anything is t
   await expect(page.locator('.ts-overlay .ts-select-chip')).toHaveText('Group');
   await page.mouse.click(workspaceX, sbox.y + 20);
   await expect(page.locator('.ts-overlay .ts-select-chip')).toHaveCount(0);
+  /* the Guides row of the canvas and picture menus is parked (docs/FOCUS.md 3.4): the two menus are
+     read behind Tools > Advanced tools */
+  await setAdvancedTools(page, true);
   await page.mouse.click(workspaceX, sbox.y + 20, { button: 'right' });
   const menu = page.locator('#ts-menu-canvas');
   await expect(menu).toBeVisible();

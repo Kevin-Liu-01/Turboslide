@@ -152,6 +152,29 @@ export const NONCE_GUARDED_PREFIXES: ReadonlyArray<string> = [
   'deck.unpublish',
 ];
 
+/**
+ * The server side actions that write this deck's document (docs/FOCUS.md rank 6): run against
+ * an unsaved draft of /new, they create the deck first, the way the draft's first `writeDeck`
+ * does (write.ts), so a picture can be the first thing a seller puts on a new presentation.
+ * Before this the first upload on a fresh draft answered "No deck untitled-… in the Blob store"
+ * (audit-images row 1). The collection actions (`deck.copy`, `deck.trash`, ...) name other decks
+ * or the collection and create nothing.
+ */
+export const DRAFT_CREATING_ACTIONS: ReadonlyArray<ActionId> = [
+  'asset.add',
+  'asset.dither',
+  'material.capture',
+  'picture.materialize',
+  'slide.setBackgroundPicture',
+  'slide.setBackgroundMaterial',
+  'slide.import',
+];
+
+/** True when an action run on an unsaved draft must create the deck before it runs. */
+export function createsDraft(action: ActionId): boolean {
+  return DRAFT_CREATING_ACTIONS.includes(action);
+}
+
 export type RunDeckActionInput = {
   deckId: string;
   action: ServerSideWindowAction;
@@ -160,6 +183,9 @@ export type RunDeckActionInput = {
   author: Author;
   force?: boolean;
 };
+
+/** The action's output with the fact that this call created the deck (a draft's first asset). */
+export type RunDeckActionAnswer = { output: unknown; created: boolean };
 
 type Parsed = {
   deckId: string;
@@ -232,6 +258,20 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
     // the body of 6.2. The author is the session's; the body's author is the fallback of a
     // request with no session behind it, logged so the shadow week shows how often that happens.
     const ctx = await requestContext();
+    // the draft's first write may be a picture (docs/FOCUS.md rank 6): the deck is created from
+    // the blank template under the draft's id with this session as its owner, before the
+    // decision reads the record, exactly as write.ts does for the first `writeDeck`
+    let created = false;
+    if (createsDraft(data.action)) {
+      const { createStoredDeck, isUnsavedDraft } = await import('./root');
+      if (await isUnsavedDraft(data.deckId)) {
+        const { DEFAULT_BLANK_TITLE } = await import('@turboslide/store/templates');
+        await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: 'blank', id: data.deckId });
+        created = true;
+        const { recordNewDeck } = await import('./access');
+        await recordNewDeck(data.deckId, ctx);
+      }
+    }
     const capability = capabilityForAction(data.action);
     if (capability !== null) {
       const decision = await authorize(ctx, data.deckId, capability, {
@@ -279,10 +319,31 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
       deckDir: deckDir(data.deckId),
       ...(data.force ? { force: true } : {}),
     });
-    return JSON.stringify(output ?? null);
+    const answer: RunDeckActionAnswer = { output: output ?? null, created };
+    return JSON.stringify(answer);
   });
 
 /** Runs one of the server-side window actions over a deck and returns the action's output. */
 export async function runDeckAction(input: RunDeckActionInput): Promise<unknown> {
-  return JSON.parse(await runDeckActionFn({ data: JSON.stringify(input) })) as unknown;
+  return (await runDeckActionDetailed(input)).output;
+}
+
+/**
+ * The same call with the fact that it created the deck: the editor's asset handlers on a /new
+ * draft attach the room and move the address on `created`, as the first `writeDeck` does.
+ */
+export async function runDeckActionDetailed(
+  input: RunDeckActionInput,
+): Promise<RunDeckActionAnswer> {
+  const parsed = JSON.parse(await runDeckActionFn({ data: JSON.stringify(input) })) as unknown;
+  if (
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    'output' in parsed &&
+    'created' in parsed &&
+    typeof (parsed as { created: unknown }).created === 'boolean'
+  ) {
+    return parsed as RunDeckActionAnswer;
+  }
+  return { output: parsed, created: false };
 }

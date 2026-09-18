@@ -59,7 +59,7 @@ import {
 import type { Inbox, Notification, NotificationEvent } from '@turboslide/store/hosted';
 
 import type { CommentsApplier } from './checkpoint';
-import { deckPrefix } from '@turboslide/store/blob-store';
+import { boundedBlobClient, deckPrefix } from '@turboslide/store/blob-store';
 import type { Room } from './room';
 import { deckDir, exportBlobClient, stateDir, storeSelection } from './root';
 
@@ -99,7 +99,10 @@ export function commentsDir(deckId: string): string {
  * write lock on this instance; on the Blob store through `applyAndPush`, whose `ifMatch` on
  * `index.json` is the commit point across instances.
  */
-export function commentsApplierFor(deckId: string): CommentsApplier {
+export function commentsApplierFor(
+  deckId: string,
+  options: { strict?: boolean } = {},
+): CommentsApplier {
   return {
     async apply(entries) {
       const ops = entries.flatMap((entry) => (entry.comment === undefined ? [] : [entry.comment]));
@@ -107,11 +110,29 @@ export function commentsApplierFor(deckId: string): CommentsApplier {
       const dir = commentsDir(deckId);
       const now = new Date().toISOString();
       return withDeckLock(dir, async () => {
-        const client = storeSelection().kind === 'blob' ? await exportBlobClient() : null;
+        // every call of the sidecar push meets the store's deadlines (blob-store.ts
+        // boundedBlobClient), the deck pulse put among them (the cycle 3 fix round)
+        const raw = storeSelection().kind === 'blob' ? await exportBlobClient() : null;
+        const client = raw === null ? null : boundedBlobClient(raw);
         const change =
           client === null
             ? applyCommentOps(dir, deckId, ops, now)
             : await applyAndPush(client, deckId, dir, ops, now);
+        for (const { op, error } of change.refused) {
+          // a refused op in the server log (the focus round, cycle 2): the sidecar's reducer
+          // refused what the admission accepted, which on the blob tier means the sidecar this
+          // instance read is not the store's (VERIFICATION F-comments-reply: a reply was not
+          // listed, with no alert and no snackbar, while the add and the resolve landed)
+          console.error(
+            `turboslide comments: ${deckId} refused a comment ${op.op} on thread ${threadIdOf(op)}: ${error.message}`,
+          );
+        }
+        if (options.strict === true && change.refused.length > 0) {
+          // the blob tier's append writes the sidecar inside the append (room.ts), so the caller
+          // still holds the request: the refusal reaches the seller as the action's error
+          // instead of an op admitted and dropped
+          throw mapCommentError(change.refused[0]?.error);
+        }
         return {
           revision: change.index.revision,
           threadIds: change.threads.map((thread) => thread.id),
@@ -121,13 +142,19 @@ export function commentsApplierFor(deckId: string): CommentsApplier {
   };
 }
 
+/** The thread an op names. */
+function threadIdOf(op: CommentOp): string {
+  return op.op === 'add' ? op.thread.id : op.threadId;
+}
+
 /** The sidecar as stored, pulled first when the Blob store moved under this instance. */
 async function storedThreads(
   deckId: string,
 ): Promise<{ threads: Map<string, Thread>; revision: number }> {
   const dir = commentsDir(deckId);
   if (storeSelection().kind === 'blob') {
-    const client = await exportBlobClient();
+    const raw = await exportBlobClient();
+    const client = raw === null ? null : boundedBlobClient(raw);
     if (client !== null) {
       const head = await client.head(`${deckPrefix(deckId)}comments/index.json`).catch(() => null);
       if (head !== null && head.version !== localIndexEtag(dir))
@@ -428,6 +455,43 @@ async function notify(
   }
 }
 
+/**
+ * The anchor a new comment lands on (docs/FOCUS.md rank 19; audit-present row 35). A block or
+ * text anchor whose block id names no block of its slide is the selection of a layout
+ * placeholder (the title slide's heading, a statement's big line: slide fields, not blocks), so
+ * the comment anchors on the slide, where the seller made it, instead of being refused with a
+ * sentence about a removed block. A slide that is gone, a cell or a text range that is not there
+ * any more is refused with the anchor named. Pure.
+ */
+export function placeAnchorOn(
+  document: DeckDocument,
+  anchor: CommentAnchor,
+): { ok: true; anchor: CommentAnchor } | { ok: false; message: string } {
+  const placed = resolveAnchor(document, anchor);
+  if (!placed.orphaned) return { ok: true, anchor };
+  if (
+    placed.reason === 'block removed' &&
+    (anchor.kind === 'block' || anchor.kind === 'text') &&
+    document.slides[anchor.slideId] !== undefined
+  ) {
+    return { ok: true, anchor: { kind: 'slide', slideId: anchor.slideId } };
+  }
+  const what =
+    anchor.kind === 'deck'
+      ? 'the presentation'
+      : anchor.kind === 'slide' || anchor.kind === 'notes'
+        ? `slide "${anchor.slideId}"`
+        : anchor.kind === 'cell'
+          ? `cell ${anchor.cell[0]},${anchor.cell[1]} of block "${anchor.blockId}" on slide "${anchor.slideId}"`
+          : `block "${anchor.blockId}" on slide "${anchor.slideId}"`;
+  /* the seller's sentence first, the anchor and the reason after it for the log and the CLI
+     (docs/FOCUS.md rank 19; b6.md R5): the words say what was refused, never "block removed" alone */
+  return {
+    ok: false,
+    message: `This comment could not be placed: the object it named is not on the slide (the ${anchor.kind} anchor names ${what}; ${placed.reason})`,
+  };
+}
+
 /** The anchor checked against the live document; a text anchor without `quoted` gets it from the document. */
 async function placeAnchor(caller: CommentCaller, anchor: CommentAnchor): Promise<CommentAnchor> {
   const document = (await caller.room.live()).document;
@@ -435,10 +499,9 @@ async function placeAnchor(caller: CommentCaller, anchor: CommentAnchor): Promis
     anchor.kind === 'text' && anchor.quoted === ''
       ? { ...anchor, quoted: quotedTextOf(document, anchor) }
       : anchor;
-  const placed = resolveAnchor(document, checked);
-  if (placed.orphaned)
-    throw new RangeError(`the anchor names nothing on the current document (${placed.reason})`);
-  return checked;
+  const placed = placeAnchorOn(document, checked);
+  if (!placed.ok) throw new RangeError(placed.message);
+  return placed.anchor;
 }
 
 export async function commentAdd(

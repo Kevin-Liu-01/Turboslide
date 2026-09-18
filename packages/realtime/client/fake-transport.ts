@@ -3,10 +3,12 @@
 // ids, sends `hello` and the replay, admits ops with the transform, the reducer and the compare and
 // append, writes the roster, and a transport per connection that the room client drives. The
 // server's admission mirrors apps/studio/src/server/room.ts's shape without its identity and
-// authorization, so a client test exercises the client and the protocol, not the studio. Two
-// knobs stage the failure modes the client must survive: `kill()` closes every stream (a
-// reconnect with `Last-Event-ID`), `offline` makes every POST throw. Test code and the dev only
-// page harness import it; nothing in production does.
+// authorization, so a client test exercises the client and the protocol, not the studio. Three
+// knobs stage the failure modes the client must survive: `kill()` closes every stream (the
+// client reopens with its position as `since`), `offline` makes every POST throw, and
+// `refuseOpens` answers every open with a refusal (a 503 with `retry-after`, a 404) the way the
+// stream route does, until set back (the focus round, cycle 3 stream fix round, C3-F1). Test
+// code and the dev only page harness import it; nothing in production does.
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
@@ -24,7 +26,7 @@ import type {
 } from '../src/channel.ts';
 import type { PresencePost } from '../src/protocol.ts';
 import { rewritesText } from './room-client.ts';
-import type { Rejected, RoomTransport, StreamHandle } from './room-client.ts';
+import type { Rejected, RoomTransport, StreamFailure, StreamHandle } from './room-client.ts';
 
 export type FakeIdentity = {
   principalId: string;
@@ -76,12 +78,33 @@ function transformPast(
   return out;
 }
 
+/** The transport of one tab over the fake server, with the test's knobs. */
+export type FakeTabTransport = RoomTransport & {
+  /** every POST throws until set back */
+  offline: (on: boolean) => void;
+  /** every open is refused with this failure (reported through `onError` on the next tick) until null */
+  refuseOpens: (failure: StreamFailure | null) => void;
+  /**
+   * The stream stays open and delivers no op or checkpoint until set back (an instance that
+   * stopped announcing; the focus round, cycle 3 stream fix round two, VERIFICATION C3S-F8).
+   * Presence and the hello still pass.
+   */
+  holdStream: (on: boolean) => void;
+  /**
+   * Whether an ops answer carries `between`, the entries between the POST's base and its
+   * admitted ones, as the ops route does since the stream fix round two; false models an older
+   * server, whose answer leaves the client to the stream and its gap watch.
+   */
+  answerBetween: (on: boolean) => void;
+  /** how many times the client asked for a stream, refused opens included */
+  opens: () => number;
+  /** the `retire` list of every open, in order */
+  retires: () => readonly (readonly string[])[];
+};
+
 export type FakeRoomServer = {
   /** a transport for one browser tab of one identity */
-  transportFor: (identity: FakeIdentity) => RoomTransport & {
-    /** every POST throws until set back */
-    offline: (on: boolean) => void;
-  };
+  transportFor: (identity: FakeIdentity) => FakeTabTransport;
   /** the live document (the last checkpoint plus every entry) */
   document: () => DeckDocument;
   /** commits everything since the last checkpoint: the revision moves, a `checkpoint` event goes out */
@@ -138,11 +161,46 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
   const server: FakeRoomServer = {
     transportFor(identity) {
       let offline = false;
-      const transport: RoomTransport & { offline: (on: boolean) => void } = {
+      let refusal: StreamFailure | null = null;
+      let held = false;
+      let between = true;
+      let opens = 0;
+      const retires: (readonly string[])[] = [];
+      const transport: FakeTabTransport = {
         offline(on) {
           offline = on;
         },
+        refuseOpens(failure) {
+          refusal = failure;
+        },
+        holdStream(on) {
+          held = on;
+        },
+        answerBetween(on) {
+          between = on;
+        },
+        opens: () => opens,
+        retires: () => retires,
         open(openOptions): StreamHandle {
+          opens += 1;
+          retires.push(openOptions.retire ?? []);
+          if (refusal !== null) {
+            // the route's refusal: no hello, no slot, the failure with its status and its wait;
+            // an id the refusal carries is bound to the identity the way the route's MAC admits
+            // it on any instance (room.ts clientBoundTo), so the client posts under it
+            const failure = refusal;
+            let closed = false;
+            if (failure.clientId !== undefined)
+              void channel.presence.bind(deckId, failure.clientId, identity.principalId, 320_000);
+            queueMicrotask(() => {
+              if (!closed) openOptions.onError(failure);
+            });
+            return {
+              close() {
+                closed = true;
+              },
+            };
+          }
           const clientId = clientIdFor();
           const connection: Connection = {
             clientId,
@@ -166,6 +224,8 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               editing: clients.filter((row) => row.role === 'editor' || row.role === 'owner')
                 .length,
               tier: channel.tier,
+              // the seq the last checkpoint covered, as the stream route sends it
+              covered,
             });
             const plan = replayPlan(openOptions.since, liveSeq);
             if (plan.kind === 'resync')
@@ -177,6 +237,8 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             connection.unsubscribe = channel.subscribe(deckId, (event) => {
               if (!connections.has(connection)) return;
               if (event.type === 'op' && identity.role === 'viewer') return;
+              // a held stream delivers no entry and no checkpoint (the knob)
+              if (held && (event.type === 'op' || event.type === 'checkpoint')) return;
               connection.onEvent(event);
             });
           })();
@@ -281,6 +343,9 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             rejected,
             head: liveSeq,
             revision: live.deck.revision,
+            // the entries between the client's base and its admitted ones, as the ops route
+            // answers them (room.ts `betweenEntries`)
+            ...(between && landed.length > 0 ? { between: landed } : {}),
           };
         },
         async postPresence(body, presenceOptions) {
@@ -350,51 +415,11 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
 }
 
 /**
- * A reconnecting transport over a fake server: the shape a browser's EventSource gives, so a
- * `kill()` is followed by a new `open` and a fresh hello after a short pause.
+ * The transport of one tab over a fake server, by the name the tests use. The client owns the
+ * reopen since the cycle 3 stream fix round (room-client.ts `reopenStream`), so nothing here
+ * reconnects: a `kill()` is reported once through `onError` and the client's next `open` follows
+ * after its wait. `opens()` counts the client's opens.
  */
-export function reconnectingTransport(
-  server: FakeRoomServer,
-  identity: FakeIdentity,
-  options: { reconnectMs?: number } = {},
-): RoomTransport & { offline: (on: boolean) => void; opens: () => number } {
-  const inner = server.transportFor(identity);
-  let opens = 0;
-  return {
-    offline: inner.offline,
-    opens: () => opens,
-    open(openOptions) {
-      let handle: StreamHandle | null = null;
-      let closed = false;
-      let lastSeq = openOptions.since;
-      const connect = (): void => {
-        if (closed) return;
-        opens += 1;
-        handle = inner.open({
-          since: lastSeq,
-          onEvent: (event) => {
-            if (event.type === 'op') lastSeq = Math.max(lastSeq, event.entry.seq);
-            if (event.type === 'ops') {
-              const last = event.entries[event.entries.length - 1];
-              if (last !== undefined) lastSeq = Math.max(lastSeq, last.seq);
-            }
-            openOptions.onEvent(event);
-          },
-          onError: (error) => {
-            openOptions.onError(error);
-            setTimeout(connect, options.reconnectMs ?? 5);
-          },
-        });
-      };
-      connect();
-      return {
-        close() {
-          closed = true;
-          handle?.close();
-        },
-      };
-    },
-    postOps: inner.postOps,
-    postPresence: inner.postPresence,
-  };
+export function tabTransport(server: FakeRoomServer, identity: FakeIdentity): FakeTabTransport {
+  return server.transportFor(identity);
 }

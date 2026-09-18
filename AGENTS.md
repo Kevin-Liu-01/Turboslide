@@ -218,6 +218,94 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   The dev server measures nothing: every number of SPEC-4 section 4 comes from the node-server
   build (check step 31) or a preview deployment, and a builder's run on a dev server is a smoke.
 
+- The written exception for the focus round (`docs/FOCUS.md`, the binding specification;
+  `docs/gslides-parity/focus/build/integrator.md` and `BUILD-STATUS.md` the record): the round
+  four form stands, with the two secrets at 32 characters or more (`apps/studio/src/server/auth/
+secret.ts` refuses a shorter session secret and the server answers 500 on every route). From
+  `apps/studio`:
+
+  `TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_LOCAL_OPEN=1 TURBOSLIDE_SESSION_SECRET=<32 or more fake characters> TURBOSLIDE_DOWNLOAD_SECRET=<32 or more fake characters> node_modules/.bin/vite dev --port <port> --strictPort`
+
+  | Port | Who                                                                               | Notes                                                                                                                                       |
+  | ---- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+  | 4321 | the integrator, the verifier, `scripts/check.mjs`                                 | the file store; the `/new` boot probe and `new-write-probe.mjs` at every merge; check steps 17, 18, 20, 21, 26, 31 and 32 start and stop it |
+  | 4361 | b1 (the surface: the menu model, the toolbar, the palette, the right click menus) | the surface probe as a smoke                                                                                                                |
+  | 4362 | b2 (text and slides)                                                              | the text and filmstrip smokes                                                                                                               |
+  | 4363 | b3 (objects: shapes, lines, pictures, arrange)                                    | the objects smokes, `scripts/canvas-fidelity.mjs` under the lock                                                                            |
+  | 4364 | b4 (the drivers)                                                                  | the probe's `--core` mode and `apps/studio/e2e/core/*.spec.ts` while they are written                                                       |
+  | 4365 | b5 (documents: README, `docs/readme/**`, the /home copy)                          | `docs/readme/shoot-readme.mjs` as a smoke                                                                                                   |
+  | 4366 | b6 (access, sharing and collaboration)                                            | `roles`, `comments`, `share` and `security` specs, in shadow and in enforce mode (`TURBOSLIDE_AUTHORIZE=enforce` on the server)             |
+  | 4367 | the integrator                                                                    | the merge smokes and `node scripts/probes/core-gate.mjs --base http://localhost:4367` beside 4321                                           |
+  | 4368 | unassigned                                                                        | spare                                                                                                                                       |
+  | 4369 | b7 (the server: the write path, the head read on the blob tier)                   | `new-write-probe.mjs`, the draft picture probe                                                                                              |
+
+  The switch of the round: one `MenuSetting`, `advancedTools`, off by default and remembered per
+  browser under `ts-editor-settings`; one row, Tools > Advanced tools (`tools.advancedTools`, a
+  check row after Check slides); one flag, `advanced: true`, on a `MenuItem`, a `ToolbarControl`,
+  the object form of a `ContextEntry`, a `PaletteEntry` and a Format options section; one
+  predicate, `isPresent`, which also hides every Later stub while the switch is off. Hidden, never
+  disabled, never deleted: a parked row leaves the menu bar, the toolbar, the right click menus,
+  Search the menus, the shortcuts dialog and the bottom bar's view buttons; its block still
+  renders; its actions stay on the CLI, MCP, HTTP and window transports and the skills document
+  them as advanced. A driver flips the switch through the product (`menu.tools.advancedTools`) and
+  reads it from `describe().state.settings.advancedTools` or `.pt-viewer[data-advanced-tools]`.
+  The rule for bringing a feature back is docs/FOCUS.md section 8: its rows join the matrix, pass
+  on a preview and on production, and only then lose the flag; a feature returns whole or not at all.
+
+  The test matrix (docs/FOCUS.md section 6): `docs/gslides-parity/focus/core-matrix.json`, 390
+  rows with stable ids `area.feature.interaction`, read in place by `scripts/probes/core-matrix.mjs`
+  (validated on load; `parkedFeaturesOf` and `shipVerdict` compute rule 4 of section 1 and the
+  exit rule of 6.2). Two drivers: `node scripts/probes/editor-walk-probe.mjs --core --base
+<origin>` (its own walk over the parity walk's helpers, `scripts/probes/core-walk/`, one module
+  per area, the scratch deck from `/new` trashed and deleted forever at the end) and the seven
+  `apps/studio/e2e/core/<area>.spec.ts` (created and torn down through the product, one context per
+  file, a second person a second context, no fixture and no disk). `node scripts/probes/core-gate.mjs
+--base <origin> [--out <dir>] [--parked docs/gslides-parity/focus/ship-<commit>.json]` runs both,
+  merges every row by id, writes `core-matrix.md` and `core-gate.json` (the `results` map by id is
+  what `docs/readme/what-works.mjs --results` renders the README from), asserts `retries` zero and
+  exits 1 on any failed, not driven or no step row outside the committed parked list; against a
+  localhost base it takes `.turboslide/e2e.lock` itself for the whole run, so a caller never holds
+  the lock while it runs; against a deployment it needs no lock and sends `VERCEL_OIDC_TOKEN` as
+  `x-vercel-trusted-oidc-idp-token`. Check step 32 is the gate against the runner's server. A row
+  the orchestrator's ruling (3) marks manual (`manual: <the obstacle>` in the matrix, a step in
+  `docs/gslides-parity/focus/manual-checklist.md`) is recorded not driven with its reason, is never
+  counted as passed, parks no feature and fails no ship; a failed manual row fails like any other.
+  A not driven row is never reported as passed, anywhere. Step 19 also runs `node
+docs/readme/what-works.mjs --check`: the README section "What works today" is rendered from the
+  matrix and a stale one fails the chain. The acceptance of a ship (6.2): every core row of every
+  feature not in the committed parked list passes on the preview built from the ship's commit and
+  on production after the alias moves, in the last run of each origin, with the run ledger in the
+  ship note and `retries` zero; a row that passes only on a rerun with no code change is flaky and
+  fails the ship. `scripts/tooltip-audit.mjs` runs in two passes, the default view and `--advanced`.
+
+  The second cycle of the round (2026-09-16; `docs/gslides-parity/focus/build/BUILD-STATUS.md`
+  "Cycle 2"): the click model of `docs/gslides-parity/focus/AMENDMENTS.md` A1 is the canvas rule
+  (one click selects an object with the ring, the handles and the chip and places no caret; a
+  pointer down anywhere inside a selected object drags it, the whole selection when several are
+  selected; a double click on a text object opens the session with the caret at the point; a
+  printable key on a selected text object starts the session over the whole text; Enter starts it
+  with the caret at the end; Escape returns to the object and a second Escape clears the
+  selection), so a spec that types into a run enters by a double click, never a single click.
+  Insert > Shape, Insert > Line and Format > Borders & lines are parked whole at the first ship
+  under the orchestrator's ruling (1) (FOCUS.md section 4); the ship's parked list is
+  `parkedFeatures: ["shapes", "lines"]` (`docs/gslides-parity/focus/verification/parked-cycle2.json`
+  until the ship names its commit), the walk drives their rows with the switch on as the evidence
+  for the return, and the two features return whole under FOCUS.md section 8. A dev server a lane
+  measures against runs on `apps/studio/vite.no-watch.config.ts` (`-c`, the watcher blind to the
+  repository, HMR on) so another lane's save cannot remount the page mid run, and no lane edits a
+  source file while any Playwright or probe run is on the checkout's servers. Two preview only
+  arrangements of the drivers step around Vercel Authentication and never around the product (the
+  card Download's bytes fetched with the OIDC header, the hero row's speculation rules removed
+  before the click); production and localhost run both rows as written. The store's second cycle
+  rules (a deadline on every Blob call, the listing joined with the instance's mirrors, a
+  `version.restore` record as an external checkpoint, `readEditorDeck` at the head, the proven
+  record and sidecar reads, no cached null on the blob tier) are `docs/hosting.md` "Reads"; the
+  third cycle's (every call cancelled underneath at its deadline, 10 s for a read, 20 s for a
+  document put and 90 s for a twin put, the hosted collection's head poll at 1 s and one at a
+  time, a version record read through the store's head before its public URL, the presence
+  roster and the comments index shared across instances through records on the store) are the
+  same section and `packages/store/src/presence-store.ts`.
+
 ## Hosting
 
 The studio is deployed to Vercel from `apps/studio` (the project `turboslide` in Kevin's team,
@@ -243,8 +331,9 @@ environment); `docs/HOSTED-STATUS.md` records the round.
 Round three adds the tiers of SPEC-3 2.5 behind environment switches. The realtime channel
 (`@turboslide/realtime/select`, `selectRealtime(env)`) is `memory` on a checkout and in the tests,
 `redis` when `TURBOSLIDE_REALTIME=redis` or `REDIS_URL` is set, and `blob` hosted without Redis
-(`BlobStore.write` per batch, a one second head poll, presence per instance, and the title row says
-so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
+(`BlobStore.write` per batch, a one second head poll, the presence roster and the comments index
+shared across instances through records on the store since the focus round's third cycle while
+live cursors stay per instance, and the title row says so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
 under `TURBOSLIDE_SESSION_SECRET`; a hosted deployment without it derives the secret from
 `TURBOSLIDE_TOKEN` and warns once. Accounts are better-auth over `node:sqlite` when
 `TURBOSLIDE_AUTH_DB` is set and Postgres when `DATABASE_URL` is set, else anonymous only; mail is

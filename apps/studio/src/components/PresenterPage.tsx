@@ -5,8 +5,7 @@ import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import { createLiveAdapter } from '@turboslide/agent/window/adapter';
 import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { presenterActionIds, registerStudioAutomation } from '@turboslide/agent/window/registry';
-import { Icon } from '@turboslide/chrome/icons';
-import { detectPlatform } from '@turboslide/chrome/menus/keys';
+import { detectPlatform } from '@turboslide/chrome/menus/platform';
 import { Toast, useToast } from '@turboslide/chrome/Toast';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { renderSlide } from '@turboslide/render/slide';
@@ -22,6 +21,7 @@ import { installThemeBridge, readTheme, useTheme } from '@turboslide/viewer/them
 import type { Theme } from '@turboslide/viewer/theme';
 
 import type { EditorDeck } from '../server/write';
+import { PRESENTER_ICONS } from './presenter-icons';
 import { useMountEffect } from './useMountEffect';
 import { useStudioSession } from './useStudioSession';
 
@@ -41,13 +41,9 @@ import { useStudioSession } from './useStudioSession';
  * this is the page attached, and the audience window follows over the channel.
  */
 
-const ICONS: PresentIcons = {
-  previous: <Icon name="prev" />,
-  next: <Icon name="next" />,
-  plus: <Icon name="plus" />,
-  minus: <Icon name="minus" />,
-  exit: <Icon name="close" />,
-};
+/* the five chrome icons as their own module, so the route does not load the chrome's icon set
+   (presenter-icons.tsx; the focus round, VERIFICATION C2-F18) */
+const ICONS: PresentIcons = PRESENTER_ICONS;
 
 const tip: PresentTip = (content) => tipProps(content);
 

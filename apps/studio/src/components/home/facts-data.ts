@@ -4,14 +4,13 @@
 // measured rows; `--check` fails when facts.json has changed since this copy (its sha256 is
 // recorded here).
 export const FACTS_DATA = {
-  factsSha256: '326f1a94ab2724e7aff788ed436151e74fba2c45ad0a51011ab83d30f8d8f380',
+  factsSha256: '43700d697be00f31679cd4f80f523df0a5943917981927bbdfe7416a65ba09b5',
   actions: 169,
   mcpTools: 146,
   httpPaths: 153,
   layouts: 21,
-  shapePresets: 135,
   materials: 17,
-  checkSteps: 31,
+  checkSteps: 32,
   parityRows: 3369,
   mismatchPercent: 0.003,
   licence: 'MIT',

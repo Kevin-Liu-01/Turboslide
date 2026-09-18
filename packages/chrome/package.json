@@ -80,6 +80,7 @@
     "./menus/model": "./src/menus/model.ts",
     "./menus/strings": "./src/menus/strings.ts",
     "./menus/keys": "./src/menus/keys.ts",
+    "./menus/platform": "./src/menus/platform.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

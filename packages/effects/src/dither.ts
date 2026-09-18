@@ -27,8 +27,8 @@ import type {
   DitherPattern,
   PictureDither,
   ResolvedDither,
-} from '@turboslide/schema/blocks/dither';
-import { resolveDither } from '@turboslide/schema/blocks/dither';
+} from '@turboslide/schema/blocks/dither-values';
+import { resolveDither } from '@turboslide/schema/blocks/dither-values';
 
 import { BAYER8_THRESHOLDS } from './bayer.ts';
 import { blue64Thresholds } from './blue64.ts';

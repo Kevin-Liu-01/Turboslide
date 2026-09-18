@@ -39,6 +39,17 @@
 // VERCEL_OIDC_TOKEN, when set, is sent as x-vercel-trusted-oidc-idp-token (a preview deployment
 // behind Vercel Authentication). The caller holds .turboslide/e2e.lock. Exit 1 when a step fails.
 // A step the walk cannot drive is recorded with ok null and the word "not driven", never as ok.
+//
+// The focus round (docs/FOCUS.md 6.1): `--core` runs the core walk instead of the parity walk
+// above, over the same helpers, pace, scratch deck and finally block. Every step that proves a
+// matrix row carries the row's id as its tag and writes it as `id` in the JSON row; a setup step
+// that fails turns the later rows of its section into not driven rows with the reason; a probe
+// row with no tagged step is "no step" and fails the run; the exit code follows `shipVerdict`
+// over `probeRows()` with the committed parked list of `--parked <ship json>` (6.2). `--matrix
+// <path>` writes the table of every probe row with its result. See core-walk/index.mjs.
+//
+//   node scripts/probes/editor-walk-probe.mjs --core --base <origin> --json <path> \
+//     [--matrix <path>] [--parked docs/gslides-parity/focus/ship-<commit>.json] [--only <areas>]
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -63,6 +74,7 @@ const JSON_OUT = arg('json', null);
 const SHOTS = arg('shots', JSON_OUT ? path.join(path.dirname(JSON_OUT), 'shots') : null);
 const QUICK = flag('quick');
 const HEADED = flag('headed');
+const CORE = flag('core');
 const OIDC = process.env.VERCEL_OIDC_TOKEN;
 const extraHTTPHeaders = OIDC ? { 'x-vercel-trusted-oidc-idp-token': OIDC } : {};
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
@@ -589,6 +601,11 @@ const clickRow = async (page, rowId) => {
 };
 const clickControl = async (page, control) => {
   const el = ctl(page, control).first();
+  /* a control inside a scrolled box below the viewport (the last Restore of a Version history
+     panel with 150 records sat at y 7,723 in a 900 px viewport) got a click on nothing and the
+     row read "restore changed the deck false" with no notice (VERIFICATION.md C2-F4, b7's
+     C2-R18); the element is scrolled into view first, as Playwright's own click does */
+  await el.scrollIntoViewIfNeeded({ timeout: 4000 }).catch(() => undefined);
   const r = await el.boundingBox();
   if (!r) throw new Error(`no control ${control}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
@@ -608,6 +625,78 @@ const clearAll = async (page) => {
   await press(page, 'Escape', 3);
   await sleep(200);
 };
+
+// ---------------------------------------------------------------------------------------------
+// the core walk (docs/FOCUS.md 6.1): the helpers above, the areas under core-walk/, its own table
+
+if (CORE) {
+  const { runCoreWalk } = await import('./core-walk/index.mjs');
+  const code = await runCoreWalk({
+    chromium,
+    BASE,
+    JSON_OUT,
+    MATRIX_OUT: arg('matrix', null),
+    SHOTS,
+    HEADED,
+    extraHTTPHeaders,
+    PARKED: arg('parked', null),
+    ONLY: arg('only', null),
+    lib: {
+      sleep,
+      rand,
+      typeHuman,
+      press,
+      moveHuman,
+      drag,
+      clickAt,
+      dblclickAt,
+      invoke,
+      state,
+      editorReady,
+      settled,
+      waitRevision,
+      pollUntil,
+      activeSlide,
+      gotoSlide,
+      slideJson,
+      objectsOf,
+      blockOf,
+      slideOrder,
+      kOf,
+      rectOf,
+      center,
+      readout,
+      chip,
+      editing,
+      activeDesc,
+      staleWords,
+      runInfo,
+      wordRect,
+      selectionText,
+      wrapFactsOf,
+      caretFacts,
+      placementOf,
+      runs,
+      boxOf,
+      handleRect,
+      handleControls,
+      fmt,
+      codesOf,
+      posStr,
+      near,
+      ctl,
+      menuRoot,
+      openMenu,
+      hoverRow,
+      clickRow,
+      clickControl,
+      has,
+      closeMenus,
+      clearAll,
+    },
+  });
+  process.exit(code);
+}
 
 // ---------------------------------------------------------------------------------------------
 // the walk

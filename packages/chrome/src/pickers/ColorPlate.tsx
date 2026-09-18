@@ -6,6 +6,7 @@ import type { Color } from '@turboslide/schema/color';
 
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
+import { useMountEffect } from '../lib/useMountEffect';
 import { PICKERS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
@@ -58,6 +59,17 @@ export function ColorPlate({
   const at = anchoredAt(anchor);
   const words = PICKERS.colors;
 
+  /* the first swatch takes the focus once, on mount (the focus round, cycle 3 fix; b3 C3-R1,
+     VERIFICATION C3-F7). It sat in the listener effect below, which re-runs whenever the caller
+     passes a fresh `onClose` (ToolbarTail's closure is new on every render of the tail, and on
+     the memory tier a checkpoint lands as a revision 2 s after the last op, so the swatch write of
+     the same plate re-rendered the tail while the hex value was typed); the re-run moved the
+     focus from the hex field to the None swatch mid word, Enter landed on that button and the
+     value never reached the shape */
+  useMountEffect(() => {
+    root.current?.querySelector<HTMLElement>('button')?.focus();
+  });
+
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
@@ -65,7 +77,6 @@ export function ColorPlate({
       onClose();
     };
     document.addEventListener('mousedown', onDown);
-    root.current?.querySelector<HTMLElement>('button')?.focus();
     return () => document.removeEventListener('mousedown', onDown);
   }, [anchor, onClose]);
 

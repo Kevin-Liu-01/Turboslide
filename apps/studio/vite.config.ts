@@ -63,8 +63,12 @@ function externalServerOnly(): Plugin {
 // alone.
 const VENDOR_TEST =
   /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/]/;
+// Hidden source maps, opt in with TURBOSLIDE_CLIENT_SOURCEMAP=1 (vite.deploy.config.ts says why).
+const CLIENT_SOURCEMAP: boolean | 'hidden' =
+  process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
 const CLIENT_BUILD = {
   build: {
+    sourcemap: CLIENT_SOURCEMAP,
     rolldownOptions: {
       output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }] } },
     },

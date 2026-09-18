@@ -205,6 +205,29 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   );
 }
 
+/** The chrome regions that keep their own clipboard: a dialog's or a menu's fields, the Format options panel. */
+const CLIPBOARD_KEEPERS = '[role="dialog"], [role="menu"], .ts-inspector';
+
+/**
+ * True when the stage takes a copy, cut or paste event (docs/FOCUS.md rank 15; audit-arrange rows
+ * 41 and 42). The shell leaves the three clipboard chords to the browser's events, so the stage is
+ * the only taker on the page: it owns the event unless a text session is open, the target is a
+ * field or an editable region (the notes, a dialog's input, the palette's query), or the target
+ * sits in a dialog, a menu or the Format options panel outside the stage. A toolbar button that
+ * kept the focus after its click (New slide) or a filmstrip card does not keep the paste: the
+ * seller who copied an object and clicked the next slide's card expects Cmd+V to land there.
+ */
+export function stageOwnsClipboard(
+  target: EventTarget | null,
+  stage: Element | null,
+  editing: boolean,
+): boolean {
+  if (editing || isEditableTarget(target)) return false;
+  if (!(target instanceof Element)) return true;
+  if (stage !== null && stage.contains(target)) return true;
+  return target.closest(CLIPBOARD_KEEPERS) === null;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Multi-selection (this round's directive: Shift click and the marquee on a freeform slide)
 
@@ -249,6 +272,68 @@ export function selectionOf(ids: readonly string[]): { selection: Selection; ext
   return anchor === undefined
     ? { selection: null, extra: [] }
     : { selection: { kind: 'block', blockId: anchor }, extra: rest };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The press on the sheet (docs/gslides-parity/focus/AMENDMENTS.md A1, the click model)
+
+/** What a pointer down on the sheet does, decided before any state changes (press-rules.test.ts). */
+export type PressPlan =
+  /** the empty sheet: a marquee, a plain click clears (SPEC-2 6.1 row 3) */
+  | { action: 'marquee' }
+  /** the paint format tool is armed: the click paints the block and nothing else (SPEC 3.1 row 6) */
+  | { action: 'paint'; blockId: string }
+  /** Shift or Cmd: the object's membership toggles, a group whole (SPEC-2 6.1 row 2) */
+  | { action: 'toggle'; blockId: string }
+  /**
+   * a plain press: `select` when the object joins the selection alone (it was not selected, or a
+   * group member the seller has not entered stands in for its group), and `drag` when the press
+   * arms the move gesture, which a move past its threshold turns into the drag of the whole
+   * selection
+   */
+  | { action: 'press'; blockId: string; select: boolean; drag: boolean };
+
+/**
+ * The click model of the canvas (A1, binding above docs/FOCUS.md 2.3), for every object kind
+ * including text boxes and the title, subtitle and body placeholders: one click selects the
+ * object and shows the ring, the handles and the chip, and places no caret; a pointer down
+ * anywhere inside a selected object arms the drag, so a move past the threshold moves it, and the
+ * whole selection when several are selected; a click on an object inside a multiple selection
+ * keeps the selection. A text object's session opens on a double click, Enter or a typed
+ * character, never here, which is what lets a drag start inside the text (Kevin, 2026-09-16:
+ * "when you click and drag in the selection area, it should drag, and double clicking is what
+ * goes inside"; the verifier's F4 and F5 saw the old one click session claim the drag, the right
+ * click and the Shift click). Commenting and Viewing mode select for a comment's anchor and never
+ * drag (SPEC-3 5.3, 6.3). The paint tool and the modifiers keep their rules.
+ */
+export function objectPressPlan(input: {
+  /** the object under the pointer (resolveObject), or null on the empty sheet */
+  under: string | null;
+  /** the selected ids, the anchor first (selectedIds) */
+  selected: readonly string[];
+  /** Shift, Cmd or Ctrl held */
+  modifier: boolean;
+  /** Editing mode; Commenting and Viewing mode read false */
+  editable: boolean;
+  /** the paint format tool is armed */
+  paint: boolean;
+  /** the object is a member of a group the seller has not entered by a double click */
+  grouped: boolean;
+  /** the id names an object the stage measured (Freeform isObjectId), so a chip handle exists */
+  object: boolean;
+}): PressPlan {
+  const { under } = input;
+  if (under === null) return { action: 'marquee' };
+  if (input.paint) return { action: 'paint', blockId: under };
+  if (input.modifier) return { action: 'toggle', blockId: under };
+  const held = input.selected.includes(under);
+  if (!input.editable) return { action: 'press', blockId: under, select: !held, drag: false };
+  return {
+    action: 'press',
+    blockId: under,
+    select: !held || (input.grouped && input.selected.length === 1),
+    drag: input.object,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------

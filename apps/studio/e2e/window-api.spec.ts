@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // MILESTONES M3 acceptance, window-api.spec.ts: seeds a deck only through applySource, calls
 // set('list: Size', 22) and set('block.list.size', 22) and asserts each is one action call, reads
 // readSource() back and sees size: 22, invokes render.slide and asserts the decoded PNG's row
@@ -151,6 +153,8 @@ test('describe().actions equals the generated list and the owners hand over', as
 
   // View > Mode > Viewing hands the global to the viewer owner; Editing hands it back
   // (gslides-parity SPEC 2.3: the Edit and View seg left the toolbar)
+  /* View > Mode is parked (docs/FOCUS.md 3.2): driven behind the switch (b1 R12) */
+  await setAdvancedTools(page, true);
   const mode = async (item: 'viewing' | 'editing') => {
     await page.locator('[data-control="menubar.view"]').click();
     await page.locator('[data-menu-item="view.mode"]').click();
@@ -277,6 +281,8 @@ test('set by label and by data-control id are one action call each, and the rend
 
 test('the source drawer is a delegating owner over the same validator', async ({ page }) => {
   await openEditor(page);
+  /* Tools > Advanced is parked (docs/FOCUS.md 3.2): the row is driven behind Tools > Advanced tools (b1 R12) */
+  await setAdvancedTools(page, true);
   /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
   await page.locator('[data-control="menubar.tools"]').click();
   await page.locator('[data-menu-item="tools.advanced"]').click();
@@ -322,6 +328,8 @@ test('the source drawer is a delegating owner over the same validator', async ({
   );
   expect(otherSlide).toBe('RangeError');
   expect(await versionCount(page)).toBe(before);
+  /* Tools > Advanced is parked (docs/FOCUS.md 3.2): the row is driven behind Tools > Advanced tools (b1 R12) */
+  await setAdvancedTools(page, true);
   /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
   await page.locator('[data-control="menubar.tools"]').click();
   await page.locator('[data-menu-item="tools.advanced"]').click();

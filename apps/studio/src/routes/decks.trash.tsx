@@ -11,6 +11,7 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { useMountEffect } from '../components/useMountEffect';
 import { listTrashedDecks, removeStoredDeck, restoreStoredDeck } from '../server/decks';
+import { clearRestoringMarker, sessionMarkerStorage, writeRestoringMarker } from './-restoring';
 import type { DeckCard } from '../server/decks';
 import { Dialog, cardThumbUrl, shortDate, useStreamedList } from './decks.index';
 import { RouterLinkSlot } from './-link-slot';
@@ -99,11 +100,18 @@ function TrashPage() {
     if (busy.has(card.id)) return;
     mark([card.id], true);
     hide([card.id]);
+    /* the marker the home page reads when the seller leaves for Recent presentations inside the
+       restore's flight time (rank 7; build/b7.md R9, routes/-restoring.ts): written before the
+       request, removed when the restore is refused, retired by the home page or its age */
+    writeRestoringMarker(sessionMarkerStorage(), card.id);
     try {
-      await restoreStoredDeck({ deckId: card.id, baseRevision: card.revision });
+      /* no revision from the listing, which lags the store (docs/FOCUS.md rank 7); Delete forever
+         below keeps its revision, since an irreversible action on a stale card should stop */
+      await restoreStoredDeck({ deckId: card.id });
       snackbar.show(`Restored ${card.title}`);
       refresh();
     } catch (error) {
+      clearRestoringMarker(sessionMarkerStorage());
       unhide([card.id]);
       snackbar.show(`${HOME.restore}: ${errorMessage(error)}`);
     } finally {
@@ -191,19 +199,24 @@ function TrashPage() {
                 type="button"
                 className="pt-ib is-text"
                 data-control="trash.confirm.cancel"
-                data-autofocus
                 onClick={() => setConfirm(null)}
                 {...tipProps({
                   name: DIALOGS.deleteForever.cancel,
                   doc: 'Keeps the presentation in the trash.',
+                  key: 'Esc',
                 })}
               >
                 <span className="pt-lb">{DIALOGS.deleteForever.cancel}</span>
               </button>
+              {/* the initial focus sits on the button whose tooltip names Enter, as Google's Delete
+                  forever dialog does, so Enter deletes and Esc keeps (docs/FOCUS.md rank 29,
+                  `decks.trash.delete-forever-enter`; audit-decks row 53a saw Enter cancel while
+                  Cancel held the focus) */}
               <button
                 type="button"
                 className="pt-ib is-text is-solid"
                 data-control="trash.confirm.ok"
+                data-autofocus
                 onClick={() => void remove(confirm.kind === 'one' ? [confirm.card] : confirm.cards)}
                 {...tipProps({
                   name: DIALOGS.deleteForever.ok,

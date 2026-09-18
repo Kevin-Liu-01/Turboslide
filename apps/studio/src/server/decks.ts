@@ -23,12 +23,12 @@ import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
 
 import type { AuthContext } from './authorize';
 import { renderSlide } from './render';
+import type { LiveDocument } from './room';
 import {
   createStoredDeck,
   deckCardFacts,
   ensureDecks,
   hostingFacts,
-  isHosted,
   openDeckStore,
   listStoredDecks,
 } from './root';
@@ -43,13 +43,14 @@ import {
  * the file, tmp and Blob stores. createServerFn lives only under apps/studio/src/server (SPEC 3.3
  * item 4).
  *
- * Fallback, checkout only: a request for a missing deck id is served from decks/fixture with
- * `fallback` set, so the M1 viewer spec runs against the two-slide fixture before an import. A
- * hosted studio has no fixture and answers 404 for a deck it does not hold.
+ * A missing deck answers null, and the routes 404, on every store (the focus round, cycle 3;
+ * VERIFICATION C2-F19 and C2-F20). Before this a checkout served `decks/fixture` for any id it
+ * did not hold, with `fallback` set on the payload (the M1 viewer spec's stand in before the
+ * first import; the spec has opened /deck/gt-brand since), so on the check's file store server
+ * `/deck/<unknown id>` answered 200 with the fixture and `/deck/<id>` answered 200 after Delete
+ * forever had removed the deck's folder, while the preview and the tmp store answered 404. The
+ * `fallback` field of the viewer payload stays for the type; nothing sets it.
  */
-
-/** The fixture deck served for a missing id in a checkout. */
-const FALLBACK_DECK = 'fixture';
 
 /** The author the home page writes as (Rename); the editor's default author (editor/EditorRoot.tsx). */
 const HOME_AUTHOR: Author = { kind: 'human', name: 'studio' };
@@ -87,28 +88,23 @@ export type DeckSlidesPayload = {
 
 type Loaded = { servedId: string; document: DeckDocument; issues: string[] };
 
-/** Reads a deck through its store; null when neither the deck nor the fixture can be read. */
+/** Reads a deck through its store; null when the store does not hold it. */
 async function loadDeck(deckId: string): Promise<Loaded | null> {
-  const candidates = [deckId];
-  if (!isHosted() && deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
-  for (const servedId of candidates) {
-    try {
-      const read = await (await openDeckStore(servedId)).read();
-      return {
-        servedId,
-        document: read.document,
-        issues: read.issues
-          .filter((issue) => issue.severity === 3)
-          .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
-      };
-    } catch (error) {
-      // a missing deck is a RangeError, a folder that is not a deck a TypeError; anything else
-      // (the store unreachable) is the route's error
-      if (error instanceof RangeError || error instanceof TypeError) continue;
-      throw error;
-    }
+  try {
+    const read = await (await openDeckStore(deckId)).read();
+    return {
+      servedId: deckId,
+      document: read.document,
+      issues: read.issues
+        .filter((issue) => issue.severity === 3)
+        .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
+    };
+  } catch (error) {
+    // a missing deck is a RangeError, a folder that is not a deck a TypeError; anything else
+    // (the store unreachable) is the route's error
+    if (error instanceof RangeError || error instanceof TypeError) return null;
+    throw error;
   }
-  return null;
 }
 
 /** The sprite the stage carries: the same markup the renderer inlines (SPEC 5.1). */
@@ -512,6 +508,11 @@ const removeDeckFn = createServerFn({ method: 'POST' })
     const { assertFlag } = await import('./flags');
     await authorizeRequest(data.deckId, 'remove', { action: 'deck.remove' });
     await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.remove' });
+    // the deck's room on this instance goes first (room.ts closeRoom says why): a checkpoint run
+    // pending or in flight would write the folder back after the removal (the focus round,
+    // cycle 2; VERIFICATION C2-F19, `/deck/<id>` 200 after Delete forever on the check's server)
+    const { closeRoom } = await import('./room');
+    await closeRoom(data.deckId);
     return mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision));
   });
 
@@ -743,6 +744,27 @@ type ShapedLoad = {
 };
 
 /**
+ * Whether the room's live document, rather than the store's, answers a viewer read when this
+ * instance holds the deck's room: whenever the live document is not behind the store (the focus
+ * round, cycle 3 fix; b3 C3-R2, VERIFICATION C2-F21). The live document is the last checkpoint
+ * plus every stream entry since, and its `deck.revision` is the checkpoint's: `applyStreamEntries`
+ * moves no revision (checkpoint.ts), so on the memory and redis tiers the two revisions read equal
+ * between checkpoints while the live document carries the ops the store does not yet. The cycle 2
+ * rule took the live document only when its revision was strictly above the store's, which never
+ * held between checkpoints, so `/deck` and `/print` opened up to 2 s after a fill write or a skip
+ * (10 s under a burst) served the checkpoint before it (`shapes.reload-and-viewer`,
+ * `export.print.include-skipped`). A live document behind the store is a record written outside
+ * the room (the CLI, an agent) the follower has not turned into entries yet: the store wins. On the
+ * blob tier `syncLive` reads the store into the live document, so the choice is inert there.
+ */
+export function liveServesRead(
+  live: LiveDocument | null,
+  stored: DeckDocument,
+): live is LiveDocument {
+  return live !== null && live.document.deck.revision >= stored.deck.revision;
+}
+
+/**
  * The authorize, the read and the theme every viewer payload starts from: null for a caller
  * without a right, a missing deck or a deck in the trash the route did not ask for (one answer
  * for a missing and a restricted deck, SPEC-3 6.2, 6.3).
@@ -753,9 +775,24 @@ async function loadShaped(data: GetDeckInput): Promise<ShapedLoad | null> {
   if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
   const shape = await shapeByRole(ctx, data.deckId, data);
   if (shape.role === 'none') return null;
-  const loaded = await loadDeck(data.deckId);
+  let loaded = await loadDeck(data.deckId);
   if (!loaded) return null;
   if (isTrashed(loaded.document.deck) && data.includeTrashed !== true) return null;
+  // the room's document when this instance holds the room and it is not behind the store: the
+  // checkpointer writes the store 2 s after the last op (10 s under a burst), so the print page
+  // and the viewer opened right after Slide > Skip slide or a fill write read the deck from
+  // before it (docs/FOCUS.md `export.print.include-skipped`; the integrator at the cycle 2 merge,
+  // for b7; the rule itself is `liveServesRead`, the cycle 3 fix for C2-F21). The store's trash
+  // stamp is kept, as the editor's loader keeps it (write.ts)
+  const { liveIfOpen } = await import('./room');
+  const live = await liveIfOpen(loaded.servedId);
+  if (liveServesRead(live, loaded.document)) {
+    const { withTrashStamp } = await import('./write');
+    loaded = {
+      ...loaded,
+      document: withTrashStamp(live.document, loaded.document.deck.trashedAt),
+    };
+  }
   // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
   const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
     JSON.stringify(slide).includes('"type":"html"'),
@@ -798,17 +835,12 @@ export const deckRevision = createServerFn({ method: 'GET' })
         // outside a request: nothing to set
       }
     }
-    const candidates = [data.deckId];
-    if (!isHosted() && data.deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
-    for (const servedId of candidates) {
-      try {
-        return { revision: await (await openDeckStore(servedId)).revision() };
-      } catch (error) {
-        if (error instanceof RangeError || error instanceof TypeError) continue;
-        throw error;
-      }
+    try {
+      return { revision: await (await openDeckStore(data.deckId)).revision() };
+    } catch (error) {
+      if (error instanceof RangeError || error instanceof TypeError) return null;
+      throw error;
     }
-    return null;
   });
 
 /**

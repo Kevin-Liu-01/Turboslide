@@ -105,10 +105,30 @@ export function vercelDocumentsClient(env: Env = process.env): BlobClient {
   return vercelBlobClient(env, { tokenVariable: DOCUMENTS_TOKEN_VARIABLE, access: 'private' });
 }
 
+/** The SDK's own switch for its retry loop; the store leaves it off unless the deployment sets it. */
+export const SDK_RETRIES_VARIABLE = 'VERCEL_BLOB_RETRIES';
+
+/**
+ * The SDK's retry loop off, unless the deployment set the variable itself (the focus round,
+ * cycle 3 fix round; the blob tier budget): `@vercel/blob` retries a network error or a 5xx up
+ * to VERCEL_BLOB_RETRIES times (10 by default) with waits of 1, 2, 4 ... seconds inside every
+ * call, which under the store's concurrency limit multiplied one refused head into a chain of
+ * them and a 10 s deadline into a timeout. The store's own layers retry instead, on a budget:
+ * the blob channel's poll backs off exponentially to 60 s (realtime/blob.ts, pulse.ts), the room
+ * client sends a refused write again after the wait the answer names (room-client.ts), and the
+ * seed upload is tried again by the next request that finds no manifest (blob-store.ts
+ * `seedOnce`). The SDK reads the variable at call time from `process.env`, so it is set once
+ * here; a 429 was never retried by the SDK (it bails with `retryAfter`).
+ */
+function disableSdkRetries(): void {
+  if (process.env[SDK_RETRIES_VARIABLE] === undefined) process.env[SDK_RETRIES_VARIABLE] = '0';
+}
+
 export function vercelBlobClient(
   env: Env = process.env,
   options: VercelClientOptions = {},
 ): BlobClient {
+  disableSdkRetries();
   const variable = options.tokenVariable ?? BLOB_TOKEN_VARIABLE;
   const token = env[variable];
   if (token === undefined || token === '') {
@@ -121,18 +141,28 @@ export function vercelBlobClient(
   const access: Access =
     options.access ?? (env[BLOB_ACCESS_VARIABLE] === 'private' ? 'private' : 'public');
   return {
-    async head(pathname) {
+    // every call carries the caller's signal as the SDK's `abortSignal` (blob-store.ts
+    // BlobCallOptions): the bounded client fires it at the deadline, which ends the SDK's own
+    // retry chain (async-retry, VERCEL_BLOB_RETRIES attempts with growing waits) there instead
+    // of letting it run on for minutes after the store gave up on the call (the focus round,
+    // cycle 3; boundedBlobClient says what that did on the enforce preview)
+    async head(pathname, options) {
       try {
-        return entryOf(await head(pathname, { token }));
+        return entryOf(await head(pathname, { token, abortSignal: options?.signal }));
       } catch (error) {
         if (isNotFound(error)) return null;
         throw error;
       }
     },
-    async get(pathname) {
+    async get(pathname, options) {
       let result;
       try {
-        result = await get(pathname, { access, token, useCache: false });
+        result = await get(pathname, {
+          access,
+          token,
+          useCache: false,
+          abortSignal: options?.signal,
+        });
       } catch (error) {
         if (isNotFound(error)) return null;
         throw error;
@@ -140,7 +170,7 @@ export function vercelBlobClient(
       if (result === null) return null;
       return { entry: entryOf(result.blob), bytes: await bytesOf(result.stream) };
     },
-    async list(prefix) {
+    async list(prefix, options) {
       const out: BlobEntry[] = [];
       let cursor: string | undefined;
       do {
@@ -148,6 +178,7 @@ export function vercelBlobClient(
           token,
           prefix,
           limit: 1000,
+          abortSignal: options?.signal,
           ...(cursor === undefined ? {} : { cursor }),
         });
         for (const blob of page.blobs) out.push(entryOf(blob));
@@ -155,7 +186,7 @@ export function vercelBlobClient(
       } while (cursor !== undefined);
       return out;
     },
-    async folders(prefix) {
+    async folders(prefix, options) {
       const out = new Set<string>();
       let cursor: string | undefined;
       do {
@@ -164,6 +195,7 @@ export function vercelBlobClient(
           prefix,
           limit: 1000,
           mode: 'folded',
+          abortSignal: options?.signal,
           ...(cursor === undefined ? {} : { cursor }),
         });
         for (const folder of page.folders) out.add(folder);
@@ -182,6 +214,7 @@ export function vercelBlobClient(
             token,
             addRandomSuffix: false,
             allowOverwrite: options.overwrite,
+            abortSignal: options.signal,
             ...(options.contentType === undefined ? {} : { contentType: options.contentType }),
             ...(options.ifMatch === undefined ? {} : { ifMatch: options.ifMatch }),
             // the object's own max age (gslides-parity SPEC-4 0.31; build-4/b4.md R1): the
@@ -198,9 +231,9 @@ export function vercelBlobClient(
         throw error;
       }
     },
-    async del(pathnames) {
+    async del(pathnames, options) {
       if (pathnames.length === 0) return;
-      await del([...pathnames], { token });
+      await del([...pathnames], { token, abortSignal: options?.signal });
     },
   };
 }

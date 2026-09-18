@@ -46,8 +46,10 @@ import { TOOLBAR_TAIL_END } from '../toolbar-tails.ts';
 // SPEC-3 10.1 and 15. The shell-level form of this test (rendering /new and /edit) lands with the
 // rest of B3; this one greps the data every surface is generated from.
 
+/* the Tools > Advanced submenu and its rows; the focus round's switch `tools.advancedTools` is a
+   default view row and is not exempt (docs/FOCUS.md 3.1) */
 const EXEMPT = (id: string): boolean =>
-  id.startsWith('tools.advanced') || id === 'extensions.agentAccess';
+  id === 'tools.advanced' || id.startsWith('tools.advanced.') || id === 'extensions.agentAccess';
 
 function clean(text: string | undefined, where: string): void {
   if (text === undefined) return;

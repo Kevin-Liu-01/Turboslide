@@ -36,6 +36,28 @@ import './comments.css';
  * and Esc leave and return focus to the marker. A new thread renders the same card with the
  * comment box alone. No hue anywhere; every name is a text node.
  */
+/**
+ * The one refusal a placed comment can meet on the server (server/comments.ts `placeAnchor`, the
+ * CLI's records/comments.ts): the anchor names a block the current document does not hold. The
+ * text is the server's sentence and nothing else is matched on it.
+ */
+export function isUnplacedAnchorRefusal(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('names nothing on the current document');
+}
+
+/**
+ * The slide anchor a block, text or cell anchor falls back to when the server refuses it as
+ * naming nothing (docs/FOCUS.md section 5 rank 19: the title placeholder of a title slide is a
+ * slide field, not a block, and the comment lands on the slide). A slide or deck anchor has no
+ * fallback and returns null.
+ */
+export function slideFallbackOf(anchor: CommentAnchorView): CommentAnchorView | null {
+  if (anchor.kind === 'slide' || anchor.kind === 'deck' || anchor.slideId === undefined)
+    return null;
+  return { kind: 'slide', slideId: anchor.slideId };
+}
+
 export type CommentCardProps = {
   /** the thread; null while a new comment is being written at `anchor` */
   thread: CommentThreadView | null;
@@ -385,11 +407,35 @@ export function CommentCard({
   const run = (promise: Promise<unknown> | undefined) =>
     promise?.catch((error: unknown) => say(error instanceof Error ? error.message : String(error)));
 
+  /* a new comment on an anchor the server refuses as naming nothing is placed on the slide
+     instead (docs/FOCUS.md rank 19; the call site's anchorAtSelection does the same when it knows
+     the slide, and this is the belt for a call site that does not) */
+  const addPlaced = (
+    body: CommentBodyInput,
+    assignee: string | null,
+  ): Promise<unknown> | undefined =>
+    comments.add?.({ anchor, body, assignee }).catch((error: unknown) => {
+      const fallback = slideFallbackOf(anchor);
+      if (fallback === null || !isUnplacedAnchorRefusal(error) || comments.add === undefined)
+        throw error;
+      return comments.add({ anchor: fallback, body, assignee });
+    });
+
+  /* the tick's settled state (docs/FOCUS.md rank 36, `comments.resolve`): once the resolve or
+     the reopen has been accepted by the server the card reads it at once, and the thread view
+     confirms it when the sidecar's refresh lands; a thread whose view moves resets it */
+  const [settled, setSettled] = useState<'resolved' | 'open' | null>(null);
+  useEffect(() => {
+    setSettled(null);
+  }, [thread?.id, thread?.resolved]);
+  const resolved = settled === null ? thread?.resolved === true : settled === 'resolved';
+
   const resolve = () => {
     if (!thread) return;
-    if (thread.resolved === true) run(comments.reopen?.(thread.id));
-    else if (assigned && comments.done) run(comments.done(thread.id));
-    else run(comments.resolve?.(thread.id));
+    if (resolved) run(comments.reopen?.(thread.id)?.then(() => setSettled('open')));
+    else if (assigned && comments.done)
+      run(comments.done(thread.id).then(() => setSettled('resolved')));
+    else run(comments.resolve?.(thread.id)?.then(() => setSettled('resolved')));
   };
 
   /* the chords inside a card (section 14): j, k, r, e, u and Esc, outside the editor's map */
@@ -435,28 +481,22 @@ export function CommentCard({
 
   let head: ReactNode = null;
   if (thread) {
-    const tickLabel =
-      thread.resolved === true ? COMMENTS.reopen : assigned ? COMMENTS.done : COMMENTS.resolve;
+    const tickLabel = resolved ? COMMENTS.reopen : assigned ? COMMENTS.done : COMMENTS.resolve;
     head = canComment ? (
       <button
         type="button"
-        className={cn(
-          'pt-ib pt-icon ts-comment-resolve',
-          thread.resolved === true && 'is-resolved',
-        )}
+        className={cn('pt-ib pt-icon ts-comment-resolve', resolved && 'is-resolved')}
         data-control={`${control}.resolve`}
         aria-label={tickLabel}
+        data-resolved={resolved ? '' : undefined}
         onClick={resolve}
         {...tipProps({
           name: tickLabel,
-          doc:
-            thread.resolved === true
-              ? 'Opens the thread again'
-              : 'Closes the thread; it stays in the panel',
+          doc: resolved ? 'Opens the thread again' : 'Closes the thread; it stays in the panel',
           key: 'E',
         })}
       >
-        <Icon name={thread.resolved === true ? 'arrow-uturn-left' : 'check'} />
+        <Icon name={resolved ? 'arrow-uturn-left' : 'check'} />
       </button>
     ) : null;
   }
@@ -467,7 +507,7 @@ export function CommentCard({
       className={cn(
         'ts-comment-card ts-chrome',
         thread === null && 'is-new',
-        thread?.resolved === true && 'is-resolved',
+        thread !== null && resolved && 'is-resolved',
       )}
       role="dialog"
       aria-label={
@@ -552,7 +592,7 @@ export function CommentCard({
           control={`${control}.new`}
           onCancel={onClose}
           onSubmit={(body, assignee) => {
-            run(comments.add?.({ anchor, body, assignee }));
+            run(addPlaced(body, assignee));
             onClose();
           }}
         />
@@ -567,9 +607,15 @@ export function CommentCard({
             assignable
             autoFocus
             control={`${control}.replyBox`}
-            onCancel={() => setReplying(false)}
+            onCancel={() => {
+              setReplying(false);
+              /* the reply box leaves: the focus returns to the card, so the chords of section 14
+                 (`u` leaves, `e` resolves, `j` and `k` step) keep working after an Escape */
+              root.current?.focus();
+            }}
             onSubmit={(body, assignee) => {
               setReplying(false);
+              root.current?.focus();
               run(comments.reply?.(thread.id, body));
               if (assignee !== null) run(comments.assign?.(thread.id, assignee));
             }}

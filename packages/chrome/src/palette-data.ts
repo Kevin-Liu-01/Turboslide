@@ -28,6 +28,7 @@ import { CONTENT_BOX } from '@turboslide/schema/render';
 import { authorName } from './dispatch';
 import type { IconName } from './icons';
 import { BLOCK_ICONS, KIND_ICONS } from './inspector/sections';
+import { isParkedRow } from './menus/model.ts';
 import type { ShellMode } from './shell-data';
 import { LAYOUTS, pickAsset } from '@turboslide/schema/layouts';
 
@@ -102,6 +103,20 @@ export type PaletteEntry = {
   /** the shape kind of a Shape primitive entry */
   variant?: ShapeKind;
   run: PaletteRun;
+  /**
+   * The menu row an Insert entry corresponds to (docs/FOCUS.md 3.1): `insert.textBox` for Text,
+   * `insert.shape.shapes.rectangle` for the rectangle, `insert.line.arrow` for the arrow, and so
+   * on. Absent for a block no menu row inserts (a grammar block, the box primitive).
+   */
+  row?: string;
+  /**
+   * A parked entry (docs/FOCUS.md 3.1, the palette's Insert group): listed only while Tools >
+   * Advanced tools is on (`PaletteContext.advancedTools`); `buildPaletteEntries` drops it
+   * otherwise. The action it runs stays registered. An Insert entry is parked when the row it
+   * names is parked (`isParkedRow`) or when it names none, so a chart, a table, a diagram, an icon,
+   * a material and the grammar blocks leave the default view with their rows.
+   */
+  advanced?: true;
 };
 
 export type PaletteView = {
@@ -134,6 +149,8 @@ export type PaletteContext = {
   toggles: PaletteToggles;
   /** Apple platforms read Cmd, the others Ctrl */
   apple?: boolean;
+  /** Tools > Advanced tools is on (docs/FOCUS.md 3.1): the entries flagged `advanced` are listed; off when absent */
+  advancedTools?: boolean;
 };
 
 /** The action ids the palette builds inputs for from the view; the rest name what they need. */
@@ -170,6 +187,33 @@ const SHAPE_DOC: Readonly<Record<ShapeKind, string>> = {
   line: 'A line across its box, horizontal when the box is wider than tall.',
   arrow: 'A line with a filled 8 px head at its end.',
 };
+
+/** The menu row each shape variant corresponds to (docs/FOCUS.md 2.6, 3.1). */
+const SHAPE_ROW: Readonly<Record<ShapeKind, string>> = {
+  rectangle: 'insert.shape.shapes.rectangle',
+  rounded: 'insert.shape.shapes.rounded',
+  ellipse: 'insert.shape.shapes.ellipse',
+  line: 'insert.line.line',
+  arrow: 'insert.line.arrow',
+};
+
+/** The menu row a block type's Insert entry corresponds to; absent for a block no row inserts. */
+const BLOCK_ROW: Readonly<Partial<Record<BlockType, string>>> = {
+  text: 'insert.textBox',
+  rule: 'insert.line.rule',
+  icon: 'insert.icon',
+  shot: 'insert.image.upload',
+  material: 'insert.material',
+  table: 'insert.table',
+  chart: 'insert.chart',
+  dia: 'insert.diagram',
+};
+
+/** The `row` and `advanced` fields of an Insert entry from the row it corresponds to (docs/FOCUS.md 3.1). */
+function rowFields(row: string | undefined): Pick<PaletteEntry, 'row' | 'advanced'> {
+  if (row === undefined) return { advanced: true };
+  return isParkedRow(row) ? { row, advanced: true } : { row };
+}
 
 /**
  * The shape variants the palette and the Insert menu strip offer: the five legacy kinds with a
@@ -386,6 +430,8 @@ function templateEntries(ctx: PaletteContext): PaletteEntry[] {
       icon: KIND_ICON[entry.kind],
       terms: `slide layout ${entry.id} ${entry.kind} ${entry.layout ?? ''} ${entry.google ? 'google' : 'gt'}`,
       insert: 'slide',
+      /* the New slide rows: insert.newSlide with the layout of slide.applyLayout (docs/FOCUS.md 2.2) */
+      ...rowFields('insert.newSlide'),
       run: {
         kind: 'dispatch',
         action: 'slide.new',
@@ -449,6 +495,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
           terms: `shape ${variant} primitive block`,
           insert: 'primitive',
           variant,
+          ...rowFields(SHAPE_ROW[variant]),
           run: dispatchInsert(madeBlock(slide, 'shape', ctx.blockId, { shape: variant })),
         });
       }
@@ -464,6 +511,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
         icon: BLOCK_ICONS.icon,
         terms: 'icon glyph sprite primitive block',
         insert: 'primitive',
+        ...rowFields(BLOCK_ROW.icon),
         run: {
           kind: 'icon',
           action: 'block.insert',
@@ -485,6 +533,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
         icon: BLOCK_ICONS.shot,
         terms: 'image picture shot capture figure primitive block',
         insert: 'primitive',
+        ...rowFields(BLOCK_ROW.shot),
         run:
           asset === undefined
             ? {
@@ -505,6 +554,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
       icon: BLOCK_ICONS[type],
       terms: `${type} primitive block ${entry.group}`,
       insert: 'primitive',
+      ...rowFields(BLOCK_ROW[type]),
       run: dispatchInsert(madeBlock(slide, type, ctx.blockId)),
     });
   }
@@ -522,6 +572,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
       icon: BLOCK_ICONS[entry.type],
       terms: `block ${entry.type} ${entry.group}`,
       insert: 'block',
+      ...rowFields(BLOCK_ROW[entry.type]),
       run: dispatchInsert(madeBlock(slide, entry.type, ctx.blockId)),
     });
   }
@@ -784,15 +835,26 @@ function versionEntries(ctx: PaletteContext): PaletteEntry[] {
     }));
 }
 
-/** Every entry of the five groups for a view, in group order. */
+/** The entries a view lists (docs/FOCUS.md 3.1): a parked entry only while Tools > Advanced tools is on. */
+export function presentPaletteEntries(
+  entries: ReadonlyArray<PaletteEntry>,
+  ctx: Pick<PaletteContext, 'advancedTools'>,
+): PaletteEntry[] {
+  return entries.filter((entry) => entry.advanced !== true || ctx.advancedTools === true);
+}
+
+/** Every entry of the five groups for a view, in group order; the parked entries only with the switch on. */
 export function buildPaletteEntries(ctx: PaletteContext): PaletteEntry[] {
-  return [
-    ...slideEntries(ctx),
-    ...insertEntries(ctx),
-    ...actionEntries(ctx),
-    ...viewEntries(ctx),
-    ...versionEntries(ctx),
-  ];
+  return presentPaletteEntries(
+    [
+      ...slideEntries(ctx),
+      ...insertEntries(ctx),
+      ...actionEntries(ctx),
+      ...viewEntries(ctx),
+      ...versionEntries(ctx),
+    ],
+    ctx,
+  );
 }
 
 export type PaletteQuery = {

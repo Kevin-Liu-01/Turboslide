@@ -51,6 +51,44 @@ export function rememberClientId(
   return kept;
 }
 
+/** The storage key of the tab's token. */
+export const TAB_TOKEN_KEY = 'turboslide:tab';
+
+/** The token's shape: 32 hex, as the stream route reads it (server/room.ts TAB_TOKEN_PATTERN). */
+const TAB_TOKEN_PATTERN = /^[0-9a-f]{32}$/;
+
+/**
+ * The tab's token (the focus round, cycle 3 stream fix round; VERIFICATION C3S-F2): 32 hex the
+ * tab mints once and keeps in its sessionStorage, so it survives a reload and dies with the tab.
+ * Every stream open carries it as `tab`, and the stream route releases the tab's earlier stream
+ * slots on the instance the open lands on, hello or not and whatever deck: a tab that navigated
+ * three times inside five seconds left slots it could never name in `retire` (their opens were
+ * aborted before a hello) and was refused at its own cap for the stream lifetime. Without
+ * storage the token is minted per page, which still names this page's own earlier streams.
+ */
+export function tabToken(
+  storage: IdStorage | null | undefined,
+  random: (bytes: Uint8Array<ArrayBuffer>) => void = (bytes) => {
+    globalThis.crypto.getRandomValues(bytes);
+  },
+): string {
+  try {
+    const stored = storage?.getItem(TAB_TOKEN_KEY);
+    if (typeof stored === 'string' && TAB_TOKEN_PATTERN.test(stored)) return stored;
+  } catch {
+    // storage refused: a fresh token below
+  }
+  const bytes = new Uint8Array(new ArrayBuffer(16));
+  random(bytes);
+  const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  try {
+    storage?.setItem(TAB_TOKEN_KEY, token);
+  } catch {
+    // storage refused (quota, a sandboxed document): the token lives with this page
+  }
+  return token;
+}
+
 /**
  * The roster split into this tab and the others (SPEC-3 4.2 to 4.8 draw `others` alone): a row
  * is this tab's when its client id is the current one or any earlier id of this tab, so the

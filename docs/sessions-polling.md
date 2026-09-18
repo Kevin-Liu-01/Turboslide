@@ -282,7 +282,28 @@ The exact change, not made here:
 
 - One SSE stream per deck per tab on every tier: `GET /api/decks/:id/stream`
   (`apps/studio/src/routes/api/decks.$deckId.stream.ts`), opened by the editor's room client
-  (`controller.tsx` lines 297 to 358, `EventSource` at line 319, the client created at line 1350).
+  through `controller.tsx` `sseTransport`, a streamed fetch with `accept: text/event-stream`
+  since the cycle 3 stream fix round (it was an `EventSource` before); the room client owns the
+  reopen (`packages/realtime/client/room-client.ts` `reopenStream`: the server's `retry-after`
+  or `retry:` value, else its own backoff) and the browser reconnects nothing. Since the stream
+  fix round's fix round the slot a stream holds is released three ways beside the runtime's
+  close: the tab's token (`?tab=` on every open) releases the tab's earlier slots on the instance
+  the open lands on, a `leave` of the stream's own client id closes it on whichever instance the
+  beacon or a later open's `retire` landed, and a reader whose presence has not reached the
+  instance for `STREAM_PRESENCE_UNSEEN_MS` (75 s) after `STREAM_PRESENCE_GRACE_MS` (45 s) is
+  closed at the heartbeat, never while the store refuses its poll; a refused open answers the
+  client id it minted in its body, every hello names the seq the last checkpoint covered
+  (`covered`), and the room client reopens on a gap of `GAP_REOPEN_MS` (8 s) without an event
+  (`docs/hosting.md` "Reads"). Since the stream fix round two the ops answer to a POST carrying
+  an edit also carries `between`, the entries between the tab's `base.seq` and its first admitted
+  one (at most 256 entries and 256 kB, read from the mirror's version log with no store call), so
+  a tab whose stream sits on another instance settles its answered ops from the answer alone; the
+  route takes its channel subscription before it writes hello and reads `covered` after it, so a
+  checkpoint that fires while hello is built is in `covered` or on the stream, never between; the
+  pulse poll ends with one line when the store says the deck is gone; and the editor's queued
+  export keeps its record at `exports/.jobs/<jobId>.json` so a poll on any instance answers from
+  it (`docs/hosting.md` "Layout" and "Reads"). The line numbers in the rest of this bullet are
+  from the tree of 2026-09-17.
   The route authorizes the reader (line 61), takes a stream counter slot (line 64), binds a server
   issued client id to the request's identity (line 72, `bindClient` at `room.ts` lines 1450 to
   1454), writes `hello` and the replay, then forwards every channel event through

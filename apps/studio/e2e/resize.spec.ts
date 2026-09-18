@@ -1,8 +1,30 @@
 import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { expect, test as base } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
+
+/**
+ * One browser context for the serial chain (the focus round, b6's FR-1; VERIFICATION.md C2-F23,
+ * b3 R23). Playwright's `page` fixture gives every test a fresh context with no cookie of the
+ * one before, so on a tmp store server the second test's first request was admitted as the
+ * localhost agent and its own cookie's requests were then denied `not_found` (the copied deck
+ * belongs to the principal that copied it) and floored to viewer at the stream's recheck: the
+ * tab redrew in Viewing mode, `.ts-stagewrap.ts-editor .ts-stage` left the page and the 50
+ * percent test hung in `stageScale` to its 600 s timeout, three passes running. Every test of
+ * the file now shares the context that copied the deck; the bodies still take `{ page }`.
+ */
+let sharedContext: BrowserContext;
+let sharedPage: Page;
+const test = base.extend<{ page: Page }>({
+  page: async ({}, use) => {
+    await use(sharedPage);
+  },
+});
+test.beforeAll(async ({ browser }) => {
+  sharedContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  sharedPage = await sharedContext.newPage();
+});
 
 // The resize handles (gslides-parity SPEC-5-amendments A4; build-4/hotfix-3.md section 2). On a
 // scratch copy of the GT deck (deck.copy through the window API) a blank canvas slide gets a
@@ -580,9 +602,41 @@ async function resetObjects(page: Page): Promise<void> {
 
 test.describe.configure({ mode: 'serial' });
 
-test.afterAll(() => {
-  rmSync(join(ROOT, 'decks', COPY), { recursive: true, force: true });
-  rmSync(join(ROOT, '.turboslide', 'worker', 'cache', COPY), { recursive: true, force: true });
+/**
+ * The copy is removed through the product first (`deck.trash`, then `deck.remove` with the
+ * tab's revision), so a tmp store server keeps nothing of it either (the file's old `afterAll`
+ * removed the repository's `decks/<copy>` alone and left 25 copies in `$TMPDIR/turboslide/decks`
+ * across the round, b6.md cycle 2 fix round); the repository path and the worker cache are then
+ * removed as before, and the shared context is closed.
+ */
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  try {
+    if (canvasReady) {
+      await sharedPage.goto(`/edit/${COPY}?author=agent:e2e-resize`);
+      await sharedPage.waitForFunction(() => Boolean(window.turboslide?.studio), null, {
+        timeout: 60_000,
+      });
+      const info = await invoke<{ revision: number }>(sharedPage, 'deck.info');
+      await invoke(sharedPage, 'deck.trash', { id: COPY, baseRevision: info.revision });
+      const again = await invoke<{ revision: number }>(sharedPage, 'deck.info').catch(() => info);
+      await invoke(sharedPage, 'deck.remove', {
+        id: COPY,
+        baseRevision: again.revision,
+        confirm: true,
+      });
+      await expect
+        .poll(
+          async () => (await sharedPage.request.get(`/edit/${COPY}`, { maxRedirects: 0 })).status(),
+          { timeout: 20_000, intervals: [2000] },
+        )
+        .toBe(404);
+    }
+  } finally {
+    rmSync(join(ROOT, 'decks', COPY), { recursive: true, force: true });
+    rmSync(join(ROOT, '.turboslide', 'worker', 'cache', COPY), { recursive: true, force: true });
+    await sharedContext.close().catch(() => undefined);
+  }
 });
 
 test('the canvas with a rectangle, a picture, a text box and a group is set up', async ({

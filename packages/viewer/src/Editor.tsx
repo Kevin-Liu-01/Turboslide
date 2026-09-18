@@ -61,7 +61,7 @@ import type { Text as Markup } from '@turboslide/schema/text';
 import { canonicalText, parseText, plainLength } from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
-import { CONTENT_ORIGIN } from '@turboslide/theme/tokens';
+import { CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
 import { measureForCanvas, measureForFit, virtualObjectIds } from './canvas-measure';
 import type { FitMeasure, VirtualObjectId } from './canvas-measure';
@@ -115,6 +115,7 @@ import {
   centredBox,
   drawnBox,
   drawnLineOrientation,
+  droppedPictureBox,
   EMPTY_BOXES,
   freeGesture,
   gestureMutation,
@@ -149,21 +150,30 @@ import { GESTURE_IDLE, gestureLife } from './gesture-life';
 import type { GestureEnd, GestureLife, GestureLifeEvent, GestureReadout } from './gesture-life';
 import type { Guide } from './Guides';
 import {
+  announceTextChanged,
+  clickEntry,
+  entryCaret,
+  forgetAbsorbed,
   InlineText,
   listAppendMutation,
   listRemoveMutation,
   nextCellPointer,
   readRunText,
+  runKey,
+  sessionContextTarget,
+  sessionPressVerdict,
   tableRowAppendMutation,
   textBurstMutation,
+  textFromNode,
 } from './InlineText';
+import { growMutation, liveContentHeight, RECONCILE_RESEND_MS, sessionReconcile } from './text-fit';
 import type {
   CaretInfo,
   CaretPlacement,
   InlineTextEndReason,
   InlineTextHandle,
 } from './InlineText';
-import { editorKeyAction, isBareCharacterKey } from './keys';
+import { editorKeyAction, isBareCharacterKey, typingEntry } from './keys';
 import { toggleMark } from './marks';
 import type { ToggleMark } from './marks';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
@@ -186,12 +196,14 @@ import {
   isTextBlockType,
   listItemPointer,
   objectContextTarget,
+  objectPressPlan,
   resolveObject,
   resolveRun,
   runElement,
   selectedBlockId,
   selectedIds,
   selectionOf,
+  stageOwnsClipboard,
   toggleSelected,
 } from './Selection';
 import type { BlockFamily, Selection } from './Selection';
@@ -343,6 +355,8 @@ export type EditorOverlayView = {
 export type EditorContextTarget =
   | 'emptyCanvas'
   | 'textBlock'
+  /** a right click on selected text inside an editing session (SPEC 4.3 "Text menu") */
+  | 'textSelection'
   | 'image'
   | 'tableCell'
   | 'shape'
@@ -446,6 +460,8 @@ export type EditorHandle = {
   toCanvas: () => Promise<void>;
   zoomTo: (zoom: SheetZoom, center?: Point) => void;
   zoomStep: (direction: 1 | -1) => void;
+  /** the live scale of the sheet (the fit scale while the zoom is Fit), read through the ref the step uses */
+  scale: () => number;
   rotate: (by: number) => void;
   flip: (axis: 'h' | 'v') => void;
   group: () => void;
@@ -624,7 +640,7 @@ const DRAG_START_PX = 4;
 /** How long the stage waits for a server write (an asset) to reach the document before it gives up. */
 const ASSET_WAIT_MS = 20_000;
 /** The default box of a dropped picture (palette-data.ts DEFAULT_SIZE shot). */
-const DROP_PICTURE_SIZE: [number, number] = [480, 272];
+const DROP_PICTURE_WIDTH = 480;
 /** Pictures up to 25 MB (gslides-parity SPEC 11.3; the sentence of menus/strings.ts ERRORS.pictureSize). */
 const PICTURE_SIZE_NOTICE = 'Pictures up to 25 MB';
 /** The indent step of Cmd+] and Cmd+[ in px (SPEC-2 2.2.11). */
@@ -925,8 +941,16 @@ export function Editor({
   const frozenHtml = useRef<string | null>(null);
   /* the markup of the run as the document last held it, what the next burst diffs against */
   const committedText = useRef<Markup>('');
+  /* the markup the session's own last write left in the document; a document that reads
+     otherwise moved by a write from outside the session (text-fit.ts sessionReconcile) */
+  const expectedDocText = useRef<Markup | null>(null);
+  /* the pending re-send of a session whose document fell behind it */
+  const reconcileTimer = useRef(0);
   const pendingEdit = useRef<PendingEdit | null>(null);
   const pendingSelect = useRef<string[] | null>(null);
+  /* the printable key that opened the session on a selected text object (AMENDMENTS.md A1 rule
+     4): typed into the session once its handle is up, over the whole text the entry selected */
+  const pendingInsert = useRef<string | null>(null);
   /* crop mode to enter once the slide re-rendered with the picture object (a double click on a kind's photograph converts first) */
   const pendingCrop = useRef<string | null>(null);
   const dispatchRef = useRef(dispatch);
@@ -1075,7 +1099,14 @@ export function Editor({
       });
   };
 
-  /** A named action with the current revision; the promise is the server's confirmation. */
+  /**
+   * A named action with the current revision; the promise is the server's confirmation. The
+   * base stamped here is the page's count; for `asset.add` and the other asset actions the
+   * controller waits for its outbox to drain and restamps the request with the acknowledged
+   * revision (`serverSide` in apps/studio/src/editor/controller.tsx, docs/FOCUS.md rank 5), so a
+   * picture dropped while a write is pending is never refused as stale. Do not restore the
+   * page's count there.
+   */
   const call = (id: ActionId, input: Record<string, unknown>): Promise<unknown> => {
     const base = revisionRef.current;
     const result = Promise.resolve(dispatchRef.current(id, { ...input, baseRevision: base }));
@@ -1413,10 +1444,35 @@ export function Editor({
       block !== undefined
         ? isMultilinePath(block, `/${run.pointer}`)
         : isMultilineType(blockTypeOf(slideNow, run.blockId) ?? '', `/${run.pointer}`);
+    /* the base of a new session is the document's text and nothing absorbed by an earlier session
+       on this run: a marker the last session left (a collaborator's change absorbed after its
+       last burst, so no burst consumed it) made the first burst here diff against a text two
+       remote writes old and send the whole run back at stale offsets (VERIFICATION.md C3-F8) */
+    forgetAbsorbed(runKey(slideNow.id, run.blockId, run.pointer));
     committedText.current = readRunText(slideNow, run.blockId, run.pointer) ?? '';
+    expectedDocText.current = committedText.current;
     frozenHtml.current = htmlRef.current;
     setEditing({ ...run, caret, multiline, ...(options.link ? { link: true } : {}) });
     select({ kind: 'run', blockId: run.blockId, pointer: run.pointer });
+  };
+
+  /**
+   * The autofit grow of a text box after a burst (docs/FOCUS.md rank 11; SPEC-2 6.2 Autofit): the
+   * content height read from the live stage once the burst's text is in the editable, and the
+   * `pos.h` write when the text needs more than the box, in the same call as the splice.
+   */
+  const growAfterBurst = (current: Editing, after: Slide | undefined): Mutation | null => {
+    const el = body.current;
+    if (!after || !el) return null;
+    const block = blockById(after, current.blockId);
+    if (!block || block.type !== 'text' || !('autofit' in block) || block.autofit !== 'grow')
+      return null;
+    const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
+    if (!blockEl) return null;
+    const wrapper = blockEl.parentElement?.closest<HTMLElement>(`.free[data-free="${block.id}"]`);
+    const stage = el.parentElement;
+    const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
+    return growMutation(after.id, block, liveContentHeight(blockEl, wrapper ?? null, k, window));
   };
 
   /** The write of one burst, or of the final text: the changed span against what the document holds. */
@@ -1432,10 +1488,61 @@ export function Editor({
     );
     if (mutation) {
       committedText.current = text;
-      commit([mutation]);
+      const after = slideAfter([mutation]);
+      const grow = growAfterBurst(current, after);
+      commit(grow ? [mutation, grow] : [mutation]);
+      expectedDocText.current =
+        (after && readRunText(after, current.blockId, current.pointer)) ?? committedText.current;
     }
     return mutation;
   };
+
+  /*
+   * A write from outside the session changed the run being edited (text-fit.ts sessionReconcile):
+   * the toolbar's Italic or a swatch on a parked session, a Format menu row, or a burst the server
+   * refused and the room folded back. A mark write is announced to the session, which absorbs the
+   * document's markup with its unflushed keystrokes (InlineText absorbRemote, the collaborator
+   * path); a document behind the session re-bases the session on it and re-sends the editable's
+   * text as one splice from the acknowledged text (docs/FOCUS.md rank 13: "sends the run's whole
+   * text once"). The remote path announces first (the controller), so a collaborator's change
+   * reaches here already absorbed and the re-send carries the local keystrokes alone.
+   */
+  useEffect(() => {
+    const current = editingRef.current;
+    const slideNow = slideRef.current;
+    const expected = expectedDocText.current;
+    if (!current || !slideNow || expected === null) return;
+    const docText = readRunText(slideNow, current.blockId, current.pointer);
+    if (docText === undefined) return;
+    const verdict = sessionReconcile(expected, docText);
+    if (verdict === 'none') return;
+    if (verdict === 'absorb') {
+      expectedDocText.current = docText;
+      announceTextChanged({
+        slideId: slideNow.id,
+        blockId: current.blockId,
+        pointer: current.pointer,
+        text: docText,
+      });
+      return;
+    }
+    /* the re-send waits a moment and reads the document again: a document behind the session for
+       one render (a publish that lands before the room folds the pending writes back on it)
+       catches up on its own and needs nothing; a refusal stays behind and is re-sent once */
+    window.clearTimeout(reconcileTimer.current);
+    reconcileTimer.current = window.setTimeout(() => {
+      reconcileTimer.current = 0;
+      const live = editingRef.current;
+      const slideLive = slideRef.current;
+      if (!live || live !== current || !slideLive) return;
+      const now = readRunText(slideLive, live.blockId, live.pointer);
+      if (now === undefined || now !== docText || now === expectedDocText.current) return;
+      expectedDocText.current = now;
+      committedText.current = now;
+      writeText(live, textFromNode(live.element, { multiline: live.multiline }));
+    }, RECONCILE_RESEND_MS);
+    // the session's refs are read here, not the render's values
+  }, [doc]);
 
   const onBurst = (text: Markup) => {
     const current = editingRef.current;
@@ -1445,11 +1552,24 @@ export function Editor({
   const endEdit = (text: Markup, reason: InlineTextEndReason) => {
     const current = editingRef.current;
     if (!current) return;
+    window.clearTimeout(reconcileTimer.current);
+    reconcileTimer.current = 0;
     setEditing(null);
+    /* a printable key that opened a session never leaves its character behind for the next one:
+       the handle callback consumes it on mount, and a session ending clears any unconsumed value */
+    pendingInsert.current = null;
+    /* the ref follows at once, not at the re-render: a parked session ends in the capture phase
+       of the press that lands outside it (InlineText onDocMouseDown), and the pointer handlers
+       of that same press must read the stage as free, or Insert > Text box while a run was being
+       edited arms the tool and the click places nothing */
+    editingRef.current = null;
     frozenHtml.current = null;
     caretRef.current = null;
     onCaretRef.current?.(null);
     const written = writeText(current, text);
+    /* the final write consumed any marker the session held; one it did not reach (no slide to
+       write against) dies with the session rather than waiting for the next one on this run */
+    forgetAbsorbed(runKey(slideIdRef.current, current.blockId, current.pointer));
     const slideNow = slideAfter(written ? [written] : []);
     const backToBlock = () => select({ kind: 'block', blockId: current.blockId });
     if (!slideNow) {
@@ -2065,7 +2185,7 @@ export function Editor({
     );
   };
 
-  /** Enter, Esc or a click outside: one write of the trim and the frame, converting the slide first (SPEC-2 1.6 "Crop image"). */
+  /** Enter or a click outside: one write of the trim and the frame, converting the slide first (SPEC-2 1.6 "Crop image"); Esc cancels (`commitCrop` false) and discards the frame and the trim. */
   const exitCrop = (commitCrop = true) => {
     const state = cropRef.current;
     if (!state) return;
@@ -2638,10 +2758,11 @@ export function Editor({
       return;
     }
     const [ox, oy] = CONTENT_ORIGIN;
-    const [w, h] = DROP_PICTURE_SIZE;
     const at = where.point ?? { x: ox, y: oy };
+    /* the box at the picture's own aspect: the picture fills its box since the focus round
+       (docs/FOCUS.md rank 18), so a fixed box would squash it at the insert */
     insertObject({ id: 'shot', type: 'shot', asset: asset.id } as Block, {
-      box: [Math.round(at.x / 8) * 8, Math.round(at.y / 8) * 8, w, h],
+      box: droppedPictureBox(at, DROP_PICTURE_WIDTH, asset.size),
     });
   };
 
@@ -2818,8 +2939,12 @@ export function Editor({
     onZoomRef.current?.(next === 'fit' ? 'fit' : clampZoom(next), center);
   };
 
+  /* the handle below is built once, so the step reads the live scale through a ref: the first
+     render's 0 made every step land on 25 percent (docs/FOCUS.md rank 23) */
+  const kRef = useRef(k);
+  kRef.current = k;
   const zoomStepBy = (direction: 1 | -1) => {
-    zoomTo(stepZoom(k, direction));
+    zoomTo(stepZoom(kRef.current, direction));
   };
 
   const addGuide = (axis: 'x' | 'y', at?: number) => {
@@ -2980,6 +3105,7 @@ export function Editor({
       toCanvas,
       zoomTo,
       zoomStep: zoomStepBy,
+      scale: () => kRef.current,
       rotate: rotateSelection,
       flip: flipSelection,
       group: groupSelection,
@@ -3082,10 +3208,11 @@ export function Editor({
         e.preventDefault();
         e.stopImmediatePropagation();
       };
-      /* crop mode owns Enter and Esc (SPEC-2 6.1 row 19) */
+      /* crop mode owns Enter and Esc (SPEC-2 6.1 row 19): Enter writes the trim, Esc leaves
+         without a write (docs/FOCUS.md rank 33) */
       if (cropRef.current) {
         if (e.key === 'Enter' || e.key === 'Escape') {
-          exitCrop(true);
+          exitCrop(e.key === 'Enter');
           stop();
           return;
         }
@@ -3152,8 +3279,26 @@ export function Editor({
         stop();
         return;
       }
+      /* Delete and Backspace with nothing selected do nothing on the stage and never reach the
+         document's key table, where `edit.delete` would remove the current slide with no prompt
+         (docs/FOCUS.md rank 4; audit-arrange row 48). A slide leaves through the filmstrip's own
+         Delete, the Slide menu or Edit > Delete with the filmstrip focused. */
+      if (
+        current === null &&
+        (e.key === 'Delete' || e.key === 'Backspace') &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        stop();
+        return;
+      }
       const free = isFreeformSlide(slideNow);
       const ids = selectedIds(current, extraRef.current);
+      /* the switch as the shell publishes it on its root (EditorShell: data-advanced-tools on
+         .pt-viewer, docs/FOCUS.md 3.1); a stage outside the shell reads no switch and keeps every
+         chord */
+      const shell = root.current?.closest('.pt-viewer') ?? null;
       const action = editorKeyAction(e, {
         selected: current !== null,
         freeform: free,
@@ -3162,11 +3307,32 @@ export function Editor({
         apple,
         several: ids.length > 1,
         grouped: sharedGroup(slideNow, ids) !== null,
+        ...(shell === null ? {} : { advanced: shell.hasAttribute('data-advanced-tools') }),
       });
       if (action === null) {
-        /* no bare letter does anything on the stage (SPEC 0.28); with a block selected the letter
-           is consumed, so a stray keystroke never reaches a shell key */
-        if (current !== null && isBareCharacterKey(e)) stop();
+        /* no bare letter is a command on the stage (SPEC 0.28); with one text object selected a
+           printable key is the first keystroke of its session (AMENDMENTS.md A1 rule 4): the
+           session opens with the whole text selected and the character replaces it, as in Google
+           Slides; with a block selected and nothing to type into the letter is consumed, so a
+           stray keystroke never reaches a shell key */
+        if (current !== null && isBareCharacterKey(e)) {
+          const run = ids.length === 1 ? firstRunOf(el, current.blockId) : null;
+          const char = typingEntry(e, {
+            textObject:
+              run !== null && readRunText(slideNow, run.blockId, run.pointer) !== undefined,
+            several: ids.length > 1,
+            editing: false,
+            editable: false,
+            composing: e.isComposing,
+          });
+          if (char !== null && run !== null && gesture.current === null) {
+            /* accumulate, so a second printable key that lands before the session mounts (a slow
+               render) is not lost but appended; startEdit is idempotent on the same run */
+            pendingInsert.current = (pendingInsert.current ?? '') + char;
+            startEdit(run, entryCaret('typing', null));
+          }
+          stop();
+        }
         return;
       }
       switch (action.type) {
@@ -3212,16 +3378,23 @@ export function Editor({
           stop();
           return;
         case 'enter': {
+          /* Enter on a selected text object opens its session with the caret at the end
+             (AMENDMENTS.md A1 rule 4; SPEC 6.9) */
           if (current === null) return;
           const run = firstRunOf(el, current.blockId);
           if (run) {
-            startEdit(run, 'end');
+            startEdit(run, entryCaret('enter', null));
             stop();
           }
           return;
         }
         case 'delete':
-          if (removeSelected()) stop();
+          /* the stage owns Delete and Backspace whenever it owns the key: with nothing selected
+             they do nothing, and never fall through to the document's key table, where
+             `edit.delete` would remove the current slide with no prompt (docs/FOCUS.md rank 4;
+             audit-arrange row 48). A slide leaves through the filmstrip's own Delete or the menu. */
+          removeSelected();
+          stop();
           return;
         case 'order':
           if (current !== null) {
@@ -3312,15 +3485,12 @@ export function Editor({
      blocks (the payload lands on the system clipboard through the event, no permission asked)
      and Cmd V pastes blocks, slides, text or an image file (gslides-parity SPEC 2.2) */
   useEffect(() => {
-    const stageOwns = (e: ClipboardEvent): boolean => {
-      if (editingRef.current || isEditableTarget(e.target)) return false;
-      if (isChromeControlTarget(e.target, root.current)) return false;
-      return (
-        selectionRef.current !== null ||
-        e.target === document.body ||
-        (e.target instanceof Node && (root.current?.contains(e.target) ?? false))
-      );
-    };
+    /* the stage owns the event unless a text session is open, the target is a field or an
+       editable region, or it sits in a dialog, a menu or the Format options panel outside the
+       stage; a toolbar button or a filmstrip card holding the focus no longer swallows a paste
+       (docs/FOCUS.md rank 15; the predicate and its cases are Selection.tsx's) */
+    const stageOwns = (e: ClipboardEvent): boolean =>
+      stageOwnsClipboard(e.target, root.current, editingRef.current !== null);
     const onCopyOrCut = (e: ClipboardEvent) => {
       if (!stageOwns(e)) return;
       const payload = payloadOfSelection();
@@ -3782,12 +3952,30 @@ export function Editor({
     window.addEventListener('pointercancel', cancel);
   };
 
+  /**
+   * Ends the session that holds the focus from a pointer handler, in the pointerdown, before the
+   * browser moves the focus for the press: InlineText's finish runs endEdit synchronously, so
+   * the same handler then reads the stage as free (editingRef null) and runs the press as a
+   * selection press (sessionPressVerdict). The blur is the fallback while the handle is not up.
+   */
+  const endSessionForPress = (current: Editing) => {
+    if (inlineRef.current) inlineRef.current.end('blur');
+    else current.element.blur();
+  };
+
   /** A press on the stage root outside the sheet: the workspace (SPEC-2 0.100) starts a marquee, a click deselects. */
   const onWorkspacePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     if (e.target instanceof Element && e.target.closest('.sheet')) return;
     if (e.target instanceof Element && e.target.closest('.ts-overlay')) return;
-    if (editingRef.current) return;
+    const current = editingRef.current;
+    if (current) {
+      /* a press on the workspace ends the session and the edited block stays selected (endEdit);
+         the focus would land on the stage root, which holds the run, and the park rule of
+         InlineText onBlur would otherwise bring the caret back */
+      endSessionForPress(current);
+      return;
+    }
     if (spaceRef.current) {
       armPan(e.clientX, e.clientY);
       return;
@@ -3811,8 +3999,21 @@ export function Editor({
     const slideNow = slideRef.current;
     if (!el || !slideNow || e.button !== 0) return;
     const current = editingRef.current;
-    /* a click inside the editable run is the caret's; one outside ends the edit through its blur */
-    if (current) return;
+    if (current) {
+      /* a click inside the editable run is the caret's; one on the edited block's padding keeps
+         the session (InlineText onBlur brings the focus back); one on another object ends the
+         session here, before the focus moves, and runs below as that object's press, so a plain
+         click selects it and a Shift or Cmd click adds it (finding F5); one on the empty sheet
+         ends the session and the block stays selected */
+      const verdict = sessionPressVerdict({
+        insideRun: e.target instanceof Node && current.element.contains(e.target),
+        under: resolveObject(e.target, el, slideNow),
+        blockId: current.blockId,
+      });
+      if (verdict === 'caret' || verdict === 'keep') return;
+      endSessionForPress(current);
+      if (editingRef.current !== null || verdict === 'end') return;
+    }
     if (spaceRef.current) {
       e.preventDefault();
       armPan(e.clientX, e.clientY);
@@ -3839,64 +4040,113 @@ export function Editor({
       return;
     }
     const id = resolveObject(e.target, el, slideNow);
-    /* paint format armed: the click paints the block and nothing else (SPEC 3.1 row 6) */
-    if (paintRef.current && id !== null) {
-      e.preventDefault();
-      applyPaint(id);
-      select({ kind: 'block', blockId: id });
-      return;
-    }
-    if (id === null) {
-      setGroupEntered(null);
-      armMarquee(e.clientX, e.clientY);
-      return;
-    }
     const selected = selectedIds(selectionRef.current, extraRef.current);
-    if (e.shiftKey || e.metaKey || e.ctrlKey) {
-      /* Shift and Cmd click toggle membership (SPEC-2 6.1 row 2); a group toggles whole */
-      const members = expandGroups(slideNow, [id]);
-      let next = { selection: selectionRef.current, extra: extraRef.current as string[] };
-      const adding = !selected.includes(id);
-      for (const member of members) {
-        if (adding === !selectedIds(next.selection, next.extra).includes(member))
-          next = toggleSelected(next.selection, next.extra, member);
-      }
-      select(next.selection, next.extra);
-      return;
-    }
-    /* a click on a member of a group selects the group, caret or not, until a double click enters
-       the member (SPEC-2 6.1 row 14; VERIFICATION-2 finding 17): the run's caret waits */
-    const grouped =
-      blockById(slideNow, id)?.pos?.group !== undefined && groupEnteredRef.current !== id;
-    /* Commenting and Viewing mode: the click selects the object for a comment's anchor and
-       nothing else, no caret, no drag (SPEC-3 5.3, 6.3) */
-    if (!editableRef.current) {
-      if (!selected.includes(id)) selectObjects([id]);
-      return;
-    }
-    /* a single click inside text places the caret there (gslides-parity SPEC 10.2, R09 A1);
-       the block's frame and the overlay's handles are the drag surface */
-    const run = resolveRun(e.target, el);
-    if (run && run.blockId === id && !grouped) {
-      const text = readRunText(slideNow, run.blockId, run.pointer);
-      if (text !== undefined) {
-        startEdit(run, { x: e.clientX, y: e.clientY });
+    /* the click model (docs/gslides-parity/focus/AMENDMENTS.md A1 rules 1 and 2, above
+       gslides-parity SPEC 10.2's single click caret, which opened the session here until this
+       round): Selection.tsx objectPressPlan decides what the press does, so its rules carry unit
+       tests (press-rules.test.ts). One click selects, whatever the object holds: no caret, no
+       session, the ring, the handles and the chip; the press that follows arms the drag from
+       anywhere inside the object's area, a text box and a placeholder included, and past
+       DRAG_START_PX the move gesture takes the whole selection with it (armPress, chipHandleFor,
+       beginGesture). The double click is the entry into the text (onDoubleClick, InlineText
+       clickEntry), and so are a printable key and Enter (onKey). */
+    const plan = objectPressPlan({
+      under: id,
+      selected,
+      modifier: e.shiftKey || e.metaKey || e.ctrlKey,
+      editable: editableRef.current,
+      paint: Boolean(paintRef.current),
+      grouped:
+        id !== null &&
+        blockById(slideNow, id)?.pos?.group !== undefined &&
+        groupEnteredRef.current !== id,
+      object: id !== null && isObjectId(slideNow, boxesRef.current, id),
+    });
+    switch (plan.action) {
+      case 'marquee':
+        setGroupEntered(null);
+        armMarquee(e.clientX, e.clientY);
+        return;
+      case 'paint':
+        /* paint format armed: the click paints the block and nothing else (SPEC 3.1 row 6) */
+        e.preventDefault();
+        applyPaint(plan.blockId);
+        select({ kind: 'block', blockId: plan.blockId });
+        return;
+      case 'toggle': {
+        /* Shift and Cmd click toggle membership (SPEC-2 6.1 row 2); a group toggles whole */
+        const members = expandGroups(slideNow, [plan.blockId]);
+        let next = { selection: selectionRef.current, extra: extraRef.current as string[] };
+        const adding = !selected.includes(plan.blockId);
+        for (const member of members) {
+          if (adding === !selectedIds(next.selection, next.extra).includes(member))
+            next = toggleSelected(next.selection, next.extra, member);
+        }
+        select(next.selection, next.extra);
         return;
       }
-    }
-    if (!selected.includes(id) || (grouped && selected.length === 1)) {
-      /* a click on a member of a group selects the group, so the drag that follows moves it whole */
-      if (groupEnteredRef.current !== id) setGroupEntered(null);
-      selectObjects([id]);
-    }
-    /* every object drags by its body: a picture, a shape, a material anywhere; the text of a
-       title or statement slide by its frame through the overlay (its interior is the caret's) */
-    if (isObjectId(slideNow, boxesRef.current, id)) {
-      armPress({ blockId: id, clientX: e.clientX, clientY: e.clientY, alt: e.altKey });
+      case 'press':
+        if (plan.select) {
+          /* a click on a member of a group selects the group, so the drag that follows moves it
+             whole, until a double click enters the member (SPEC-2 6.1 row 14; VERIFICATION-2
+             finding 17) */
+          if (groupEnteredRef.current !== plan.blockId) setGroupEntered(null);
+          selectObjects([plan.blockId]);
+        }
+        /* Commenting and Viewing mode select the object for a comment's anchor and never drag
+           (SPEC-3 5.3, 6.3): the plan's `drag` is false there; in Editing mode every measured
+           object drags by its body, a picture, a shape, a material, a text box or a placeholder
+           alike, and the ring's handles keep their own gestures (Overlay) */
+        if (plan.drag)
+          armPress({
+            blockId: plan.blockId,
+            clientX: e.clientX,
+            clientY: e.clientY,
+            alt: e.altKey,
+          });
+        return;
     }
   };
 
-  /** A double click: a member of a group alone (SPEC-2 6.1 row 14), crop mode on a picture (row 19). */
+  /**
+   * What `clickEntry` reads about the object under a click (AMENDMENTS.md A1): a picture is a
+   * croppable block on a canvas or a shot, or the photograph of a picture kind; a line never
+   * opens; a shape and every text bearing object open their run; a member of a group not yet
+   * entered is selected first.
+   */
+  const entryInputFor = (slideNow: Slide, el: HTMLElement, id: string, clicks: 1 | 2) => {
+    const block = blockById(slideNow, id);
+    const picture =
+      (isCroppable(block) && (isFreeformSlide(slideNow) || block.type === 'shot')) ||
+      (id === 'picture' && !isFreeformSlide(slideNow));
+    const shape = block !== undefined && block.type === 'shape';
+    const kind = picture
+      ? 'picture'
+      : shape
+        ? isLineBlock(block)
+          ? 'line'
+          : 'shape'
+        : isTextBlockType(blockTypeOf(slideNow, id) ?? '') || firstRunOf(el, id) !== null
+          ? 'text'
+          : 'other';
+    return {
+      clicks,
+      editing: editingRef.current?.blockId === id,
+      kind,
+      groupMember: block?.pos?.group !== undefined && groupEnteredRef.current !== id,
+      hasRun: firstRunOf(el, id) !== null,
+    } as const;
+  };
+
+  /**
+   * A double click: the entry into an object (docs/gslides-parity/focus/AMENDMENTS.md A1 rule 3;
+   * SPEC-2 6.1 rows 14 and 19). Inside an open session it is the browser's word selection; on a
+   * member of a group it selects the member alone; on a picture it opens crop; on a text object,
+   * a placeholder or a shape with text it opens the session with the caret at the double click
+   * (the run under the pointer, else the block's first run at its end). The one click before it
+   * selected the object (onPointerDown), so the two clicks of the double are a select and an
+   * entry, as in Google Slides.
+   */
   const onDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
     const el = body.current;
     const slideNow = slideRef.current;
@@ -3905,25 +4155,38 @@ export function Editor({
     if (!editableRef.current) return;
     const id = resolveObject(e.target, el, slideNow);
     if (id === null) return;
-    const block = blockById(slideNow, id);
-    if (isCroppable(block) && (isFreeformSlide(slideNow) || block.type === 'shot')) {
-      e.preventDefault();
-      enterCrop(id);
-      return;
-    }
-    if (id === 'picture' && !isFreeformSlide(slideNow)) {
-      /* the photograph of a picture kind: crop mode on the picture object's box without a write;
-         the conversion travels with the crop's own commit (finding 19) */
-      e.preventDefault();
-      void enterCropProvisional('picture');
-      return;
-    }
-    const tag = block?.pos?.group;
-    if (tag !== undefined && groupEnteredRef.current !== id) {
-      e.preventDefault();
-      setGroupEntered(id);
-      groupEnteredRef.current = id;
-      select({ kind: 'block', blockId: id }, []);
+    switch (clickEntry(entryInputFor(slideNow, el, id, 2))) {
+      case 'crop':
+        e.preventDefault();
+        if (id === 'picture' && !isFreeformSlide(slideNow)) {
+          /* the photograph of a picture kind: crop mode on the picture object's box without a
+             write; the conversion travels with the crop's own commit (finding 19) */
+          void enterCropProvisional('picture');
+        } else enterCrop(id);
+        return;
+      case 'member':
+        e.preventDefault();
+        setGroupEntered(id);
+        groupEnteredRef.current = id;
+        select({ kind: 'block', blockId: id }, []);
+        return;
+      case 'text': {
+        /* the run under the pointer takes the caret at the point; a double click on the box's
+           padding, or on a closed shape's body (docs/FOCUS.md section 4), opens the first run at
+           its end. The browser's own double click selection of the drawn text is prevented: the
+           session places the caret itself. */
+        const under = resolveRun(e.target, el);
+        const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
+        if (!run || readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
+        e.preventDefault();
+        startEdit(
+          run,
+          entryCaret('double-click', run === under ? { x: e.clientX, y: e.clientY } : null),
+        );
+        return;
+      }
+      default:
+        return;
     }
   };
 
@@ -3932,20 +4195,84 @@ export function Editor({
     if (e.target instanceof Element && e.target.closest('a')) e.preventDefault();
   };
 
-  /** A right-click: the target of gslides-parity SPEC 4.3 and SPEC-2 4.3 for the chrome's menu; inside an editing session the browser's own menu carries the spelling suggestions. */
+  /**
+   * A right-click: the target of gslides-parity SPEC 4.3 and SPEC-2 4.3 for the chrome's menu.
+   * Inside an editing session a right click over selected text opens the Text menu on the
+   * selection (the `textSelection` target: the clipboard rows, Italic, Underline, Strikethrough,
+   * Link, Format options; the matrix row text.context.text-selection), and a right click on a
+   * collapsed caret ends the session and opens the edited object's own menu on the block (the
+   * matrix row text.context.text-block; focus verification finding F4: a single click opens the
+   * session, so the caret is the common state of a right click on a text box, and the menu's
+   * rows are block writes whose result the editor adopts only outside a session). The browser's
+   * own menu, with its spelling suggestions, never shows on the stage.
+   */
   const onContextMenuEvent = (e: ReactMouseEvent<HTMLDivElement>) => {
     const cb = onContextMenuRef.current;
     const el = body.current;
     const slideNow = slideRef.current;
     if (!cb || !el || !slideNow) return;
     const current = editingRef.current;
-    if (current && e.target instanceof Node && current.element.contains(e.target)) return;
+    if (current && e.target instanceof Node && current.element.contains(e.target)) {
+      e.preventDefault();
+      const selection = window.getSelection();
+      const selected =
+        selection !== null &&
+        selection.rangeCount > 0 &&
+        !selection.isCollapsed &&
+        current.element.contains(selection.anchorNode) &&
+        current.element.contains(selection.focusNode);
+      const element =
+        (e.target instanceof Element ? e.target.closest<HTMLElement>('[data-block]') : null) ?? el;
+      const block = blockById(slideNow, current.blockId);
+      const cell = block?.type === 'table' ? cellPointer(current.pointer) : null;
+      const inSession = sessionContextTarget({ selected, cell: cell !== null });
+      if (inSession === 'textSelection') {
+        cb({
+          target: 'textSelection',
+          x: e.clientX,
+          y: e.clientY,
+          element,
+          blockId: current.blockId,
+        });
+        return;
+      }
+      /* a collapsed caret: the session ends (endEdit selects the block) and the object's menu
+         opens on it, as a right click on the frame edge does */
+      endSessionForPress(current);
+      if (inSession === 'tableCell' && cell) {
+        select({ kind: 'run', blockId: current.blockId, pointer: current.pointer });
+        cb({
+          target: 'tableCell',
+          x: e.clientX,
+          y: e.clientY,
+          element,
+          blockId: current.blockId,
+          cell: { ...cell, pointer: current.pointer },
+        });
+        return;
+      }
+      cb({
+        target: contextTargetFor(slideNow, current.blockId),
+        x: e.clientX,
+        y: e.clientY,
+        element,
+        blockId: current.blockId,
+      });
+      return;
+    }
     e.preventDefault();
     const inSheet = e.target instanceof Element && e.target.closest('.sheet') !== null;
-    const id = inSheet ? resolveObject(e.target, el, slideNow) : null;
+    /* a right click on a selected object lands on the overlay's frame, not the sheet: it is the
+       object's own menu, as on an unselected object (the matrix rows text.context.text-block and
+       images.context.image; measured on the dev server: the selected box answered no menu) */
+    const onOverlay = e.target instanceof Element && e.target.closest('.ts-overlay') !== null;
+    const selectedAnchor = onOverlay ? selectedBlockId(selectionRef.current) : null;
+    const id = inSheet ? resolveObject(e.target, el, slideNow) : selectedAnchor;
     const run = resolveRun(e.target, el);
     const element =
-      (e.target instanceof Element ? e.target.closest<HTMLElement>('[data-block]') : null) ?? el;
+      (e.target instanceof Element ? e.target.closest<HTMLElement>('[data-block]') : null) ??
+      (id !== null ? el.querySelector<HTMLElement>(`[data-block="${id}"]`) : null) ??
+      el;
     if (id === null) {
       cb({ target: 'emptyCanvas', x: e.clientX, y: e.clientY, element });
       return;
@@ -3990,7 +4317,12 @@ export function Editor({
     e.preventDefault();
     const rect = stageRect();
     const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : undefined;
-    const id = resolveObject(e.target, el, slideNow);
+    /* a person's drop fires on the picture under the pointer; a drop dispatched on the stage
+       wrapper names no object, so the object under the point is read (docs/FOCUS.md design
+       rule 13: a file dropped on a picture replaces it and keeps the frame) */
+    const id =
+      resolveObject(e.target, el, slideNow) ??
+      resolveObject(document.elementFromPoint(e.clientX, e.clientY), el, slideNow);
     const [first] = files;
     if (!first) return;
     void insertPicture(first, {
@@ -4247,6 +4579,13 @@ export function Editor({
             onRedo={() => onRedoRef.current?.()}
             handle={(inline) => {
               inlineRef.current = inline;
+              /* the printable key that opened this session (onKey, A1 rule 4) lands now, over the
+                 whole text the entry selected, so the first character replaces the text */
+              const typed = pendingInsert.current;
+              if (inline !== null && typed !== null) {
+                pendingInsert.current = null;
+                inline.insertText(typed);
+              }
             }}
           />
         ) : null}

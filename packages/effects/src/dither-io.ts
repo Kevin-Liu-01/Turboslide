@@ -9,8 +9,8 @@
 // imports sharp and stays out of the browser; dither.ts is the shared part.
 import sharp from 'sharp';
 
-import type { PictureDither } from '@turboslide/schema/blocks/dither';
-import { resolveDither } from '@turboslide/schema/blocks/dither';
+import type { PictureDither } from '@turboslide/schema/blocks/dither-values';
+import { resolveDither } from '@turboslide/schema/blocks/dither-values';
 
 import {
   DITHER_COLORS,

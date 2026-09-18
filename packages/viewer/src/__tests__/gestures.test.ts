@@ -804,7 +804,15 @@ describe('draw tools', () => {
       slideId: 'positioning',
       slot: 'left',
       after: 'h',
-      block: { id: 'shape', type: 'shape', shape: 'rectangle' },
+      /* a fresh closed shape carries its look and an empty run (docs/FOCUS.md section 4) */
+      block: {
+        id: 'shape',
+        type: 'shape',
+        shape: 'rectangle',
+        fill: 'plate',
+        stroke: 'ink',
+        text: '',
+      },
     });
     expect(toolBlockType({ kind: 'line', line: 'rule' })).toBe('rule');
     expect(toolBlockType({ kind: 'line', line: 'arrow' })).toBe('shape');

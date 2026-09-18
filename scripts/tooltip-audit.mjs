@@ -21,6 +21,11 @@
 // there and walks the stage's handles and the arrange bar, then removes the deck; elsewhere pass
 // --freeform-url <edit url of a freeform slide> or the surface is skipped and said so. Exit 0
 // when every page is covered, 1 when an element is missing, 2 when a page could not be walked.
+// Since the focus round (docs/FOCUS.md 3.1) the audit runs in two passes: the default view (Tools
+// > Advanced tools off, the parked controls absent) and, with `--advanced`, the switch on (the
+// page's `ts-editor-settings` seeded with `{ "advancedTools": true }` before the load), so every
+// control a person can reach is hovered in one of the two passes; the expected set of each pass is
+// what the page draws, since a parked control is hidden, never disabled.
 // --report prints the results without failing; --json prints them as one JSON object. The
 // verifier runs it against the server the check starts on 4321 (AGENTS.md dev server rules); a
 // browser comes from @turboslide/headless/launch through playwright-core, never a second dev
@@ -56,6 +61,7 @@ const asJson = flag('json');
 const report = flag('report');
 const strict = flag('strict');
 const freeformUrl = values('freeform-url')[0];
+const advanced = flag('advanced');
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** The scratch deck with the freeform slide, seeded from decks/fixture on a localhost base. */
@@ -238,9 +244,14 @@ function removeScratchDeck() {
 
 /** Loads a studio page and waits for the shell or the window API, as main() does. */
 async function loadPage(page, target) {
-  await page.addInitScript((value) => {
-    localStorage.setItem('gt-theme', value);
-  }, theme);
+  await page.addInitScript(
+    ([value, on]) => {
+      localStorage.setItem('gt-theme', value);
+      /* the second pass of the focus round: Tools > Advanced tools on before the first paint */
+      if (on) localStorage.setItem('ts-editor-settings', JSON.stringify({ advancedTools: true }));
+    },
+    [theme, advanced],
+  );
   const response = await page.goto(target, { waitUntil: 'load', timeout: 60000 });
   if (!response || response.status() >= 400) {
     throw new Error(`status ${response?.status() ?? 'none'}`);

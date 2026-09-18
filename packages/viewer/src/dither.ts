@@ -8,7 +8,7 @@ import {
   type ToneBaseSpec,
 } from '@turboslide/effects/pipeline';
 import { RAMP_COLORS, rampCells, rampInk } from '@turboslide/effects/ramp';
-import type { PictureDither } from '@turboslide/schema/blocks/dither';
+import type { PictureDither } from '@turboslide/schema/blocks/dither-values';
 import {
   previewDither as previewDitherOverlay,
   setMaterialPlay as setMaterialPlayOverlay,

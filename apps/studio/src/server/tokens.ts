@@ -80,8 +80,14 @@ export function downloadSecret(env: Env = process.env, hosted?: boolean): Buffer
       'must be set on a hosted store (docs/security.md, the deploy variables)',
     );
   }
-  return randomBytes(32);
+  // one value per process on a checkout (the docblock's rule): a grant signed with one key and a
+  // PUT verified with another made every presigned upload 403 on a checkout without the
+  // variable, and security.spec.ts's upload row red on the check chain's server (b6 FR1)
+  checkoutSecret ??= randomBytes(32);
+  return checkoutSecret;
 }
+
+let checkoutSecret: Buffer | null = null;
 
 /** What the health function reports: whether the secret is set, never its value. */
 export function downloadSecretStatus(env: Env = process.env): {

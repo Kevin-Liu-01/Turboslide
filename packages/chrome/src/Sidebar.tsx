@@ -21,7 +21,7 @@ import { SidebarFilter as FilterRow } from './SidebarFilter';
 import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
 import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
-import { tipProps } from './Tooltip';
+import { mergeTipProps, tipProps } from './Tooltip';
 import { Filmstrip, makeFollow } from './Filmstrip';
 
 import './Sidebar.css';
@@ -243,19 +243,33 @@ function TreeRow({
     },
     [track, follow],
   );
+  /* the row's tooltip is the Tooltip primitive, as every control of the chrome (AGENTS.md; the
+     focus round, cycle 3 fix, VERIFICATION C2-F13: the rows were the tooltip audit's one title
+     only hit, `a.pt-orow` with a native title and no primitive); the row's own press and Space
+     handlers run first, the primitive's after (mergeTipProps) */
+  const tip = mergeTipProps(
+    {
+      onMouseDown: pressWithoutFocus,
+      onKeyDown: (event: KeyboardEvent<HTMLElement>) => onRowSpace(event, () => onPick(item, null)),
+    },
+    tipProps({
+      name: item.title || `Slide ${item.n ?? ''}`.trim(),
+      doc: edit
+        ? 'Go to this slide. Drag to move it; right click or the dots open its menu.'
+        : 'Go to this slide.',
+    }),
+  );
   return (
     <a
       className={cn('pt-orow', active && 'is-active', edit?.dragging && 'is-dragging')}
       href={href}
-      title={item.title}
       data-preview={item.id}
       data-id={item.id}
       data-drop={edit?.drop ?? undefined}
       aria-current={active ? 'true' : undefined}
       draggable={edit ? true : undefined}
-      onMouseDown={pressWithoutFocus}
+      {...tip}
       onClick={(event) => onPick(item, event)}
-      onKeyDown={(event) => onRowSpace(event, () => onPick(item, null))}
       onDragStart={edit ? (event) => edit.onDragStart(item, event) : undefined}
       onDragOver={edit ? (event) => edit.onDragOver(item, event) : undefined}
       onDrop={edit ? edit.onDrop : undefined}
@@ -282,7 +296,10 @@ function TreeRow({
             <span
               className="pt-orow-badge"
               data-severity={lint.s3 > 0 ? '3' : '2'}
-              title={`${lint.s3} must fix, ${lint.s2} should fix`}
+              {...tipProps({
+                name: 'Lint findings',
+                doc: `${lint.s3} must fix, ${lint.s2} should fix.`,
+              })}
             >
               {lint.s3 > 0 ? lint.s3 : lint.s2}
             </span>

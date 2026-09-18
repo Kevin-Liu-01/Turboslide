@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { Slide } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import {
@@ -16,6 +17,7 @@ import {
   mentionToken,
   openCounts,
   shortTime,
+  slideHasBlock,
   sortThreads,
   stepThread,
 } from '../comments/comments-model';
@@ -89,6 +91,44 @@ describe('the anchor at the selection (5.3)', () => {
     });
     /* a collapsed range is a block anchor */
     expect(anchorAtSelection(s1, { blockId: 'b', text: true, range: [4, 4] }).kind).toBe('block');
+  });
+
+  it('anchors a placeholder run of a title or statement slide on the slide when the slide is given (docs/FOCUS.md rank 19)', () => {
+    const title: Slide = {
+      id: 'cover',
+      kind: 'title',
+      heading: 'Pipeline review',
+      lead: 'Acme, Q3 2026',
+    } as Slide;
+    /* the selection of the title placeholder names the run's field, not a block */
+    expect(slideHasBlock(title, 'heading')).toBe(false);
+    expect(
+      anchorAtSelection('cover', { blockId: 'heading', text: true }, undefined, title),
+    ).toEqual({ kind: 'slide', slideId: 'cover' });
+    expect(
+      anchorAtSelection(
+        'cover',
+        { blockId: 'heading', text: true, range: [0, 8] },
+        'Pipeline',
+        title,
+      ),
+    ).toEqual({ kind: 'slide', slideId: 'cover' });
+    /* a content slide's own block keeps its anchor; a foreign id falls back */
+    const content = doc.slides['content-rule']!;
+    const block = Object.values(content.kind === 'content' ? content.slots : {}).flat()[0];
+    if (block === undefined) throw new Error('the worked document has a content slide with blocks');
+    expect(slideHasBlock(content, block.id)).toBe(true);
+    expect(anchorAtSelection('content-rule', { blockId: block.id }, undefined, content)).toEqual({
+      kind: 'block',
+      slideId: 'content-rule',
+      blockId: block.id,
+    });
+    expect(
+      anchorAtSelection('content-rule', { blockId: 'not-a-block' }, undefined, content),
+    ).toEqual({ kind: 'slide', slideId: 'content-rule' });
+    /* without the slide the parity rounds' reading stands */
+    expect(slideHasBlock(undefined, 'heading')).toBe(true);
+    expect(anchorAtSelection('cover', { blockId: 'heading' }).kind).toBe('block');
   });
 });
 

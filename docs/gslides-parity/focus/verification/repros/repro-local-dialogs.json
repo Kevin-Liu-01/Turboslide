@@ -1,0 +1,118 @@
+{
+  "base": "http://localhost:4368",
+  "scenario": "dialogs",
+  "startedAt": "2026-09-16T13:50:50.561Z",
+  "steps": [
+    {
+      "name": "Slide > Change background (menu)",
+      "present": true,
+      "dialogs": ["dialog.background"],
+      "panels": ["panel.toggle"],
+      "menusOpen": 0,
+      "at": "2026-09-16T13:50:54.892Z"
+    },
+    {
+      "name": "Slide > Change background (menu) after Escape",
+      "stillPresent": false,
+      "menusOpen": 0,
+      "at": "2026-09-16T13:50:55.525Z"
+    },
+    {
+      "name": "toolbar Background button",
+      "present": true,
+      "dialogs": ["dialog.background"],
+      "panels": ["panel.toggle"],
+      "menusOpen": 0,
+      "at": "2026-09-16T13:50:56.460Z"
+    },
+    {
+      "name": "toolbar Background button after Escape",
+      "stillPresent": false,
+      "menusOpen": 0,
+      "at": "2026-09-16T13:50:57.073Z"
+    },
+    {
+      "name": "Format > Format options (menu) with the box selected",
+      "present": true,
+      "dialogs": [],
+      "panels": ["panel.formatOptions", "panel.formatOptions.close", "panel.toggle"],
+      "menusOpen": 0,
+      "at": "2026-09-16T13:51:01.239Z"
+    },
+    {
+      "name": "Format > Format options (menu) with the box selected after Escape",
+      "stillPresent": false,
+      "menusOpen": 0,
+      "at": "2026-09-16T13:51:01.869Z"
+    },
+    {
+      "name": "toolbar Format options (tail) with the box selected",
+      "present": true,
+      "dialogs": [],
+      "panels": ["panel.formatOptions", "panel.formatOptions.close", "panel.toggle"],
+      "menusOpen": 0,
+      "at": "2026-09-16T13:51:03.620Z"
+    },
+    {
+      "name": "toolbar Format options (tail) with the box selected after Escape",
+      "stillPresent": true,
+      "menusOpen": 0,
+      "at": "2026-09-16T13:51:04.264Z"
+    },
+    {
+      "name": "Format > Text fitting (menu) with the box selected",
+      "error": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.format.textFitting\"]').first()\n",
+      "at": "2026-09-16T13:52:05.413Z"
+    },
+    {
+      "name": "Arrange menu with the box selected",
+      "rows": ["arrange.order", "arrange.align", "arrange.centerOnPage"],
+      "at": "2026-09-16T13:52:06.522Z"
+    },
+    {
+      "name": "Arrange > Order submenu",
+      "rows": [
+        "arrange.order.bringToFront",
+        "arrange.order.bringForward",
+        "arrange.order.sendBackward",
+        "arrange.order.sendToBack"
+      ],
+      "at": "2026-09-16T13:52:07.146Z"
+    },
+    {
+      "name": "state at the end",
+      "blockId": "box-a",
+      "menusOpen": 0,
+      "at": "2026-09-16T13:52:07.364Z"
+    }
+  ],
+  "deckId": "untitled-20260916-2ze7",
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 248505",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45s35i-4b820b rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45s35i-4b820b rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45s35i-4b820b rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45s35i-4b820b rend",
+    "A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={some",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45tpf3-7c8857 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4368/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u45tpf3-7c8857 rend",
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T13:52:10.947Z"
+}

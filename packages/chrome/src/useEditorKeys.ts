@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
 import type { MenuItem, Platform } from './menus/model';
-import { findItem, isEnabled, MENUS } from './menus/model';
+import { findItem, isEnabled, isPresent, MENUS } from './menus/model';
 import type { MenuContext, MenuId } from './menus/model';
 import { bindingsFor, buildKeyTable, isBareKey, chordsOf } from './menus/keys';
 import type { KeyBinding } from './menus/keys';
@@ -168,6 +168,10 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
       /* Esc: menus and dialogs close themselves; the shell's ladder runs when nothing of theirs is open */
       if (event.key === 'Escape') {
         if (h.overlayOpen() || inField || inCanvasText) return;
+        /* a modal dialog takes the key alone (its document listener closes it, Dialog.tsx); the
+           shell's ladder would otherwise close an open panel with it, where Google closes the
+           dialog and leaves the panel (b1 R30) */
+        if (document.querySelector('.ts-dialog-scrim') !== null) return;
         if (h.escape()) event.preventDefault();
         return;
       }
@@ -218,6 +222,13 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         if (binding.scope === 'present') continue;
         if (CLIPBOARD_CHORDS.has(binding.id)) continue;
         if (inCanvasText && RUN_OWNED.has(binding.id)) continue;
+        /* a bare Delete or Backspace removes a slide only while the filmstrip has the focus
+           (docs/FOCUS.md section 5 rank 4; audit-arrange row 48): with the stage, a toolbar button
+           or nothing focused and no object selected the key does nothing, where it used to run
+           `edit.delete` and take the current slide with no prompt; the stage removes its own
+           selection before this table sees the key, and Edit > Delete from the menu is untouched */
+        if (binding.id === 'edit.delete' && !modifier && s.menuContext.focus !== 'filmstrip')
+          continue;
         const menuId = menuIdOf(binding);
         if (menuId !== null) {
           event.preventDefault();
@@ -226,6 +237,9 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         }
         const item = findItem(binding.id);
         if (item !== undefined) {
+          /* a parked row's chord matches nothing, prevents nothing and runs nothing while Tools >
+             Advanced tools is off (docs/FOCUS.md 3.1; the matrix row surface.parked-shortcut-unbound) */
+          if (!isPresent(item, s.menuContext)) continue;
           if (!isEnabled(item, s.menuContext)) {
             /* a disabled item swallows its chord so the browser's own meaning does not fire (Cmd+P, Cmd+O) */
             if (binding.status === 'now') event.preventDefault();

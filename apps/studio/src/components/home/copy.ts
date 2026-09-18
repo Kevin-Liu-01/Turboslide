@@ -217,10 +217,10 @@ export const NUMBERS: ReadonlyArray<Figure> = [
     source: 'packages/schema/src/layouts.ts',
   },
   {
-    id: 'shapes',
-    figure: (f) => formatCount(f.shapePresets),
-    line: 'shape presets drawn from the PowerPoint geometry',
-    source: 'packages/schema/src/shapes/definitions.ts',
+    id: 'checks',
+    figure: (f) => formatCount(f.checkSteps),
+    line: 'steps in the acceptance chain a release passes first',
+    source: `scripts/check.mjs --list; ${FACTS_PATH}`,
   },
   {
     id: 'mismatch',
@@ -248,8 +248,8 @@ export const NUMBERS: ReadonlyArray<Figure> = [
 export const EDITOR = {
   heading: "Google Slides' frame, on every slide a canvas",
   claims: [
-    "The same menus, toolbar, filmstrip, speaker notes and right click menus, in Google's order, with Google's shortcuts. An item Turboslide lacks is in its place, disabled, with one sentence on what to do instead.",
-    'Every object drags, resizes, rotates, groups and reorders. The first drag on a slide converts it to a canvas without moving a pixel, and one undo puts the layout back.',
+    "The same menus, toolbar, filmstrip, speaker notes and right click menus, in Google's order, with Google's shortcuts. The default view holds what a seller uses weekly; a feature not yet tested end to end sits behind Tools > Advanced tools.",
+    'Every object drags, resizes, rotates and reorders. The first drag on a slide converts it to a canvas without moving a pixel, and one undo puts the layout back.',
     'One look: Inter, paper and ink, one pixel rules, a light and a dark appearance that the stage, the thumbnails, the slideshow and every download follow.',
   ],
 } as const;
@@ -279,19 +279,19 @@ export const SHOT_ALT: Readonly<Record<ShotName, string>> = {
   '01-new-presentation':
     'The fresh Untitled presentation on the Title slide in the dark appearance: the title row, the menu bar, the toolbar, the filmstrip and the speaker notes pane.',
   '02-file-menu': 'The File menu open with its Download submenu.',
-  '03-insert-menu': 'The Insert menu with the Chart submenu.',
+  '03-insert-menu': 'The Insert menu with the Image submenu.',
   '04-layout-grid': "The layout grid with Google's eleven layouts and the GT layouts after them.",
   '05-filmstrip-menu': "The filmstrip's right click menu with Google's rows.",
-  '06-canvas-rotation':
-    'Rotation by the handle with the degree readout, beside a chart and a table.',
-  '07-canvas-snap-guides': 'A group dragged into alignment with a snap guide.',
-  '08-format-options': 'Format options on a rotated rectangle.',
+  '06-canvas-rotation': 'A picture rotated by its handle, with the degree readout.',
+  '07-canvas-snap-guides': 'A picture dragged into alignment with a snap guide.',
+  '08-format-options': 'Format options on a picture.',
   '09-download-dialog': 'The Download dialog with Perfect and Editable text.',
   '10-decks-home': 'The home page at /decks with the search field and the cards.',
   '11-presenter-console': 'Presenter view with the timer, the notes and the previews.',
   '12-slideshow-dither':
     'The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate.',
-  '13-editor-light': 'The editor on a content slide in the light appearance.',
+  '13-editor-light':
+    'The editor on a Title and body slide with typed text, in the light appearance.',
   '14-book-view': "The viewer's book view of the GT brand deck.",
   '15-grid-view': "The viewer's grid view of the GT deck's Brand section.",
   'hero-frame': 'The liquid metal material, one continuous frame before the two tone screen.',
@@ -317,58 +317,58 @@ export type Card = {
 
 export const CARDS = {
   heading: 'What it does',
-  lead: 'Twelve groups of features, in the order the README lists them. Every card is one thing the editor does today.',
+  lead: 'Twelve groups of features. What is in the default view is driven end to end against production before a release; the rest sits behind Tools > Advanced tools until its own interactions pass.',
   cards: [
     {
       id: 'shell',
       title: 'The Google Slides shell',
-      copy: 'Ten menus, a toolbar whose tail follows the selection, the filmstrip, the notes pane, the right panels and the bottom bar. Search the menus finds every item by name, and every control carries its name and its key.',
+      copy: "The menus, a toolbar whose tail follows the selection, the filmstrip, the notes pane and the right panels, in Google's order. Search the menus finds every row by name, every control carries its name and its key, and the rows of a feature that is not yet tested end to end sit behind Tools > Advanced tools.",
       shot: '02-file-menu',
       pair: '05-filmstrip-menu',
     },
     {
       id: 'canvas',
       title: 'The canvas',
-      copy: 'Drag, resize and rotate with live readouts. Snap guides, rulers, guides, zoom to 1600 percent, marquee selection, z order, groups, crop mode and connectors that follow the shape they are attached to.',
+      copy: 'Drag, resize and rotate with live readouts. Snap guides, marquee selection, z order, align and centre from the Arrange menu, the zoom box with its presets, and crop mode on a picture. Rulers, guides, groups and connectors are behind Advanced tools.',
       shot: '07-canvas-snap-guides',
     },
     {
       id: 'layouts',
-      title: 'Layouts and themes',
+      title: 'Layouts',
       copy: (f) =>
-        `${formatCount(f.layouts)} layouts in one grid: Google's eleven and the ${formatCount(f.layouts - 11)} GT layouts after them. Apply layout keeps the content and never refuses. A new presentation opens on a Title slide with four starter pictures already in it.`,
+        `${formatCount(f.layouts)} layouts in one grid: Google's eleven and the ${formatCount(f.layouts - 11)} GT layouts after them. Apply layout moves the slide's content into the new layout's placeholders. A new presentation opens on a Title slide with four starter pictures already in it.`,
       shot: '04-layout-grid',
     },
     {
       id: 'text',
       title: 'Text',
-      copy: 'Bold, italic, underline, strikethrough, super and subscript, colour and highlight on a range. Lists with nine bullet and six numbering presets, line spacing, columns, indents, alignment, autofit, find and replace across the deck, links to a URL or a slide.',
+      copy: 'Bold, italic, underline and strikethrough on a selected word, from the keyboard or the toolbar. Font size, alignment, line spacing, bulleted and numbered lists, indent and clear formatting on the toolbar and in the Format menu; a link on a word; find and replace across the deck. Superscript, capitalization, columns and custom spacing are behind Advanced tools.',
       icon: 'bars-3-bottom-left',
     },
     {
       id: 'objects',
-      title: 'Objects, pictures and materials',
+      title: 'Pictures',
       copy: (f) =>
-        `${formatCount(f.shapePresets)} shapes in Google's four categories, seven line kinds with ten end decorations, fills, borders, dashes and shadows. Pictures upload, crop, mask to any shape and adjust. ${formatCount(f.materials)} shader materials play live on the stage, and a photograph becomes a two tone dither in one step.`,
-      shot: '08-format-options',
+        `Upload from your computer, drop a file on the slide or paste one; drop a file on a picture to replace it and keep the frame. Crop, adjust transparency, brightness and contrast, and colour one slide's background. Masks, drop shadows, two tone dithers and the ${formatCount(f.materials)} shader materials are behind Advanced tools.`,
+      shot: '03-insert-menu',
+      pair: '08-format-options',
     },
     {
       id: 'tables',
       title: 'Tables',
-      copy: 'A hover grid up to 20 by 20. Insert and delete rows and columns, merge and unmerge, distribute, header rows, cell fills and borders. Tab moves between cells. The editable export writes a real PowerPoint table.',
+      copy: 'The tables a layout places (Title and table, Ruled rows, Status board) take typing in their cells like any placeholder. Insert > Table and the table tools (rows, columns, merge, distribute, cell fills and borders) are behind Advanced tools until a tables audit runs.',
       icon: 'table-cells',
     },
     {
       id: 'charts',
       title: 'Charts and diagrams',
-      copy: 'Bar, column, line and pie charts with a data grid in the panel, up to 12 categories and 6 series. Six diagram templates in three styles insert as a group you edit like any other.',
-      shot: '03-insert-menu',
+      copy: 'Insert > Chart, Diagram and Word art are behind Advanced tools. A chart or a diagram a deck already carries draws on the slide, in the show and in every download, and moves, resizes and deletes like any object.',
       icon: 'presentation-chart-bar',
     },
     {
       id: 'exports',
       title: 'Exports',
-      copy: 'Perfect PowerPoint by default: each page is the rendered slide over searchable text, checked against the screen before the file is written. Editable text PowerPoint, PDF, a single web page, plain text, JPEG and PNG beside it.',
+      copy: 'PDF and PowerPoint from File > Download, with skipped slides and speaker notes left out unless you check them. The PowerPoint file is the rendered slide over searchable text, checked against the screen before the file is written, with an editable text mode beside it. Web page, plain text, JPEG and PNG are behind Advanced tools.',
       shot: '09-download-dialog',
     },
     {
@@ -380,21 +380,21 @@ export const CARDS = {
     {
       id: 'viewer',
       title: 'The viewer and sharing',
-      copy: 'A read only link with Slide, Grid and Book views, an embed for any site, and a Share dialog with people by email and a role, Anyone with the link, and Publish to the web. Skipped slides and speaker notes stay out of the view and present links.',
+      copy: 'Share offers a view link, a present link and an edit link, and the view link opens the viewer with its Slide, Grid and Book views. Publish to the web and the embed are behind Advanced tools.',
       shot: '14-book-view',
       pair: '15-grid-view',
     },
     {
       id: 'files',
       title: 'Home and files',
-      copy: 'Recent presentations as cards with thumbnails, Make a copy, Rename, Move to trash with Undo, Import slides from another presentation, Version history by author with named versions, comments with an inbox, and a bundle you can download and upload.',
+      copy: 'Recent presentations as cards with thumbnails; Open, Present, Rename, Make a copy, Download and Move to trash with Undo on every card; the trash with Restore and Delete forever; Version history with named versions and restore. Import slides, the bundle, Details and the inbox are behind Advanced tools.',
       shot: '10-decks-home',
     },
     {
       id: 'quality',
       title: 'Quality gates',
       copy: (f) =>
-        `Every slide is checked for overflow, contrast, type sizes and copy in both appearances, with Fix for the mechanical findings. A ${formatCount(f.checkSteps)} step acceptance chain and a ${formatCount(f.parityRows)} row parity audit pass before anything ships.`,
+        `Every slide is checked for overflow, contrast, type sizes and copy in both appearances, with Fix for the mechanical findings. Every feature in the default view is driven end to end against production before a release, and a ${formatCount(f.checkSteps)} step acceptance chain and a ${formatCount(f.parityRows)} row parity audit pass before anything ships.`,
       icon: 'check-badge',
     },
   ] as ReadonlyArray<Card>,
@@ -407,7 +407,7 @@ export const DITHERS = {
   heading: 'Dithers and shaders, from the deck to the interface',
   lead: 'The GT brand deck draws its photographs as two tone dithers: an eight by eight Bayer screen at two pixel cells, cut from a toned and cropped picture, with a light version that is the exact inverse of the dark one.',
   claims: [
-    'The same pipeline handles any photograph or a frozen frame of a shader material, reports how clear the plate stays, and is written three times with one arithmetic: in TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test that proves the three light the same cells.',
+    'The same pipeline handles any photograph or a frozen frame of a shader material from the command line and the API, reports how clear the plate stays, and is written three times with one arithmetic: in TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test that proves the three light the same cells.',
     (f: HomeFacts) =>
       `${formatCount(f.materials)} Paper Shaders materials play live on the stage with typed controls and the GT colour presets, and every one is captured as frozen frames for the thumbnails and the exports.`,
   ] as ReadonlyArray<Text>,
@@ -662,7 +662,7 @@ export const AGENTS = {
     },
   ] as ReadonlyArray<AgentRow>,
   closing:
-    "The hosted agent routes accept a bearer token set by the deployment's owner; a checkout serves them to localhost without one. A deck moves between a checkout and the hosted studio with turboslide deck push and deck pull.",
+    "The hosted agent routes accept a bearer token set by the deployment's owner; a checkout serves them to localhost without one. A deck moves between a checkout and the hosted studio with turboslide deck push and deck pull. Every action stays on every transport whether or not its menu row is in the editor's default view; the rows behind Tools > Advanced tools are the advanced ones.",
   push: `pnpm exec turboslide deck push gt-brand --to ${PRODUCTION}`,
 } as const;
 
@@ -682,7 +682,7 @@ export const COMPARE = {
       google:
         "A Google account; the product page's calls to action are Sign in and Try Slides for work.",
       turboslide:
-        'Optional. Anonymous by default with a label such as Wax 613, and sign in by email code or magic link when your work should follow you.',
+        'Optional. Anonymous by default with a label such as Wax 613; sign in by email code or magic link is behind Advanced tools.',
     },
     {
       id: 'file',
@@ -696,21 +696,21 @@ export const COMPARE = {
       row: 'Editing together',
       google: 'Live co editing with pointers, comments, assignments and a comments panel.',
       turboslide:
-        'Several people edit one presentation at once, with live carets and pointers, comments with replies and assignments, a roster in the title row and version history by author.',
+        'Several people can edit one presentation, with a roster in the title row, comments with replies and assignments, and version history by author.',
     },
     {
       id: 'export',
       row: 'Export',
       google: 'PowerPoint, ODP, PDF, plain text, JPEG, PNG and SVG of the current slide.',
       turboslide:
-        'PowerPoint in two modes, one pixel identical to the screen with a report; PDF, one file web page, plain text, JPEG, PNG and the Turboslide bundle. No ODP or SVG.',
+        'PDF and PowerPoint in the default view, the PowerPoint one pixel identical to the screen with a report; web page, plain text, JPEG, PNG and the Turboslide bundle behind Advanced tools. No ODP or SVG.',
     },
     {
       id: 'import',
       row: 'Import',
       google: 'PowerPoint and Canva files; Import slides from another presentation.',
       turboslide:
-        'Import slides from a presentation on this studio; open a Turboslide bundle. No PowerPoint import yet.',
+        'Import slides from a presentation on this studio and the Turboslide bundle, behind Advanced tools. No PowerPoint import yet.',
     },
     {
       id: 'automation',
@@ -732,13 +732,13 @@ export const COMPARE = {
       row: 'Pictures',
       google: 'Stock and web images, Drive and Photos, GIFs and stickers, Gemini image generation.',
       turboslide: (f: HomeFacts) =>
-        `Upload, URL or this presentation; crop, mask, adjust; two tone dithers and ${formatCount(f.materials)} shader materials.`,
+        `Upload, drop or paste; crop and adjust. By URL, masks, two tone dithers and ${formatCount(f.materials)} shader materials are behind Advanced tools.`,
     },
     {
       id: 'transitions',
       row: 'Transitions',
       google: 'Slide transitions and object animations.',
-      turboslide: 'None; the Transition item is present and disabled with a sentence.',
+      turboslide: 'None; the Transition item appears, disabled, only under Advanced tools.',
     },
     {
       id: 'presenting',

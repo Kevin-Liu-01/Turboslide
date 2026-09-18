@@ -12,7 +12,7 @@
 import type { Asset } from '@turboslide/schema/assets';
 import { hasContinuousSource } from '@turboslide/schema/assets';
 import type { Block, PictureBlock, ShotBlock } from '@turboslide/schema/blocks';
-import { DITHER_NO_SOURCE_MESSAGE } from '@turboslide/schema/blocks/dither';
+import { DITHER_NO_SOURCE_MESSAGE } from '@turboslide/schema/blocks/dither-values';
 import { CANVAS_GROUP } from '@turboslide/schema/canvas';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { canvasObjects, slideBlocks, slideOrder } from '@turboslide/schema/deck';

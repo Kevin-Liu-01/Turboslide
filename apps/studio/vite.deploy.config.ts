@@ -192,8 +192,16 @@ const PRERENDER = existsSync(HOME_ROUTE)
 // chunking rule's. The client environment alone; the server bundle is Nitro's.
 const VENDOR_TEST =
   /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/]/;
+// Hidden source maps for the client chunks, opt in (the focus round, cycle 3 stream fix round's
+// fix round; VERIFICATION C2-F18): `TURBOSLIDE_CLIENT_SOURCEMAP=1` writes a `.map` beside every
+// chunk with no `sourceMappingURL` comment, so the served bytes are the same and
+// scripts/chunk-attribution.mjs can say which module put how many bytes in which chunk. Off by
+// default: a deployment ships no map.
+const CLIENT_SOURCEMAP: boolean | 'hidden' =
+  process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
 const CLIENT_BUILD = {
   build: {
+    sourcemap: CLIENT_SOURCEMAP,
     rolldownOptions: {
       output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }] } },
     },

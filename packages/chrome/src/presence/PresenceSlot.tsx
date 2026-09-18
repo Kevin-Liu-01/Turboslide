@@ -5,7 +5,7 @@ import { COLLAB_CLASSES } from '@turboslide/render/collab';
 import { useEditorShell } from '../editor-shell-context';
 import type { EditorPresence, IdentityView, PresenceParticipant } from '../editor-shell';
 import { cn } from '../lib/cn';
-import { itemById } from '../menus/model';
+import { isPresent, itemById } from '../menus/model';
 import { PRESENCE } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { AccountMenu } from './AccountMenu';
@@ -123,31 +123,38 @@ export function PresenceSlot() {
       >
         <span className="ts-presence-count">{more > 0 ? PRESENCE.more(more) : ''}</span>
       </button>
-      <span className="ts-presence-rule" aria-hidden="true" />
-      <button
-        ref={meRef}
-        type="button"
-        className="ts-presence-me"
-        data-control="title.account"
-        data-menu-item="title.account"
-        aria-haspopup="menu"
-        aria-expanded={account !== null}
-        aria-label={itemById('title.account').label}
-        onClick={() => setAccount((open) => (open === null ? meRef.current : null))}
-        {...tipProps({
-          name:
-            self === null
-              ? itemById('title.account').label
-              : `${self.name ?? self.label} ${PRESENCE.you}`,
-          doc: itemById('title.account').doc ?? '',
-        })}
-      >
-        {self === null ? (
-          <span className="ts-chip is-self is-blank" aria-hidden="true" />
-        ) : (
-          <IdentityChip identity={self} size={24} self />
-        )}
-      </button>
+      {/* the own chip opens the account menu, parked whole (docs/FOCUS.md 3.2): the chip and its
+          rule are drawn only while Tools > Advanced tools is on; the other people's chips stay
+          drawn (3.2: "the presence chips themselves stay drawn") */}
+      {isPresent(itemById('title.account'), shell.menuContext) ? (
+        <>
+          <span className="ts-presence-rule" aria-hidden="true" />
+          <button
+            ref={meRef}
+            type="button"
+            className="ts-presence-me"
+            data-control="title.account"
+            data-menu-item="title.account"
+            aria-haspopup="menu"
+            aria-expanded={account !== null}
+            aria-label={itemById('title.account').label}
+            onClick={() => setAccount((open) => (open === null ? meRef.current : null))}
+            {...tipProps({
+              name:
+                self === null
+                  ? itemById('title.account').label
+                  : `${self.name ?? self.label} ${PRESENCE.you}`,
+              doc: itemById('title.account').doc ?? '',
+            })}
+          >
+            {self === null ? (
+              <span className="ts-chip is-self is-blank" aria-hidden="true" />
+            ) : (
+              <IdentityChip identity={self} size={24} self />
+            )}
+          </button>
+        </>
+      ) : null}
       {roster !== null ? (
         <RosterMenu
           anchor={roster}
@@ -155,6 +162,7 @@ export function PresenceSlot() {
           document={input.document}
           viewer={viewer}
           capabilities={input.capabilities}
+          context={shell.menuContext}
           onFollow={(participant) => {
             setRoster(null);
             follow(participant);

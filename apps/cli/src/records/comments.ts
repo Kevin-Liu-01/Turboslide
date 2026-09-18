@@ -281,7 +281,9 @@ export async function placeAnchor(
       : anchor;
   const placed = resolveAnchor(document, checked);
   if (placed.orphaned) {
-    throw new RangeError(`the anchor names nothing on the current document (${placed.reason})`);
+    throw new RangeError(
+      `This comment could not be placed: the object it named is not on the slide (the anchor names nothing on the current document; ${placed.reason})`,
+    );
   }
   return checked;
 }

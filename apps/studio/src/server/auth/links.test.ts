@@ -327,3 +327,67 @@ describe('the exchange', () => {
     expect((await runtime.principals.get('usr_maya', NOW))?.linkGrants).toHaveLength(1);
   });
 });
+
+// Cycle 2 (VERIFICATION.md pass 2 F-share-404): the grant lands where every instance reads it as
+// well as on this instance's principal record; a failure of that second write never fails the
+// exchange.
+describe('the grant across instances (cycle 2)', () => {
+  const lookup = async (hash: string) => findLinkInRecord(record(), hash, NOW);
+
+  test('notes the grant with the principal id, the link and the stamp for an anonymous visitor', async () => {
+    const { runtime } = runtimeWith();
+    const noted: { principalId: string; grant: unknown; now: string }[] = [];
+    const outcome = await exchangeShareToken(TOKEN, navigation(), {
+      runtime,
+      identity: anonymousIdentity(),
+      lookup,
+      now: NOW,
+      noteGrant: async (principalId, grant, now) => {
+        noted.push({ principalId, grant, now });
+      },
+    });
+    expect(outcome.kind).toBe('redirect');
+    expect(noted).toEqual([
+      {
+        principalId: ANON,
+        grant: { linkId: 'lnk_viewer1', deckId: 'q4-review', role: 'viewer' },
+        now: NOW.toISOString(),
+      },
+    ]);
+    const held = await runtime.principals.get(ANON);
+    expect(held?.linkGrants).toEqual([
+      { linkId: 'lnk_viewer1', deckId: 'q4-review', role: 'viewer' },
+    ]);
+  });
+
+  test('a failing note leaves the redirect and the record grant standing', async () => {
+    const { runtime } = runtimeWith();
+    const outcome = await exchangeShareToken(TOKEN, navigation(), {
+      runtime,
+      identity: anonymousIdentity(),
+      lookup,
+      now: NOW,
+      noteGrant: async () => {
+        throw new Error('the index is unreachable');
+      },
+    });
+    expect(outcome.kind).toBe('redirect');
+    expect((await runtime.principals.get(ANON))?.linkGrants).toHaveLength(1);
+  });
+
+  test('a dead token notes nothing', async () => {
+    const { runtime } = runtimeWith();
+    let calls = 0;
+    const outcome = await exchangeShareToken(REVOKED, navigation(), {
+      runtime,
+      identity: anonymousIdentity(),
+      lookup,
+      now: NOW,
+      noteGrant: async () => {
+        calls += 1;
+      },
+    });
+    expect(outcome.kind).toBe('not_found');
+    expect(calls).toBe(0);
+  });
+});

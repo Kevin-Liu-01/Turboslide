@@ -38,3 +38,4 @@ Read [references/verification.md](references/verification.md) for the evidence a
 - A resolved apply is only a React commit; wait for the render before reading pixels.
 - Look at both themes after every edit; a slide passes only when both do.
 - The gate (`gate.json` from the judge loop, or `turboslide lint` exit 0 plus `render` with no page errors and `build` under budget) names the revision; the claim is about that revision.
+- A feature is in the editor's default view only when every row of its part of the core matrix (`docs/gslides-parity/focus/core-matrix.json`) passes on the preview and on production; a row nobody drove is not driven, never passed (docs/FOCUS.md section 6).

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { ICON_COLORS, ICON_NAMES, isIconName } from '@turboslide/schema/icons';
-import type { IconColor, IconName } from '@turboslide/schema/icons';
+import { ICON_COLORS, ICON_NAMES, isIconName } from '@turboslide/schema/icon-names';
+import type { IconColor, IconName } from '@turboslide/schema/icon-names';
 
 import { Glyph, IconPicker } from '../IconPicker';
 import { tipProps } from '../Tooltip';

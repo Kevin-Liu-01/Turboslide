@@ -61,19 +61,28 @@ const ITEMS: MenuItem[] = assignAccessKeys([
     dividerBefore: true,
   },
   { id: 'edit.gone', label: 'Gone', status: 'omit', omitReason: 'never drawn' },
+  /* a disabled row with its reason: the fixture reads `canRedo`, which the default context answers
+     false; `canPaste` answered false on an empty clipboard until cycle 2 of the focus round, when
+     Paste became always enabled as Google's is (menu-model.test.ts "cycle 2") */
   {
     id: 'edit.paste',
     label: 'Paste',
     status: 'now',
     effect: { kind: 'client', handler: 'paste' },
-    enabled: 'canPaste',
+    enabled: 'canRedo',
     disabledReason: 'Copy something first',
   },
 ]).map((item) => (item.id === 'edit.grid' ? { ...item, accessKey: 'r' } : item));
 
+/* the focus round (docs/FOCUS.md 3.1): a Later row is drawn only while Tools > Advanced tools is
+   on, so the harness runs with the switch on and one test below asserts the row's absence off */
 const CTX: MenuContext = {
   ...DEFAULT_MENU_CONTEXT,
-  settings: { ...DEFAULT_MENU_CONTEXT.settings, snapGrid: true },
+  settings: { ...DEFAULT_MENU_CONTEXT.settings, snapGrid: true, advancedTools: true },
+};
+const DEFAULT_CTX: MenuContext = {
+  ...CTX,
+  settings: { ...CTX.settings, advancedTools: false },
 };
 
 function Harness(props: Partial<MenuProps> & { trigger?: boolean }) {
@@ -143,6 +152,18 @@ describe('Menu rows', () => {
     );
     for (const el of document.querySelectorAll('[role^="menuitem"]'))
       expect(el.hasAttribute('title')).toBe(false);
+  });
+
+  it('leaves a Later row out while Advanced tools is off, and keeps the rest (docs/FOCUS.md 3.1)', () => {
+    render(<Harness context={DEFAULT_CTX} />);
+    expect(document.querySelector('[data-menu-item="edit.italic"]')).toBeNull();
+    expect(row('edit.undo')).toBeTruthy();
+    expect(row('edit.more')).toBeTruthy();
+    expect(row('edit.grid')).toBeTruthy();
+    expect(row('edit.paste')).toBeTruthy();
+    expect(document.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]').length).toBe(
+      4,
+    );
   });
 
   it('prints Windows words and Windows chords on the other platform', () => {

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import type { EditorShellInput, PresenceParticipant } from '../editor-shell';
+import { SETTINGS_STORAGE } from '../editor-shell';
 import { EditorShell } from '../EditorShell';
 import { cn } from '../lib/cn';
 import { ShellContext } from '../shell-context';
@@ -140,19 +141,59 @@ describe('the title row slots', () => {
     const presence = right.querySelector('[data-control="title.presence"]')!;
     expect(presence.querySelectorAll('.ts-presence-slot.is-empty')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('');
+    /* the own chip (the account menu's opener) and the inbox plate are parked (docs/FOCUS.md
+       3.2): absent in the default view, the inbox slot kept empty for the row's geometry */
+    expect(presence.querySelector('.ts-presence-rule')).toBeNull();
+    expect(presence.querySelector('[data-control="title.account"]')).toBeNull();
+    expect(right.querySelector('[data-control="title.inbox"]')).toBeNull();
+    expect(
+      right.querySelector('[data-control="title.inbox.slot"]')?.classList.contains('is-empty'),
+    ).toBe(true);
+    expect(right.querySelector('.ts-title-share-slot')?.classList.contains('has-dot')).toBe(false);
+  });
+
+  it('draws the own chip, its rule and the inbox plate at zero behind Tools > Advanced tools', () => {
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
+    const { container } = render(<Harness input={input()} shell={shellState()} />);
+    const right = container.querySelector('.ts-title-r')!;
+    const presence = right.querySelector('[data-control="title.presence"]')!;
     expect(presence.querySelector('.ts-presence-rule')).not.toBeNull();
     expect(presence.querySelector('[data-control="title.account"]')).not.toBeNull();
     const inbox = right.querySelector('[data-control="title.inbox"]')!;
     expect(inbox.getAttribute('data-unread')).toBe('0');
     expect(inbox.getAttribute('aria-label')).toBe(TITLE_ROW.notifications);
-    expect(right.querySelector('.ts-title-share-slot')?.classList.contains('has-dot')).toBe(false);
+    expect(
+      right.querySelector('[data-control="title.inbox.slot"]')?.classList.contains('is-empty'),
+    ).toBe(false);
   });
 
-  it('draws four chips and +16 for twenty people, the roster with every row and the Join chat stub', () => {
+  it('draws four chips and +16 for twenty people, the roster with every row; the Go to slide word and the Join chat stub are parked and return behind Tools > Advanced tools', () => {
     const others = Array.from({ length: 20 }, (_, i) => person(i + 1));
     const self = person(0, { clientId: 'me', name: 'Kevin', trust: 'guest' });
     const onFollow = vi.fn();
     const onGoTo = vi.fn();
+    /* the default view first: the rows and chips stay, the parked words and the stub are absent
+       (docs/FOCUS.md 3.1, 3.2; b6's FR2) */
+    const plain = render(
+      <Harness
+        input={input({ presence: { self, others, onFollow, onGoTo } })}
+        shell={shellState()}
+      />,
+    );
+    fireEvent.click(plain.container.querySelector('[data-control="presence.more"]')!);
+    const plainRoster = document.getElementById('ts-menu-roster')!;
+    /* the twenty people; the own row (the account menu's opener, `title.presence.me`) is parked */
+    expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(20);
+    expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).toBeNull();
+    expect(plainRoster.querySelector('[data-menu-item="title.presence.joinChat"]')).toBeNull();
+    expect(plainRoster.textContent ?? '').not.toContain('Go to slide');
+    expect(plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+      'slide',
+    );
+    fireEvent.keyDown(plainRoster, { key: 'Escape' });
+    plain.unmount();
+    /* the switch on, remembered per browser: the words and the stub return */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(
       <Harness
         input={input({ presence: { self, others, onFollow, onGoTo } })}
@@ -175,6 +216,9 @@ describe('the title row slots', () => {
     expect(roster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(21);
     expect(roster.querySelector('[data-control="presence.roster.me"]')?.textContent).toContain(
       PRESENCE.you,
+    );
+    expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+      'Go to slide',
     );
     const stub = roster.querySelector('[data-menu-item="title.presence.joinChat"]')!;
     expect(stub.getAttribute('aria-disabled')).toBe('true');
@@ -217,6 +261,9 @@ describe('the title row slots', () => {
   });
 
   it('opens the own chip menu with the account rows and the sentence, and nothing else in the chrome mentions accounts', () => {
+    /* the account rows are parked (docs/FOCUS.md 3.2): the menu is asserted with Tools > Advanced
+       tools on, remembered per browser */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const me = {
       principalId: 'anon_me',
       label: 'Titanium 471',
@@ -251,6 +298,8 @@ describe('the title row slots', () => {
   });
 
   it('counts the inbox plate to 99+, dots Share on a pending request, and reads the offline phrase and the last editor', () => {
+    /* the inbox plate is parked (docs/FOCUS.md 3.2): its count is read behind Tools > Advanced tools */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const maya = {
       principalId: 'anon_m',
       label: 'Cobalt 212',

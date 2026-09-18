@@ -181,9 +181,13 @@
   border-color: var(--pt-ink);
 }
 
+/* the numeral in a box of one width whose text starts at the left edge whatever the count: "+9" to
+   "+10" moves no text node (centred in a box that grew with it, the numeral moved 1.67 px at its
+   second digit, a layout shift entry the twenty participants row of presence.spec.ts read;
+   VERIFICATION C3S-F10, build/t2.md T2-R2); 23 px is "+10" in the twelve pixel tabular figures */
 .ts-presence-count {
-  min-width: 20px;
-  text-align: center;
+  width: 23px;
+  text-align: left;
 }
 
 .ts-presence-rule {

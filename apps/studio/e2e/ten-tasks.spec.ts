@@ -33,8 +33,10 @@ const BUDGET = {
   /* Ctrl+M, Cmd+D, Delete, one drag */
   5: { clicks: 1, keys: 3 },
   6: { clicks: 5, keys: 0 },
-  /* the first cell, Tab through the cells; the big number, Cmd+A */
-  7: { clicks: 2, keys: 21 },
+  /* the first cell, Tab through the cells; the big number, Cmd+A. SPEC 11.2 counts one click
+     into each; under the click model of docs/gslides-parity/focus/AMENDMENTS.md A1 (rule 3) the
+     entry into a text object is a double click, two presses each, so the row's budget is four */
+  7: { clicks: 4, keys: 21 },
   8: { clicks: 1, keys: 0 },
   9: { clicks: 2, keys: 0 },
   /* Share, Copy link; then File > Download > PDF Document, Download */
@@ -483,12 +485,13 @@ test('task 7: update the pricing table and the big number', async ({ page }) => 
     'data-active',
     'table',
   );
-  /* the task: click the first price cell, type, Tab through the cells */
+  /* the task: double click the first price cell (AMENDMENTS.md A1 rule 3: one click selects the
+     table, the double click opens the cell), type, Tab through the cells */
   const cell = (r: number, c: number) =>
     page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="table/rows/${r}/cells/${c}"]`);
   const first = await cell(1, 1).boundingBox();
   expect(first).not.toBeNull();
-  await k.clickAt(first!.x + 8, first!.y + first!.height / 2);
+  await k.clickAt(first!.x + 8, first!.y + first!.height / 2, { clickCount: 2 });
   await expect(cell(1, 1)).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.press('End');
   await page.keyboard.press('Shift+Home');
@@ -505,7 +508,7 @@ test('task 7: update the pricing table and the big number', async ({ page }) => 
       { timeout: 20_000 },
     )
     .toBe('10');
-  /* the big number: one click into the prompt, Cmd+A, type */
+  /* the big number: a double click into the prompt (A1 rule 3), Cmd+A, type */
   const big = (await rows(page)).find((row) => row.template === 'big-number');
   expect(big).toBeTruthy();
   await invoke(page, 'view.goto', { slideId: big!.id });
@@ -516,7 +519,7 @@ test('task 7: update the pricing table and the big number', async ({ page }) => 
   const number = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const nbox = await number.boundingBox();
   expect(nbox).not.toBeNull();
-  await k.clickAt(nbox!.x + nbox!.width / 2, nbox!.y + nbox!.height / 2);
+  await k.clickAt(nbox!.x + nbox!.width / 2, nbox!.y + nbox!.height / 2, { clickCount: 2 });
   await expect(number).toHaveAttribute('contenteditable', 'true');
   await k.press('ControlOrMeta+a');
   await k.type('42%');
@@ -576,7 +579,13 @@ test('task 10: send a link or a PDF', async ({ page, context }) => {
   await k.click(menuItem(page, 'file.download.pdf'));
   await expect(control(page, 'dialog.download.pdf')).toBeVisible();
   await expect(control(page, 'dialog.download.ok')).toBeEnabled();
-  await expect(control(page, 'dialog.download.includeNotes')).toBeVisible();
+  /* the PDF dialog offers the skipped slides check and says the notes are not in the PDF (File >
+     Print preview prints them); the speaker notes check belongs to the PowerPoint dialog alone
+     (packages/chrome/src/dialogs/Download.tsx) */
+  await expect(control(page, 'dialog.download.includeSkipped')).toBeVisible();
+  await expect(control(page, 'dialog.download.pdf')).toContainText(
+    'The speaker notes are not in the PDF',
+  );
   /* the fourth click runs the export on the worker; counted, not run here (the PDF gate is B2's suite) */
   k.c.clicks += 1;
   await page.keyboard.press('Escape');

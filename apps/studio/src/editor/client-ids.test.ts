@@ -5,10 +5,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CLIENT_IDS_KEPT,
+  TAB_TOKEN_KEY,
   clientIdsKey,
   partitionRoster,
   readClientIds,
   rememberClientId,
+  tabToken,
 } from './client-ids';
 import type { IdStorage } from './client-ids';
 
@@ -94,5 +96,38 @@ describe('partitionRoster', () => {
     );
     expect(others).toHaveLength(1);
     expect(others[0]?.clientId).toBe(id(3));
+  });
+});
+
+describe('the tab’s token (the cycle 3 stream fix round, fix round; VERIFICATION C3S-F2)', () => {
+  it('mints one 32 hex token per tab, keeps it in storage across a reload and answers the same one on every read', () => {
+    const store = storage();
+    const first = tabToken(store);
+    expect(first).toMatch(/^[0-9a-f]{32}$/);
+    expect(store.map.get(TAB_TOKEN_KEY)).toBe(first);
+    expect(tabToken(store)).toBe(first);
+    // another tab (its own storage) gets its own token
+    expect(tabToken(storage())).not.toBe(first);
+  });
+
+  it('mints a fresh token without storage, when the stored value is malformed and when storage throws', () => {
+    const fixed = (bytes: Uint8Array<ArrayBuffer>): void => {
+      bytes.fill(0xab);
+    };
+    expect(tabToken(null, fixed)).toBe('ab'.repeat(16));
+    expect(tabToken(undefined, fixed)).toBe('ab'.repeat(16));
+    const bad = storage();
+    bad.map.set(TAB_TOKEN_KEY, 'not-a-token');
+    expect(tabToken(bad, fixed)).toBe('ab'.repeat(16));
+    expect(bad.map.get(TAB_TOKEN_KEY)).toBe('ab'.repeat(16));
+    const throwing: IdStorage = {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {
+        throw new Error('blocked');
+      },
+    };
+    expect(tabToken(throwing, fixed)).toBe('ab'.repeat(16));
   });
 });

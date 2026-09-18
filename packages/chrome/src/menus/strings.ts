@@ -33,6 +33,10 @@ export const TITLE_ROW = {
   retrying: "Couldn't save, retrying",
   /* SPEC-3 15: the fifth save phrase; the five stack in one fixed cell (9.2 E5) */
   offline: 'Offline. Changes will save when you reconnect',
+  /* the focus round's blob tier budget (cycle 3 fix round, build/b7.md FR3-R5): the store refused
+     the room's poll (a 429, a 5xx) and the poll backs off; the word stands until a poll succeeds.
+     The ellipsis as `saving` carries it; the sixth phrase in the same cell, shorter than `offline` */
+  reconnecting: 'Reconnecting…',
   lastEdit: (ago: string) => `Last edit ${ago}`,
   /* SPEC-3 4.2: the newest record's author through resolvePrincipal, never the tab's own */
   lastEditBy: (ago: string, name: string) => `Last edit ${ago} by ${name}`,
@@ -580,11 +584,19 @@ export const PICKERS = {
   weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
 } as const;
 
-/** The canvas chips, readouts and bars of round two (SPEC-2 section 10, 0.86). */
+/**
+ * The canvas chips, readouts and bars of round two (SPEC-2 section 10, 0.86). The click model of
+ * the focus round (docs/gslides-parity/focus/AMENDMENTS.md A1) adds the chip's sentence for a
+ * selected text object: one click selects and shows the ring, the handles and the chip with no
+ * caret, so the chip's tooltip tells the seller how the text opens; the placeholder prompts
+ * below stay Google's words (A1 item 5).
+ */
 export const CANVAS = {
   crop: 'Drag the handles to crop. Press Enter to finish',
   wordArt: 'Type your text and press Enter',
   group: 'Group',
+  /* the selected text object's chip tooltip (A1 items 3 and 4): the two ways into the text */
+  editText: 'Double click to edit the text, or start typing',
   /* the multi selection chip: "3 objects" */
   objects: (count: number) => `${count} objects`,
   /* the rotation chip: "37°" */

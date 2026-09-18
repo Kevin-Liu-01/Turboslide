@@ -48,6 +48,16 @@
 //      and the text chords on a range (the marks, Justify, the indents) are dispatched as real
 //      keydowns; the words of section 10 are checked while every new dialog and picker is open.
 //
+//  10. The focus round (docs/FOCUS.md section 3): the expectation table reads Tools > Advanced
+//      tools from the page (`data-advanced-tools` on the root, `contextOf`). With the switch off,
+//      a parked row or control (`advanced: true`) and a Later stub are expected absent from the
+//      menus, the toolbar and the right-click menus, and a tail parked whole falls back to the
+//      default tail; a core row is expected present and enabled by its predicate. A second
+//      presence pass turns the switch on through the Tools menu row (`setAdvancedTools`) and
+//      expects every parked row in its Google position with the Later rows disabled and carrying
+//      their stub clause; the parity phases (the effects, the tails, the object states, round
+//      three) run with the switch on, and it goes off again before the read-only walk.
+//
 // The read-only deck (`/edit/gt-brand`) gets steps 2, 4 (default tail), 5 (filmstrip) and 7 with
 // no write. The JSON report (one row per item with pass or fail and the evidence, totals per
 // menu) goes to --out; exit 1 on any miss, 0 with --report. Rules: no bare letters typed with
@@ -80,7 +90,11 @@ import {
   isEnabled,
   isPresent,
   menuOf,
+  presentControls,
+  resolveContextEntries,
+  resolveEffect,
   resolveLabel,
+  visibleMenus,
   walkItems,
 } from '../packages/chrome/src/menus/model.ts';
 import {
@@ -514,6 +528,20 @@ async function readRows(page, level) {
   );
 }
 
+/**
+ * docs/FOCUS.md 3.2: `title.presence.follow` and `title.presence.goTo` are parked rows of the
+ * roster, but the presence chips that carry their ids in the title row stay drawn (the matrix row
+ * `collab.presence-chips`), so a chip found at level 0 of the title row is not a parked row drawn.
+ */
+function isPresenceChip(id, found) {
+  return (
+    (id === 'title.presence.follow' || id === 'title.presence.goTo') &&
+    found !== undefined &&
+    found.level === 0 &&
+    found.menu === 'title'
+  );
+}
+
 async function openBarMenu(page, menuId) {
   await closeMenus(page);
   await page.click(`[data-control="menubar.${menuId}"]`);
@@ -772,10 +800,21 @@ async function contextOf(page, { focus = 'none', selection, clipboard = 'empty' 
   const mode = await page.evaluate(
     () => document.querySelector('.pt-viewer')?.getAttribute('data-edit-mode') ?? 'editing',
   );
+  /* the Sign in row's predicate reads the product's own fact (`describe().state.account`, the
+     controller's `signInAvailable` from the page's init payload) and falls back to the auth
+     probe on a build that does not report it; the two disagreed on the check chain's server and
+     the switch on pass expected a Sign in row the account menu did not draw (VERIFICATION.md
+     F-step20, `rows:scratch-advanced title.account.signIn`) */
   const account = {
     signedIn: st.account?.signedIn === true,
-    signInAvailable: await signInAvailable(page),
+    signInAvailable:
+      typeof st.account?.signInAvailable === 'boolean'
+        ? st.account.signInAvailable
+        : await signInAvailable(page),
   };
+  /* the focus round (docs/FOCUS.md 3.1): the switch as the page reports it, so every presence
+     expectation below follows the state the audit put the product in */
+  const advancedTools = await advancedToolsOn(page);
   return {
     ...DEFAULT_MENU_CONTEXT,
     ...roleFacts,
@@ -793,8 +832,103 @@ async function contextOf(page, { focus = 'none', selection, clipboard = 'empty' 
     clipboard,
     history: { undo, redo },
     sections,
-    settings: { ...DEFAULT_MENU_CONTEXT.settings, mode },
+    settings: { ...DEFAULT_MENU_CONTEXT.settings, mode, advancedTools },
   };
+}
+
+/** True while Tools > Advanced tools is on: the shell stamps `data-advanced-tools` on the root (docs/FOCUS.md 3.1). */
+async function advancedToolsOn(page) {
+  return page.evaluate(
+    () => document.querySelector('.pt-viewer')?.hasAttribute('data-advanced-tools') === true,
+  );
+}
+
+/**
+ * Flips Tools > Advanced tools through the product's own row (docs/FOCUS.md 3.1) until the root
+ * reports the wanted state; the setting is kept per browser, so it holds across the pages of one
+ * run. Records the flip as a row of the `advanced` section and returns whether the state was
+ * reached.
+ */
+async function setAdvancedTools(page, on, { quietMiss = false } = {}) {
+  const check = on ? 'turn on' : 'turn off';
+  if ((await advancedToolsOn(page)) === on) return true;
+  await closeOverlays(page);
+  /* a page without the editor's menu bar (a view only page, the home page) has no row to click;
+     say so rather than time out on the bar. A caller with a fallback page (setAdvancedToolsAnywhere)
+     passes quietMiss: the miss is its expected first step and records no row */
+  if ((await page.$('[data-control="menubar.tools"]')) === null) {
+    if (!quietMiss)
+      fail('advanced', {
+        id: 'tools.advancedTools',
+        check,
+        evidence: `no Tools menu on ${page.url()}: ${
+          (await page.$('[data-control="toolbar.viewOnly"]')) !== null
+            ? 'the page is view only'
+            : 'the menu bar is not drawn'
+        }`,
+      });
+    return false;
+  }
+  await openBarMenu(page, 'tools');
+  /* the rows of a busy page render a frame late; wait for the row before reading it absent */
+  const row = await page
+    .waitForSelector('[data-menu-item="tools.advancedTools"]', { timeout: 2000 })
+    .catch(() => null);
+  if (row === null) {
+    const rows = await page
+      .$$eval(`${ROW_SELECTOR(0)}`, (els) => els.map((el) => el.getAttribute('data-menu-item')))
+      .catch(() => []);
+    if (!quietMiss)
+      fail('advanced', {
+        id: 'tools.advancedTools',
+        check,
+        evidence: `the row is not in the Tools menu on ${page.url()}; rows drawn: ${rows.join(', ') || 'none'}`,
+      });
+    await closeMenus(page);
+    return false;
+  }
+  await row.click();
+  const reached = await waitFor(async () => ((await advancedToolsOn(page)) === on ? true : null), {
+    timeout: 3000,
+  });
+  await closeMenus(page);
+  (reached ? pass : fail)('advanced', {
+    id: 'tools.advancedTools',
+    check,
+    evidence: reached
+      ? `the root ${on ? 'carries' : 'lost'} data-advanced-tools after the row`
+      : 'the root did not follow the row within 3 s',
+  });
+  return reached === true;
+}
+
+/**
+ * setAdvancedTools with the browser's own /new draft as the fallback page. The setting is the
+ * browser's (docs/FOCUS.md 3.1) and the row is gated to writers (menus/model.ts, the Tools menu's
+ * `gate(..., 'write')`), so a page that draws a Tools menu without the row (the collaborator the
+ * scratch deck admits as a viewer under ruling (2), a read only deck) or no menu bar at all cannot
+ * flip it; the flip is made on /new (no write, so no deck is made) and the page is loaded again.
+ * The miss on the first page is the expected first step and records nothing (the check chain's
+ * step 20 read it as a failure of the product, "the row is not in the Tools menu on
+ * /edit/<scratch>; rows drawn: tools.accessibilitySettings", VERIFICATION.md C2-F13, cycle 3);
+ * one row of the `advanced` section records the fallback's outcome.
+ */
+async function setAdvancedToolsAnywhere(page, on) {
+  if (await setAdvancedTools(page, on, { quietMiss: true })) return true;
+  const back = page.url();
+  await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  const flipped = await setAdvancedTools(page, on, { quietMiss: true });
+  await page.goto(back, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  (flipped ? pass : fail)('advanced', {
+    id: 'tools.advancedTools',
+    check: on ? 'turn on' : 'turn off',
+    evidence: flipped
+      ? `no row on ${back}; turned ${on ? 'on' : 'off'} on /new and the page loaded again`
+      : `no row on ${back} nor on /new`,
+  });
+  return flipped;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -846,6 +980,21 @@ async function walkMenus(page, ctx, tag) {
      Follow or Go to slide, the own row the account menu, the footer the Join chat stub */
   let rosterParticipants = 0;
   for (const [parentId, plate] of Object.entries(PLATE_MENUS)) {
+    /* docs/FOCUS.md 3.2: the own chip's menu is parked whole, so its opener is not drawn while
+       Tools > Advanced tools is off; the rows are asserted absent by the loop below */
+    const parentItem = findItem(parentId);
+    if (parentItem !== undefined && !isPresent(parentItem, ctx)) {
+      const shown = (await page.$(plate.opener)) !== null;
+      (shown ? fail : pass)(`rows:${tag}`, {
+        id: parentId,
+        menu: 'title',
+        check: 'plate menu opens',
+        evidence: shown
+          ? `${plate.opener} is drawn while ${parentId} is parked with Tools > Advanced tools off`
+          : `${plate.opener} absent: ${parentId} is parked while Tools > Advanced tools is off`,
+      });
+      continue;
+    }
     const opened = await openPlate(page, plate).catch(() => false);
     if (!opened) {
       fail(`rows:${tag}`, {
@@ -895,8 +1044,12 @@ async function walkMenus(page, ctx, tag) {
       const row = listed.find((r) => r.id === item.id);
       if (!row || row.disabled) continue;
       /* a dynamic row may carry no child rows at all (Insert > Table, the preset grids): the
-         plate is checked before the children test */
-      const dynamic = item.effect?.kind === 'submenu' && item.effect.dynamic;
+         plate is checked before the children test. The effect is the resolved one: Insert >
+         Shape > Shapes lists its three rows in the default view and draws the gallery plate
+         through `altEffect` while Tools > Advanced tools is on (docs/FOCUS.md section 4), and the
+         static `effect` read walked the rows while the plate stood */
+      const effect = resolveEffect(item, ctx) ?? item.effect;
+      const dynamic = effect?.kind === 'submenu' && effect.dynamic;
       if (!dynamic && (!item.items || item.items.length === 0)) continue;
       if (!dynamic && row.haspopup !== 'menu') continue;
       if (dynamic) {
@@ -906,7 +1059,7 @@ async function walkMenus(page, ctx, tag) {
            click on a row whose plate is open closes it again (measured: every plate read as
            missing on the first run), so the click is only for a row the hover did not open */
         const rowSel = `${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`;
-        const prefix = item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.`;
+        const prefix = effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.`;
         await page.hover(rowSel);
         let plate = await page
           .waitForSelector(`.ts-menu.is-dynamic [data-control^="${prefix}"]`, { timeout: 1500 })
@@ -921,14 +1074,14 @@ async function walkMenus(page, ctx, tag) {
           plate === null
             ? 0
             : await page.$$eval(
-                `.ts-menu.is-dynamic [data-control^="${item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
+                `.ts-menu.is-dynamic [data-control^="${effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
                 (els) => els.length,
               );
         const untipped =
           plate === null
             ? []
             : await page.$$eval(
-                `.ts-menu.is-dynamic [data-control^="${item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
+                `.ts-menu.is-dynamic [data-control^="${effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
                 (els) =>
                   els
                     .filter((el) => !el.closest('[data-tip]'))
@@ -937,7 +1090,7 @@ async function walkMenus(page, ctx, tag) {
               );
         seen.get(item.id).dynamic = {
           plate: plate !== null,
-          kind: item.effect.dynamic,
+          kind: effect.dynamic,
           tiles,
           untipped,
         };
@@ -947,7 +1100,28 @@ async function walkMenus(page, ctx, tag) {
       await walkList(menuId, item.items, level + 1);
     }
   };
+  /* docs/FOCUS.md 3.1: a menu whose rows are all parked is not drawn while Tools > Advanced tools
+     is off (Extensions), so only the menus the model draws in this context are opened; the bar is
+     read once and each absent menu is asserted absent (VERIFICATION F20: the default view's walk
+     clicked menubar.extensions and timed out) */
+  const drawn = visibleMenus(ctx).map((menu) => menu.id);
+  const barMenus = await page.$$eval('[data-control^="menubar."]', (els) =>
+    els.map((el) => el.getAttribute('data-control').slice('menubar.'.length)),
+  );
   for (const menu of MENUS) {
+    const shown = barMenus.includes(menu.id);
+    const expected = drawn.includes(menu.id);
+    (shown === expected ? pass : fail)(`rows:${tag}`, {
+      id: `menubar.${menu.id}`,
+      menu: menu.id,
+      check: 'menu present',
+      evidence: `${shown ? 'in the bar' : 'absent'}; the model ${expected ? 'draws' : 'does not draw'} the menu in this context${
+        expected || ctx.settings.advancedTools === true
+          ? ''
+          : ' (every row parked while Tools > Advanced tools is off)'
+      }`,
+    });
+    if (!expected || !shown) continue;
     await openBarMenu(page, menu.id);
     await walkList(menu.id, menu.items, 0);
     await closeMenus(page);
@@ -989,13 +1163,29 @@ async function walkMenus(page, ctx, tag) {
     const present =
       isPresent(item, ctx) && parentIds.every((pid) => isPresent(findItem(pid) ?? {}, ctx));
     if (!present) {
+      /* docs/FOCUS.md 3.1: a parked row or a Later stub is absent while the switch is off, a row
+         a role cannot use is absent by its predicate */
+      const parkedHere = [item.id, ...parentIds].find((id) => {
+        const each = findItem(id);
+        return each !== undefined && (each.advanced === true || each.status === 'later');
+      });
+      const why =
+        parkedHere !== undefined && ctx.settings.advancedTools !== true
+          ? `parked (${parkedHere}) while Tools > Advanced tools is off`
+          : `when: ${item.when}`;
       if (found === undefined)
-        pass(section, { ...base, check: 'absent by predicate', evidence: `when: ${item.when}` });
+        pass(section, { ...base, check: 'absent by predicate', evidence: why });
+      else if (isPresenceChip(item.id, found))
+        pass(section, {
+          ...base,
+          check: 'absent by predicate',
+          evidence: `a presence chip in the title row; the chips stay drawn while their rows are parked (docs/FOCUS.md 3.2)`,
+        });
       else
         fail(section, {
           ...base,
           check: 'absent by predicate',
-          evidence: `rendered while the predicate ${item.when} says absent in this state`,
+          evidence: `rendered while ${why} says absent in this state`,
         });
       continue;
     }
@@ -1092,12 +1282,15 @@ async function walkMenus(page, ctx, tag) {
       const check = isChecked(item, ctx);
       if (check !== undefined && found.role === 'menuitem')
         problems.push('a check item drawn as a plain menuitem');
-      /* SPEC-2 4.1: an enabled dynamic row draws its plate with tiles that carry the tooltip primitive */
-      if (item.effect?.kind === 'submenu' && item.effect.dynamic && expected && !found.disabled) {
+      /* SPEC-2 4.1: an enabled dynamic row draws its plate with tiles that carry the tooltip
+         primitive; the effect is the resolved one, since Insert > Shape > Shapes draws its gallery
+         plate only while Tools > Advanced tools is on (docs/FOCUS.md section 4) */
+      const resolved = resolveEffect(item, ctx);
+      if (resolved?.kind === 'submenu' && resolved.dynamic && expected && !found.disabled) {
         const plate = found.dynamic;
         if (!plate || plate.plate !== true)
-          problems.push(`the ${item.effect.dynamic} plate did not render`);
-        else if (plate.tiles === 0) problems.push(`the ${item.effect.dynamic} plate has no tile`);
+          problems.push(`the ${resolved.dynamic} plate did not render`);
+        else if (plate.tiles === 0) problems.push(`the ${resolved.dynamic} plate has no tile`);
         else if (plate.untipped.length > 0)
           problems.push(`tiles without a tooltip: ${plate.untipped.join(', ')}`);
       }
@@ -1130,13 +1323,19 @@ async function readToolbar(page) {
   );
 }
 
-async function checkToolbar(page, kind, tag) {
+async function checkToolbar(page, kind, tag, ctx = null) {
+  const menuCtx = ctx ?? (await contextOf(page).catch(() => DEFAULT_MENU_CONTEXT));
   const observed = (await readToolbar(page)).map((c) => c.id);
-  /* Hide the menus (SPEC 3.1 row 18) closes every tail; tailFor() leaves it out because the bar draws it apart */
-  const wanted =
-    kind === 'default'
-      ? [...HEAD_IDS, ...DEFAULT_TAIL_IDS]
-      : [...HEAD_IDS, ...tailFor(kind).map((c) => c.control), HIDE_MENUS_CONTROL];
+  /* docs/FOCUS.md 3.3: a parked control is absent while Tools > Advanced tools is off, a tail
+     parked whole falls back to the default tail (ToolbarTail.tsx), and Hide the menus (SPEC 3.1
+     row 18, drawn apart from the tail) is parked with View > Full screen */
+  const head = presentControls(TOOLBAR_HEAD, menuCtx).map((c) => c.control);
+  const own = presentControls(tailFor(kind), menuCtx);
+  const tail = (
+    own.length > 0 || kind === 'default' ? own : presentControls(tailFor('default'), menuCtx)
+  ).map((c) => c.control);
+  const hide = isPresent(findItem('view.fullScreen') ?? {}, menuCtx) ? [HIDE_MENUS_CONTROL] : [];
+  const wanted = [...head, ...tail, ...hide];
   const known = new Set([
     ...HEAD_IDS,
     ...DEFAULT_TAIL_IDS,
@@ -1149,10 +1348,11 @@ async function checkToolbar(page, kind, tag) {
   const row = {
     id: `toolbar.${kind}`,
     kind,
+    advancedTools: menuCtx.settings.advancedTools === true,
     wanted,
     observed: filtered,
     evidence: same
-      ? `${filtered.length} controls in the order of SPEC 3`
+      ? `${filtered.length} controls in the order of SPEC 3 with Tools > Advanced tools ${menuCtx.settings.advancedTools === true ? 'on' : 'off'}`
       : `wanted ${wanted.join(', ')}; observed ${filtered.join(', ')}`,
   };
   if (same) pass(`toolbar:${tag}`, { ...row, check: 'order' });
@@ -1164,25 +1364,11 @@ async function checkToolbar(page, kind, tag) {
 // Step 5: the right-click menus
 
 function expectedContext(target, ctx) {
-  const out = [];
-  for (const entry of CONTEXT_MENUS[target]) {
-    if (entry === DIVIDER) {
-      out.push('-');
-      continue;
-    }
-    const id = typeof entry === 'string' ? entry : evaluate(entry.when, ctx) ? entry.id : null;
-    if (id === null) continue;
-    /* a conditional divider (the covering picture's appended rows, SPEC-2 0.100) */
-    if (id === DIVIDER) {
-      out.push('-');
-      continue;
-    }
-    const item = findItem(id);
-    if (item && item.status !== 'omit') out.push(id);
-  }
-  /* no divider first, last or doubled */
-  return out.filter(
-    (e, i, a) => !(e === '-' && (i === 0 || i === a.length - 1 || a[i - 1] === '-')),
+  /* the model's own resolution (menus/model.ts resolveContextEntries): a conditional entry by its
+     predicate, a parked row or a Later stub only while Tools > Advanced tools is on (docs/FOCUS.md
+     3.4), and no divider first, last or doubled */
+  return resolveContextEntries(CONTEXT_MENUS[target], ctx).map((entry) =>
+    entry === DIVIDER ? '-' : entry.id,
   );
 }
 
@@ -1350,6 +1536,14 @@ async function toggleState(page, setting) {
          button's pressed state, the announcements region's live attribute */
       case 'mode':
         return v?.getAttribute('data-edit-mode') ?? null;
+      /* View > Comments (SPEC-3 5.3): the display the shell stores; unset is Show all
+         (CollabLayer.tsx reads `settings.comments ?? 'all'`). Read from the reported settings so
+         a radio row's revert (observeToggle) finds the option that was on: without this case the
+         four rows left the display on Hide comments, the last row run, and Insert > Comment later
+         opened no card (the check chain's step 20 read "no comment card opened; snackbar ''",
+         VERIFICATION.md C2-F13) */
+      case 'comments':
+        return st.settings?.comments ?? 'all';
       case 'pointerMine':
         return (
           document
@@ -1669,7 +1863,9 @@ async function runEffect(page, context, item, ctx, deckId, tag) {
             ok: false,
             evidence: `the row is disabled while the predicate ${item.enabled ?? 'always'} says enabled: ${error.message}`,
           }
-        : { ok: false, evidence: `threw: ${String(error).slice(0, 240)}` };
+        : /* a Playwright call log names what intercepted a click or where the element sat only
+             past the first lines, so the whole log is kept the way the infrastructure rows keep it */
+          { ok: false, evidence: `threw: ${String(error).slice(0, 600)}` };
   }
   await closeOverlays(page).catch(() => null);
   if (outcome === undefined) return;
@@ -1882,9 +2078,11 @@ async function runClientEffect(page, context, item) {
         const z = (await state(page)).zoom;
         return z !== before ? z : null;
       });
+      /* back to Fit, the audited zoom (the view.zoom case below says why) */
+      await invoke(page, 'view.zoom', { zoom: 'fit' }).catch(() => null);
       return {
         ok: after !== null,
-        evidence: `zoom ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+        evidence: `zoom ${JSON.stringify(before)} -> ${JSON.stringify(after)}; back to fit`,
       };
     }
     case 'focusTitle': {
@@ -2115,7 +2313,18 @@ async function runClientEffect(page, context, item) {
         },
         { timeout: 6000 },
       );
-      const markers = await page.$$('[data-control="comment.marker"]');
+      /* the page's own list follows the write 60 ms later through comment.list
+         (controller.tsx roomAction, scheduleCommentsRefresh), so the marker is read with a wait,
+         not at the instant the server's list moved (run 1 of the cycle 3 fix round read "threads
+         0 -> 1; 0 marker(s)" on 4381, build/b1.md 12.1) */
+      const markers =
+        (await waitFor(
+          async () => {
+            const drawn = await page.$$('[data-control="comment.marker"]');
+            return drawn.length > 0 ? drawn : null;
+          },
+          { timeout: 4000 },
+        )) ?? [];
       await page.keyboard.press('Escape');
       return {
         ok: landed !== null && markers.length > 0,
@@ -2485,10 +2694,16 @@ async function runActionEffect(page, context, item, ctx, deckId) {
               (Math.abs(z - wanted / 100) < 0.001 || Math.abs(z - wanted) < 0.001);
         return ok ? JSON.stringify(z) : null;
       });
+      /* back to Fit, the audited zoom, the way checkShortcuts returns after its zoom chords: a
+         zoom left at 200 percent moved the stage under every later effect (run 5 of the cycle 3
+         fix round: the comment card of Insert > Comment, placed at the overlay's corner for a
+         slide anchor, sat outside the viewport and its Comment button could not be clicked,
+         build/b1.md 12.1) */
+      if (wanted !== 'fit') await invoke(page, 'view.zoom', { zoom: 'fit' }).catch(() => null);
       return {
         ok: after !== null,
         evidence: after
-          ? `zoom ${after}`
+          ? `zoom ${after}${wanted !== 'fit' ? '; back to fit' : ''}`
           : `zoom ${JSON.stringify((await state(page)).zoom)} wanted ${wanted}; snackbar "${await snackbarText(page)}"`,
       };
     }
@@ -3132,18 +3347,21 @@ async function selectBlockByClick(page, blockId, { text }) {
   if (!el) return null;
   const box = await el.boundingBox();
   if (!box) return null;
-  /* an object is taken by its frame (2 px in from the corner); a text selection by a click 12 px
-     inside, which places the caret (SPEC-2 6.1 rows 1 and 18) */
+  /* an object is taken by its frame (2 px in from the corner); a text object by a click 12 px
+     inside. Under the click model of the focus round (docs/gslides-parity/focus/AMENDMENTS.md
+     A1 items 1 and 4) one click selects the object with no caret and no session, so no Escape
+     follows it: an Escape on a selected object with no session clears the selection (the check
+     chain's step 20 read "clicking p1 then Esc selected null", VERIFICATION.md C2-F13). Only a
+     session that did open (the earlier one click model, or a click that landed inside an open
+     session) is stepped back to the object with Escape (SPEC-2 0.11) */
   const inset = text ? 12 : 2;
   await page.mouse.click(
     box.x + Math.min(inset, box.width / 2),
     box.y + Math.min(inset, box.height / 2),
   );
   await page.waitForTimeout(150);
-  /* a click inside a Text opens its caret (a shape with text included, SPEC-2 0.11): Esc steps
-     the caret to the object, so the keys and rows that follow act on the object */
   const editing = (await page.$('.ts-stagewrap [contenteditable="true"]')) !== null;
-  if (text || editing) {
+  if (editing) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(150);
   }
@@ -3252,11 +3470,23 @@ async function tailStates(page, context, deckId, tag) {
             ? 'line'
             : 'shape';
     let selected;
+    let cellSession = false;
     if (kind === 'table') {
+      /* SPEC 3.6: a table cell selected. Under the click model (AMENDMENTS.md A1 items 1 and 3)
+         one click on the table selects the object, whose tail is the other tail (editor-shell.ts
+         tailKindOf: a table with no cell and no session), and a double click on the cell opens
+         the cell's session, the state the table tail is drawn for (the check chain's step 20 read
+         the other tail's controls where it wanted the table tail, VERIFICATION.md C2-F13) */
       const cell = await page.$(`.ts-stagewrap .pt-slide [data-run="${block.id}/rows/0/cells/0"]`);
       if (cell) {
         const box = await cell.boundingBox();
         await page.mouse.click(box.x + 8, box.y + box.height / 2);
+        await page.waitForTimeout(150);
+        await page.mouse.dblclick(box.x + 8, box.y + box.height / 2);
+        cellSession =
+          (await page
+            .waitForSelector('.ts-stagewrap [contenteditable="true"]', { timeout: 2000 })
+            .catch(() => null)) !== null;
         await page.waitForTimeout(150);
       }
       selected = (await state(page)).blockId;
@@ -3266,8 +3496,13 @@ async function tailStates(page, context, deckId, tag) {
       fail(section, {
         id: `toolbar.${kind}`,
         check: 'select',
-        evidence: `clicking ${block.id} selected ${selected ?? 'nothing'}`,
+        evidence: `clicking ${block.id} selected ${selected ?? 'nothing'}${kind === 'table' ? `; cell session ${cellSession ? 'open' : 'not opened by the double click'}` : ''}`,
       });
+    /* Escape inside a session returns to the object and a second Escape clears the selection (A1 item 4) */
+    if (cellSession) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+    }
     await page.keyboard.press('Escape');
     await page.waitForTimeout(100);
   }
@@ -3752,7 +3987,11 @@ async function checkTextShortcuts(page, slideId, blockId, tag) {
     const run = await page.$(`.ts-stagewrap .pt-slide [data-run="${blockId}/text"]`);
     if (!run) return false;
     const box = await run.boundingBox();
-    await page.mouse.click(box.x + 8, box.y + box.height / 2);
+    /* the click model of the focus round (docs/gslides-parity/focus/AMENDMENTS.md A1): one click
+       selects the object with no caret and a double click opens the session at the point; under
+       the earlier one click model the second click selects the word, which Home collapses, so the
+       battery reads the same first four characters either way */
+    await page.mouse.dblclick(box.x + 8, box.y + box.height / 2);
     const editable = await waitFor(
       () => page.$(`.ts-stagewrap [data-run="${blockId}/text"][contenteditable="true"]`),
       { timeout: 3000 },
@@ -3976,13 +4215,32 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       'textBlock2',
       panelAt(page, 'textFitting'),
     );
-    await runContextRow(
-      page,
-      textBlock.id,
-      'format.dropShadow',
-      'textBlock2',
-      panelAt(page, 'shadow'),
-    );
+    /* Drop shadow applies to the types whose schema carries `shadow` (box, shape, text, shot,
+       picture, icon, table, chart; inspector/format-sections.ts `hasShadow`); on a heading or a
+       paragraph the row opens Format options without the section (VERIFICATION-2 finding 10,
+       VERIFICATION-3 finding 16), so the section is expected by the block's type at the click, not
+       by the row alone (VERIFICATION.md F-step20, `effects:textBlock2 format.dropShadow`) */
+    const SHADOW_TYPES = new Set([
+      'box',
+      'shape',
+      'text',
+      'shot',
+      'picture',
+      'icon',
+      'table',
+      'chart',
+    ]);
+    const shadowBlock = await blockNow(page, slideId, textBlock.id).catch(() => null);
+    const carriesShadow = SHADOW_TYPES.has(shadowBlock?.type ?? textBlock.type);
+    await runContextRow(page, textBlock.id, 'format.dropShadow', 'textBlock2', async (row) => {
+      const outcome = await panelAt(page, 'shadow')(row);
+      if (carriesShadow) return outcome;
+      const panelOpened = /Format options opened/.test(outcome.evidence);
+      return {
+        ok: panelOpened,
+        evidence: `${outcome.evidence}; a ${shadowBlock?.type ?? textBlock.type} block carries no shadow field, so the section is absent by the schema`,
+      };
+    });
     await runContextRow(
       page,
       textBlock.id,
@@ -4203,9 +4461,38 @@ async function roundTwoStates(page, context, states, deckId, tag) {
     }
   }
 
-  // 6. a chart: inserted through the action, its tail, menu, sections and rows
+  // 6. a chart: inserted through the action, its tail, menu, sections and rows. The chart takes a
+  //    blank slide of its own (cycle 2, VERIFICATION.md F-step20 `toolbar:objects toolbar.chart`,
+  //    b1's R17): on the tail slide its corner sat over the table the earlier states placed and
+  //    the click selected the table; the slide leaves with the chart at the end.
   {
     await goto();
+    const created = await invoke(page, 'slide.new', {
+      layout: 'blank',
+      after: slideId,
+      baseRevision: await revisionOf(page),
+    }).catch((e) => ({ error: String(e) }));
+    let chartSlide = null;
+    if (!created.error) {
+      await settled(page).catch(() => null);
+      const list = await invoke(page, 'slide.list').catch(() => []);
+      chartSlide = list[list.findIndex((r) => r.id === slideId) + 1]?.id ?? null;
+    }
+    const gotoChart = async () => {
+      await closeOverlays(page);
+      await invoke(page, 'view.goto', { slideId: chartSlide }).catch(() => null);
+      await waitFor(async () => ((await state(page)).slideId === chartSlide ? true : null));
+      await page
+        .waitForSelector(`.pt-viewer[data-active="${chartSlide}"]`, { timeout: 5000 })
+        .catch(() => null);
+    };
+    const selectChart = async (id) => {
+      await gotoChart();
+      const got = await selectBlockByClick(page, id, { text: false });
+      if (got !== id && (await page.$('.ts-stagewrap [contenteditable="true"]')))
+        await page.keyboard.press('Escape');
+      return (await state(page)).blockId === id;
+    };
     const rev = await revisionOf(page);
     const chart = {
       id: 'audit-chart',
@@ -4215,12 +4502,15 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       series: [{ name: 'Series 1', values: [3, 5, 2] }],
       pos: { x: 320, y: 180, w: 960, h: 540 },
     };
-    const result = await invoke(page, 'block.insert', {
-      slideId,
-      slot: 'main',
-      block: chart,
-      baseRevision: rev,
-    }).catch((e) => ({ error: String(e) }));
+    const result =
+      chartSlide === null
+        ? { error: `slide.new blank: ${created.error ?? 'no slide id after the tail slide'}` }
+        : await invoke(page, 'block.insert', {
+            slideId: chartSlide,
+            slot: 'main',
+            block: chart,
+            baseRevision: rev,
+          }).catch((e) => ({ error: String(e) }));
     if (result.error)
       skip(`toolbar:${tag}`, {
         id: 'toolbar.chart',
@@ -4229,7 +4519,7 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       });
     else {
       await settled(page).catch(() => null);
-      if (await select(chart.id)) {
+      if (await selectChart(chart.id)) {
         await checkToolbar(page, 'chart', tag);
         const ctxC = await objectContext(page, 'chart');
         await checkContextMenu(page, 'chart', () => openBlockMenu(page, chart.id), ctxC, tag);
@@ -4247,7 +4537,7 @@ async function roundTwoStates(page, context, states, deckId, tag) {
           await child.click();
           const after = await waitRevision(page, before, 8000);
           await settled(page).catch(() => null);
-          const block = await blockNow(page, slideId, chart.id);
+          const block = await blockNow(page, chartSlide, chart.id);
           const ok = after !== null && block?.kind === 'pie';
           if (after !== null) await undo(page);
           return { ok, evidence: `revision ${before} -> ${after}; kind bar -> ${block?.kind}` };
@@ -4259,13 +4549,16 @@ async function roundTwoStates(page, context, states, deckId, tag) {
           check: 'select',
           evidence: `clicking ${chart.id} selected ${(await state(page)).blockId}`,
         });
-      /* the chart leaves so the group and picture states see the tail slide as before */
-      await invoke(page, 'block.remove', {
-        slideId,
-        blockId: chart.id,
+    }
+    /* the chart's slide leaves whole, so the group and picture states see the deck as before */
+    if (chartSlide !== null) {
+      await closeOverlays(page);
+      await invoke(page, 'slide.remove', {
+        slideId: chartSlide,
         baseRevision: await revisionOf(page),
       }).catch(() => null);
       await settled(page).catch(() => null);
+      await goto();
     }
   }
 
@@ -4379,54 +4672,83 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       timeout: 4000,
     });
     const ctxGd = { ...(await contextOf(page)), guides: 1 };
+    /* the guides are parked (docs/FOCUS.md 3.2): their rows are drawn with the switch on, and the
+       guide's own right click menu is the feature's behaviour behind the switch. A menu that does
+       not open within 4 s is the guide's defect (build/b1.md R16, the objects lane's
+       `packages/viewer/src/Guides.tsx`), recorded as not driven with that reason rather than as
+       a red check of a parked feature (VERIFICATION.md C2-F13); a menu that opens is checked
+       against the model as before */
+    const guideParked = !isPresent(findItem('view.guides') ?? {}, DEFAULT_MENU_CONTEXT);
+    const rightClickGuide = async () => {
+      const g = await page.$('.ts-overlay [data-control="guide.x.800"]');
+      const b = await g.boundingBox();
+      await page.mouse.click(b.x + b.width / 2, b.y + Math.min(200, b.height / 2), {
+        button: 'right',
+      });
+      return page
+        .waitForSelector('#ts-menu-canvas [data-menu-item]', { timeout: 4000 })
+        .catch(() => null);
+    };
     if (guide) {
       pass(`rows:${tag}`, {
         id: 'guide.drawn',
         menu: 'view',
         evidence: 'the vertical guide at 800 is drawn in the overlay',
       });
-      await checkContextMenu(
-        page,
-        'guide',
-        async () => {
-          const g = await page.$('.ts-overlay [data-control="guide.x.800"]');
-          const b = await g.boundingBox();
-          await page.mouse.click(b.x + b.width / 2, b.y + Math.min(200, b.height / 2), {
-            button: 'right',
-          });
-        },
-        ctxGd,
-        tag,
-      );
-      /* Delete guide from the guide's menu writes deck.guides with remove */
       await closeOverlays(page);
-      const g = await page.$('.ts-overlay [data-control="guide.x.800"]');
-      const b = await g.boundingBox();
-      await page.mouse.click(b.x + b.width / 2, b.y + Math.min(200, b.height / 2), {
-        button: 'right',
-      });
-      const del = await page
-        .waitForSelector('#ts-menu-canvas [data-menu-item="view.guides.delete"]', { timeout: 4000 })
-        .catch(() => null);
-      if (del) {
-        const before = await revisionOf(page);
-        await del.click();
-        const after = await waitRevision(page, before, 8000);
-        await settled(page).catch(() => null);
-        const info = await invoke(page, 'deck.info');
-        const gone = !(info.guides?.x ?? []).includes(800);
-        (after !== null && gone ? pass : fail)(`effects:${tag}`, {
+      const opened = await rightClickGuide();
+      await closeOverlays(page);
+      if (opened === null && guideParked) {
+        skip(`contextMenu:${tag}`, {
+          id: 'guide',
+          check: 'opens',
+          evidence:
+            'not driven: no menu opened within 4 s on a right click on the drawn guide; the guides are parked (docs/FOCUS.md 3.2) and the menu is the feature’s own defect behind the switch (build/b1.md R16, Guides.tsx)',
+        });
+        skip(`effects:${tag}`, {
           id: 'view.guides.delete',
           menu: 'view',
-          evidence: `revision ${before} -> ${after}; guides ${JSON.stringify(info.guides ?? null)}`,
+          evidence:
+            'not driven: the guide menu did not open (build/b1.md R16); the guides are parked',
         });
-        if (after !== null) await undo(page);
-      } else
-        fail(`effects:${tag}`, {
-          id: 'view.guides.delete',
-          menu: 'view',
-          evidence: 'no Delete guide row in the guide menu',
-        });
+      } else {
+        await checkContextMenu(
+          page,
+          'guide',
+          async () => {
+            await rightClickGuide();
+          },
+          ctxGd,
+          tag,
+        );
+        /* Delete guide from the guide's menu writes deck.guides with remove */
+        await closeOverlays(page);
+        await rightClickGuide();
+        const del = await page
+          .waitForSelector('#ts-menu-canvas [data-menu-item="view.guides.delete"]', {
+            timeout: 4000,
+          })
+          .catch(() => null);
+        if (del) {
+          const before = await revisionOf(page);
+          await del.click();
+          const after = await waitRevision(page, before, 8000);
+          await settled(page).catch(() => null);
+          const info = await invoke(page, 'deck.info');
+          const gone = !(info.guides?.x ?? []).includes(800);
+          (after !== null && gone ? pass : fail)(`effects:${tag}`, {
+            id: 'view.guides.delete',
+            menu: 'view',
+            evidence: `revision ${before} -> ${after}; guides ${JSON.stringify(info.guides ?? null)}`,
+          });
+          if (after !== null) await undo(page);
+        } else
+          fail(`effects:${tag}`, {
+            id: 'view.guides.delete',
+            menu: 'view',
+            evidence: 'no Delete guide row in the guide menu',
+          });
+      }
     } else
       fail(`rows:${tag}`, {
         id: 'guide.drawn',
@@ -4566,8 +4888,12 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       id: 'insert.table.pick',
       evidence: outcome.evidence,
     });
+    /* the Shapes gallery is its own row, All shapes (`insert.shape.gallery`, behind the switch)
+       since the cycle 2 fix round moved it off the Shapes row's altEffect (build/b1.md 10.2); the
+       Shapes row lists Rectangle, Rounded rectangle and Ellipse and draws no plate (the check
+       chain's step 20 read "no tile insert.shape.shapes.pick.hexagon", VERIFICATION.md C2-F13) */
     for (const [rowId, tile] of [
-      ['insert.shape.shapes', 'hexagon'],
+      ['insert.shape.gallery', 'hexagon'],
       ['insert.shape.arrows', 'rightArrow'],
       ['insert.shape.callouts', 'wedgeRectCallout'],
       ['insert.shape.equation', 'mathPlus'],
@@ -5354,7 +5680,13 @@ async function walkRoleMenus(page, ctx, tag) {
           check: 'absent by role',
           evidence: `when ${item.when ?? menuDef?.when}`,
         });
-      } else
+      } else if (isPresenceChip(item.id, found))
+        pass(section, {
+          ...base,
+          check: 'absent by role',
+          evidence: `a presence chip in the title row; the chips stay drawn while their rows are parked (docs/FOCUS.md 3.2)`,
+        });
+      else
         fail(section, {
           ...base,
           check: 'absent by role',
@@ -5720,6 +6052,23 @@ async function forgetOnCollaborator(tag) {
   };
   page.on('dialog', onDialog);
   try {
+    /* the account menu is parked (docs/FOCUS.md 3.2) and the switch is per browser: the
+       collaborator's own switch goes on before its row is reached. A collaborator the scratch
+       deck admits as a viewer (ruling (2): a new deck's general access is restricted, so the
+       second anonymous context reads the shadow floor's role) sees a Tools menu without the row
+       on the deck; the setting is the browser's, so setAdvancedToolsAnywhere flips it on the
+       collaborator's own /new draft and loads the deck page again (VERIFICATION.md F-step20,
+       `effects:scratch title.account.forget`; C2-F13, cycle 3) */
+    const back = page.url();
+    if (!(await setAdvancedToolsAnywhere(page, true))) {
+      page.off('dialog', onDialog);
+      skip(section, {
+        id: item.id,
+        menu: 'title',
+        evidence: `not driven: the collaborator's browser could not turn Tools > Advanced tools on (no row on ${back} nor on /new)`,
+      });
+      return;
+    }
     await activate(page, item.id);
   } catch (error) {
     page.off('dialog', onDialog);
@@ -5838,15 +6187,20 @@ try {
       ['one card in the filmstrip', first.cards === 1],
       ['the right panel closed', first.panel === null],
       ['no snackbar', first.snackbar === ''],
+      /* docs/FOCUS.md 3.1, 3.2: the bar draws the menus with a visible row (Extensions is parked
+         whole), and the bottom bar's view buttons follow View > Grid view behind the switch */
       [
-        'the ten menus in order',
-        JSON.stringify(first.menus) === JSON.stringify(MENUS.map((m) => m.label)),
+        'the menus of the default view in order',
+        JSON.stringify(first.menus) ===
+          JSON.stringify(visibleMenus(DEFAULT_MENU_CONTEXT).map((m) => m.label)),
       ],
       [
-        'the bottom bar: filmstrip, grid, the panel chevron',
-        first.bottom.includes('view.filmstripView') &&
-          first.bottom.includes('view.gridView') &&
-          first.bottom.includes('panel.toggle'),
+        'the bottom bar: the panel chevron, the view buttons only with Grid view present',
+        first.bottom.includes('panel.toggle') &&
+          first.bottom.includes('view.gridView') ===
+            isPresent(findItem('view.gridView') ?? {}, DEFAULT_MENU_CONTEXT) &&
+          first.bottom.includes('view.filmstripView') ===
+            isPresent(findItem('view.gridView') ?? {}, DEFAULT_MENU_CONTEXT),
       ],
     ];
     for (const [name, ok] of firstChecks)
@@ -5959,9 +6313,27 @@ try {
       ctxA,
       'scratch',
     );
+    /* docs/FOCUS.md 3.1: the second presence pass, Tools > Advanced tools on through the
+       product's own row: every parked row in its Google position, every Later row disabled with
+       its stub clause, the default tail and the card menu with their parked controls and rows */
+    if (await setAdvancedTools(page, true)) {
+      const ctxOn = await contextOf(page);
+      await walkMenus(page, ctxOn, 'scratch-advanced');
+      await checkToolbar(page, 'default', 'scratch-advanced', ctxOn);
+      await checkContextMenu(
+        page,
+        'filmstripCard',
+        async () => page.click('.ts-card[data-id]', { button: 'right' }),
+        ctxOn,
+        'scratch-advanced',
+      );
+    }
   }
 
   if (!QUICK) {
+    /* the parity phases drive the parked rows too (SPEC-2 and SPEC-3 surfaces), so they run with
+       the switch on; every effect reads its context again (runEffect, contextOf) */
+    await setAdvancedTools(page, true);
     // 3. the effects, fresh state
     if (phase('effects')) {
       const items = allItems().filter((item) => item.status === 'now' && !item.contextOnly);
@@ -6202,9 +6574,17 @@ try {
     if (!QUICK) await checkTitleSlots(page, `/edit/${READ_ONLY_DECK}`, READ_ONLY_DECK);
     await page.goto(`${BASE}/edit/${READ_ONLY_DECK}`, { waitUntil: 'domcontentloaded' });
     await ready(page);
+    /* the read-only walk audits the default view: the switch off (docs/FOCUS.md 3.1). The setting
+       is the browser's; a read-only deck's page can draw a Tools menu without the row (the check
+       chain's step 20 read "the row is not in the Tools menu ... rows drawn:
+       tools.accessibilitySettings" on this page, VERIFICATION.md C2-F13), so when the page has no
+       row setAdvancedToolsAnywhere turns the switch off on the browser's own /new draft (no
+       write, so no deck is made) and loads the deck page again, the way `forgetOnCollaborator`
+       flips it on */
+    await setAdvancedToolsAnywhere(page, false);
     const ctxG = await contextOf(page);
     await walkMenus(page, ctxG, READ_ONLY_DECK);
-    await checkToolbar(page, 'default', READ_ONLY_DECK);
+    await checkToolbar(page, 'default', READ_ONLY_DECK, ctxG);
     await checkDefaultWords(page, `/edit/${READ_ONLY_DECK}`);
     await checkContextMenu(
       page,

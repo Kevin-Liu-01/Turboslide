@@ -314,6 +314,36 @@ describe('the checkpointer', () => {
     expect(plainOf(String(findText(replayed.slides[SLIDE]))).startsWith('CLI k')).toBe(true);
     expect(plainOf(String(findText(replayed.slides[SLIDE])))).not.toMatch(/^CLI CLI/);
   });
+
+  it('commits the client entries admitted before a follower’s store entry instead of skipping them (the stream fix round two, T1-R4)', async () => {
+    // a tab typed two keystrokes (seq 1 and 2, uncommitted), then an agent's strict write landed
+    // at the store and the follower appended it as a store entry (seq 3): the run commits the two
+    // keystrokes onto the store that already holds the agent's record, filters the store entry,
+    // and covers all three; before this the follower moved `covered` to the store entry's seq and
+    // the keystrokes never reached the store
+    const before = plainOf(String(findText((await store.read()).document.slides[SLIDE])));
+    const agent = await store.write({
+      baseRevision: 412,
+      author: maya,
+      mutations: [splice(before.length, 0, ' agent')],
+    });
+    expect(agent.ok).toBe(true);
+    await channel.append('gt-brand', 0, [
+      entryOf(CLIENT_A, kevin, 1, [splice(0, 0, 'k')]),
+      entryOf(CLIENT_A, kevin, 1, [splice(1, 0, 'e')]),
+      { ...entryOf('store', maya, 1, [splice(before.length, 0, ' agent')]), opId: 'store:1' },
+    ]);
+    const runner = checkpointer();
+    const result = await runner.run({ force: true });
+    expect(result.ok && result.committed.length).toBe(1);
+    expect(result.ok && result.toSeq).toBe(3);
+    const records = await store.records();
+    expect(records[1]?.ops).toEqual({ fromSeq: 1, toSeq: 2 });
+    expect(records[1]?.mutations).toEqual([splice(0, 0, 'ke')]);
+    const after = plainOf(String(findText((await store.read()).document.slides[SLIDE])));
+    expect(after).toBe(`ke${before} agent`);
+    expect(runner.state().covered).toBe(3);
+  });
 });
 
 /** The text of the fixture's paragraph `p1` in the left slot. */

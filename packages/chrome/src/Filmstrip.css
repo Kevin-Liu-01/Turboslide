@@ -212,12 +212,21 @@
    inside the card frame at the top right (absolute, so the card's intrinsic size holds), the +N
    chip in 9 px tabular figures, the comment count chip under the number in the gutter (present at
    zero as an empty box), the 12 px chip of the outline density where the lease dot was. */
+/* A box whose edges never move (the focus round, b6's fix round R1; SPEC-3 16.5 against 4.3):
+   four 16 px slots and three 2 px gaps, 70 px, packed at the right edge of the row-reverse box, so
+   a chip that arrives fills leftwards inside the box and neither the box nor an earlier chip moves.
+   Sized to its content, the box grew leftwards with every arrival and the layout shift API counted
+   each growth (presence.spec.ts:411, twenty arrivals). */
 .ts-card-marks {
   position: absolute;
   top: 4px;
   right: 4px;
+  box-sizing: border-box;
+  width: 70px;
+  height: 16px;
   display: inline-flex;
   flex-direction: row-reverse;
+  justify-content: flex-start;
   align-items: center;
   gap: 2px;
   pointer-events: none;

@@ -1,0 +1,132 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "format-menu",
+  "startedAt": "2026-09-16T11:06:47.488Z",
+  "steps": [
+    {
+      "name": "box-a selected",
+      "selected": "box-a",
+      "chip": null,
+      "at": "2026-09-16T11:06:56.027Z"
+    },
+    {
+      "name": "box-a format rows",
+      "rows": [
+        "format.text.size",
+        "format.text.size.increase",
+        "format.text.size.decrease",
+        "format.alignIndent",
+        "format.spacing"
+      ],
+      "at": "2026-09-16T11:06:56.688Z"
+    },
+    {
+      "name": "box-a format menu results",
+      "before": {
+        "size": null,
+        "align": null,
+        "leading": null,
+        "indent": null
+      },
+      "afterSizeIncrease": {
+        "size": 22,
+        "align": null,
+        "leading": null,
+        "indent": null
+      },
+      "afterCenter": {
+        "size": 22,
+        "align": "center",
+        "leading": null,
+        "indent": null
+      },
+      "afterDouble": {
+        "size": 22,
+        "align": "center",
+        "leading": 2,
+        "indent": null
+      },
+      "afterIndent": {
+        "size": 22,
+        "align": "center",
+        "leading": 2,
+        "indent": 64
+      },
+      "snackbar": "",
+      "revision": 6,
+      "blockJson": "{\"id\":\"box-a\",\"pos\":{\"x\":200,\"y\":300,\"w\":520,\"h\":140,\"z\":3},\"type\":\"text\",\"text\":\"Kickoff notes for the format menu\",\"typography\":{\"size\":22,\"align\":\"center\",\"leading\":2,\"indent\":64}}",
+      "at": "2026-09-16T11:07:01.777Z"
+    },
+    {
+      "name": "heading block",
+      "run": "heading/text",
+      "blockId": "heading",
+      "at": "2026-09-16T11:07:01.781Z"
+    },
+    {
+      "name": "heading selected",
+      "selected": "heading",
+      "chip": null,
+      "at": "2026-09-16T11:07:02.114Z"
+    },
+    {
+      "name": "heading format rows",
+      "rows": [
+        "format.text.size",
+        "format.text.size.increase",
+        "format.text.size.decrease",
+        "format.alignIndent",
+        "format.spacing"
+      ],
+      "at": "2026-09-16T11:07:02.764Z"
+    },
+    {
+      "name": "heading format menu results",
+      "before": {
+        "size": null,
+        "align": null,
+        "leading": null,
+        "indent": null
+      },
+      "afterSizeIncrease": {
+        "size": 72,
+        "align": null,
+        "leading": null,
+        "indent": null
+      },
+      "afterCenter": {
+        "size": 72,
+        "align": "center",
+        "leading": null,
+        "indent": null
+      },
+      "afterDouble": {
+        "size": 72,
+        "align": "center",
+        "leading": 2,
+        "indent": null
+      },
+      "afterIndent": {
+        "size": 72,
+        "align": "center",
+        "leading": 2,
+        "indent": 64
+      },
+      "snackbar": "",
+      "revision": 10,
+      "blockJson": "{\"id\":\"heading\",\"pos\":{\"x\":137,\"y\":439.28125,\"w\":1326,\"h\":89.75,\"z\":1},\"type\":\"heading\",\"level\":\"h1\",\"text\":\"Format menu repro\",\"typography\":{\"size\":72,\"align\":\"center\",\"leading\":2,\"indent\":64},\"autofit\":\"shrink\"}",
+      "at": "2026-09-16T11:07:10.690Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-s7hh",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:07:17.624Z"
+}

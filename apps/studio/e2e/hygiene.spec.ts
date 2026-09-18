@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // The hygiene items of the Google Slides parity round two (gslides-parity SPEC-2 8.6, 0.28 to
 // 0.30, 0.61; MILESTONES-2 B6 item 6): Help > Help Turboslide improve opens the repository's
 // issue page in a new tab; the first write from /new can be undone and the address stays on the
@@ -126,6 +128,8 @@ test('Help > Help Turboslide improve opens the repository’s issue page in a ne
     route.fulfill({ status: 200, contentType: 'text/html', body: '<title>issues</title>' }),
   );
   await openEditor(page);
+  /* Help > Help Turboslide improve is parked (docs/FOCUS.md 3.2): asserted behind the switch */
+  await setAdvancedTools(page, true);
   await control(page, 'menubar.help').click();
   const row = menuItem(page, 'help.improve');
   await expect(row).toBeVisible();
@@ -150,7 +154,8 @@ test('the first write from /new can be undone and the address stays on the saved
   const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]');
   await expect(heading).toBeVisible();
   const box = await heading.boundingBox();
-  await page.mouse.click(box!.x + 8, box!.y + box!.height / 2);
+  /* the session opens on a double click (AMENDMENTS.md A1; one click selects the placeholder) */
+  await page.mouse.dblclick(box!.x + 8, box!.y + box!.height / 2);
   await expect(heading).toHaveAttribute('contenteditable', 'true');
   await page.keyboard.type('Undo probe', { delay: 20 });
   await page.keyboard.press('Escape');
@@ -235,6 +240,8 @@ test('Edit > Select all with the filmstrip focused selects every card, and Edit 
 
 test('Edit > Select none clears a block selection (SPEC-2 0.61)', async ({ page }) => {
   await openEditor(page, 'breaks');
+  /* Edit > Select none is parked (docs/FOCUS.md 3.2): asserted behind Tools > Advanced tools */
+  await setAdvancedTools(page, true);
   const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   await heading.click();
   await expect.poll(() => state(page).then((s) => s.blockId)).toBe('h');

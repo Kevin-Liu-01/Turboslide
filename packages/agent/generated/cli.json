@@ -1263,7 +1263,7 @@
           "flag": "--snap",
           "type": "boolean",
           "required": false,
-          "description": "Snap the selection's shared edge to the guides and the grid; on unless false, and never applied to the slide's or the content box's edges"
+          "description": "Snap the selection's shared edge to the guides and the grid; off unless true, and never applied to the slide's or the content box's edges"
         },
         {
           "key": "baseRevision",

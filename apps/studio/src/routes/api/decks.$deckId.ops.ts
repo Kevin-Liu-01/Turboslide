@@ -15,6 +15,7 @@ import {
   refuseNonJson,
   requestIdentity,
   roomFor,
+  storeRefusalOf,
 } from '../../server/room';
 
 /**
@@ -68,6 +69,11 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     room = await roomFor(deckId);
   } catch (error) {
     if (error instanceof RangeError) return jsonResponse({ error: 'not_found' }, 404);
+    // the store refused the room's open (a 429, a 5xx, the deadline, an edge answering 403 on
+    // a fresh deck's file; VERIFICATION C3S-F4): the product's 503, never the framework's 500
+    const busy = storeRefusalOf(error);
+    if (busy !== null)
+      return jsonResponse(busy.body, busy.status, { 'retry-after': String(busy.retryAfterS) });
     throw error;
   }
   const hasEdits = parsed.data.entries.some((entry) => entry.kind === 'edit');
@@ -79,13 +85,37 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     const comment = await decideFor(identity, deckId, 'comment', 'ops');
     if (!comment.ok) return jsonResponse(denialBody(comment, 'comment'), comment.status);
   }
-  const result = await admitOps(room, {
-    post: parsed.data,
-    bytes: body.bytes,
-    identity,
-    author: authorOf(identity),
-    role: decision.role,
-  });
+  let result: Awaited<ReturnType<typeof admitOps>>;
+  try {
+    result = await admitOps(room, {
+      post: parsed.data,
+      bytes: body.bytes,
+      identity,
+      author: authorOf(identity),
+      role: decision.role,
+    });
+  } catch (error) {
+    // the store did not answer within its deadline (packages/store blob-store.ts
+    // BlobTimeoutError, the focus round's cycle 2): a transient answer the client resends after
+    // `retry-after`, never the framework's 500 the client read as a refusal of the change (the
+    // cycle 2 enforce preview: "A change was not applied HTTPError" on every row after a stalled
+    // head; the integrator at the merge, for b7). The error's name is read, since a bundle can
+    // carry two copies of the store module
+    if (error instanceof Error && error.name === 'BlobTimeoutError') {
+      return jsonResponse({ error: 'store_timeout', message: error.message }, 503, {
+        'retry-after': '1',
+      });
+    }
+    // every other refusal of the store under the admission (the mirror's pull on the base
+    // check, the record; C3S-F4): the same transient answer, in the product's words
+    const busy = storeRefusalOf(error);
+    if (busy !== null)
+      return jsonResponse(busy.body, busy.status, { 'retry-after': String(busy.retryAfterS) });
+    throw error;
+  }
+  /* every write answer names the instance's document revision in `x-turboslide-revision` beside
+     the request's `baseRevision` (docs/FOCUS.md rank 3, the reproduction step): a probe records
+     both on every refused write, so an instance behind the client is read from the wire */
   if (!result.ok) {
     return jsonResponse(
       {
@@ -94,16 +124,28 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         ...(result.head === undefined ? {} : { head: result.head }),
       },
       result.status,
-      result.retryAfterMs === undefined
-        ? {}
-        : { 'retry-after': String(Math.max(1, Math.ceil(result.retryAfterMs / 1000))) },
+      {
+        'x-turboslide-revision': String(result.head ?? ''),
+        ...(result.retryAfterMs === undefined
+          ? {}
+          : { 'retry-after': String(Math.max(1, Math.ceil(result.retryAfterMs / 1000))) }),
+      },
     );
   }
-  return jsonResponse({
-    ok: true,
-    entries: result.entries,
-    rejected: result.rejected,
-    head: result.head,
-    revision: result.revision,
-  });
+  return jsonResponse(
+    {
+      ok: true,
+      entries: result.entries,
+      rejected: result.rejected,
+      head: result.head,
+      revision: result.revision,
+      // the entries between the tab's position and its own, so the answer settles the ops with
+      // no stream delivery under them (VERIFICATION C3S-F8). For a writer with the write right
+      // alone: the entries are the stream's unfiltered ones, and a comment only POST from a
+      // commenter, whose stream strips the notes, is answered as before
+      ...(result.between !== undefined && hasEdits ? { between: result.between } : {}),
+    },
+    200,
+    { 'x-turboslide-revision': String(result.revision ?? result.head ?? '') },
+  );
 }

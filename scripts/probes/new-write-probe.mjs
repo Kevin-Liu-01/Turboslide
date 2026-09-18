@@ -154,19 +154,25 @@ const others = async (page) => {
  * an open second tab as one other) hold on every tier.
  */
 const tierOf = async (page) => (await state(page)).sync?.tier ?? 'memory';
-/** Counts the streams a page opened (an EventSource wrapper installed before the page's scripts). */
+/**
+ * Counts the streams a page opened: a fetch wrapper installed before the page's scripts records
+ * every request of the stream route. The room's transport has been a streamed fetch with
+ * `accept: text/event-stream` since the cycle 3 stream fix round (controller.tsx sseTransport;
+ * s1.md S1-R3), so an EventSource wrapper would read 0 on every origin.
+ */
 const streamsOpened = (page) => page.evaluate(() => window.__tsStreams?.length ?? -1);
 const countStreams = (context) =>
   context.addInitScript(() => {
     const opens = [];
     window.__tsStreams = opens;
-    const Native = window.EventSource;
-    if (typeof Native !== 'function') return;
-    window.EventSource = class extends Native {
-      constructor(url, init) {
-        super(url, init);
-        opens.push(String(url));
-      }
+    const native = window.fetch;
+    if (typeof native !== 'function') return;
+    const STREAM = /\/api\/decks\/[^/?]+\/stream(\?|$)/;
+    window.fetch = function (input, init) {
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.href : input?.url;
+      if (typeof url === 'string' && STREAM.test(url)) opens.push(url);
+      return native.call(this, input, init);
     };
   });
 

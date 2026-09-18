@@ -24,9 +24,12 @@ import type {
   RejectReason,
   Role,
   RoomEvent,
+  RoomMutation,
   RosterEntry,
 } from '../src/channel.ts';
+import { foldMutation } from '../src/coalesce.ts';
 import {
+  CLIENT_ID_PATTERN,
   OPS_POST_MAX_BYTES,
   OPS_POST_MAX_ENTRIES,
   PRESENCE_BATCH_MS,
@@ -42,7 +45,22 @@ import { pendingKey, unsavedCount } from './pending-store.ts';
 export type Rejected = { opId: string; reason: RejectReason; message?: string };
 
 export type OpsResponse =
-  | { ok: true; entries: Entry[]; rejected: Rejected[]; head: number; revision: number }
+  | {
+      ok: true;
+      entries: Entry[];
+      rejected: Rejected[];
+      head: number;
+      revision: number;
+      /**
+       * The entries between the POST's `base.seq` and its first admitted entry, oldest first
+       * (the focus round, cycle 3 stream fix round two; VERIFICATION C3S-F8): the client takes
+       * them before the admitted ones, so an answer whose entries sit above the position settles
+       * from the answer alone instead of waiting for the stream to fill the gap (or the gap
+       * watch's GAP_REOPEN_MS). Absent from an older server, when the stream and the gap watch
+       * stay the way.
+       */
+      between?: Entry[];
+    }
   | {
       ok: false;
       status: number;
@@ -64,9 +82,83 @@ export type OpenOptions = {
    */
   retire?: readonly string[];
   onEvent: (event: RoomEvent) => void;
-  /** the connection dropped; the transport reconnects on its own and sends a new hello */
+  /**
+   * The stream ended or its open was refused. The transport reports it once per `open` and
+   * reconnects nothing itself: the client owns the reopen (the focus round, cycle 3 stream fix
+   * round, VERIFICATION.md C3-F1; before this the browser's EventSource reconnected on its own
+   * and nobody read the 503 or its `retry-after`). The argument is a `StreamFailure` when the
+   * transport knows the status and the wait, any error otherwise (`streamFailureOf` reads both).
+   */
   onError: (error: unknown) => void;
 };
+
+/**
+ * How a stream ended, as the transport reports it: a refused open carries the HTTP status, the
+ * body's `error` code and the `retry-after` the server sent; a stream that closed after a hello
+ * carries the server's `retry:` field when it sent one and no status.
+ */
+export type StreamFailure = {
+  status?: number;
+  code?: string;
+  /** the wait the server named before the next open, in milliseconds */
+  retryAfterMs?: number;
+  /**
+   * The client id the refused open minted (the stream route's 503 body; the focus round, cycle
+   * 3 stream fix round, VERIFICATION C3S-F2): a page whose every open is refused has no hello
+   * to learn an id from, and without one it cannot post. The route's id names this deck and
+   * this identity, so the ops and presence routes admit it on any instance.
+   */
+  clientId?: string;
+  message: string;
+};
+
+/** Reads a transport's `onError` argument as a StreamFailure; a plain error carries the message alone. */
+export function streamFailureOf(error: unknown): StreamFailure {
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const row = error as {
+      status?: unknown;
+      code?: unknown;
+      retryAfterMs?: unknown;
+      clientId?: unknown;
+      message?: unknown;
+    };
+    const out: StreamFailure = {
+      message: typeof row.message === 'string' ? row.message : 'the stream closed',
+    };
+    if (typeof row.status === 'number' && Number.isFinite(row.status)) out.status = row.status;
+    if (typeof row.code === 'string') out.code = row.code;
+    if (
+      typeof row.retryAfterMs === 'number' &&
+      Number.isFinite(row.retryAfterMs) &&
+      row.retryAfterMs >= 0
+    )
+      out.retryAfterMs = row.retryAfterMs;
+    if (typeof row.clientId === 'string' && CLIENT_ID_PATTERN.test(row.clientId))
+      out.clientId = row.clientId;
+    return out;
+  }
+  return { message: typeof error === 'string' ? error : 'the stream closed' };
+}
+
+/**
+ * Splits the text a stream has delivered so far into its complete Server-Sent Events blocks
+ * (the lines up to a blank line; the server writes `\n\n`, a `\r\n\r\n` is read too) and the
+ * rest, a block still arriving. Pure; the browser transport feeds each block to
+ * `parseSseBlock` and `roomEventOf` (protocol.ts). Here rather than in the studio so a unit
+ * test covers a frame split across two chunks.
+ */
+export function splitSseBlocks(buffer: string): { blocks: string[]; rest: string } {
+  const text = buffer.replace(/\r\n/g, '\n');
+  const blocks: string[] = [];
+  let from = 0;
+  for (;;) {
+    const at = text.indexOf('\n\n', from);
+    if (at < 0) break;
+    blocks.push(text.slice(from, at));
+    from = at + 2;
+  }
+  return { blocks, rest: text.slice(from) };
+}
 
 /** What the client needs of the wire: the stream, the ops POST and the presence POST. */
 export type RoomTransport = {
@@ -84,6 +176,20 @@ export type FlushClass = 'now' | 'pos' | 'text';
 export const FLUSH_MS: Readonly<Record<FlushClass, number>> = { now: 0, pos: 50, text: 100 };
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
+/** The longest wait a server's `retry-after` or `retry:` is honoured for before the next open. */
+export const REOPEN_WAIT_MAX_MS = 60_000;
+/** At most this many earlier ids ride an open's `retire` (server/room.ts RETIRE_MAX reads no more). */
+export const RETIRE_MAX = 8;
+/**
+ * How long an entry may wait above the position for the stream to fill the gap under it before
+ * the client reopens the stream (the focus round, cycle 3 stream fix round; VERIFICATION
+ * C3S-F1: a POST's answer arrived at a revision two above the tab's, the revision between them
+ * never came down the stream, and the answered ops sat pending and in flight for 238 s while
+ * the title row read Saving; the reopen's replay from the position filled the gap at once). A
+ * stream that delivers fills a gap within a few seconds (the writer's pulse, the 2 s poll, the
+ * announce), so eight is a stream that is not delivering.
+ */
+export const GAP_REOPEN_MS = 8000;
 /** How many recent entries `transformSince` can reach back over. */
 export const RECENT_ENTRIES = 2000;
 
@@ -101,6 +207,8 @@ export type PendingOp = {
   inflight: boolean;
   /** the local clock the op was recorded at, for `transformSince` */
   at: number;
+  /** the mutations that undo this op on the document it was applied to, for the rebase of the ops after it when it is refused */
+  inverse?: Mutation[];
   /** resolves when the op is admitted or rejected */
   settle?: (outcome: Settled) => void;
 };
@@ -117,6 +225,19 @@ export type SyncStatus = {
   connected: boolean;
   /** the stream is down and the last POST failed */
   offline: boolean;
+  /**
+   * The room's store refuses its poll (a `store` event with `ok: false`; the blob tier alone
+   * sends one): the title row reads Reconnecting until a poll succeeds (the focus round, cycle 3
+   * fix round, VERIFICATION C3-F2). False on every other tier.
+   */
+  storeDegraded: boolean;
+  /**
+   * The stream ended or its open was refused and the client is reopening it (the focus round,
+   * cycle 3 stream fix round, C3-F1). Writes still post over `POST /ops` meanwhile; the title
+   * row reads Reconnecting while this is true and nothing is pending. False before the first
+   * open answers and from the next hello on.
+   */
+  streamDown: boolean;
   clientId: string | null;
   role: Role | null;
   /** editing connections at the last hello; at 100 the tab opens in Viewing mode (SPEC-3 0.9) */
@@ -326,6 +447,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let overCeiling = false;
   let connected = false;
   let offline = false;
+  let storeDegraded = false;
+  let streamDown = false;
+  /**
+   * Whether the server's binding of `clientId` stands: true from a hello, false after the ops
+   * route answered `client_unbound` (a long sleep, a lapsed TTL), when the ops wait for the
+   * reopen's hello. `connected` no longer gates a flush (C3-F1: a tab whose stream was refused
+   * posted nothing and read Saving for a minute), so this is the one gate left besides the id.
+   */
+  let bound = false;
+  /** the reopen ladder of the stream: 500 ms doubling to BACKOFF_MAX_MS, reset by a hello */
+  let streamBackoff = 0;
+  let reopenTimer: unknown;
+  /** the wait for the stream to fill a gap under a buffered entry (GAP_REOPEN_MS) */
+  let gapTimer: unknown;
+  /** the ops of the POST in flight, which a hello leaves in flight (their answer settles them) */
+  let inflightBatch: readonly PendingOp[] | null = null;
   /** the head the last hello named; a resync moves the position here */
   let helloSeq = options.seq;
   /**
@@ -345,6 +482,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let posting: Promise<void> | null = null;
   let backoff = 0;
   let stopped = false;
+  /**
+   * The POSTs of this client on the blob tier whose commit may reach this tab as a store echo
+   * before, or instead of, their answer: the one in flight and every one whose answer was lost
+   * (the transport threw at the 30 s deadline, a dropped connection, a 5xx). Each carries its
+   * base and the fold of its mutations as the blob channel commits them (blob.ts `append` folds
+   * a POST's entries with `foldMutation`). On the blob tier a record carries `clientId: 'store'`
+   * and no client op id, so before this an echo of the tab's own write was taken for another
+   * author's: the pending ops moved past their own content, the fold applied them a second time
+   * and the resend committed them a second time (the focus round, cycle 3, VERIFICATION C2-F24: a
+   * doubled word after a stalled save); and an echo arriving while the POST was still in flight
+   * doubled the text until the answer landed (cycle 3 fix round, C3-F1). `settleOwnEcho` reads
+   * an echo against these records and acknowledges the ops instead. An answered POST leaves the
+   * list; a resync clears it.
+   */
+  type PostedBatch = { base: number; opIds: string[]; folded: string; answered: boolean };
+  let posted: PostedBatch[] = [];
   let roster: RosterEntry[] = [];
   let presence: Omit<PresencePost, 'clientId' | 'clock'> = { pointerOn: false, presenting: false };
   let presenceClock = 0;
@@ -363,6 +516,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     transport: 'sse',
     connected,
     offline,
+    storeDegraded,
+    streamDown,
     clientId,
     role,
     editing,
@@ -412,13 +567,44 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     void store.save(queue).catch(() => undefined);
   };
 
-  /** The local document from the server document and the pending ops; an op that no longer applies is returned to its author. */
+  /**
+   * The pending ops after one of them was refused (docs/FOCUS.md rank 13): every op recorded
+   * after it moves past the refused op's inverse, as if a remote undo had landed, so a burst
+   * typed on a text that carried the refused insertion is neither refused for an offset the
+   * server never reached ("text.splice: 10 plus 0 is outside a text of 7 characters", audit-text
+   * row 21) nor folded at the wrong place; an op that cannot move is returned to its author.
+   * Pure over `pending`; the caller folds afterwards.
+   */
+  const rebasePast = (refused: PendingOp | undefined): void => {
+    if (refused?.inverse === undefined || refused.inverse.length === 0) return;
+    const next: PendingOp[] = [];
+    for (const op of pending) {
+      if (op.kind !== 'edit' || op.mutations === undefined || op.at <= refused.at) {
+        next.push(op);
+        continue;
+      }
+      const moved = transformPast(op.mutations, refused.inverse, transform);
+      if (moved === null) {
+        options.onUnplaceable?.(op);
+        const rejected: Rejected = { opId: op.opId, reason: 'stale' };
+        rejects.push({ ...rejected, mutations: op.mutations });
+        op.settle?.({ rejected });
+        continue;
+      }
+      next.push({ ...op, mutations: moved });
+    }
+    pending = next;
+  };
+
+  /** The local document from the server document and the pending ops; an op that no longer applies is returned to its author, and the ops after it move past it. */
   const fold = (): { document: DeckDocument; changed: readonly string[] | 'all' } => {
     let document = server;
     const kept: PendingOp[] = [];
     let changed: readonly string[] | 'all' = [];
     const touched = new Set<string>();
-    for (const op of pending) {
+    const queue = [...pending];
+    while (queue.length > 0) {
+      const op = queue.shift() as PendingOp;
       if (op.kind !== 'edit' || op.mutations === undefined) {
         kept.push(op);
         continue;
@@ -435,6 +621,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
         changed = 'all';
+        // the ops after it were recorded on a text that carried it: they move past its inverse
+        pending = queue;
+        rebasePast(op);
+        queue.splice(0, queue.length, ...pending);
       }
     }
     pending = kept;
@@ -444,6 +634,85 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const remember = (entry: Entry): void => {
     recent.push(entry);
     if (recent.length > RECENT_ENTRIES) recent.splice(0, recent.length - RECENT_ENTRIES);
+  };
+
+  /** The fold of a batch's edit mutations, as the blob channel commits one POST (blob.ts `append`). */
+  const foldOf = (batch: readonly PendingOp[]): string => {
+    const folded: RoomMutation[] = [];
+    for (const op of batch) {
+      if (op.kind !== 'edit') continue;
+      for (const mutation of op.mutations ?? []) foldMutation(folded, mutation);
+    }
+    return JSON.stringify(folded);
+  };
+
+  /**
+   * A store echo that is the commit of one of this client's own POSTs (in flight or lost): its
+   * base at or above the POST's and its mutations the POST's fold, byte for byte. The ops of
+   * that POST still pending are acknowledged at the echo's seq, the server document takes the
+   * echo once, and nothing is resent; the answer of the POST, when it comes, finds its ops
+   * settled and repeats nothing (`held`). False for any other echo.
+   */
+  const settleOwnEcho = (entry: Entry): boolean => {
+    if (tier !== 'blob' || posted.length === 0) return false;
+    const folded = JSON.stringify(entry.mutations ?? []);
+    const batch = posted.find(
+      (row) => !row.answered && entry.rev >= row.base && row.folded === folded,
+    );
+    if (batch === undefined) return false;
+    batch.answered = true;
+    posted = posted.filter((row) => row !== batch);
+    const own = pending.filter((op) => batch.opIds.includes(op.opId));
+    pending = pending.filter((op) => !own.includes(op));
+    for (const op of own) {
+      op.settle?.({ seq: entry.seq });
+      if (!retained.some((row) => row.opId === op.opId)) {
+        retained.push({
+          opId: op.opId,
+          seq: entry.seq,
+          ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+        });
+      }
+    }
+    try {
+      server = applyMutations(server, entry.mutations ?? [], { now: entry.at }).document;
+    } catch {
+      scheduleResync(Math.max(entry.seq, revision));
+    }
+    const refolded = fold();
+    emitChange(refolded.document, 'all', 'ack');
+    options.onEvent?.({ type: 'op', entry });
+    persist();
+    emitStatus();
+    return true;
+  };
+
+  /**
+   * An entry of this client's own at or behind the position (the answer of a resent POST, which
+   * the server replays with the seq its first admission made; VERIFICATION C3-F1): the op it
+   * names is acknowledged and leaves the pending set. The document holds its content already,
+   * through the echo applied at that seq or the resync that brought the revision in, so nothing
+   * is applied again. Before this such an entry was dropped as a duplicate of the position and
+   * its op stayed pending and in flight for good: the title row read Saving with the tab and
+   * the server at one revision (the stall of C2-F24 and C3-F1 on the blob tier).
+   */
+  const settleBehind = (entry: Entry): void => {
+    if (!myClientIds.has(entry.clientId)) return;
+    const own = pending.find((op) => op.opId === entry.opId);
+    if (own === undefined) return;
+    pending = pending.filter((op) => op !== own);
+    own.settle?.({ seq: entry.seq });
+    if (entry.kind === 'edit' && !retained.some((row) => row.opId === own.opId)) {
+      retained.push({
+        opId: own.opId,
+        seq: entry.seq,
+        ...(own.mutations === undefined ? {} : { mutations: own.mutations }),
+      });
+    }
+    const folded = fold();
+    emitChange(folded.document, 'all', 'ack');
+    persist();
+    emitStatus();
   };
 
   /** One admitted entry in stream order. */
@@ -466,14 +735,24 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const mutations = entry.mutations ?? [];
     // a store entry (the follower's copy of a record) that the document holds already is skipped
     if (entry.clientId === 'store' && entry.rev < server.deck.revision) return;
+    if (entry.clientId === 'store' && settleOwnEcho(entry)) return;
     if (mine) {
       const own = pending.find((op) => op.opId === entry.opId);
+      // acknowledged before this entry arrived (the store echo of its POST, settleOwnEcho): its
+      // content is in the server document already
+      const acknowledged = own === undefined && retained.some((row) => row.opId === entry.opId);
       pending = pending.filter((op) => op.opId !== entry.opId);
       own?.settle?.({ seq: entry.seq });
-      retained.push({ opId: entry.opId, seq: entry.seq, mutations });
+      if (!retained.some((row) => row.opId === entry.opId))
+        retained.push({ opId: entry.opId, seq: entry.seq, mutations });
+      // on the blob tier the seq is the revision the record made: an entry at or under the
+      // revision the server document already holds (a resent POST answered with its first
+      // admission after a resync brought that revision in), or one acknowledged from its echo,
+      // is in the document, and applying it again would double it
+      const held = tier === 'blob' && (entry.seq <= server.deck.revision || acknowledged);
       let next: DeckDocument;
       try {
-        next = applyMutations(server, mutations, { now: entry.at }).document;
+        next = held ? server : applyMutations(server, mutations, { now: entry.at }).document;
       } catch {
         next = server;
       }
@@ -516,7 +795,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     try {
       server = applyMutations(server, mutations, { now: entry.at }).document;
     } catch {
-      // an entry this copy cannot apply: the server document is behind; a resync will follow
+      // an entry this copy cannot apply (a store record whose mutations need the version log, a
+      // restore; an entry on a document this copy never reached): the server document is ahead
+      // of this copy, so the tab reloads at the entry's position, which on the blob tier is the
+      // revision the record made. Before this the catch trusted a resync that never came: the
+      // checkpoint frame after the entry moved the revision and the document stayed the one from
+      // before the entry (VERIFICATION F-versions, "restore changed the deck false")
+      scheduleResync(tier === 'blob' ? Math.max(entry.seq, revision) : revision);
     }
     const folded = fold();
     const changed = changedSlides(mutations);
@@ -550,6 +835,29 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // anything below the seq is a duplicate
     for (const key of [...incoming.keys()]) if (key <= seq) incoming.delete(key);
     noteCaughtUp();
+    watchGap();
+  };
+
+  /**
+   * The gap watch (GAP_REOPEN_MS): an entry buffered above the position waits for the stream to
+   * deliver what sits between; when nothing has for GAP_REOPEN_MS the stream is not delivering
+   * (its instance stopped announcing, or it is refused and the reopen is on its way), and the
+   * client reopens it so the replay from the position fills the gap. Armed when a gap appears,
+   * moved on every advance of the position, cleared when the buffer empties; a stream already
+   * down has its reopen scheduled and is left to it.
+   */
+  const watchGap = (): void => {
+    if (incoming.size === 0) {
+      if (gapTimer !== undefined) timers.clearTimeout(gapTimer);
+      gapTimer = undefined;
+      return;
+    }
+    if (gapTimer !== undefined) timers.clearTimeout(gapTimer);
+    gapTimer = timers.setTimeout(() => {
+      gapTimer = undefined;
+      if (stopped || incoming.size === 0) return;
+      if (connected && !streamDown) reopenStream({ message: 'the stream fell behind the room' });
+    }, GAP_REOPEN_MS);
   };
 
   /**
@@ -560,9 +868,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * batch's entries already carried and is dropped. Above the position it is buffered by seq.
    */
   const take = (entry: Entry): void => {
-    if (entry.seq < seq) return;
+    if (entry.seq < seq) {
+      settleBehind(entry);
+      return;
+    }
     if (entry.seq === seq) {
-      if (entry.clientId === 'store' || appliedAtSeq.has(entry.opId)) return;
+      if (entry.clientId === 'store') return;
+      if (appliedAtSeq.has(entry.opId)) {
+        settleBehind(entry);
+        return;
+      }
       applyEntry(entry);
       return;
     }
@@ -576,6 +891,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     revision = next;
     server = { deck: { ...server.deck, revision: next, updatedAt: at }, slides: server.slides };
     local = { deck: { ...local.deck, revision: next, updatedAt: at }, slides: local.slides };
+  };
+
+  /** One reload at a time for the entries this copy cannot apply; a burst of them is one resync. */
+  let resyncing = false;
+  const scheduleResync = (at: number): void => {
+    if (resyncing || options.onResync === undefined) return;
+    resyncing = true;
+    void resync(at)
+      .catch(() => undefined)
+      .finally(() => {
+        resyncing = false;
+      });
   };
 
   const resync = async (at: number): Promise<void> => {
@@ -593,7 +920,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // the pending ops (re-folded on the fresh document) may flush
     caughtUp = true;
     incoming.clear();
+    watchGap();
     retained = [];
+    posted = [];
     for (const op of pending) op.inflight = false;
     const folded = fold();
     emitChange(folded.document, 'all', 'resync');
@@ -605,8 +934,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const onEvent = (event: RoomEvent): void => {
     switch (event.type) {
       case 'hello': {
+        const previousId = clientId;
         clientId = event.clientId;
         myClientIds.add(event.clientId);
+        if (previousId !== null && previousId !== event.clientId) {
+          // a reconnect under a new id (the seam step of the cycle 3 stream fix round): the
+          // pending ops travel and persist under the new id from here, so the record kept under
+          // the old one goes, or the next page is offered as unsaved changes ops that landed
+          // (realtime.spec.ts:515 read 6 unsaved changes where 3 were typed once an offline blip
+          // ended the stream)
+          persist();
+          void options.pendingStore?.remove(pendingKey(deckId, previousId)).catch(() => undefined);
+        }
         role = event.role;
         editing = event.editing;
         overCeiling = event.role === 'viewer' && event.editing >= 100;
@@ -617,9 +956,20 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // waits for the replay to drain (finding 33), which noteCaughtUp arms
         caughtUp = seq >= helloSeq;
         connected = true;
+        bound = true;
+        streamDown = false;
+        streamBackoff = 0;
         offline = false;
         backoff = 0;
         if (event.revision > revision) revision = event.revision;
+        // the ops retained at or below the seq the last checkpoint covered are saved: the
+        // checkpoint event that covered them may have fired while this tab's stream was down,
+        // and a reopen replays entries, not checkpoints (SEAM-F8: the title row read Saving on
+        // a quiet deck after a reconnect, for good)
+        if (event.covered !== undefined) {
+          const covered = event.covered;
+          retained = retained.filter((op) => op.seq > covered);
+        }
         if (event.seq < seq) {
           // the stream was reset behind this client; reload at the server's revision
           seq = event.seq;
@@ -627,8 +977,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           void resync(event.revision);
         }
         // ops sent on a connection that died are re-sent under the new client id once the
-        // replay has shown which of them landed
-        for (const op of pending) op.inflight = false;
+        // replay has shown which of them landed; the ops of a POST still in flight stay in
+        // flight, since the client posts while its stream is down and that POST's answer
+        // settles them (or hands them back to the resend when it fails)
+        for (const op of pending) if (!(inflightBatch?.includes(op) ?? false)) op.inflight = false;
         options.onEvent?.(event);
         emitStatus();
         presenceDirty = true;
@@ -645,7 +997,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       case 'checkpoint': {
         retained = retained.filter((op) => op.seq > event.toSeq);
         if (event.external === true) {
-          void resync(event.revision);
+          void resync(event.revision).catch(() => undefined);
         } else {
           // never backwards: on the blob tier the ops POST answer names the revision first and
           // the stream's instance delivers the checkpoint frames of earlier revisions after it,
@@ -659,8 +1011,17 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       case 'presence': {
-        const rest = roster.filter((row) => row.clientId !== event.clientId);
-        roster = [...rest, event.state];
+        // the row is replaced in place and a client the roster does not hold is appended, so the
+        // roster keeps its join order across presence posts: the title row's four slots read it
+        // in order, and a post from one person moves nobody's chip (before this the roster was
+        // rebuilt as [...rest, state], so every post moved its participant to the end and a
+        // second person's chip moved 28 px whenever a third was present; presence.spec.ts's
+        // second person row, build/t2.md T2-R1)
+        const at = roster.findIndex((row) => row.clientId === event.clientId);
+        roster =
+          at === -1
+            ? [...roster, event.state]
+            : roster.map((row, index) => (index === at ? event.state : row));
         options.onEvent?.(event);
         return;
       }
@@ -671,6 +1032,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       case 'reject': {
         const own = pending.find((op) => op.opId === event.opId);
         pending = pending.filter((op) => op.opId !== event.opId);
+        rebasePast(own);
         own?.settle?.({ rejected: { opId: event.opId, reason: event.reason } });
         const notice: Rejected & { mutations?: Mutation[]; comment?: CommentOp } = {
           opId: event.opId,
@@ -688,7 +1050,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       case 'resync':
-        void resync(event.revision);
+        void resync(event.revision).catch(() => undefined);
+        return;
+      case 'store':
+        // the room's store refuses its poll, or answers again: the title row's word
+        storeDegraded = !event.ok;
+        options.onEvent?.(event);
+        emitStatus();
         return;
       case 'inbox':
       case 'access':
@@ -727,7 +1095,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (pending.some((op) => !op.inflight)) await flush();
       return;
     }
-    if (clientId === null || !connected) return;
+    // the POST needs the server's client id and its binding, not the stream: while the stream
+    // is down or refused the pending ops post as before and the answer settles them (the focus
+    // round, cycle 3 stream fix round, C3-F1; before this `!connected` returned here and a tab
+    // whose stream was refused 503 read Saving for the 60 s bound with nothing on the wire)
+    if (clientId === null || !bound) return;
     // hold the first flush until the replay has caught the stream up (finding 33): the op stays
     // pending and applied locally, and goes once it has been transformed against what landed
     if (!caughtUp) return;
@@ -757,12 +1129,27 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
             },
       ),
     };
+    // the POST's record (blob tier): its commit may reach this tab as a store echo before its
+    // answer, and the echo is matched against this record (settleOwnEcho)
+    const record: PostedBatch | null =
+      tier === 'blob'
+        ? {
+            base: body.base.seq,
+            opIds: batch.map((op) => op.opId),
+            folded: foldOf(batch),
+            answered: false,
+          }
+        : null;
+    if (record !== null) posted.push(record);
+    inflightBatch = batch;
     posting = (async () => {
       let response: OpsResponse;
       try {
         response = await transport.postOps(body);
       } catch (error) {
         void error;
+        // the answer is lost, the write may not be: the record stays for the store echo of its
+        // commit, which settles the ops before they are resent
         for (const op of batch) op.inflight = false;
         offline = true;
         emitStatus();
@@ -773,10 +1160,15 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       offline = false;
       if (response.ok) {
         backoff = 0;
+        if (record !== null) posted = posted.filter((row) => row !== record);
+        // what landed under the admitted entries first, so they drain at once (C3S-F8); an
+        // entry the stream delivered meanwhile is a duplicate `take` drops
+        for (const entry of response.between ?? []) take(entry);
         for (const entry of response.entries) take(entry);
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
           pending = pending.filter((row) => row.opId !== rejected.opId);
+          rebasePast(op);
           op?.settle?.({ rejected });
           const notice = {
             ...rejected,
@@ -807,16 +1199,35 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       if (response.status === 429) {
+        // the room's budget or the store's window: the ops stay pending and go again after the
+        // wait the answer named; the record stays, since a 429 may follow the store's commit
         timers.setTimeout(() => void flush(), response.retryAfterMs ?? 1000);
         return;
       }
+      if (response.status >= 500) {
+        // a server side failure is transient (the store did not answer within its deadline, an
+        // instance that stalled): the ops stay pending and are resent after a backoff, the way a
+        // POST that threw is, never returned to the author as a refusal. On the cycle 2 enforce
+        // preview a stalled Blob head landed here as "A change was not applied HTTPError" and
+        // every later row failed in the stuck save state (the integrator at the cycle 2 merge)
+        offline = true;
+        emitStatus();
+        backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
+        timers.setTimeout(() => void flush(), response.retryAfterMs ?? backoff);
+        return;
+      }
       if (response.status === 403 && response.code === 'client_unbound') {
-        // the binding lapsed (a long sleep): the stream reconnects and a new hello rebinds
+        // the binding lapsed (a long sleep): the ops wait for the hello of a fresh stream, which
+        // this client opens itself now (before this the wait was for the browser's EventSource
+        // to reconnect at the lifetime's end)
+        bound = false;
         connected = false;
         emitStatus();
+        reopenStream({ message: 'the client binding lapsed' });
         return;
       }
       // a refusal that will not change on a retry (a forbidden write): the ops return to the author
+      if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {
         pending = pending.filter((row) => row !== op);
         const notice = {
@@ -837,15 +1248,109 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       emitStatus();
     })().finally(() => {
       posting = null;
+      inflightBatch = null;
     });
     await posting;
+  };
+
+  // -------------------------------------------------------------------------------------------
+  // The stream and its reopen (the focus round, cycle 3 stream fix round, C3-F1)
+
+  /**
+   * The ids this open retires on the instance it lands on: the tab's earlier pages' ids
+   * (`options.retire`) and this page's own earlier ids, so a reconnect releases the slot its
+   * last stream still holds there and removes that stream's roster row, the newest last and at
+   * most RETIRE_MAX of them (server/room.ts reads no more).
+   */
+  const retireList = (): string[] => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const id of [...(options.retire ?? []), ...myClientIds]) {
+      if (id === '' || seen.has(id)) continue;
+      seen.add(id);
+      out.push(id);
+    }
+    return out.slice(Math.max(0, out.length - RETIRE_MAX));
+  };
+
+  /** The wait before the next open: the server's word when it gave one, else the ladder. */
+  const reopenWaitMs = (failure: StreamFailure): number => {
+    if (failure.retryAfterMs !== undefined)
+      return Math.min(failure.retryAfterMs, REOPEN_WAIT_MAX_MS);
+    if (failure.status === 403 || failure.status === 404) return BACKOFF_MAX_MS;
+    streamBackoff = Math.min(BACKOFF_MAX_MS, streamBackoff === 0 ? 500 : streamBackoff * 2);
+    return streamBackoff;
+  };
+
+  const openStream = (): void => {
+    if (stopped || stream !== null) return;
+    const retire = retireList();
+    let reported = false;
+    let self: StreamHandle | null = null;
+    const handle = transport.open({
+      since: seq,
+      ...(retire.length === 0 ? {} : { retire }),
+      onEvent,
+      onError: (error) => {
+        // one report per open, and none from a handle the client has already replaced
+        if (reported) return;
+        reported = true;
+        if (self !== null && stream !== self) return;
+        reopenStream(streamFailureOf(error));
+      },
+    });
+    self = handle;
+    // a transport that refused inside `open` has scheduled the reopen already
+    if (reported) return;
+    stream = handle;
+  };
+
+  /**
+   * The stream is gone (closed at its lifetime, dropped, or refused at the open): the client
+   * marks it down, closes the handle and opens the next one after the wait the server named
+   * (`retry-after` on a 503, the `retry:` field of a stream that closed) or its own ladder, with
+   * `since` at its position so the replay fills the gap. Nothing here waits on a browser's
+   * EventSource; the studio's transport reports and reconnects nothing itself.
+   */
+  const reopenStream = (failure: StreamFailure): void => {
+    stream?.close();
+    stream = null;
+    connected = false;
+    streamDown = true;
+    if (stopped) {
+      emitStatus();
+      return;
+    }
+    if (reopenTimer !== undefined) timers.clearTimeout(reopenTimer);
+    reopenTimer = timers.setTimeout(() => {
+      reopenTimer = undefined;
+      openStream();
+    }, reopenWaitMs(failure));
+    // a refused open that minted an id for this page: the page posts under it while it waits
+    // for a slot (C3S-F2: with no hello there was no id, so nothing left the tab and the title
+    // row read Saving for the 60 s bound). The document is the one the page was handed, so the
+    // first flush goes at once and the server transforms or resyncs as for any base; a hello
+    // later replaces the id and the ops travel under the new one
+    if (clientId === null && failure.clientId !== undefined) {
+      clientId = failure.clientId;
+      myClientIds.add(failure.clientId);
+      bound = true;
+      caughtUp = true;
+      presenceDirty = true;
+      schedulePresence(0);
+      if (pending.some((op) => !op.inflight)) scheduleFlush('now');
+    }
+    emitStatus();
   };
 
   // -------------------------------------------------------------------------------------------
   // Presence (SPEC-3 3.8): one batch per 80 ms, a heartbeat every 5 s
 
   const postPresence = async (): Promise<void> => {
-    if (clientId === null || !connected) return;
+    // the binding gates a presence post, not the stream: a tab whose stream is down or refused
+    // is alive, its row stays in every roster (the chip, the server's reader liveness) and its
+    // leave lands when it closes (C3S-F3: a closed tab's chip stayed while its leave was lost)
+    if (clientId === null || !bound) return;
     presenceClock += 1;
     presenceDirty = false;
     try {
@@ -907,17 +1412,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const client: RoomClient = {
     start() {
       if (stream !== null || stopped) return;
-      stream = transport.open({
-        since: seq,
-        ...(options.retire === undefined || options.retire.length === 0
-          ? {}
-          : { retire: options.retire }),
-        onEvent,
-        onError: () => {
-          connected = false;
-          emitStatus();
-        },
-      });
+      openStream();
       heartbeat();
       void offerPersisted();
     },
@@ -926,10 +1421,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (flushTimer !== undefined) timers.clearTimeout(flushTimer);
       if (presenceTimer !== undefined) timers.clearTimeout(presenceTimer);
       if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);
+      if (reopenTimer !== undefined) timers.clearTimeout(reopenTimer);
+      if (gapTimer !== undefined) timers.clearTimeout(gapTimer);
       // the leave goes first (a `pagehide` gives it no time to wait on a POST in flight; the
-      // browser transport sends it with keepalive), then the POST in flight is awaited
+      // browser transport sends it with keepalive), then the POST in flight is awaited. The
+      // binding gates it, not the stream: a tab closed while its stream was down leaves too
       const leaving =
-        clientId !== null && connected
+        clientId !== null && bound
           ? transport
               .postPresence({ clientId, clock: presenceClock + 1, ...presence }, { leave: true })
               .catch(() => undefined)
@@ -948,13 +1446,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       const settled = new Promise<Settled>((resolve) => {
         settle = resolve;
       });
+      // the op holds its own copy: the controller's typing group grows the array it handed in
+      // with every later burst (controller.tsx commitAs, `group.mutations.push`), and a shared
+      // reference made an offline resend, a lost POST's resend and the persisted queue carry a
+      // later burst's splice twice (realtime.spec.ts:515 `late12323`; s2.md S2-R1)
       pending.push({
         opId: '',
         kind: 'edit',
-        mutations,
+        mutations: [...mutations],
         label,
         inflight: false,
         at: clock,
+        inverse: result.inverse,
         ...(settle === undefined ? {} : { settle }),
       });
       emitChange(result.document, changedSlides(mutations), 'local');

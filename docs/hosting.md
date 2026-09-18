@@ -134,6 +134,14 @@ prefix also holds `snapshots/<md5>.json`, one immutable copy of the whole docume
 write (the subsection "Immutable per revision documents" below). Templates are not uploaded; they
 ship in the bundle. Produced exports live beside the decks under `exports/<deckId>/<jobId>/` (the
 files of a synchronous export; the plan, the parts and the files of a batched one, section 7).
+The editor's queued export keeps its record at `exports/.jobs/<jobId>.json`, a folder no deck id
+can name (the stream fix round two, `build/t1.md` C3S-F7): written `queued` when the export
+starts, rewritten `done` or `failed` by the instance that ran the job under `waitUntil` after its
+response, with the produced files stored under `exports/<deckId>/<jobId>/` and their `?download=1`
+addresses, so a poll on any instance answers from the record and a job no record names is refused
+in the product's words, never a 500. Records older than a day are pruned at the next export start;
+`deck.remove` deletes the stored files with the deck prefix and the small record outlives it until
+that prune.
 
 ### Reads
 
@@ -146,10 +154,82 @@ to its cache max-age, one minute at least), then removes the local documents the
 has. Syncs closer than 750 ms apart share one result. Measured against the in-memory fake: an
 unchanged deck costs one `head` per read and no download.
 
+The focus round's second cycle (`docs/gslides-parity/focus/build/b7.md` Cycle 2, `b6.md` Cycle 2)
+added four rules to the reads. Every call of the Blob client meets a deadline (`boundedBlobClient`
+in `blob-store.ts`: `BLOB_READ_TIMEOUT_MS` 10 s for a `head`, `get`, `list` or `del`,
+`BLOB_DOCUMENT_WRITE_TIMEOUT_MS` 20 s for a `put` at or under 256 kB (a document),
+`BLOB_WRITE_TIMEOUT_MS` 90 s for a larger `put` (a twin); a call past its deadline settles as a
+`BlobTimeoutError` and the deck's serial queue on the instance moves on, since one `head`, `get`
+or `put` that never answered held every request of that deck on the instance). Since the third
+cycle (`b7.md` Cycle 3, VERIFICATION C2-F24) the call underneath is cancelled at the deadline
+through the SDK's `abortSignal`: `@vercel/blob` retries a network error or a 5xx up to
+`VERCEL_BLOB_RETRIES` times (10 by default) with waits of 1, 2, 4, 8 ... seconds, so a call the
+caller had given up on kept a retry chain running for up to seventeen minutes and held its
+sockets; the plain abort ends that chain. The hosted collection's head poll (`HOSTED_POLL_MS`) is
+1 s and one at a time (a tick while the last poll's sync is in flight is skipped), and a version
+record is read through the store's `head` before its public URL, so a record that does not exist
+yet never seeds the edge's cached miss for its path. `list()` enumerates the folder listing joined with the mirrors
+this instance holds, so a deck made or opened here lists while the folder listing lags, and a
+mirror whose manifest is gone leaves the listing. A `version.restore` record travels on the blob
+channel as an external checkpoint at its revision and never as an op, so every tab reloads at that
+revision instead of failing to apply a mutation only the store can replay. `readEditorDeck` (the
+editor's and the show's loaders, a tab's reload, an access refresh) reads the head on the blob tier
+past the sync window and lands at or above the revision a write's answer named
+(`apps/studio/src/server/room.ts` `liveAtLeast`); every other read keeps the window. The access
+record, the link hash index and the per identity deck index are read proven
+(`access-store.ts` `provenGet`: `head()` first, a body accepted when its md5 is the head's version,
+else the url read again with a cache busting query, else the last body under its own version so a
+write on it is refused as stale), a missing record is never cached on this tier, a link grant is
+written on the visitor's deck index so every instance sees it, and the comments sidecar is read by
+its index rows and never by the prefix listing.
+
+The stream's slot on an instance (the caps of `packages/realtime/src/admission.ts`, the counters of
+`room.ts` `createStreamCounters`; the cycle 3 stream fix round and its fix round, `build/s1.md`,
+`seam.md`, `b7.md` SF.2) is released by the runtime's close, abort or cancel when the runtime
+reports one, and, where it reports nothing (the deployment, VERIFICATION C3S.3a: a closed stream's
+abort and cancel never arrived and its heartbeats were taken, so the slot lived until the lifetime
+timer), by three releases the route gives itself: the tab's token (`?tab=` on every open) releases
+the tab's earlier slots on the instance the open lands on, hello or not and whatever the deck; a
+`leave` of the stream's own client id (the tab's beacon, or a later open of the same tab retiring
+it through `?retire=`) closes the stream on whichever instance it landed; and a reader whose
+presence has not reached the instance for `STREAM_PRESENCE_UNSEEN_MS` (75 s) after
+`STREAM_PRESENCE_GRACE_MS` (45 s) is closed at the heartbeat, never while the store refuses its
+poll. A refused open (503 `too_many_streams` with `retry-after`) answers the client id it minted in
+its body, so a page whose every open is refused still posts its writes over `POST /ops`; every
+hello names the seq the last checkpoint covered (`covered`), so a tab trims what it retained while
+its stream was down; and the room client reopens on a gap of `GAP_REOPEN_MS` (8 s) without an
+event. None of this changed a cadence or added a store call: the liveness reads the `presence`
+events the stream's subscription already receives, and `isStoreBusy` (`packages/store/src/pulse.ts`)
+reads the SDK's "Failed to fetch blob: <status>" as a refusal, so the routes answer 503 and the poll
+backs off.
+
+Two more readings of the stream fix round two (`build/t1.md` C3S-F8 and C3-F13), neither a cadence
+change nor a store call on the polling path: an ops answer to a POST carrying an edit also carries
+`between`, the entries between the tab's `base.seq` and its first admitted one (at most 256
+entries and 256 kB; over the bound the field is absent and the stream and the gap watch stay the
+way), read from the mirror's version log the sync above pulled, so a tab whose stream sits on
+another instance settles its answered ops from the answer alone instead of waiting on the gap
+watch's reopen; and the pulse poll of a deck ends with one line, `polling <id> stopped, the deck is
+gone`, when the store says the deck is gone (Delete forever on another instance), clearing the
+deck's watch and comments watch and scheduling no tick, where it logged `polling <id> failed` once
+per tick until the last stream closed.
+
 ### Writes
 
 A write pulls first, then applies through `FileStore.write` on the mirror (the same `applyWrite`,
-lease check and version record as on disk), then pushes in this order:
+lease check and version record as on disk), then pushes in this order. The focus round
+(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed
+the order that follows: the version record travels in the second round, before the commit, as a
+claim on its number (`overwrite` refused; a number another instance holds is `RecordTakenError`
+and the write runs once more from the store's current document; a claim older than 60 s is a
+stopped writer's and is taken over), so a record is never invisible to the other instances until
+the next commit; the fourth round is the removed bodies alone; every push of `deck.json` (the
+seed, `create`, `copy`, `trash`, `restore`) stores its snapshot first; `pull()` fetches the bodies
+the manifest names and proves each against its own head, and a lagging body leaves the document
+unproven (`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the
+mirror when its manifest row names the head's etag, else the origin body when its md5 is the etag,
+else the snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within
+its own refresh. The steps as they were, for the record of round two:
 
 1. `snapshots/<md5>.json`, the whole document as canonical JSON under the md5 of the `deck.json`
    bytes about to be pushed, with overwrite refused (the subsection below; gslides-parity SPEC-2
@@ -170,8 +250,9 @@ lease check and version record as on disk), then pushes in this order:
 A named version (`saveVersion`) uploads its record with overwrite refused; a collision with another
 instance's record of the same number is a `ConflictError`. Leases are pulled fresh before every
 write, lease and release, and pushed after; the file is small and last writer wins. The watch
-channel (`watch`) is a revision poll every 3 s, so an external revision reaches an open editor
-within that plus the editor's own poll.
+channel (`watch`) is a revision poll, 3 s by default and 1 s for the hosted collection
+(`HOSTED_POLL_MS`, one poll at a time), so an external revision reaches an open editor within that
+plus the editor's own poll.
 
 If a push fails between steps (the network, the store), the mirror's record is dropped so the next
 sync pulls the store's truth; the caller sees the error and retries from the current revision.
@@ -234,6 +315,9 @@ the editor is a handful of `head` calls; a write is one `list` (only when the ma
 `put` per changed slide, one for the version record and one for the manifest; a deck created from
 the GT template is about 290 `put` calls (85 slides, the manifest and 202 twins, eight at a time,
 measured a few seconds against the fake with no network). The seed upload happens once per store.
+The editor's queued export costs one `list` (the prune of the day old records) and two `put` calls
+for its record, plus one `put` per produced file, all on a write the person asked for; the ops
+answer's `between` and the pulse poll's stop added no store call.
 
 ## 5. Connect a Blob store
 

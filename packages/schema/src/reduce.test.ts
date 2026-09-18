@@ -5,6 +5,7 @@ import { workedDocument } from './fixtures.ts';
 import type { Mutation, Write } from './mutations.ts';
 import { applyMutation, applyMutations, applyWrite } from './reduce.ts';
 import { canonicalText } from './text.ts';
+import { transformAgainst } from './transform.ts';
 import { validateDocument } from './validate.ts';
 
 const author = { kind: 'agent', name: 'agent', runId: 'test' } as const;
@@ -960,5 +961,57 @@ describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
       ),
     );
     expect(blockLink.ok).toBe(false);
+  });
+});
+
+describe('the undo of a text session against a document a collaborator moved (VERIFICATION.md C3-F8)', () => {
+  // The shape of realtime.spec.ts "undo in A never reverts B's later change" (SPEC-3 3.5, 3.6):
+  // A opens a session on p1 and types U at the start; B's VV at the start lands; A undoes. The
+  // inverse the reducer answered at A's commit (remove one character at 0) is moved past B's
+  // splice the way the controller's stepMutations moves it (room-client transformSince over the
+  // entries that landed since, transformAgainst here) and applied to the document as it stands
+  // when the undo runs: B's change stays and only A's character leaves.
+  const p1 = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
+
+  function textOf(document: DeckDocument): string {
+    const slide = document.slides['content-rule'];
+    const block = slide?.kind === 'content' ? slide.slots.left?.[1] : undefined;
+    return block?.type === 'paragraph' ? block.text : '';
+  }
+
+  it('moves the commit’s inverse past the collaborator’s later insert at the same offset', () => {
+    const before = textOf(base());
+    // A commits: the session's first burst, one character at the start
+    const a = applyMutations(base(), [{ op: 'text.splice', ...p1, at: 0, remove: 0, insert: 'U' }]);
+    expect(textOf(a.document)).toBe(`U${before}`);
+    expect(a.inverse).toEqual([{ op: 'text.splice', ...p1, at: 0, remove: 1, insert: '' }]);
+    // B's change lands after A's commit, at the same offset
+    const bSplice: Mutation = { op: 'text.splice', ...p1, at: 0, remove: 0, insert: 'VV' };
+    const b = applyMutations(a.document, [bSplice]);
+    expect(textOf(b.document)).toBe(`VVU${before}`);
+    // A undoes: the inverse rebased past what landed since, applied to the current document
+    const undo = a.inverse.flatMap((inverse) => transformAgainst(inverse, [bSplice]));
+    expect(undo).toEqual([{ op: 'text.splice', ...p1, at: 2, remove: 1, insert: '' }]);
+    const undone = applyMutations(b.document, undo);
+    expect(textOf(undone.document)).toBe(`VV${before}`);
+    // the untransformed inverse is the finding's shape: it would take one of B's characters
+    const stale = applyMutations(b.document, a.inverse);
+    expect(textOf(stale.document)).toBe(`VU${before}`);
+  });
+
+  it('keeps the collaborator’s change whichever side undoes, and inside the run as well', () => {
+    const before = textOf(base());
+    const a = applyMutations(base(), [
+      { op: 'text.splice', ...p1, at: 6, remove: 4, insert: 'note' },
+    ]);
+    expect(textOf(a.document)).toBe(before.replace('post', 'note'));
+    const bSplice: Mutation = { op: 'text.splice', ...p1, at: 0, remove: 0, insert: 'VV' };
+    const b = applyMutations(a.document, [bSplice]);
+    // A undoes past B's insert before the replaced word: the word comes back and VV stays
+    const undoA = a.inverse.flatMap((inverse) => transformAgainst(inverse, [bSplice]));
+    expect(textOf(applyMutations(b.document, undoA).document)).toBe(`VV${before}`);
+    // B undoes its own insert with nothing landed since: A's replacement stays
+    const undoB = applyMutations(b.document, b.inverse);
+    expect(textOf(undoB.document)).toBe(before.replace('post', 'note'));
   });
 });

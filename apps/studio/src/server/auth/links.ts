@@ -142,6 +142,13 @@ export type ExchangeDeps = {
   identity: RequestIdentity;
   lookup: LinkLookup;
   now?: Date;
+  /**
+   * Records the grant where every instance reads it (the principal's deck index on the Blob
+   * store, `server/access.ts` `noteLinkGrant`; the focus round, VERIFICATION.md pass 2
+   * F-share-404): the principal record below is this instance's file on the blob tier. A failure
+   * here never fails the exchange; the record's grant stands for this instance.
+   */
+  noteGrant?: (principalId: string, grant: LinkGrant, now: string) => Promise<void>;
 };
 
 /**
@@ -176,6 +183,9 @@ export async function exchangeShareToken(
       linkGrants: [...others, grant],
       lastSeenAt: now.toISOString(),
     });
+  }
+  if (deps.noteGrant !== undefined) {
+    await deps.noteGrant(identity.principalId, grant, now.toISOString()).catch(() => undefined);
   }
   if (identity.kind === 'account' && runtime.hooks.onLinkGrant !== null)
     await runtime.hooks.onLinkGrant(identity.principalId, grant);

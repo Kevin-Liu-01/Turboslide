@@ -43,8 +43,8 @@ export function renderSpriteModule(symbols: ReadonlyArray<ParsedSymbol>): string
 // (MIT, tailwindlabs/heroicons) plus gt-mark at viewBox "-8 214 1213 771" (SPEC 5.1). Icons are
 // written as <svg class="ic ok" aria-hidden="true"><use href="#i-check-circle"/></svg>
 // (DECK-GRAMMAR.md:40); the renderer inlines spriteMarkup() once per document.
-import type { IconName } from '@turboslide/schema/icons';
-import { iconSymbolId } from '@turboslide/schema/icons';
+import type { IconName } from '@turboslide/schema/icon-names';
+import { iconSymbolId } from '@turboslide/schema/icon-names';
 
 export type SpriteSymbol = { id: string; viewBox: string; body: string };
 

@@ -12,7 +12,7 @@ import type { Block } from '@turboslide/schema/blocks';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
-import { RETIRED_KEYS_STORAGE } from '../editor-shell';
+import { RETIRED_KEYS_STORAGE, SETTINGS_STORAGE } from '../editor-shell';
 import type { EditorShellInput } from '../editor-shell';
 import { EditorShell } from '../EditorShell';
 import { cn } from '../lib/cn';
@@ -179,6 +179,46 @@ describe('the editor shell in its default state', () => {
     const titles = [...container.querySelectorAll('[role="menubar"] [role="menuitem"]')].map(
       (el) => el.textContent,
     );
+    /* the Extensions menu's rows are all parked, so the bar draws nine menus with the switch off
+       (docs/FOCUS.md 3.1, 3.2); the ten are asserted behind the switch below */
+    expect(titles).toEqual(
+      MENUS.filter((menu) => menu.id !== 'extensions').map((menu) => menu.label),
+    );
+    const toolbar = container.querySelector('[data-control="toolbar"]') as HTMLElement;
+    const controls = [...toolbar.querySelectorAll<HTMLElement>('[data-control^="toolbar."]')]
+      .map((el) => el.dataset.control as string)
+      .filter((id) =>
+        [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT].some((control) => control.control === id),
+      );
+    /* the focus round (docs/FOCUS.md 3.1, 3.3): a Later or parked control is drawn behind Tools >
+       Advanced tools, so the default state lists the head and the default tail without them */
+    expect(controls).toEqual(
+      [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT]
+        .filter((control) => control.status !== 'later' && control.advanced !== true)
+        .map((control) => control.control),
+    );
+    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition, the Later
+       control, is absent while the switch is off (asserted behind the switch below) */
+    const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
+    expect(comment.getAttribute('aria-disabled')).toBeNull();
+    expect(toolbar.querySelector('[data-control="toolbar.transition"]')).toBeNull();
+    for (const parked of ['toolbar.paintFormat', 'toolbar.theme', 'toolbar.hideMenus'])
+      expect(toolbar.querySelector(`[data-control="${parked}"]`), parked).toBeNull();
+    expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
+    expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();
+    /* the bottom bar's view buttons follow View > Grid view, parked with the switch off (3.1, 3.2) */
+    expect(container.querySelector('[data-control="view.gridView"]')).toBeNull();
+    expect(container.querySelector('[data-control="view.filmstripView"]')).toBeNull();
+    expect(container.querySelector('.ts-rpanel')?.childElementCount).toBe(0);
+    expect(container.querySelector('.pt-viewer')?.hasAttribute('data-advanced-tools')).toBe(false);
+  });
+
+  it('draws the Later controls and rows behind Tools > Advanced tools, remembered per browser (docs/FOCUS.md 3.1)', () => {
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
+    const { container } = render(<Harness input={input()} shell={shellState()} />);
+    const titles = [...container.querySelectorAll('[role="menubar"] [role="menuitem"]')].map(
+      (el) => el.textContent,
+    );
     expect(titles).toEqual(MENUS.map((menu) => menu.label));
     const toolbar = container.querySelector('[data-control="toolbar"]') as HTMLElement;
     const controls = [...toolbar.querySelectorAll<HTMLElement>('[data-control^="toolbar."]')]
@@ -189,16 +229,29 @@ describe('the editor shell in its default state', () => {
     expect(controls).toEqual(
       [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT].map((control) => control.control),
     );
-    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition stays the
-       Later control, in the tab order, aria-disabled, with the stub sentence */
-    const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
-    expect(comment.getAttribute('aria-disabled')).toBeNull();
+    /* Transition is the Later control, in the tab order, aria-disabled, with the stub sentence */
     const transition = toolbar.querySelector('[data-control="toolbar.transition"]') as HTMLElement;
     expect(transition.getAttribute('aria-disabled')).toBe('true');
     expect(transition.hasAttribute('disabled')).toBe(false);
-    expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
-    expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();
-    expect(container.querySelector('.ts-rpanel')?.childElementCount).toBe(0);
+    expect(container.querySelector('.pt-viewer')?.hasAttribute('data-advanced-tools')).toBe(true);
+    /* the bottom bar's two view buttons return with the grid view (3.1's table) */
+    expect(container.querySelector('[data-control="view.gridView"]')).not.toBeNull();
+    expect(container.querySelector('[data-control="view.filmstripView"]')).not.toBeNull();
+    /* SPEC-3 13.3: Email is present with Email collaborators as its Later row */
+    const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
+    fireEvent.click(file);
+    const menu = screen.getByRole('menu', { name: 'File menu' });
+    expect(menu.querySelector('[data-menu-item="file.email"]')?.getAttribute('aria-disabled')).toBe(
+      'true',
+    );
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    /* the switch is a check row of the Tools menu, checked while on */
+    fireEvent.click(container.querySelector('[data-control="menubar.tools"]') as HTMLElement);
+    const tools = screen.getByRole('menu', { name: 'Tools menu' });
+    const row = tools.querySelector('[data-menu-item="tools.advancedTools"]');
+    expect(row?.getAttribute('role')).toBe('menuitemcheckbox');
+    expect(row?.getAttribute('aria-checked')).toBe('true');
+    fireEvent.keyDown(tools, { key: 'Escape' });
   });
 
   it('keeps every engineering word, action id and JSON pointer out of the text and the tooltips', () => {
@@ -218,11 +271,11 @@ describe('the editor shell in its default state', () => {
     const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
     fireEvent.click(file);
     const menu = screen.getByRole('menu', { name: 'File menu' });
-    expect(menu.querySelector('[data-menu-item="file.open"]')).not.toBeNull();
-    /* SPEC-3 13.3: Email is present with Email collaborators as its Later row */
-    expect(menu.querySelector('[data-menu-item="file.email"]')?.getAttribute('aria-disabled')).toBe(
-      'true',
-    );
+    expect(menu.querySelector('[data-menu-item="file.makeCopy"]')).not.toBeNull();
+    /* SPEC-3 13.3's Email row is Later and Open is parked, so both are absent while Tools >
+       Advanced tools is off (docs/FOCUS.md 3.1, 3.2); the test above asserts Email behind the switch */
+    expect(menu.querySelector('[data-menu-item="file.open"]')).toBeNull();
+    expect(menu.querySelector('[data-menu-item="file.email"]')).toBeNull();
     expect(menu.querySelector('[data-menu-item="file.move"]')).toBeNull();
     for (const text of defaultViewText(menu)) expect(forbiddenWordsIn(text), text).toEqual([]);
     for (const row of menu.querySelectorAll('[role^="menuitem"]')) {
@@ -237,6 +290,8 @@ describe('the editor shell in its default state', () => {
   });
 
   it('runs File > Details from the menu and the dialog names the presentation', async () => {
+    /* Details is parked (docs/FOCUS.md 3.2): the row runs behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     fireEvent.click(container.querySelector('[data-control="menubar.file"]') as HTMLElement);
     fireEvent.click(document.querySelector('[data-menu-item="file.details"]') as HTMLElement);
@@ -249,7 +304,101 @@ describe('the editor shell in its default state', () => {
     expect(screen.queryByRole('dialog', { name: 'Details' })).toBeNull();
   });
 
+  it('a text block shows the core text tail with split list buttons; the button writes the first preset, the arrow opens the plate (docs/FOCUS.md 3.3, rank 9)', async () => {
+    const { container } = render(
+      <Harness input={input({ selection: { blockId: 'p1' } })} shell={shellState()} />,
+    );
+    const toolbar = container.querySelector('[data-control="toolbar"]') as HTMLElement;
+    const ids = [...toolbar.querySelectorAll<HTMLElement>('[data-control^="toolbar."]')].map(
+      (el) => el.dataset.control as string,
+    );
+    /* the parked controls of the text tail are absent, the core ones present, Font disabled */
+    for (const parked of [
+      'toolbar.fillColor',
+      'toolbar.borderColor',
+      'toolbar.borderWeight',
+      'toolbar.borderDash',
+      'toolbar.highlightColor',
+    ])
+      expect(ids, parked).not.toContain(parked);
+    for (const core of [
+      'toolbar.font',
+      'toolbar.fontSize',
+      'toolbar.bold',
+      'toolbar.italic',
+      'toolbar.underline',
+      'toolbar.textColor',
+      'toolbar.insertLink',
+      'toolbar.align',
+      'toolbar.spacing',
+      'toolbar.bulletedList',
+      'toolbar.bulletedList.arrow',
+      'toolbar.numberedList',
+      'toolbar.numberedList.arrow',
+      'toolbar.decreaseIndent',
+      'toolbar.increaseIndent',
+      'toolbar.clearFormatting',
+      'toolbar.formatOptions',
+    ])
+      expect(ids, core).toContain(core);
+    expect(
+      toolbar.querySelector('[data-control="toolbar.font"]')?.getAttribute('aria-disabled'),
+    ).toBe('true');
+    /* the button writes text.list with the first preset (audit-text rows 38 and 39 saw no write) */
+    fireEvent.click(toolbar.querySelector('[data-control="toolbar.bulletedList"]') as HTMLElement);
+    await flush();
+    expect(dispatch).toHaveBeenCalledWith(
+      'text.list',
+      expect.objectContaining({
+        slideId: SLIDE,
+        blockId: 'p1',
+        marker: 'bullet',
+        preset: 'disc-circle-square',
+      }),
+    );
+    fireEvent.click(toolbar.querySelector('[data-control="toolbar.numberedList"]') as HTMLElement);
+    await flush();
+    expect(dispatch).toHaveBeenCalledWith(
+      'text.list',
+      expect.objectContaining({ blockId: 'p1', marker: 'number', preset: 'digit-alpha-roman' }),
+    );
+    /* the arrow opens the preset plate and writes nothing */
+    const calls = dispatch.mock.calls.length;
+    fireEvent.click(
+      toolbar.querySelector('[data-control="toolbar.bulletedList.arrow"]') as HTMLElement,
+    );
+    expect(document.querySelectorAll('[role="gridcell"]').length).toBeGreaterThan(0);
+    expect(dispatch.mock.calls).toHaveLength(calls);
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+  });
+
+  it('a toolbar button never takes the focus on the pointer down, so a text session and its range survive the click (rank 10)', () => {
+    const { container } = render(
+      <Harness input={input({ selection: { blockId: 'p1' } })} shell={shellState()} />,
+    );
+    const italic = container.querySelector('[data-control="toolbar.italic"]') as HTMLElement;
+    const probe = document.createElement('input');
+    document.body.appendChild(probe);
+    probe.focus();
+    expect(document.activeElement).toBe(probe);
+    /* fireEvent returns false when the default was prevented */
+    expect(fireEvent.mouseDown(italic)).toBe(false);
+    expect(document.activeElement).toBe(probe);
+    expect(fireEvent.mouseDown(document.body)).toBe(true);
+    probe.remove();
+  });
+
+  it('the Full screen chord and the Hide the menus chevron do nothing while Advanced tools is off (docs/FOCUS.md 3.2, 3.3)', () => {
+    const { container } = render(<Harness input={input()} shell={shellState()} />);
+    expect(container.querySelector('[data-control="toolbar.hideMenus"]')).toBeNull();
+    fireEvent.keyDown(document.body, { key: 'F', code: 'KeyF', ctrlKey: true, shiftKey: true });
+    expect(container.querySelector('[data-control="toolbar.showMenus"]')).toBeNull();
+    expect(container.querySelector('.pt-viewer')?.classList.contains('is-compact')).toBe(false);
+  });
+
   it('Ctrl+Shift+F is compact mode and Esc restores; Cmd+/ opens the shortcuts dialog', async () => {
+    /* Full screen is parked (docs/FOCUS.md 3.2): the chord and the row are asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     fireEvent.keyDown(document.body, { key: 'F', code: 'KeyF', ctrlKey: true, shiftKey: true });
     expect(
@@ -296,6 +445,8 @@ describe('the editor shell in its default state', () => {
   });
 
   it('Format options opens the empty panel and the bottom chevron closes it', () => {
+    /* the Theme button is parked (docs/FOCUS.md 3.3): asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     fireEvent.click(container.querySelector('[data-control="menubar.format"]') as HTMLElement);
     fireEvent.click(
@@ -341,15 +492,81 @@ describe('the Insert menu, compact mode and the title row', () => {
     clickMenuPath(first.container, 'insert', 'insert.textBox');
     expect(onDrawTool).toHaveBeenCalledWith({ kind: 'text' });
     expect(dispatch).not.toHaveBeenCalled();
-    clickMenuPath(first.container, 'insert', 'insert.shape', 'insert.shape.shapes');
-    /* the Shapes row opens the shape picker plate (SPEC-2 4.1); a tile arms the draw tool */
-    const ellipse = document.querySelector('[data-control="insert.shape.shapes.pick.ellipse"]');
+    /* docs/FOCUS.md section 4 under the orchestrator's ruling (1), cycle 2 (build/b3.md R14): Insert >
+       Shape and Insert > Line leave the default view whole, with the two toolbar buttons; the
+       Insert menu keeps the seller's rows. The rows were asserted as named rows in the default view
+       in cycle 1 and are asserted behind the switch below, never deleted */
+    clickMenuPath(first.container, 'insert');
+    for (const parked of ['insert.shape', 'insert.line'])
+      expect(document.querySelector(`[data-menu-item="${parked}"]`), parked).toBeNull();
+    for (const kept of ['insert.newSlide', 'insert.textBox', 'insert.image', 'insert.link'])
+      expect(document.querySelector(`[data-menu-item="${kept}"]`), kept).not.toBeNull();
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    for (const control of ['toolbar.insertShape', 'toolbar.insertLine'])
+      expect(first.container.querySelector(`[data-control="${control}"]`), control).toBeNull();
+    cleanup();
+    /* with the switch on the two menus and the two buttons are back: the Shapes row lists the
+       three named rows (docs/FOCUS.md section 4; the matrix row `shapes.insert.named-rows` is
+       driven with the switch on while the feature is parked, VERIFICATION.md C2-F11), the gallery
+       plate is its own row All shapes (SPEC-2 4.1), Insert > Line lists Line, Arrow and the
+       parked kinds */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
+    const gallery = render(<Harness input={input({ onDrawTool })} shell={shellState()} />);
+    for (const control of ['toolbar.insertShape', 'toolbar.insertLine'])
+      expect(
+        gallery.container.querySelector(`[data-control="${control}"]`),
+        control,
+      ).not.toBeNull();
+    clickMenuPath(gallery.container, 'insert', 'insert.shape', 'insert.shape.shapes');
+    expect(
+      [...document.querySelectorAll('[data-menu-item^="insert.shape.shapes."]')].map((el) =>
+        el.getAttribute('data-menu-item'),
+      ),
+    ).toEqual([
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+    ]);
+    expect(document.querySelector('[data-control^="insert.shape.shapes.pick."]')).toBeNull();
+    fireEvent.click(
+      document.querySelector('[data-menu-item="insert.shape.shapes.rounded"]') as HTMLElement,
+    );
+    expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'rounded' });
+    clickMenuPath(gallery.container, 'insert', 'insert.shape', 'insert.shape.gallery');
+    const ellipse = document.querySelector('[data-control="insert.shape.gallery.pick.ellipse"]');
     expect(ellipse).not.toBeNull();
     fireEvent.click(ellipse as HTMLElement);
     expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'ellipse' });
-    clickMenuPath(first.container, 'insert', 'insert.line', 'insert.line.rule');
+    /* the toolbar Shape button lists the named rows first, then the gallery rows */
+    fireEvent.click(
+      gallery.container.querySelector('[data-control="toolbar.insertShape"]') as HTMLElement,
+    );
+    expect(
+      [...document.querySelectorAll('#ts-menu-toolbar\\.insertShape [data-menu-item]')].map((el) =>
+        el.getAttribute('data-menu-item'),
+      ),
+    ).toEqual([
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+    ]);
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    clickMenuPath(gallery.container, 'insert', 'insert.line');
+    expect(
+      [...document.querySelectorAll('[data-menu-item^="insert.line."]')]
+        .map((el) => el.getAttribute('data-menu-item'))
+        .slice(0, 2),
+    ).toEqual(['insert.line.line', 'insert.line.arrow']);
+    fireEvent.click(document.querySelector('[data-menu-item="insert.line.arrow"]') as HTMLElement);
+    expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'line', line: 'arrow' });
+    clickMenuPath(gallery.container, 'insert', 'insert.line', 'insert.line.rule');
     expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'line', line: 'rule' });
     cleanup();
+    localStorage.clear();
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.textBox');
     await flush();
@@ -367,6 +584,8 @@ describe('the Insert menu, compact mode and the title row', () => {
   });
 
   it('Insert > Table opens the hover grid inside the menu; a cell writes a table of that size with a header row (SPEC-2 0.26)', async () => {
+    /* Insert > Table is parked (docs/FOCUS.md 3.2): the plate is asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.table');
     /* the plate is the Table row's submenu, not a dialog */
@@ -412,6 +631,8 @@ describe('the Insert menu, compact mode and the title row', () => {
   });
 
   it('Insert > Icon opens the symbol picker; a symbol writes an icon block of that name', async () => {
+    /* Insert > Icon is parked (docs/FOCUS.md 3.2): asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.icon');
     const dialog = await screen.findByRole('dialog', { name: 'Icon' });
@@ -434,6 +655,8 @@ describe('the Insert menu, compact mode and the title row', () => {
   });
 
   it('Insert > Material lists the catalog; a row writes a material block with that recipe', async () => {
+    /* Insert > Material is parked (docs/FOCUS.md 3.2): asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.material');
     const dialog = await screen.findByRole('dialog', { name: 'Material' });
@@ -472,6 +695,8 @@ describe('the Insert menu, compact mode and the title row', () => {
 
   it('View > Full screen puts is-compact on the root and the shell’s CSS hides the menu bar and the toolbar; Esc restores', () => {
     withShellCss();
+    /* View > Full screen is parked (docs/FOCUS.md 3.2): asserted behind the switch */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const root = container.querySelector('.pt-viewer') as HTMLElement;
     const menubar = container.querySelector('.ts-menubar') as HTMLElement;

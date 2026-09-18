@@ -15,7 +15,10 @@
 // this module twice (the Nitro server chunk that builds the Blob client and the SSR chunk that
 // runs the store), so an `instanceof` across the two copies fails and the raw store sentence
 // ("… changed in the Blob store since it was read") reached a person in the production walk.
-// Framework free; the studio's server/access.ts wires it.
+// Since the focus round's second cycle every document this module writes to the Blob store goes
+// up with an immutable copy under its md5 first (`putWithCopy`, `immutableCopyPath`) and every
+// read is proven against `head()` with that copy as the read that holds when the document's own
+// url serves a stale body (`provenGet`). Framework free; the studio's server/access.ts wires it.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -25,7 +28,7 @@ import { accessRecordSchema } from '@turboslide/schema/access';
 import { canonicalJson } from '@turboslide/schema/json';
 import { z } from 'zod';
 
-import type { BlobClient } from './blob-store.ts';
+import type { BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
 import { ACCESS_FILE, BlobExistsError, BlobPreconditionError, deckPrefix } from './blob-store.ts';
 import { STATE_DIR } from './file-store.ts';
 import type { DeckHead } from './templates.ts';
@@ -162,15 +165,168 @@ export function fileAccessStore(decksDir: string): AccessStore {
   };
 }
 
+// ---------------------------------------------------------------------------------------------
+// The proven read (the focus round, docs/FOCUS.md section 5 rank 1; VERIFICATION.md pass 2
+// F-share-copy, F-share-404, F-missing-record)
+
+/** Reads a body at its public url past the CDN's cached copy; null when the read fails. */
+export type FreshBodyFetch = (url: string, version: string) => Promise<Uint8Array | null>;
+
+export type ProvenReadOptions = {
+  /**
+   * the read past the CDN when the client's body does not hash to the head's version; the default
+   * fetches the url with a query the CDN keys by (measured 2026-09-16: a new query is a MISS to
+   * the store, the plain url may be a stale HIT for a while after an overwrite)
+   */
+  fetchFresh?: FreshBodyFetch;
+  /** how many times the client's read is tried again after the url read; 2 by default */
+  retries?: number;
+  /** the wait before each try again, in ms; 120 by default */
+  waitMs?: number;
+  /** the clock's sleep, for tests */
+  sleep?: (ms: number) => Promise<void>;
+  /**
+   * the immutable copy read when the document's own body does not prove (`immutableCopyPath` by
+   * default); false for a document that is never overwritten and so has no copy
+   */
+  copyOf?: ((pathname: string, version: string) => string) | false;
+};
+
+const MD5_VERSION = /^"[0-9a-f]{32}"$/;
+
+/** The hex of an md5 version, without the quotes and a weak validator's prefix. */
+export function versionHex(version: string): string {
+  return version.replace(/^W\//, '').replace(/"/g, '');
+}
+
 /**
- * The Blob backend over the private client (SPEC-3 2.5): `decks/<id>/access.json`, read with
- * the client's uncached `get`, written with `ifMatch` on the etag the caller read, or with
- * overwrite refused for a record that must not exist yet.
+ * The folder the immutable copies of a stored document live under: the deck's or the user's own
+ * state folder (`decks/<id>/.turboslide/copies/`, `users/<folder>/.turboslide/copies/`), which
+ * the mirror never pulls (`blob-store.ts` `isMirroredDocument` leaves `.turboslide/` out) and
+ * `deck.remove` deletes with the prefix; for any other path, a state folder beside the file.
  */
-export function blobAccessStore(client: BlobClient): AccessStore {
+function copiesFolderOf(pathname: string): string {
+  const segments = pathname.split('/');
+  const root =
+    (segments[0] === 'decks' || segments[0] === 'users') && segments.length >= 3
+      ? `${segments[0]}/${segments[1]}/`
+      : `${segments.slice(0, -1).join('/')}${segments.length > 1 ? '/' : ''}`;
+  return `${root}${STATE_DIR}/copies/`;
+}
+
+/**
+ * The immutable copy of a document at one version (the focus round, cycle 2 fix round; the rule
+ * `snapshots/<md5>.json` applies to `deck.json`): `<folder>/.turboslide/copies/<md5 hex>.json`,
+ * written before the document itself and never overwritten with other bytes, so the CDN can hold
+ * no copy of it from before a write, and a reader that learned the version from `head()` reads the
+ * body the writer stored whatever the CDN serves at the document's own url. Measured on the
+ * cycle 2 enforce preview: the plain url and the url with a cache busting query both served the
+ * access record from before a mint for seconds on the function's edge (the dialog refused with
+ * "the access record is at revision 0, not 1", the exchange answered 404 for a link the record
+ * did not yet list), while from another edge every read was a miss to the store.
+ */
+export function immutableCopyPath(pathname: string, version: string): string {
+  return `${copiesFolderOf(pathname)}${versionHex(version)}.json`;
+}
+
+/**
+ * Stores the immutable copy of `bytes` under their md5, then the document itself with the
+ * caller's options; the copy goes first so no version `head()` ever names is without its copy.
+ * The copy's put overwrites: two writers of the same bytes store the same copy.
+ */
+export async function putWithCopy(
+  client: BlobClient,
+  pathname: string,
+  bytes: Uint8Array,
+  options: BlobPutOptions,
+): Promise<BlobEntry> {
+  await client.put(immutableCopyPath(pathname, accessEtag(bytes)), bytes, {
+    overwrite: true,
+    contentType: options.contentType ?? 'application/json',
+  });
+  return client.put(pathname, bytes, options);
+}
+
+/** The default url read: the same url with `?v=<hex>` appended, so the CDN cannot answer the cached copy. */
+export const fetchFreshByQuery: FreshBodyFetch = async (url, version) => {
+  const hex = version.replace(/^W\//, '').replace(/"/g, '');
+  const target = `${url}${url.includes('?') ? '&' : '?'}v=${encodeURIComponent(hex)}`;
+  const response = await fetch(target, { cache: 'no-store' });
+  if (!response.ok) return null;
+  return new Uint8Array(await response.arrayBuffer());
+};
+
+/**
+ * The current bytes of a blob, proven (the rule `packages/store/src/blob-store.ts` `pull()` applies
+ * to `deck.json`, now on the records the studio reads on every request): `head()` answers the
+ * store's version at once while the body a public url serves may be the CDN's copy from before
+ * the last overwrite, or a cached miss for a path written since. So a body counts only when its
+ * md5 is the version `head()` names. A body that does not is read from the document's immutable
+ * copy under that version (`immutableCopyPath`, stored before the document by `putWithCopy`; a
+ * path the CDN never served stale, since no other bytes were ever stored under it), then at the
+ * url with a query the CDN keys by, then the client is asked again after a short wait. When no
+ * read proves the body (a document written before the copies existed, behind a lagging edge),
+ * the last body the client gave is answered under its own version, so a write based on it is
+ * refused as stale rather than committed over a newer record. A version that is not an md5 (a
+ * client that reports the upload time) takes the client's body as it is. Measured on the enforce
+ * preview 2026-09-16: a second `share.createLink` 155 ms after the first read the record at
+ * revision 0 through the plain read and was refused ("the access record is at revision 0, not
+ * 1"), and on the cycle 2 preview the url read with the query served the same stale body (the
+ * verifier's C2-F2: "revision 0, not 1" with the store at revision 3); the Share dialog's second
+ * Copy link, the link exchange's lookup and the record of a fresh deck all read through this path.
+ */
+export async function provenGet(
+  client: BlobClient,
+  pathname: string,
+  options: ProvenReadOptions = {},
+): Promise<{ entry: BlobEntry; bytes: Uint8Array } | null> {
+  const head = await client.head(pathname);
+  if (head === null) return null;
+  const wanted = head.version;
+  if (!MD5_VERSION.test(wanted)) return client.get(pathname);
+  const proves = (bytes: Uint8Array): boolean => accessEtag(bytes) === wanted;
+  const fetchFresh = options.fetchFresh ?? fetchFreshByQuery;
+  const sleep = options.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const tries = 1 + Math.max(0, options.retries ?? 2);
+  const copyOf = options.copyOf === undefined ? immutableCopyPath : options.copyOf;
+  let last: { entry: BlobEntry; bytes: Uint8Array } | null = null;
+  let copyMissing = copyOf === false;
+  for (let attempt = 0; attempt < tries; attempt += 1) {
+    if (attempt > 0) await sleep(options.waitMs ?? 120);
+    const got = await client.get(pathname).catch(() => null);
+    if (got !== null) {
+      if (proves(got.bytes)) return { entry: { ...got.entry, version: wanted }, bytes: got.bytes };
+      last = got;
+    }
+    if (!copyMissing && copyOf !== false) {
+      // the copy under the version head() named: the bytes the writer stored, from a path no
+      // edge served before they existed; absent (null, not an error) for a document written
+      // before the copies, which the later tries then skip
+      const copy = await client.get(copyOf(pathname, wanted)).then(
+        (got) => ({ ok: true as const, got }),
+        () => ({ ok: false as const, got: null }),
+      );
+      if (copy.got !== null && proves(copy.got.bytes))
+        return { entry: head, bytes: copy.got.bytes };
+      if (copy.ok && copy.got === null) copyMissing = true;
+    }
+    const fresh = await fetchFresh(head.url, wanted).catch(() => null);
+    if (fresh !== null && proves(fresh)) return { entry: head, bytes: fresh };
+  }
+  return last;
+}
+
+/**
+ * The Blob backend over the store's client (SPEC-3 2.5): `decks/<id>/access.json`, read through
+ * `provenGet` (the head's version against the body's md5, the immutable copy under that version
+ * as the second read, the url past the CDN as the third), written with its copy first and then
+ * with `ifMatch` on the etag the caller read, or with overwrite refused for a record that must
+ * not exist yet.
+ */
+export function blobAccessStore(client: BlobClient, options: ProvenReadOptions = {}): AccessStore {
   const pathOf = (deckId: string): string => `${deckPrefix(deckId)}${ACCESS_FILE}`;
   const readAt = async (deckId: string): Promise<StoredAccess | null> => {
-    const fetched = await client.get(pathOf(deckId));
+    const fetched = await provenGet(client, pathOf(deckId), options);
     if (fetched === null) return null;
     return {
       record: parseAccessRecord(fetched.bytes, pathOf(deckId)),
@@ -183,7 +339,9 @@ export function blobAccessStore(client: BlobClient): AccessStore {
     async write(deckId, record, options = {}) {
       const bytes = accessBytes(record);
       try {
-        const entry = await client.put(pathOf(deckId), bytes, {
+        // the immutable copy first, then the record (putWithCopy): a reader whose edge still
+        // serves the record from before this write proves the copy under the head's version
+        const entry = await putWithCopy(client, pathOf(deckId), bytes, {
           overwrite: options.ifMatch !== null,
           contentType: 'application/json',
           ...(typeof options.ifMatch === 'string' ? { ifMatch: options.ifMatch } : {}),
@@ -271,7 +429,11 @@ export type CachedAccessStore = AccessStore & {
 /**
  * A read through cache in front of a backend: a page load is one lookup instead of one store
  * read; a write on this instance drops the entry and publishes the deck id so every other
- * instance drops its own. A null (no record) is cached too, for the same 60 s.
+ * instance drops its own. A null (no record) is cached too, for the same 60 s, except on the
+ * blob tier: there a deck created a moment ago on another instance can read as recordless on
+ * this one, and a cached null would hold that answer for the window while `decide()` treats a
+ * recordless deck as the legacy open deck (VERIFICATION F-missing-record; b7 C2-R13), so a null
+ * is read again on the next call and a record, once found, is cached as before.
  */
 export function cachedAccessStore(
   inner: AccessStore,
@@ -287,7 +449,7 @@ export function cachedAccessStore(
       const hit = cache.get(deckId);
       if (hit !== undefined && now() - hit.at < ttlMs) return hit.value;
       const value = await inner.read(deckId);
-      cache.set(deckId, { value, at: now() });
+      if (value !== null || inner.kind !== 'blob') cache.set(deckId, { value, at: now() });
       return value;
     },
     async write(deckId, record, writeOptions) {
@@ -324,6 +486,8 @@ export type DeckIndex = {
     role: 'viewer' | 'commenter' | 'editor';
     since: string;
     via?: 'grant' | 'link';
+    /** the link the row came from (`via: 'link'`), so the grant follows the link's revocation (SPEC-3 6.4) */
+    linkId?: string;
   }[];
   trashed: { deckId: string; at: string }[];
   recent: { deckId: string; at: string }[];
@@ -339,6 +503,7 @@ export const deckIndexSchema = z.strictObject({
       role: z.enum(['viewer', 'commenter', 'editor']),
       since: z.string(),
       via: z.enum(['grant', 'link']).optional(),
+      linkId: z.string().min(1).optional(),
     }),
   ),
   trashed: z.array(z.strictObject({ deckId: z.string().min(1), at: z.string() })),
@@ -404,14 +569,14 @@ export function fileIndexStore(stateDir: string): IndexStore {
   };
 }
 
-/** `users/<principalId>/decks.json` on the private Blob store, written with `ifMatch`. */
-export function blobIndexStore(client: BlobClient): IndexStore {
+/** `users/<principalId>/decks.json` on the Blob store, read through `provenGet`, written with its immutable copy first and then with `ifMatch`. */
+export function blobIndexStore(client: BlobClient, options: ProvenReadOptions = {}): IndexStore {
   const pathOf = (principalId: string): string =>
     `users/${principalFolder(principalId)}/decks.json`;
   const readAt = async (
     principalId: string,
   ): Promise<{ index: DeckIndex; etag: string | null }> => {
-    const fetched = await client.get(pathOf(principalId));
+    const fetched = await provenGet(client, pathOf(principalId), options);
     if (fetched === null) return { index: emptyDeckIndex(), etag: null };
     return { index: parseIndex(fetched.bytes, pathOf(principalId)), etag: fetched.entry.version };
   };
@@ -425,11 +590,16 @@ export function blobIndexStore(client: BlobClient): IndexStore {
         const next = update(index);
         if (next === null) return index;
         try {
-          await client.put(pathOf(principalId), new TextEncoder().encode(canonicalJson(next)), {
-            overwrite: etag !== null,
-            contentType: 'application/json',
-            ...(etag === null ? {} : { ifMatch: etag }),
-          });
+          await putWithCopy(
+            client,
+            pathOf(principalId),
+            new TextEncoder().encode(canonicalJson(next)),
+            {
+              overwrite: etag !== null,
+              contentType: 'application/json',
+              ...(etag === null ? {} : { ifMatch: etag }),
+            },
+          );
           return next;
         } catch (error) {
           if (isBlobConflict(error)) continue;
@@ -475,12 +645,25 @@ export const indexUpdates = {
     role: 'viewer' | 'commenter' | 'editor',
     since: string,
     via: 'grant' | 'link' = 'grant',
+    linkId?: string,
   ): (index: DeckIndex) => DeckIndex | null {
     return (index) => {
       const rest = index.shared.filter((row) => row.deckId !== deckId);
       const existing = index.shared.find((row) => row.deckId === deckId);
-      if (existing !== undefined && existing.role === role && existing.via === via) return null;
-      return { ...index, shared: [...rest, { deckId, role, since, via }] };
+      if (
+        existing !== undefined &&
+        existing.role === role &&
+        existing.via === via &&
+        existing.linkId === linkId
+      )
+        return null;
+      return {
+        ...index,
+        shared: [
+          ...rest,
+          { deckId, role, since, via, ...(linkId === undefined ? {} : { linkId }) },
+        ],
+      };
     };
   },
   unshared(deckId: string): (index: DeckIndex) => DeckIndex | null {
@@ -611,11 +794,11 @@ export function fileLinkIndex(stateDir: string): LinkIndex {
   };
 }
 
-/** `links/<hex>.json` on the Blob store the records live on; a put overwrites, so it never conflicts. */
-export function blobLinkIndex(client: BlobClient): LinkIndex {
+/** `links/<hex>.json` on the Blob store the records live on, read through `provenGet` (one body per hash, never overwritten with other bytes, so no copy); a put overwrites, so it never conflicts. */
+export function blobLinkIndex(client: BlobClient, options: ProvenReadOptions = {}): LinkIndex {
   return {
     async get(hash) {
-      const fetched = await client.get(linkIndexKey(hash));
+      const fetched = await provenGet(client, linkIndexKey(hash), { copyOf: false, ...options });
       return fetched === null ? null : parseLinkIndexEntry(fetched.bytes);
     },
     async put(hash, entry) {

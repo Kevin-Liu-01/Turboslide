@@ -5,12 +5,14 @@ import {
   ACCESS_PAGE,
   ACCOUNT,
   AGENT_SENTENCES,
+  CANVAS,
   COMMENTS,
   DIALOGS,
   DITHER,
   INBOX,
   PANELS,
   PRESENCE,
+  PROMPTS,
   REFUSALS,
   TITLE_ROW,
   forbiddenWordsIn,
@@ -18,7 +20,7 @@ import {
 
 // The strings of round three (SPEC-3 6.8, 15; 16.6 "strings.test.ts"): every refusal of 6.8 is
 // present verbatim, every new default view string of 15 is present, Google's labels are Google's
-// words, the Turboslide additions of 15 exist as rows or words, and the five save phrases stack in
+// words, the Turboslide additions of 15 exist as rows or words, and the six save phrases stack in
 // one cell. The wording is data here so the e2e fixtures and the surfaces read one source.
 
 /** The plain strings of a strings block, its functions and nested blocks left out. */
@@ -100,6 +102,8 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(ACCOUNT.signInDialog.passkeysLater).toBe('Passkeys arrive once the address is final');
     expect(TITLE_ROW.offline).toBe('Offline. Changes will save when you reconnect');
     expect(TITLE_ROW.retrying).toBe("Couldn't save, retrying");
+    /* the blob tier budget's word for a store that refuses the room's poll (build/b7.md FR3-R5) */
+    expect(TITLE_ROW.reconnecting).toBe('Reconnecting…');
     expect(DITHER.uploading('6.2')).toBe('Uploading 6.2 MB');
     expect(DITHER.help).toBe(
       'The deck’s two tone screen over the picture; change it under Format options',
@@ -115,15 +119,19 @@ describe('the default view strings of SPEC-3 15', () => {
     );
   });
 
-  it('stack the five save phrases in one cell and count the inbox to two digits', () => {
+  it('stack the six save phrases in one cell and count the inbox to two digits', () => {
     const phrases = [
       TITLE_ROW.saving,
       TITLE_ROW.saved,
       TITLE_ROW.retrying,
       TITLE_ROW.offline,
       TITLE_ROW.notSaved,
+      TITLE_ROW.reconnecting,
     ];
-    expect(new Set(phrases).size).toBe(5);
+    expect(new Set(phrases).size).toBe(6);
+    /* the cell's width rule (SPEC-3 15, 9.2 E5): the offline sentence stays the longest phrase */
+    for (const phrase of phrases)
+      expect(phrase.length).toBeLessThanOrEqual(TITLE_ROW.offline.length);
     expect(TITLE_ROW.unread(7)).toBe('7');
     expect(TITLE_ROW.unread(99)).toBe('99');
     expect(TITLE_ROW.unread(100)).toBe('99+');
@@ -268,5 +276,16 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(itemById('title.account').items).toHaveLength(6);
     expect(ACCOUNT.notSignedIn).toBe('Not signed in');
     expect(ACCOUNT.signedInAs('kevin@example.com')).toBe('Signed in as kevin@example.com');
+  });
+});
+
+describe('the click model of the focus round (AMENDMENTS.md A1)', () => {
+  it('gives the selected text object a chip sentence naming the two ways into the text, and keeps the placeholder prompts', () => {
+    expect(CANVAS.editText).toBe('Double click to edit the text, or start typing');
+    expect(forbiddenWordsIn(CANVAS.editText)).toEqual([]);
+    /* A1 item 5: the prompt text stays Google's; the matrix row records the two step entry */
+    expect(PROMPTS.title).toBe('Click to add title');
+    expect(PROMPTS.subtitle).toBe('Click to add subtitle');
+    expect(PROMPTS.text).toBe('Click to add text');
   });
 });

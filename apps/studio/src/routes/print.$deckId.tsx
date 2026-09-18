@@ -124,7 +124,16 @@ function PrintPage() {
     setPdf(
       `Preparing your PDF, about ${Math.max(1, Math.ceil(count / 12))} minute${count > 12 ? 's' : ''} for ${count} slide${count === 1 ? '' : 's'}`,
     );
-    const input = { format: 'pdf' as const, slideIds: slides.map((slide) => slide.id) };
+    /* the file follows the preview (docs/FOCUS.md rank 25, `export.print.download-pdf-follows-preview`):
+       the builder drops a skipped slide unless `includeSkipped` travels, whatever `slideIds` says
+       (packages/render/src/print.ts `renderPrintDocument`), and the notes layout asks for the notes
+       with `includeNotes` (the builder carries them once it draws the notes page) */
+    const input = {
+      format: 'pdf' as const,
+      slideIds: slides.map((slide) => slide.id),
+      ...(includeSkipped ? { includeSkipped: true } : {}),
+      ...(layout === 'notes' ? { includeNotes: true } : {}),
+    };
     try {
       const caps = await exportCapabilities();
       let url: string | null = null;
@@ -163,9 +172,19 @@ function PrintPage() {
         dangerouslySetInnerHTML={{ __html: payload.sprite }}
       />
       <header className="ts-print-bar" data-control="print.bar">
+        {/* Close preview runs no route view transition (docs/FOCUS.md rank 37,
+            `export.print.file-menu-after-close`; VERIFICATION C2-F25): while a view transition
+            is active the browser hit tests the `::view-transition` pseudo tree and not the live
+            document, so a click on the editor's File title in the window after the editor paints
+            reaches nothing (measured on 4381: `:active-view-transition` true at the click,
+            `elementFromPoint` the root element, `::view-transition-new(pt-stage)` running for the
+            enter duration after its 60 ms delay; `pointer-events: none` on the pseudo tree does
+            not restore the hit test). The editor's chrome is the same frame the print bar left,
+            so the return is a cut and the first click lands. */}
         <Link
           to="/edit/$deckId"
           params={{ deckId }}
+          viewTransition={false}
           className="pt-ib is-text"
           data-control="print.close"
           {...tipProps({ name: 'Close preview', doc: 'Back to the editor.', key: 'Esc' })}

@@ -1,6 +1,10 @@
 import type { MenuItem, MenuPredicate, Platform, Shortcut } from './model.ts';
 import { MENUS, TITLE_ROW_ITEMS, TOOLBAR_HEAD, TOOLBAR_TAIL_DEFAULT, walkItems } from './model.ts';
 
+// the platform check lives in ./platform.ts since the focus round (VERIFICATION C2-F18): a reader
+// that needs it alone, the presenter, no longer loads this module and the menu model behind it
+export { detectPlatform } from './platform.ts';
+
 /**
  * Keyboard shortcuts of the Google Slides parity round (SPEC 10, R04 Part B). One chord grammar
  * for the model, the menus, the tooltips, the shortcuts dialog and the key handlers:
@@ -367,16 +371,6 @@ export function matchesBinding(binding: string, event: KeyLike, platform: Platfo
 /** True when the shortcut fires on the event for the platform. */
 export function matchesShortcut(key: Shortcut, event: KeyLike, platform: Platform): boolean {
   return matchesBinding(platform === 'mac' ? key.mac : key.win, event, platform);
-}
-
-/** Apple platforms read Cmd, the others Ctrl; the studio's `apple` flag maps to this. */
-export function detectPlatform(
-  nav: { platform?: string; userAgent?: string } | undefined = typeof navigator === 'undefined'
-    ? undefined
-    : navigator,
-): Platform {
-  const text = `${nav?.platform ?? ''} ${nav?.userAgent ?? ''}`;
-  return /Mac|iPhone|iPad|iPod/i.test(text) ? 'mac' : 'win';
 }
 
 // ---------------------------------------------------------------------------------------------

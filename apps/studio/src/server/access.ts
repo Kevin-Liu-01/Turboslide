@@ -18,6 +18,7 @@ import {
   fileAccessStore,
   fileIndexStore,
   fileLinkIndex,
+  indexUpdates,
   isAccessPrecondition,
   memoryAccessBus,
   memoryHeadCache,
@@ -35,6 +36,7 @@ import type {
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
+import type { LinkGrant } from '@turboslide/identity/access';
 import { denialBody } from './authorize';
 import type { RequestIdentity } from './room';
 import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
@@ -155,6 +157,57 @@ export async function readStoredAccessFresh(deckId: string): Promise<StoredAcces
   return store.read(deckId);
 }
 
+// ---------------------------------------------------------------------------------------------
+// The link grants across instances (the focus round, VERIFICATION.md pass 2 F-share-404)
+
+/** How long an instance trusts the index's grants it read for a principal. */
+export const LINK_GRANT_TTL_MS = 5_000;
+
+const grantCache = new Map<string, { grants: LinkGrant[]; at: number }>();
+
+/**
+ * Records a link grant on the principal's deck index (`users/<principalId>/decks.json`, a `shared`
+ * row with `via: 'link'` and the link's id), beside the principal record the exchange writes. The
+ * principal store of the blob tier is a file store under the instance's state folder
+ * (`selectPrincipalStore` without Redis), so a grant written by the exchange on one instance was
+ * unknown to the next: the visitor a link admitted met You need access when the landing or a
+ * server function ran on another instance. The index lives on the Blob store every instance
+ * reads, so `linkGrantsFromIndex` finds the grant wherever the request lands.
+ */
+export async function noteLinkGrant(
+  principalId: string,
+  grant: LinkGrant,
+  now: string = new Date().toISOString(),
+): Promise<void> {
+  grantCache.delete(principalId);
+  await (
+    await indexStore()
+  ).update(principalId, indexUpdates.shared(grant.deckId, grant.role, now, 'link', grant.linkId));
+}
+
+/** The link grants the principal's deck index records (`via: 'link'` rows with a link id), read past a 5 s cache. */
+export async function linkGrantsFromIndex(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<LinkGrant[]> {
+  const cached = grantCache.get(principalId);
+  if (cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS) return cached.grants;
+  const index = await (await indexStore()).read(principalId);
+  const grants: LinkGrant[] = [];
+  for (const row of index.shared) {
+    if (row.via !== 'link' || row.linkId === undefined) continue;
+    grants.push({ linkId: row.linkId, deckId: row.deckId, role: row.role });
+  }
+  grantCache.set(principalId, { grants, at: now });
+  return grants;
+}
+
+/** Forgets the cached grants (a test, a hook that knows the index moved). */
+export function dropLinkGrantCache(principalId?: string): void {
+  if (principalId === undefined) grantCache.clear();
+  else grantCache.delete(principalId);
+}
+
 /** The record `decide()` reads: the stored one, or null (the legacy synthesis is the decider's). */
 export async function readAccess(deckId: string): Promise<AccessRecord | null> {
   const stored = await readStoredAccess(deckId);
@@ -172,6 +225,21 @@ export async function effectiveAccess(
   now: string = new Date().toISOString(),
 ): Promise<AccessRecord> {
   return (await readAccess(deckId)) ?? synthesizeLegacyRecord(deckId, now);
+}
+
+/**
+ * The record past this instance's cache, or the legacy synthesis: what `share.get` and
+ * `GET /api/access/<id>` answer, since the Share dialog bases its next write on it (the cycle 2
+ * preview: the dialog reopened on an instance whose 5 s entry was the record from before another
+ * instance's mint, minted again with the old base and was refused with "the access record is at
+ * revision 1, not 0", and its Copy link minted a second token where the first was remembered).
+ */
+export async function effectiveAccessFresh(
+  deckId: string,
+  now: string = new Date().toISOString(),
+): Promise<AccessRecord> {
+  const stored = await readStoredAccessFresh(deckId);
+  return stored?.record ?? synthesizeLegacyRecord(deckId, now);
 }
 
 /** Writes a record with the etag the caller read (an AccessPreconditionError when stale). */
@@ -498,7 +566,8 @@ export async function shareGetFor(
   const decision = await decideFor(identity, deckId, 'read', 'share.get');
   if (!decision.ok)
     return { ok: false, status: decision.status, body: denialBody(decision, 'read') };
-  const record = await effectiveAccess(deckId);
+  // past the cache: the dialog's next write bases on this revision (effectiveAccessFresh)
+  const record = await effectiveAccessFresh(deckId);
   const standing = standingOf(decision, record);
   return {
     ok: true,

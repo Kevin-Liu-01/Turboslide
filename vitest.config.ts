@@ -17,7 +17,8 @@ export default defineConfig({
         test: {
           name: 'scripts',
           root: '.',
-          include: ['scripts/**/*.test.mjs'],
+          // docs/readme/what-works.test.mjs pins the README section against the matrix (b5.md R3)
+          include: ['scripts/**/*.test.mjs', 'docs/readme/**/*.test.mjs'],
         },
       },
     ],

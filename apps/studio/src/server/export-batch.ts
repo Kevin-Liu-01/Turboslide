@@ -2,7 +2,9 @@ import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
+
+import { waitUntil } from '@vercel/functions';
 
 import {
   assetHashes,
@@ -24,17 +26,31 @@ import {
 } from '@turboslide/export/batch';
 import type { BatchExportInput, BatchRecord, ExportPlan } from '@turboslide/export/batch';
 import { extractScenes } from '@turboslide/export/scene/extract';
+import type { PublicJob, WorkerClient } from '@turboslide/render-worker/client';
 import { verifySkippedNote, verifyTools } from '@turboslide/render-worker/jobs/export';
 import type { VerifyOutcome } from '@turboslide/render-worker/jobs/export';
 import { ACTIONS } from '@turboslide/schema/actions';
 import type { DeckDocument } from '@turboslide/schema/deck';
-import { NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
+import { NATIVE_BLOCK_TYPES, exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Theme } from '@turboslide/schema/render';
 import { diskBlobClient } from '@turboslide/store/blob-disk';
 import type { BlobClient } from '@turboslide/store/blob-store';
 
-import { contentTypeOf, jsonBody } from './export-sync';
+import {
+  EXPORT_JOB_NO_REPORT,
+  attachmentUrlOf,
+  exportJobStatusOf,
+  finishedExportJob,
+  missingExportJobPoll,
+  pollOfExportJob,
+  pruneExportJobs,
+  queuedExportJob,
+  readExportJob,
+  writeExportJob,
+} from './export-jobs';
+import type { ExportJobDownload, ExportJobPoll, ExportJobRecord } from './export-jobs';
+import { SYNC_EXPORT_TIMEOUT_MS, contentTypeOf, jsonBody, storedExportPath } from './export-sync';
 import type { SyncExportFile, SyncExportResult } from './export-sync';
 import { deckDir, ensureDeckAssets, exportBlobClient, openDeckStore, stateDir } from './root';
 import { cancelTokenFor } from './tokens';
@@ -87,7 +103,8 @@ export function isJobId(value: unknown): value is string {
   return typeof value === 'string' && /^[a-z0-9-]{1,80}$/.test(value);
 }
 
-type PartStore = { client: BlobClient; stored: boolean };
+/** The part store: the Blob client on a deployment (`stored`), else this instance's folder of derived files. */
+export type PartStore = { client: BlobClient; stored: boolean };
 
 let diskStore: BlobClient | undefined;
 
@@ -448,4 +465,237 @@ export async function batchedJobFile(
   if (fetched === null) return null;
   // a copy over its own ArrayBuffer, the body type a Response takes
   return { data: new Uint8Array(fetched.bytes), contentType: contentTypeOf(name) };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The editor's queued export across instances (VERIFICATION C3S-F7; export-jobs.ts says why)
+
+/** Runs `work` after the response: inside Vercel's `waitUntil` when a request context exists, as a detached promise otherwise (a checkout). The same shape as thumbs.ts `afterResponse`. */
+export function afterResponse(work: Promise<unknown>, label: string): void {
+  const settled = work.catch((error: unknown) => {
+    console.error(
+      `turboslide export: ${label}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  });
+  try {
+    waitUntil(settled);
+  } catch {
+    // no request context (the dev server, a test): the promise runs on its own
+  }
+}
+
+/** The worker's last log line, when it wrote one. */
+function lastLineOf(job: PublicJob): string | undefined {
+  return job.log[job.log.length - 1];
+}
+
+type JobResultLike = { report?: unknown };
+
+/**
+ * Stores a finished job's files where any instance can serve them and rewrites its record as
+ * done (or failed, when the report is missing or a file cannot be read); the worker's own
+ * instance runs it under `waitUntil` right after the job ends, and a poll on that instance that
+ * meets a done job whose record is not done yet runs it too. Idempotent: a record already done
+ * is answered as it is, and two runs put the same paths with `overwrite: true`. On a checkout
+ * (the folder store) the files stay in the job folder, which the download route serves through
+ * the signed one time URLs the poll mints; the record carries no downloads there.
+ */
+export async function storeFinishedExportJob(
+  worker: WorkerClient,
+  store: PartStore,
+  record: ExportJobRecord,
+  job: PublicJob,
+  now: () => string = () => new Date().toISOString(),
+): Promise<ExportJobRecord> {
+  const current = (await readExportJob(store.client, record.jobId)) ?? record;
+  if (current.status === 'done' || current.status === 'failed') return current;
+  const line = lastLineOf(job);
+  const finish = async (record2: ExportJobRecord): Promise<ExportJobRecord> => {
+    await writeExportJob(store.client, record2);
+    return record2;
+  };
+  if (job.status !== 'done') {
+    return finish(
+      finishedExportJob(
+        current,
+        {
+          status: 'failed',
+          error: job.error?.message ?? 'the export failed',
+          ...(job.ms !== undefined ? { ms: job.ms } : {}),
+          ...(line !== undefined ? { line } : {}),
+        },
+        now(),
+      ),
+    );
+  }
+  const report = exportReportSchema.safeParse((job.result as JobResultLike | undefined)?.report);
+  if (!report.success) {
+    return finish(
+      finishedExportJob(current, { status: 'failed', error: EXPORT_JOB_NO_REPORT }, now()),
+    );
+  }
+  let downloads: ExportJobDownload[] | undefined;
+  if (store.stored) {
+    downloads = [];
+    try {
+      for (const file of report.data.files) {
+        const name = basename(file.path);
+        const data = await worker.readJobFile(job.id, `export/${name}`);
+        const entry = await store.client.put(storedExportPath(record.deckId, job.id, name), data, {
+          overwrite: true,
+          contentType: contentTypeOf(name),
+        });
+        downloads.push({ name, bytes: data.byteLength, url: attachmentUrlOf(entry.url) });
+      }
+    } catch (error) {
+      // the other run stored the files and pruned the job folder first: its record stands
+      const again = await readExportJob(store.client, record.jobId);
+      if (again?.status === 'done') return again;
+      return finish(
+        finishedExportJob(
+          current,
+          { status: 'failed', error: error instanceof Error ? error.message : String(error) },
+          now(),
+        ),
+      );
+    }
+  }
+  const done = await finish(
+    finishedExportJob(
+      current,
+      {
+        status: 'done',
+        report: report.data,
+        ...(downloads !== undefined ? { downloads } : {}),
+        ...(job.ms !== undefined ? { ms: job.ms } : {}),
+        ...(line !== undefined ? { line } : {}),
+      },
+      now(),
+    ),
+  );
+  // the bytes are in the store: free the job's disk, which a function shares with the browser
+  // and the next export (export-sync.ts does the same after a synchronous export)
+  if (store.stored) await worker.pruneJob(job.id).catch(() => undefined);
+  return done;
+}
+
+/**
+ * Step one of the queued export, after `submit`: the record at queue time, the records older
+ * than a day pruned, and the job followed to its end after the response (the worker's instance
+ * rewrites the record with the stored files), so a poll routed anywhere reads the outcome.
+ */
+export async function followExportJob(
+  worker: WorkerClient,
+  job: PublicJob,
+  deckId: string,
+  format: 'pptx' | 'pdf',
+  store?: PartStore,
+): Promise<void> {
+  store ??= await partStore();
+  const record = queuedExportJob(job.id, deckId, format, new Date().toISOString());
+  await writeExportJob(store.client, record);
+  afterResponse(
+    (async () => {
+      await pruneExportJobs(store.client, Date.now());
+      let finished: PublicJob;
+      try {
+        finished = await worker.wait(job.id, SYNC_EXPORT_TIMEOUT_MS);
+      } catch (error) {
+        const again = await readExportJob(store.client, job.id);
+        if (again?.status === 'done' || again?.status === 'failed') return;
+        await writeExportJob(
+          store.client,
+          finishedExportJob(
+            again ?? record,
+            { status: 'failed', error: error instanceof Error ? error.message : String(error) },
+            new Date().toISOString(),
+          ),
+        );
+        return;
+      }
+      await storeFinishedExportJob(worker, store, record, finished);
+    })(),
+    `job ${job.id}`,
+  );
+}
+
+export type ExportPollDeps = {
+  /** `authorize(export)` on the job's deck, the poll's right (download.ts `pollExportFn`) */
+  authorize: (deckId: string) => Promise<void>;
+  /** a signed one time download URL of a job file on this instance (the checkout path) */
+  sign: (jobId: string, name: string) => string;
+};
+
+/**
+ * Step two: the job's state. The job in this process answers as before (its live log line, the
+ * report and the download URLs once done: the stored copies on a deployment, the signed job
+ * files on a checkout); a job this process never held answers from the record another instance
+ * wrote, and a job no record names answers the refusal in the product's words, never a thrown
+ * error.
+ */
+export async function pollExportJob(
+  worker: WorkerClient,
+  jobId: string,
+  deps: ExportPollDeps,
+  store?: PartStore,
+): Promise<ExportJobPoll> {
+  store ??= await partStore();
+  const job = await worker.job(jobId);
+  if (job !== null) {
+    const deckOfJob = (job.input as { deckId?: string } | undefined)?.deckId;
+    if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob))
+      await deps.authorize(deckOfJob);
+    const status = exportJobStatusOf(job.status);
+    const line = lastLineOf(job);
+    const poll: ExportJobPoll = {
+      jobId: job.id,
+      status,
+      ...(line !== undefined ? { line } : {}),
+      ...(job.ms !== undefined ? { ms: job.ms } : {}),
+    };
+    if (status === 'failed') return { ...poll, error: job.error?.message ?? 'the export failed' };
+    if (status !== 'done') return poll;
+    const report = exportReportSchema.safeParse((job.result as JobResultLike | undefined)?.report);
+    if (!report.success) return { ...poll, status: 'failed', error: EXPORT_JOB_NO_REPORT };
+    if (!store.stored) {
+      return {
+        ...poll,
+        report: report.data,
+        downloads:
+          worker.mode === 'local'
+            ? report.data.files.map((file) => {
+                const name = basename(file.path);
+                return { name, bytes: file.bytes, url: deps.sign(job.id, name) };
+              })
+            : [],
+      };
+    }
+    // a deployment: the stored copies, written by the follow of the job or here
+    const record =
+      (await readExportJob(store.client, jobId)) ??
+      queuedExportJob(
+        job.id,
+        typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob) ? deckOfJob : 'unknown-deck',
+        report.data.format,
+        job.createdAt,
+      );
+    const finished = await storeFinishedExportJob(worker, store, record, job);
+    return pollOfExportJob(finished, { stored: true });
+  }
+  const record = await readExportJob(store.client, jobId);
+  if (record === null) return missingExportJobPoll(jobId);
+  await deps.authorize(record.deckId);
+  return pollOfExportJob(record, { stored: store.stored });
+}
+
+/** The stored copy of a finished job's file with the deck it belongs to, for a download the editor asks for again; null on a checkout or for a name the job did not make. */
+export async function storedExportDownload(
+  jobId: string,
+  name: string,
+): Promise<{ deckId: string; download: ExportJobDownload } | null> {
+  const store = await partStore();
+  if (!store.stored) return null;
+  const record = await readExportJob(store.client, jobId);
+  const download = record?.downloads?.find((file) => file.name === name);
+  return record === null || download === undefined ? null : { deckId: record.deckId, download };
 }

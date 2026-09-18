@@ -16,8 +16,11 @@ import { tipProps } from '../Tooltip';
  * slides (off), More options (Light, Dark or Both defaulting to the deck's appearance, fonts
  * Exact or Standard, Embed fonts, Headings as pictures), Download; then the progress sentence with
  * the time estimate (2.5 s per slide rounded up to the half minute) and "Your file is ready" with
- * a Details link to the report card. For a PDF the same dialog without the Seg and More options.
- * The notes and skipped slides defaults are the deliberate departure of SPEC 0.23.
+ * a Details link to the report card. For a PDF the same dialog without the Seg and More options,
+ * and without Include speaker notes: the PDF builder (packages/export/src/pdf/build.ts) prints one
+ * page per slide and never the notes, so the box is offered only where the file carries them
+ * (docs/FOCUS.md rank 24, `export.pdf.notes-honest`; audit-export row 15 saw a checked box change
+ * nothing). The notes and skipped slides defaults are the deliberate departure of SPEC 0.23.
  */
 export type DownloadDialogProps = { format: 'pptx' | 'pdf' };
 
@@ -64,7 +67,7 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
         ...(format === 'pptx' && mode === 'native' && embed ? { embedFonts: true } : {}),
         ...(format === 'pptx' && raster ? { headings: 'raster' } : {}),
         ...(skipped ? { includeSkipped: true } : {}),
-        ...(notes ? { includeNotes: true } : {}),
+        ...(format === 'pptx' && notes ? { includeNotes: true } : {}),
         verify: false,
       })
       .then(() => setState('done'))
@@ -145,15 +148,20 @@ export function DownloadDialog({ format }: DownloadDialogProps) {
           </button>
         </div>
       ) : (
-        <p>One slide per page, 13.333 by 7.5 inches.</p>
+        <p>
+          One slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File &gt;
+          Print preview prints them under each slide.
+        </p>
       )}
-      <DialogCheck
-        label={DIALOGS.download.includeNotes}
-        checked={notes}
-        onChange={setNotes}
-        control="dialog.download.includeNotes"
-        doc="The speaker notes travel with the file"
-      />
+      {format === 'pptx' ? (
+        <DialogCheck
+          label={DIALOGS.download.includeNotes}
+          checked={notes}
+          onChange={setNotes}
+          control="dialog.download.includeNotes"
+          doc="The speaker notes travel with the file"
+        />
+      ) : null}
       <DialogCheck
         label={DIALOGS.download.includeSkipped}
         checked={skipped}

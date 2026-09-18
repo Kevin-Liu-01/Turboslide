@@ -26,6 +26,7 @@ import type {
   EditorSync,
   IdentityView,
   PictureTarget,
+  ShellSettings,
 } from '@turboslide/chrome/editor-shell';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
@@ -474,6 +475,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [tokenRequired, setTokenRequired] = useState(true);
   /* the report card, from the Download dialog's Details link and nowhere else (SPEC 6.7) */
   const [reportOpen, setReportOpen] = useState(false);
+  /* the shell's stored settings as it reports them (docs/FOCUS.md 3.1): Tools > Advanced tools
+     reaches the palette's Insert group here and the window API through the controller */
+  const [shellSettings, setShellSettings] = useState<ShellSettings>({});
   const snap = useSyncExternalStore(
     controller.subscribe,
     controller.getSnapshot,
@@ -494,6 +498,16 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [editorHandle, setEditorHandle] = useState<EditorHandle | null>(null);
   /* the toolbar's draw tool; Select between inserts */
   const [tool, setTool] = useState<EditorTool>('select');
+  /* the tab title follows the deck's title on both routes (docs/FOCUS.md rank 28: the /new route's
+     head is static and a rename left "Untitled presentation" in the tab until a reload; the second
+     browser's tab kept the old name after a rename); the route's head sets the same words at the
+     first paint and this keeps them true afterwards */
+  const deckTitle = snap.document.deck.title;
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const next = `${deckTitle}, editor, Turboslide`;
+    if (document.title !== next) document.title = next;
+  }, [deckTitle]);
   /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
      colour), reported by the stage; a state so the shell re-reads the selection facts on change */
   const [caret, setCaret] = useState<CaretInfo | null>(null);
@@ -735,6 +749,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     transport: snap.sync === null ? 'none' : 'sse',
     connected: snap.sync?.connected ?? false,
     offline: snap.sync?.offline ?? false,
+    storeDegraded: snap.sync?.storeDegraded ?? false,
+    streamDown: snap.sync?.streamDown ?? false,
     ...(snap.persisted !== null
       ? {
           persisted: {
@@ -962,6 +978,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         source: () => patch({ src: src ? undefined : 1 }),
       },
       apple: isApple(),
+      advancedTools: shellSettings.advancedTools === true,
     });
   }, [
     deck,
@@ -976,6 +993,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     twin,
     lintLayer,
     src,
+    shellSettings.advancedTools,
   ]);
 
   /* the live copy lint of a Text field (SPEC 6.5): the same rules over a draft of the slide */
@@ -1242,6 +1260,15 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     }
     return [...seen.values()];
   }, [rosterRows, selfIdentity.principalId, threadViews]);
+  /* a viewer or a commenter whose role holds readComments takes the editing stage too, in the
+     role's forced mode (Viewing or Commenting, SPEC-3 5.3): the comment markers mount inside the
+     stage's overlay, and the plain Stage has none (docs/FOCUS.md `comments.reaches-second-browser`
+     for a second browser on a view link; b6.md R10) */
+  const readsComments =
+    !trashed &&
+    search.edit !== 0 &&
+    payload.draft !== true &&
+    roleCapabilities.includes('readComments');
   const comments: EditorComments | undefined = canReadComments
     ? {
         threads: threadViews,
@@ -1409,6 +1436,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       }).html,
     paletteEntries,
     onNotice: controller.say,
+    onSettingsChange: (settings) => {
+      controller.setShellSettings(settings);
+      setShellSettings(settings);
+    },
     ...(slide !== undefined
       ? {
           notes: (
@@ -1495,6 +1526,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       if (!handle.armPaint()) controller.say('Select a block with a look to copy first');
     },
     onDrawTool: (drawTool) => setTool(toEditorTool(drawTool)),
+    /* the toolbar Select button returns the stage to the Select tool as well as clearing the
+       selection (docs/FOCUS.md `arrange.toolbar.select`: the tool stayed `text`) */
+    onSelectTool: () => setTool('select'),
     /* the canvas (SPEC-2 sections 1 and 6): the stage's handle, the deck's guides, the zoom the
        stage reports and the measured boxes of a grammar slide's objects */
     editor: shellEditor,
@@ -1569,6 +1603,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           snap={snap}
           viewerDeck={viewerDeck}
           editing={editing}
+          readsComments={readsComments}
           twin={twin}
           lintLayer={lintLayer}
           findings={activeFindings}
@@ -1614,6 +1649,8 @@ type EditorStageProps = {
   snap: EditorSnapshot;
   viewerDeck: ViewerDeck;
   editing: boolean;
+  /** a viewer or commenter who may read comments: the editing stage in the role's mode, for the markers */
+  readsComments: boolean;
   twin: boolean;
   lintLayer: boolean;
   findings: readonly Finding[];
@@ -1636,6 +1673,7 @@ function EditorStage({
   snap,
   viewerDeck,
   editing,
+  readsComments,
   twin,
   lintLayer,
   findings,
@@ -1659,7 +1697,11 @@ function EditorStage({
   const record = snap.document.slides[shell.active];
   const showTwin = twin && shell.mode === 'slide' && !shell.present && slide !== undefined;
   const editStage =
-    editing && shell.mode === 'slide' && !shell.present && !showTwin && slide !== undefined;
+    (editing || readsComments) &&
+    shell.mode === 'slide' &&
+    !shell.present &&
+    !showTwin &&
+    slide !== undefined;
   const selectedBlock =
     snap.selection && slide && snap.selection.slideId === slide.id
       ? snap.selection.blockId
@@ -2011,6 +2053,29 @@ function TwinOverlay({
 // ---------------------------------------------------------------------------------------------
 // The conflict card and the external revision banner (SPEC 6.6, 6.7)
 
+/** The change a refused operation made, in the seller's words: the operations' names, deduplicated. */
+export function changeWords(mutations: ReadonlyArray<{ op: string }>): string {
+  const words: Record<string, string> = {
+    'slide.insert': 'Slide added',
+    'slide.remove': 'Slide deleted',
+    'slide.move': 'Slide moved',
+    'slide.set': 'Slide changed',
+    'slide.replace': 'Slide changed',
+    'block.insert': 'Object added',
+    'block.remove': 'Object deleted',
+    'block.set': 'Object changed',
+    'block.move': 'Object moved',
+    'text.splice': 'Text typed',
+    'text.replace': 'Text changed',
+    'text.mark': 'Text styled',
+    'deck.set': 'Presentation changed',
+    'section.set': 'Sections changed',
+  };
+  const seen = new Set<string>();
+  for (const m of mutations) seen.add(words[m.op] ?? 'Change');
+  return [...seen].join(', ') || 'Change';
+}
+
 /**
  * The reject card (gslides-parity SPEC-3 3.5, 3.6): an operation the room could not place comes
  * back to its author with its content and a fixed reason; the card lists it with Copy text so no
@@ -2042,12 +2107,17 @@ function RejectCard({
       {notices.map((notice) => (
         <div key={notice.opId} className="ts-conflict-both" data-reason={notice.reason}>
           <div>
-            <h4>
-              {notice.text === '' ? notice.mutations.map((m) => m.op).join(', ') : 'Your text'}
-            </h4>
-            <pre>
-              {notice.text === '' ? JSON.stringify(notice.mutations, null, 2) : notice.text}
-            </pre>
+            <h4>{notice.text === '' ? changeWords(notice.mutations) : 'Your text'}</h4>
+            {notice.text === '' ? (
+              /* the mutation JSON stays behind Details: the seller reads the change's name and the
+                 sentence, never the JSON (docs/FOCUS.md rank 3) */
+              <details className="ts-conflict-details" data-control="conflict.details">
+                <summary>Details</summary>
+                <pre>{JSON.stringify(notice.mutations, null, 2)}</pre>
+              </details>
+            ) : (
+              <pre>{notice.text}</pre>
+            )}
           </div>
           <div className="ts-conflict-actions">
             {notice.text !== '' ? (

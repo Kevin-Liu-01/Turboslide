@@ -1,0 +1,66 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "scenario": "share-escape",
+  "startedAt": "2026-09-16T11:10:19.882Z",
+  "steps": [
+    {
+      "name": "share dialog open",
+      "active": {
+        "tag": "BUTTON",
+        "control": "dialog.share.done",
+        "cls": "pt-ib is-solid ts-dialog-btn",
+        "insideDialog": true
+      },
+      "rows": [
+        "dialog.share.close",
+        "dialog.share.review",
+        "dialog.share.emails",
+        "dialog.share.inviteRole",
+        "dialog.share.send",
+        "dialog.share.notify",
+        "dialog.share.message",
+        "dialog.share.people",
+        "dialog.share.owner",
+        "dialog.share.rows",
+        "dialog.share.view",
+        "dialog.share.view.copy",
+        "dialog.share.present",
+        "dialog.share.present.copy",
+        "dialog.share.edit",
+        "dialog.share.edit.copy",
+        "dialog.share.general",
+        "dialog.share.mode",
+        "dialog.share.gear",
+        "dialog.share.publish",
+        "dialog.share.footer",
+        "dialog.share.authorize",
+        "dialog.share.error",
+        "dialog.share.copyLink",
+        "dialog.share.done"
+      ],
+      "at": "2026-09-16T11:10:25.671Z"
+    },
+    {
+      "name": "after Escape",
+      "open": 0,
+      "active": "BUTTON share.open",
+      "at": "2026-09-16T11:10:26.478Z"
+    },
+    {
+      "name": "reopen then Escape at once",
+      "open": 0,
+      "at": "2026-09-16T11:10:27.307Z"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "deckId": "untitled-20260916-fyyn",
+  "teardown404": true,
+  "teardownStatus": 404,
+  "endedAt": "2026-09-16T11:10:34.313Z"
+}

@@ -1,0 +1,493 @@
+{
+  "base": "https://turboslide-7o1m3892o-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-16T15:31:42.340Z",
+  "scenarios": {
+    "setup": [
+      {
+        "name": "deck",
+        "deck": "untitled-20260916-3yx2",
+        "slides": ["title", "split-1", "split-2"],
+        "at": "2026-09-16T15:31:52.794Z"
+      },
+      {
+        "name": "done",
+        "ms": 10311,
+        "at": "2026-09-16T15:31:52.794Z"
+      }
+    ],
+    "share-copy": [
+      {
+        "name": "copy view",
+        "clip": "/s/<token>",
+        "facts": {
+          "active": "BODY ",
+          "busy": 0,
+          "error": "",
+          "snackbar": "Link copied"
+        },
+        "closedAtMs": null,
+        "trace": [
+          {
+            "ms": 0,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 306,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 613,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 920,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 1226,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          }
+        ],
+        "byX": 0,
+        "at": "2026-09-16T15:31:59.810Z"
+      },
+      {
+        "name": "copy present",
+        "clip": "/s/<token>",
+        "facts": {
+          "active": "BODY ",
+          "busy": 0,
+          "error": "",
+          "snackbar": ""
+        },
+        "closedAtMs": null,
+        "trace": [
+          {
+            "ms": 0,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 305,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 608,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 913,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 1217,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          }
+        ],
+        "byX": 0,
+        "at": "2026-09-16T15:32:06.270Z"
+      },
+      {
+        "name": "copy edit",
+        "clip": "/s/<token>?present=1",
+        "facts": {
+          "active": "BODY ",
+          "busy": 0,
+          "error": "",
+          "snackbar": ""
+        },
+        "closedAtMs": null,
+        "trace": [
+          {
+            "ms": 0,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 306,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 610,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 915,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 1221,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          }
+        ],
+        "byX": 0,
+        "at": "2026-09-16T15:32:12.728Z"
+      },
+      {
+        "name": "copy view",
+        "clip": "/s/<token>?present=1",
+        "facts": {
+          "active": "BODY ",
+          "busy": 0,
+          "error": "",
+          "snackbar": ""
+        },
+        "closedAtMs": null,
+        "trace": [
+          {
+            "ms": 0,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 304,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 609,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 913,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          },
+          {
+            "ms": 1217,
+            "active": "BODY ",
+            "dialogs": 1,
+            "controls": ["dialog.share"]
+          }
+        ],
+        "byX": 0,
+        "at": "2026-09-16T15:32:19.194Z"
+      },
+      {
+        "name": "done",
+        "ms": 26802,
+        "at": "2026-09-16T15:32:19.596Z"
+      }
+    ],
+    "download-route": [
+      {
+        "name": "with route",
+        "download": "no download: TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+        "ms": 29973,
+        "responses": [
+          {
+            "url": "https://vercel.com/sso-api?url=https%3A%2F%2Fturboslide-7o1m3892o-kl01s-projects.vercel.app%2Fapi%2Fdecks%2Funtitled-202",
+            "status": 307,
+            "disposition": null
+          },
+          {
+            "url": "https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252F",
+            "status": 200,
+            "disposition": "inline"
+          },
+          {
+            "url": "https://vercel.com/signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252",
+            "status": 200,
+            "disposition": "inline"
+          },
+          {
+            "url": "https://vercel.com/signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252",
+            "status": 200,
+            "disposition": "inline"
+          },
+          {
+            "url": "https://vercel.com/_stream/external/hexagon-analytics.com/images/689331.gif?bk=e0fb7b5a33&r=920560214&v=121&cs=UTF-8&h=v",
+            "status": 200,
+            "disposition": "attachment"
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          },
+          {
+            "url": "/assets/bundle-CJS_lWyU.js",
+            "status": 200,
+            "disposition": "inline; filename=\"bundle-CJS_lWyU.js\""
+          }
+        ],
+        "url": "https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fturboslide-7o1m3892o-kl01s-projects.vercel.app%252Fapi%252Fdecks%252Funtitled-20260916-3yx2%252Fbundle%253Ft%253D<ticket>",
+        "at": "2026-09-16T15:32:51.581Z"
+      },
+      {
+        "name": "done",
+        "ms": 31988,
+        "at": "2026-09-16T15:32:51.584Z"
+      }
+    ],
+    "from-beginning-fast": [
+      {
+        "name": "arrow 1",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "BODY ",
+          "fullscreen": "HTML"
+        },
+        "leftAtMs": 104,
+        "after": {
+          "inShow": false,
+          "index": null,
+          "active": "BODY ",
+          "fullscreen": null
+        },
+        "at": "2026-09-16T15:33:22.588Z"
+      },
+      {
+        "name": "arrow 2",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "BODY ",
+          "fullscreen": null
+        },
+        "leftAtMs": 1,
+        "after": {
+          "inShow": false,
+          "index": "0",
+          "active": "BODY ",
+          "fullscreen": "HTML"
+        },
+        "at": "2026-09-16T15:33:22.979Z"
+      },
+      {
+        "name": "arrow 3",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "BODY ",
+          "fullscreen": "HTML"
+        },
+        "leftAtMs": 103,
+        "after": {
+          "inShow": false,
+          "index": null,
+          "active": "BODY ",
+          "fullscreen": null
+        },
+        "at": "2026-09-16T15:33:54.160Z"
+      },
+      {
+        "name": "chord 1",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": null
+        },
+        "leftAtMs": 0,
+        "after": {
+          "inShow": true,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": null
+        },
+        "at": "2026-09-16T15:33:54.510Z"
+      },
+      {
+        "name": "chord 2",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": "HTML"
+        },
+        "leftAtMs": 1,
+        "after": {
+          "inShow": true,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": null
+        },
+        "at": "2026-09-16T15:33:55.578Z"
+      },
+      {
+        "name": "chord 3",
+        "atAttach": {
+          "inShow": true,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": null
+        },
+        "leftAtMs": 1,
+        "after": {
+          "inShow": false,
+          "index": "0",
+          "active": "DIV[filmstrip.slide.split-2] ts-card",
+          "fullscreen": "HTML"
+        },
+        "at": "2026-09-16T15:33:55.949Z"
+      },
+      {
+        "name": "done",
+        "ms": 65077,
+        "at": "2026-09-16T15:33:56.662Z"
+      }
+    ],
+    "make-a-copy": [
+      {
+        "name": "flow",
+        "note": "Open with the renewal date.",
+        "controls": [
+          "dialog.makeCopy:DIV",
+          "dialog.makeCopy.close:BUTTON",
+          "dialog.makeCopy.name:INPUT:false",
+          "dialog.makeCopy.removeNotes:INPUT:false",
+          "dialog.makeCopy.copyComments:INPUT:false",
+          "dialog.makeCopy.ok:BUTTON"
+        ],
+        "checkedBefore": false,
+        "checkedAfter": true,
+        "ms": 2060,
+        "newPages": 1,
+        "copy": {
+          "url": "/edit/copy-of-repro-deck-2-b4-fixes",
+          "closed": false,
+          "notes": ""
+        },
+        "ownUrl": "/edit/untitled-20260916-3yx2",
+        "snackbar": "Copied as Copy of Repro deck 2: b4 fixes",
+        "at": "2026-09-16T15:33:59.971Z"
+      },
+      {
+        "name": "done",
+        "ms": 3309,
+        "at": "2026-09-16T15:33:59.971Z"
+      }
+    ],
+    "paste-tab-b": [
+      {
+        "name": "state",
+        "clipB": "turboslide:v1:{\"kind\":\"slides\",\"deckId\":\"untitled-",
+        "rowsB": [
+          "menu.edit.cut",
+          "menu.edit.copy",
+          "menu.edit.paste (disabled)",
+          "menu.slide.newSlide",
+          "menu.slide.duplicateSlide",
+          "menu.edit.delete",
+          "menu.slide.skipSlide",
+          "menu.slide.changeBackground",
+          "menu.slide.applyLayout",
+          "menu.slide.moveSlide",
+          "menu.insert.comment"
+        ],
+        "kindB": null,
+        "editPaste": "true",
+        "cmdV": {
+          "before": 1,
+          "after": 2
+        },
+        "snackbar": "",
+        "at": "2026-09-16T15:34:15.467Z"
+      },
+      {
+        "name": "second right click",
+        "pasteDisabled": ["true"],
+        "at": "2026-09-16T15:34:15.492Z"
+      },
+      {
+        "name": "done",
+        "ms": 15522,
+        "at": "2026-09-16T15:34:15.493Z"
+      }
+    ],
+    "teardown": [
+      {
+        "name": "untitled-20260916-3yx2",
+        "status": 404,
+        "at": "2026-09-16T15:34:17.888Z"
+      },
+      {
+        "name": "copy-of-repro-deck-2-b4-fixes",
+        "status": 404,
+        "at": "2026-09-16T15:34:19.857Z"
+      },
+      {
+        "name": "untitled-20260916-syxr",
+        "status": 404,
+        "at": "2026-09-16T15:34:21.614Z"
+      },
+      {
+        "name": "untitled-20260916-lb4t",
+        "status": 404,
+        "at": "2026-09-16T15:34:23.090Z"
+      },
+      {
+        "name": "done",
+        "ms": 7597,
+        "at": "2026-09-16T15:34:23.090Z"
+      }
+    ]
+  },
+  "decks": [
+    "untitled-20260916-3yx2",
+    "copy-of-repro-deck-2-b4-fixes",
+    "untitled-20260916-syxr",
+    "untitled-20260916-lb4t"
+  ],
+  "endedAt": "2026-09-16T15:34:23.090Z"
+}

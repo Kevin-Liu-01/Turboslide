@@ -18,8 +18,13 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import {
+  BLOB_DOCUMENT_WRITE_TIMEOUT_MS,
+  BLOB_READ_TIMEOUT_MS,
+  BLOB_WRITE_TIMEOUT_MS,
   BlobExistsError,
   BlobTimeoutError,
+  DOCUMENT_PUT_MAX_BYTES,
+  HOSTED_POLL_MS,
   boundedBlobClient,
   isMirroredDocument,
   manifestSlideIds,
@@ -27,6 +32,7 @@ import {
   parseThumbPathname,
   pruneThumbs,
   pushDeckDir,
+  putDeadlineFor,
   storedThumbs,
   thumbPathname,
   thumbsPrefix,
@@ -35,6 +41,7 @@ import type { BlobClient, BlobStore } from './blob-store.ts';
 import { digestAssetName, openFileStore } from './file-store.ts';
 import { openHostedDecks } from './hosted.ts';
 import type { HostedDecks } from './hosted.ts';
+import { POLL_CALLS_PER_MINUTE_MAX, pulsePath } from './pulse.ts';
 import { directorySeed, materializeSeed } from './seed.ts';
 import { NOT_PERSISTENT_NOTICE, selectStore } from './select.ts';
 import {
@@ -777,16 +784,18 @@ describe('hosted stores', () => {
       expect(at('put decks/gt-brand/slides/content-rule.json')).toBeLessThan(commit);
       expect(at('put decks/gt-brand/versions/1.json')).toBeLessThan(commit);
       // round three is the commit alone: the puts are the three bodies of round two in any
-      // order, then the manifest and nothing else
+      // order, then the manifest, then the deck's pulse (pulse.ts, the cycle 3 fix round: the
+      // one head every other instance's poll makes moves with the commit) and nothing else
       const puts = ops.filter((op) => op.startsWith('put '));
-      expect(puts.slice(0, -1).sort()).toEqual(
+      expect(puts.slice(0, -2).sort()).toEqual(
         [
           `put decks/gt-brand/${snapshotPath(key)}`,
           'put decks/gt-brand/slides/content-rule.json',
           'put decks/gt-brand/versions/1.json',
         ].sort(),
       );
-      expect(puts[puts.length - 1]).toBe('put decks/gt-brand/deck.json');
+      expect(puts[puts.length - 2]).toBe('put decks/gt-brand/deck.json');
+      expect(puts[puts.length - 1]).toBe(`put ${pulsePath('gt-brand')}`);
       // nothing of the deck is deleted by the write; the retention that follows the answer may
       // prune the seed's snapshot, which no record names (the upload stores one since the focus round)
       expect(ops.filter((op) => op.startsWith('del ') && !op.includes('/snapshots/'))).toEqual([]);
@@ -1246,6 +1255,57 @@ describe('hosted stores', () => {
       expect((await second.list()).map((head) => head.id)).toEqual(['gt-brand']);
     });
 
+    it('joins the listings in flight on one instance, lists a change on the next load, and moves the deck pulse on a stamp and a create (cycle 3 fix round, C3-F2, C3-F5)', async () => {
+      const fake = memoryBlobClient();
+      const decks = collection('blob', join(root, 'overlay-memo'), fake);
+      await decks.ready();
+      const heads = (): number => fake.calls.filter((call) => call.op === 'head').length;
+      await decks.list();
+      const one = heads();
+      // a second load alone reads the store again
+      await decks.list();
+      const two = heads();
+      expect(two).toBeGreaterThan(one);
+      // three loads at once are one listing
+      await Promise.all([decks.list(), decks.list(), decks.list()]);
+      expect(heads() - two).toBe(two - one);
+      // a create on this instance moves the new deck's pulse and lists at once
+      clock = '2026-09-11T11:00:00.000Z';
+      await decks.create({ name: 'Memo deck', from: 'blank' });
+      expect(fake.blobs.has(pulsePath('memo-deck'))).toBe(true);
+      expect((await decks.list()).map((head) => head.id)).toEqual(['memo-deck', 'gt-brand']);
+      // a trash stamp moves the pulse and lists at once
+      const before = fake.blobs.get(pulsePath('memo-deck'))?.version;
+      await decks.trash('memo-deck');
+      expect(fake.blobs.get(pulsePath('memo-deck'))?.version).not.toBe(before);
+      expect((await decks.list()).map((head) => head.id)).toEqual(['gt-brand']);
+      expect((await decks.list({ includeTrashed: true })).map((head) => head.id)).toEqual([
+        'memo-deck',
+        'gt-brand',
+      ]);
+      // a store that refuses the head of a mirrored deck: has() and open() answer from the mirror
+      let refuse = false;
+      const busy = {
+        ...fake,
+        head: (pathname: string, callOptions?: { signal?: AbortSignal }) =>
+          refuse
+            ? Promise.reject(
+                new Error(
+                  'Vercel Blob: The blob service is currently not available. Please try again.',
+                ),
+              )
+            : fake.head(pathname, callOptions),
+      } as FakeBlobClient;
+      const degraded = collection('blob', join(root, 'overlay-memo-c'), busy);
+      await degraded.ready();
+      await (await degraded.open('gt-brand')).read();
+      refuse = true;
+      expect(await degraded.has('gt-brand')).toBe(true);
+      expect((await (await degraded.open('gt-brand')).read()).document.deck.revision).toBe(412);
+      await expect(degraded.has('memo-deck')).rejects.toThrow(/not available/);
+      refuse = false;
+    });
+
     it('refuses to open without a client', () => {
       expect(() => collection('blob', join(root, 'overlay-3'), null)).toThrow(
         /needs a Blob client/,
@@ -1564,7 +1624,7 @@ describe('hosted stores', () => {
       fake.releaseGet();
     });
 
-    it('a restore on the instance that trashed is three round trips: the manifest head, the snapshot put and the manifest put (the fix round, F12)', async () => {
+    it('a restore on the instance that trashed is four round trips: the manifest head, the snapshot put, the manifest put and the pulse put (the fix round, F12; the cycle 3 fix round adds the pulse)', async () => {
       // the trash page's Restore is optimistic and a reload of /decks follows it at once, so
       // the stamp's flight time is the window in which a fresh listing still reads the trash
       // stamp (VERIFICATION F12, reproduced on the preview: the restore answered 665 ms after
@@ -1588,6 +1648,7 @@ describe('hosted stores', () => {
         { op: 'head', pathname: manifest },
         { op: 'put', pathname: snapshot },
         { op: 'put', pathname: manifest },
+        { op: 'put', pathname: pulsePath('gt-brand') },
       ]);
       // the snapshot under the key is the upload's, untouched, and every instance lists the deck
       expect(fake.blobs.has(snapshot)).toBe(true);
@@ -1702,6 +1763,366 @@ describe('hosted stores', () => {
       // a client wrapped once is not wrapped again
       const bounded = boundedBlobClient(fake);
       expect(boundedBlobClient(bounded)).toBe(bounded);
+    });
+
+    it('cancels the call underneath at the deadline, so nothing of it runs on after the store gave up (cycle 3, VERIFICATION C2-F24)', async () => {
+      const fake = memoryBlobClient();
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const store = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'mirror-abort', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { readMs: 60 },
+      });
+      expect((await store.read()).document.deck.revision).toBe(412);
+      fake.holdHead();
+      const started = Date.now();
+      await expect(store.read()).rejects.toBeInstanceOf(BlobTimeoutError);
+      expect(Date.now() - started).toBeLessThan(2000);
+      // the held call ended with the deadline's signal (the SDK's abortSignal, which ends its
+      // retry chain as well): the fake recorded the abort and holds nothing
+      expect(fake.calls.filter((call) => call.aborted === true)).toHaveLength(1);
+      expect(fake.held()).toBe(0);
+      // the queue is free and the next call answers once the store does
+      fake.releaseHead();
+      expect((await store.read()).document.deck.revision).toBe(412);
+    });
+
+    it("two instances: the instance whose head hung reads the other instance's write once the store answers again, with no call left behind (cycle 3)", async () => {
+      const fake = memoryBlobClient();
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const a = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'two-a', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { readMs: 60 },
+      });
+      const b = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'two-b', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { readMs: 60 },
+      });
+      expect((await a.read()).document.deck.revision).toBe(412);
+      expect((await b.read()).document.deck.revision).toBe(412);
+      // the store stops answering heads: a's read and b's write both meet the deadline
+      fake.holdHead();
+      await expect(a.read()).rejects.toBeInstanceOf(BlobTimeoutError);
+      await expect(
+        b.write({ baseRevision: 412, author: kevin, mutations: [newSlide('added')] }),
+      ).rejects.toBeInstanceOf(BlobTimeoutError);
+      expect(fake.calls.filter((call) => call.aborted === true).length).toBeGreaterThanOrEqual(2);
+      expect(fake.held()).toBe(0);
+      // the store answers again: b's write lands and a reads it on its next call
+      fake.releaseHead();
+      const written = await b.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [newSlide('added')],
+      });
+      expect(written.ok).toBe(true);
+      expect((await a.read()).document.deck.revision).toBe(413);
+      expect((await a.read()).document.slides['added']).toBeDefined();
+    });
+
+    it('the watch polls one at a time: a tick while the last poll is still in flight is skipped (cycle 3)', async () => {
+      const fake = memoryBlobClient();
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const store = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'mirror-poll', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        pollMs: 20,
+        deadlines: { readMs: 2000 },
+      });
+      expect((await store.read()).document.deck.revision).toBe(412);
+      const events: number[] = [];
+      const stop = store.watch((event) => {
+        if (event.revision !== null) events.push(event.revision);
+      });
+      // the store stops answering heads: the ticks keep coming, one poll waits, the rest skip
+      fake.holdHead();
+      const before = fake.calls.filter((call) => call.op === 'head').length;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(fake.calls.filter((call) => call.op === 'head').length - before).toBe(1);
+      expect(fake.held()).toBe(1);
+      // the store answers again: the held poll finishes and the polling goes on
+      fake.releaseHead();
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      expect(fake.calls.filter((call) => call.op === 'head').length - before).toBeGreaterThan(2);
+      stop();
+      expect(events).toEqual([]);
+      // the budget of the cycle 3 fix round: one timed call per tick, at most 30 a minute
+      expect(HOSTED_POLL_MS).toBe(2000);
+      expect(Math.ceil(60_000 / HOSTED_POLL_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+    });
+
+    it('reads a record through the head first: no public read probes a record that is not there, and a miss the edge still serves is read past it (cycle 3, b6 R2 b)', async () => {
+      const fake = memoryBlobClient();
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      // the edge: one cached miss for the next record's path, then the store's body
+      const cachedMiss = new Set<string>();
+      const edge: BlobClient = {
+        ...fake,
+        get: async (pathname, options) => {
+          if (cachedMiss.has(pathname)) {
+            cachedMiss.delete(pathname);
+            return null;
+          }
+          return fake.get(pathname, options);
+        },
+      };
+      const a = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'record-a', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      const b = openBlobStore({
+        client: edge,
+        deckId: 'gt-brand',
+        dir: join(root, 'record-b', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      expect((await b.read()).document.deck.revision).toBe(412);
+      const probes = () =>
+        fake.calls.filter(
+          (call) => call.pathname.startsWith('decks/gt-brand/versions/') && call.op === 'get',
+        );
+      const before = probes().length;
+      // a writes 413; b's edge answers a miss for the new record's first read
+      const written = await a.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [newSlide('added')],
+      });
+      expect(written.ok).toBe(true);
+      const record = [...fake.blobs.keys()].find(
+        (key) => key.startsWith('decks/gt-brand/versions/') && !key.endsWith('/412.json'),
+      );
+      expect(record).toBeDefined();
+      cachedMiss.add(record as string);
+      expect((await b.read()).document.deck.revision).toBe(413);
+      expect((await b.read()).document.slides['added']).toBeDefined();
+      // the record past the newest was asked of the store's head alone, never of the edge
+      const gets = probes()
+        .slice(before)
+        .map((call) => call.pathname);
+      expect(gets.every((pathname) => fake.blobs.has(pathname))).toBe(true);
+      expect(
+        fake.calls.some(
+          (call) =>
+            call.op === 'head' && call.pathname === record?.replace(/\d+\.json$/, '414.json'),
+        ) ||
+          fake.calls.some(
+            (call) =>
+              call.op === 'head' &&
+              /versions\/\d+\.json$/.test(call.pathname) &&
+              !fake.blobs.has(call.pathname),
+          ),
+      ).toBe(true);
+    });
+
+    it('finishes a commit whose manifest put met its deadline after the store took it: the head says the commit landed, the record stays (cycle 3 fix round, C3-F1)', async () => {
+      const fake = memoryBlobClient(undefined, { now });
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      let hang = false;
+      // the store applies the put and its answer never arrives
+      const slow: BlobClient = {
+        ...fake,
+        put: async (pathname, bytes, putOptions) => {
+          const entry = await fake.put(pathname, bytes, putOptions);
+          if (hang && pathname === 'decks/gt-brand/deck.json') return new Promise(() => undefined);
+          return entry;
+        },
+      };
+      const a = openBlobStore({
+        client: slow,
+        deckId: 'gt-brand',
+        dir: join(root, 'commit-a', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { documentWriteMs: 80, readMs: 2000 },
+      });
+      const b = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'commit-b', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      expect((await a.read()).document.deck.revision).toBe(412);
+      hang = true;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (!outcome.ok) return;
+      expect(outcome.revision).toBe(413);
+      // the claim was not released: the record is in the store and the other instance reads it
+      expect(fake.blobs.has('decks/gt-brand/versions/1.json')).toBe(true);
+      expect(
+        fake.calls.some((call) => call.op === 'del' && call.pathname.endsWith('versions/1.json')),
+      ).toBe(false);
+      expect((await b.read()).document.deck.revision).toBe(413);
+      expect((await b.records()).map((record) => record.n)).toEqual([1]);
+      // the writer's mirror is not discarded: its next write bases on the commit
+      hang = false;
+      const next = await a.write({ baseRevision: 413, author: agentA, mutations: [setSize(24)] });
+      expect(next.ok).toBe(true);
+      expect((await b.read()).document.deck.revision).toBe(414);
+    });
+
+    it("takes over the write's own earlier claim at once instead of answering a conflict at the base it wrote against (cycle 3 fix round, C3-F1 `decks.access.paint`)", async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      // the claim of the same write's earlier attempt, fresh (inside the grace): the same author,
+      // base, revision and mutations, a clock of its own
+      const earlier: VersionRecord = {
+        n: 1,
+        revision: 413,
+        baseRevision: 412,
+        author: agentA,
+        note: '',
+        createdAt: clock,
+        mutations: [setSize(22)],
+        inverse: [setSize(24)],
+        snapshot: 'ffffffffffffffffffffffffffffffff',
+      };
+      await fake.put(
+        'decks/gt-brand/versions/1.json',
+        new TextEncoder().encode(canonicalJson(earlier)),
+        { overwrite: false },
+      );
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (outcome.ok) expect(outcome.entry.n).toBe(1);
+      expect((await a.read()).document.deck.revision).toBe(413);
+      // another author's claim from the same base is still another writer's (the test above)
+      const foreign: VersionRecord = {
+        ...earlier,
+        n: 2,
+        revision: 414,
+        baseRevision: 413,
+        author: agentB,
+      };
+      await fake.put(
+        'decks/gt-brand/versions/2.json',
+        new TextEncoder().encode(canonicalJson(foreign)),
+        { overwrite: false },
+      );
+      const refused = await a.write({
+        baseRevision: 413,
+        author: agentA,
+        mutations: [setSize(26)],
+      });
+      expect(refused.ok).toBe(false);
+    });
+
+    it('answers a read from the mirror while the store refuses, and a write of the mirror moves the deck pulse (cycle 3 fix round, C3-F2, C3-F3)', async () => {
+      const fake = memoryBlobClient(undefined, { now });
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      let refuse = false;
+      const rateLimited = (): Error => {
+        const error = new Error(
+          'Vercel Blob: Too many requests please lower the number of concurrent requests  - try again in 60 seconds.',
+        );
+        (error as { retryAfter?: number }).retryAfter = 60;
+        return error;
+      };
+      const flaky: BlobClient = {
+        ...fake,
+        head: (pathname, callOptions) =>
+          refuse ? Promise.reject(rateLimited()) : fake.head(pathname, callOptions),
+        get: (pathname, callOptions) =>
+          refuse ? Promise.reject(rateLimited()) : fake.get(pathname, callOptions),
+      };
+      const store = openBlobStore({
+        client: flaky,
+        deckId: 'gt-brand',
+        dir: join(root, 'degraded', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        degradedReads: true,
+      });
+      const fresh = openBlobStore({
+        client: flaky,
+        deckId: 'gt-brand',
+        dir: join(root, 'degraded-fresh', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        degradedReads: true,
+      });
+      // a bare store keeps the store's answer (the CLI reads it that way)
+      const bare = openBlobStore({
+        client: flaky,
+        deckId: 'gt-brand',
+        dir: join(root, 'degraded-bare', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      expect((await bare.read()).document.deck.revision).toBe(412);
+      expect((await store.read()).document.deck.revision).toBe(412);
+      expect(await store.leases()).toEqual([]);
+      expect(store.degradedReads()).toBe(0);
+      refuse = true;
+      // the mirror answers: the document, the revision, the records and the leases
+      expect((await store.read()).document.deck.revision).toBe(412);
+      expect(await store.revision()).toBe(412);
+      expect(await store.records()).toEqual([]);
+      expect(await store.leases()).toEqual([]);
+      expect(store.degradedReads()).toBeGreaterThan(0);
+      // a store with no mirror has nothing to answer, and a bare store answers the refusal
+      await expect(fresh.read()).rejects.toThrow(/Too many requests/);
+      await expect(bare.read()).rejects.toThrow(/Too many requests/);
+      refuse = false;
+      // the pulse: none before a write, moved by a commit
+      expect(fake.blobs.has(pulsePath('gt-brand'))).toBe(false);
+      const written = await store.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(written.ok).toBe(true);
+      const first = fake.blobs.get(pulsePath('gt-brand'))?.version;
+      expect(first).toBeDefined();
+      const again = await store.write({
+        baseRevision: 413,
+        author: agentA,
+        mutations: [setSize(24)],
+      });
+      expect(again.ok).toBe(true);
+      expect(fake.blobs.get(pulsePath('gt-brand'))?.version).not.toBe(first);
+      // the pulse put is awaited inside the write, before the answer
+      const puts = fake.calls.filter((call) => call.op === 'put').map((call) => call.pathname);
+      expect(puts[puts.length - 1]).toBe(pulsePath('gt-brand'));
+    });
+
+    it('a put meets the document deadline for a document sized body and the twin deadline above it', () => {
+      expect(putDeadlineFor(4096)).toBe(BLOB_DOCUMENT_WRITE_TIMEOUT_MS);
+      expect(putDeadlineFor(DOCUMENT_PUT_MAX_BYTES)).toBe(BLOB_DOCUMENT_WRITE_TIMEOUT_MS);
+      expect(putDeadlineFor(DOCUMENT_PUT_MAX_BYTES + 1)).toBe(BLOB_WRITE_TIMEOUT_MS);
+      expect(putDeadlineFor(4096, { documentWriteMs: 5 })).toBe(5);
+      expect(putDeadlineFor(4 * 1024 * 1024, { writeMs: 7, documentWriteMs: 5 })).toBe(7);
+      // the read deadline stays under the room client's 30 s POST deadline with room for the
+      // two to four heads an ops POST makes (controller.tsx OPS_POST_TIMEOUT_MS)
+      expect(BLOB_READ_TIMEOUT_MS * 2).toBeLessThan(30_000);
     });
   });
 });

@@ -148,10 +148,19 @@ unchanged deck costs one `head` per read and no download.
 
 The focus round's second cycle (`docs/gslides-parity/focus/build/b7.md` Cycle 2, `b6.md` Cycle 2)
 added four rules to the reads. Every call of the Blob client meets a deadline (`boundedBlobClient`
-in `blob-store.ts`: `BLOB_READ_TIMEOUT_MS` 20 s, `BLOB_WRITE_TIMEOUT_MS` 90 s; a call past it
-settles as a `BlobTimeoutError` and the deck's serial queue on the instance moves on, since one
-`head`, `get` or `put` that never answered held every request of that deck on the instance; the
-SDK call itself is not cancelled). `list()` enumerates the folder listing joined with the mirrors
+in `blob-store.ts`: `BLOB_READ_TIMEOUT_MS` 10 s for a `head`, `get`, `list` or `del`,
+`BLOB_DOCUMENT_WRITE_TIMEOUT_MS` 20 s for a `put` at or under 256 kB (a document),
+`BLOB_WRITE_TIMEOUT_MS` 90 s for a larger `put` (a twin); a call past its deadline settles as a
+`BlobTimeoutError` and the deck's serial queue on the instance moves on, since one `head`, `get`
+or `put` that never answered held every request of that deck on the instance). Since the third
+cycle (`b7.md` Cycle 3, VERIFICATION C2-F24) the call underneath is cancelled at the deadline
+through the SDK's `abortSignal`: `@vercel/blob` retries a network error or a 5xx up to
+`VERCEL_BLOB_RETRIES` times (10 by default) with waits of 1, 2, 4, 8 ... seconds, so a call the
+caller had given up on kept a retry chain running for up to seventeen minutes and held its
+sockets; the plain abort ends that chain. The hosted collection's head poll (`HOSTED_POLL_MS`) is
+1 s and one at a time (a tick while the last poll's sync is in flight is skipped), and a version
+record is read through the store's `head` before its public URL, so a record that does not exist
+yet never seeds the edge's cached miss for its path. `list()` enumerates the folder listing joined with the mirrors
 this instance holds, so a deck made or opened here lists while the folder listing lags, and a
 mirror whose manifest is gone leaves the listing. A `version.restore` record travels on the blob
 channel as an external checkpoint at its revision and never as an op, so every tab reloads at that
@@ -202,8 +211,9 @@ its own refresh. The steps as they were, for the record of round two:
 A named version (`saveVersion`) uploads its record with overwrite refused; a collision with another
 instance's record of the same number is a `ConflictError`. Leases are pulled fresh before every
 write, lease and release, and pushed after; the file is small and last writer wins. The watch
-channel (`watch`) is a revision poll every 3 s, so an external revision reaches an open editor
-within that plus the editor's own poll.
+channel (`watch`) is a revision poll, 3 s by default and 1 s for the hosted collection
+(`HOSTED_POLL_MS`, one poll at a time), so an external revision reaches an open editor within that
+plus the editor's own poll.
 
 If a push fails between steps (the network, the store), the mirror's record is dropped so the next
 sync pulls the store's truth; the caller sees the error and retries from the current revision.

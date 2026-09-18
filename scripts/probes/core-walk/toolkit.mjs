@@ -82,22 +82,61 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    * so the step fails with the action's name and the walk goes on; the call itself keeps running
    * in the page and its late answer is not read.
    */
-  t.INVOKE_TIMEOUT_MS = 60_000;
+  t.INVOKE_TIMEOUT_MS = Number(process.env.TURBOSLIDE_WALK_INVOKE_TIMEOUT_MS) || 60_000;
+  /** The section running (`{ name, ids, driven }`) and the step running, for the stall record. */
+  let current = null;
+  let activeStep = null;
+  /**
+   * The driver's own test of the stall cascade, never set in a run that counts:
+   * `TURBOSLIDE_WALK_FAKE_STALL=<action>[@<area>]` makes the first matching window API call hang
+   * to its bound, the way the enforce preview's ops route did (C2-F24), so the not driven cascade,
+   * the fresh deck and the `decks.save.acknowledged` row can be driven on a dev server in minutes
+   * (with `TURBOSLIDE_WALK_INVOKE_TIMEOUT_MS` shortening the bound). The run's JSON records it.
+   */
+  t.fakeStall = process.env.TURBOSLIDE_WALK_FAKE_STALL ?? null;
+  let fakeStalled = false;
+  /**
+   * Every window API call of the walk that did not answer within its bound, in order: the
+   * action, the bound, the time, the deck, the area and the step it served (VERIFICATION.md
+   * C2-F24, the stall). The runner reads the list after each area to give the next area a fresh
+   * deck, and at the end to judge `decks.save.acknowledged`, the product row the stall fails.
+   */
+  t.stalls = [];
   t.invoke = (action, input = {}, ms = t.INVOKE_TIMEOUT_MS) => {
     let timer;
     const late = new Promise((_, reject) => {
-      timer = setTimeout(
-        () => reject(new Error(`window API ${action} did not answer within ${ms / 1000} s`)),
-        ms,
-      );
+      timer = setTimeout(() => {
+        t.stalls.push({
+          action,
+          ms,
+          at: new Date().toISOString(),
+          deck: t.deck?.id ?? null,
+          area: current?.name ?? null,
+          step: activeStep,
+        });
+        reject(new Error(`window API ${action} did not answer within ${ms / 1000} s`));
+      }, ms);
     });
-    return Promise.race([lib.invoke(page, action, input), late]).finally(() => clearTimeout(timer));
+    const [fakeAction, fakeArea] = t.fakeStall?.split('@') ?? [];
+    let call;
+    if (
+      !fakeStalled &&
+      fakeAction !== undefined &&
+      action === fakeAction &&
+      (!fakeArea || current?.name === fakeArea)
+    ) {
+      fakeStalled = true;
+      console.log(
+        `       fake stall: ${action} in ${current?.name ?? 'no area'} hangs to its bound (TURBOSLIDE_WALK_FAKE_STALL)`,
+      );
+      call = new Promise(() => undefined);
+    } else call = lib.invoke(page, action, input);
+    return Promise.race([call, late]).finally(() => clearTimeout(timer));
   };
 
   // ---------------------------------------------------------------------------------------------
   // the table: tagged steps, setup steps, sections
 
-  let current = null;
   const record = (id, name, expected, observed, ok, ms) => {
     const row = {
       n: report.rows.length + 1,
@@ -138,6 +177,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     if (id !== null && !report.isProbeId(id))
       throw new RangeError(`${name}: ${id} is not a probe --core row of the matrix`);
     const started = Date.now();
+    activeStep = name;
     try {
       await t.dismissPrompts();
       const r = await fn();
@@ -157,8 +197,12 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       );
       await t.recover(row, true);
       return { ok: false, observed: 'error', error };
+    } finally {
+      activeStep = null;
     }
   };
+  /** Records a row from a reading the runner made outside a step (the stall row at the end). */
+  t.recordRow = (id, name, expected, observed, ok) => record(id, name, expected, observed, ok);
   /**
    * After a failed step, the page is put back where the next row expects it (VERIFICATION.md
    * F7: a `menuPath` that timed out on a submenu left the Format menu open, no later step closed
@@ -1028,7 +1072,10 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.placePicture = async (slideId, pos, id = `shot-core-${Date.now().toString(36)}`) => {
     const png = await t.pngDataUrl(96, 64);
     const s = await t.state();
+    /* the asset id is passed (b7's cycle 3 C3-R3): with a data URL and no id every picture is
+       `assets/capture.png` and a second one with other bytes is refused */
     const asset = await t.invoke('asset.add', {
+      id: `${id}-asset`,
       url: png,
       role: 'capture',
       alt: 'core walk picture',
@@ -1046,6 +1093,216 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     const obj = await t.newObjectAfter(slideId, before, 20_000);
     await t.settled();
     return obj;
+  };
+
+  // ---------------------------------------------------------------------------------------------
+  // the scratch deck: its ground paint and a fresh one after a stall
+
+  /**
+   * The paint of a fresh draft's stage (VERIFICATION.md C2-F26: one /new load of the enforce
+   * preview drew a dithered texture over the whole stage at many times its scale, the sheet's
+   * frame, guides and mark under it, and the title read "covered by html" to the first click).
+   * Three readings, so the race is named when it recurs whatever element carries it: every
+   * canvas of the document with its bitmap against its box (the ramp canvas `canvas.dither`
+   * draws one cell per two layout px and the CSS scales the bitmap to the box, so a bitmap drawn
+   * before the box had its size is stretched: `perCell` is the layout px one cell covers, 2 when
+   * drawn right); every painted element (canvas, img, video, svg, an inline background) outside
+   * the filmstrip whose box runs past the sheet's on any side by more than 5 percent while
+   * covering more than half the stage (`covers`); and what `elementFromPoint` meets at the centre
+   * of the first run and at the sheet's centre (`hit`, `sheetHit`), which has to be inside the
+   * sheet.
+   */
+  t.groundPaintFacts = () =>
+    page.evaluate(() => {
+      const box = (el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, w: r.width, h: r.height };
+      };
+      const stage = document.querySelector('.ts-stagewrap.ts-editor');
+      const sheet = stage?.querySelector('.pt-slide:not(.is-leaving)') ?? null;
+      const filmstrip = document.querySelector('.ts-filmstrip, aside.pt-sb');
+      const stageRect = stage ? box(stage) : null;
+      const sheetRect = sheet ? box(sheet) : null;
+      const canvases = [...document.querySelectorAll('canvas')]
+        .filter((c) => c.clientWidth > 0 && c.clientHeight > 0 && !filmstrip?.contains(c))
+        .map((c) => ({
+          cls: c.className || 'canvas',
+          w: c.width,
+          h: c.height,
+          layoutW: c.clientWidth,
+          layoutH: c.clientHeight,
+          drawn: c.dataset.drawn ?? null,
+          perCell: c.width > 0 ? Math.round((c.clientWidth / c.width) * 100) / 100 : null,
+        }));
+      const covers = [];
+      if (stageRect && sheetRect) {
+        const stageArea = stageRect.w * stageRect.h;
+        const slack = { x: sheetRect.w * 0.05, y: sheetRect.h * 0.05 };
+        for (const el of document.querySelectorAll(
+          'canvas, img, video, svg, [style*="background"]',
+        )) {
+          if (filmstrip?.contains(el)) continue;
+          const r = box(el);
+          if (r.w === 0 || r.h === 0) continue;
+          const ix = Math.max(
+            0,
+            Math.min(r.x + r.w, stageRect.x + stageRect.w) - Math.max(r.x, stageRect.x),
+          );
+          const iy = Math.max(
+            0,
+            Math.min(r.y + r.h, stageRect.y + stageRect.h) - Math.max(r.y, stageRect.y),
+          );
+          const past =
+            r.x < sheetRect.x - slack.x ||
+            r.y < sheetRect.y - slack.y ||
+            r.x + r.w > sheetRect.x + sheetRect.w + slack.x ||
+            r.y + r.h > sheetRect.y + sheetRect.h + slack.y;
+          if (ix * iy > stageArea / 2 && past)
+            covers.push({
+              tag: el.tagName.toLowerCase(),
+              cls: (typeof el.className === 'string' ? el.className : (el.className?.baseVal ?? ''))
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 3)
+                .join('.'),
+              w: Math.round(r.w),
+              h: Math.round(r.h),
+              attrs: [...el.attributes]
+                .filter((a) => /^data-/.test(a.name))
+                .map((a) => `${a.name}=${a.value.slice(0, 24)}`)
+                .slice(0, 4)
+                .join(' '),
+            });
+        }
+      }
+      const hitAt = (x, y, within) => {
+        const el = document.elementFromPoint(x, y);
+        return {
+          tag: el?.tagName.toLowerCase() ?? null,
+          cls: typeof el?.className === 'string' ? el.className.split(' ')[0] || null : null,
+          inside: el && within ? within.contains(el) || el.contains(within) : false,
+        };
+      };
+      const run = sheet?.querySelector('[data-run]') ?? null;
+      let hit = null;
+      if (run) {
+        const rr = run.getBoundingClientRect();
+        hit = hitAt(rr.x + rr.width / 2, rr.y + rr.height / 2, run);
+      }
+      const sheetHit = sheetRect
+        ? hitAt(sheetRect.x + sheetRect.w / 2, sheetRect.y + sheetRect.h * 0.8, sheet)
+        : null;
+      const round = (r) => (r ? { w: Math.round(r.w), h: Math.round(r.h) } : null);
+      return { stage: round(stageRect), sheet: round(sheetRect), canvases, covers, hit, sheetHit };
+    });
+  /** The ground paint facts as one sentence for a row's observed column. */
+  t.describeGroundPaint = (f) => {
+    const where = (h, what) =>
+      h
+        ? `${h.tag ?? 'nothing'}${h.cls ? `.${h.cls}` : ''} (inside ${what} ${h.inside})`
+        : `no ${what}`;
+    return `${f.canvases.length} canvas(es)${
+      f.canvases.length > 0
+        ? `: ${f.canvases
+            .map(
+              (c) =>
+                `${c.cls} ${c.w}x${c.h} bitmap in ${c.layoutW}x${c.layoutH} layout px (${c.perCell ?? 'no'} px per cell${c.drawn ? `, drawn ${c.drawn}` : ''})`,
+            )
+            .join('; ')}`
+        : ''
+    }; covers past the sheet ${
+      f.covers.length > 0
+        ? f.covers
+            .map(
+              (c) =>
+                `${c.tag}${c.cls ? `.${c.cls}` : ''} ${c.w}x${c.h}${c.attrs ? ` ${c.attrs}` : ''}`,
+            )
+            .join(', ')
+        : 'none'
+    }; sheet ${f.sheet ? `${f.sheet.w}x${f.sheet.h}` : 'none'} in a stage of ${
+      f.stage ? `${f.stage.w}x${f.stage.h}` : 'none'
+    }; at the title centre ${where(f.hit, 'the run')}; at the sheet ${where(f.sheetHit, 'the sheet')}`;
+  };
+  /** True when a canvas is stretched past a factor 1.5 of its drawn scale (2 layout px per cell). */
+  t.oversizedCanvases = (f) => f.canvases.filter((c) => c.perCell !== null && c.perCell > 3);
+  /** The paint is right: no stretched canvas, nothing past the sheet, the pointer meets the run and the sheet. */
+  t.groundPaintOk = (f) =>
+    t.oversizedCanvases(f).length === 0 &&
+    f.covers.length === 0 &&
+    (f.hit?.inside ?? false) &&
+    (f.sheetHit?.inside ?? false);
+
+  /**
+   * A fresh scratch deck for the areas after a stall (VERIFICATION.md C2-F24): the deck whose
+   * writes stopped being acknowledged is retired (the finally block trashes and removes it and
+   * reads its 404), /new is loaded, the title is typed through the product (the first write that
+   * creates the deck) and one more slide is added the way the decks area left the first deck, so
+   * the next area starts on a deck the server answers for instead of timing out its own setups
+   * one after another. Recorded as a setup row (the cascade of the area that stalled is already
+   * written); returns false when no deck could be made, which ends the walk.
+   */
+  t.freshDeck = async (why) => {
+    const TITLE = 'Pipeline review: Acme, Q3 2026';
+    const previous = t.deck.id || null;
+    const r = await t.step(
+      null,
+      `setup: a fresh deck after the stall (${why})`,
+      'a new deck from /new with its title written, at /edit, with a second slide',
+      async () => {
+        const stuck = await page
+          .evaluate(() => {
+            const words =
+              document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ??
+              null;
+            const s = window.turboslide?.studio?.describe?.().state;
+            return {
+              words,
+              pending: s?.sync?.pending ?? s?.pending ?? null,
+              revision: s?.revision ?? null,
+              serverRevision: s?.serverRevision ?? null,
+            };
+          })
+          .catch(() => ({ words: null, pending: null, revision: null, serverRevision: null }));
+        if (previous) t.deck.retired.push(previous);
+        const keep = new Set(['id', 'titleSlide', 'head', 'body', 'build', 'retired']);
+        for (const key of Object.keys(t.deck)) if (!keep.has(key)) delete t.deck[key];
+        await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
+        await t.editorReady();
+        const info = await t.invoke('deck.info');
+        const s = await t.state();
+        const allRuns = await t.runs();
+        const head = allRuns.find((x) => /heading/.test(x)) ?? allRuns[0] ?? null;
+        t.deck.id = info.id;
+        t.deck.titleSlide = s.slideId;
+        t.deck.head = head;
+        t.deck.body = allRuns.find((x) => x !== head) ?? null;
+        const paint = await t.groundPaintFacts();
+        if (!head)
+          return {
+            ok: false,
+            observed: `${info.id}: no run to type the title into; ${t.describeGroundPaint(paint)}`,
+          };
+        if (await t.visible('dialog.namePrompt'))
+          await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+        const on = await t.openRun(head);
+        await t.typeHuman(TITLE);
+        await t.sleep(300);
+        await t.press('Escape');
+        await t.waitRevision(1, 30_000);
+        const s1 = await t.settled();
+        await page.waitForURL(/\/edit\//, { timeout: 30_000 }).catch(() => undefined);
+        if (await t.visible('dialog.namePrompt'))
+          await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+        const second = await t.setupSlide(t.deck.titleSlide);
+        t.deck.secondSlide = second;
+        await t.clickCard(t.deck.titleSlide);
+        return {
+          ok: on && /\/edit\//.test(page.url()) && s1.revision >= 1 && Boolean(second),
+          observed: `retired ${previous ?? 'none'} (its title row read "${stuck.words ?? 'unknown'}", pending ${stuck.pending ?? 'unknown'}, revision ${stuck.revision ?? '?'} against the server's ${stuck.serverRevision ?? '?'}); ${info.id} at ${t.url()}, revision ${s1.revision}, second slide ${second ?? 'none'}; ${t.describeGroundPaint(paint)}`,
+        };
+      },
+    );
+    return r.ok === true;
   };
 
   // ---------------------------------------------------------------------------------------------

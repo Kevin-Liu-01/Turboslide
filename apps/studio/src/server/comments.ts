@@ -59,7 +59,7 @@ import {
 import type { Inbox, Notification, NotificationEvent } from '@turboslide/store/hosted';
 
 import type { CommentsApplier } from './checkpoint';
-import { deckPrefix } from '@turboslide/store/blob-store';
+import { boundedBlobClient, deckPrefix } from '@turboslide/store/blob-store';
 import type { Room } from './room';
 import { deckDir, exportBlobClient, stateDir, storeSelection } from './root';
 
@@ -110,7 +110,10 @@ export function commentsApplierFor(
       const dir = commentsDir(deckId);
       const now = new Date().toISOString();
       return withDeckLock(dir, async () => {
-        const client = storeSelection().kind === 'blob' ? await exportBlobClient() : null;
+        // every call of the sidecar push meets the store's deadlines (blob-store.ts
+        // boundedBlobClient), the deck pulse put among them (the cycle 3 fix round)
+        const raw = storeSelection().kind === 'blob' ? await exportBlobClient() : null;
+        const client = raw === null ? null : boundedBlobClient(raw);
         const change =
           client === null
             ? applyCommentOps(dir, deckId, ops, now)
@@ -150,7 +153,8 @@ async function storedThreads(
 ): Promise<{ threads: Map<string, Thread>; revision: number }> {
   const dir = commentsDir(deckId);
   if (storeSelection().kind === 'blob') {
-    const client = await exportBlobClient();
+    const raw = await exportBlobClient();
+    const client = raw === null ? null : boundedBlobClient(raw);
     if (client !== null) {
       const head = await client.head(`${deckPrefix(deckId)}comments/index.json`).catch(() => null);
       if (head !== null && head.version !== localIndexEtag(dir))

@@ -49,6 +49,11 @@ import { applyMutations } from '@turboslide/schema/reduce';
 import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
 import { validateDocument } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
+import { boundedBlobClient } from '@turboslide/store/blob-store';
+import type { BlobClient } from '@turboslide/store/blob-store';
+import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
+import { sharedPresence } from '@turboslide/store/presence-store';
+import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
@@ -64,7 +69,14 @@ import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comm
 import type { CommentActionId, CommentCaller } from './comments';
 import type { Checkpointer } from './checkpoint';
 import { logSecurityEvent } from './log';
-import { hasStoredDeck, isHosted, openDeckStore, stateDir } from './root';
+import {
+  deckDir,
+  exportBlobClient,
+  hasStoredDeck,
+  isHosted,
+  openDeckStore,
+  stateDir,
+} from './root';
 
 /**
  * The room (gslides-parity SPEC-3 2.3, 3.2 to 3.8; MILESTONES-3 B2 day 3): one process wide
@@ -121,23 +133,80 @@ function buildChannel(selection: RealtimeSelection): {
         redis,
       };
     }
-    case 'blob':
-      return {
-        channel: blobChannel({
-          open: (deckId) => openDeckStore(deckId),
-          // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
-          // since the version log carries no comment entries for the checkpointer to fold
-          // (VERIFICATION-3 finding 6: without it every comment write answered 400)
-          applyComments: async (deckId, entries) => {
-            // strict: a comment op the sidecar refuses fails the append with its sentence, so
-            // the seller's action is refused instead of admitted and dropped (comments.ts)
-            await commentsApplierFor(deckId, { strict: true }).apply(entries);
-          },
-          onError: (error, context) =>
-            log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
-        }),
-        redis: null,
+    case 'blob': {
+      const onError = (error: unknown, context: string): void =>
+        log(`${context}: ${error instanceof Error ? error.message : String(error)}`);
+      // the roster every instance agrees on and the comments index other instances push, over
+      // the export Blob client (store/presence-store.ts, comments-store.ts `watchSidecarIndex`;
+      // the focus round cycle 3, VERIFICATION C2-F28), read when the deck's pulse moved
+      // (store/pulse.ts; the cycle 3 fix round's budget: one head per tick per open deck per
+      // instance, none without a stream). `channel` is assigned below; the sink runs only once a
+      // presence write reaches the room, so the reference is settled by then.
+      let channel: RealtimeChannel | undefined;
+      // every call of the shared half meets the store's deadlines (blob-store.ts boundedBlobClient)
+      let boundedExport: Promise<BlobClient | null> | undefined;
+      const exportClient = (): Promise<BlobClient | null> => {
+        boundedExport ??= exportBlobClient()
+          .then((client) => (client === null ? null : boundedBlobClient(client)))
+          .catch((error: unknown) => {
+            boundedExport = undefined;
+            throw error;
+          });
+        return boundedExport;
       };
+      const presence = sharedPresence<RosterEntry>({
+        client: exportClient,
+        publish: (deckId, event) => void channel?.publish(deckId, event),
+        onError,
+      });
+      channel = blobChannel({
+        open: (deckId) => openDeckStore(deckId),
+        // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
+        // since the version log carries no comment entries for the checkpointer to fold
+        // (VERIFICATION-3 finding 6: without it every comment write answered 400)
+        applyComments: async (deckId, entries) => {
+          // strict: a comment op the sidecar refuses fails the append with its sentence, so
+          // the seller's action is refused instead of admitted and dropped (comments.ts)
+          await commentsApplierFor(deckId, { strict: true }).apply(entries);
+        },
+        shared: {
+          presence,
+          pulse: async (deckId) => {
+            const client = await exportClient();
+            return client === null ? null : headPulse(client, deckId);
+          },
+          watchComments: (deckId, onChange) => {
+            let stopped = false;
+            let watch: { poll: () => Promise<void>; stop: () => void } | undefined;
+            const ready = exportClient()
+              .then((client) => {
+                if (client === null || stopped) return;
+                // this instance's own pushes carry the etag of its mirror's index and are not
+                // announced twice (its append published the op already); no timer of its own,
+                // the channel reads it when the pulse moved
+                watch = watchSidecarIndex(client, deckId, onChange, {
+                  pollMs: null,
+                  localEtag: () => localIndexEtag(deckDir(deckId)),
+                  onError,
+                });
+              })
+              .catch((error: unknown) => onError(error, 'comments: the Blob client'));
+            return {
+              poll: async () => {
+                await ready;
+                await watch?.poll();
+              },
+              stop: () => {
+                stopped = true;
+                watch?.stop();
+              },
+            };
+          },
+        },
+        onError,
+      });
+      return { channel, redis: null };
+    }
   }
 }
 
@@ -424,34 +493,39 @@ async function createRoom(deckId: string): Promise<Room> {
     log,
   });
 
-  // every admitted op of every instance reaches the live document in stream order
-  const stopSubscription = channel.subscribe(deckId, (event) => {
-    if (event.type === 'op') {
-      void queued(async () => {
-        if (event.entry.seq <= live.seq) return;
-        if (event.entry.seq !== live.seq + 1) {
-          await syncLive();
-          return;
-        }
-        try {
-          live.document = applyEntries(live.document, [event.entry]);
-        } catch {
-          const current = await store.read();
-          live.document = current.document;
-        }
-        live.seq = event.entry.seq;
-      });
-    } else if (event.type === 'checkpoint') {
-      void queued(async () => {
-        if (event.external === true) {
-          const current = await store.read();
-          live.document = current.document;
-          return;
-        }
-        setRevision(event.revision, new Date().toISOString());
-      });
-    }
-  });
+  // every admitted op of every instance reaches the live document in stream order; the room's
+  // listener is passive, so it holds no poll of the store on the blob tier (a client stream does)
+  const stopSubscription = channel.subscribe(
+    deckId,
+    (event) => {
+      if (event.type === 'op') {
+        void queued(async () => {
+          if (event.entry.seq <= live.seq) return;
+          if (event.entry.seq !== live.seq + 1) {
+            await syncLive();
+            return;
+          }
+          try {
+            live.document = applyEntries(live.document, [event.entry]);
+          } catch {
+            const current = await store.read();
+            live.document = current.document;
+          }
+          live.seq = event.entry.seq;
+        });
+      } else if (event.type === 'checkpoint') {
+        void queued(async () => {
+          if (event.external === true) {
+            const current = await store.read();
+            live.document = current.document;
+            return;
+          }
+          setRevision(event.revision, new Date().toISOString());
+        });
+      }
+    },
+    { passive: true },
+  );
 
   /**
    * The follower (SPEC-3 0.48, 3.7 c): a record written outside the room (a CLI write beside the
@@ -643,6 +717,7 @@ export async function liveIfOpen(deckId: string): Promise<LiveDocument | null> {
  * in flight or pending when the folder goes.
  */
 export async function closeRoom(deckId: string): Promise<void> {
+  forgetBlobAdmitted(deckId);
   const s = shared.__turboslideRoom;
   const pending = s?.rooms.get(deckId);
   if (s === undefined || pending === undefined) return;
@@ -738,12 +813,28 @@ export type AdmissionResult =
   | { ok: true; entries: Entry[]; rejected: Rejected[]; head: number; revision: number }
   | {
       ok: false;
-      status: 400 | 403 | 409 | 429;
+      status: 400 | 403 | 409 | 429 | 503;
       code: string;
       message: string;
       head?: number;
       retryAfterMs?: number;
     };
+
+/**
+ * The answer to an ops POST the store refused (a 429, a 5xx, the deadline): 503 with the wait
+ * the store named, or one second; the room client keeps the ops pending and sends them again
+ * after it (room-client.ts, the 5xx branch).
+ */
+export function storeBusyResult(error: unknown): AdmissionResult {
+  const retryAfterMs = storeRetryAfterMs(error) ?? 1000;
+  return {
+    ok: false,
+    status: 503,
+    code: 'store_busy',
+    message: `The store did not answer; the change is sent again in ${Math.ceil(retryAfterMs / 1000)} s`,
+    retryAfterMs,
+  };
+}
 
 /** A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). */
 function slideBytes(slide: Slide): number {
@@ -1024,7 +1115,17 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       retryAfterMs: over.retryAfterMs,
     };
   }
-  if (room.tier === 'blob') return admitOnBlob(room, input);
+  if (room.tier === 'blob') {
+    try {
+      return await admitOnBlob(room, input);
+    } catch (error) {
+      // the store refused (a 429, a 5xx, the deadline; pulse.ts isStoreBusy): a transient the
+      // client resends after `retry-after`, never a 500 the tab reads as a refusal and never a
+      // 404 of the room (the focus round, cycle 3 fix round; VERIFICATION C3-F2)
+      if (!isStoreBusy(error)) throw error;
+      return storeBusyResult(error);
+    }
+  }
   const live = await room.live();
   const head = live.seq;
   const windowCheck = checkBaseWindow(post.base.seq, head);
@@ -1214,14 +1315,25 @@ export async function liveAtLeast(
   if (room.tier !== 'blob') return live;
   const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
   if (typeof store.sync !== 'function') return live;
+  // the store refused the forced sync (a 429, a 5xx, the deadline): the mirror's document as it
+  // stands answers the page instead of the store's error (the focus round, cycle 3 fix round;
+  // VERIFICATION C3-F3: a 429 of this head reached the editor's loader and the router replaced
+  // the editor with its default error page)
+  const syncOrKeep = async (): Promise<void> => {
+    try {
+      await store.sync?.(true);
+    } catch (error) {
+      if (!isStoreBusy(error)) throw error;
+    }
+  };
   if (revision === undefined) {
     // no revision named: the head, read once past the sync window (a page load)
-    await store.sync(true);
+    await syncOrKeep();
     return room.live();
   }
   for (let attempt = 0; attempt < attempts && revision > live.document.deck.revision; attempt++) {
     if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 250));
-    await store.sync(true);
+    await syncOrKeep();
     live = await room.live();
   }
   return live;
@@ -1251,17 +1363,66 @@ export function blobRefusal(
   };
 }
 
-/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. */
-async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
+/**
+ * The op ids this instance admitted on the blob tier lately, by deck, with the entry each made
+ * (the focus round, cycle 3; VERIFICATION C2-F24). A client that gave up on a POST after the
+ * room client's 30 s (controller.tsx OPS_POST_TIMEOUT_MS) resends its ops under the same ids
+ * while this instance may have committed the first POST after all; on the memory tier `admitOps`
+ * finds such an id in the stream's tail and answers the entry it made, but the blob tier's
+ * stream is the version log, whose records carry `clientId: 'store'` and no client op id, so a
+ * resend was admitted and committed a second time (a doubled word, a second copy of a slide).
+ * The memory is per instance and bounded; a resend that lands on another instance is not caught
+ * here (its record carries no id to match), and the room client's own match of a store echo
+ * against the POST it lost covers that side (room-client.ts `settleLostPost`).
+ */
+const BLOB_ADMITTED_MAX = 512;
+const blobAdmitted = new Map<string, Map<string, Entry>>();
+
+/** Remembers the entries one blob tier POST admitted, newest last, the oldest forgotten past the cap. */
+export function rememberBlobAdmitted(deckId: string, entries: readonly Entry[]): void {
+  let known = blobAdmitted.get(deckId);
+  if (known === undefined) {
+    known = new Map();
+    blobAdmitted.set(deckId, known);
+  }
+  for (const entry of entries) {
+    known.delete(entry.opId);
+    known.set(entry.opId, entry);
+  }
+  while (known.size > BLOB_ADMITTED_MAX) {
+    const oldest = known.keys().next().value;
+    if (oldest === undefined) break;
+    known.delete(oldest);
+  }
+}
+
+/** The entry an op id made on this instance, when this instance admitted it lately. */
+export function blobAdmittedBefore(deckId: string, opId: string): Entry | undefined {
+  return blobAdmitted.get(deckId)?.get(opId);
+}
+
+function forgetBlobAdmitted(deckId: string): void {
+  blobAdmitted.delete(deckId);
+}
+
+/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for its test. */
+export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
   const live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
   const rejected: Rejected[] = [];
   const candidates: NewEntry[] = [];
+  // the entries of a resent POST this instance admitted already, answered as they were made
+  const replayed: Entry[] = [];
   let running = live.document;
   // the undo of every entry refused so far, which the later entries are transformed past
   const refusedUndo: Mutation[] = [];
   for (const entry of post.entries) {
+    const already = blobAdmittedBefore(room.deckId, entry.opId);
+    if (already !== undefined) {
+      replayed.push(already);
+      continue;
+    }
     if (entry.kind === 'comment') {
       if (entry.comment !== undefined)
         candidates.push({
@@ -1318,13 +1479,20 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
   if (candidates.length === 0)
     return {
       ok: true,
-      entries: [],
+      entries: replayed,
       rejected,
       head: live.seq,
       revision: live.document.deck.revision,
     };
   const result = await room.channel.append(room.deckId, live.document.deck.revision, candidates);
   if (!result.ok) {
+    if (result.head === live.document.deck.revision) {
+      // the store did not move and the write did not land (a claim in flight on another
+      // instance, a mirror the pull could not prove): a resync at the same revision would send
+      // the client round again with the same base, so the answer is the transient 503 and the
+      // client sends the ops again after a second (VERIFICATION C3-F1, `decks.access.paint`)
+      return storeBusyResult(null);
+    }
     return {
       ok: false,
       status: 409,
@@ -1333,8 +1501,15 @@ async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResu
       head: result.head,
     };
   }
+  rememberBlobAdmitted(room.deckId, result.entries);
   const revision = result.entries[0]?.seq ?? live.document.deck.revision;
-  return { ok: true, entries: result.entries, rejected, head: revision, revision };
+  return {
+    ok: true,
+    entries: [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq),
+    rejected,
+    head: revision,
+    revision,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1897,6 +2072,13 @@ export async function admitServerWrite(
         { force: true },
       );
     } catch (error) {
+      // the store refused (a 429, a 5xx, the deadline): the caller's card reads the product's
+      // sentence, never the SDK's (the focus round, cycle 3 fix round; VERIFICATION C3-F2 read
+      // "Vercel Blob: Too many requests" in the Share dialog)
+      if (isStoreBusy(error)) {
+        const wait = Math.ceil((storeRetryAfterMs(error) ?? 1000) / 1000);
+        throw new Error(`The store did not answer; try again in ${wait} s`);
+      }
       // a race the store reports as an error (a mirror behind the store, a named version taken
       // first) is a lost race, answered as the conflict of 6.2 (VERIFICATION-3 finding 19)
       if (!isLostRace(error)) throw error;

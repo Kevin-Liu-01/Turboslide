@@ -189,11 +189,23 @@ export type RoomEvent =
     }
   | { type: 'inbox'; unread: number; principalId?: string }
   | { type: 'access'; revision: number }
-  | { type: 'resync'; revision: number };
+  | { type: 'resync'; revision: number }
+  /**
+   * The deck's store refused the room's poll (a 429, a 5xx, the deadline) and the poll is backing
+   * off, or answered again after refusing (the focus round, cycle 3 fix round; VERIFICATION
+   * C3-F2): a tab's title row reads Reconnecting while `ok` is false. `retryAfterMs` is the wait
+   * before the next poll. The blob tier alone sends it; the other tiers have no store poll.
+   */
+  | { type: 'store'; ok: boolean; retryAfterMs?: number };
 
 export type RoomEventType = RoomEvent['type'];
 
 export type RoomListener = (event: RoomEvent) => void;
+
+export type SubscribeOptions = {
+  /** a listener of the instance's own (the room's live document), never a client's stream */
+  passive?: boolean;
+};
 
 export type LockOptions = {
   /**
@@ -246,9 +258,13 @@ export type RealtimeChannel = {
   /**
    * Delivers every admitted `op`, every presence change and every published event of the deck
    * to the listener, in stream order; the return value unsubscribes. One subscription per
-   * instance per deck on Redis, however many listeners (report 10 F24).
+   * instance per deck on Redis, however many listeners (report 10 F24). A `passive` listener
+   * (the room's own, for its live document) holds no poll of the store on the blob tier: the
+   * store is polled while a client stream of the deck is open on the instance and never
+   * otherwise (the focus round, cycle 3 fix round, the blob tier budget); the other tiers
+   * ignore the option.
    */
-  subscribe: (deckId: string, onEvent: RoomListener) => () => void;
+  subscribe: (deckId: string, onEvent: RoomListener, options?: SubscribeOptions) => () => void;
   /** announces an event to every instance's listeners (the checkpointer's `checkpoint`, `access`, `inbox`) */
   publish: (deckId: string, event: RoomEvent) => Promise<void>;
   /** drops retained entries after a checkpoint (SPEC-3 3.7 d, `XTRIM`) */

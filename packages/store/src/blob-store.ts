@@ -60,7 +60,9 @@ import {
 } from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
+import { provenGet } from './access-store.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
+import { HOSTED_POLL_MS, isStoreBusy, putPulse } from './pulse.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
 import type {
   AssetPut,
@@ -105,20 +107,36 @@ export type BlobPutOptions = {
    * cannot pass it through ignore it.
    */
   cacheControlMaxAge?: number;
+  /** cancels the put underneath (BlobCallOptions.signal) */
+  signal?: AbortSignal;
+};
+
+/**
+ * What every call of the client may carry: a signal that cancels the call underneath (the SDK's
+ * `abortSignal`). The bounded client (`boundedBlobClient`) fires it at the call's deadline, so
+ * the SDK's own retry chain ends there; without it a call past its deadline kept running for
+ * minutes (the focus round, cycle 3; the note on `boundedBlobClient`). A client that cannot
+ * cancel ignores it.
+ */
+export type BlobCallOptions = {
+  signal?: AbortSignal;
 };
 
 export type BlobClient = {
   /** the entry, or null when the pathname is not stored */
-  head: (pathname: string) => Promise<BlobEntry | null>;
+  head: (pathname: string, options?: BlobCallOptions) => Promise<BlobEntry | null>;
   /** the current bytes, never a cached copy, or null */
-  get: (pathname: string) => Promise<{ entry: BlobEntry; bytes: Uint8Array } | null>;
+  get: (
+    pathname: string,
+    options?: BlobCallOptions,
+  ) => Promise<{ entry: BlobEntry; bytes: Uint8Array } | null>;
   /** every blob under a prefix, every page */
-  list: (prefix: string) => Promise<BlobEntry[]>;
+  list: (prefix: string, options?: BlobCallOptions) => Promise<BlobEntry[]>;
   /** the folders directly under a prefix, each with its trailing slash */
-  folders: (prefix: string) => Promise<string[]>;
+  folders: (prefix: string, options?: BlobCallOptions) => Promise<string[]>;
   put: (pathname: string, bytes: Uint8Array, options: BlobPutOptions) => Promise<BlobEntry>;
   /** removes what exists; a missing pathname is not an error */
-  del: (pathnames: ReadonlyArray<string>) => Promise<void>;
+  del: (pathnames: ReadonlyArray<string>, options?: BlobCallOptions) => Promise<void>;
 };
 
 export class BlobExistsError extends Error {
@@ -552,19 +570,32 @@ function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
 // The deadline on every call to the store
 
 /**
- * How long one read of the Blob store (`head`, `get`, `list`, `folders`, `del`) may take, and how
- * long one `put` may (a twin of up to the asset cap travels in a put). A call past its deadline
- * is a BlobTimeoutError and the store's queue moves on (the focus round, cycle 2). Every call of
- * a deck's store runs through one serial queue per instance (`serialQueue`), and the SDK's fetch
+ * How long one read of the Blob store (`head`, `get`, `list`, `folders`, `del`) may take, how
+ * long a put of a document may (a manifest, a slide body, a record, a snapshot: kilobytes) and
+ * how long a put of a twin may (up to the asset cap). A call past its deadline is a
+ * BlobTimeoutError and the store's queue moves on (the focus round, cycle 2). Every call of a
+ * deck's store runs through one serial queue per instance (`serialQueue`), and the SDK's fetch
  * has no timeout of its own, so one call that never answered held the queue and every request
  * of that deck on the instance with it: `asset.add` through the window API did not return for
  * nine and a half minutes on the enforce preview while the deck stood unchanged in the store
  * (VERIFICATION F-stall, F-asset-add-intermittent; b4's fix round saw 665 s once).
+ *
+ * The read deadline is 10 s since cycle 3 (it was 20 s): a `head` answers in well under a second
+ * and an ops POST on the blob tier makes two to four of them in a row (the live document, the
+ * forced syncs of `liveAtLeast`, the write's own head), while the room client gives a POST 30 s
+ * (controller.tsx OPS_POST_TIMEOUT_MS) and resends after that with the server still working on
+ * the first, which admits the write twice. With 10 s the SDK still gets four attempts inside the
+ * deadline (its retry waits are 1, 2 and 4 s), and the POST's reads end inside the client's
+ * bound. The document put deadline keeps the commit inside the same bound; the twin put keeps
+ * 90 s.
  */
-export const BLOB_READ_TIMEOUT_MS = 20_000;
+export const BLOB_READ_TIMEOUT_MS = 10_000;
 /** The turn after the deadline in which an answer that arrived during a stall still counts. */
 export const TIMEOUT_GRACE_MS = 250;
 export const BLOB_WRITE_TIMEOUT_MS = 90_000;
+/** A put of a body at or under this many bytes is a document put and meets the document deadline. */
+export const DOCUMENT_PUT_MAX_BYTES = 256 * 1024;
+export const BLOB_DOCUMENT_WRITE_TIMEOUT_MS = 20_000;
 
 export class BlobTimeoutError extends Error {
   readonly op: keyof BlobClient;
@@ -581,19 +612,51 @@ const BOUNDED = Symbol.for('turboslide.boundedBlobClient');
 
 type Bounded = BlobClient & { [BOUNDED]?: true };
 
-export type BlobDeadlines = { readMs?: number; writeMs?: number };
+export type BlobDeadlines = {
+  readMs?: number;
+  /** the put of a twin (a body above DOCUMENT_PUT_MAX_BYTES) */
+  writeMs?: number;
+  /** the put of a document (a body at or under DOCUMENT_PUT_MAX_BYTES) */
+  documentWriteMs?: number;
+};
+
+/** The put deadline a body meets: the document deadline for a document sized body, the twin deadline above it. */
+export function putDeadlineFor(bytes: number, deadlines: BlobDeadlines = {}): number {
+  return bytes > DOCUMENT_PUT_MAX_BYTES
+    ? (deadlines.writeMs ?? BLOB_WRITE_TIMEOUT_MS)
+    : (deadlines.documentWriteMs ?? BLOB_DOCUMENT_WRITE_TIMEOUT_MS);
+}
+
+/** The signal the call underneath gets: the deadline's, joined with the caller's when there is one. */
+function callSignal(deadline: AbortSignal, own: AbortSignal | undefined): AbortSignal {
+  if (own === undefined) return deadline;
+  return AbortSignal.any([deadline, own]);
+}
 
 /**
- * The client with a deadline on every call. The underlying call is not cancelled (the SDK offers
- * no handle for that); the caller's promise settles with the error and the store continues. A
- * client wrapped once is not wrapped again.
+ * The client with a deadline on every call. At the deadline the call underneath is cancelled
+ * through its signal (`BlobCallOptions.signal`, the SDK's `abortSignal`) and the caller's promise
+ * settles with BlobTimeoutError; the store continues. The cancel matters (the focus round, cycle
+ * 3, VERIFICATION C2-F24 and C2-F27): the SDK retries every request up to VERCEL_BLOB_RETRIES
+ * (10) times on a network error or a 5xx, with waits of 1, 2, 4, 8 ... seconds between them, so
+ * a call this deadline gave up on kept retrying underneath for up to seventeen minutes, holding
+ * its sockets and hitting the store at every step; every timed out call on a stalled instance
+ * left one such chain behind it, and the instance stayed slow long after whatever had stalled
+ * it (the enforce preview's "Saving..." for eight minutes, the ops route's `BlobTimeoutError ...
+ * head deck.json within 20 s` lines). A client wrapped once is not wrapped again.
  */
 export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines = {}): BlobClient {
   if ((client as Bounded)[BOUNDED] === true) return client;
   const readMs = deadlines.readMs ?? BLOB_READ_TIMEOUT_MS;
-  const writeMs = deadlines.writeMs ?? BLOB_WRITE_TIMEOUT_MS;
-  const bound = <T>(op: keyof BlobClient, pathname: string, ms: number, run: () => Promise<T>) =>
+  const bound = <T>(
+    op: keyof BlobClient,
+    pathname: string,
+    ms: number,
+    own: AbortSignal | undefined,
+    run: (signal: AbortSignal) => Promise<T>,
+  ) =>
     new Promise<T>((resolve, reject) => {
+      const controller = new AbortController();
       let settled = false;
       let grace: ReturnType<typeof setTimeout> | undefined;
       const timer = setTimeout(() => {
@@ -604,34 +667,66 @@ export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines =
         // presence posts in two seconds and refused the ops POST beside them with this error;
         // the integrator at the merge, for b7)
         grace = setTimeout(() => {
-          if (!settled) reject(new BlobTimeoutError(op, pathname, ms));
-        }, TIMEOUT_GRACE_MS);
-        grace.unref?.();
-      }, ms);
-      timer.unref?.();
-      run().then(
-        (value) => {
+          if (settled) return;
           settled = true;
-          clearTimeout(timer);
-          if (grace !== undefined) clearTimeout(grace);
+          // the call underneath ends here with the deadline, retry chain included; the abort
+          // carries no reason of its own, so the SDK meets the plain AbortError its retry loop
+          // bails on (any other error class is one it retries)
+          controller.abort();
+          reject(new BlobTimeoutError(op, pathname, ms));
+        }, TIMEOUT_GRACE_MS);
+        grace.unref();
+      }, ms);
+      timer.unref();
+      const done = (): void => {
+        clearTimeout(timer);
+        if (grace !== undefined) clearTimeout(grace);
+      };
+      run(callSignal(controller.signal, own)).then(
+        (value) => {
+          if (settled) return;
+          settled = true;
+          done();
           resolve(value);
         },
         (error: unknown) => {
+          // the rejection of a call this deadline cancelled is the deadline's, already answered
+          if (settled) return;
           settled = true;
-          clearTimeout(timer);
-          if (grace !== undefined) clearTimeout(grace);
+          done();
           reject(error);
         },
       );
     });
   const wrapped: Bounded = {
-    head: (pathname) => bound('head', pathname, readMs, () => client.head(pathname)),
-    get: (pathname) => bound('get', pathname, readMs, () => client.get(pathname)),
-    list: (prefix) => bound('list', prefix, readMs, () => client.list(prefix)),
-    folders: (prefix) => bound('folders', prefix, readMs, () => client.folders(prefix)),
+    head: (pathname, options) =>
+      bound('head', pathname, readMs, options?.signal, (signal) =>
+        client.head(pathname, { ...options, signal }),
+      ),
+    get: (pathname, options) =>
+      bound('get', pathname, readMs, options?.signal, (signal) =>
+        client.get(pathname, { ...options, signal }),
+      ),
+    list: (prefix, options) =>
+      bound('list', prefix, readMs, options?.signal, (signal) =>
+        client.list(prefix, { ...options, signal }),
+      ),
+    folders: (prefix, options) =>
+      bound('folders', prefix, readMs, options?.signal, (signal) =>
+        client.folders(prefix, { ...options, signal }),
+      ),
     put: (pathname, bytes, options) =>
-      bound('put', pathname, writeMs, () => client.put(pathname, bytes, options)),
-    del: (pathnames) => bound('del', pathnames[0] ?? '', readMs, () => client.del(pathnames)),
+      bound(
+        'put',
+        pathname,
+        putDeadlineFor(bytes.byteLength, deadlines),
+        options.signal,
+        (signal) => client.put(pathname, bytes, { ...options, signal }),
+      ),
+    del: (pathnames, options) =>
+      bound('del', pathnames[0] ?? '', readMs, options?.signal, (signal) =>
+        client.del(pathnames, { ...options, signal }),
+      ),
   };
   wrapped[BOUNDED] = true;
   return wrapped;
@@ -668,6 +763,13 @@ export type BlobStoreOptions = {
   snapshotGraceMs?: number;
   /** the deadlines on the store's calls (boundedBlobClient); the module's defaults when absent */
   deadlines?: BlobDeadlines;
+  /**
+   * A read of a deck this instance has mirrored is answered from the mirror while the store
+   * refuses (a 429, a 5xx, the deadline); off, the refusal is the caller's error. The hosted
+   * collection turns it on for the studio's pages (`blobDecks`); a bare store, the CLI's among
+   * them, keeps the store's answer (the focus round, cycle 3 fix round).
+   */
+  degradedReads?: boolean;
 };
 
 export type BlobStore = DeckStore & {
@@ -680,6 +782,8 @@ export type BlobStore = DeckStore & {
   snapshots: () => Promise<number>;
   /** removes every snapshot no retained record names; returns how many went (write() runs this after a commit) */
   pruneSnapshots: () => Promise<number>;
+  /** how many reads the mirror answered while the store refused (the focus round, cycle 3 fix round) */
+  degradedReads: () => number;
 };
 
 export function openBlobStore(options: BlobStoreOptions): BlobStore {
@@ -747,12 +851,29 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       const fetched = await client.get(`${prefix}${relative}`);
       return fetched === null ? null : { bytes: fetched.bytes, version: fetched.entry.version };
     };
-    /** records never change, so their first body is the body */
-    const fetchRecord = async (relative: string): Promise<boolean> => {
-      const fetched = await fetchBody(relative);
+    /**
+     * Records never change, so their first body is the body. The store's API (`head`) says
+     * whether the record exists before its public URL is read: a `get` of the path before the
+     * record landed seeded the edge's cached miss for that path, which then hid the record for
+     * a while after it landed, so the pull could not prove the document and the next write on
+     * the instance met a stale mirror (b6's cycle 3 reading, R2 b; VERIFICATION C2-F25 and
+     * C2-F28, a second browser's slide late). A body the edge serves that does not hash to the
+     * head's etag, or a miss the edge still serves, is read past the edge (`provenGet`).
+     */
+    const fetchRecord = async (relative: string, listed?: string): Promise<boolean> => {
+      const pathname = `${prefix}${relative}`;
+      // a listed record's version is the listing's (no head round trip; a cold instance pulls
+      // hundreds of them); a record past the listing is asked of the head
+      const version = listed ?? (await client.head(pathname))?.version ?? null;
+      if (version === null) return false;
+      let fetched = await client.get(pathname);
+      if (fetched === null || quotedMd5(fetched.bytes) !== version) {
+        // a record has no immutable copy of its own: it is one
+        fetched = await provenGet(client, pathname, { copyOf: false });
+      }
       if (fetched === null) return false;
       writeAtomic(pathOf(relative), fetched.bytes);
-      next.files[relative] = fetched.version;
+      next.files[relative] = version;
       return true;
     };
     // 1. the records: the listing's, then by number past what the listing shows; the comments
@@ -776,7 +897,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         next.files[relative] = entry.version;
         return;
       }
-      if (!(await fetchRecord(relative)) && existsSync(pathOf(relative)))
+      if (!(await fetchRecord(relative, entry.version)) && existsSync(pathOf(relative)))
         next.files[relative] = manifest.files[relative] ?? entry.version;
     });
     const first = lastRecord(dir, next) + 1;
@@ -971,8 +1092,26 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
   const sync = (force = false): Promise<SyncState> => serial(() => syncNow(force));
 
+  /**
+   * A read of a deck this instance has mirrored is answered from the mirror while the store
+   * refuses (a 429, a 5xx, the deadline; pulse.ts `isStoreBusy`): the document may be a moment
+   * behind, which the next sync corrects, and nothing thrown by the store reaches a page or the
+   * room's live document (the focus round, cycle 3 fix round; VERIFICATION C3-F2, C3-F3: a 429 of
+   * a head reached the editor's loader and the router replaced the editor with its default error
+   * page). A deck with no mirror here still throws, since there is nothing to answer.
+   */
+  let degradedReads = 0;
+  const answersFromMirror = options.degradedReads === true;
   const requirePresent = async (force = false): Promise<void> => {
-    const state = await sync(force);
+    let state: SyncState;
+    try {
+      state = await sync(force);
+    } catch (error) {
+      if (!answersFromMirror || !isStoreBusy(error) || !existsSync(pathOf('deck.json')))
+        throw error;
+      degradedReads += 1;
+      return;
+    }
     if (!state.present) throw new RangeError(`No deck ${deckId} in the Blob store`);
   };
 
@@ -980,6 +1119,16 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     const fetched = await client.get(`${prefix}${LEASES_FILE}`);
     if (fetched === null) rmSync(file.leaseFile, { force: true });
     else writeAtomic(file.leaseFile, fetched.bytes);
+  };
+
+  /** The lease read of a page load: the mirror's copy while the store refuses (requirePresent says why). */
+  const pullLeasesOrKeep = async (): Promise<void> => {
+    try {
+      await pullLeases();
+    } catch (error) {
+      if (!answersFromMirror || !isStoreBusy(error)) throw error;
+      degradedReads += 1;
+    }
   };
 
   const pushLeases = async (): Promise<void> => {
@@ -1038,7 +1187,19 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         held !== null &&
         held.revision > entry.baseRevision &&
         Date.parse(clock()) - Date.parse(held.createdAt) > CLAIM_GRACE_MS;
-      if (existing === null || stale) {
+      // the same write's own earlier claim (the same author, base and mutations): an attempt of
+      // this instance that met a deadline after its claim, or the client's resend of a POST
+      // whose first attempt stopped before its commit. Its claim is taken over at once instead
+      // of holding this write for the grace, which answered the client a conflict at the
+      // revision it wrote against and looped it through resyncs (the focus round, cycle 3 fix
+      // round; VERIFICATION C3-F1 `decks.access.paint`, the write right after a restore)
+      const own =
+        held !== null &&
+        held.baseRevision === entry.baseRevision &&
+        held.revision === entry.revision &&
+        canonicalJson(held.author) === canonicalJson(entry.author) &&
+        canonicalJson(held.mutations) === canonicalJson(entry.mutations);
+      if (existing === null || stale || own) {
         return client.put(pathname, bytes, { overwrite: true, contentType });
       }
       throw new RecordTakenError(deckId, relative);
@@ -1184,7 +1345,22 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           const pushedSlides = bodyResults.map((result) => (result.ok ? result.value : undefined));
           // Round three: the commit point, alone. The manifest goes up conditional on the version
           // this instance read; a precondition failure is the conflict outcome below.
-          const committed = await putDocument('deck.json', synced);
+          let committed: BlobEntry;
+          try {
+            committed = await putDocument('deck.json', synced);
+          } catch (error) {
+            // the commit put met its deadline while the store may hold the commit (the answer
+            // was slow, not the write): the head says. A head at our bytes is our commit and the
+            // write finishes as one; before this the claim was released (the record deleted
+            // under a manifest that names its revision) and the mirror discarded, so the client's
+            // resend was admitted a second time and the version log lost a number (the focus
+            // round, cycle 3 fix round; VERIFICATION C3-F1, docs/FOCUS.md rank 21)
+            if (!(error instanceof BlobTimeoutError)) throw error;
+            const ours = quotedMd5(new Uint8Array(readFileSync(pathOf('deck.json'))));
+            const landed = await client.head(`${prefix}deck.json`).catch(() => null);
+            if (landed === null || landed.version !== ours) throw error;
+            committed = landed;
+          }
           claimed = false;
           manifest.files['deck.json'] = committed.version;
           manifest.files[record] = stored.version;
@@ -1211,6 +1387,10 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           }
           syncedAt = Date.now();
           lastState = { present: true, pulled: false, revision: outcome.revision };
+          // the deck's pulse (pulse.ts): the one head every other instance's poll makes moves
+          // with this commit; awaited, because a function instance is frozen once its answer
+          // has gone and a put left in flight would never land
+          await putPulse(client, deckId, 'deck', { now: clock });
           // retention runs after the commit and never blocks the answer (SPEC-2 8.2)
           void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
@@ -1352,18 +1532,29 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     },
 
     async leases(): Promise<Lease[]> {
-      await serial(pullLeases);
+      await serial(pullLeasesOrKeep);
       return file.leases();
     },
 
+    degradedReads: () => degradedReads,
+
     watch(listener: StoreListener): () => void {
       // the store has no push channel: the manifest's version is polled, and a change of the
-      // mirror's revision (a pull, or a write on this instance) is one event
+      // mirror's revision (a pull, or a write on this instance) is one event. One poll at a
+      // time: a tick that finds the last poll's sync still in flight is skipped, so a store that
+      // answers slowly meets one head from the watch in the deck's queue and not one per tick
+      // (the focus round, cycle 3: with the deadline at 20 s and a tick every 3 s, a slow store
+      // queued seven polls behind one another, each waiting its own deadline, and every write of
+      // the deck waited behind them)
       let last = readRevision(dir);
+      let polling = false;
       const timer = setInterval(() => {
+        if (polling) return;
+        polling = true;
         void sync()
           .catch(() => undefined)
           .then(() => {
+            polling = false;
             const revision = readRevision(dir);
             if (revision === last) return;
             last = revision;
@@ -1544,6 +1735,15 @@ export function deckHeadOf(deckId: string, bytes: Uint8Array): DeckHead | null {
   return head;
 }
 
+/**
+ * The hosted poll interval per open deck per instance (SPEC-3 2.5, amended by the focus round's
+ * cycle 3 fix round): the one timed store call the blob channel makes per tick while a client
+ * stream of the deck is open on the instance, a head of the deck's pulse (pulse.ts). Defined
+ * there, node free, so the realtime package reads the same number; re-exported here for the
+ * callers of the store.
+ */
+export { HOSTED_POLL_MS };
+
 /** The Blob backend: the overlay as a mirror, one BlobStore per deck, the seed uploaded once. */
 export function blobDecks(options: HostedOptions): HostedDecks {
   if (options.blob === null) {
@@ -1570,6 +1770,17 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   };
   const stores = new Map<string, BlobStore>();
   const urls = new Map<string, string | null>();
+  /**
+   * One listing in flight per shape (by whether the trash is included): the listing is one
+   * head per deck the store holds, so a burst of home page loads on one instance (the drivers'
+   * navigations, a person's reload) multiplied into the store's concurrency limit (the focus
+   * round, cycle 3 fix round; VERIFICATION C3-F2, C3-F5: the /decks page did not hydrate after
+   * a move to the trash). A load that arrives while a listing runs joins it; the next load after
+   * it reads the store again, so a change made on any instance still lists on the next load
+   * (SPEC 6.2, rank 7). A write of this collection ends the join early, so its own change lists
+   * at once.
+   */
+  const listingInFlight = new Map<string, Promise<DeckHead[]>>();
   let readyPromise: Promise<void> | undefined;
 
   const storeFor = async (deckId: string): Promise<BlobStore> => {
@@ -1579,6 +1790,12 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         client: await client(),
         deckId,
         dir: join(decksDir, deckId),
+        // the store's own watch is a fallback (a caller without the pulse); the blob channel
+        // polls the deck's pulse at this cadence instead (packages/realtime/src/blob.ts,
+        // pulse.ts): one head per tick per open deck per instance, and one at a time
+        pollMs: HOSTED_POLL_MS,
+        // the studio's pages read the mirror while the store refuses (requirePresent says why)
+        degradedReads: true,
         ...(options.now === undefined ? {} : { now: options.now }),
       });
       stores.set(deckId, store);
@@ -1772,6 +1989,8 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       const manifest = readManifest(store.dir);
       manifest.files['deck.json'] = entry.version;
       writeManifestFile(store.dir, manifest);
+      listingInFlight.clear();
+      await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
     } catch (error) {
       // the store moved under us: forget the mirror's manifest so the next sync pulls the truth
       writeManifestFile(store.dir, { files: {} });
@@ -1796,7 +2015,6 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     ready,
     async list(listOptions) {
       await ready();
-      const ids = await deckIds();
       // the listing reads every manifest at the store's head, in parallel, and writes no mirror
       // (gslides-parity SPEC-4 0.29, 3.1; PP 3.1): a trash stamp or a title written on another
       // instance shows on the next home page load (SPEC 6.2), and a deck store opens only when a
@@ -1806,26 +2024,54 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       // origin body when its md5 is the etag, else the snapshot the etag names; the CDN kept
       // serving an overwritten manifest for a while, so a rename, a Make a copy and a Restore
       // listed the state before them and a card sent that revision back as a stale base.
-      const c = await client();
-      const heads: DeckHead[] = [];
-      await eachLimit(ids, 8, async (deckId) => {
-        const bytes = await currentManifest(c, deckId);
-        if (bytes === null) return;
-        const head = deckHeadOf(deckId, bytes);
-        if (head === null) return;
-        if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
-        heads.push(head);
-      });
-      return heads.sort(byNewest);
+      const shape = listOptions?.includeTrashed === true ? 'all' : 'live';
+      const joined = listingInFlight.get(shape);
+      if (joined !== undefined) return [...(await joined)];
+      const run = (async (): Promise<DeckHead[]> => {
+        const ids = await deckIds();
+        const c = await client();
+        const heads: DeckHead[] = [];
+        // four at a time: the store's 429 names the number of concurrent requests (C3-F2)
+        await eachLimit(ids, 4, async (deckId) => {
+          const bytes = await currentManifest(c, deckId);
+          if (bytes === null) return;
+          const head = deckHeadOf(deckId, bytes);
+          if (head === null) return;
+          if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
+          heads.push(head);
+        });
+        return heads.sort(byNewest);
+      })();
+      listingInFlight.set(shape, run);
+      try {
+        return [...(await run)];
+      } finally {
+        if (listingInFlight.get(shape) === run) listingInFlight.delete(shape);
+      }
     },
     async has(deckId) {
       await ready();
-      return (await (await client()).head(`${deckPrefix(deckId)}deck.json`)) !== null;
+      try {
+        return (await (await client()).head(`${deckPrefix(deckId)}deck.json`)) !== null;
+      } catch (error) {
+        // the store refused (a 429, a 5xx, the deadline): a deck this instance has mirrored is
+        // there until the store says otherwise, so its routes keep answering (the focus round,
+        // cycle 3 fix round; VERIFICATION C3-F2, C3-F5: a 429 of this head answered 500 and 404)
+        if (isStoreBusy(error) && existsSync(join(decksDir, deckId, 'deck.json'))) return true;
+        throw error;
+      }
     },
     async open(deckId) {
       await ready();
       const store = await storeFor(deckId);
-      const state = await store.sync(true);
+      let state: SyncState;
+      try {
+        state = await store.sync(true);
+      } catch (error) {
+        // the mirror answers while the store refuses (openBlobStore requirePresent says why)
+        if (isStoreBusy(error) && existsSync(join(store.dir, 'deck.json'))) return store;
+        throw error;
+      }
       if (!state.present) throw new RangeError(`No deck ${deckId} in the Blob store`);
       return store;
     },
@@ -1863,6 +2109,8 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         }
         throw error;
       }
+      listingInFlight.clear();
+      await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
       return result;
     },
     async copy(input, baseRevision) {
@@ -1899,6 +2147,8 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         }
         throw error;
       }
+      listingInFlight.clear();
+      await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
       return result;
     },
     async trash(deckId, baseRevision) {
@@ -1930,6 +2180,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       const rest = (await c.list(prefix)).map((entry) => entry.pathname);
       await c.del(rest);
       stores.delete(deckId);
+      listingInFlight.clear();
       for (const pathname of [...urls.keys()])
         if (pathname.startsWith(prefix)) urls.delete(pathname);
       rmSync(join(decksDir, deckId), { recursive: true, force: true });

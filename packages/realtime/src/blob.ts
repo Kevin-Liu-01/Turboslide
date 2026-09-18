@@ -3,12 +3,32 @@
 // stream: every append is one commit through the deck's store (`BlobStore.write` hosted, a
 // `FileStore` on a checkout), so the seq of an entry is the revision its record made, `since`
 // reads the version log, `head` is the revision, and `subscribe` follows the store's watch
-// channel (the Blob mirror's one second head poll, `fs.watch` on a checkout). Presence, locks,
-// budgets and flags are per instance, from memory.ts; the title row says so (select.ts
-// BLOB_TIER_NOTICE). One write per second per deck per instance keeps the deployment under the
-// Blob operation cap. Comment entries go straight to the sidecar through `applyComments`, which
-// the comments store supplies (SPEC-3 5.2); without it a comment entry is refused. No `node:`.
+// channel (the Blob mirror's head poll, `fs.watch` on a checkout). Locks, budgets and flags are
+// per instance, from memory.ts. Presence is shared when `shared` is given (the focus round, cycle
+// 3; VERIFICATION C2-F28): the roster lives in the store's presence record (store/presence-store.ts)
+// and the comments index other instances push is read beside it (comments-store.ts
+// `watchSidecarIndex`) and announced as the checkpoint frame with `comments`, so a second browser
+// on another instance sees the chips, the leaves and a new thread; without it presence stays per
+// instance. With `shared` the channel polls the store on the blob tier budget of the cycle 3 fix
+// round (store/pulse.ts; VERIFICATION C3-F1, C3-F2): one head of the deck's pulse per
+// HOSTED_POLL_MS while a client stream of the deck is open on this instance, none when no stream
+// is open (the room's own listener is `passive`), the three reads (the manifest, the presence
+// record, the comments index) only when the pulse moved, the manifest alone every fifteenth
+// tick, and a 429 or a 5xx from the store backs the poll off to 60 s and tells the streams with
+// a `store` event, whose title row reads Reconnecting until a poll succeeds. One write per second
+// per deck per instance keeps the deployment under the Blob operation cap. Comment entries go
+// straight to the sidecar through `applyComments`, which the comments store supplies (SPEC-3
+// 5.2); without it a comment entry is refused. No `node:` (store/pulse.ts is node free).
 import { ConflictError } from '@turboslide/schema/errors';
+import type { SidecarIndexChange } from '@turboslide/store/comments-store';
+import type { SharedPresence } from '@turboslide/store/presence-store';
+import {
+  HOSTED_POLL_MS,
+  PULSE_SAFETY_TICKS,
+  isStoreBusy,
+  pollBackoffMs,
+  storeRetryAfterMs,
+} from '@turboslide/store/pulse';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import type {
@@ -19,6 +39,8 @@ import type {
   RoomEvent,
   RoomListener,
   RoomMutation,
+  RosterEntry,
+  SubscribeOptions,
 } from './channel.ts';
 import { foldMutation } from './coalesce.ts';
 import type { FlagName } from './keys.ts';
@@ -26,6 +48,27 @@ import { checkDeckId } from './keys.ts';
 import { memoryChannel } from './memory.ts';
 import type { MemoryChannel } from './memory.ts';
 import { REPLAY_MAX_ENTRIES } from './protocol.ts';
+
+/** A watcher of the deck's comments index the channel drives: one read now, and the stop. */
+export type CommentsWatch = { poll: () => Promise<void>; stop: () => void };
+
+/** The cross instance half of the blob tier (store/presence-store.ts, comments-store.ts, pulse.ts). */
+export type BlobSharedDeps = {
+  /** the roster every instance agrees on, over the store's presence record */
+  presence: SharedPresence<RosterEntry>;
+  /**
+   * the deck's pulse version (store/pulse.ts `headPulse`): the one head the poll makes per tick;
+   * null when the store holds no pulse for the deck yet
+   */
+  pulse: (deckId: string) => Promise<string | null>;
+  /**
+   * a watcher of the deck's comments index without a timer of its own (`pollMs: null`); the
+   * channel reads it when the pulse moved and hands over every version another instance pushed
+   */
+  watchComments?: (deckId: string, onChange: (change: SidecarIndexChange) => void) => CommentsWatch;
+  /** the tick; HOSTED_POLL_MS by default (the tests shorten it) */
+  pollMs?: number;
+};
 
 export type BlobChannelDeps = {
   /** the deck's store on this instance (`openDeckStore`); a RangeError for a missing deck */
@@ -38,6 +81,8 @@ export type BlobChannelDeps = {
   applyComments?: (deckId: string, entries: NewEntry[]) => Promise<void>;
   /** kill switch values (SPEC-3 0.33) */
   flags?: Partial<Record<FlagName, boolean>>;
+  /** the shared roster and the comments index poll; absent, presence is per instance */
+  shared?: BlobSharedDeps;
   onError?: (error: unknown, context: string) => void;
 };
 
@@ -50,8 +95,20 @@ type DeckState = {
   lastWriteAt: number;
   /** the last revision delivered to this instance's listeners */
   lastSeq: number;
+  /** the store poll (the pulse loop with `shared`, the store's own watch without); running while a client stream is open here */
   watching: Promise<() => void> | undefined;
   store: Promise<DeckStore> | undefined;
+  /** the client streams subscribed on this instance; the poll runs while there is one */
+  listeners: number;
+  /** the pulse version the poll read last; undefined before the first read */
+  lastPulse: string | null | undefined;
+  /** the ticks so far, for the safety tick */
+  ticks: number;
+  /** the refusals of the store in a row, for the backoff */
+  failures: number;
+  /** the streams were told the store refuses; cleared with the `store` ok event */
+  degraded: boolean;
+  comments: CommentsWatch | undefined;
 };
 
 /** A record as one stream entry: the writer's author, its mutations, the revision as the seq. */
@@ -132,6 +189,12 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         lastSeq: -1,
         watching: undefined,
         store: undefined,
+        listeners: 0,
+        lastPulse: undefined,
+        ticks: 0,
+        failures: 0,
+        degraded: false,
+        comments: undefined,
       };
       decks.set(id, state);
     }
@@ -205,6 +268,117 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         external: true,
       });
     }
+  };
+
+  /** Ends a deck's poll on this instance; the next stream starts it again from the position it reads then. */
+  const stopWatching = (state: DeckState): void => {
+    const watching = state.watching;
+    state.watching = undefined;
+    state.lastPulse = undefined;
+    if (watching === undefined) return;
+    watching.then(
+      (release) => release(),
+      () => undefined,
+    );
+  };
+
+  /**
+   * The three reads a moved pulse asks for, together: the manifest (a sync of the mirror, then
+   * the records since the position announced as ops), the presence record and the comments
+   * index. Each read is a head, plus what moved.
+   */
+  const readMoved = async (deckId: string, shared: BlobSharedDeps): Promise<void> => {
+    const state = stateOf(deckId);
+    await Promise.all([
+      queued(deckId, async () => {
+        const store = (await storeOf(deckId)) as DeckStore & {
+          sync?: (force?: boolean) => Promise<unknown>;
+        };
+        await store.sync?.(true);
+        await announce(deckId);
+      }),
+      shared.presence.poll(deckId),
+      state.comments?.poll() ?? Promise.resolve(),
+    ]);
+  };
+
+  /**
+   * The poll of one deck on this instance (the blob tier budget): one head of the deck's pulse
+   * per tick, the three reads when it moved, the manifest alone every PULSE_SAFETY_TICKS ticks
+   * (a writer that stopped between its commit and its pulse put), and the backoff with the
+   * `store` events when the store refuses. Runs while a client stream of the deck is open here.
+   */
+  const startPulsePoll = (deckId: string, shared: BlobSharedDeps): (() => void) => {
+    const state = stateOf(deckId);
+    const pollMs = shared.pollMs ?? HOSTED_POLL_MS;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    state.comments = shared.watchComments?.(deckId, (change) => {
+      // a moved comments index becomes the checkpoint frame with `comments` the memory tier's
+      // checkpointer sends, at the revision this instance announced last, so every tab reads
+      // the sidecar again (docs/FOCUS.md ranks 20 and 36; VERIFICATION C2-F28)
+      const revision = Math.max(0, state.lastSeq);
+      void local.publish(deckId, {
+        type: 'checkpoint',
+        revision,
+        fromSeq: revision,
+        toSeq: revision,
+        author: { kind: 'agent', name: 'store' },
+        note: '',
+        comments: { revision: change.revision, threadIds: change.threadIds },
+      });
+    });
+    const tick = async (): Promise<void> => {
+      if (stopped) return;
+      let wait = pollMs;
+      try {
+        const safety = state.ticks > 0 && state.ticks % PULSE_SAFETY_TICKS === 0;
+        state.ticks += 1;
+        if (safety) {
+          // the manifest alone, in place of the pulse: one call this tick as well
+          await queued(deckId, async () => {
+            const store = (await storeOf(deckId)) as DeckStore & {
+              sync?: (force?: boolean) => Promise<unknown>;
+            };
+            await store.sync?.(true);
+            await announce(deckId);
+          });
+        } else {
+          const version = await shared.pulse(deckId);
+          const moved = state.lastPulse === undefined || version !== state.lastPulse;
+          state.lastPulse = version;
+          if (moved) await readMoved(deckId, shared);
+          else shared.presence.confirm(deckId);
+        }
+        if (state.degraded) {
+          state.degraded = false;
+          state.failures = 0;
+          await local.publish(deckId, { type: 'store', ok: true });
+        }
+      } catch (error) {
+        if (isStoreBusy(error)) {
+          state.failures += 1;
+          wait = pollBackoffMs(state.failures, pollMs, storeRetryAfterMs(error));
+          if (!state.degraded) {
+            state.degraded = true;
+            await local
+              .publish(deckId, { type: 'store', ok: false, retryAfterMs: wait })
+              .catch(() => undefined);
+          }
+        }
+        onError(error, `blob: polling ${deckId} failed`);
+      }
+      if (stopped) return;
+      timer = setTimeout(() => void tick(), wait);
+      timer.unref?.();
+    };
+    void tick();
+    return () => {
+      stopped = true;
+      if (timer !== undefined) clearTimeout(timer);
+      state.comments?.stop();
+      state.comments = undefined;
+    };
   };
 
   const channel: BlobChannel = {
@@ -286,24 +460,37 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       return (await storeOf(deckId)).revision();
     },
 
-    subscribe(deckId, onEvent: RoomListener): () => void {
+    subscribe(deckId, onEvent: RoomListener, options?: SubscribeOptions): () => void {
       const state = stateOf(deckId);
       const stop = local.subscribe(deckId, onEvent);
+      // the room's own listener holds no poll: the store is polled while a client stream of the
+      // deck is open on this instance, and never otherwise (the budget)
+      if (options?.passive === true) return stop;
+      state.listeners += 1;
       if (state.watching === undefined) {
-        // the position first, then the watch; both on the deck's queue so a poll never runs
+        // the position first, then the poll; both on the deck's queue so a poll never runs
         // beside an append of this instance
         state.watching = queued(deckId, async () => {
           const store = await storeOf(deckId);
           state.lastSeq = await store.revision();
-          return store.watch(() => {
-            void queued(deckId, () => announce(deckId)).catch((error: unknown) =>
-              onError(error, `blob: announcing ${deckId} failed`),
-            );
-          });
+          return deps.shared === undefined
+            ? store.watch(() => {
+                void queued(deckId, () => announce(deckId)).catch((error: unknown) =>
+                  onError(error, `blob: announcing ${deckId} failed`),
+                );
+              })
+            : startPulsePoll(deckId, deps.shared);
         });
         state.watching.catch((error: unknown) => onError(error, `blob: watching ${deckId} failed`));
       }
-      return stop;
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        stop();
+        state.listeners -= 1;
+        if (state.listeners <= 0) stopWatching(state);
+      };
     },
 
     async publish(deckId, event): Promise<void> {
@@ -314,7 +501,19 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       // the version log is the stream; retention is the store's (snapshots, records)
     },
 
-    presence: local.presence,
+    presence:
+      deps.shared === undefined
+        ? local.presence
+        : {
+            set: (deckId, clientId, state, ttlMs) =>
+              deps.shared!.presence.set(deckId, clientId, state, ttlMs),
+            roster: (deckId) => deps.shared!.presence.roster(deckId),
+            leave: (deckId, clientId) => deps.shared!.presence.leave(deckId, clientId),
+            // the client bindings stay per instance: the id's own MAC decides on another one
+            // (apps/studio/src/server/room.ts clientBoundTo)
+            bind: local.presence.bind,
+            owner: local.presence.owner,
+          },
     lock: local.lock,
     heartbeat: local.heartbeat,
     unlock: local.unlock,
@@ -325,14 +524,17 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
     async close(): Promise<void> {
       for (const [deckId, state] of decks) {
         decks.delete(deckId);
-        if (state.watching !== undefined) {
+        const watching = state.watching;
+        state.watching = undefined;
+        if (watching !== undefined) {
           try {
-            (await state.watching)();
+            (await watching)();
           } catch {
             // closing anyway
           }
         }
       }
+      await deps.shared?.presence.close();
       await local.close();
     },
   };

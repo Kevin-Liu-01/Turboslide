@@ -291,6 +291,11 @@ export const roomEventSchema = z.discriminatedUnion('type', [
   }),
   z.strictObject({ type: z.literal('access'), revision: nonNegativeInt }),
   z.strictObject({ type: z.literal('resync'), revision: nonNegativeInt }),
+  z.strictObject({
+    type: z.literal('store'),
+    ok: z.boolean(),
+    retryAfterMs: nonNegativeInt.optional(),
+  }),
 ]) satisfies z.ZodType<RoomEvent>;
 
 // ---------------------------------------------------------------------------------------------

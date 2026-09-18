@@ -17,7 +17,10 @@ export const REALTIME_VARIABLE = 'TURBOSLIDE_REALTIME';
 export const REDIS_URL_VARIABLE = 'REDIS_URL';
 
 /** The title row's sentence on the blob tier (SPEC-3 2.5). */
-export const BLOB_TIER_NOTICE = 'Presence and live cursors need a Redis store on this deployment';
+// presence follows the store's shared roster record a few seconds behind on the blob tier since
+// the focus round's cycle 3 (b6's presence-store.ts, wired in blob.ts); the live cursors still
+// need a stream every instance shares
+export const BLOB_TIER_NOTICE = 'Live cursors need a Redis store on this deployment';
 
 export type Env = Readonly<Record<string, string | undefined>>;
 

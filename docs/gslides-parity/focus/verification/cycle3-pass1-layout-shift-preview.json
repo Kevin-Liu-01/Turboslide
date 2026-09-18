@@ -1,0 +1,4761 @@
+{
+  "base": "https://turboslide-edntdmv3u-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-17T23:38:03.356Z",
+  "ms": 279457,
+  "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL",
+  "version": "147.0.7727.15",
+  "cells": 22,
+  "failures": [
+    {
+      "cell": "edit 1440 light",
+      "id": "?",
+      "why": "state panel: entries in 17 frames"
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0135 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0135 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0120 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "id": "E2",
+      "why": "load entry 0.0120 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet"
+    },
+    {
+      "cell": "edit 1440 light F",
+      "id": "?",
+      "why": "load entry 0.0000 from (no source)"
+    }
+  ],
+  "skipped": [
+    "edit 1440 light: filmstrip (enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n)",
+    "edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:1859)\n    at Object.dispatch (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:2059)\n    at ht (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/EditorRoot-BwnV_6TH.js:21:26922)\n    at Object.<anonymous> (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:2724)\n    at nt (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:8958)\n    at Object.invoke (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30)",
+    "edit 1440 light: ditherDrag (control absent: [data-control=\"formatOptions.dither.black.slider\"])",
+    "edit 1440 light: share (control absent: [data-control=\"title.share\"])",
+    "edit 1440 light: inbox (control absent: [data-control=\"title.inbox\"])",
+    "edit 1440 light: signIn (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: profile (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: avatarBuilder (control absent: [data-control=\"title.account\"])",
+    "edit 1440 light: follow (control absent: [data-control=\"title.presence.more\"])",
+    "edit 1440 light: join20 (enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44))"
+  ],
+  "runs": [
+    {
+      "cell": "new 1440 light",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3901,
+      "unsupported": false,
+      "marks": {
+        "fonts": 158.29999995231628,
+        "first-paint": 424.60000002384186,
+        "hydrated": 789.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 743,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        }
+      ]
+    },
+    {
+      "cell": "new 1440 dark",
+      "route": "/new",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3696,
+      "unsupported": false,
+      "marks": {
+        "fonts": 232.60000002384186,
+        "first-paint": 298.2000000476837,
+        "hydrated": 575
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 472,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 light",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3566,
+      "unsupported": false,
+      "marks": {
+        "fonts": 173.60000002384186,
+        "first-paint": 292,
+        "hydrated": 434.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 427,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 1280 dark",
+      "route": "/new",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3578,
+      "unsupported": false,
+      "marks": {
+        "fonts": 153.80000007152557,
+        "first-paint": 361.40000009536743,
+        "hydrated": 473.40000009536743
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 416,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 light",
+      "route": "/new",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4206,
+      "unsupported": false,
+      "marks": {
+        "fonts": 156.5,
+        "first-paint": 259.7999999523163,
+        "hydrated": 1052.8999999761581
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 777,
+          "from": [
+            256,
+            112,
+            134,
+            700
+          ],
+          "to": [
+            0,
+            112,
+            390,
+            700
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 782,
+          "from": [
+            11,
+            124,
+            368,
+            208
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "new 390 dark",
+      "route": "/new",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 3700,
+      "unsupported": false,
+      "marks": {
+        "fonts": 221.79999995231628,
+        "first-paint": 301.89999997615814,
+        "hydrated": 567.0999999046326
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 452,
+          "from": [
+            256,
+            112,
+            134,
+            700
+          ],
+          "to": [
+            0,
+            112,
+            390,
+            700
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 461,
+          "from": [
+            11,
+            124,
+            368,
+            208
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4376,
+      "unsupported": false,
+      "marks": {
+        "fonts": 699.7000000476837,
+        "first-paint": 931.8999999761581,
+        "hydrated": 1225.2000000476837
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1183,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": [
+        {
+          "name": "panel",
+          "skipped": null,
+          "entries": [
+            {
+              "startTime": 4347.100000023842,
+              "value": 0.000004839543681412895,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    826,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    813.59375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 4348.5,
+              "value": 0.0011670027367862653,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1415.1875,
+                    112,
+                    24.8125,
+                    756
+                  ],
+                  "currentRect": [
+                    1372.90625,
+                    112,
+                    67.09375,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [
+                    1397.90625,
+                    115.5,
+                    30,
+                    32
+                  ],
+                  "currentRect": [
+                    1402,
+                    115.5,
+                    30,
+                    32
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    813.59375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    792.453125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4356.700000047684,
+              "value": 0.01869796133368431,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    137,
+                    1045.796875,
+                    641
+                  ],
+                  "currentRect": [
+                    281,
+                    156,
+                    1045.796875,
+                    603
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1372.90625,
+                    112,
+                    67.09375,
+                    756
+                  ],
+                  "currentRect": [
+                    1326.796875,
+                    112,
+                    113.203125,
+                    756
+                  ]
+                },
+                {
+                  "path": "aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day > ul.ts-versions-list",
+                  "previousRect": [
+                    1327.796875,
+                    352.890625,
+                    102,
+                    86.09375
+                  ],
+                  "currentRect": [
+                    1327.796875,
+                    340.890625,
+                    108.203125,
+                    86.09375
+                  ]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > label.ts-versions-named.ts-versions-foot",
+                  "previousRect": [
+                    1343.796875,
+                    450.984375,
+                    90.46875,
+                    44.78125
+                  ],
+                  "currentRect": [
+                    1343.796875,
+                    438.984375,
+                    90.46875,
+                    44.78125
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-head > button.ts-panel-x",
+                  "previousRect": [
+                    1355.890625,
+                    115.5,
+                    30,
+                    32
+                  ],
+                  "currentRect": [
+                    1402,
+                    115.5,
+                    30,
+                    32
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4365,
+              "value": 0.014614346476739325,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    156,
+                    1008.0625,
+                    603
+                  ],
+                  "currentRect": [
+                    281,
+                    169,
+                    1008.0625,
+                    577
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1326.796875,
+                    112,
+                    113.203125,
+                    756
+                  ],
+                  "currentRect": [
+                    1289.0625,
+                    112,
+                    150.9375,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    769.390625,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    750.53125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4373.399999976158,
+              "value": 0.010810366030092593,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    169,
+                    979.3125,
+                    577
+                  ],
+                  "currentRect": [
+                    281,
+                    180,
+                    979.3125,
+                    556
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1289.0625,
+                    112,
+                    150.9375,
+                    756
+                  ],
+                  "currentRect": [
+                    1260.3125,
+                    112,
+                    179.6875,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    750.53125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    736.15625,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4381.600000023842,
+              "value": 0.008485416214554398,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    180,
+                    956.21875,
+                    556
+                  ],
+                  "currentRect": [
+                    281,
+                    188,
+                    954,
+                    539
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1260.3125,
+                    112,
+                    179.6875,
+                    756
+                  ],
+                  "currentRect": [
+                    1237.21875,
+                    112,
+                    202.78125,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    736.15625,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    724.609375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4390,
+              "value": 0.006646815923996913,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    188,
+                    937.796875,
+                    539
+                  ],
+                  "currentRect": [
+                    281,
+                    195,
+                    931,
+                    526
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1237.21875,
+                    112,
+                    202.78125,
+                    756
+                  ],
+                  "currentRect": [
+                    1218.796875,
+                    112,
+                    221.203125,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    724.609375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    715.390625,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4398.299999952316,
+              "value": 0.005599459357451346,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    195,
+                    922.078125,
+                    526
+                  ],
+                  "currentRect": [
+                    281,
+                    200,
+                    913,
+                    516
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1218.796875,
+                    112,
+                    221.203125,
+                    756
+                  ],
+                  "currentRect": [
+                    1203.078125,
+                    112,
+                    236.921875,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    715.390625,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    707.53125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4406.799999952316,
+              "value": 0.004682227391372493,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    200,
+                    908.8125,
+                    516
+                  ],
+                  "currentRect": [
+                    281,
+                    204,
+                    897,
+                    507
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1203.078125,
+                    112,
+                    236.921875,
+                    756
+                  ],
+                  "currentRect": [
+                    1189.8125,
+                    112,
+                    250.1875,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    707.53125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    700.90625,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4415,
+              "value": 0.003907528263714742,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    204,
+                    897,
+                    507
+                  ],
+                  "currentRect": [
+                    281,
+                    208,
+                    884,
+                    500
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1189.8125,
+                    112,
+                    250.1875,
+                    756
+                  ],
+                  "currentRect": [
+                    1178.640625,
+                    112,
+                    261.359375,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    700.90625,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    695.3125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4423.200000047684,
+              "value": 0.003220169632523148,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    208,
+                    884,
+                    500
+                  ],
+                  "currentRect": [
+                    281,
+                    211,
+                    873,
+                    494
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1178.640625,
+                    112,
+                    261.359375,
+                    756
+                  ],
+                  "currentRect": [
+                    1169.359375,
+                    112,
+                    270.640625,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    695.3125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    690.671875,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4431.700000047684,
+              "value": 0.0029977756997358325,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    211,
+                    873,
+                    494
+                  ],
+                  "currentRect": [
+                    281,
+                    214,
+                    863,
+                    488
+                  ]
+                },
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1169.359375,
+                    112,
+                    270.640625,
+                    756
+                  ],
+                  "currentRect": [
+                    1160.65625,
+                    112,
+                    279.34375,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    690.671875,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    686.328125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 4440.100000023842,
+              "value": 0.000831440875101809,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1160.65625,
+                    112,
+                    279.34375,
+                    756
+                  ],
+                  "currentRect": [
+                    1153.5,
+                    112,
+                    286.5,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    686.328125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    682.75,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4448.399999976158,
+              "value": 0.0007364333164544754,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1153.5,
+                    112,
+                    286.5,
+                    756
+                  ],
+                  "currentRect": [
+                    1147.3125,
+                    112,
+                    292.6875,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    682.75,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    679.65625,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4456.700000047684,
+              "value": 0.002274772135416667,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1147.3125,
+                    112,
+                    292.6875,
+                    756
+                  ],
+                  "currentRect": [
+                    1141.984375,
+                    112,
+                    298.015625,
+                    756
+                  ]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day",
+                  "previousRect": [
+                    1142.984375,
+                    312.890625,
+                    287.6875,
+                    114.09375
+                  ],
+                  "currentRect": [
+                    1142.984375,
+                    294.046875,
+                    293.015625,
+                    114.09375
+                  ]
+                },
+                {
+                  "path": "div.ts-rpanel > aside.ts-panel.ts-chrome > div.ts-panel-body.pt-scroll > div.ts-versions.is-history > section.ts-versions-day",
+                  "previousRect": [
+                    1142.984375,
+                    236.375,
+                    287.6875,
+                    76.515625
+                  ],
+                  "currentRect": [
+                    1142.984375,
+                    217.53125,
+                    293.015625,
+                    76.515625
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4465.100000023842,
+              "value": 0.0005696044921875,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1141.984375,
+                    112,
+                    298.015625,
+                    756
+                  ],
+                  "currentRect": [
+                    1137.34375,
+                    112,
+                    302.65625,
+                    756
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4473.5,
+              "value": 0.0004896809895833333,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1137.34375,
+                    112,
+                    302.65625,
+                    756
+                  ],
+                  "currentRect": [
+                    1133.40625,
+                    112,
+                    306.59375,
+                    756
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 4481.700000047684,
+              "value": 0.00041009295428240747,
+              "hadRecentInput": true,
+              "lastInputTime": 4317.799999952316,
+              "sources": [
+                {
+                  "path": "html > body > div.ts-editor > div.pt-viewer.is-editor > div.ts-rpanel",
+                  "previousRect": [
+                    1133.40625,
+                    112,
+                    306.59375,
+                    756
+                  ],
+                  "currentRect": [
+                    1130.140625,
+                    112,
+                    309.859375,
+                    756
+                  ]
+                }
+              ],
+              "id": "E6"
+            },
+            {
+              "startTime": 5281.399999976158,
+              "value": 0.000004118575317215364,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    667.84375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    678.59375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 5289.799999952316,
+              "value": 0.004423577880859375,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    226,
+                    818,
+                    463
+                  ],
+                  "currentRect": [
+                    281,
+                    220,
+                    839,
+                    475
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    678.59375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    699.265625,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5297.899999976158,
+              "value": 0.005498985158661266,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    220,
+                    839,
+                    475
+                  ],
+                  "currentRect": [
+                    281,
+                    209,
+                    881,
+                    498
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    699.265625,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    722.609375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5306.299999952316,
+              "value": 0.004916894045647934,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    209,
+                    881,
+                    498
+                  ],
+                  "currentRect": [
+                    281,
+                    196,
+                    927,
+                    524
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    722.609375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    741.46875,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5314.700000047684,
+              "value": 0.0041010229793595684,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    196,
+                    927,
+                    524
+                  ],
+                  "currentRect": [
+                    281,
+                    185,
+                    965,
+                    545
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    741.46875,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    756,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5322.899999976158,
+              "value": 0.0033811772434145662,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    185,
+                    965,
+                    545
+                  ],
+                  "currentRect": [
+                    281,
+                    177,
+                    994,
+                    562
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    756,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    767.28125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5330.399999976158,
+              "value": 0.00266656164266118,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    177,
+                    994,
+                    562
+                  ],
+                  "currentRect": [
+                    281,
+                    170,
+                    1017,
+                    575
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    767.28125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    775.78125,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5339.700000047684,
+              "value": 0.0028395140848042053,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    170,
+                    1017,
+                    575
+                  ],
+                  "currentRect": [
+                    281,
+                    166,
+                    1034,
+                    584
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    775.78125,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    784.546875,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5348,
+              "value": 0.002192338739926269,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    166,
+                    1034,
+                    584
+                  ],
+                  "currentRect": [
+                    281,
+                    161,
+                    1051,
+                    594
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    784.546875,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    791.09375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5356.399999976158,
+              "value": 0.0019400745951753257,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    161,
+                    1051,
+                    594
+                  ],
+                  "currentRect": [
+                    281,
+                    157,
+                    1064,
+                    601
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    791.09375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    796.75,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5364.700000047684,
+              "value": 0.0016612119823816872,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    157,
+                    1064,
+                    601
+                  ],
+                  "currentRect": [
+                    281,
+                    154,
+                    1076,
+                    608
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    796.75,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    801.484375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5373,
+              "value": 0.0014938028469007201,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+                  "previousRect": [
+                    281,
+                    154,
+                    1076,
+                    608
+                  ],
+                  "currentRect": [
+                    281,
+                    151,
+                    1085,
+                    613
+                  ]
+                },
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    801.484375,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    805.671875,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E2"
+            },
+            {
+              "startTime": 5381.299999952316,
+              "value": 0.0000011868114497599452,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    805.671875,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    809.296875,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E7"
+            },
+            {
+              "startTime": 5389.600000023842,
+              "value": 0.000001007766618977195,
+              "hadRecentInput": true,
+              "lastInputTime": 5255.299999952316,
+              "sources": [
+                {
+                  "path": "div.pt-viewer.is-editor > section.pt-main > div.ts-notes-slot > div.ts-notes > button.ts-notes-handle",
+                  "previousRect": [
+                    809.296875,
+                    798,
+                    44,
+                    13
+                  ],
+                  "currentRect": [
+                    812.375,
+                    798,
+                    44,
+                    13
+                  ]
+                }
+              ],
+              "id": "E7"
+            }
+          ],
+          "frames": 17,
+          "unexpected": [],
+          "anchorMoves": [
+            {
+              "selector": ".ts-rpanel",
+              "t": 4345,
+              "from": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "to": [
+                1440,
+                112,
+                0,
+                756
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4347,
+              "from": [
+                256,
+                112,
+                1184,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1159.19,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4347,
+              "from": [
+                1440,
+                112,
+                0,
+                756
+              ],
+              "to": [
+                1415.19,
+                112,
+                24.81,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4347,
+              "from": [
+                256,
+                804,
+                1184,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1159.19,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4348,
+              "from": [
+                256,
+                112,
+                1159.19,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1116.91,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4348,
+              "from": [
+                1415.19,
+                112,
+                24.81,
+                756
+              ],
+              "to": [
+                1372.91,
+                112,
+                67.09,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4348,
+              "from": [
+                256,
+                804,
+                1159.19,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1116.91,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4357,
+              "from": [
+                256,
+                112,
+                1116.91,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1070.8,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4357,
+              "from": [
+                1372.91,
+                112,
+                67.09,
+                756
+              ],
+              "to": [
+                1326.8,
+                112,
+                113.2,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4357,
+              "from": [
+                256,
+                804,
+                1116.91,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1070.8,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4365,
+              "from": [
+                256,
+                112,
+                1070.8,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1033.06,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4365,
+              "from": [
+                1326.8,
+                112,
+                113.2,
+                756
+              ],
+              "to": [
+                1289.06,
+                112,
+                150.94,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4365,
+              "from": [
+                256,
+                804,
+                1070.8,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1033.06,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4373,
+              "from": [
+                256,
+                112,
+                1033.06,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1004.31,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4373,
+              "from": [
+                1289.06,
+                112,
+                150.94,
+                756
+              ],
+              "to": [
+                1260.31,
+                112,
+                179.69,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4373,
+              "from": [
+                256,
+                804,
+                1033.06,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1004.31,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4382,
+              "from": [
+                256,
+                112,
+                1004.31,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                981.22,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4382,
+              "from": [
+                1260.31,
+                112,
+                179.69,
+                756
+              ],
+              "to": [
+                1237.22,
+                112,
+                202.78,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4382,
+              "from": [
+                256,
+                804,
+                1004.31,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                981.22,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4390,
+              "from": [
+                256,
+                112,
+                981.22,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                962.8,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4390,
+              "from": [
+                1237.22,
+                112,
+                202.78,
+                756
+              ],
+              "to": [
+                1218.8,
+                112,
+                221.2,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4390,
+              "from": [
+                256,
+                804,
+                981.22,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                962.8,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4398,
+              "from": [
+                256,
+                112,
+                962.8,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                947.08,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4398,
+              "from": [
+                1218.8,
+                112,
+                221.2,
+                756
+              ],
+              "to": [
+                1203.08,
+                112,
+                236.92,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4398,
+              "from": [
+                256,
+                804,
+                962.8,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                947.08,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4407,
+              "from": [
+                256,
+                112,
+                947.08,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                933.81,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4407,
+              "from": [
+                1203.08,
+                112,
+                236.92,
+                756
+              ],
+              "to": [
+                1189.81,
+                112,
+                250.19,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4407,
+              "from": [
+                256,
+                804,
+                947.08,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                933.81,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4415,
+              "from": [
+                256,
+                112,
+                933.81,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                922.64,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4415,
+              "from": [
+                1189.81,
+                112,
+                250.19,
+                756
+              ],
+              "to": [
+                1178.64,
+                112,
+                261.36,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4415,
+              "from": [
+                256,
+                804,
+                933.81,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                922.64,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4423,
+              "from": [
+                256,
+                112,
+                922.64,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                913.36,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4423,
+              "from": [
+                1178.64,
+                112,
+                261.36,
+                756
+              ],
+              "to": [
+                1169.36,
+                112,
+                270.64,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4423,
+              "from": [
+                256,
+                804,
+                922.64,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                913.36,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4432,
+              "from": [
+                256,
+                112,
+                913.36,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                904.66,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4432,
+              "from": [
+                1169.36,
+                112,
+                270.64,
+                756
+              ],
+              "to": [
+                1160.66,
+                112,
+                279.34,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4432,
+              "from": [
+                256,
+                804,
+                913.36,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                904.66,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4440,
+              "from": [
+                256,
+                112,
+                904.66,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                897.5,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4440,
+              "from": [
+                1160.66,
+                112,
+                279.34,
+                756
+              ],
+              "to": [
+                1153.5,
+                112,
+                286.5,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4440,
+              "from": [
+                256,
+                804,
+                904.66,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                897.5,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4448,
+              "from": [
+                256,
+                112,
+                897.5,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                891.31,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4448,
+              "from": [
+                1153.5,
+                112,
+                286.5,
+                756
+              ],
+              "to": [
+                1147.31,
+                112,
+                292.69,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4448,
+              "from": [
+                256,
+                804,
+                897.5,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                891.31,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4456,
+              "from": [
+                256,
+                112,
+                891.31,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                885.98,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4456,
+              "from": [
+                1147.31,
+                112,
+                292.69,
+                756
+              ],
+              "to": [
+                1141.98,
+                112,
+                298.02,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4456,
+              "from": [
+                256,
+                804,
+                891.31,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                885.98,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4465,
+              "from": [
+                256,
+                112,
+                885.98,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                881.34,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4465,
+              "from": [
+                1141.98,
+                112,
+                298.02,
+                756
+              ],
+              "to": [
+                1137.34,
+                112,
+                302.66,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4465,
+              "from": [
+                256,
+                804,
+                885.98,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                881.34,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4473,
+              "from": [
+                256,
+                112,
+                881.34,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                877.41,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4473,
+              "from": [
+                1137.34,
+                112,
+                302.66,
+                756
+              ],
+              "to": [
+                1133.41,
+                112,
+                306.59,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4473,
+              "from": [
+                256,
+                804,
+                881.34,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                877.41,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4482,
+              "from": [
+                256,
+                112,
+                877.41,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                874.14,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4482,
+              "from": [
+                1133.41,
+                112,
+                306.59,
+                756
+              ],
+              "to": [
+                1130.14,
+                112,
+                309.86,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4482,
+              "from": [
+                256,
+                804,
+                877.41,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                874.14,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4490,
+              "from": [
+                256,
+                112,
+                874.14,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                871.36,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4490,
+              "from": [
+                1130.14,
+                112,
+                309.86,
+                756
+              ],
+              "to": [
+                1127.36,
+                112,
+                312.64,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4490,
+              "from": [
+                256,
+                804,
+                874.14,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                871.36,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4498,
+              "from": [
+                256,
+                112,
+                871.36,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                869.11,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4498,
+              "from": [
+                1127.36,
+                112,
+                312.64,
+                756
+              ],
+              "to": [
+                1125.11,
+                112,
+                314.89,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4498,
+              "from": [
+                256,
+                804,
+                871.36,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                869.11,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4507,
+              "from": [
+                256,
+                112,
+                869.11,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                867.3,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4507,
+              "from": [
+                1125.11,
+                112,
+                314.89,
+                756
+              ],
+              "to": [
+                1123.3,
+                112,
+                316.7,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4507,
+              "from": [
+                256,
+                804,
+                869.11,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                867.3,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4515,
+              "from": [
+                256,
+                112,
+                867.3,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                865.95,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4515,
+              "from": [
+                1123.3,
+                112,
+                316.7,
+                756
+              ],
+              "to": [
+                1121.95,
+                112,
+                318.05,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4515,
+              "from": [
+                256,
+                804,
+                867.3,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                865.95,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4523,
+              "from": [
+                256,
+                112,
+                865.95,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                864.95,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4523,
+              "from": [
+                1121.95,
+                112,
+                318.05,
+                756
+              ],
+              "to": [
+                1120.95,
+                112,
+                319.05,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4523,
+              "from": [
+                256,
+                804,
+                865.95,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                864.95,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4531,
+              "from": [
+                256,
+                112,
+                864.95,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                864.33,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4531,
+              "from": [
+                1120.95,
+                112,
+                319.05,
+                756
+              ],
+              "to": [
+                1120.33,
+                112,
+                319.67,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4531,
+              "from": [
+                256,
+                804,
+                864.95,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                864.33,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4540,
+              "from": [
+                256,
+                112,
+                864.33,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                864.03,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4540,
+              "from": [
+                1120.33,
+                112,
+                319.67,
+                756
+              ],
+              "to": [
+                1120.03,
+                112,
+                319.97,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4540,
+              "from": [
+                256,
+                804,
+                864.33,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                864.03,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 4548,
+              "from": [
+                256,
+                112,
+                864.03,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                864,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 4548,
+              "from": [
+                1120.03,
+                112,
+                319.97,
+                756
+              ],
+              "to": [
+                1120,
+                112,
+                320,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 4548,
+              "from": [
+                256,
+                804,
+                864.03,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                864,
+                64
+              ]
+            },
+            {
+              "selector": ".ts-rpanel",
+              "t": 5265,
+              "from": [
+                1120,
+                112,
+                320,
+                756
+              ],
+              "to": [
+                0,
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5272,
+              "from": [
+                256,
+                112,
+                864,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                867.7,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5272,
+              "from": [
+                256,
+                804,
+                864,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                867.7,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5281,
+              "from": [
+                256,
+                112,
+                867.7,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                889.2,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5281,
+              "from": [
+                256,
+                804,
+                867.7,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                889.2,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5290,
+              "from": [
+                256,
+                112,
+                889.2,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                930.53,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5290,
+              "from": [
+                256,
+                804,
+                889.2,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                930.53,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5298,
+              "from": [
+                256,
+                112,
+                930.53,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                977.22,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5298,
+              "from": [
+                256,
+                804,
+                930.53,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                977.22,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5306,
+              "from": [
+                256,
+                112,
+                977.22,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1014.95,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5306,
+              "from": [
+                256,
+                804,
+                977.22,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1014.95,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5315,
+              "from": [
+                256,
+                112,
+                1014.95,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1044.02,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5315,
+              "from": [
+                256,
+                804,
+                1014.95,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1044.02,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5323,
+              "from": [
+                256,
+                112,
+                1044.02,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1066.56,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5323,
+              "from": [
+                256,
+                804,
+                1044.02,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1066.56,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5330,
+              "from": [
+                256,
+                112,
+                1066.56,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1083.56,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5330,
+              "from": [
+                256,
+                804,
+                1066.56,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1083.56,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5340,
+              "from": [
+                256,
+                112,
+                1083.56,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1101.11,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5340,
+              "from": [
+                256,
+                804,
+                1083.56,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1101.11,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5348,
+              "from": [
+                256,
+                112,
+                1101.11,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1114.2,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5348,
+              "from": [
+                256,
+                804,
+                1101.11,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1114.2,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5356,
+              "from": [
+                256,
+                112,
+                1114.2,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1125.5,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5356,
+              "from": [
+                256,
+                804,
+                1114.2,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1125.5,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5365,
+              "from": [
+                256,
+                112,
+                1125.5,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1134.98,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5365,
+              "from": [
+                256,
+                804,
+                1125.5,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1134.98,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5373,
+              "from": [
+                256,
+                112,
+                1134.98,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1143.36,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5373,
+              "from": [
+                256,
+                804,
+                1134.98,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1143.36,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5381,
+              "from": [
+                256,
+                112,
+                1143.36,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1150.59,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5381,
+              "from": [
+                256,
+                804,
+                1143.36,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1150.59,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5390,
+              "from": [
+                256,
+                112,
+                1150.59,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1156.77,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5390,
+              "from": [
+                256,
+                804,
+                1150.59,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1156.77,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5398,
+              "from": [
+                256,
+                112,
+                1156.77,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1162.09,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5398,
+              "from": [
+                256,
+                804,
+                1156.77,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1162.09,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5406,
+              "from": [
+                256,
+                112,
+                1162.09,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1166.56,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5406,
+              "from": [
+                256,
+                804,
+                1162.09,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1166.56,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5415,
+              "from": [
+                256,
+                112,
+                1166.56,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1170.61,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5415,
+              "from": [
+                256,
+                804,
+                1166.56,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1170.61,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5423,
+              "from": [
+                256,
+                112,
+                1170.61,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1173.91,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5423,
+              "from": [
+                256,
+                804,
+                1170.61,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1173.91,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5431,
+              "from": [
+                256,
+                112,
+                1173.91,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1176.66,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5431,
+              "from": [
+                256,
+                804,
+                1173.91,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1176.66,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5440,
+              "from": [
+                256,
+                112,
+                1176.66,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1178.91,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5440,
+              "from": [
+                256,
+                804,
+                1176.66,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1178.91,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5448,
+              "from": [
+                256,
+                112,
+                1178.91,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1180.72,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5448,
+              "from": [
+                256,
+                804,
+                1178.91,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1180.72,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5456,
+              "from": [
+                256,
+                112,
+                1180.72,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1182.08,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5456,
+              "from": [
+                256,
+                804,
+                1180.72,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1182.08,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5465,
+              "from": [
+                256,
+                112,
+                1182.08,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1183.08,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5465,
+              "from": [
+                256,
+                804,
+                1182.08,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1183.08,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5473,
+              "from": [
+                256,
+                112,
+                1183.08,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1183.7,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5473,
+              "from": [
+                256,
+                804,
+                1183.08,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1183.7,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5481,
+              "from": [
+                256,
+                112,
+                1183.7,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1183.98,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5481,
+              "from": [
+                256,
+                804,
+                1183.7,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1183.98,
+                64
+              ]
+            },
+            {
+              "selector": ".pt-main",
+              "t": 5490,
+              "from": [
+                256,
+                112,
+                1183.98,
+                756
+              ],
+              "to": [
+                256,
+                112,
+                1184,
+                756
+              ]
+            },
+            {
+              "selector": ".ts-notes",
+              "t": 5490,
+              "from": [
+                256,
+                804,
+                1183.98,
+                64
+              ],
+              "to": [
+                256,
+                804,
+                1184,
+                64
+              ]
+            }
+          ],
+          "overBudget": true
+        },
+        {
+          "name": "menu",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "theme",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "notesOpen",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "filmstrip",
+          "skipped": "enter failed: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"view.filmstrip\"]')\n",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "write",
+          "skipped": "enter failed: page.evaluate: RangeError: Unknown action \"slide.setNotes\"\n    at t (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:1859)\n    at Object.dispatch (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:2059)\n    at ht (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/EditorRoot-BwnV_6TH.js:21:26922)\n    at Object.<anonymous> (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:2724)\n    at nt (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:8958)\n    at Object.invoke (https://turboslide-edntdmv3u-kl01s-projects.vercel.app/assets/useStudioSession-myJb1GY7.js:1:11436)\n    at eval (eval at evaluate (:311:30), <anonymous>:7:22)\n    at async <anonymous>:337:30",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "selectBlock",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "backgroundDialog",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherToggle",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "ditherDrag",
+          "skipped": "control absent: [data-control=\"formatOptions.dither.black.slider\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "share",
+          "skipped": "control absent: [data-control=\"title.share\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "inbox",
+          "skipped": "control absent: [data-control=\"title.inbox\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "commentAdd",
+          "skipped": null,
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": [],
+          "overBudget": false
+        },
+        {
+          "name": "signIn",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "profile",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "avatarBuilder",
+          "skipped": "control absent: [data-control=\"title.account\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "follow",
+          "skipped": "control absent: [data-control=\"title.presence.more\"]",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        },
+        {
+          "name": "join20",
+          "skipped": "enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:17)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "entries": [],
+          "frames": 0,
+          "unexpected": [],
+          "anchorMoves": []
+        }
+      ]
+    },
+    {
+      "cell": "edit 1440 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4220,
+      "unsupported": false,
+      "marks": {
+        "fonts": 514.6000000238419,
+        "first-paint": 748.1000000238419,
+        "hydrated": 1077.2999999523163
+      },
+      "loadCls": 0.013515104166666665,
+      "loadEntries": [
+        {
+          "startTime": 966.7999999523163,
+          "value": 0.013515104166666665,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [
+                281,
+                137,
+                1134,
+                641
+              ],
+              "currentRect": [
+                281,
+                170,
+                1134,
+                641
+              ]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 967,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            283,
+            172,
+            1130,
+            637
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 989,
+          "from": [
+            283,
+            172,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4747,
+      "unsupported": false,
+      "marks": {
+        "fonts": 482.8000000715256,
+        "first-paint": 779.3000000715256,
+        "hydrated": 1614.8000000715256
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1326,
+          "from": [
+            155,
+            139,
+            1131,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4328,
+      "unsupported": false,
+      "marks": {
+        "fonts": 627.5,
+        "first-paint": 832.8000000715256,
+        "hydrated": 1177.1000000238419
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1086,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4115,
+      "unsupported": false,
+      "marks": {
+        "fonts": 448.89999997615814,
+        "first-paint": 611.7999999523163,
+        "hydrated": 995.7999999523163
+      },
+      "loadCls": 0.013515104166666665,
+      "loadEntries": [
+        {
+          "startTime": 885,
+          "value": 0.013515104166666665,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [
+                281,
+                137,
+                1134,
+                641
+              ],
+              "currentRect": [
+                281,
+                170,
+                1134,
+                641
+              ]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 885,
+          "from": [
+            283,
+            139,
+            1130,
+            637
+          ],
+          "to": [
+            283,
+            172,
+            1130,
+            637
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 907,
+          "from": [
+            283,
+            172,
+            1130,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4090,
+      "unsupported": false,
+      "marks": {
+        "fonts": 413.2999999523163,
+        "first-paint": 528,
+        "hydrated": 931.8999999761581
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 840,
+          "from": [
+            155,
+            139,
+            1131,
+            637
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4799,
+      "unsupported": false,
+      "marks": {
+        "fonts": 613.3999999761581,
+        "first-paint": 803.1999999284744,
+        "hydrated": 1643.1999999284744
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1334,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4419,
+      "unsupported": false,
+      "marks": {
+        "fonts": 647.2000000476837,
+        "first-paint": 833.9000000953674,
+        "hydrated": 1278.5
+      },
+      "loadCls": 0.012037017822265624,
+      "loadEntries": [
+        {
+          "startTime": 1168.5,
+          "value": 0.012037017822265624,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [
+                290,
+                137,
+                957,
+                541
+              ],
+              "currentRect": [
+                281,
+                165,
+                974,
+                551
+              ]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1168,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            283,
+            167,
+            970,
+            547
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 1186,
+          "from": [
+            283,
+            167,
+            970,
+            547
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 light listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "light",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4067,
+      "unsupported": false,
+      "marks": {
+        "fonts": 471.60000002384186,
+        "first-paint": 608.8000000715256,
+        "hydrated": 944.7000000476837
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 922,
+          "from": [
+            164,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 5493,
+      "unsupported": false,
+      "marks": {
+        "fonts": 886.3999999761581,
+        "first-paint": 1160.5,
+        "hydrated": 2343.5
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 2196,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark notesHidden",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "notesHidden",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4434,
+      "unsupported": false,
+      "marks": {
+        "fonts": 791.6000000238419,
+        "first-paint": 872.2999999523163,
+        "hydrated": 1296.6000000238419
+      },
+      "loadCls": 0.012037017822265624,
+      "loadEntries": [
+        {
+          "startTime": 1138.2999999523163,
+          "value": 0.012037017822265624,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet",
+              "previousRect": [
+                290,
+                137,
+                957,
+                541
+              ],
+              "currentRect": [
+                281,
+                165,
+                974,
+                551
+              ]
+            }
+          ],
+          "id": "E2"
+        }
+      ],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 1138,
+          "from": [
+            292,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            283,
+            167,
+            970,
+            547
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 1160,
+          "from": [
+            283,
+            167,
+            970,
+            547
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1280 dark listClosed",
+      "route": "/edit/gt-brand",
+      "width": 1280,
+      "appearance": "dark",
+      "variant": "listClosed",
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4072,
+      "unsupported": false,
+      "marks": {
+        "fonts": 439,
+        "first-paint": 560.2000000476837,
+        "hydrated": 948.2000000476837
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".sheet",
+          "t": 854,
+          "from": [
+            164,
+            139,
+            953,
+            537
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 light",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "light",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 200,
+      "ms": 4050,
+      "unsupported": false,
+      "marks": {
+        "fonts": 402.89999997615814,
+        "first-paint": 534.6000000238419,
+        "hydrated": 911
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [
+        {
+          "selector": ".pt-main",
+          "t": 794,
+          "from": [
+            256,
+            112,
+            134,
+            700
+          ],
+          "to": [
+            0,
+            112,
+            390,
+            700
+          ]
+        },
+        {
+          "selector": ".sheet",
+          "t": 817,
+          "from": [
+            11,
+            124,
+            368,
+            208
+          ],
+          "to": [
+            37,
+            127,
+            201,
+            112.19
+          ]
+        }
+      ],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 390 dark",
+      "route": "/edit/gt-brand",
+      "width": 390,
+      "appearance": "dark",
+      "variant": null,
+      "network": null,
+      "reducedMotion": false,
+      "status": 500,
+      "ms": 33907,
+      "unsupported": false,
+      "marks": {
+        "fonts": 586.5,
+        "first-paint": 799.5,
+        "hydrated": 30800
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light F",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "F",
+      "reducedMotion": false,
+      "status": 404,
+      "ms": 35304,
+      "unsupported": false,
+      "marks": {
+        "fonts": 626.7999999523163,
+        "first-paint": 863.8999999761581,
+        "hydrated": 32207.199999928474
+      },
+      "loadCls": 0.000041030092592592595,
+      "loadEntries": [
+        {
+          "startTime": 2196.2999999523163,
+          "value": 0.000041030092592592595,
+          "hadRecentInput": false,
+          "lastInputTime": 0,
+          "sources": [
+            {
+              "path": "",
+              "previousRect": [
+                504,
+                509.53125,
+                432,
+                16
+              ],
+              "currentRect": [
+                504,
+                509.53125,
+                432,
+                16
+              ]
+            }
+          ],
+          "id": "?"
+        }
+      ],
+      "loadAnchorMoves": [],
+      "errors": [],
+      "states": []
+    },
+    {
+      "cell": "edit 1440 light I",
+      "route": "/edit/gt-brand",
+      "width": 1440,
+      "appearance": "light",
+      "variant": null,
+      "network": "I",
+      "reducedMotion": false,
+      "status": 500,
+      "ms": 33875,
+      "unsupported": false,
+      "marks": {
+        "fonts": 293.90000009536743,
+        "first-paint": 616.8000000715256,
+        "hydrated": 30709.700000047684
+      },
+      "loadCls": 0,
+      "loadEntries": [],
+      "loadAnchorMoves": [],
+      "errors": [],
+      "states": []
+    }
+  ]
+}

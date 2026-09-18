@@ -189,33 +189,65 @@ export async function run(t) {
   /* the Include skipped slides row needs a skipped slide in the deck (the verifier's walk had
      none marked, so the page count could not grow): one card that is not the title is skipped
      through Slide > Skip slide as a setup step when no card is skipped yet */
+  /* the skip has to be a write the server holds, since the print page is a fresh load of the
+     server's document: on the memory tier the walk's skip landed on a slide whose file the store
+     did not carry (C2-R8's `blank-1`, the text area's slide) and the print page counted no
+     skipped page (VERIFICATION.md C2-F21, "pages 9 -> 9; marked 0"). The candidates are the
+     slide the decks area added first, then the other cards; a skip the server refused (the
+     title row at "Couldn't save" or the reject card) is undone and the next card is tried, and
+     the step waits for the store's copy of the slide to carry the skip */
   await t.step(
     null,
     'setup: a skipped slide for the print rows',
-    'one card carries the skip',
+    'one card carries the skip and the server holds it',
     async () => {
       const cards = await t.cards();
-      if (cards.some((c) => c.skipped))
-        return {
-          ok: true,
-          observed: `already skipped: ${cards
-            .filter((c) => c.skipped)
-            .map((c) => c.id)
-            .join(', ')}`,
-        };
-      const victim = cards.find((c) => c.id !== t.deck.titleSlide);
-      if (!victim) return { ok: false, observed: 'one slide in the deck' };
-      await t.clickCard(victim.id);
-      await t.clearAll();
-      await t.menuPath('slide', 'slide.skipSlide');
-      const skipped = await t.pollUntil(
-        async () => (await t.cards()).find((c) => c.id === victim.id)?.skipped,
-        (x) => x === true,
-        8000,
-      );
-      await t.settled();
-      await t.clickCard(t.deck.titleSlide);
-      return { ok: skipped === true, observed: `skipped ${victim.id}: ${skipped}` };
+      const held = async (id) =>
+        Boolean((await t.slideJson(id).catch(() => null))?.skip) &&
+        !/Couldn't save|retrying/.test((await t.saveWords()) ?? '');
+      for (const c of cards.filter((x) => x.skipped)) {
+        if (await held(c.id)) return { ok: true, observed: `already skipped and held: ${c.id}` };
+      }
+      const ordered = [
+        ...cards.filter((c) => c.id === t.deck.secondSlide),
+        ...cards.filter((c) => c.id !== t.deck.secondSlide && c.id !== t.deck.titleSlide),
+      ].filter((c) => !c.skipped);
+      if (ordered.length === 0) return { ok: false, observed: 'no card to skip beside the title' };
+      const tried = [];
+      for (const victim of ordered.slice(0, 3)) {
+        await t.clickCard(victim.id);
+        await t.clearAll();
+        await t.menuPath('slide', 'slide.skipSlide');
+        const marked = await t.pollUntil(
+          async () => (await t.cards()).find((c) => c.id === victim.id)?.skipped,
+          (x) => x === true,
+          8000,
+        );
+        await t.settled();
+        const stored = await t.pollUntil(
+          () => held(victim.id),
+          (x) => x,
+          8000,
+        );
+        const words = await t.saveWords();
+        tried.push(
+          `${victim.id}: marked ${marked}, held by the server ${stored}, title row "${words}"`,
+        );
+        if (marked === true && stored) {
+          t.deck.skippedSlide = victim.id;
+          await t.clickCard(t.deck.titleSlide);
+          return { ok: true, observed: tried.join('; ') };
+        }
+        /* undo the refused skip so the deck carries no half applied mark */
+        await t.recoverSave({ observed: '' }).catch(() => undefined);
+        if ((await t.cards()).find((c) => c.id === victim.id)?.skipped) {
+          await t.clickCard(victim.id).catch(() => undefined);
+          await t.menuPath('slide', 'slide.skipSlide').catch(() => undefined);
+          await t.settled();
+        }
+      }
+      await t.clickCard(t.deck.titleSlide).catch(() => undefined);
+      return { ok: false, observed: tried.join('; ') };
     },
   );
   const onPrint = () => /\/print\//.test(page.url());

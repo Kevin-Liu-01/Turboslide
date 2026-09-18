@@ -33,6 +33,10 @@ export const TITLE_ROW = {
   retrying: "Couldn't save, retrying",
   /* SPEC-3 15: the fifth save phrase; the five stack in one fixed cell (9.2 E5) */
   offline: 'Offline. Changes will save when you reconnect',
+  /* the focus round's blob tier budget (cycle 3 fix round, build/b7.md FR3-R5): the store refused
+     the room's poll (a 429, a 5xx) and the poll backs off; the word stands until a poll succeeds.
+     The ellipsis as `saving` carries it; the sixth phrase in the same cell, shorter than `offline` */
+  reconnecting: 'Reconnecting…',
   lastEdit: (ago: string) => `Last edit ${ago}`,
   /* SPEC-3 4.2: the newest record's author through resolvePrincipal, never the tab's own */
   lastEditBy: (ago: string, name: string) => `Last edit ${ago} by ${name}`,

@@ -5,6 +5,7 @@ import type { ShellMode } from '@turboslide/chrome/shell-data';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
+import { refusalSentence } from '../editor/refusal';
 import { deckRevision, getDeck } from '../server/decks';
 import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
@@ -173,13 +174,18 @@ function DeckMissing() {
   return <AccessPage deckId={deckId} />;
 }
 
-/** The loader's refusal on a client side navigation: the unpublished player, or the plain error. */
+/**
+ * The loader's refusal on a client side navigation: the unpublished player, or the plain error.
+ * The sentence is `refusalSentence`'s (editor/refusal.ts; the focus round, cycle 3 fix round,
+ * VERIFICATION C3-F3): a store error thrown by a server function reaches here with the store's
+ * own words, and the page shows the product's.
+ */
 function DeckRefused({ error }: { error: unknown }) {
   const gone = isNoLongerPublished(error);
   return (
     <main className="ts-home ts-access-page">
       <h1>{gone ? REFUSALS.noLongerPublished : 'This presentation could not be opened'}</h1>
-      {gone ? null : <p>{error instanceof Error ? error.message : String(error)}</p>}
+      {gone ? null : <p>{refusalSentence(error)}</p>}
     </main>
   );
 }

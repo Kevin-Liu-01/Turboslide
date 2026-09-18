@@ -5,10 +5,11 @@
 // instances, and `calls` records every operation so a test can count round trips.
 import { createHash } from 'node:crypto';
 
-import type { BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
+import type { BlobCallOptions, BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
 import { BlobExistsError, BlobPreconditionError } from './blob-store.ts';
 
-export type FakeBlobCall = { op: keyof BlobClient; pathname: string };
+/** One recorded call; `aborted` when the caller's signal ended it while the fake held it. */
+export type FakeBlobCall = { op: keyof BlobClient; pathname: string; aborted?: true };
 
 export type FakeBlobClient = BlobClient & {
   /** the stored bytes by pathname */
@@ -24,7 +25,23 @@ export type FakeBlobClient = BlobClient & {
   /** get() keeps answering the bodies stored now for overwritten pathnames until releaseGet(): the CDN lags an overwrite */
   holdGet: () => void;
   releaseGet: () => void;
+  /**
+   * head() stops answering until releaseHead(): a store call that hangs (the focus round, cycle
+   * 3). A held call ends with the caller's signal when it fires (recorded as `aborted`), the way
+   * the SDK's request ends with its `abortSignal`; releaseHead() answers the calls still held.
+   */
+  holdHead: () => void;
+  releaseHead: () => void;
+  /** how many calls the fake holds right now */
+  readonly held: () => number;
 };
+
+/** The rejection of a cancelled call, the shape the SDK's `abortSignal` produces. */
+function abortError(signal: AbortSignal): Error {
+  const reason = signal.reason;
+  if (reason instanceof Error) return reason;
+  return new DOMException('The operation was aborted', 'AbortError');
+}
 
 /** The etag Vercel Blob answers is the md5 of the body in quotes (measured 2026-09-11); the fake matches it so the mirror's proofs hold in tests. */
 export function versionOf(bytes: Uint8Array): string {
@@ -46,6 +63,33 @@ export function memoryBlobClient(
   const now = options.now ?? (() => new Date().toISOString());
   let heldList: BlobEntry[] | null = null;
   let heldBodies: Map<string, { bytes: Uint8Array; version: string }> | null = null;
+  let headHeld = false;
+  const heldHeads: (() => void)[] = [];
+  /** Waits while head() is held; the caller's signal ends the wait with its abort error. */
+  const whileHeld = (call: FakeBlobCall, signal: AbortSignal | undefined): Promise<void> =>
+    new Promise<void>((resolve, reject) => {
+      if (!headHeld) {
+        resolve();
+        return;
+      }
+      if (signal?.aborted) {
+        call.aborted = true;
+        reject(abortError(signal));
+        return;
+      }
+      const release = (): void => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve();
+      };
+      const onAbort = (): void => {
+        const i = heldHeads.indexOf(release);
+        if (i >= 0) heldHeads.splice(i, 1);
+        call.aborted = true;
+        reject(abortError(signal as AbortSignal));
+      };
+      signal?.addEventListener('abort', onAbort, { once: true });
+      heldHeads.push(release);
+    });
   const listing = (): BlobEntry[] =>
     [...blobs.keys()]
       .sort()
@@ -84,8 +128,18 @@ export function memoryBlobClient(
     releaseList() {
       heldList = null;
     },
-    async head(pathname) {
-      calls.push({ op: 'head', pathname });
+    holdHead() {
+      headHeld = true;
+    },
+    releaseHead() {
+      headHeld = false;
+      for (const release of heldHeads.splice(0)) release();
+    },
+    held: () => heldHeads.length,
+    async head(pathname, options?: BlobCallOptions) {
+      const call: FakeBlobCall = { op: 'head', pathname };
+      calls.push(call);
+      await whileHeld(call, options?.signal);
       return entryOf(pathname);
     },
     async get(pathname) {

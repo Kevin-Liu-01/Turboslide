@@ -84,6 +84,29 @@ describe('the kept shape presets in the renderer (FOCUS.md section 4)', () => {
     );
   });
 
+  it('writes a stored fill the same on the editor root and the viewer root (R36, shapes.reload-and-viewer)', () => {
+    /* the /deck viewer paints the shape through this renderer with `blockAttrs: true` and no live
+       stage (server/decks.ts buildViewerDeck), the editor with `live: true`; a semantic token
+       lands as its hex and a custom hex as itself on both, so a viewer that paints the default
+       where the editor holds a colour reads a document behind the editor's, not a render */
+    for (const [fill, css] of [
+      ['green', '#12a37a'],
+      ['blue', '#2f5ce0'],
+      ['#aa3366', '#aa3366'],
+      ['plate', 'var(--plate)'],
+    ] as const) {
+      const block = { id: 'shape', type: 'shape', shape: 'rectangle', fill, pos } as BlockOf<'shape'>;
+      const editor = renderShape(block, context('dark', true));
+      const viewer = renderShape(block, context('dark', false));
+      expect(editor, fill).toContain(`fill="${css}"`);
+      expect(viewer, fill).toContain(`fill="${css}"`);
+      expect(viewer, fill).toContain('data-block="shape"');
+      expect(renderBlock(block as Block, context('dark', false)), fill).toContain(`fill="${css}"`);
+    }
+    const bare = { id: 'shape', type: 'shape', shape: 'rectangle', pos } as BlockOf<'shape'>;
+    expect(renderShape(bare, context('dark', false))).toContain('fill="none"');
+  });
+
   it('keeps the whole box as the text rectangle of every kind, so the layer and the PPTX insets agree', () => {
     for (const shape of ['rectangle', 'rounded', 'ellipse', 'roundRect', 'hexagon'] as const) {
       const block = { id: 'a', type: 'shape', shape, text: 'A' } as BlockOf<'shape'>;

@@ -296,6 +296,43 @@ describe('menuActionPlan', () => {
     expect(stepPlainSize(20, -1)).toBe(20);
   });
 
+  it('Bold, the alignments and the line spacings refuse on a list block instead of writing /typography (C2-F1, b7 C2-R16)', () => {
+    /* a `plain` block has no typography field, so the `/typography` write these plans made was
+       refused by the server's schema check and the title row read "Couldn't save, retrying"
+       (VERIFICATION C2-F1: `text.format-menu.size-increase` and every text row after it while the
+       reject card stood); the plan refuses with a sentence, as the table branch refuses Justified */
+    const slide = document.slides[RULE] as Slide;
+    const list = firstBlockOf(slide, 'plain') as Block;
+    const listFacts = facts(RULE, { blockId: list.id });
+    const rows = [
+      ['format.text.bold', 'Bold applies to a text block'],
+      ['format.alignIndent.left', 'Alignment applies to a text block'],
+      ['format.alignIndent.center', 'Alignment applies to a text block'],
+      ['format.alignIndent.right', 'Alignment applies to a text block'],
+      ['format.alignIndent.justified', 'Alignment applies to a text block'],
+      ['format.spacing.single', 'Line spacing applies to a text block'],
+      ['format.spacing.1_15', 'Line spacing applies to a text block'],
+      ['format.spacing.1_5', 'Line spacing applies to a text block'],
+      ['format.spacing.double', 'Line spacing applies to a text block'],
+    ] as const;
+    for (const [id, sentence] of rows) {
+      const plan = menuActionPlan(itemById(id), listFacts);
+      expect(plan, id).toEqual({ refused: sentence });
+    }
+    /* the same rows on a text block keep their /typography write */
+    const heading = firstBlockOf(slide, 'heading') as Block;
+    const bold = menuActionPlan(itemById('format.text.bold'), facts(RULE, { blockId: heading.id }));
+    expect(bold).toMatchObject({ action: 'block.set', input: { path: '/typography' } });
+    const double = menuActionPlan(
+      itemById('format.spacing.double'),
+      facts(RULE, { blockId: heading.id }),
+    );
+    expect(double).toMatchObject({
+      action: 'block.set',
+      input: { path: '/typography', value: expect.objectContaining({ leading: 2 }) },
+    });
+  });
+
   it('a zoom step from Fit starts at the stage scale, not at 100 (F-zoom-fit, b1 R20)', () => {
     /* at Fit the controller reports no number; the shell reads the stage's live scale through
        the handle's `scale()` and steps from it: 0.705 is 71 percent, whose next rung is 75 and

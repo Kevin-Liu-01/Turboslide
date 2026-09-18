@@ -44,11 +44,49 @@ export function coverage(specFile: string, driven: readonly string[]): void {
   }
 }
 
-export async function invoke<T = unknown>(page: Page, action: string, input?: unknown): Promise<T> {
-  return page.evaluate(
+/** The bound of a window API call: the toolkit's (VERIFICATION.md pass 2 F-stall, C2-F27). */
+export const INVOKE_TIMEOUT_MS = 60_000;
+
+/**
+ * A window API call bounded in time. `page.evaluate` has no timeout, so an `asset.add` the blob
+ * tier never answered (C2-F27: `images.replace.drop-on-picture`, two of two runs) held the test
+ * to its own timeout and failed as "Execution context was destroyed", the teardown's navigation;
+ * a call that has not answered within `ms` fails with the action's name and the title row's
+ * words instead. The call itself keeps running in the page; its late answer is not read.
+ */
+export async function invoke<T = unknown>(
+  page: Page,
+  action: string,
+  input?: unknown,
+  ms = INVOKE_TIMEOUT_MS,
+): Promise<T> {
+  const evaluated = page.evaluate(
     ([id, value]) => window.turboslide!.studio.invoke(id as string, value) as Promise<unknown>,
     [action, input] as const,
   ) as Promise<T>;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<{ late: true }>((resolve) => {
+    timer = setTimeout(() => resolve({ late: true }), ms);
+  });
+  try {
+    const won = await Promise.race([
+      evaluated.then((value) => ({ late: false as const, value })),
+      late,
+    ]);
+    if (won.late) {
+      evaluated.catch(() => undefined);
+      const words = await page
+        .locator('[data-control="deck.saveState"]')
+        .textContent({ timeout: 2000 })
+        .catch(() => null);
+      throw new Error(
+        `window API ${action} did not answer within ${ms / 1000} s (the title row reads "${words?.trim() ?? 'unknown'}")`,
+      );
+    }
+    return won.value;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export type EditorState = {
@@ -63,7 +101,11 @@ export type EditorState = {
   sync: { connected: boolean; pending: number; tier: string; transport: string };
   presence: { clientId: string | null; others: { clientId: string }[]; count: number };
   access: { mode: string; role: string | null; revision?: number };
-  comments?: { threads: { id: string; resolved?: boolean; replies: unknown[] }[] };
+  comments?: {
+    threads: { id: string; resolved?: boolean; replies: unknown[] }[];
+    /** true once `comment.list` has answered after the room opened (b6's cycle 3 R3, with the integrator's controller projection) */
+    loaded?: boolean;
+  };
   view?: { present: boolean };
 };
 
@@ -377,7 +419,11 @@ export async function placePicture(
 ): Promise<string> {
   const url = await pngDataUrl(page);
   const s = await state(page);
+  /* the asset id is passed (b7's cycle 3 C3-R3): a window API `asset.add` with a data URL and no
+     id names every picture `assets/capture.png`, so a second picture with other bytes is refused
+     ("exists with other bytes"); the spec's PNGs are byte identical, which is why the rows passed */
   const asset = await invoke<{ id: string; revision?: number }>(page, 'asset.add', {
+    id: `${id}-asset`,
     url,
     role: 'capture',
     alt: 'core spec picture',
@@ -419,6 +465,11 @@ export async function newDeck(
   await page.goto('/new');
   await waitEditor(page);
   const info = await invoke<{ id: string }>(page, 'deck.info');
+  /* the fresh draft's paint (VERIFICATION.md C2-F26: one /new load of the enforce preview drew a
+     dithered texture over the whole stage and the title read "covered by html" to the first
+     click): the setup fails on the paint's own facts rather than on an actionability wait */
+  const paint = await groundPaintFacts(page);
+  expect(paint.ok, `the fresh draft's stage paints right (${paint.summary})`).toBe(true);
   const run = await headingRun(page);
   await typeInto(page, run, titleText);
   await waitRevision(page, 1, 30_000);
@@ -433,6 +484,71 @@ export async function newDeck(
       .click()
       .catch(() => undefined);
   return scratch.add(info.id);
+}
+
+/**
+ * The paint of a fresh draft's stage, the walk's reading (core-walk/toolkit.mjs `groundPaintFacts`):
+ * every canvas outside the filmstrip against its box (the dither ramp draws one cell per two
+ * layout px; a bitmap drawn before its box had a size is stretched), every painted element whose
+ * box runs past the sheet while covering more than half the stage, and what the pointer meets at
+ * the first run's centre and at the sheet's centre.
+ */
+export async function groundPaintFacts(page: Page): Promise<{ ok: boolean; summary: string }> {
+  return page.evaluate(() => {
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    };
+    const stage = document.querySelector('.ts-stagewrap.ts-editor');
+    const sheet = stage?.querySelector('.pt-slide:not(.is-leaving)') ?? null;
+    const filmstrip = document.querySelector('.ts-filmstrip, aside.pt-sb');
+    const stretched = [...document.querySelectorAll('canvas')]
+      .filter((c) => c.clientWidth > 0 && c.width > 0 && !filmstrip?.contains(c))
+      .map((c) => ({
+        cls: c.className || 'canvas',
+        perCell: Math.round((c.clientWidth / c.width) * 100) / 100,
+      }))
+      .filter((c) => c.perCell > 3);
+    const covers: string[] = [];
+    if (stage && sheet) {
+      const st = box(stage);
+      const sh = box(sheet);
+      for (const el of document.querySelectorAll(
+        'canvas, img, video, svg, [style*="background"]',
+      )) {
+        if (filmstrip?.contains(el)) continue;
+        const r = box(el);
+        if (r.w === 0 || r.h === 0) continue;
+        const ix = Math.max(0, Math.min(r.x + r.w, st.x + st.w) - Math.max(r.x, st.x));
+        const iy = Math.max(0, Math.min(r.y + r.h, st.y + st.h) - Math.max(r.y, st.y));
+        const past =
+          r.x < sh.x - sh.w * 0.05 ||
+          r.y < sh.y - sh.h * 0.05 ||
+          r.x + r.w > sh.x + sh.w * 1.05 ||
+          r.y + r.h > sh.y + sh.h * 1.05;
+        if (ix * iy > (st.w * st.h) / 2 && past)
+          covers.push(`${el.tagName.toLowerCase()} ${Math.round(r.w)}x${Math.round(r.h)}`);
+      }
+    }
+    const hit = (x: number, y: number, within: Element | null) => {
+      const el = document.elementFromPoint(x, y);
+      const inside = Boolean(el && within && (within.contains(el) || el.contains(within)));
+      return { name: el ? el.tagName.toLowerCase() : 'nothing', inside };
+    };
+    const run = sheet?.querySelector('[data-run]') ?? null;
+    const rr = run?.getBoundingClientRect();
+    const runHit = rr
+      ? hit(rr.x + rr.width / 2, rr.y + rr.height / 2, run)
+      : { name: 'no run', inside: false };
+    const sr = sheet?.getBoundingClientRect();
+    const sheetHit = sr
+      ? hit(sr.x + sr.width / 2, sr.y + sr.height * 0.8, sheet)
+      : { name: 'no sheet', inside: false };
+    return {
+      ok: stretched.length === 0 && covers.length === 0 && runHit.inside && sheetHit.inside,
+      summary: `stretched canvases ${stretched.map((c) => `${c.cls} at ${c.perCell} px per cell`).join(', ') || 'none'}; covers past the sheet ${covers.join(', ') || 'none'}; at the title centre ${runHit.name} (inside the run ${runHit.inside}); at the sheet ${sheetHit.name} (inside the sheet ${sheetHit.inside})`,
+    };
+  });
 }
 
 export async function openEditor(page: Page, deckId: string, hash = ''): Promise<void> {
@@ -545,7 +661,13 @@ export async function otherContext(
 // ---------------------------------------------------------------------------------------------
 // downloads and the files
 
-/** Runs `start`, waits for the download the page begins within `timeout`, and reads its bytes. */
+/**
+ * Runs `start`, waits for the download the page begins within `timeout`, and reads its bytes.
+ * A refused export (the anonymous quota of five a day, SPEC-3 8.3; b7's C2-R20 read the sixth
+ * download of `core/export.spec.ts` refused 429 with "You have reached today's export limit"
+ * while the row waited 30 s for a file) fails at once on the sentence the dialog or the snackbar
+ * shows, so the ledger names the refusal and not the wait.
+ */
 export async function download(
   page: Page,
   start: () => Promise<void>,
@@ -553,8 +675,40 @@ export async function download(
 ): Promise<{ name: string; bytes: Buffer; ms: number; download: Download }> {
   const t = Date.now();
   const waiting = page.waitForEvent('download', { timeout });
+  waiting.catch(() => undefined);
   await start();
-  const d = await waiting;
+  const refusal = (async (): Promise<string | null> => {
+    const until = Date.now() + timeout;
+    while (Date.now() < until) {
+      const text = await page
+        .evaluate(() =>
+          [
+            ...document.querySelectorAll(
+              '[data-control="dialog.download.pdf"], [data-control="dialog.download.pptx"], [data-control="snackbar"], .ts-snackbar, [role="alert"]',
+            ),
+          ]
+            .map((el) => el.textContent ?? '')
+            .join(' | '),
+        )
+        .catch(() => '');
+      const m =
+        /([^.|]*(?:export limit|too many downloads|try again tomorrow|could not be (?:made|exported)|export failed)[^.|]*)/i.exec(
+          text,
+        );
+      if (m) return m[1]!.trim();
+      await page.waitForTimeout(400);
+    }
+    return null;
+  })();
+  const won = await Promise.race([
+    waiting.then((d) => ({ d })),
+    refusal.then((sentence) => ({ sentence })),
+  ]);
+  if ('sentence' in won && won.sentence !== null)
+    throw new Error(
+      `the export was refused ${Date.now() - t} ms after the click: "${won.sentence}"`,
+    );
+  const d = 'd' in won ? won.d : await waiting;
   const path = await d.path();
   const { readFileSync } = await import('node:fs');
   const bytes = readFileSync(path);

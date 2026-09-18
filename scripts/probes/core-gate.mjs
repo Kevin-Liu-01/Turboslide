@@ -10,6 +10,21 @@
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
 //     [--only probe|specs] [--spec <area>[,<area>]] [--shots] [--matrix <path>] [--report <dir>]
+//     [--allow-scratch] [--decks <dir>] [--dry-run] [--lock <path>]
+// The gate refuses to start while scratch decks sit under the repository's decks/ folder (every
+// folder there git does not track; the check chains' spec runs left eight behind, VERIFICATION.md
+// C2-F29): it prints them and exits 2, so a run never measures against a store carrying another
+// run's leftovers and the leftovers are removed on purpose rather than shipped. `--allow-scratch`
+// runs anyway (a contributor's own local decks); `--decks <dir>` names another folder to read (the
+// gate's own test). A `--report` re-render reads no store and skips the check. `--dry-run` stops
+// after the check: it prints the plan (the base, the drivers, the lock a localhost run would take),
+// takes no lock, runs no driver, writes no file and exits 0 (2 on the refusal). `--lock <path>`
+// names the lock folder a localhost run takes instead of the repository's .turboslide/e2e.lock.
+// Both exist for the gate's own test: a unit test never takes the checkout's lock, because a test
+// killed on its timeout cannot release it (VERIFICATION.md C3-F9: check step 5 left one behind).
+// The gate holds that rule itself: under vitest (`VITEST` is set in every worker and a spawned gate
+// inherits it) a localhost run that names neither flag is refused with exit 2 before the scratch
+// check, so a later test cannot take the checkout's lock by leaving the flags out.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
 // verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:
@@ -24,7 +39,15 @@
 // hours with no Playwright or probe process alive is orphaned); a run against a deployment
 // needs no lock. `retries` is read from the Playwright report and asserted to be zero (6.2).
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -62,7 +85,43 @@ const MATRIX_OUT = arg('matrix', null);
 /** A finished run's directory to re-render from, instead of running the drivers. */
 const REPORT = arg('report', null);
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE);
-const LOCK = join(ROOT, '.turboslide', 'e2e.lock');
+/** The lock folder a localhost run takes (the repository's e2e.lock; `--lock` for the gate's own test). */
+const LOCK = resolve(ROOT, arg('lock', join('.turboslide', 'e2e.lock')));
+/** `--dry-run`: stop after the scratch check, before the lock and the drivers. */
+const DRY_RUN = flag('dry-run');
+/** The decks folder the scratch check reads (the repository's by default). */
+const DECKS_DIR = resolve(ROOT, arg('decks', 'decks'));
+const ALLOW_SCRATCH = flag('allow-scratch');
+/** Set in every vitest worker and inherited by the gate a test spawns (the guard of C3-F9). */
+const UNDER_VITEST = (process.env.VITEST ?? '') !== '';
+/** Whether `--lock` named a folder (the way past the guard for a test that must run a driver). */
+const LOCK_NAMED = arg('lock', null) != null;
+
+/**
+ * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
+ * the repository), or, when git does not answer, every folder named like a run's deck
+ * (`e2e-*`, `untitled-*`, `scratch-*`, `<template>-<date>-<suffix>`). A tracked deck (the GT
+ * brand deck, the fixture, the templates) is never scratch.
+ */
+export function scratchDecks(dir = DECKS_DIR) {
+  if (!existsSync(dir)) return [];
+  const folders = readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+    .map((d) => d.name)
+    .sort();
+  const git = spawnSync('git', ['-C', ROOT, 'ls-files', '--', dir], { encoding: 'utf8' });
+  if (git.status === 0) {
+    const tracked = new Set(
+      git.stdout
+        .split('\n')
+        .filter(Boolean)
+        .map((f) => f.slice(f.indexOf('decks/') + 'decks/'.length).split('/')[0]),
+    );
+    return folders.filter((name) => !tracked.has(name));
+  }
+  const runDeck = /^(e2e-|untitled-|scratch-|[a-z-]+-\d{8}-[a-z0-9]{4}$)/;
+  return folders.filter((name) => runDeck.test(name));
+}
 
 /** The tree's commit, for the run's JSON; the working tree may carry uncommitted edits (the ledger names that). */
 function gitCommit() {
@@ -257,6 +316,35 @@ if (REPORT !== null) {
   if (ONLY !== 'specs') probe = readProbe(join(dir, 'core-walk.json'), null, 0);
   if (ONLY !== 'probe') specs = readSpecs(join(dir, 'specs.json'), null, 0);
 } else {
+  if (UNDER_VITEST && LOCAL && !DRY_RUN && !LOCK_NAMED) {
+    console.error(
+      `core-gate: a localhost run under vitest (VITEST is set) would take the checkout's lock ${LOCK}, which a test killed on its timeout cannot release (VERIFICATION.md C3-F9): pass --dry-run, or --lock <folder> outside the repository. Nothing ran; exit 2.`,
+    );
+    process.exit(2);
+  }
+  const scratch = scratchDecks();
+  if (scratch.length > 0 && !ALLOW_SCRATCH) {
+    console.error(
+      `core-gate: ${scratch.length} scratch deck(s) under ${DECKS_DIR} (folders git does not track): ${scratch.join(', ')}. A run leaves nothing behind, so these are another run's leftovers: remove them (each through the product, or the folder when its run is gone) or pass --allow-scratch to run anyway. Nothing ran; exit 2.`,
+    );
+    process.exit(2);
+  }
+  if (scratch.length > 0)
+    console.log(
+      `core-gate: running with ${scratch.length} scratch deck(s) under ${DECKS_DIR} by --allow-scratch: ${scratch.join(', ')}`,
+    );
+  if (DRY_RUN) {
+    const drivers =
+      ONLY === 'probe'
+        ? 'the walk probe'
+        : ONLY === 'specs'
+          ? 'the core specs'
+          : 'the walk probe and the core specs';
+    console.log(
+      `core-gate: dry run against ${BASE}: the scratch check passed over ${DECKS_DIR} (${scratch.length} scratch deck(s)); the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}. Nothing ran and no lock was taken; exit 0.`,
+    );
+    process.exit(0);
+  }
   const held = await takeLock();
   try {
     if (ONLY !== 'specs') probe = runProbe();

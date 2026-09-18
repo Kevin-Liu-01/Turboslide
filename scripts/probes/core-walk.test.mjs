@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { probeRows } from './core-matrix.mjs';
-import { AREAS, CLEANUP_IDS, declaredIds, renderMatrix } from './core-walk/index.mjs';
+import { AREAS, CLEANUP_IDS, WALK_IDS, declaredIds, renderMatrix } from './core-walk/index.mjs';
 
 // The core walk's coverage of the matrix (docs/FOCUS.md 6.1): every row whose driver is
 // `probe --core` is declared by exactly one area module (or the finally block), and no area
@@ -22,7 +22,7 @@ describe('the core walk declares every probe row once', () => {
     const probeSet = new Set(probe);
     const extra = [...declared.keys()].filter((id) => !probeSet.has(id));
     expect(extra, `declared ids that are not probe rows: ${extra.join(', ')}`).toEqual([]);
-    const all = [...AREAS.flatMap((area) => area.IDS), ...CLEANUP_IDS];
+    const all = [...AREAS.flatMap((area) => area.IDS), ...CLEANUP_IDS, ...WALK_IDS];
     const seen = new Set();
     const twice = all.filter((id) => (seen.has(id) ? true : (seen.add(id), false)));
     expect(twice, `ids declared twice: ${twice.join(', ')}`).toEqual([]);

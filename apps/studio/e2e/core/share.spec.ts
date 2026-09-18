@@ -57,6 +57,9 @@ test.beforeAll(async ({ browser }) => {
   await settled(page);
 });
 test.afterAll(async () => {
+  /* the teardown runs past a failed row and past the file's own test timeout, so no scratch deck
+     is left behind (VERIFICATION.md C2-F29) */
+  test.setTimeout(180_000);
   try {
     await teardownAll(page, scratch);
   } finally {
@@ -395,13 +398,39 @@ test(title('share.stranger-cannot-edit'), async ({ browser }) => {
   }
 });
 
-/** A second editor on the Edit link, kept for the collaboration rows. */
+/**
+ * A second editor on the Edit link, kept for the collaboration rows. The link's landing is a
+ * setup here, not the row (`share.edit-link-lands-editor` judges it): on the blob tier a link
+ * minted seconds after the deck's creation can redirect to an `/edit/<id>` that answers 404 on
+ * the instance serving it (the cycle 3 drive of the collab rows alone: `/s/<token>` 303 to
+ * `/edit/<deck>` 404, `waitEditor` at its 90 s bound on a Not found page), so the load is made
+ * again every 2 s for up to 30 s until the editor route answers, and the wait is recorded as an
+ * annotation of the test for the ledger.
+ */
 async function secondEditor(
   browser: import('@playwright/test').Browser,
 ): Promise<{ context: BrowserContext; page: Page }> {
   links = await readLinks();
   const pair = await otherContext(browser);
-  await pair.page.goto(links.edit);
+  const started = Date.now();
+  let status: number | null = null;
+  let loads = 0;
+  for (;;) {
+    loads += 1;
+    const res = await pair.page.goto(loads === 1 ? links.edit : `/edit/${deck}`);
+    status = res?.status() ?? null;
+    if (status !== 404 || Date.now() - started > 30_000) break;
+    await pair.page.waitForTimeout(2000);
+  }
+  if (loads > 1)
+    test.info().annotations.push({
+      type: 'second editor landing',
+      description: `${loads} loads over ${Date.now() - started} ms before /edit/${deck} answered ${status} for the Edit link's browser`,
+    });
+  expect(
+    status,
+    `the Edit link lands /edit/${deck} (${loads} load(s), ${Date.now() - started} ms)`,
+  ).not.toBe(404);
   await pair.page.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 20_000 });
   await waitEditor(pair.page);
   await expect(pair.page.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(

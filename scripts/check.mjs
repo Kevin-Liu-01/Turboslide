@@ -200,6 +200,17 @@ const OVERWRITE_ALLOW = [
   // documents client (SPEC-3 8.9): record rewrites, never a public asset (the integrator, merge 2)
   'packages/store/src/comments-store.ts',
   'packages/store/src/migrate.ts',
+  // the shared presence roster of the blob tier (the focus round's cycle 3, b6):
+  // `decks/<id>/.turboslide/presence.json` rewritten under `ifMatch` on the version read, with
+  // an immutable copy per version beside it (`.turboslide/presence/<md5>.json`) as the read that
+  // holds; a state file under the deck's hidden folder, never a public asset (the integrator,
+  // cycle 3 merge; check step 6 named the two call sites)
+  'packages/store/src/presence-store.ts',
+  // the deck pulse of the blob tier budget (the focus round's cycle 3 fix round, b7):
+  // `decks/<id>/.turboslide/pulse.json`, a nonce body every writer of the deck overwrites after
+  // its own write landed, so one head per tick tells whether the manifest, the presence record
+  // or the comments index moved; a state file under the deck's hidden folder, never a public asset
+  'packages/store/src/pulse.ts',
   // the thumbnail cache's stamped objects `decks/<id>/.thumbs/<stamp>/<theme>@<w>/<slide>.png`
   // (gslides-parity SPEC-4 0.31; B4's day 3): the key carries the slide's content stamp, so a
   // second put writes the same pixels (two instances rendering one stamp), and the older stamps
@@ -345,7 +356,12 @@ const steps = [
     needs: 'node-server',
   },
   // the focus round (docs/FOCUS.md section 6, 6.2): the core gate, every driver of the matrix
-  // against the runner's dev server, judged by row id; the gate takes .turboslide/e2e.lock itself
+  // against the runner's dev server, judged by row id; the gate takes .turboslide/e2e.lock itself.
+  // The gate refuses to start while scratch decks sit under decks/ (VERIFICATION C2-F29) and the
+  // chain passes no --allow-scratch (b4 cycle 3 C3-R2, decided at the cycle 3 merge): the runner
+  // stops at the first red step, so a spec of step 21 or 26 that failed before its afterAll has
+  // already stopped the chain, and a leftover from an earlier run is removed on purpose by the
+  // person running the chain (the gate prints the folders), never measured against or shipped.
   {
     cmd: `node scripts/probes/core-gate.mjs --base ${STUDIO_URL} --out .turboslide/core-gate`,
     needs: 'server',

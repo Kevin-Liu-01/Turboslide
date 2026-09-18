@@ -20,6 +20,7 @@ import {
   selectBlock,
   settled,
   skipCurrent,
+  slideJson,
   slideOrder,
   state,
   teardownAll,
@@ -63,6 +64,9 @@ test.beforeAll(async ({ browser }) => {
   slides = await slideOrder(page);
 });
 test.afterAll(async () => {
+  /* the teardown of every deck this file made runs past a failed row and past the file's own
+     test timeout, so no scratch deck is left behind (VERIFICATION.md C2-F29) */
+  test.setTimeout(180_000);
   try {
     await teardownAll(page, scratch);
   } finally {
@@ -285,9 +289,18 @@ test(title('present.skipped-left-out'), async () => {
   await clickCard(page, slides[2]!);
   await skipCurrent(page);
   await clickCard(page, slides[0]!);
+  /* the skip is acknowledged (skipCurrent waits for the store's copy and All changes saved), so
+     the three reads below judge the show, the card's Present tab and the present link on the
+     server's document; each read is named, since the cycle 2 flip of this row (C2-F25: "4 where
+     3 was expected") did not say which of the three loads counted the skipped slide */
+  const skipStored = (await slideJson(page, slides[2]!))['skip'] === true;
+  const revision = (await state(page)).serverRevision;
   await startShow();
   const total = slides.length - 1;
-  await expect(show()).toHaveAttribute('data-total', String(total));
+  await expect(
+    show(),
+    `the show started from the editor leaves the skipped slide out (skip stored ${skipStored}, server revision ${revision})`,
+  ).toHaveAttribute('data-total', String(total));
   await expect(ctl(page, 'present.counter')).toContainText(`of ${total}`);
   const ids: string[] = [];
   for (let i = 0; i < total; i += 1) {
@@ -304,11 +317,17 @@ test(title('present.skipped-left-out'), async () => {
   await page.locator('#home-card-menu [role="menuitem"]', { hasText: /^Present$/ }).click();
   const tab = await opened;
   await tab.waitForURL(/present=1/, { timeout: 20_000 });
-  await expect(show(tab)).toHaveAttribute('data-total', String(total), { timeout: 20_000 });
+  await expect(
+    show(tab),
+    `the card's Present tab (a fresh load of the server's document) leaves the skipped slide out`,
+  ).toHaveAttribute('data-total', String(total), { timeout: 20_000 });
   await tab.close();
   /* the present link */
   await page.goto(`/deck/${deck}?present=1`);
-  await expect(show()).toHaveAttribute('data-total', String(total), { timeout: 20_000 });
+  await expect(
+    show(),
+    'the present link /deck/<id>?present=1 (a fresh load) leaves the skipped slide out',
+  ).toHaveAttribute('data-total', String(total), { timeout: 20_000 });
   await openEditor(page, deck);
   await clickCard(page, slides[2]!);
   await menuPath(page, 'slide', 'slide.skipSlide');
@@ -367,9 +386,14 @@ test(title('text.link.present-click'), async () => {
   const stored = JSON.stringify(await objectsOf(page, slideId));
   expect(stored.includes('/home'), 'the link is stored on the word').toBe(true);
   await startShow();
-  /* the show draws the linked word as an anchor a person can click (the editor draws
-     `<a href>`; on the preview the show drew no link element for it, the b4 repro show-link) */
-  const linked = show().locator('a[href*="/home"], [data-control="run.link.href"]').first();
+  /* the show's slide is the stage's sheet in present mode, `.ts-stagewrap.is-present
+     .pt-slide:not(.is-leaving)`; `[data-control="present.show"]` is the Slideshow overlay, a
+     sibling of the stage that never holds a slide, so the anchor was looked for where it cannot
+     be (b1's R32, VERIFICATION.md C2-F5: the product draws `<a href>` for the linked run in the
+     show's stage and the click opened the address in a new page) */
+  const linked = page
+    .locator('.ts-stagewrap.is-present .pt-slide:not(.is-leaving) a[href*="/home"]')
+    .first();
   await expect(linked, 'the show draws the linked word as a link element').toBeAttached({
     timeout: 10_000,
   });
@@ -407,6 +431,12 @@ async function markers(): Promise<number> {
  * 500 ms apart have to agree.
  */
 async function threadCountSettled(): Promise<number> {
+  /* the product's own fact first (b6's cycle 3 R3): `describe().state.comments.loaded` reads true
+     once `comment.list` has answered after the reload; until the controller projects it (the
+     integrator's half of R3) the field is undefined and the two agreeing reads below decide */
+  await expect
+    .poll(async () => (await state(page)).comments?.loaded ?? null, { timeout: 15_000 })
+    .not.toBe(false);
   let last = (await threads()).length;
   for (let i = 0; i < 20; i += 1) {
     await page.waitForTimeout(500);
@@ -559,7 +589,10 @@ test(title('comments.toolbar-and-menu-routes'), async () => {
   await openEditor(page, deck);
   await clickCard(page, slides[3]!);
   await page.keyboard.press('Escape');
-  const before = (await threads()).length;
+  /* the count once the threads have loaded, as the `comments.on-*` rows read it (b6 R5); read
+     at once it missed the earlier rows' threads and the row then counted them as its own (the
+     cycle 2 rerun, C2-F25: "4 threads where 1 was expected") */
+  const before = await threadCountSettled();
   await ctl(page, 'toolbar.insertComment').click();
   await submitComment('From the toolbar.');
   await expect.poll(async () => (await threads()).length, { timeout: 20_000 }).toBe(before + 1);

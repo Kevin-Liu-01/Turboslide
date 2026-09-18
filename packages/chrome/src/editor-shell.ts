@@ -1376,6 +1376,11 @@ const SELECT_TEXT = 'Select a text block first';
 const SELECT_BLOCK = 'Select an object on the slide first';
 const SELECT_CELL = 'Click a table cell first';
 const SELECT_OBJECTS = 'Select two or more objects on the slide first';
+/* the sentences of the plans a `plain` list block cannot carry (C2-F1, C2-R16): its items have no
+   typography field, so Bold, the alignments and the line spacings apply to a text block alone */
+const BOLD_ON_LIST = 'Bold applies to a text block';
+const ALIGN_ON_LIST = 'Alignment applies to a text block';
+const SPACING_ON_LIST = 'Line spacing applies to a text block';
 
 function currentSlide(facts: ActionFacts): Slide | undefined {
   return facts.document.slides[facts.slideId];
@@ -2436,6 +2441,11 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     }
     case 'format.text.bold': {
       if (target === undefined) return { refused: SELECT_TEXT };
+      /* a `plain` list block has no typography field (blocks.ts `plainBlockSchema`, strict), so the
+         `/typography` write was refused by the server and the title row read "Couldn't save,
+         retrying" until the card was dismissed (VERIFICATION C2-F1; b7's C2-R16, applied by the
+         integrator at the cycle 3 merge): refuse with a sentence, as the table branch does */
+      if (target.type === 'plain') return { refused: BOLD_ON_LIST };
       const typography = typographyOf(target);
       const weight = typography.weight === 500 ? undefined : 500;
       const next = { ...typography };
@@ -2520,6 +2530,8 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.alignIndent.justified': {
       if (target === undefined) return { refused: SELECT_TEXT };
       const align = ALIGN_OF[item.id];
+      /* no typography field on a `plain` list block (C2-F1, C2-R16; the Bold case above) */
+      if (target.type === 'plain') return { refused: ALIGN_ON_LIST };
       if (target.type === 'table') {
         if (align === 'justify') return { refused: 'Justified applies to a text block' };
         const column = facts.selection?.cell?.column ?? 0;
@@ -2561,6 +2573,8 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.spacing.1_5':
     case 'format.spacing.double': {
       if (target === undefined) return { refused: SELECT_TEXT };
+      /* no typography field on a `plain` list block (C2-F1, C2-R16; the Bold case above) */
+      if (target.type === 'plain') return { refused: SPACING_ON_LIST };
       return blockSet(
         facts,
         target.id,

@@ -849,22 +849,24 @@ async function advancedToolsOn(page) {
  * run. Records the flip as a row of the `advanced` section and returns whether the state was
  * reached.
  */
-async function setAdvancedTools(page, on) {
+async function setAdvancedTools(page, on, { quietMiss = false } = {}) {
   const check = on ? 'turn on' : 'turn off';
   if ((await advancedToolsOn(page)) === on) return true;
   await closeOverlays(page);
   /* a page without the editor's menu bar (a view only page, the home page) has no row to click;
-     say so rather than time out on the bar */
+     say so rather than time out on the bar. A caller with a fallback page (setAdvancedToolsAnywhere)
+     passes quietMiss: the miss is its expected first step and records no row */
   if ((await page.$('[data-control="menubar.tools"]')) === null) {
-    fail('advanced', {
-      id: 'tools.advancedTools',
-      check,
-      evidence: `no Tools menu on ${page.url()}: ${
-        (await page.$('[data-control="toolbar.viewOnly"]')) !== null
-          ? 'the page is view only'
-          : 'the menu bar is not drawn'
-      }`,
-    });
+    if (!quietMiss)
+      fail('advanced', {
+        id: 'tools.advancedTools',
+        check,
+        evidence: `no Tools menu on ${page.url()}: ${
+          (await page.$('[data-control="toolbar.viewOnly"]')) !== null
+            ? 'the page is view only'
+            : 'the menu bar is not drawn'
+        }`,
+      });
     return false;
   }
   await openBarMenu(page, 'tools');
@@ -876,11 +878,12 @@ async function setAdvancedTools(page, on) {
     const rows = await page
       .$$eval(`${ROW_SELECTOR(0)}`, (els) => els.map((el) => el.getAttribute('data-menu-item')))
       .catch(() => []);
-    fail('advanced', {
-      id: 'tools.advancedTools',
-      check,
-      evidence: `the row is not in the Tools menu on ${page.url()}; rows drawn: ${rows.join(', ') || 'none'}`,
-    });
+    if (!quietMiss)
+      fail('advanced', {
+        id: 'tools.advancedTools',
+        check,
+        evidence: `the row is not in the Tools menu on ${page.url()}; rows drawn: ${rows.join(', ') || 'none'}`,
+      });
     await closeMenus(page);
     return false;
   }
@@ -897,6 +900,35 @@ async function setAdvancedTools(page, on) {
       : 'the root did not follow the row within 3 s',
   });
   return reached === true;
+}
+
+/**
+ * setAdvancedTools with the browser's own /new draft as the fallback page. The setting is the
+ * browser's (docs/FOCUS.md 3.1) and the row is gated to writers (menus/model.ts, the Tools menu's
+ * `gate(..., 'write')`), so a page that draws a Tools menu without the row (the collaborator the
+ * scratch deck admits as a viewer under ruling (2), a read only deck) or no menu bar at all cannot
+ * flip it; the flip is made on /new (no write, so no deck is made) and the page is loaded again.
+ * The miss on the first page is the expected first step and records nothing (the check chain's
+ * step 20 read it as a failure of the product, "the row is not in the Tools menu on
+ * /edit/<scratch>; rows drawn: tools.accessibilitySettings", VERIFICATION.md C2-F13, cycle 3);
+ * one row of the `advanced` section records the fallback's outcome.
+ */
+async function setAdvancedToolsAnywhere(page, on) {
+  if (await setAdvancedTools(page, on, { quietMiss: true })) return true;
+  const back = page.url();
+  await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  const flipped = await setAdvancedTools(page, on, { quietMiss: true });
+  await page.goto(back, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  (flipped ? pass : fail)('advanced', {
+    id: 'tools.advancedTools',
+    check: on ? 'turn on' : 'turn off',
+    evidence: flipped
+      ? `no row on ${back}; turned ${on ? 'on' : 'off'} on /new and the page loaded again`
+      : `no row on ${back} nor on /new`,
+  });
+  return flipped;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1504,6 +1536,14 @@ async function toggleState(page, setting) {
          button's pressed state, the announcements region's live attribute */
       case 'mode':
         return v?.getAttribute('data-edit-mode') ?? null;
+      /* View > Comments (SPEC-3 5.3): the display the shell stores; unset is Show all
+         (CollabLayer.tsx reads `settings.comments ?? 'all'`). Read from the reported settings so
+         a radio row's revert (observeToggle) finds the option that was on: without this case the
+         four rows left the display on Hide comments, the last row run, and Insert > Comment later
+         opened no card (the check chain's step 20 read "no comment card opened; snackbar ''",
+         VERIFICATION.md C2-F13) */
+      case 'comments':
+        return st.settings?.comments ?? 'all';
       case 'pointerMine':
         return (
           document
@@ -1823,7 +1863,9 @@ async function runEffect(page, context, item, ctx, deckId, tag) {
             ok: false,
             evidence: `the row is disabled while the predicate ${item.enabled ?? 'always'} says enabled: ${error.message}`,
           }
-        : { ok: false, evidence: `threw: ${String(error).slice(0, 240)}` };
+        : /* a Playwright call log names what intercepted a click or where the element sat only
+             past the first lines, so the whole log is kept the way the infrastructure rows keep it */
+          { ok: false, evidence: `threw: ${String(error).slice(0, 600)}` };
   }
   await closeOverlays(page).catch(() => null);
   if (outcome === undefined) return;
@@ -2036,9 +2078,11 @@ async function runClientEffect(page, context, item) {
         const z = (await state(page)).zoom;
         return z !== before ? z : null;
       });
+      /* back to Fit, the audited zoom (the view.zoom case below says why) */
+      await invoke(page, 'view.zoom', { zoom: 'fit' }).catch(() => null);
       return {
         ok: after !== null,
-        evidence: `zoom ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+        evidence: `zoom ${JSON.stringify(before)} -> ${JSON.stringify(after)}; back to fit`,
       };
     }
     case 'focusTitle': {
@@ -2269,7 +2313,18 @@ async function runClientEffect(page, context, item) {
         },
         { timeout: 6000 },
       );
-      const markers = await page.$$('[data-control="comment.marker"]');
+      /* the page's own list follows the write 60 ms later through comment.list
+         (controller.tsx roomAction, scheduleCommentsRefresh), so the marker is read with a wait,
+         not at the instant the server's list moved (run 1 of the cycle 3 fix round read "threads
+         0 -> 1; 0 marker(s)" on 4381, build/b1.md 12.1) */
+      const markers =
+        (await waitFor(
+          async () => {
+            const drawn = await page.$$('[data-control="comment.marker"]');
+            return drawn.length > 0 ? drawn : null;
+          },
+          { timeout: 4000 },
+        )) ?? [];
       await page.keyboard.press('Escape');
       return {
         ok: landed !== null && markers.length > 0,
@@ -2639,10 +2694,16 @@ async function runActionEffect(page, context, item, ctx, deckId) {
               (Math.abs(z - wanted / 100) < 0.001 || Math.abs(z - wanted) < 0.001);
         return ok ? JSON.stringify(z) : null;
       });
+      /* back to Fit, the audited zoom, the way checkShortcuts returns after its zoom chords: a
+         zoom left at 200 percent moved the stage under every later effect (run 5 of the cycle 3
+         fix round: the comment card of Insert > Comment, placed at the overlay's corner for a
+         slide anchor, sat outside the viewport and its Comment button could not be clicked,
+         build/b1.md 12.1) */
+      if (wanted !== 'fit') await invoke(page, 'view.zoom', { zoom: 'fit' }).catch(() => null);
       return {
         ok: after !== null,
         evidence: after
-          ? `zoom ${after}`
+          ? `zoom ${after}${wanted !== 'fit' ? '; back to fit' : ''}`
           : `zoom ${JSON.stringify((await state(page)).zoom)} wanted ${wanted}; snackbar "${await snackbarText(page)}"`,
       };
     }
@@ -3409,11 +3470,23 @@ async function tailStates(page, context, deckId, tag) {
             ? 'line'
             : 'shape';
     let selected;
+    let cellSession = false;
     if (kind === 'table') {
+      /* SPEC 3.6: a table cell selected. Under the click model (AMENDMENTS.md A1 items 1 and 3)
+         one click on the table selects the object, whose tail is the other tail (editor-shell.ts
+         tailKindOf: a table with no cell and no session), and a double click on the cell opens
+         the cell's session, the state the table tail is drawn for (the check chain's step 20 read
+         the other tail's controls where it wanted the table tail, VERIFICATION.md C2-F13) */
       const cell = await page.$(`.ts-stagewrap .pt-slide [data-run="${block.id}/rows/0/cells/0"]`);
       if (cell) {
         const box = await cell.boundingBox();
         await page.mouse.click(box.x + 8, box.y + box.height / 2);
+        await page.waitForTimeout(150);
+        await page.mouse.dblclick(box.x + 8, box.y + box.height / 2);
+        cellSession =
+          (await page
+            .waitForSelector('.ts-stagewrap [contenteditable="true"]', { timeout: 2000 })
+            .catch(() => null)) !== null;
         await page.waitForTimeout(150);
       }
       selected = (await state(page)).blockId;
@@ -3423,8 +3496,13 @@ async function tailStates(page, context, deckId, tag) {
       fail(section, {
         id: `toolbar.${kind}`,
         check: 'select',
-        evidence: `clicking ${block.id} selected ${selected ?? 'nothing'}`,
+        evidence: `clicking ${block.id} selected ${selected ?? 'nothing'}${kind === 'table' ? `; cell session ${cellSession ? 'open' : 'not opened by the double click'}` : ''}`,
       });
+    /* Escape inside a session returns to the object and a second Escape clears the selection (A1 item 4) */
+    if (cellSession) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+    }
     await page.keyboard.press('Escape');
     await page.waitForTimeout(100);
   }
@@ -4810,8 +4888,12 @@ async function roundTwoStates(page, context, states, deckId, tag) {
       id: 'insert.table.pick',
       evidence: outcome.evidence,
     });
+    /* the Shapes gallery is its own row, All shapes (`insert.shape.gallery`, behind the switch)
+       since the cycle 2 fix round moved it off the Shapes row's altEffect (build/b1.md 10.2); the
+       Shapes row lists Rectangle, Rounded rectangle and Ellipse and draws no plate (the check
+       chain's step 20 read "no tile insert.shape.shapes.pick.hexagon", VERIFICATION.md C2-F13) */
     for (const [rowId, tile] of [
-      ['insert.shape.shapes', 'hexagon'],
+      ['insert.shape.gallery', 'hexagon'],
       ['insert.shape.arrows', 'rightArrow'],
       ['insert.shape.callouts', 'wedgeRectCallout'],
       ['insert.shape.equation', 'mathPlus'],
@@ -5973,25 +6055,19 @@ async function forgetOnCollaborator(tag) {
     /* the account menu is parked (docs/FOCUS.md 3.2) and the switch is per browser: the
        collaborator's own switch goes on before its row is reached. A collaborator the scratch
        deck admits as a viewer (ruling (2): a new deck's general access is restricted, so the
-       second anonymous context reads the shadow floor's role) sees no Tools menu on the deck; the
-       setting is the browser's, so it is flipped on the collaborator's own /new draft and the
-       deck page is loaded again (VERIFICATION.md F-step20, `effects:scratch title.account.forget`) */
-    if (!(await setAdvancedTools(page, true))) {
-      const back = page.url();
-      await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
-      await ready(page);
-      const flipped = await setAdvancedTools(page, true);
-      await page.goto(back, { waitUntil: 'domcontentloaded' });
-      await ready(page);
-      if (!flipped) {
-        page.off('dialog', onDialog);
-        skip(section, {
-          id: item.id,
-          menu: 'title',
-          evidence: `not driven: the collaborator's browser could not turn Tools > Advanced tools on (no row on ${back} nor on /new)`,
-        });
-        return;
-      }
+       second anonymous context reads the shadow floor's role) sees a Tools menu without the row
+       on the deck; the setting is the browser's, so setAdvancedToolsAnywhere flips it on the
+       collaborator's own /new draft and loads the deck page again (VERIFICATION.md F-step20,
+       `effects:scratch title.account.forget`; C2-F13, cycle 3) */
+    const back = page.url();
+    if (!(await setAdvancedToolsAnywhere(page, true))) {
+      page.off('dialog', onDialog);
+      skip(section, {
+        id: item.id,
+        menu: 'title',
+        evidence: `not driven: the collaborator's browser could not turn Tools > Advanced tools on (no row on ${back} nor on /new)`,
+      });
+      return;
     }
     await activate(page, item.id);
   } catch (error) {
@@ -6502,22 +6578,10 @@ try {
        is the browser's; a read-only deck's page can draw a Tools menu without the row (the check
        chain's step 20 read "the row is not in the Tools menu ... rows drawn:
        tools.accessibilitySettings" on this page, VERIFICATION.md C2-F13), so when the page has no
-       row the switch is turned off on the browser's own /new draft (no write, so no deck is made)
-       and the deck page is loaded again, the way `forgetOnCollaborator` flips it on */
-    if (!(await setAdvancedTools(page, false))) {
-      await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
-      await ready(page);
-      const flipped = await setAdvancedTools(page, false);
-      await page.goto(`${BASE}/edit/${READ_ONLY_DECK}`, { waitUntil: 'domcontentloaded' });
-      await ready(page);
-      (flipped ? pass : fail)('advanced', {
-        id: 'tools.advancedTools',
-        check: 'turn off',
-        evidence: flipped
-          ? `no row on /edit/${READ_ONLY_DECK}; turned off on /new and the deck page loaded again`
-          : `no row on /edit/${READ_ONLY_DECK} nor on /new`,
-      });
-    }
+       row setAdvancedToolsAnywhere turns the switch off on the browser's own /new draft (no
+       write, so no deck is made) and loads the deck page again, the way `forgetOnCollaborator`
+       flips it on */
+    await setAdvancedToolsAnywhere(page, false);
     const ctxG = await contextOf(page);
     await walkMenus(page, ctxG, READ_ONLY_DECK);
     await checkToolbar(page, 'default', READ_ONLY_DECK, ctxG);

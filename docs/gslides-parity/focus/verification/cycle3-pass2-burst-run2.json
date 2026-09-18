@@ -1,0 +1,26 @@
+{
+  "summary": {
+    "base": "https://turboslide-eh39w16hp-kl01s-projects.vercel.app",
+    "startedAt": "2026-09-18T04:05:28.687Z",
+    "writes": 60,
+    "assets": 5,
+    "secondTab": true,
+    "companions": 3,
+    "error": "page.waitForFunction: Timeout 60000ms exceeded.",
+    "companionLoads": [
+      24,
+      23,
+      24
+    ],
+    "endedAt": "2026-09-18T04:06:35.899Z",
+    "calls": 0,
+    "failed": 0,
+    "slowest": [],
+    "consoleLines": 2
+  },
+  "rows": [],
+  "consoleLines": [
+    "2026-09-18T04:05:29.146Z error The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "2026-09-18T04:05:33.883Z error Failed to load resource: the server responded with a status of 503 ()"
+  ]
+}

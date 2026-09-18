@@ -9,6 +9,7 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { getAt } from '@turboslide/schema/pointer';
+import { applyMutations } from '@turboslide/schema/reduce';
 import { plainOf } from '@turboslide/schema/text';
 import { validateDocument } from '@turboslide/schema/validate';
 
@@ -23,6 +24,7 @@ import { createRoomClient } from './room-client.ts';
 import type {
   DocumentChange,
   OpenOptions,
+  OpsResponse,
   RoomClientOptions,
   RoomTransport,
   SyncStatus,
@@ -948,5 +950,329 @@ describe('createRoomClient', () => {
     expect(transport.leaves[0]!.clientId).toBe(CLIENT_A);
     transport.hold(false);
     await stopping;
+  });
+});
+
+describe('the blob tier and a lost POST (the focus round, cycle 3; VERIFICATION C2-F24; the fix round, C3-F1)', () => {
+  /**
+   * A transport of this test's own: the stream hands the test its event sink, and the POST
+   * admits the ops on the test's server document and then throws, the way the room client's 30 s
+   * deadline ends a POST an instance is still working on. The server's commit then comes back
+   * through the head poll as a store echo (`clientId: 'store'`), which is what the blob channel
+   * announces to every other instance's tabs (blob.ts `entryOfRecord`).
+   */
+  const lostAnswerHarness = () => {
+    const base = normalized();
+    const r0 = base.deck.revision;
+    let server = base;
+    let emit: ((event: RoomEvent) => void) | null = null;
+    const posted: OpsPost[] = [];
+    const transport: RoomTransport = {
+      open({ onEvent }: OpenOptions) {
+        emit = onEvent;
+        queueMicrotask(() =>
+          onEvent({
+            type: 'hello',
+            seq: r0,
+            revision: r0,
+            clientId: 'c1',
+            role: 'editor',
+            clients: [],
+            editing: 1,
+            tier: 'blob',
+          }),
+        );
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posted.push(body);
+        for (const entry of body.entries) {
+          if (entry.kind === 'edit')
+            server = applyMutations(server, entry.mutations ?? []).document;
+        }
+        server = {
+          deck: { ...server.deck, revision: server.deck.revision + 1 },
+          slides: server.slides,
+        };
+        throw new Error('the POST did not answer within its deadline');
+      },
+      async postPresence() {},
+    };
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document: base,
+      seq: r0,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      onResync: async () => server,
+    });
+    /** The echo of the commit at the next revision, as the poll of another instance announces it. */
+    const echo = (mutations: Mutation[]): void => {
+      emit?.({
+        type: 'op',
+        entry: {
+          seq: r0 + 1,
+          rev: r0,
+          kind: 'edit',
+          author: { kind: 'human', name: 'Titanium 471' },
+          clientId: 'store',
+          opId: 'store:9',
+          mutations,
+          at: '2026-09-17T00:00:00.000Z',
+        },
+      });
+    };
+    return {
+      room,
+      posted,
+      echo,
+      emitEvent: (event: RoomEvent) => emit?.(event),
+      r0,
+      serverText: () => textOf(server),
+      changes,
+    };
+  };
+
+  it('acknowledges the ops from the store echo of the POST it lost, applies the edit once and resends nothing', async () => {
+    const h = lostAnswerHarness();
+    const original = textOf(h.room.document());
+    h.room.start();
+    await until(() => h.room.status().connected);
+    h.room.apply([splice(0, 0, 'q')], 'type', 'now');
+    await until(() => h.posted.length === 1);
+    await until(() => h.room.status().offline, 3000);
+    expect(h.room.status().pending).toBe(1);
+    expect(h.serverText()).toBe(`q${original}`);
+    // the commit's echo arrives before the resend: the op is acknowledged at its revision
+    h.echo([splice(0, 0, 'q')]);
+    expect(h.room.status().pending).toBe(0);
+    expect(h.room.status().seq).toBe(h.r0 + 1);
+    expect(textOf(h.room.document())).toBe(`q${original}`);
+    expect(h.changes[h.changes.length - 1]?.reason).toBe('ack');
+    // no resend follows, so nothing lands twice
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    expect(h.posted).toHaveLength(1);
+    expect(h.serverText()).toBe(`q${original}`);
+    await h.room.stop();
+  });
+
+  it('acknowledges an echo of the POST still in flight, so the text is never doubled while the answer is slow, and the answer then repeats nothing', async () => {
+    const base = normalized();
+    const r0 = base.deck.revision;
+    let emit = null as ((event: RoomEvent) => void) | null;
+    let release = null as ((response: OpsResponse) => void) | null;
+    const posted: OpsPost[] = [];
+    const transport: RoomTransport = {
+      open({ onEvent }: OpenOptions) {
+        emit = onEvent;
+        queueMicrotask(() =>
+          onEvent({
+            type: 'hello',
+            seq: r0,
+            revision: r0,
+            clientId: 'c1',
+            role: 'editor',
+            clients: [],
+            editing: 1,
+            tier: 'blob',
+          }),
+        );
+        return { close: () => undefined };
+      },
+      postOps(body) {
+        posted.push(body);
+        // the server admits at once; its answer is held (a slow store, a 20 s put)
+        return new Promise<OpsResponse>((resolve) => {
+          release = resolve;
+        });
+      },
+      async postPresence() {},
+    };
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document: base,
+      seq: r0,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    const original = textOf(room.document());
+    room.start();
+    await until(() => room.status().connected);
+    const applied = room.apply([splice(0, 0, 'q')], 'type', 'now');
+    await until(() => posted.length === 1);
+    expect(room.status().pending).toBe(1);
+    // the stream's instance polled the store first: the echo of the commit lands before the answer
+    emit?.({
+      type: 'op',
+      entry: {
+        seq: r0 + 1,
+        rev: r0,
+        kind: 'edit',
+        author: { kind: 'human', name: 'Titanium 471' },
+        clientId: 'store',
+        opId: 'store:9',
+        mutations: [splice(0, 0, 'q')],
+        at: '2026-09-17T00:00:00.000Z',
+      },
+    });
+    // acknowledged from the echo: nothing pending, the text once
+    expect(room.status().pending).toBe(0);
+    expect(room.status().seq).toBe(r0 + 1);
+    expect(textOf(room.document())).toBe(`q${original}`);
+    expect(await applied.settled).toEqual({ seq: r0 + 1 });
+    // the answer arrives: the entry at the position repeats nothing and nothing is resent
+    const entry: Entry = {
+      seq: r0 + 1,
+      rev: r0,
+      kind: 'edit',
+      author: { kind: 'human', name: 'Titanium 471' },
+      clientId: 'c1',
+      opId: posted[0]!.entries[0]!.opId,
+      mutations: [splice(0, 0, 'q')],
+      at: '2026-09-17T00:00:00.000Z',
+    };
+    release?.({ ok: true, entries: [entry], rejected: [], head: r0 + 1, revision: r0 + 1 });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(textOf(room.document())).toBe(`q${original}`);
+    expect(room.status()).toMatchObject({ pending: 0, seq: r0 + 1, revision: r0 + 1 });
+    expect(room.status().retained).toBe(1);
+    expect(posted).toHaveLength(1);
+    await room.stop();
+  });
+
+  it("settles an op the resent POST's answer replays behind the position instead of leaving it pending and in flight for good (the stall of C3-F1)", async () => {
+    const base = normalized();
+    const r0 = base.deck.revision;
+    let emit = null as ((event: RoomEvent) => void) | null;
+    const posted: OpsPost[] = [];
+    let answers = 0;
+    const transport: RoomTransport = {
+      open({ onEvent }: OpenOptions) {
+        emit = onEvent;
+        queueMicrotask(() =>
+          onEvent({
+            type: 'hello',
+            seq: r0,
+            revision: r0,
+            clientId: 'c1',
+            role: 'editor',
+            clients: [],
+            editing: 1,
+            tier: 'blob',
+          }),
+        );
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posted.push(body);
+        answers += 1;
+        // the first answer is lost (the 30 s deadline); the resend lands on the instance that
+        // admitted the first and is answered with the entry that admission made, at r0 + 1
+        if (answers === 1) throw new Error('the POST did not answer within its deadline');
+        const entry: Entry = {
+          seq: r0 + 1,
+          rev: r0,
+          kind: 'edit',
+          author: { kind: 'human', name: 'Titanium 471' },
+          clientId: body.clientId,
+          opId: body.entries[0]!.opId,
+          mutations: [splice(0, 0, 'q')],
+          at: '2026-09-17T00:00:00.000Z',
+        };
+        return { ok: true, entries: [entry], rejected: [], head: r0 + 2, revision: r0 + 2 };
+      },
+      async postPresence() {},
+    };
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document: base,
+      seq: r0,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: () => undefined,
+      onResync: async () => base,
+    });
+    const original = textOf(room.document());
+    room.start();
+    await until(() => room.status().connected);
+    room.apply([splice(0, 0, 'q')], 'type', 'now');
+    await until(() => posted.length === 1);
+    await until(() => room.status().offline, 3000);
+    // the stream delivers the commit and another author's write after it, with the fold of the
+    // commit not the client's (the server placed the write differently), so the echo is a remote
+    // write here and the position moves to r0 + 2 before the resend is answered
+    emit?.({
+      type: 'op',
+      entry: {
+        seq: r0 + 1,
+        rev: r0,
+        kind: 'edit',
+        author: { kind: 'human', name: 'Titanium 471' },
+        clientId: 'store',
+        opId: 'store:9',
+        mutations: [splice(0, 0, 'q'), splice(1, 0, '')],
+        at: '2026-09-17T00:00:00.000Z',
+      },
+    });
+    emit?.({
+      type: 'op',
+      entry: {
+        seq: r0 + 2,
+        rev: r0 + 1,
+        kind: 'edit',
+        author: { kind: 'human', name: 'Cobalt 118' },
+        clientId: 'store',
+        opId: 'store:10',
+        mutations: [splice(3, 0, 'Z')],
+        at: '2026-09-17T00:00:01.000Z',
+      },
+    });
+    expect(room.status().seq).toBe(r0 + 2);
+    expect(room.status().pending).toBe(1);
+    // the resend goes and is answered with the entry at r0 + 1, behind the position: the op is
+    // acknowledged, not dropped as a duplicate
+    await until(() => posted.length === 2, 3000);
+    await until(() => room.status().pending === 0, 3000);
+    expect(room.status()).toMatchObject({ pending: 0, seq: r0 + 2, revision: r0 + 2 });
+    // nothing stays in flight and nothing is sent a third time
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(posted).toHaveLength(2);
+    expect(textOf(room.document()).startsWith('q')).toBe(true);
+    expect(textOf(room.document()).length).toBe(original.length + 2);
+    await room.stop();
+  });
+
+  it("reads the store event into sync.status: degraded while the room's store refuses its poll, clear once it answers", async () => {
+    const h = lostAnswerHarness();
+    const statuses: { storeDegraded: boolean }[] = [];
+    h.room.start();
+    await until(() => h.room.status().connected);
+    expect(h.room.status().storeDegraded).toBe(false);
+    h.emitEvent({ type: 'store', ok: false, retryAfterMs: 4000 });
+    statuses.push(h.room.status());
+    h.emitEvent({ type: 'store', ok: true });
+    statuses.push(h.room.status());
+    expect(statuses.map((row) => row.storeDegraded)).toEqual([true, false]);
+    await h.room.stop();
+  });
+
+  it("takes an echo that is not the lost POST as another author's write, as before", async () => {
+    const h = lostAnswerHarness();
+    const original = textOf(h.room.document());
+    h.room.start();
+    await until(() => h.room.status().connected);
+    h.room.apply([splice(0, 0, 'q')], 'type', 'now');
+    await until(() => h.room.status().offline, 3000);
+    // another author's word at the same base: the pending op moves past it and stays pending
+    h.echo([splice(0, 0, 'zz')]);
+    expect(h.room.status().pending).toBe(1);
+    expect(textOf(h.room.document())).toBe(`zzq${original}`);
+    await h.room.stop();
   });
 });

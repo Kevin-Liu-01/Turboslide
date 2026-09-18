@@ -601,6 +601,11 @@ const clickRow = async (page, rowId) => {
 };
 const clickControl = async (page, control) => {
   const el = ctl(page, control).first();
+  /* a control inside a scrolled box below the viewport (the last Restore of a Version history
+     panel with 150 records sat at y 7,723 in a 900 px viewport) got a click on nothing and the
+     row read "restore changed the deck false" with no notice (VERIFICATION.md C2-F4, b7's
+     C2-R18); the element is scrolled into view first, as Playwright's own click does */
+  await el.scrollIntoViewIfNeeded({ timeout: 4000 }).catch(() => undefined);
   const r = await el.boundingBox();
   if (!r) throw new Error(`no control ${control}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import {
   Scratch,
@@ -8,7 +8,6 @@ import {
   coverage,
   ctl,
   download,
-  headingRun,
   invoke,
   menuPath,
   newDeck,
@@ -25,7 +24,6 @@ import {
   state,
   teardownAll,
   title,
-  typeInto,
   typeNote,
   zipEntries,
 } from './lib';
@@ -37,21 +35,43 @@ import {
 // the preview shows. The deck: a title, two more slides, the third skipped, a note on slide 1, a
 // picture placed as setup and a filled rectangle inserted from Insert > Shape.
 //
+// The export quota (SPEC-3 8.3 R3, `ratelimit.ts` `exportsPerDay`): an anonymous identity gets
+// five downloads a day and the sixth is refused 429 with the dialog's sentence. This file's rows
+// make eleven downloads, so the sixth (`images.export.pdf-with-picture`) was refused on every
+// tier and the rows after it passed only because Playwright restarted the worker after the
+// failure and `beforeAll` ran again as a new identity (VERIFICATION.md C2-F8, b7's C2-R20). Each
+// browser context is a new anonymous identity and a deck belongs to the identity that made it,
+// so the rows run as three owners, each with the same deck built for it, and `withBudget(n)`
+// hands a row the owner whose quota holds `n` more downloads (five per identity, never spent
+// past it). The quota is the product's decision and stays; the file just keeps within it.
+//
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/export.spec.ts
 
-const scratch = new Scratch();
-let context: BrowserContext;
-let page: Page;
-let deck = '';
-let unskipped = 0;
+/** Downloads an anonymous identity may make a day (SPEC-3 8.3 R3). */
+const QUOTA = 5;
 const NOTE = 'Open with the renewal date and the two new logos.';
 const TITLE = 'Acme pricing review, Q3 2026';
 const FILL = '#aa3366';
 
-test.beforeAll(async ({ browser }) => {
-  test.setTimeout(240_000);
-  ({ context, page } = await ownerContext(browser));
-  deck = await newDeck(page, scratch, TITLE);
+type Owner = {
+  context: BrowserContext;
+  page: Page;
+  scratch: Scratch;
+  deck: string;
+  /** slides the downloads count: every slide but the skipped one */
+  unskipped: number;
+  /** downloads this identity has made or reserved */
+  downloads: number;
+  n: number;
+};
+const owners: Owner[] = [];
+let browserRef: Browser;
+
+/** A new anonymous identity with the file's deck built for it (a setup, never a driven step). */
+async function makeOwner(browser: Browser): Promise<Owner> {
+  const { context, page } = await ownerContext(browser);
+  const scratch = new Scratch();
+  const deck = await newDeck(page, scratch, TITLE);
   const first = (await slideOrder(page))[0]!;
   await clickCard(page, first);
   await typeNote(page, NOTE);
@@ -75,29 +95,67 @@ test.beforeAll(async ({ browser }) => {
     },
   });
   await settled(page);
-  void second;
   const third = await addSlide(page);
   await clickCard(page, third);
   await skipCurrent(page);
-  unskipped = (await slideOrder(page)).length - 1;
+  const owner: Owner = {
+    context,
+    page,
+    scratch,
+    deck,
+    unskipped: (await slideOrder(page)).length - 1,
+    downloads: 0,
+    n: owners.length + 1,
+  };
+  owners.push(owner);
+  return owner;
+}
+
+/**
+ * The owner for a row that makes `n` downloads: the current one while its quota holds them, else
+ * a new identity with its own deck. The reservation is made before the row runs, so a row that
+ * fails mid way never leaves the count wrong for the next.
+ */
+async function withBudget(n: number): Promise<Owner> {
+  let owner = owners[owners.length - 1];
+  if (!owner || owner.downloads + n > QUOTA) owner = await makeOwner(browserRef);
+  owner.downloads += n;
+  return owner;
+}
+
+test.beforeAll(async ({ browser }) => {
+  test.setTimeout(240_000);
+  browserRef = browser;
+  await makeOwner(browser);
 });
 test.afterAll(async () => {
-  try {
-    await teardownAll(page, scratch);
-  } finally {
-    await context.close();
+  /* every owner's deck is torn down by its own identity (the one that can open it), past a
+     failed row and past the file's own test timeout (VERIFICATION.md C2-F29) */
+  test.setTimeout(300_000);
+  const failures: string[] = [];
+  for (const owner of owners) {
+    try {
+      await teardownAll(owner.page, owner.scratch);
+    } catch (error) {
+      failures.push(
+        `owner ${owner.n}: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      );
+    } finally {
+      await owner.context.close().catch(() => undefined);
+    }
   }
+  expect(failures, 'every owner tore its deck down').toEqual([]);
 });
 
-async function openPdf(): Promise<void> {
+async function openPdf(page: Page): Promise<void> {
   await menuPath(page, 'file', 'file.download', 'file.download.pdf');
   await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
 }
-async function openPptx(): Promise<void> {
+async function openPptx(page: Page): Promise<void> {
   await menuPath(page, 'file', 'file.download', 'file.download.pptx');
   await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
 }
-async function check(control: string): Promise<void> {
+async function check(page: Page, control: string): Promise<void> {
   const box = ctl(page, control);
   const input = box.locator('input').first();
   const target = (await input.count()) > 0 ? input : box;
@@ -110,7 +168,7 @@ async function check(control: string): Promise<void> {
  * timeout (b3 R19, VERIFICATION.md pass 2 F-shapes-export). Done, else the close control, is
  * clicked first; Escape is the fallback for a dialog with neither.
  */
-async function closeDialogs(): Promise<void> {
+async function closeDialogs(page: Page): Promise<void> {
   for (let i = 0; i < 3; i += 1) {
     const dialog = page.locator('.ts-dialog-scrim [role="dialog"]');
     if ((await dialog.count()) === 0) break;
@@ -132,10 +190,11 @@ async function closeDialogs(): Promise<void> {
 
 test(title('export.pdf.file'), async () => {
   test.setTimeout(120_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPdf();
+  await openPdf(page);
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pdf.ms, 'arrives within 30 s').toBeLessThan(30_000);
   expect(pdf.name).toMatch(/\.pdf$/);
   expect(pdf.bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
@@ -144,22 +203,27 @@ test(title('export.pdf.file'), async () => {
 
 test(title('export.pdf.include-skipped'), async () => {
   test.setTimeout(120_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPdf();
-  await check('dialog.download.includeSkipped');
+  await openPdf(page);
+  await check(page, 'dialog.download.includeSkipped');
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pdf.ms).toBeLessThan(30_000);
   expect(pdfPages(pdf.bytes), 'a page for the skipped slide too').toBe(unskipped + 1);
 });
 
 test(title('export.pdf.notes-honest'), async () => {
   test.setTimeout(150_000);
+  /* two downloads when the dialog offers the notes, none when it does not; two are reserved */
+  const owner = await withBudget(2);
+  const { page, deck } = owner;
   await openEditor(page, deck);
-  await openPdf();
+  await openPdf(page);
   const offered = (await ctl(page, 'dialog.download.includeNotes').count()) > 0;
   if (!offered) {
-    await closeDialogs();
+    await closeDialogs(page);
+    owner.downloads -= 2;
     expect(
       offered,
       'the dialog offers Include speaker notes only when the PDF carries them; it is not offered',
@@ -167,11 +231,11 @@ test(title('export.pdf.notes-honest'), async () => {
     return;
   }
   const plain = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
-  await openPdf();
-  await check('dialog.download.includeNotes');
+  await closeDialogs(page);
+  await openPdf(page);
+  await check(page, 'dialog.download.includeNotes');
   const withNotes = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
+  await closeDialogs(page);
   expect(withNotes.ms).toBeLessThan(30_000);
   const differs =
     withNotes.bytes.length !== plain.bytes.length ||
@@ -186,8 +250,9 @@ test(title('export.pdf.notes-honest'), async () => {
 
 test(title('export.pptx.perfect'), async () => {
   test.setTimeout(150_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPptx();
+  await openPptx(page);
   await expect(
     ctl(page, 'dialog.download.mode.flatten')
       .locator('input, [role=radio]')
@@ -195,7 +260,7 @@ test(title('export.pptx.perfect'), async () => {
       .or(ctl(page, 'dialog.download.mode.flatten')),
   ).toBeAttached();
   const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pptx.ms, 'arrives within 30 s').toBeLessThan(30_000);
   expect(pptx.bytes.subarray(0, 2).toString('latin1')).toBe('PK');
   expect(pptxSlides(pptx.bytes).length, 'one slide part per unskipped slide').toBe(unskipped);
@@ -203,11 +268,12 @@ test(title('export.pptx.perfect'), async () => {
 
 test(title('export.pptx.editable'), async () => {
   test.setTimeout(150_000);
+  const { page, deck } = await withBudget(1);
   await openEditor(page, deck);
-  await openPptx();
+  await openPptx(page);
   await ctl(page, 'dialog.download.mode.native').click({ force: true });
   const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pptx.ms).toBeLessThan(30_000);
   const entries = zipEntries(pptx.bytes);
   const slide1 = entries.get('ppt/slides/slide1.xml')?.();
@@ -220,12 +286,13 @@ test(title('export.pptx.editable'), async () => {
 
 test(title('export.pptx.notes-and-skipped'), async () => {
   test.setTimeout(150_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPptx();
-  await check('dialog.download.includeNotes');
-  await check('dialog.download.includeSkipped');
+  await openPptx(page);
+  await check(page, 'dialog.download.includeNotes');
+  await check(page, 'dialog.download.includeSkipped');
   const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pptx.ms).toBeLessThan(30_000);
   expect(pptxSlides(pptx.bytes).length, 'every slide, the skipped one too').toBe(unskipped + 1);
   const entries = zipEntries(pptx.bytes);
@@ -237,10 +304,11 @@ test(title('export.pptx.notes-and-skipped'), async () => {
 
 test(title('images.export.pdf-with-picture'), async () => {
   test.setTimeout(120_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPdf();
+  await openPdf(page);
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pdf.ms).toBeLessThan(30_000);
   expect(pdfPages(pdf.bytes)).toBe(unskipped);
   expect(pdfImages(pdf.bytes), 'one image object per picture at least').toBeGreaterThanOrEqual(1);
@@ -248,10 +316,11 @@ test(title('images.export.pdf-with-picture'), async () => {
 
 test(title('shapes.export.pdf'), async () => {
   test.setTimeout(120_000);
+  const { page, deck, unskipped } = await withBudget(1);
   await openEditor(page, deck);
-  await openPdf();
+  await openPdf(page);
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
-  await closeDialogs();
+  await closeDialogs(page);
   expect(pdf.ms).toBeLessThan(30_000);
   expect(pdfPages(pdf.bytes)).toBe(unskipped);
   const streams = pdfStreams(pdf.bytes);
@@ -264,17 +333,18 @@ test(title('shapes.export.pdf'), async () => {
 });
 
 test(title('shapes.export.pptx'), async () => {
-  test.setTimeout(200_000);
+  test.setTimeout(240_000);
+  const { page, deck, unskipped } = await withBudget(2);
   await openEditor(page, deck);
-  await openPptx();
+  await openPptx(page);
   const perfect = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
-  await closeDialogs();
+  await closeDialogs(page);
   expect(perfect.ms).toBeLessThan(30_000);
   expect(pptxSlides(perfect.bytes).length).toBe(unskipped);
-  await openPptx();
+  await openPptx(page);
   await ctl(page, 'dialog.download.mode.native').click({ force: true });
   const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
-  await closeDialogs();
+  await closeDialogs(page);
   expect(editable.ms).toBeLessThan(30_000);
   const entries = zipEntries(editable.bytes);
   const xml = pptxSlides(editable.bytes)
@@ -285,7 +355,8 @@ test(title('shapes.export.pptx'), async () => {
 });
 
 test(title('export.print.download-pdf-follows-preview'), async () => {
-  test.setTimeout(200_000);
+  test.setTimeout(240_000);
+  const { page, deck, unskipped } = await withBudget(2);
   await openEditor(page, deck);
   await menuPath(page, 'file', 'file.printPreview');
   await page.waitForURL(/\/print\//, { timeout: 20_000 });
@@ -310,8 +381,6 @@ test(title('export.print.download-pdf-follows-preview'), async () => {
   );
   await ctl(page, 'print.close').click();
   await page.waitForURL(/\/edit\//, { timeout: 20_000 });
-  void headingRun;
-  void typeInto;
 });
 
 coverage(import.meta.filename, [

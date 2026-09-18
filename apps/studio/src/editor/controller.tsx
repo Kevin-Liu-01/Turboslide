@@ -4,7 +4,9 @@ import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { createEditHistory } from '@turboslide/agent/window/history';
 import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history';
 import { awaitAcknowledged } from './ack-wait';
+import { refusalSentence } from './refusal';
 import { resyncBroughtUnseen } from './resync-history';
+import { keepsPlace } from './select-after-write';
 import { typingKeyOf } from './typing-key';
 import { windowActionIds } from '@turboslide/agent/window/registry';
 import {
@@ -315,6 +317,9 @@ function sseTransport(deckId: string): RoomTransport {
     'inbox',
     'access',
     'resync',
+    // the room's store refusing its poll, or answering again (the blob tier; room-client.ts
+    // SyncStatus.storeDegraded; the focus round, cycle 3 fix round)
+    'store',
   ];
   return {
     open({ since, retire, onEvent, onError }) {
@@ -403,6 +408,8 @@ class StaleBaseError extends ConflictError {
 
 /** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
 const EXTERNAL_BANNER_MS = 8000;
+/** The floor between two snackbars of one refusal sentence (C3-F3; `sayRefusal`). */
+const REFUSAL_SNACKBAR_SPACING_MS = 60_000;
 /**
  * How long one ops POST may take before the room client treats it as failed and resends (the
  * focus round, cycle 2; the transport's `postOps` says what a POST that never answered did).
@@ -924,6 +931,8 @@ export function createEditorController(init: {
   const listeners = new Set<() => void>();
   let alive = false;
   let shell: ShellState | null = null;
+  /** told once with the mutations of the next write the store shim applies locally (select-after-write.ts) */
+  let onLocalApply: ((mutations: readonly Mutation[]) => void) | null = null;
   /* the editor shell's stored settings, for describe().state.settings (docs/FOCUS.md 3.1) */
   let shellSettings: Readonly<Record<string, boolean | string>> = {};
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
@@ -1064,12 +1073,49 @@ export function createEditorController(init: {
      run in five on a loaded machine, and one extra frame was not always enough). The select runs
      at most twice: a select is a hash navigation, and repeating it every frame cleared the
      snackbar the removal had just shown */
-  const selectSoon = (slideId: string): void => {
+  /**
+   * Selects the slide a write made (the copy, the new slide) once the write is acknowledged. With
+   * `from` (the slide that was active when the write was asked for) the selection lands only while
+   * the person has not moved on since: the acknowledgement is the memory tier's two second
+   * checkpoint idle, and a late `select` overrode the two cards the person had picked in between
+   * (C2-F21 `slides.duplicate.two-selected-menu`; select-after-write.ts).
+   */
+  /**
+   * Arms the selection of the last slide a write inserts, at the local apply (the store shim's
+   * write tells `onLocalApply`), so the copy of Duplicate slide and the slide of New slide are
+   * selected the moment they exist, as Google does, and never two seconds later over a card the
+   * person picked since (C2-F21 `slides.duplicate.two-selected-menu`). `settle` runs after the
+   * acknowledgement with the id the action answered: the fallback when the apply told nothing
+   * (a draft's first writes go through `draftCommit`, which has no local apply hook).
+   */
+  const selectInsertedAtApply = (): { settle: (slideId: string | undefined) => void } => {
+    const from = shell?.active ?? snapshot.activeSlide;
+    let selected = false;
+    onLocalApply = (mutations) => {
+      const inserted = mutations.flatMap((mutation) =>
+        mutation.op === 'slide.insert' ? [mutation.slide.id] : [],
+      );
+      const last = inserted[inserted.length - 1];
+      if (last === undefined || snapshot.document.slides[last] === undefined) return;
+      selected = true;
+      selectSoon(last, from);
+    };
+    return {
+      settle: (slideId) => {
+        if (onLocalApply !== null) onLocalApply = null;
+        if (!selected && slideId !== undefined) selectSoon(slideId, from);
+      },
+    };
+  };
+
+  const selectSoon = (slideId: string, from?: string | null): void => {
+    if (!keepsPlace(shell?.active, from, slideId)) return;
     shell?.select(slideId);
     if (typeof requestAnimationFrame !== 'function' || typeof document === 'undefined') return;
     const until = Date.now() + 2_000;
     const tick = (): void => {
       if (shell?.active === slideId) return;
+      if (!keepsPlace(shell?.active, from, slideId)) return;
       const card = document.querySelector(`.ts-filmstrip .ts-card[data-id="${slideId}"]`);
       if (card !== null) {
         shell?.select(slideId);
@@ -1129,6 +1175,17 @@ export function createEditorController(init: {
 
   const say = (message: string): void => {
     shell?.say(message);
+  };
+  /* the product's sentence for an error a server function threw (editor/refusal.ts), at most once
+     a minute per sentence so a store that refuses every reload does not fill the snackbar */
+  const refusalsSaid = new Map<string, number>();
+  const sayRefusal = (error: unknown): void => {
+    const sentence = refusalSentence(error);
+    const now = Date.now();
+    const last = refusalsSaid.get(sentence) ?? 0;
+    if (now - last < REFUSAL_SNACKBAR_SPACING_MS) return;
+    refusalsSaid.set(sentence, now);
+    say(sentence);
   };
 
   /** Waits until nothing is pending in the room (a named version, a restore). */
@@ -1500,10 +1557,20 @@ export function createEditorController(init: {
         // tab just learned of (its own restore, another tab's write announced as an external
         // checkpoint), and a document from before it left the tab on the old slides while its
         // revision moved (VERIFICATION F-versions); write.ts syncs the store by force when behind
-        const payload = await readEditorDeck({
-          deckId,
-          ...(revision > 0 ? { atLeast: revision } : {}),
-        });
+        let payload: EditorDeck | null;
+        try {
+          payload = await readEditorDeck({
+            deckId,
+            ...(revision > 0 ? { atLeast: revision } : {}),
+          });
+        } catch (error) {
+          // a store error the server function threw (the 429 of VERIFICATION C3-F2) stays out
+          // of the room client's promise chain (C3-F3): the tab keeps its document and its
+          // pending queue, the next stream event or POST answer asks for the reload again, and
+          // the person reads the product's sentence once a minute at most, not the store's
+          sayRefusal(error);
+          return null;
+        }
         if (payload === null) return null;
         const fresh = payload.document.deck.revision;
         // a reload that lands at or below the revision this tab acknowledged brought nothing the
@@ -2106,7 +2173,14 @@ export function createEditorController(init: {
       revision: async () => snapshot.document.deck.revision,
       write: async (write) => {
         checkBase(write.baseRevision);
-        const committed = await commit(write.mutations, label);
+        const settling = commit(write.mutations, label);
+        /* the local document carries the write from here (commitAs applies before it returns the
+           acknowledgement's promise); a handler that selects what the write made is told now,
+           not two seconds later on the memory tier's checkpoint idle (C2-F21, select-after-write.ts) */
+        const told = onLocalApply;
+        onLocalApply = null;
+        told?.(write.mutations);
+        const committed = await settling;
         return {
           ok: true,
           document: snapshot.document,
@@ -2943,15 +3017,17 @@ export function createEditorController(init: {
   });
 
   on<SlideNewInput>('slide.new', async (input) => {
-    const result = await slideNew(storeDeps('slide.new'), context, input);
     // Google selects the new slide (R01 Slide > New slide); a grid stays a grid
-    selectSoon(result.slide.id);
+    const select = selectInsertedAtApply();
+    const result = await slideNew(storeDeps('slide.new'), context, input);
+    select.settle(result.slide.id);
     return result;
   });
   on<SlideDuplicateInput>('slide.duplicate', async (input) => {
+    const select = selectInsertedAtApply();
     const result = await slideDuplicate(storeDeps('slide.duplicate'), context, input);
     const last = result.slides[result.slides.length - 1];
-    if (last !== undefined) selectSoon(last.id);
+    select.settle(last?.id);
     return result;
   });
   on<SlideSkipInput>('slide.skip', (input) => slideSkip(storeDeps('slide.skip'), context, input));
@@ -3215,6 +3291,10 @@ export function createEditorController(init: {
         revision: snapshot.comments.revision,
         display: snapshot.comments.display,
         openThreadId: snapshot.comments.openThreadId,
+        /* `comment.list` answered once since the room opened (b6 cycle 3 R3): the drivers read
+           the thread count only after this is true, so a row never counts threads that are still
+           loading beside the document (VERIFICATION C2-F25, `comments.toolbar-and-menu-routes`) */
+        loaded: snapshot.comments.loaded,
       },
       inbox: {
         unread: snapshot.inbox.unread,

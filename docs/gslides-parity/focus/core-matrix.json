@@ -34,6 +34,16 @@
       "evidence": "audit-decks row 11"
     },
     {
+      "id": "decks.new.ground-paint",
+      "feature": "decks",
+      "interaction": "/new before any write: no canvas of the stage is stretched past its drawn scale, nothing painted runs past the sheet over the stage, and the pointer meets the title placeholder and the sheet at their centres",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "VERIFICATION.md C2-F26: one of eight /new loads on the enforce preview at 2026-09-17T07:40Z painted the dither ramp over the whole stage at many times its scale and the title read \"covered by html\" to the first click; the other seven loads, the boot check and the new write probe painted right",
+      "note": "The audits never read the paint of the fresh draft; the row is the driver for the paint race of C2-F26 and reads every canvas against its box, every painted element past the sheet and what the pointer meets, before the first write"
+    },
+    {
       "id": "decks.new.first-write",
       "feature": "decks",
       "interaction": "Double click the title, type, Escape; revision 1, the address moves to /edit/<id>, the save words read Saving then All changes saved",
@@ -113,6 +123,16 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-decks row 25"
+    },
+    {
+      "id": "decks.save.acknowledged",
+      "feature": "decks",
+      "interaction": "Every write the walk makes through the window API is acknowledged by the server within 60 s and the title row leaves Saving; a write that is not acknowledged fails this row, leaves the rows it served not driven, and the walk goes on with a fresh deck",
+      "driver": "probe --core",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "VERIFICATION.md C2-F24: on the enforce preview the integrator's run of record (2026-09-17T00:31Z, 161 rows lost) and cycle 2 pass 2's run of record (06:57Z, 162 rows lost) saw the window API's writes stop being acknowledged after the title battery, the title row at Saving for eight minutes; cycle 2 pass 1 and every dev server run saw none",
+      "note": "Judged from the whole walk: the toolkit records every window API call that ran to its 60 s bound with its action, deck, area and step, and the row fails on a non empty list"
     },
     {
       "id": "decks.list.read",
@@ -3236,7 +3256,8 @@
       "interaction": "The scratch deck is trashed and deleted forever and answers 404 on /edit and /deck",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "every audit's cleanup row; hotfix-4.md section 3.8 rows 800 to 802"
+      "evidence": "every audit's cleanup row; hotfix-4.md section 3.8 rows 800 to 802",
+      "note": "Since cycle 3 the row also covers every deck a stall retired (decks.save.acknowledged): each is trashed and removed through the window API and has to answer 404 on /edit and /deck as well"
     },
     {
       "id": "surface.parked-shortcut-unbound",

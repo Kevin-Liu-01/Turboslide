@@ -41,9 +41,11 @@ import type { Mutation } from '@turboslide/schema/mutations';
 
 import type { ProvenReadOptions } from './access-store.ts';
 import { provenGet, putWithCopy } from './access-store.ts';
+import { HOSTED_POLL_MS, putPulse } from './pulse.ts';
 import type { BlobClient } from './blob-store.ts';
 import {
   COMMENTS_DIR,
+  boundedBlobClient,
   deckPrefix,
   isBlobExistsError,
   isBlobPreconditionError,
@@ -351,6 +353,17 @@ export async function pullSidecar(
   for (const row of index.threads) {
     if (!/^[A-Za-z0-9_.-]+$/.test(row.id)) continue;
     const name = `${row.id}.json`;
+    // a thread file on disk that hashes to the etag the index names is the store's already
+    // (`pushSidecar` writes the etag beside each row it pushes): no read for it, so a pull of a
+    // deck with many threads costs the index and the changed threads alone (the focus round,
+    // cycle 3: the second browser's `comment.list` on the blob tier read every thread twice)
+    const local = join(dir, name);
+    if (row.etag !== undefined && existsSync(local)) {
+      if (quotedMd5(new Uint8Array(readFileSync(local))) === row.etag) {
+        keep.add(name);
+        continue;
+      }
+    }
     const fetched = await provenGet(client, `${prefix}${name}`, options);
     if (fetched === null) continue;
     keep.add(name);
@@ -411,6 +424,9 @@ export async function pushSidecar(
     ...(indexEtag === null ? {} : { ifMatch: indexEtag }),
   });
   pushed.push(INDEX_FILE);
+  // the deck's pulse (pulse.ts): the one head every other instance's poll makes moves with
+  // this push, so its watcher reads the index (the focus round, cycle 3 fix round)
+  await putPulse(client, deckId, 'comments');
   return { pushed, indexEtag: entry.version };
 }
 
@@ -455,4 +471,135 @@ export async function applyAndPush(
 export function localIndexEtag(deckDir: string): string | null {
   const path = join(commentsDir(deckDir), INDEX_FILE);
   return existsSync(path) ? quotedMd5(new Uint8Array(readFileSync(path))) : null;
+}
+
+/** What a poll of the sidecar's index announces: its version and the threads whose row changed. */
+export type SidecarIndexChange = {
+  version: string;
+  revision: number;
+  /** the rows new or changed since the last announced index; every row on the first change */
+  threadIds: string[];
+};
+
+/** The standalone watcher's interval, for a caller without the deck's pulse; the blob channel passes null. */
+export const SIDECAR_WATCH_POLL_MS = HOSTED_POLL_MS;
+
+export type SidecarWatchOptions = {
+  /**
+   * how often the index's head is read on the watcher's own timer; SIDECAR_WATCH_POLL_MS by
+   * default, null for no timer at all (the caller drives `poll`: the blob channel reads the
+   * index when the deck's pulse moved, so the watcher makes no timed call of its own; the focus
+   * round's cycle 3 fix round, VERIFICATION C3-F2)
+   */
+  pollMs?: number | null;
+  /**
+   * the etag of this instance's own copy of the index; a head that equals it is this instance's
+   * push, which its own append announced already, so it is not announced twice
+   */
+  localEtag?: () => string | null;
+  proven?: ProvenReadOptions;
+  onError?: (error: unknown, context: string) => void;
+};
+
+export type SidecarWatch = {
+  /** one poll now (the tests, a stream open) */
+  poll: () => Promise<void>;
+  stop: () => void;
+};
+
+/**
+ * Polls the head of a deck's `comments/index.json` and announces every version another instance
+ * pushed (the focus round, cycle 3; VERIFICATION.md C2-F28 `comments.reaches-second-browser`).
+ * On the blob tier a comment entry writes the sidecar inside the append and moves no deck
+ * revision, so the store's manifest poll behind the blob channel never fires for it: the writer's
+ * instance published the `op` to its own listeners and every tab streaming from another instance
+ * kept the threads it had. The watcher takes its position first (the current head is not
+ * announced), reads a moved index through `provenGet` (the immutable copy `pushSidecar` stores
+ * under the deck's state folder is the read that holds while the url lags) and hands the caller
+ * the revision and the changed thread ids; the blob channel turns them into the checkpoint frame
+ * with `comments` that the memory tier's checkpointer sends, which every tab answers with a
+ * `comment.list`.
+ */
+export function watchSidecarIndex(
+  rawClient: BlobClient,
+  deckId: string,
+  onChange: (change: SidecarIndexChange) => void,
+  options: SidecarWatchOptions = {},
+): SidecarWatch {
+  // every call meets a deadline (blob-store.ts boundedBlobClient): a hung head never holds the poll
+  const client = boundedBlobClient(rawClient);
+  const path = `${deckPrefix(deckId)}${COMMENTS_DIR}/${INDEX_FILE}`;
+  const onError = options.onError ?? (() => {});
+  let last: string | null | undefined;
+  let rows = new Map<string, string | undefined>();
+  let running: Promise<void> | null = null;
+  let stopped = false;
+  const pollNow = async (): Promise<void> => {
+    const head = await client.head(path);
+    const version = head?.version ?? null;
+    if (last === undefined) {
+      // the position: what is stored now was there before this watcher
+      last = version;
+      if (head !== null) {
+        const got = await provenGet(client, path, options.proven);
+        if (got !== null) rows = rowsOf(got.bytes);
+      }
+      return;
+    }
+    if (version === last) return;
+    if (version !== null && options.localEtag?.() === version) {
+      last = version;
+      const got = await provenGet(client, path, options.proven);
+      if (got !== null) rows = rowsOf(got.bytes);
+      return;
+    }
+    if (head === null) {
+      last = null;
+      rows = new Map();
+      return;
+    }
+    const got = await provenGet(client, path, options.proven);
+    if (got === null) return;
+    const parsed = commentsIndexSchema.safeParse(JSON.parse(new TextDecoder().decode(got.bytes)));
+    if (!parsed.success) return;
+    const next = new Map(parsed.data.threads.map((row) => [row.id, row.etag] as const));
+    const changed = [...next].filter(([id, etag]) => !rows.has(id) || rows.get(id) !== etag);
+    last = got.entry.version;
+    rows = next;
+    onChange({
+      version: got.entry.version,
+      revision: parsed.data.revision,
+      threadIds: changed.map(([id]) => id),
+    });
+  };
+  const poll = (): Promise<void> => {
+    if (stopped) return Promise.resolve();
+    running ??= pollNow()
+      .catch((error: unknown) => onError(error, `comments: polling the index of ${deckId}`))
+      .finally(() => {
+        running = null;
+      });
+    return running;
+  };
+  const pollMs = options.pollMs === undefined ? SIDECAR_WATCH_POLL_MS : options.pollMs;
+  const timer = pollMs === null ? null : setInterval(() => void poll(), pollMs);
+  timer?.unref();
+  return {
+    poll,
+    stop() {
+      stopped = true;
+      if (timer !== null) clearInterval(timer);
+    },
+  };
+}
+
+/** The thread rows of an index's bytes, id to etag; empty for bytes that are not an index. */
+function rowsOf(bytes: Uint8Array): Map<string, string | undefined> {
+  try {
+    const parsed = commentsIndexSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
+    if (!parsed.success) return new Map();
+    return new Map(parsed.data.threads.map((row) => [row.id, row.etag] as const));
+  } catch {
+    return new Map();
+  }
 }

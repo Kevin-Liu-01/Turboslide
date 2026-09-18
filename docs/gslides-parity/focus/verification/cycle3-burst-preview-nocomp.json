@@ -1,0 +1,863 @@
+{
+  "summary": {
+    "base": "https://turboslide-edntdmv3u-kl01s-projects.vercel.app",
+    "startedAt": "2026-09-17T21:00:54.774Z",
+    "writes": 30,
+    "assets": 3,
+    "secondTab": true,
+    "companions": 0,
+    "deckId": "untitled-20260917-j3b4",
+    "duplicate": {
+      "before": 11,
+      "after": 13,
+      "answered": 2,
+      "pair": ["title", "blank-1"]
+    },
+    "tabAtEnd": {
+      "revision": 38,
+      "server": 38,
+      "pending": 0,
+      "connected": true,
+      "words": ""
+    },
+    "storeAtEnd": {
+      "revision": 38,
+      "slides": 13
+    },
+    "cleanup": {
+      "/edit/untitled-20260917-j3b4": 404,
+      "/deck/untitled-20260917-j3b4": 404
+    },
+    "companionLoads": [],
+    "endedAt": "2026-09-17T21:01:39.041Z",
+    "calls": 37,
+    "failed": 0,
+    "slowest": [
+      "write 7 slide.new 1440 ms",
+      "write 30 block.set 1357 ms",
+      "write 10 slide.new 1341 ms",
+      "write 22 slide.new 1289 ms",
+      "write 23 block.insert 1280 ms"
+    ],
+    "consoleLines": 1
+  },
+  "rows": [
+    {
+      "at": "2026-09-17T21:00:59.813Z",
+      "label": "write 1 slide.new",
+      "action": "slide.new",
+      "ms": 307,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 1,
+        "server": 1,
+        "pending": 0
+      },
+      "after": {
+        "revision": 2,
+        "server": 2,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:00.319Z",
+      "label": "write 2 block.insert",
+      "action": "block.insert",
+      "ms": 489,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 2,
+        "server": 2,
+        "pending": 0
+      },
+      "after": {
+        "revision": 3,
+        "server": 3,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:01.587Z",
+      "label": "write 3 block.set",
+      "action": "block.set",
+      "ms": 1254,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 3,
+        "server": 3,
+        "pending": 0
+      },
+      "after": {
+        "revision": 4,
+        "server": 4,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:02.770Z",
+      "label": "write 4 slide.new",
+      "action": "slide.new",
+      "ms": 1173,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 4,
+        "server": 4,
+        "pending": 0
+      },
+      "after": {
+        "revision": 5,
+        "server": 5,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:03.510Z",
+      "label": "write 5 block.insert",
+      "action": "block.insert",
+      "ms": 731,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 5,
+        "server": 5,
+        "pending": 0
+      },
+      "after": {
+        "revision": 6,
+        "server": 6,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:04.227Z",
+      "label": "write 6 block.set",
+      "action": "block.set",
+      "ms": 687,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 6,
+        "server": 6,
+        "pending": 0
+      },
+      "after": {
+        "revision": 7,
+        "server": 7,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:05.701Z",
+      "label": "write 7 slide.new",
+      "action": "slide.new",
+      "ms": 1440,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 7,
+        "server": 7,
+        "pending": 0
+      },
+      "after": {
+        "revision": 8,
+        "server": 8,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:06.633Z",
+      "label": "write 8 block.insert",
+      "action": "block.insert",
+      "ms": 921,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 8,
+        "server": 8,
+        "pending": 0
+      },
+      "after": {
+        "revision": 9,
+        "server": 9,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:07.288Z",
+      "label": "write 9 block.set",
+      "action": "block.set",
+      "ms": 647,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 9,
+        "server": 9,
+        "pending": 0
+      },
+      "after": {
+        "revision": 10,
+        "server": 10,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:08.653Z",
+      "label": "write 10 slide.new",
+      "action": "slide.new",
+      "ms": 1341,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 10,
+        "server": 10,
+        "pending": 0
+      },
+      "after": {
+        "revision": 11,
+        "server": 11,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:09.797Z",
+      "label": "asset 1 asset.add",
+      "action": "asset.add",
+      "ms": 1110,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 11,
+        "server": 11,
+        "pending": 0
+      },
+      "after": {
+        "revision": 12,
+        "server": 12,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:10.548Z",
+      "label": "asset 1 block.insert",
+      "action": "block.insert",
+      "ms": 741,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 12,
+        "server": 12,
+        "pending": 0
+      },
+      "after": {
+        "revision": 13,
+        "server": 13,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:11.214Z",
+      "label": "write 11 block.insert",
+      "action": "block.insert",
+      "ms": 656,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 13,
+        "server": 13,
+        "pending": 0
+      },
+      "after": {
+        "revision": 14,
+        "server": 14,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:11.694Z",
+      "label": "write 12 block.set",
+      "action": "block.set",
+      "ms": 471,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 14,
+        "server": 14,
+        "pending": 0
+      },
+      "after": {
+        "revision": 15,
+        "server": 15,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:12.655Z",
+      "label": "write 13 slide.new",
+      "action": "slide.new",
+      "ms": 912,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 15,
+        "server": 15,
+        "pending": 0
+      },
+      "after": {
+        "revision": 16,
+        "server": 16,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:13.952Z",
+      "label": "write 14 block.insert",
+      "action": "block.insert",
+      "ms": 1273,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 16,
+        "server": 16,
+        "pending": 0
+      },
+      "after": {
+        "revision": 17,
+        "server": 17,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:15.242Z",
+      "label": "write 15 block.set",
+      "action": "block.set",
+      "ms": 1275,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 17,
+        "server": 17,
+        "pending": 0
+      },
+      "after": {
+        "revision": 18,
+        "server": 18,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:15.887Z",
+      "label": "write 16 slide.new",
+      "action": "slide.new",
+      "ms": 628,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 18,
+        "server": 18,
+        "pending": 0
+      },
+      "after": {
+        "revision": 19,
+        "server": 19,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:17.103Z",
+      "label": "write 17 block.insert",
+      "action": "block.insert",
+      "ms": 1200,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 19,
+        "server": 19,
+        "pending": 0
+      },
+      "after": {
+        "revision": 20,
+        "server": 20,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:18.329Z",
+      "label": "write 18 block.set",
+      "action": "block.set",
+      "ms": 1195,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 20,
+        "server": 20,
+        "pending": 0
+      },
+      "after": {
+        "revision": 21,
+        "server": 21,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:19.553Z",
+      "label": "write 19 slide.new",
+      "action": "slide.new",
+      "ms": 1210,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 21,
+        "server": 21,
+        "pending": 0
+      },
+      "after": {
+        "revision": 22,
+        "server": 22,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:20.803Z",
+      "label": "write 20 block.insert",
+      "action": "block.insert",
+      "ms": 1237,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 22,
+        "server": 22,
+        "pending": 0
+      },
+      "after": {
+        "revision": 23,
+        "server": 23,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:21.535Z",
+      "label": "asset 2 asset.add",
+      "action": "asset.add",
+      "ms": 716,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 23,
+        "server": 23,
+        "pending": 0
+      },
+      "after": {
+        "revision": 24,
+        "server": 24,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:22.261Z",
+      "label": "asset 2 block.insert",
+      "action": "block.insert",
+      "ms": 716,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 24,
+        "server": 24,
+        "pending": 0
+      },
+      "after": {
+        "revision": 25,
+        "server": 25,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:23.005Z",
+      "label": "write 21 block.set",
+      "action": "block.set",
+      "ms": 725,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 25,
+        "server": 25,
+        "pending": 0
+      },
+      "after": {
+        "revision": 26,
+        "server": 26,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:24.319Z",
+      "label": "write 22 slide.new",
+      "action": "slide.new",
+      "ms": 1289,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 26,
+        "server": 26,
+        "pending": 0
+      },
+      "after": {
+        "revision": 27,
+        "server": 27,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:25.607Z",
+      "label": "write 23 block.insert",
+      "action": "block.insert",
+      "ms": 1280,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 27,
+        "server": 27,
+        "pending": 0
+      },
+      "after": {
+        "revision": 28,
+        "server": 28,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:26.385Z",
+      "label": "write 24 block.set",
+      "action": "block.set",
+      "ms": 772,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 28,
+        "server": 28,
+        "pending": 0
+      },
+      "after": {
+        "revision": 29,
+        "server": 29,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:27.622Z",
+      "label": "write 25 slide.new",
+      "action": "slide.new",
+      "ms": 1222,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 29,
+        "server": 29,
+        "pending": 0
+      },
+      "after": {
+        "revision": 30,
+        "server": 30,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:28.742Z",
+      "label": "write 26 block.insert",
+      "action": "block.insert",
+      "ms": 1108,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 30,
+        "server": 30,
+        "pending": 0
+      },
+      "after": {
+        "revision": 31,
+        "server": 31,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:29.257Z",
+      "label": "write 27 block.set",
+      "action": "block.set",
+      "ms": 507,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 31,
+        "server": 31,
+        "pending": 0
+      },
+      "after": {
+        "revision": 32,
+        "server": 32,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:30.502Z",
+      "label": "write 28 slide.new",
+      "action": "slide.new",
+      "ms": 1238,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 32,
+        "server": 32,
+        "pending": 0
+      },
+      "after": {
+        "revision": 33,
+        "server": 33,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:31.700Z",
+      "label": "write 29 block.insert",
+      "action": "block.insert",
+      "ms": 1188,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 33,
+        "server": 33,
+        "pending": 0
+      },
+      "after": {
+        "revision": 34,
+        "server": 34,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:33.084Z",
+      "label": "write 30 block.set",
+      "action": "block.set",
+      "ms": 1357,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 34,
+        "server": 34,
+        "pending": 0
+      },
+      "after": {
+        "revision": 35,
+        "server": 35,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:34.011Z",
+      "label": "asset 3 asset.add",
+      "action": "asset.add",
+      "ms": 890,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 35,
+        "server": 35,
+        "pending": 0
+      },
+      "after": {
+        "revision": 36,
+        "server": 36,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:34.510Z",
+      "label": "asset 3 block.insert",
+      "action": "block.insert",
+      "ms": 490,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 36,
+        "server": 36,
+        "pending": 0
+      },
+      "after": {
+        "revision": 37,
+        "server": 37,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    },
+    {
+      "at": "2026-09-17T21:01:35.184Z",
+      "label": "duplicate two slides",
+      "action": "slide.duplicate",
+      "ms": 663,
+      "ok": true,
+      "error": null,
+      "before": {
+        "revision": 37,
+        "server": 37,
+        "pending": 0
+      },
+      "after": {
+        "revision": 38,
+        "server": 38,
+        "pending": 0,
+        "connected": true,
+        "transport": "sse",
+        "error": null
+      },
+      "words": ""
+    }
+  ],
+  "consoleLines": [
+    "2026-09-17T21:00:55.122Z error The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

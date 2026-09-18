@@ -7,6 +7,7 @@
 export const NAME = 'decks';
 export const IDS = [
   'decks.new.draft',
+  'decks.new.ground-paint',
   'decks.new.first-write',
   'decks.title.save-words',
   'decks.title.rename-enter',
@@ -94,6 +95,24 @@ export async function run(t) {
     },
   );
   if (!t.deck.id) throw new Error('no draft id');
+
+  await t.step(
+    'decks.new.ground-paint',
+    'read the ground canvases and the pointer at the title, before the first write',
+    'no canvas is stretched past its drawn scale, nothing painted runs past the sheet over the stage, and the pointer meets the title run and the sheet at their centres',
+    async () => {
+      /* VERIFICATION.md C2-F26: one /new load of the enforce preview drew the dither ramp over
+         the stage at many times its scale and the title could not be clicked ("covered by html");
+         the row reads the bitmaps against their boxes and what the pointer meets, so the race is
+         named when it recurs instead of failing the first write on an actionability wait */
+      const facts = await t.groundPaintFacts();
+      const oversized = t.oversizedCanvases(facts);
+      return {
+        ok: t.groundPaintOk(facts),
+        observed: `${oversized.length > 0 ? `stretched: ${oversized.map((c) => `${c.cls} at ${c.perCell} px per cell`).join(', ')}; ` : ''}${t.describeGroundPaint(facts)}`,
+      };
+    },
+  );
 
   await t.step(
     'decks.new.first-write',

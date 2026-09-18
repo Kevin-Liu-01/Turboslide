@@ -299,7 +299,12 @@ docs/readme/what-works.mjs --check`: the README section "What works today" is re
   before the click); production and localhost run both rows as written. The store's second cycle
   rules (a deadline on every Blob call, the listing joined with the instance's mirrors, a
   `version.restore` record as an external checkpoint, `readEditorDeck` at the head, the proven
-  record and sidecar reads, no cached null on the blob tier) are `docs/hosting.md` "Reads".
+  record and sidecar reads, no cached null on the blob tier) are `docs/hosting.md` "Reads"; the
+  third cycle's (every call cancelled underneath at its deadline, 10 s for a read, 20 s for a
+  document put and 90 s for a twin put, the hosted collection's head poll at 1 s and one at a
+  time, a version record read through the store's head before its public URL, the presence
+  roster and the comments index shared across instances through records on the store) are the
+  same section and `packages/store/src/presence-store.ts`.
 
 ## Hosting
 
@@ -326,8 +331,9 @@ environment); `docs/HOSTED-STATUS.md` records the round.
 Round three adds the tiers of SPEC-3 2.5 behind environment switches. The realtime channel
 (`@turboslide/realtime/select`, `selectRealtime(env)`) is `memory` on a checkout and in the tests,
 `redis` when `TURBOSLIDE_REALTIME=redis` or `REDIS_URL` is set, and `blob` hosted without Redis
-(`BlobStore.write` per batch, a one second head poll, presence per instance, and the title row says
-so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
+(`BlobStore.write` per batch, a one second head poll, the presence roster and the comments index
+shared across instances through records on the store since the focus round's third cycle while
+live cursors stay per instance, and the title row says so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
 under `TURBOSLIDE_SESSION_SECRET`; a hosted deployment without it derives the secret from
 `TURBOSLIDE_TOKEN` and warns once. Accounts are better-auth over `node:sqlite` when
 `TURBOSLIDE_AUTH_DB` is set and Postgres when `DATABASE_URL` is set, else anonymous only; mail is

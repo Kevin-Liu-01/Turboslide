@@ -981,19 +981,28 @@ export async function run(t) {
         10_000,
       );
       await t.sleep(800);
-      const facts = await page.evaluate((blockId) => {
-        const viewer = document.querySelector('.pt-viewer.is-present');
-        const sheet =
-          [...(viewer?.querySelectorAll('.pt-slide') ?? [])].find(
-            (el) => !el.classList.contains('is-leaving'),
-          ) ?? viewer?.querySelector('.pt-slide');
-        const img =
-          sheet?.querySelector(`[data-block="${blockId}"] img`) ??
-          /* a shot object draws `img.shot`; the covering picture kind `img.picture-img` (b3.md) */
-          sheet?.querySelector('img.shot, img.picture-img');
-        return { img: Boolean(img) };
-      }, id);
-      const showGround = await groundOf('.pt-viewer.is-present');
+      /* the show's slide is the stage's sheet in present mode, `.ts-stagewrap.is-present
+         .pt-slide:not(.is-leaving)`; the first `.pt-slide` under `.pt-viewer.is-present` is the
+         filmstrip's live clone, which holds no picture and paints no ground (b1's R32,
+         VERIFICATION.md C2-F5: the product draws both in the show's stage) */
+      const SHOW = '.ts-stagewrap.is-present';
+      await page
+        .locator(`${SHOW} .pt-slide:not(.is-leaving)`)
+        .first()
+        .waitFor({ timeout: 5000 })
+        .catch(() => undefined);
+      const facts = await page.evaluate(
+        ([blockId, root]) => {
+          const sheet = document.querySelector(`${root} .pt-slide:not(.is-leaving)`);
+          const img =
+            sheet?.querySelector(`[data-block="${blockId}"] img`) ??
+            /* a shot object draws `img.shot`; the covering picture kind `img.picture-img` (b3.md) */
+            sheet?.querySelector('img.shot, img.picture-img');
+          return { img: Boolean(img), sheet: Boolean(sheet) };
+        },
+        [id, SHOW],
+      );
+      const showGround = await groundOf(SHOW);
       await t.press('Escape');
       const off = await t.pollUntil(
         () => t.has('.pt-viewer.is-present'),
@@ -1002,7 +1011,7 @@ export async function run(t) {
       );
       return {
         ok: on && facts.img && showGround !== null && showGround === editorGround && !off,
-        observed: `show ${on}; picture ${facts.img}; ground in the editor ${editorGround}, in the show ${showGround}; back in the editor ${!off}`,
+        observed: `show ${on} (the stage's present sheet ${facts.sheet}); picture ${facts.img}; ground in the editor ${editorGround}, in the show ${showGround}; back in the editor ${!off}`,
       };
     },
   );

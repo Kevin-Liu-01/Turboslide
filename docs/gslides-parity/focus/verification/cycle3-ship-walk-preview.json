@@ -1,0 +1,6334 @@
+{
+  "mode": "core",
+  "base": "https://turboslide-eh39w16hp-kl01s-projects.vercel.app",
+  "matrix": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/focus/core-matrix.json",
+  "build": {
+    "version": 1,
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "settings",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "deckId": "untitled-20260918-9l8x",
+  "retiredDecks": [
+    "untitled-20260918-273j"
+  ],
+  "stalls": [
+    {
+      "action": "block.insert",
+      "ms": 60000,
+      "at": "2026-09-18T06:01:34.376Z",
+      "deck": "untitled-20260918-273j",
+      "area": "images",
+      "step": "setup: a picture on the slide"
+    }
+  ],
+  "fakeStall": null,
+  "invokeTimeoutMs": 60000,
+  "startedAt": "2026-09-18T05:50:46.093Z",
+  "ms": 1189523,
+  "steps": 316,
+  "passed": 281,
+  "failed": 3,
+  "notDriven": 32,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 503 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "parked": {
+    "commit": null,
+    "parkedFeatures": []
+  },
+  "core": {
+    "rows": 298,
+    "passed": 264,
+    "failed": 2,
+    "notDriven": 32,
+    "noStep": 0,
+    "results": {
+      "decks.new.draft": "passed",
+      "decks.new.ground-paint": "passed",
+      "decks.new.first-write": "passed",
+      "decks.title.save-words": "passed",
+      "decks.title.rename-enter": "passed",
+      "decks.title.rename-escape": "passed",
+      "decks.title.rename-blur": "passed",
+      "decks.title.rename-empty": "passed",
+      "decks.title.file-rename": "passed",
+      "decks.title.tab-title-after-rename": "passed",
+      "decks.title.mark-to-list": "passed",
+      "decks.edit.reload-keeps-slide": "passed",
+      "decks.save.acknowledged": "failed",
+      "decks.editor.move-to-trash": "passed",
+      "slides.new.toolbar": "passed",
+      "slides.new.arrow-layout": "passed",
+      "slides.new.menu": "passed",
+      "slides.new.ctrl-m-card": "passed",
+      "slides.new.ctrl-m-canvas": "passed",
+      "slides.new.context": "passed",
+      "slides.new.undo": "passed",
+      "slides.duplicate.context": "passed",
+      "slides.duplicate.menu": "passed",
+      "slides.duplicate.cmd-d": "passed",
+      "slides.duplicate.undo-toolbar": "passed",
+      "slides.duplicate.undo-redo-keys": "passed",
+      "slides.duplicate.two-selected-cmd-d": "passed",
+      "slides.duplicate.two-selected-menu": "passed",
+      "slides.delete.key": "passed",
+      "slides.delete.undo-snackbar": "passed",
+      "slides.delete.context": "passed",
+      "slides.delete.undo-cmd-z": "passed",
+      "slides.delete.menu-undo-redo": "passed",
+      "slides.delete.two-selected-key-undo": "passed",
+      "slides.delete.two-selected-menu": "passed",
+      "slides.delete.two-selected-edit-menu": "passed",
+      "slides.delete.canvas-focus-undo": "passed",
+      "slides.delete.undo-redo-saved": "passed",
+      "slides.select.click": "passed",
+      "slides.select.arrows-shift": "passed",
+      "slides.select.shift-cmd-click": "passed",
+      "slides.select.cmd-click-toggle": "passed",
+      "slides.reorder.drag-above": "passed",
+      "slides.reorder.drag-below": "passed",
+      "slides.reorder.cmd-up-down": "passed",
+      "slides.reorder.menu-to-end-undo": "passed",
+      "slides.reorder.undo-drag": "passed",
+      "slides.reorder.two-selected-drag": "passed",
+      "slides.skip.context": "passed",
+      "slides.skip.context-two": "passed",
+      "slides.skip.menu-unskip": "passed",
+      "slides.skip.menu-two": "passed",
+      "slides.layout.picker-open-escape": "passed",
+      "slides.layout.apply.title": "passed",
+      "slides.layout.apply.opener": "passed",
+      "slides.layout.apply.split": "passed",
+      "slides.layout.apply.cols": "passed",
+      "slides.layout.apply.title-only": "passed",
+      "slides.layout.apply.one-column": "passed",
+      "slides.layout.apply.statement": "passed",
+      "slides.layout.apply.section-description": "passed",
+      "slides.layout.apply.mood": "passed",
+      "slides.layout.apply.big-number": "passed",
+      "slides.layout.apply.blank": "passed",
+      "slides.layout.apply.rows": "passed",
+      "slides.layout.apply.plain": "passed",
+      "slides.layout.apply.table": "passed",
+      "slides.layout.apply.figure": "passed",
+      "slides.layout.apply.pair": "passed",
+      "slides.layout.apply.tiles": "passed",
+      "slides.layout.apply.details": "passed",
+      "slides.layout.apply.board": "passed",
+      "slides.layout.apply.matrix": "passed",
+      "slides.layout.apply.closing": "passed",
+      "slides.layout.reopen-ring": "passed",
+      "slides.layout.context-apply": "passed",
+      "slides.layout.menu-apply-undo": "passed",
+      "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+      "slides.layout.typed-title-round-trip": "passed",
+      "slides.layout.snackbar-counts-typed-only": "passed",
+      "slides.layout.undo-typed": "passed",
+      "slides.notes.type": "passed",
+      "slides.notes.per-slide": "passed",
+      "slides.notes.resize-handle": "passed",
+      "slides.notes.reload": "passed",
+      "slides.counter.footer-and-cards": "passed",
+      "slides.hash.click-and-reload": "passed",
+      "slides.reorder.menu-up-down-beginning": "passed",
+      "slides.reorder.cmd-shift-up-down": "passed",
+      "slides.notes.view-menu-toggle": "passed",
+      "slides.context.empty-canvas": "passed",
+      "text.title.single-click": "passed",
+      "text.title.double-click": "passed",
+      "text.title.type-escape": "passed",
+      "text.selected.typing-replaces": "passed",
+      "text.selected.enter-appends": "passed",
+      "text.title.double-click-enters": "passed",
+      "text.caret.click-mid-word": "passed",
+      "text.caret.home-end": "passed",
+      "text.caret.shift-arrow-replace": "passed",
+      "text.caret.shift-home-end": "passed",
+      "text.caret.backspace-word": "passed",
+      "text.caret.option-backspace": "passed",
+      "text.caret.delete": "passed",
+      "text.caret.cmd-a": "passed",
+      "text.title.enter-commits": "passed",
+      "text.session.escape-twice": "passed",
+      "text.subtitle.double-click-type": "passed",
+      "text.subtitle.enter-new-line": "passed",
+      "text.subtitle.shift-enter": "passed",
+      "text.subtitle.arrows-backspace-join": "passed",
+      "text.subtitle.escape-commits": "passed",
+      "text.textbox.insert-click-type": "passed",
+      "text.textbox.insert-drag": "passed",
+      "text.textbox.drag-inside-moves": "passed",
+      "text.textbox.burst-reliability": "passed",
+      "text.toolbar.swaps-on-select": "passed",
+      "text.fontsize.type-enter": "passed",
+      "text.fontsize.plus-minus": "passed",
+      "text.bold.toolbar": "passed",
+      "text.bold.cmd-b-word": "passed",
+      "text.italic.toolbar-word": "passed",
+      "text.italic.cmd-i-word": "passed",
+      "text.underline.cmd-u-word": "passed",
+      "text.underline.toolbar": "passed",
+      "text.strikethrough.cmd-shift-x": "passed",
+      "text.strikethrough.menu": "passed",
+      "text.color.swatch-on-word": "passed",
+      "text.align.toolbar-and-key": "passed",
+      "text.spacing.toolbar": "passed",
+      "text.list.bulleted-toolbar": "passed",
+      "text.list.numbered-toolbar": "passed",
+      "text.list.bulleted-menu-preset": "passed",
+      "text.indent.toolbar": "passed",
+      "text.indent.keys": "passed",
+      "text.link.cmd-k-enter": "passed",
+      "text.clear-formatting": "passed",
+      "text.format-menu.rows-enabled": "passed",
+      "text.format-menu.size-increase": "passed",
+      "text.format-menu.align-left": "passed",
+      "text.format-menu.spacing-double": "passed",
+      "text.format-menu.text-fitting": "passed",
+      "text.autofit.title-wraps": "passed",
+      "text.autofit.textbox-grow": "passed",
+      "text.clipboard.within-box": "passed",
+      "text.clipboard.between-boxes": "passed",
+      "text.clipboard.paste-without-formatting": "not driven",
+      "text.find-replace.replace-all": "passed",
+      "text.find-replace.shortcut": "passed",
+      "text.persistence.reload": "passed",
+      "text.list.numbered-menu-preset": "passed",
+      "text.list.chords": "passed",
+      "text.link.toolbar-button": "passed",
+      "text.format-options.panel": "passed",
+      "text.layout-runs.type": "passed",
+      "text.context.text-block": "passed",
+      "text.context.text-selection": "passed",
+      "text.context.inside-session": "passed",
+      "text.format-menu.size-decrease": "passed",
+      "text.format-menu.spacing-single-1-15": "passed",
+      "text.format-menu.align-indent-rows": "passed",
+      "text.textbox.toolbar-button": "passed",
+      "images.insert.toolbar-sources": "passed",
+      "images.select.chip-handles-tail": "not driven",
+      "images.delete.key": "not driven",
+      "images.move.drag-frame": "not driven",
+      "images.guides.edge-snap": "not driven",
+      "images.guides.centre-y": "not driven",
+      "images.guides.centre-x": "not driven",
+      "images.nudge.arrows": "not driven",
+      "images.resize.eight-handles": "not driven",
+      "images.resize.eight-handles-shift": "not driven",
+      "images.resize.edge-fill": "not driven",
+      "images.resize.alt-centre": "not driven",
+      "images.rotate.ring": "not driven",
+      "images.crop.double-click": "not driven",
+      "images.crop.east-edge": "not driven",
+      "images.crop.south-edge": "not driven",
+      "images.crop.enter": "not driven",
+      "images.crop.undo": "not driven",
+      "images.crop.redo": "not driven",
+      "images.crop.menu-escape": "not driven",
+      "images.crop.toolbar-escape-cancels": "not driven",
+      "images.options.panel": "not driven",
+      "images.options.transparency": "not driven",
+      "images.options.reset": "not driven",
+      "images.reset-image.menu": "not driven",
+      "images.background.colour": "not driven",
+      "images.background.toolbar": "not driven",
+      "images.background.reset": "not driven",
+      "images.present.picture-and-ground": "not driven",
+      "images.context.image": "not driven",
+      "images.options.menu-row": "not driven",
+      "images.background.hex-field": "not driven",
+      "arrange.select.click": "passed",
+      "arrange.select.shift-add": "passed",
+      "arrange.multi.drag-inside-moves-all": "passed",
+      "arrange.select.shift-remove": "passed",
+      "arrange.select.marquee": "passed",
+      "arrange.select.marquee-partial": "passed",
+      "arrange.select.click-away": "passed",
+      "arrange.select.cmd-a": "passed",
+      "arrange.select.escape": "passed",
+      "arrange.order.bring-to-front": "passed",
+      "arrange.order.send-to-back": "passed",
+      "arrange.order.bring-forward": "passed",
+      "arrange.order.send-backward": "passed",
+      "arrange.order.keys": "passed",
+      "arrange.align.left": "passed",
+      "arrange.align.center": "passed",
+      "arrange.align.right": "passed",
+      "arrange.align.top": "passed",
+      "arrange.align.middle": "passed",
+      "arrange.align.bottom": "passed",
+      "arrange.align.single-to-slide": "passed",
+      "arrange.center.horizontal": "passed",
+      "arrange.center.vertical": "passed",
+      "arrange.undo.toolbar-on-arrange": "passed",
+      "arrange.undo.menu-on-arrange": "passed",
+      "arrange.clipboard.copy-paste": "passed",
+      "arrange.clipboard.delete": "passed",
+      "arrange.clipboard.undo-redo-delete": "passed",
+      "arrange.clipboard.cut-paste-undo": "passed",
+      "arrange.clipboard.menu-copy-paste": "passed",
+      "arrange.clipboard.paste-after-new-slide-button": "passed",
+      "arrange.clipboard.paste-with-filmstrip-focus": "passed",
+      "arrange.clipboard.paste-keeps-position": "passed",
+      "arrange.duplicate.cmd-d": "passed",
+      "arrange.duplicate.menu-selects-copy": "passed",
+      "arrange.duplicate.nothing-selected": "passed",
+      "arrange.redo.after-undone-duplicate": "passed",
+      "arrange.keys.backspace-empty-selection": "passed",
+      "arrange.nudge.arrows": "passed",
+      "arrange.nudge.shift": "passed",
+      "arrange.nudge.undo": "passed",
+      "arrange.zoom.box-reads": "passed",
+      "arrange.zoom.menu-in": "passed",
+      "arrange.zoom.cmd-minus": "passed",
+      "arrange.zoom.cmd-plus": "passed",
+      "arrange.zoom.fit": "passed",
+      "arrange.zoom.type-percent": "passed",
+      "arrange.zoom.arrow-menu": "passed",
+      "arrange.zoom.cmd-0": "passed",
+      "arrange.zoom.menu-out": "passed",
+      "arrange.readout.fit": "passed",
+      "arrange.readout.200": "passed",
+      "arrange.selection-colour.light": "passed",
+      "arrange.selection-colour.dark": "passed",
+      "arrange.escape.text-then-selection": "passed",
+      "arrange.zoom.menu-presets": "passed",
+      "arrange.toolbar.select": "passed",
+      "shapes.insert.rectangle-click": "passed",
+      "shapes.insert.rounded-click": "passed",
+      "shapes.insert.ellipse-click": "passed",
+      "shapes.insert.rectangle-drag": "passed",
+      "shapes.insert.ellipse-drag": "passed",
+      "shapes.insert.named-rows": "passed",
+      "shapes.default-look": "passed",
+      "shapes.select": "passed",
+      "shapes.move": "passed",
+      "shapes.resize.eight-handles": "passed",
+      "shapes.rotate": "passed",
+      "shapes.fill.colour": "failed",
+      "shapes.border.colour-weight-dash": "passed",
+      "shapes.text.type-align-bold": "passed",
+      "shapes.duplicate-delete-undo-redo": "passed",
+      "shapes.format-options.size-position": "passed",
+      "shapes.reload-and-viewer": "passed",
+      "shapes.context.shape": "passed",
+      "lines.insert.line-drag": "passed",
+      "lines.insert.arrow-drag": "passed",
+      "lines.end-handle": "passed",
+      "lines.tail.colour-weight-dash-ends": "passed",
+      "lines.context.line": "passed",
+      "share.file-menu-share-with-others": "passed",
+      "versions.open-from-last-edit": "passed",
+      "versions.pick": "passed",
+      "versions.name-current": "passed",
+      "versions.undo-restore": "passed",
+      "export.download-submenu": "passed",
+      "export.pdf.dialog": "passed",
+      "export.pdf.skipped-check": "passed",
+      "export.pdf.close-paths": "passed",
+      "export.pptx.dialog": "passed",
+      "export.print.preview-page": "passed",
+      "export.print.layout-with-notes": "passed",
+      "export.print.include-skipped": "passed",
+      "export.print.print-button": "passed",
+      "export.print.close-preview": "passed",
+      "export.print.file-menu-after-close": "passed",
+      "export.print.menu-row": "passed",
+      "export.print.cmd-p": "passed",
+      "help.help-dialog": "passed",
+      "help.documentation-link": "passed",
+      "help.keyboard-shortcuts": "passed",
+      "help.search-the-menus": "passed",
+      "surface.menus.open-close-escape": "passed",
+      "surface.cleanup": "passed"
+    },
+    "table": [
+      {
+        "id": "decks.new.draft",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          1
+        ]
+      },
+      {
+        "id": "decks.new.ground-paint",
+        "feature": "decks",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          2
+        ]
+      },
+      {
+        "id": "decks.new.first-write",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          3
+        ]
+      },
+      {
+        "id": "decks.title.save-words",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          4
+        ]
+      },
+      {
+        "id": "decks.title.rename-enter",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          5
+        ]
+      },
+      {
+        "id": "decks.title.rename-escape",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          6
+        ]
+      },
+      {
+        "id": "decks.title.rename-blur",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          7
+        ]
+      },
+      {
+        "id": "decks.title.rename-empty",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          8
+        ]
+      },
+      {
+        "id": "decks.title.file-rename",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          9
+        ]
+      },
+      {
+        "id": "decks.title.tab-title-after-rename",
+        "feature": "decks",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          10
+        ]
+      },
+      {
+        "id": "decks.title.mark-to-list",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          11
+        ]
+      },
+      {
+        "id": "decks.edit.reload-keeps-slide",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          12
+        ]
+      },
+      {
+        "id": "decks.save.acknowledged",
+        "feature": "decks",
+        "today": "flaky",
+        "result": "failed",
+        "reason": "every window API write of the walk is acknowledged within 60 s: 1 unanswered call(s): block.insert at 2026-09-18T06:01:34.376Z on untitled-20260918-273j in images (setup: a picture on the slide); 1 fresh deck(s) made for the areas after",
+        "steps": [
+          314
+        ]
+      },
+      {
+        "id": "decks.editor.move-to-trash",
+        "feature": "decks",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          315
+        ]
+      },
+      {
+        "id": "slides.new.toolbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          13
+        ]
+      },
+      {
+        "id": "slides.new.arrow-layout",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          14
+        ]
+      },
+      {
+        "id": "slides.new.menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          15
+        ]
+      },
+      {
+        "id": "slides.new.ctrl-m-card",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          16
+        ]
+      },
+      {
+        "id": "slides.new.ctrl-m-canvas",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          17
+        ]
+      },
+      {
+        "id": "slides.new.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          18
+        ]
+      },
+      {
+        "id": "slides.new.undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          19
+        ]
+      },
+      {
+        "id": "slides.duplicate.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          20
+        ]
+      },
+      {
+        "id": "slides.duplicate.menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          21
+        ]
+      },
+      {
+        "id": "slides.duplicate.cmd-d",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          22
+        ]
+      },
+      {
+        "id": "slides.duplicate.undo-toolbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          23
+        ]
+      },
+      {
+        "id": "slides.duplicate.undo-redo-keys",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          24
+        ]
+      },
+      {
+        "id": "slides.duplicate.two-selected-cmd-d",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          25
+        ]
+      },
+      {
+        "id": "slides.duplicate.two-selected-menu",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          26
+        ]
+      },
+      {
+        "id": "slides.delete.key",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          27
+        ]
+      },
+      {
+        "id": "slides.delete.undo-snackbar",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          28
+        ]
+      },
+      {
+        "id": "slides.delete.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          29
+        ]
+      },
+      {
+        "id": "slides.delete.undo-cmd-z",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          30
+        ]
+      },
+      {
+        "id": "slides.delete.menu-undo-redo",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          31
+        ]
+      },
+      {
+        "id": "slides.delete.two-selected-key-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          32
+        ]
+      },
+      {
+        "id": "slides.delete.two-selected-menu",
+        "feature": "slides",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          33
+        ]
+      },
+      {
+        "id": "slides.delete.two-selected-edit-menu",
+        "feature": "slides",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          34
+        ]
+      },
+      {
+        "id": "slides.delete.canvas-focus-undo",
+        "feature": "slides",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          35
+        ]
+      },
+      {
+        "id": "slides.delete.undo-redo-saved",
+        "feature": "slides",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          36
+        ]
+      },
+      {
+        "id": "slides.select.click",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          38
+        ]
+      },
+      {
+        "id": "slides.select.arrows-shift",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          39
+        ]
+      },
+      {
+        "id": "slides.select.shift-cmd-click",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          40
+        ]
+      },
+      {
+        "id": "slides.select.cmd-click-toggle",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          41
+        ]
+      },
+      {
+        "id": "slides.reorder.drag-above",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          43
+        ]
+      },
+      {
+        "id": "slides.reorder.drag-below",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          45
+        ]
+      },
+      {
+        "id": "slides.reorder.cmd-up-down",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          46
+        ]
+      },
+      {
+        "id": "slides.reorder.menu-to-end-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          47
+        ]
+      },
+      {
+        "id": "slides.reorder.undo-drag",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          44
+        ]
+      },
+      {
+        "id": "slides.reorder.two-selected-drag",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          50
+        ]
+      },
+      {
+        "id": "slides.skip.context",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          52
+        ]
+      },
+      {
+        "id": "slides.skip.context-two",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          54
+        ]
+      },
+      {
+        "id": "slides.skip.menu-unskip",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          53
+        ]
+      },
+      {
+        "id": "slides.skip.menu-two",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          55
+        ]
+      },
+      {
+        "id": "slides.layout.picker-open-escape",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          57
+        ]
+      },
+      {
+        "id": "slides.layout.apply.title",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          58
+        ]
+      },
+      {
+        "id": "slides.layout.apply.opener",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          59
+        ]
+      },
+      {
+        "id": "slides.layout.apply.split",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          60
+        ]
+      },
+      {
+        "id": "slides.layout.apply.cols",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          61
+        ]
+      },
+      {
+        "id": "slides.layout.apply.title-only",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          62
+        ]
+      },
+      {
+        "id": "slides.layout.apply.one-column",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          63
+        ]
+      },
+      {
+        "id": "slides.layout.apply.statement",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          64
+        ]
+      },
+      {
+        "id": "slides.layout.apply.section-description",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          65
+        ]
+      },
+      {
+        "id": "slides.layout.apply.mood",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          66
+        ]
+      },
+      {
+        "id": "slides.layout.apply.big-number",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          67
+        ]
+      },
+      {
+        "id": "slides.layout.apply.blank",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          68
+        ]
+      },
+      {
+        "id": "slides.layout.apply.rows",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          69
+        ]
+      },
+      {
+        "id": "slides.layout.apply.plain",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          70
+        ]
+      },
+      {
+        "id": "slides.layout.apply.table",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          71
+        ]
+      },
+      {
+        "id": "slides.layout.apply.figure",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          72
+        ]
+      },
+      {
+        "id": "slides.layout.apply.pair",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          73
+        ]
+      },
+      {
+        "id": "slides.layout.apply.tiles",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          74
+        ]
+      },
+      {
+        "id": "slides.layout.apply.details",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          75
+        ]
+      },
+      {
+        "id": "slides.layout.apply.board",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          76
+        ]
+      },
+      {
+        "id": "slides.layout.apply.matrix",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          77
+        ]
+      },
+      {
+        "id": "slides.layout.apply.closing",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          78
+        ]
+      },
+      {
+        "id": "slides.layout.reopen-ring",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          79
+        ]
+      },
+      {
+        "id": "slides.layout.context-apply",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          80
+        ]
+      },
+      {
+        "id": "slides.layout.menu-apply-undo",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          81
+        ]
+      },
+      {
+        "id": "slides.layout.fresh-slide-two-picks-no-carry",
+        "feature": "slides",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          82
+        ]
+      },
+      {
+        "id": "slides.layout.typed-title-round-trip",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          83
+        ]
+      },
+      {
+        "id": "slides.layout.snackbar-counts-typed-only",
+        "feature": "slides",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          84
+        ]
+      },
+      {
+        "id": "slides.layout.undo-typed",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          85
+        ]
+      },
+      {
+        "id": "slides.notes.type",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          87
+        ]
+      },
+      {
+        "id": "slides.notes.per-slide",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          88
+        ]
+      },
+      {
+        "id": "slides.notes.resize-handle",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          89
+        ]
+      },
+      {
+        "id": "slides.notes.reload",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          90
+        ]
+      },
+      {
+        "id": "slides.counter.footer-and-cards",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          93
+        ]
+      },
+      {
+        "id": "slides.hash.click-and-reload",
+        "feature": "slides",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          94
+        ]
+      },
+      {
+        "id": "slides.reorder.menu-up-down-beginning",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          48
+        ]
+      },
+      {
+        "id": "slides.reorder.cmd-shift-up-down",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          49
+        ]
+      },
+      {
+        "id": "slides.notes.view-menu-toggle",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          91
+        ]
+      },
+      {
+        "id": "slides.context.empty-canvas",
+        "feature": "slides",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          95
+        ]
+      },
+      {
+        "id": "text.title.single-click",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          96
+        ]
+      },
+      {
+        "id": "text.title.double-click",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          97
+        ]
+      },
+      {
+        "id": "text.title.type-escape",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          98
+        ]
+      },
+      {
+        "id": "text.selected.typing-replaces",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          99
+        ]
+      },
+      {
+        "id": "text.selected.enter-appends",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          100
+        ]
+      },
+      {
+        "id": "text.title.double-click-enters",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          101
+        ]
+      },
+      {
+        "id": "text.caret.click-mid-word",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          102
+        ]
+      },
+      {
+        "id": "text.caret.home-end",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          103
+        ]
+      },
+      {
+        "id": "text.caret.shift-arrow-replace",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          104
+        ]
+      },
+      {
+        "id": "text.caret.shift-home-end",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          105
+        ]
+      },
+      {
+        "id": "text.caret.backspace-word",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          106
+        ]
+      },
+      {
+        "id": "text.caret.option-backspace",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          107
+        ]
+      },
+      {
+        "id": "text.caret.delete",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          108
+        ]
+      },
+      {
+        "id": "text.caret.cmd-a",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          109
+        ]
+      },
+      {
+        "id": "text.title.enter-commits",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          110
+        ]
+      },
+      {
+        "id": "text.session.escape-twice",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          111
+        ]
+      },
+      {
+        "id": "text.subtitle.double-click-type",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          112
+        ]
+      },
+      {
+        "id": "text.subtitle.enter-new-line",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          113
+        ]
+      },
+      {
+        "id": "text.subtitle.shift-enter",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          114
+        ]
+      },
+      {
+        "id": "text.subtitle.arrows-backspace-join",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          115
+        ]
+      },
+      {
+        "id": "text.subtitle.escape-commits",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          116
+        ]
+      },
+      {
+        "id": "text.textbox.insert-click-type",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          118
+        ]
+      },
+      {
+        "id": "text.textbox.insert-drag",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          119
+        ]
+      },
+      {
+        "id": "text.textbox.drag-inside-moves",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          120
+        ]
+      },
+      {
+        "id": "text.textbox.burst-reliability",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          122
+        ]
+      },
+      {
+        "id": "text.toolbar.swaps-on-select",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          123
+        ]
+      },
+      {
+        "id": "text.fontsize.type-enter",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          124
+        ]
+      },
+      {
+        "id": "text.fontsize.plus-minus",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          125
+        ]
+      },
+      {
+        "id": "text.bold.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          126
+        ]
+      },
+      {
+        "id": "text.bold.cmd-b-word",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          127
+        ]
+      },
+      {
+        "id": "text.italic.toolbar-word",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          128
+        ]
+      },
+      {
+        "id": "text.italic.cmd-i-word",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          129
+        ]
+      },
+      {
+        "id": "text.underline.cmd-u-word",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          130
+        ]
+      },
+      {
+        "id": "text.underline.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          132
+        ]
+      },
+      {
+        "id": "text.strikethrough.cmd-shift-x",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          131
+        ]
+      },
+      {
+        "id": "text.strikethrough.menu",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          133
+        ]
+      },
+      {
+        "id": "text.color.swatch-on-word",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          134
+        ]
+      },
+      {
+        "id": "text.align.toolbar-and-key",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          135
+        ]
+      },
+      {
+        "id": "text.spacing.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          136
+        ]
+      },
+      {
+        "id": "text.list.bulleted-toolbar",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          137
+        ]
+      },
+      {
+        "id": "text.list.numbered-toolbar",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          138
+        ]
+      },
+      {
+        "id": "text.list.bulleted-menu-preset",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          139
+        ]
+      },
+      {
+        "id": "text.indent.toolbar",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          142
+        ]
+      },
+      {
+        "id": "text.indent.keys",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          143
+        ]
+      },
+      {
+        "id": "text.link.cmd-k-enter",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          144
+        ]
+      },
+      {
+        "id": "text.clear-formatting",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          146
+        ]
+      },
+      {
+        "id": "text.format-menu.rows-enabled",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          147
+        ]
+      },
+      {
+        "id": "text.format-menu.size-increase",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          148
+        ]
+      },
+      {
+        "id": "text.format-menu.align-left",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          150
+        ]
+      },
+      {
+        "id": "text.format-menu.spacing-double",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          152
+        ]
+      },
+      {
+        "id": "text.format-menu.text-fitting",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          154
+        ]
+      },
+      {
+        "id": "text.autofit.title-wraps",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          156
+        ]
+      },
+      {
+        "id": "text.autofit.textbox-grow",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          157
+        ]
+      },
+      {
+        "id": "text.clipboard.within-box",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          158
+        ]
+      },
+      {
+        "id": "text.clipboard.between-boxes",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          159
+        ]
+      },
+      {
+        "id": "text.clipboard.paste-without-formatting",
+        "feature": "text",
+        "today": "not driven",
+        "result": "not driven",
+        "reason": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+        "steps": [
+          160
+        ]
+      },
+      {
+        "id": "text.find-replace.replace-all",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          161
+        ]
+      },
+      {
+        "id": "text.find-replace.shortcut",
+        "feature": "text",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          162
+        ]
+      },
+      {
+        "id": "text.persistence.reload",
+        "feature": "text",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          167
+        ]
+      },
+      {
+        "id": "text.list.numbered-menu-preset",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          140
+        ]
+      },
+      {
+        "id": "text.list.chords",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          141
+        ]
+      },
+      {
+        "id": "text.link.toolbar-button",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          145
+        ]
+      },
+      {
+        "id": "text.format-options.panel",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          155
+        ]
+      },
+      {
+        "id": "text.layout-runs.type",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          166
+        ]
+      },
+      {
+        "id": "text.context.text-block",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          163
+        ]
+      },
+      {
+        "id": "text.context.text-selection",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          164
+        ]
+      },
+      {
+        "id": "text.context.inside-session",
+        "feature": "text",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          165
+        ]
+      },
+      {
+        "id": "text.format-menu.size-decrease",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          149
+        ]
+      },
+      {
+        "id": "text.format-menu.spacing-single-1-15",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          153
+        ]
+      },
+      {
+        "id": "text.format-menu.align-indent-rows",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          151
+        ]
+      },
+      {
+        "id": "text.textbox.toolbar-button",
+        "feature": "text",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          121
+        ]
+      },
+      {
+        "id": "images.insert.toolbar-sources",
+        "feature": "images",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          169
+        ]
+      },
+      {
+        "id": "images.select.chip-handles-tail",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          171
+        ]
+      },
+      {
+        "id": "images.delete.key",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          172
+        ]
+      },
+      {
+        "id": "images.move.drag-frame",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          173
+        ]
+      },
+      {
+        "id": "images.guides.edge-snap",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          174
+        ]
+      },
+      {
+        "id": "images.guides.centre-y",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          175
+        ]
+      },
+      {
+        "id": "images.guides.centre-x",
+        "feature": "images",
+        "today": "flaky",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          176
+        ]
+      },
+      {
+        "id": "images.nudge.arrows",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          177
+        ]
+      },
+      {
+        "id": "images.resize.eight-handles",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          178
+        ]
+      },
+      {
+        "id": "images.resize.eight-handles-shift",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          179
+        ]
+      },
+      {
+        "id": "images.resize.edge-fill",
+        "feature": "images",
+        "today": "broken",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          180
+        ]
+      },
+      {
+        "id": "images.resize.alt-centre",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          181
+        ]
+      },
+      {
+        "id": "images.rotate.ring",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          182
+        ]
+      },
+      {
+        "id": "images.crop.double-click",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          183
+        ]
+      },
+      {
+        "id": "images.crop.east-edge",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          184
+        ]
+      },
+      {
+        "id": "images.crop.south-edge",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          185
+        ]
+      },
+      {
+        "id": "images.crop.enter",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          186
+        ]
+      },
+      {
+        "id": "images.crop.undo",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          187
+        ]
+      },
+      {
+        "id": "images.crop.redo",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          188
+        ]
+      },
+      {
+        "id": "images.crop.menu-escape",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          189
+        ]
+      },
+      {
+        "id": "images.crop.toolbar-escape-cancels",
+        "feature": "images",
+        "today": "broken",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          190
+        ]
+      },
+      {
+        "id": "images.options.panel",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          191
+        ]
+      },
+      {
+        "id": "images.options.transparency",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          192
+        ]
+      },
+      {
+        "id": "images.options.reset",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          193
+        ]
+      },
+      {
+        "id": "images.reset-image.menu",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          194
+        ]
+      },
+      {
+        "id": "images.background.colour",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          195
+        ]
+      },
+      {
+        "id": "images.background.toolbar",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          196
+        ]
+      },
+      {
+        "id": "images.background.reset",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          197
+        ]
+      },
+      {
+        "id": "images.present.picture-and-ground",
+        "feature": "images",
+        "today": "works",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          198
+        ]
+      },
+      {
+        "id": "images.context.image",
+        "feature": "images",
+        "today": "not driven",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          199
+        ]
+      },
+      {
+        "id": "images.options.menu-row",
+        "feature": "images",
+        "today": "not driven",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          200
+        ]
+      },
+      {
+        "id": "images.background.hex-field",
+        "feature": "images",
+        "today": "not driven",
+        "result": "not driven",
+        "reason": "setup failed: a picture on the slide",
+        "steps": [
+          201
+        ]
+      },
+      {
+        "id": "arrange.select.click",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          205
+        ]
+      },
+      {
+        "id": "arrange.select.shift-add",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          206
+        ]
+      },
+      {
+        "id": "arrange.multi.drag-inside-moves-all",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          207
+        ]
+      },
+      {
+        "id": "arrange.select.shift-remove",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          208
+        ]
+      },
+      {
+        "id": "arrange.select.marquee",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          209
+        ]
+      },
+      {
+        "id": "arrange.select.marquee-partial",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          210
+        ]
+      },
+      {
+        "id": "arrange.select.click-away",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          211
+        ]
+      },
+      {
+        "id": "arrange.select.cmd-a",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          212
+        ]
+      },
+      {
+        "id": "arrange.select.escape",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          213
+        ]
+      },
+      {
+        "id": "arrange.order.bring-to-front",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          214
+        ]
+      },
+      {
+        "id": "arrange.order.send-to-back",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          215
+        ]
+      },
+      {
+        "id": "arrange.order.bring-forward",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          216
+        ]
+      },
+      {
+        "id": "arrange.order.send-backward",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          217
+        ]
+      },
+      {
+        "id": "arrange.order.keys",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          218
+        ]
+      },
+      {
+        "id": "arrange.align.left",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          219
+        ]
+      },
+      {
+        "id": "arrange.align.center",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          220
+        ]
+      },
+      {
+        "id": "arrange.align.right",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          221
+        ]
+      },
+      {
+        "id": "arrange.align.top",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          222
+        ]
+      },
+      {
+        "id": "arrange.align.middle",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          223
+        ]
+      },
+      {
+        "id": "arrange.align.bottom",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          224
+        ]
+      },
+      {
+        "id": "arrange.align.single-to-slide",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          225
+        ]
+      },
+      {
+        "id": "arrange.center.horizontal",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          226
+        ]
+      },
+      {
+        "id": "arrange.center.vertical",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          227
+        ]
+      },
+      {
+        "id": "arrange.undo.toolbar-on-arrange",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          228
+        ]
+      },
+      {
+        "id": "arrange.undo.menu-on-arrange",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          229
+        ]
+      },
+      {
+        "id": "arrange.clipboard.copy-paste",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          230
+        ]
+      },
+      {
+        "id": "arrange.clipboard.delete",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          231
+        ]
+      },
+      {
+        "id": "arrange.clipboard.undo-redo-delete",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          232
+        ]
+      },
+      {
+        "id": "arrange.clipboard.cut-paste-undo",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          233
+        ]
+      },
+      {
+        "id": "arrange.clipboard.menu-copy-paste",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          234
+        ]
+      },
+      {
+        "id": "arrange.clipboard.paste-after-new-slide-button",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          235
+        ]
+      },
+      {
+        "id": "arrange.clipboard.paste-with-filmstrip-focus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          236
+        ]
+      },
+      {
+        "id": "arrange.clipboard.paste-keeps-position",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          237
+        ]
+      },
+      {
+        "id": "arrange.duplicate.cmd-d",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          238
+        ]
+      },
+      {
+        "id": "arrange.duplicate.menu-selects-copy",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          239
+        ]
+      },
+      {
+        "id": "arrange.duplicate.nothing-selected",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          240
+        ]
+      },
+      {
+        "id": "arrange.redo.after-undone-duplicate",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          241
+        ]
+      },
+      {
+        "id": "arrange.keys.backspace-empty-selection",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          242
+        ]
+      },
+      {
+        "id": "arrange.nudge.arrows",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          243
+        ]
+      },
+      {
+        "id": "arrange.nudge.shift",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          244
+        ]
+      },
+      {
+        "id": "arrange.nudge.undo",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          245
+        ]
+      },
+      {
+        "id": "arrange.zoom.box-reads",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          246
+        ]
+      },
+      {
+        "id": "arrange.zoom.menu-in",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          251
+        ]
+      },
+      {
+        "id": "arrange.zoom.cmd-minus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          250
+        ]
+      },
+      {
+        "id": "arrange.zoom.cmd-plus",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          249
+        ]
+      },
+      {
+        "id": "arrange.zoom.fit",
+        "feature": "arrange",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          253
+        ]
+      },
+      {
+        "id": "arrange.zoom.type-percent",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          247
+        ]
+      },
+      {
+        "id": "arrange.zoom.arrow-menu",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          254
+        ]
+      },
+      {
+        "id": "arrange.zoom.cmd-0",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          248
+        ]
+      },
+      {
+        "id": "arrange.zoom.menu-out",
+        "feature": "arrange",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          252
+        ]
+      },
+      {
+        "id": "arrange.readout.fit",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          256
+        ]
+      },
+      {
+        "id": "arrange.readout.200",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          257
+        ]
+      },
+      {
+        "id": "arrange.selection-colour.light",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          259
+        ]
+      },
+      {
+        "id": "arrange.selection-colour.dark",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          258
+        ]
+      },
+      {
+        "id": "arrange.escape.text-then-selection",
+        "feature": "arrange",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          260
+        ]
+      },
+      {
+        "id": "arrange.zoom.menu-presets",
+        "feature": "arrange",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          255
+        ]
+      },
+      {
+        "id": "arrange.toolbar.select",
+        "feature": "arrange",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          261
+        ]
+      },
+      {
+        "id": "shapes.insert.rectangle-click",
+        "feature": "shapes",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          264
+        ]
+      },
+      {
+        "id": "shapes.insert.rounded-click",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          265
+        ]
+      },
+      {
+        "id": "shapes.insert.ellipse-click",
+        "feature": "shapes",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          266
+        ]
+      },
+      {
+        "id": "shapes.insert.rectangle-drag",
+        "feature": "shapes",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          267
+        ]
+      },
+      {
+        "id": "shapes.insert.ellipse-drag",
+        "feature": "shapes",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          268
+        ]
+      },
+      {
+        "id": "shapes.insert.named-rows",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          269
+        ]
+      },
+      {
+        "id": "shapes.default-look",
+        "feature": "shapes",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          270
+        ]
+      },
+      {
+        "id": "shapes.select",
+        "feature": "shapes",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          271
+        ]
+      },
+      {
+        "id": "shapes.move",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          272
+        ]
+      },
+      {
+        "id": "shapes.resize.eight-handles",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          273
+        ]
+      },
+      {
+        "id": "shapes.rotate",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          274
+        ]
+      },
+      {
+        "id": "shapes.fill.colour",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "failed",
+        "reason": "the toolbar Fill color: a swatch, then a hex value; Undo: fill rgba(242, 242, 240, 0.05) -> rgb(47, 92, 224) (stored blue true) -> rgb(47, 92, 224); after two undos rgba(7, 7, 7, 0.035)",
+        "steps": [
+          275
+        ]
+      },
+      {
+        "id": "shapes.border.colour-weight-dash",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          276
+        ]
+      },
+      {
+        "id": "shapes.text.type-align-bold",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          277
+        ]
+      },
+      {
+        "id": "shapes.duplicate-delete-undo-redo",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          278
+        ]
+      },
+      {
+        "id": "shapes.format-options.size-position",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          279
+        ]
+      },
+      {
+        "id": "shapes.reload-and-viewer",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          281
+        ]
+      },
+      {
+        "id": "shapes.context.shape",
+        "feature": "shapes",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          280
+        ]
+      },
+      {
+        "id": "lines.insert.line-drag",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          283
+        ]
+      },
+      {
+        "id": "lines.insert.arrow-drag",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          284
+        ]
+      },
+      {
+        "id": "lines.end-handle",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          285
+        ]
+      },
+      {
+        "id": "lines.tail.colour-weight-dash-ends",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          286
+        ]
+      },
+      {
+        "id": "lines.context.line",
+        "feature": "lines",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          287
+        ]
+      },
+      {
+        "id": "share.file-menu-share-with-others",
+        "feature": "share",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          289
+        ]
+      },
+      {
+        "id": "versions.open-from-last-edit",
+        "feature": "versions",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          290
+        ]
+      },
+      {
+        "id": "versions.pick",
+        "feature": "versions",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          291
+        ]
+      },
+      {
+        "id": "versions.name-current",
+        "feature": "versions",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          292
+        ]
+      },
+      {
+        "id": "versions.undo-restore",
+        "feature": "versions",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          293
+        ]
+      },
+      {
+        "id": "export.download-submenu",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          294
+        ]
+      },
+      {
+        "id": "export.pdf.dialog",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          295
+        ]
+      },
+      {
+        "id": "export.pdf.skipped-check",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          296
+        ]
+      },
+      {
+        "id": "export.pdf.close-paths",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          297
+        ]
+      },
+      {
+        "id": "export.pptx.dialog",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          298
+        ]
+      },
+      {
+        "id": "export.print.preview-page",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          301
+        ]
+      },
+      {
+        "id": "export.print.layout-with-notes",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          302
+        ]
+      },
+      {
+        "id": "export.print.include-skipped",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          303
+        ]
+      },
+      {
+        "id": "export.print.print-button",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          304
+        ]
+      },
+      {
+        "id": "export.print.close-preview",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          305
+        ]
+      },
+      {
+        "id": "export.print.file-menu-after-close",
+        "feature": "export",
+        "today": "flaky",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          306
+        ]
+      },
+      {
+        "id": "export.print.menu-row",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          307
+        ]
+      },
+      {
+        "id": "export.print.cmd-p",
+        "feature": "export",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          308
+        ]
+      },
+      {
+        "id": "help.help-dialog",
+        "feature": "help",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          309
+        ]
+      },
+      {
+        "id": "help.documentation-link",
+        "feature": "help",
+        "today": "broken",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          310
+        ]
+      },
+      {
+        "id": "help.keyboard-shortcuts",
+        "feature": "help",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          311
+        ]
+      },
+      {
+        "id": "help.search-the-menus",
+        "feature": "help",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          312
+        ]
+      },
+      {
+        "id": "surface.menus.open-close-escape",
+        "feature": "surface",
+        "today": "not driven",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          313
+        ]
+      },
+      {
+        "id": "surface.cleanup",
+        "feature": "surface",
+        "today": "works",
+        "result": "passed",
+        "reason": "",
+        "steps": [
+          316
+        ]
+      }
+    ],
+    "verdict": {
+      "ok": false,
+      "failures": [
+        {
+          "id": "decks.save.acknowledged",
+          "feature": "decks",
+          "result": "failed"
+        },
+        {
+          "id": "images.select.chip-handles-tail",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.delete.key",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.move.drag-frame",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.guides.edge-snap",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.guides.centre-y",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.guides.centre-x",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.nudge.arrows",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.resize.eight-handles",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.resize.eight-handles-shift",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.resize.edge-fill",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.resize.alt-centre",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.rotate.ring",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.double-click",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.east-edge",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.south-edge",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.enter",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.undo",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.redo",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.menu-escape",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.crop.toolbar-escape-cancels",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.options.panel",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.options.transparency",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.options.reset",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.reset-image.menu",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.background.colour",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.background.toolbar",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.background.reset",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.present.picture-and-ground",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.context.image",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.options.menu-row",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "images.background.hex-field",
+          "feature": "images",
+          "result": "not driven"
+        },
+        {
+          "id": "shapes.fill.colour",
+          "feature": "shapes",
+          "result": "failed"
+        }
+      ]
+    },
+    "untaggedFailures": [],
+    "exitCode": 1
+  },
+  "rows": [
+    {
+      "n": 1,
+      "id": "decks.new.draft",
+      "step": "open /new",
+      "expected": "revision 0, Not saved yet, the title placeholder prompts",
+      "observed": "untitled-20260918-273j; revision 0; save words \"Not saved yet\"; prompts 2; runs heading/text,lead/text",
+      "ok": true,
+      "ms": 560
+    },
+    {
+      "n": 2,
+      "id": "decks.new.ground-paint",
+      "step": "read the ground canvases and the pointer at the title, before the first write",
+      "expected": "no canvas is stretched past its drawn scale, nothing painted runs past the sheet over the stage, and the pointer meets the title run and the sheet at their centres",
+      "observed": "0 canvas(es); covers past the sheet none; sheet 1128x635 in a stage of 1184x691; at the title centre h1 (inside the run true); at the sheet div.in (inside the sheet true)",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 3,
+      "id": "decks.new.first-write",
+      "step": "double click the title, type, Escape",
+      "expected": "revision 1, the address moves to /edit/<id>, the save words read Saving then All changes saved",
+      "observed": "editing true; /edit/untitled-20260918-273j; revision 1; words seen Not saved yet > Saving… > All changes saved; final \"All changes saved\"; stored true",
+      "ok": true,
+      "ms": 3877
+    },
+    {
+      "n": 4,
+      "id": "decks.title.save-words",
+      "step": "a second edit",
+      "expected": "the save words turn to Saving and back to All changes saved",
+      "observed": "words All changes saved > Saving… > All changes saved; final \"All changes saved\"",
+      "ok": true,
+      "ms": 1627
+    },
+    {
+      "n": 5,
+      "id": "decks.title.rename-enter",
+      "step": "click the deck name, type, Enter",
+      "expected": "the name and deck.info title change",
+      "observed": "\"Pipeline review: Acme, Q3 2026\" -> shown \"Acme renewal deck\", stored \"Acme renewal deck\"",
+      "ok": true,
+      "ms": 2703
+    },
+    {
+      "n": 6,
+      "id": "decks.title.rename-escape",
+      "step": "click the deck name, type, Escape",
+      "expected": "the name is restored",
+      "observed": "before \"Acme renewal deck\"; shown \"Acme renewal deck\"; stored \"Acme renewal deck\"",
+      "ok": true,
+      "ms": 2371
+    },
+    {
+      "n": 7,
+      "id": "decks.title.rename-blur",
+      "step": "click the deck name, type, click the canvas",
+      "expected": "the typed name is kept",
+      "observed": "stored \"Acme renewal deck v2\"; shown \"Acme renewal deck v2\"",
+      "ok": true,
+      "ms": 3102
+    },
+    {
+      "n": 8,
+      "id": "decks.title.rename-empty",
+      "step": "clear the deck name and press Enter",
+      "expected": "the old name comes back",
+      "observed": "before \"Acme renewal deck v2\"; shown \"Acme renewal deck v2\"; stored \"Acme renewal deck v2\"",
+      "ok": true,
+      "ms": 1854
+    },
+    {
+      "n": 9,
+      "id": "decks.title.file-rename",
+      "step": "File > Rename",
+      "expected": "the name field takes the focus",
+      "observed": "field open true; focus input[deck.name]",
+      "ok": true,
+      "ms": 2098
+    },
+    {
+      "n": 10,
+      "id": "decks.title.tab-title-after-rename",
+      "step": "rename the deck and read document.title",
+      "expected": "the browser tab title reads the new name without a reload",
+      "observed": "document.title \"Acme renewal deck v3, editor, Turboslide\"",
+      "ok": true,
+      "ms": 2595
+    },
+    {
+      "n": 11,
+      "id": "decks.title.mark-to-list",
+      "step": "click the Turboslide mark",
+      "expected": "/decks opens",
+      "observed": "/decks; the deck's card listed true",
+      "ok": true,
+      "ms": 3450
+    },
+    {
+      "n": 12,
+      "id": "decks.edit.reload-keeps-slide",
+      "step": "reload /edit/<id>#s/<slide>",
+      "expected": "the same slide is current after the reload",
+      "observed": "hash before reload #s/split-1; active after split-1; hash after #s/split-1",
+      "ok": true,
+      "ms": 1747
+    },
+    {
+      "n": 13,
+      "id": "slides.new.toolbar",
+      "step": "click New slide in the toolbar",
+      "expected": "one slide is added after the current one and becomes current",
+      "observed": "2 -> 3; new split-2 at 1; active split-2",
+      "ok": true,
+      "ms": 1778
+    },
+    {
+      "n": 14,
+      "id": "slides.new.arrow-layout",
+      "step": "the arrow beside New slide, then a layout tile",
+      "expected": "the plate opens and a pick adds a slide with that layout",
+      "observed": "new title-only-1; layout title-only",
+      "ok": true,
+      "ms": 1074
+    },
+    {
+      "n": 15,
+      "id": "slides.new.menu",
+      "step": "Slide > New slide",
+      "expected": "a slide is added",
+      "observed": "4 -> 5",
+      "ok": true,
+      "ms": 1277
+    },
+    {
+      "n": 16,
+      "id": "slides.new.ctrl-m-card",
+      "step": "Ctrl+M with a filmstrip card focused",
+      "expected": "a slide is added",
+      "observed": "5 -> 6; focus div[filmstrip.slide.split-2]",
+      "ok": true,
+      "ms": 557
+    },
+    {
+      "n": 17,
+      "id": "slides.new.ctrl-m-canvas",
+      "step": "Ctrl+M with the canvas focused",
+      "expected": "a slide is added",
+      "observed": "6 -> 7",
+      "ok": true,
+      "ms": 532
+    },
+    {
+      "n": 18,
+      "id": "slides.new.context",
+      "step": "right click a card > New slide",
+      "expected": "a slide is added after it",
+      "observed": "7 -> 8; new split-4 after split-2 true",
+      "ok": true,
+      "ms": 1043
+    },
+    {
+      "n": 19,
+      "id": "slides.new.undo",
+      "step": "Cmd+Z after New slide",
+      "expected": "the new slide is removed and the order restored",
+      "observed": "title,split-2,split-4,split-3,title-only-3,title-only-1,title-only-2,split-1 -> 9 -> title,split-2,split-4,split-3,title-only-3,title-only-1,title-only-2,split-1",
+      "ok": true,
+      "ms": 1838
+    },
+    {
+      "n": 20,
+      "id": "slides.duplicate.context",
+      "step": "right click the title card > Duplicate slide",
+      "expected": "the copy lands after the source with its heading",
+      "observed": "new title-2 after title; heading \"\" (source \"\")",
+      "ok": true,
+      "ms": 1065
+    },
+    {
+      "n": 21,
+      "id": "slides.duplicate.menu",
+      "step": "Slide > Duplicate slide",
+      "expected": "one more slide after the current one",
+      "observed": "9 -> 10",
+      "ok": true,
+      "ms": 1947
+    },
+    {
+      "n": 22,
+      "id": "slides.duplicate.cmd-d",
+      "step": "Cmd+D with a card focused",
+      "expected": "the slide is duplicated",
+      "observed": "10 -> 11",
+      "ok": true,
+      "ms": 643
+    },
+    {
+      "n": 23,
+      "id": "slides.duplicate.undo-toolbar",
+      "step": "the toolbar Undo",
+      "expected": "the duplicate is removed",
+      "observed": "11 -> 10",
+      "ok": true,
+      "ms": 1148
+    },
+    {
+      "n": 24,
+      "id": "slides.duplicate.undo-redo-keys",
+      "step": "Cmd+D, Cmd+Z, Cmd+Shift+Z",
+      "expected": "the duplicate leaves and comes back",
+      "observed": "10 -> 11 -> 10 -> 11",
+      "ok": true,
+      "ms": 2788
+    },
+    {
+      "n": 25,
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "step": "two cards selected, Cmd+D",
+      "expected": "both are copied",
+      "observed": "selected title-2,title-2-2-2; 11 -> 13",
+      "ok": true,
+      "ms": 2703
+    },
+    {
+      "n": 26,
+      "id": "slides.duplicate.two-selected-menu",
+      "step": "two cards selected, Slide > Duplicate slide",
+      "expected": "both are copied",
+      "observed": "selected title-2,title-2-2-2; 13 -> 15",
+      "ok": true,
+      "ms": 2968
+    },
+    {
+      "n": 27,
+      "id": "slides.delete.key",
+      "step": "Delete with a card focused",
+      "expected": "the slide leaves with the Slide deleted snackbar",
+      "observed": "15 -> 14; snackbar \"Slide deletedUndo\"",
+      "ok": true,
+      "ms": 673
+    },
+    {
+      "n": 28,
+      "id": "slides.delete.undo-snackbar",
+      "step": "Undo on the snackbar",
+      "expected": "the slide returns at its index",
+      "observed": "title,title-2,title-2-2-2,title-2-2-4,title-2-2-3,title-2-2,split-2,split-4,split-3,title-only-3,title-only-1,title-only-2,split-1,title-2-2-2-2 -> title,title-2,title-2-2-2,title-2-2-4,title-2-2-3,title-2-2,split-2,split-4,split-3,title-only-3,title-only-1,title-only-2,split-1,title-2-2-2-2",
+      "ok": true,
+      "ms": 1111
+    },
+    {
+      "n": 29,
+      "id": "slides.delete.context",
+      "step": "right click a card > Delete",
+      "expected": "the slide leaves",
+      "observed": "14 -> 13",
+      "ok": true,
+      "ms": 1057
+    },
+    {
+      "n": 30,
+      "id": "slides.delete.undo-cmd-z",
+      "step": "Cmd+Z after the delete",
+      "expected": "the slide returns",
+      "observed": "13 -> 14",
+      "ok": true,
+      "ms": 2077
+    },
+    {
+      "n": 31,
+      "id": "slides.delete.menu-undo-redo",
+      "step": "Slide > Delete slide, the toolbar Undo, Edit > Redo",
+      "expected": "the slide leaves, returns, leaves",
+      "observed": "14 -> 13 -> 14 -> 13",
+      "ok": true,
+      "ms": 5152
+    },
+    {
+      "n": 32,
+      "id": "slides.delete.two-selected-key-undo",
+      "step": "two cards selected, Delete, the snackbar Undo, a reload",
+      "expected": "both leave, both return, the server order matches after a reload",
+      "observed": "selected title-2,title-2-2-2; 13 -> 11 -> 13; after reload same",
+      "ok": true,
+      "ms": 4858
+    },
+    {
+      "n": 33,
+      "id": "slides.delete.two-selected-menu",
+      "step": "two cards selected, Slide > Delete slide",
+      "expected": "both leave",
+      "observed": "selected title-2,title-2-2-2; 13 -> 11",
+      "ok": true,
+      "ms": 6181
+    },
+    {
+      "n": 34,
+      "id": "slides.delete.two-selected-edit-menu",
+      "step": "two cards selected, Edit > Delete",
+      "expected": "both leave",
+      "observed": "selected title-2,title-2-2-2; 13 -> 11",
+      "ok": true,
+      "ms": 5768
+    },
+    {
+      "n": 35,
+      "id": "slides.delete.canvas-focus-undo",
+      "step": "click the empty canvas, Delete, Cmd+Z",
+      "expected": "the slide returns in the tab and on the server after a reload",
+      "observed": "the canvas Delete removed nothing (rank 4); the delete was made from the focused card; 13 -> 12 -> 13; after reload same order; snackbar Slide deletedUndo",
+      "ok": true,
+      "ms": 7790
+    },
+    {
+      "n": 36,
+      "id": "slides.delete.undo-redo-saved",
+      "step": "delete a slide, wait for the save, Cmd+Z, wait, Cmd+Shift+Z, reload",
+      "expected": "the server order matches the screen after the reload",
+      "observed": "13 -> 12 -> 13 -> 12; server after reload matches the screen; snackbar Slide deletedUndo",
+      "ok": true,
+      "ms": 5155
+    },
+    {
+      "n": 37,
+      "step": "setup: trim the deck to 5 slides",
+      "expected": "slide.remove through the window API",
+      "observed": "5 slides",
+      "ok": true,
+      "ms": 9196
+    },
+    {
+      "n": 38,
+      "id": "slides.select.click",
+      "step": "click a card",
+      "expected": "current, selected and focused; the stage and the hash follow",
+      "observed": "active title-2-2-2; card current true selected true focused true; hash #s/title-2-2-2",
+      "ok": true,
+      "ms": 761
+    },
+    {
+      "n": 39,
+      "id": "slides.select.arrows-shift",
+      "step": "Down and Up, then Shift+Down",
+      "expected": "the current card moves, Shift+Down extends the selection",
+      "observed": "down title-2-2-2, up title-2; after Shift+Down selected title-2,title-2-2-2",
+      "ok": true,
+      "ms": 1190
+    },
+    {
+      "n": 40,
+      "id": "slides.select.shift-cmd-click",
+      "step": "Shift click a range, Cmd click one, plain click",
+      "expected": "a range, then one more, then one",
+      "observed": "range 3; after Cmd click 4; after a plain click 1",
+      "ok": true,
+      "ms": 2132
+    },
+    {
+      "n": 41,
+      "id": "slides.select.cmd-click-toggle",
+      "step": "Cmd click a card twice",
+      "expected": "it is added, then dropped",
+      "observed": "2 then 1",
+      "ok": true,
+      "ms": 1541
+    },
+    {
+      "n": 42,
+      "step": "setup: trim the deck to 5 slides",
+      "expected": "slide.remove through the window API",
+      "observed": "5 slides",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 43,
+      "id": "slides.reorder.drag-above",
+      "step": "drag a card above another",
+      "expected": "the order changes",
+      "observed": "title,title-2,title-2-2-2,title-2-2-4,title-2-2-3 -> title,title-2-2-2,title-2,title-2-2-4,title-2-2-3",
+      "ok": true,
+      "ms": 1908
+    },
+    {
+      "n": 44,
+      "id": "slides.reorder.undo-drag",
+      "step": "Cmd+Z after the drag",
+      "expected": "the order is restored",
+      "observed": "title,title-2,title-2-2-2,title-2-2-4,title-2-2-3",
+      "ok": true,
+      "ms": 1320
+    },
+    {
+      "n": 45,
+      "id": "slides.reorder.drag-below",
+      "step": "drag a card below another",
+      "expected": "the order changes",
+      "observed": "title,title-2,title-2-2-2,title-2-2-4,title-2-2-3 -> title,title-2-2-2,title-2-2-4,title-2,title-2-2-3",
+      "ok": true,
+      "ms": 1945
+    },
+    {
+      "n": 46,
+      "id": "slides.reorder.cmd-up-down",
+      "step": "Cmd+Down and Cmd+Up with a card focused",
+      "expected": "the card moves one step each way",
+      "observed": "index 1 -> 2 -> 1",
+      "ok": true,
+      "ms": 2653
+    },
+    {
+      "n": 47,
+      "id": "slides.reorder.menu-to-end-undo",
+      "step": "Slide > Move slide > Move slide to end, then Cmd+Z",
+      "expected": "the card goes last and comes back",
+      "observed": "to end true; back true",
+      "ok": true,
+      "ms": 3658
+    },
+    {
+      "n": 48,
+      "id": "slides.reorder.menu-up-down-beginning",
+      "step": "Slide > Move slide > up, down, to beginning",
+      "expected": "each moves the current card",
+      "observed": "index 2 -> 1 -> 2 -> 0",
+      "ok": true,
+      "ms": 7061
+    },
+    {
+      "n": 49,
+      "id": "slides.reorder.cmd-shift-up-down",
+      "step": "Cmd+Shift+Up then Cmd+Shift+Down with a card focused",
+      "expected": "to the beginning, then to the end",
+      "observed": "index 2 -> 0 -> 4 of 4",
+      "ok": true,
+      "ms": 3990
+    },
+    {
+      "n": 50,
+      "id": "slides.reorder.two-selected-drag",
+      "step": "two selected cards dragged together",
+      "expected": "both move",
+      "observed": "title,title-2-2-2,title-2-2-4,title-2,title-2-2-3 -> title,title-2,title-2-2-3,title-2-2-2,title-2-2-4",
+      "ok": true,
+      "ms": 4710
+    },
+    {
+      "n": 51,
+      "step": "setup: trim the deck to 5 slides",
+      "expected": "slide.remove through the window API",
+      "observed": "5 slides",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 52,
+      "id": "slides.skip.context",
+      "step": "right click a card > Skip slide",
+      "expected": "the card fades with the eye glyph and the row reads Unskip slide",
+      "observed": "skipped true; glyph true; row \"Unskip slide\"",
+      "ok": true,
+      "ms": 1867
+    },
+    {
+      "n": 53,
+      "id": "slides.skip.menu-unskip",
+      "step": "Slide > Unskip slide",
+      "expected": "the skipped slide comes back",
+      "observed": "skipped false",
+      "ok": true,
+      "ms": 1788
+    },
+    {
+      "n": 54,
+      "id": "slides.skip.context-two",
+      "step": "two cards selected, right click > Skip slide",
+      "expected": "both skipped with the Skipped 2 slides snackbar",
+      "observed": "skipped 2 of 2; snackbar \"Skipped 2 slidesUndo\"",
+      "ok": true,
+      "ms": 2521
+    },
+    {
+      "n": 55,
+      "id": "slides.skip.menu-two",
+      "step": "two cards selected, Slide > Skip slide (unskips the pair), then again",
+      "expected": "both toggle together",
+      "observed": "unskipped to 0, skipped to 2; title-2-2-3 stays skipped for the later areas",
+      "ok": true,
+      "ms": 7444
+    },
+    {
+      "n": 56,
+      "step": "setup: a fresh slide for the layout rows",
+      "expected": "slide.new through the window API",
+      "observed": "slide split-1",
+      "ok": true,
+      "ms": 786
+    },
+    {
+      "n": 57,
+      "id": "slides.layout.picker-open-escape",
+      "step": "the toolbar Layout button, then Escape",
+      "expected": "the picker opens ringing the current layout and closes",
+      "observed": "ringed split; current split; gone true",
+      "ok": true,
+      "ms": 981
+    },
+    {
+      "n": 58,
+      "id": "slides.layout.apply.title",
+      "step": "apply title from the picker",
+      "expected": "the slide's template reads title",
+      "observed": "template title",
+      "ok": true,
+      "ms": 1917
+    },
+    {
+      "n": 59,
+      "id": "slides.layout.apply.opener",
+      "step": "apply opener from the picker",
+      "expected": "the slide's template reads opener",
+      "observed": "template opener",
+      "ok": true,
+      "ms": 1611
+    },
+    {
+      "n": 60,
+      "id": "slides.layout.apply.split",
+      "step": "apply split from the picker",
+      "expected": "the slide's template reads split",
+      "observed": "template split",
+      "ok": true,
+      "ms": 2053
+    },
+    {
+      "n": 61,
+      "id": "slides.layout.apply.cols",
+      "step": "apply cols from the picker",
+      "expected": "the slide's template reads cols",
+      "observed": "template cols",
+      "ok": true,
+      "ms": 1852
+    },
+    {
+      "n": 62,
+      "id": "slides.layout.apply.title-only",
+      "step": "apply title-only from the picker",
+      "expected": "the slide's template reads title-only",
+      "observed": "template title-only",
+      "ok": true,
+      "ms": 1621
+    },
+    {
+      "n": 63,
+      "id": "slides.layout.apply.one-column",
+      "step": "apply one-column from the picker",
+      "expected": "the slide's template reads one-column",
+      "observed": "template one-column",
+      "ok": true,
+      "ms": 1484
+    },
+    {
+      "n": 64,
+      "id": "slides.layout.apply.statement",
+      "step": "apply statement from the picker",
+      "expected": "the slide's template reads statement",
+      "observed": "template statement",
+      "ok": true,
+      "ms": 1818
+    },
+    {
+      "n": 65,
+      "id": "slides.layout.apply.section-description",
+      "step": "apply section-description from the picker",
+      "expected": "the slide's template reads section-description",
+      "observed": "template section-description",
+      "ok": true,
+      "ms": 1560
+    },
+    {
+      "n": 66,
+      "id": "slides.layout.apply.mood",
+      "step": "apply mood from the picker",
+      "expected": "the slide's template reads mood",
+      "observed": "template mood",
+      "ok": true,
+      "ms": 1578
+    },
+    {
+      "n": 67,
+      "id": "slides.layout.apply.big-number",
+      "step": "apply big-number from the picker",
+      "expected": "the slide's template reads big-number",
+      "observed": "template big-number",
+      "ok": true,
+      "ms": 1748
+    },
+    {
+      "n": 68,
+      "id": "slides.layout.apply.blank",
+      "step": "apply blank from the picker",
+      "expected": "the slide's template reads blank",
+      "observed": "template blank",
+      "ok": true,
+      "ms": 1561
+    },
+    {
+      "n": 69,
+      "id": "slides.layout.apply.rows",
+      "step": "apply rows from the picker",
+      "expected": "the slide's template reads rows",
+      "observed": "template rows",
+      "ok": true,
+      "ms": 1916
+    },
+    {
+      "n": 70,
+      "id": "slides.layout.apply.plain",
+      "step": "apply plain from the picker",
+      "expected": "the slide's template reads plain",
+      "observed": "template plain",
+      "ok": true,
+      "ms": 1813
+    },
+    {
+      "n": 71,
+      "id": "slides.layout.apply.table",
+      "step": "apply table from the picker",
+      "expected": "the slide's template reads table",
+      "observed": "template table",
+      "ok": true,
+      "ms": 1499
+    },
+    {
+      "n": 72,
+      "id": "slides.layout.apply.figure",
+      "step": "apply figure from the picker",
+      "expected": "the slide's template reads figure",
+      "observed": "template figure",
+      "ok": true,
+      "ms": 2416
+    },
+    {
+      "n": 73,
+      "id": "slides.layout.apply.pair",
+      "step": "apply pair from the picker",
+      "expected": "the slide's template reads pair",
+      "observed": "template pair",
+      "ok": true,
+      "ms": 1791
+    },
+    {
+      "n": 74,
+      "id": "slides.layout.apply.tiles",
+      "step": "apply tiles from the picker",
+      "expected": "the slide's template reads tiles",
+      "observed": "template tiles",
+      "ok": true,
+      "ms": 1919
+    },
+    {
+      "n": 75,
+      "id": "slides.layout.apply.details",
+      "step": "apply details from the picker",
+      "expected": "the slide's template reads details",
+      "observed": "template details",
+      "ok": true,
+      "ms": 1971
+    },
+    {
+      "n": 76,
+      "id": "slides.layout.apply.board",
+      "step": "apply board from the picker",
+      "expected": "the slide's template reads board",
+      "observed": "template board",
+      "ok": true,
+      "ms": 1542
+    },
+    {
+      "n": 77,
+      "id": "slides.layout.apply.matrix",
+      "step": "apply matrix from the picker",
+      "expected": "the slide's template reads matrix",
+      "observed": "template matrix",
+      "ok": true,
+      "ms": 1714
+    },
+    {
+      "n": 78,
+      "id": "slides.layout.apply.closing",
+      "step": "apply closing from the picker",
+      "expected": "the slide's template reads closing",
+      "observed": "template closing",
+      "ok": true,
+      "ms": 1608
+    },
+    {
+      "n": 79,
+      "id": "slides.layout.reopen-ring",
+      "step": "reopen the picker",
+      "expected": "the applied layout is ringed",
+      "observed": "ringed closing",
+      "ok": true,
+      "ms": 454
+    },
+    {
+      "n": 80,
+      "id": "slides.layout.context-apply",
+      "step": "right click the card > Apply layout > Title and body",
+      "expected": "the layout applies",
+      "observed": "template split",
+      "ok": true,
+      "ms": 2002
+    },
+    {
+      "n": 81,
+      "id": "slides.layout.menu-apply-undo",
+      "step": "Slide > Apply layout > Title only, then Cmd+Z",
+      "expected": "the previous layout returns",
+      "observed": "split -> title-only -> split",
+      "ok": true,
+      "ms": 3460
+    },
+    {
+      "n": 82,
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "step": "on a fresh slide apply Section header then Title and body",
+      "expected": "the slide holds only the second layout's placeholders",
+      "observed": "fresh split blocks \"type\":\"heading\",\"type\":\"paragraph\",\"type\":\"paragraph\",\"type\":\"split\"; after opener then split \"type\":\"heading\",\"type\":\"paragraph\",\"type\":\"paragraph\",\"type\":\"split\"; pictures 0",
+      "ok": true,
+      "ms": 5329
+    },
+    {
+      "n": 83,
+      "id": "slides.layout.typed-title-round-trip",
+      "step": "type a title, apply Main point, then Title and body",
+      "expected": "the title comes back and nothing else",
+      "observed": "texts after the round trip [\"Round trip title\"]",
+      "ok": true,
+      "ms": 8899
+    },
+    {
+      "n": 84,
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "step": "apply Title slide to an untouched slide",
+      "expected": "no dropped block warning",
+      "observed": "snackbar \"none new\"",
+      "ok": true,
+      "ms": 5478
+    },
+    {
+      "n": 85,
+      "id": "slides.layout.undo-typed",
+      "step": "Cmd+Z after a layout change on a typed slide",
+      "expected": "the layout and the text come back",
+      "observed": "layout back split; text back true",
+      "ok": true,
+      "ms": 6223
+    },
+    {
+      "n": 86,
+      "step": "setup: trim the deck to 4 slides",
+      "expected": "slide.remove through the window API",
+      "observed": "4 slides",
+      "ok": true,
+      "ms": 6291
+    },
+    {
+      "n": 87,
+      "id": "slides.notes.type",
+      "step": "click the notes field and type a talk track",
+      "expected": "the slide stores it",
+      "observed": "stored \"Open with the renewal date and the two new logos.\"",
+      "ok": true,
+      "ms": 5570
+    },
+    {
+      "n": 88,
+      "id": "slides.notes.per-slide",
+      "step": "click another card, read its notes, come back",
+      "expected": "each slide shows its own notes",
+      "observed": "other slide \"\"; title slide \"Open with the renewal date and the two new logos.\"",
+      "ok": true,
+      "ms": 2122
+    },
+    {
+      "n": 89,
+      "id": "slides.notes.resize-handle",
+      "step": "drag the notes handle taller, double click it, drag it back",
+      "expected": "the pane height follows",
+      "observed": "height 64 -> 154 -> 64 (double click) -> 64",
+      "ok": true,
+      "ms": 1867
+    },
+    {
+      "n": 90,
+      "id": "slides.notes.reload",
+      "step": "reload",
+      "expected": "the notes survive",
+      "observed": "shown \"Open with the renewal date and the two new logos.\"; stored \"Open with the renewal date and the two new logos.\"",
+      "ok": true,
+      "ms": 521
+    },
+    {
+      "n": 91,
+      "id": "slides.notes.view-menu-toggle",
+      "step": "View > Show speaker notes twice",
+      "expected": "the pane hides, then shows",
+      "observed": "hidden true; shown again true",
+      "ok": true,
+      "ms": 3103
+    },
+    {
+      "n": 92,
+      "step": "setup: trim the deck to 4 slides",
+      "expected": "slide.remove through the window API",
+      "observed": "4 slides",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 93,
+      "id": "slides.counter.footer-and-cards",
+      "step": "read the footer counter and the card numbers after a click, New slide, Delete and a drag",
+      "expected": "the counter reads the current slide of the total and the numbers follow",
+      "observed": "click: \"02 / 04\" for slide 2 of 4; New slide: \"03 / 05\" for 3 of 5; cards 1,2,3,4,5; Delete: \"03 / 04\" for 3 of 4; drag: \"02 / 04\" for 2 of 4; cards 1,2,3,4",
+      "ok": true,
+      "ms": 62927
+    },
+    {
+      "n": 94,
+      "id": "slides.hash.click-and-reload",
+      "step": "a card click writes #s/<id>; a reload with the hash and with the numeric form",
+      "expected": "both land on that slide",
+      "observed": "hash #s/title-2-2-2; after #s/<id> title-2-2-2; after #2 title-2-2-2 (hash then #2); cards title,title-2-2-2,split-1,split-5; slide.list title,title-2-2-2,split-1,split-5",
+      "ok": true,
+      "ms": 2042
+    },
+    {
+      "n": 95,
+      "id": "slides.context.empty-canvas",
+      "step": "right click the empty sheet, read the rows, New slide from it",
+      "expected": "the eight rows and a slide added",
+      "observed": "menu true; rows edit.paste, slide.newSlide, slide.duplicateSlide, slide.deleteSlide, slide.skipSlide, slide.changeBackground, slide.applyLayout, insert.comment; missing none; 4 -> 5",
+      "ok": true,
+      "ms": 2209
+    },
+    {
+      "n": 96,
+      "id": "text.title.single-click",
+      "step": "one click at the centre of Click to add title",
+      "expected": "the ring, the eight handles, the rotation handle and the chip; no caret, no session",
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; block heading",
+      "ok": true,
+      "ms": 1772
+    },
+    {
+      "n": 97,
+      "id": "text.title.double-click",
+      "step": "a double click on the title placeholder",
+      "expected": "the session opens; the prompt stayed Click to add title before it",
+      "observed": "editing true; prompt before \"none\"; focus h1[contenteditable][run heading/text]",
+      "ok": true,
+      "ms": 767
+    },
+    {
+      "n": 98,
+      "id": "text.title.type-escape",
+      "step": "Cmd+A, type a sentence with spaces, punctuation and a number, Escape",
+      "expected": "typed equals stored",
+      "observed": "\"Quarterly review: Q3, 2026!\"; stored true",
+      "ok": true,
+      "ms": 2693
+    },
+    {
+      "n": 99,
+      "id": "text.selected.typing-replaces",
+      "step": "one click on the title (selected, no caret), then type a sentence",
+      "expected": "the session opens with the whole text selected and the typed sentence replaces it",
+      "observed": "before the typing move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; \"Quarterly review: Q3, 2026!\" -> \"Renewal review for Acme\" (session true); stored true; restored \"Quarterly review: Q3, 2026!\"",
+      "ok": true,
+      "ms": 7543
+    },
+    {
+      "n": 100,
+      "id": "text.selected.enter-appends",
+      "step": "one click on the title (selected, no caret), Enter, then type",
+      "expected": "the session opens with the caret at the end and the letters land at the end",
+      "observed": "before Enter move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; session true; caret inside true at offset 27 of 27 (at the end true); \"Quarterly review: Q3, 2026!\" -> \"Quarterly review: Q3, 2026! now\"; restored true",
+      "ok": true,
+      "ms": 4382
+    },
+    {
+      "n": 101,
+      "id": "text.title.double-click-enters",
+      "step": "one click on the title (selected, no caret), then a double click on its second word",
+      "expected": "the session opens with the caret inside that word",
+      "observed": "before the double click move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; session true; caret offset 14 inside \"review:\" [10, 17] true; selection \"\"",
+      "ok": true,
+      "ms": 2216
+    },
+    {
+      "n": 102,
+      "id": "text.caret.click-mid-word",
+      "step": "inside the open session, click mid word and type",
+      "expected": "the letters land there",
+      "observed": "\"Quarterly review: Qxx3, 2026!\"",
+      "ok": true,
+      "ms": 985
+    },
+    {
+      "n": 103,
+      "id": "text.caret.home-end",
+      "step": "Home then type, End then type",
+      "expected": "the text starts and ends with the typed words",
+      "observed": "\"A Quarterly review: Qxx3, 2026! end\"",
+      "ok": true,
+      "ms": 988
+    },
+    {
+      "n": 104,
+      "id": "text.caret.shift-arrow-replace",
+      "step": "ArrowLeft four times, Shift+ArrowLeft three times, type Z",
+      "expected": "three characters selected and replaced",
+      "observed": "selected \"26!\"; \"A Quarterly review: Qxx3, 2026! end\" -> \"A Quarterly review: Qxx3, 20Z end\"",
+      "ok": true,
+      "ms": 1042
+    },
+    {
+      "n": 105,
+      "id": "text.caret.shift-home-end",
+      "step": "Shift+Home then Shift+End",
+      "expected": "the selections reach the line ends",
+      "observed": "to start \"A Quarterly review: Qxx3, 20Z \"; to end \"end\"; text \"A Quarterly review: Qxx3, 20Z end\"",
+      "ok": true,
+      "ms": 531
+    },
+    {
+      "n": 106,
+      "id": "text.caret.backspace-word",
+      "step": "Backspace across a word",
+      "expected": "the letters leave one by one",
+      "observed": "\"A Quarterly review: Qxx3, 20Z end\" -> \"A Quarterly review: Qxx3, 20Z \"",
+      "ok": true,
+      "ms": 604
+    },
+    {
+      "n": 107,
+      "id": "text.caret.option-backspace",
+      "step": "Option+Backspace",
+      "expected": "the word before the caret leaves",
+      "observed": "\"A Quarterly review: Qxx3, 20Z  tail\" -> \"A Quarterly review: Qxx3, 20Z  \"",
+      "ok": true,
+      "ms": 849
+    },
+    {
+      "n": 108,
+      "id": "text.caret.delete",
+      "step": "Home then Delete",
+      "expected": "the character after the caret leaves",
+      "observed": "\"A Quarterly review: Qxx3, 20Z  \" -> \" Quarterly review: Qxx3, 20Z  \"",
+      "ok": true,
+      "ms": 436
+    },
+    {
+      "n": 109,
+      "id": "text.caret.cmd-a",
+      "step": "Cmd+A",
+      "expected": "the whole run is selected and the session stays open",
+      "observed": "selected 30 of 30; editing true",
+      "ok": true,
+      "ms": 162
+    },
+    {
+      "n": 110,
+      "id": "text.title.enter-commits",
+      "step": "Enter on the single line title",
+      "expected": "the session ends and the text is kept",
+      "observed": "editing false; \" Quarterly review: Qxx3, 20Z  \" -> \"Quarterly review: Qxx3, 20Z\"",
+      "ok": true,
+      "ms": 2279
+    },
+    {
+      "n": 111,
+      "id": "text.session.escape-twice",
+      "step": "double click the title, Escape, Escape",
+      "expected": "the first Escape returns to the selected title (handles, chip, no caret, the text kept); the second clears the selection",
+      "observed": "session true; after one Escape move handle true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false, text kept true; after two: handles 0, chip none",
+      "ok": true,
+      "ms": 1655
+    },
+    {
+      "n": 112,
+      "id": "text.subtitle.double-click-type",
+      "step": "double click the subtitle placeholder and type a line",
+      "expected": "the line is in the run",
+      "observed": "editing true; \"Revenue grew 12 percent, costs held.\"",
+      "ok": true,
+      "ms": 3282
+    },
+    {
+      "n": 113,
+      "id": "text.subtitle.enter-new-line",
+      "step": "Enter, then type",
+      "expected": "a new line and the words on it",
+      "observed": "session true; breaks 1; lines 2; \"Revenue grew 12 percent, costs held.Second line\"",
+      "ok": true,
+      "ms": 1290
+    },
+    {
+      "n": 114,
+      "id": "text.subtitle.shift-enter",
+      "step": "Shift+Enter, then type",
+      "expected": "a line break and the words after it",
+      "observed": "session true; lines 3; \"Revenue grew 12 percent, costs held.Second lineThird line\"",
+      "ok": true,
+      "ms": 1184
+    },
+    {
+      "n": 115,
+      "id": "text.subtitle.arrows-backspace-join",
+      "step": "ArrowUp, ArrowDown, then Home and Backspace on the last line",
+      "expected": "the caret moves between lines and Backspace joins two lines",
+      "observed": "caret 45 then 57; lines 3 -> 2; \"Revenue grew 12 percent, costs held.Second lineThird line\"",
+      "ok": true,
+      "ms": 669
+    },
+    {
+      "n": 116,
+      "id": "text.subtitle.escape-commits",
+      "step": "Escape",
+      "expected": "the multiline subtitle is stored",
+      "observed": "revision 138; stored true",
+      "ok": true,
+      "ms": 831
+    },
+    {
+      "n": 117,
+      "step": "setup: a slide for the text boxes",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-1",
+      "ok": true,
+      "ms": 1192
+    },
+    {
+      "n": 118,
+      "id": "text.textbox.insert-click-type",
+      "step": "Insert > Text box, one click on the sheet, type",
+      "expected": "the text is stored",
+      "observed": "text text at 200,200 480x64; stored true",
+      "ok": true,
+      "ms": 4974
+    },
+    {
+      "n": 119,
+      "id": "text.textbox.insert-drag",
+      "step": "Insert > Text box drawn by a drag",
+      "expected": "the box lands at the drawn box",
+      "observed": "text-2 at 700,500 400x140",
+      "ok": true,
+      "ms": 3815
+    },
+    {
+      "n": 120,
+      "id": "text.textbox.drag-inside-moves",
+      "step": "one click on the text box (selected, no caret), then a pointer down inside its text and a move",
+      "expected": "the box moves to the new place with its text unchanged and no session",
+      "observed": "after the click move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; drag 200,200 480x64 -> 320,260 480x64 (dx 120, dy 60); during the drag session false, text selected \"\", readout none; after move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; text unchanged true",
+      "ok": true,
+      "ms": 4034
+    },
+    {
+      "n": 121,
+      "id": "text.textbox.toolbar-button",
+      "step": "the toolbar Text box button, then a click on the sheet, type",
+      "expected": "a box that takes typing",
+      "observed": "text-3; stored true",
+      "ok": true,
+      "ms": 3441
+    },
+    {
+      "n": 122,
+      "id": "text.textbox.burst-reliability",
+      "step": "insert three text boxes in a row and type into each",
+      "expected": "no refused write, no doubled word",
+      "observed": "boxes 3; each holds its words true; doubled false; stale none; snackbar none",
+      "ok": true,
+      "ms": 10468
+    },
+    {
+      "n": 123,
+      "id": "text.toolbar.swaps-on-select",
+      "step": "select the text box",
+      "expected": "the toolbar shows the text controls",
+      "observed": "handles 10; text tail true; chip \"Text box\"",
+      "ok": true,
+      "ms": 842
+    },
+    {
+      "n": 124,
+      "id": "text.fontsize.type-enter",
+      "step": "type a size in the field and press Enter",
+      "expected": "the size applies as typed or the snackbar names the step taken",
+      "observed": "stored size 26; field \"26\"; snackbar Font size 26: the nearest step of the type ladder",
+      "ok": true,
+      "ms": 2060
+    },
+    {
+      "n": 125,
+      "id": "text.fontsize.plus-minus",
+      "step": "the plus and the minus beside the size",
+      "expected": "the size steps up and down",
+      "observed": "26 -> 34 -> 26",
+      "ok": true,
+      "ms": 2582
+    },
+    {
+      "n": 126,
+      "id": "text.bold.toolbar",
+      "step": "Bold on the toolbar with the box selected, then again",
+      "expected": "the block turns bold, then back",
+      "observed": "bold on true (weight 500, flags none), off true",
+      "ok": true,
+      "ms": 3238
+    },
+    {
+      "n": 127,
+      "id": "text.bold.cmd-b-word",
+      "step": "double click a word, Cmd+B",
+      "expected": "the word alone carries the mark",
+      "observed": "selected \"Onboarding\"; marks [\"b:Onboarding\"]; session after true",
+      "ok": true,
+      "ms": 3976
+    },
+    {
+      "n": 128,
+      "id": "text.italic.toolbar-word",
+      "step": "double click a word, click Italic on the toolbar",
+      "expected": "the word alone carries the mark",
+      "observed": "selected \"Onboarding\"; marks [\"i:Onboarding\"]; session after true",
+      "ok": true,
+      "ms": 4484
+    },
+    {
+      "n": 129,
+      "id": "text.italic.cmd-i-word",
+      "step": "double click a word, Cmd+I",
+      "expected": "the word alone carries the mark",
+      "observed": "selected \"Onboarding\"; marks [\"i:Onboarding\"]; session after true",
+      "ok": true,
+      "ms": 3836
+    },
+    {
+      "n": 130,
+      "id": "text.underline.cmd-u-word",
+      "step": "double click a word, Cmd+U",
+      "expected": "the word alone carries the mark",
+      "observed": "selected \"Onboarding\"; marks [\"u:Onboarding\"]; session after true",
+      "ok": true,
+      "ms": 3850
+    },
+    {
+      "n": 131,
+      "id": "text.strikethrough.cmd-shift-x",
+      "step": "double click a word, Cmd+Shift+X",
+      "expected": "the word alone carries the mark",
+      "observed": "selected \"Onboarding\"; marks [\"s:Onboarding\"]; session after true",
+      "ok": true,
+      "ms": 3850
+    },
+    {
+      "n": 132,
+      "id": "text.underline.toolbar",
+      "step": "Underline on the toolbar with the box selected, then again",
+      "expected": "the block is underlined, then not",
+      "observed": "underline on true (flags u), off true",
+      "ok": true,
+      "ms": 2970
+    },
+    {
+      "n": 133,
+      "id": "text.strikethrough.menu",
+      "step": "Format > Text > Strikethrough with the box selected, then again",
+      "expected": "the block is struck through, then not",
+      "observed": "strike on true (flags s), off true",
+      "ok": true,
+      "ms": 4924
+    },
+    {
+      "n": 134,
+      "id": "text.color.swatch-on-word",
+      "step": "double click a word, open Text color, pick a swatch",
+      "expected": "the word takes the colour",
+      "observed": "selected \"Onboarding\"; coloured marks [\"Onboarding\"]; stored red true",
+      "ok": true,
+      "ms": 3285
+    },
+    {
+      "n": 135,
+      "id": "text.align.toolbar-and-key",
+      "step": "Align > Center on the toolbar, then Cmd+Shift+R",
+      "expected": "centred, then right aligned",
+      "observed": "center then right",
+      "ok": true,
+      "ms": 3353
+    },
+    {
+      "n": 136,
+      "id": "text.spacing.toolbar",
+      "step": "Line & paragraph spacing > 1.5 on the toolbar",
+      "expected": "the leading is 1.5",
+      "observed": "leading 1.5",
+      "ok": true,
+      "ms": 1847
+    },
+    {
+      "n": 137,
+      "id": "text.list.bulleted-toolbar",
+      "step": "the toolbar Bulleted list button",
+      "expected": "the box becomes a bulleted list",
+      "observed": "type plain; marker bullet",
+      "ok": true,
+      "ms": 2827
+    },
+    {
+      "n": 138,
+      "id": "text.list.numbered-toolbar",
+      "step": "the toolbar Numbered list button",
+      "expected": "the box becomes a numbered list",
+      "observed": "type plain; marker number",
+      "ok": true,
+      "ms": 3133
+    },
+    {
+      "n": 139,
+      "id": "text.list.bulleted-menu-preset",
+      "step": "Format > Bullets & numbering > bulleted list, pick a preset",
+      "expected": "the box becomes a bulleted list",
+      "observed": "picked format.bulletsNumbering.bulleted.pick.disc-circle-square; type plain; marker bullet",
+      "ok": true,
+      "ms": 4741
+    },
+    {
+      "n": 140,
+      "id": "text.list.numbered-menu-preset",
+      "step": "Format > Bullets & numbering > numbered list, pick a preset",
+      "expected": "the box becomes a numbered list",
+      "observed": "picked format.bulletsNumbering.numbered.pick.digit-alpha-roman; type plain; marker number",
+      "ok": true,
+      "ms": 4686
+    },
+    {
+      "n": 141,
+      "id": "text.list.chords",
+      "step": "Cmd+Shift+8 then Cmd+Shift+7 on the selected box",
+      "expected": "a bulleted list, then a numbered one",
+      "observed": "after Cmd+Shift+8 marker bullet; after Cmd+Shift+7 marker number",
+      "ok": true,
+      "ms": 3878
+    },
+    {
+      "n": 142,
+      "id": "text.indent.toolbar",
+      "step": "Increase indent then Decrease indent on the toolbar",
+      "expected": "the indent steps in and back",
+      "observed": "changed on increase true, on decrease true; \"level\":2",
+      "ok": true,
+      "ms": 3344
+    },
+    {
+      "n": 143,
+      "id": "text.indent.keys",
+      "step": "Cmd+] then Cmd+[ inside the list session",
+      "expected": "the indent steps in and back",
+      "observed": "changed on Cmd+] true, on Cmd+[ true",
+      "ok": true,
+      "ms": 3096
+    },
+    {
+      "n": 144,
+      "id": "text.link.cmd-k-enter",
+      "step": "double click a word, Cmd+K, type a URL, Enter",
+      "expected": "the word carries the link and no URL text lands in the caption",
+      "observed": "field run.link.href; selected \"the\"; text \"See the proposal online\" -> \"See the proposal online\"; link mark \"the\" href https://example.com/acme; stored true",
+      "ok": true,
+      "ms": 11730
+    },
+    {
+      "n": 145,
+      "id": "text.link.toolbar-button",
+      "step": "double click a word, the toolbar Insert link button, type a URL, Enter",
+      "expected": "the word carries the link and no URL text lands in the caption",
+      "observed": "field run.link.href; selected \"the\"; text \"See the proposal online\" -> \"See the proposal online\"; link mark \"the\" href https://example.com/acme; stored true",
+      "ok": true,
+      "ms": 11614
+    },
+    {
+      "n": 146,
+      "id": "text.clear-formatting",
+      "step": "Clear formatting on the toolbar and Cmd+\\",
+      "expected": "the size, alignment, leading and weight clear",
+      "observed": "before size null align null leading null; after toolbar size null align null leading null weight null; after Cmd+\\ align null",
+      "ok": true,
+      "ms": 8359
+    },
+    {
+      "n": 147,
+      "id": "text.format-menu.rows-enabled",
+      "step": "open Format > Text with the box selected",
+      "expected": "the rows are enabled",
+      "observed": "format.text.bold, format.text.italic, format.text.underline, format.text.strikethrough",
+      "ok": true,
+      "ms": 1687
+    },
+    {
+      "n": 148,
+      "id": "text.format-menu.size-increase",
+      "step": "Format > Text > Size > Increase font size",
+      "expected": "the size steps up",
+      "observed": "default -> 22",
+      "ok": true,
+      "ms": 2615
+    },
+    {
+      "n": 149,
+      "id": "text.format-menu.size-decrease",
+      "step": "Format > Text > Size > Decrease font size",
+      "expected": "the size steps down",
+      "observed": "22 -> 20",
+      "ok": true,
+      "ms": 3089
+    },
+    {
+      "n": 150,
+      "id": "text.format-menu.align-left",
+      "step": "Format > Align & indent > Left",
+      "expected": "the alignment is left",
+      "observed": "align left",
+      "ok": true,
+      "ms": 3531
+    },
+    {
+      "n": 151,
+      "id": "text.format-menu.align-indent-rows",
+      "step": "Format > Align & indent > Center, Right, Increase indent, Decrease indent",
+      "expected": "each applies from the menu",
+      "observed": "center center; right right; indent in true, out true",
+      "ok": true,
+      "ms": 8920
+    },
+    {
+      "n": 152,
+      "id": "text.format-menu.spacing-double",
+      "step": "Format > Line & paragraph spacing > Double",
+      "expected": "the leading is 2",
+      "observed": "leading 2",
+      "ok": true,
+      "ms": 2113
+    },
+    {
+      "n": 153,
+      "id": "text.format-menu.spacing-single-1-15",
+      "step": "Format > Line & paragraph spacing > Single, then 1.15",
+      "expected": "the leading follows each",
+      "observed": "single 1; 1.15 1.2",
+      "ok": true,
+      "ms": 4616
+    },
+    {
+      "n": 154,
+      "id": "text.format-menu.text-fitting",
+      "step": "Format > Text fitting with the text box selected",
+      "expected": "Format options opens for the box",
+      "observed": "panel open true; text fitting section true",
+      "ok": true,
+      "ms": 2738
+    },
+    {
+      "n": 155,
+      "id": "text.format-options.panel",
+      "step": "Format > Format options with the text box selected",
+      "expected": "the panel opens with the block sections (Size and Position)",
+      "observed": "sections size, position, textFitting, text, colour",
+      "ok": true,
+      "ms": 2915
+    },
+    {
+      "n": 156,
+      "id": "text.autofit.title-wraps",
+      "step": "type a long title into the title slide",
+      "expected": "the title wraps inside the sheet without overlapping the subtitle",
+      "observed": "lines 3; split words 0; overlap with the subtitle 0 px²; inside the sheet true",
+      "ok": true,
+      "ms": 6487
+    },
+    {
+      "n": 157,
+      "id": "text.autofit.textbox-grow",
+      "step": "type a paragraph that overflows the drawn text box at its width and size",
+      "expected": "the box grows and no text overflows the frame",
+      "observed": "pos.h 140 -> 216; 2 sentences (312 characters) typed at 20 sheet px into a 400 by 140 box; the text needed 216 sheet px before Escape (overflow due true); after: content 216 sheet px (152.3 css px) in a frame of 216 sheet px (152.3 css px); text landed true",
+      "ok": true,
+      "ms": 27804
+    },
+    {
+      "n": 158,
+      "id": "text.clipboard.within-box",
+      "step": "double click a word, Cmd+C, End, space, Cmd+V",
+      "expected": "the word is appended",
+      "observed": "copied \"Onboarding\"; \"Onboarding plan for Acme Onboarding\"",
+      "ok": true,
+      "ms": 2715
+    },
+    {
+      "n": 159,
+      "id": "text.clipboard.between-boxes",
+      "step": "Cmd+A, Cmd+C in one box, Cmd+V in another",
+      "expected": "the text lands in the other box",
+      "observed": "copied \"Onboarding plan for Acme Onboarding\"; box B now \"estions for each account in the order the team reviews them.\"",
+      "ok": true,
+      "ms": 2827
+    },
+    {
+      "n": 160,
+      "id": "text.clipboard.paste-without-formatting",
+      "step": "copy a bold word, Cmd+Shift+V into another box",
+      "expected": "plain text lands without the mark",
+      "observed": "not driven: manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+      "ok": null
+    },
+    {
+      "n": 161,
+      "id": "text.find-replace.replace-all",
+      "step": "Edit > Find and replace, find, replace, Replace all",
+      "expected": "the word changes across the deck",
+      "observed": "result \"Find and replaceFind4 matches on 1 slideReplace withMatch casePrevNextReplaceReplace all\"; replaced true",
+      "ok": true,
+      "ms": 4738
+    },
+    {
+      "n": 162,
+      "id": "text.find-replace.shortcut",
+      "step": "Cmd+Shift+H, type a query, Escape",
+      "expected": "the dialog opens, the query counts, Escape closes",
+      "observed": "result \"Replaced 4 occurrences\"; closed true",
+      "ok": true,
+      "ms": 3921
+    },
+    {
+      "n": 163,
+      "id": "text.context.text-block",
+      "step": "right click the text box, read the rows, Duplicate from it",
+      "expected": "the rows and a copy",
+      "observed": "rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.centerOnPage, arrange.align, insert.link, format.textFitting, format.formatOptions, insert.comment; missing none; duplicated true",
+      "ok": true,
+      "ms": 3391
+    },
+    {
+      "n": 164,
+      "id": "text.context.text-selection",
+      "step": "right click a selected word, read the rows, Italic from it",
+      "expected": "the rows and the word alone italic",
+      "observed": "rows edit.cut, edit.copy, edit.paste, edit.pasteWithoutFormatting, format.text.italic, format.text.underline, format.text.strikethrough, insert.link, format.formatOptions; missing none; italic on \"plan\" true",
+      "ok": true,
+      "ms": 5944
+    },
+    {
+      "n": 165,
+      "id": "text.context.inside-session",
+      "step": "double click the text box, click to collapse the caret, right click at the caret",
+      "expected": "the text box's object menu opens with the clipboard, arrange and Comment rows",
+      "observed": "session true; caret collapsed true; menu opened true; rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.centerOnPage, arrange.align, insert.link, format.textFitting, format.formatOptions, insert.comment; missing none; the text selection menu instead false",
+      "ok": true,
+      "ms": 2485
+    },
+    {
+      "n": 166,
+      "id": "text.layout-runs.type",
+      "step": "type into a table cell, a Ruled rows value, a Status board row name and the Big number; reload",
+      "expected": "each reads back",
+      "observed": "table true; rows typed yes; board typed yes; big number after reload true",
+      "ok": true,
+      "ms": 19323
+    },
+    {
+      "n": 167,
+      "id": "text.persistence.reload",
+      "step": "reload the text box slide and the title slide",
+      "expected": "the title, subtitle, text box and list persist",
+      "observed": "box A the same true; box B the same true; title slide the same true; after the load: Kickoff false, a list true, the title true, the subtitle true",
+      "ok": true,
+      "ms": 2197
+    },
+    {
+      "n": 168,
+      "step": "setup: a slide for the pictures",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-2",
+      "ok": true,
+      "ms": 1769
+    },
+    {
+      "n": 169,
+      "id": "images.insert.toolbar-sources",
+      "step": "click the toolbar Image button",
+      "expected": "the menu lists Upload from computer",
+      "observed": "rows menu.insert.image.upload",
+      "ok": true,
+      "ms": 744
+    },
+    {
+      "n": 170,
+      "step": "setup: a picture on the slide",
+      "expected": "asset.add and block.insert through the window API",
+      "observed": "error: window API block.insert did not answer within 60 s",
+      "ok": false,
+      "ms": 61100
+    },
+    {
+      "n": 171,
+      "id": "images.select.chip-handles-tail",
+      "step": "images: images.select.chip-handles-tail",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 172,
+      "id": "images.delete.key",
+      "step": "images: images.delete.key",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 173,
+      "id": "images.move.drag-frame",
+      "step": "images: images.move.drag-frame",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 174,
+      "id": "images.guides.edge-snap",
+      "step": "images: images.guides.edge-snap",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 175,
+      "id": "images.guides.centre-y",
+      "step": "images: images.guides.centre-y",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 176,
+      "id": "images.guides.centre-x",
+      "step": "images: images.guides.centre-x",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 177,
+      "id": "images.nudge.arrows",
+      "step": "images: images.nudge.arrows",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 178,
+      "id": "images.resize.eight-handles",
+      "step": "images: images.resize.eight-handles",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 179,
+      "id": "images.resize.eight-handles-shift",
+      "step": "images: images.resize.eight-handles-shift",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 180,
+      "id": "images.resize.edge-fill",
+      "step": "images: images.resize.edge-fill",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 181,
+      "id": "images.resize.alt-centre",
+      "step": "images: images.resize.alt-centre",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 182,
+      "id": "images.rotate.ring",
+      "step": "images: images.rotate.ring",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 183,
+      "id": "images.crop.double-click",
+      "step": "images: images.crop.double-click",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 184,
+      "id": "images.crop.east-edge",
+      "step": "images: images.crop.east-edge",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 185,
+      "id": "images.crop.south-edge",
+      "step": "images: images.crop.south-edge",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 186,
+      "id": "images.crop.enter",
+      "step": "images: images.crop.enter",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 187,
+      "id": "images.crop.undo",
+      "step": "images: images.crop.undo",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 188,
+      "id": "images.crop.redo",
+      "step": "images: images.crop.redo",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 189,
+      "id": "images.crop.menu-escape",
+      "step": "images: images.crop.menu-escape",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 190,
+      "id": "images.crop.toolbar-escape-cancels",
+      "step": "images: images.crop.toolbar-escape-cancels",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 191,
+      "id": "images.options.panel",
+      "step": "images: images.options.panel",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 192,
+      "id": "images.options.transparency",
+      "step": "images: images.options.transparency",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 193,
+      "id": "images.options.reset",
+      "step": "images: images.options.reset",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 194,
+      "id": "images.reset-image.menu",
+      "step": "images: images.reset-image.menu",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 195,
+      "id": "images.background.colour",
+      "step": "images: images.background.colour",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 196,
+      "id": "images.background.toolbar",
+      "step": "images: images.background.toolbar",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 197,
+      "id": "images.background.reset",
+      "step": "images: images.background.reset",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 198,
+      "id": "images.present.picture-and-ground",
+      "step": "images: images.present.picture-and-ground",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 199,
+      "id": "images.context.image",
+      "step": "images: images.context.image",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 200,
+      "id": "images.options.menu-row",
+      "step": "images: images.options.menu-row",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 201,
+      "id": "images.background.hex-field",
+      "step": "images: images.background.hex-field",
+      "expected": "driven",
+      "observed": "not driven: setup failed: a picture on the slide",
+      "ok": null
+    },
+    {
+      "n": 202,
+      "step": "setup: a fresh deck after the stall (block.insert did not answer in images)",
+      "expected": "a new deck from /new with its title written, at /edit, with a second slide",
+      "observed": "retired untitled-20260918-273j (its title row read \"Saving…\", pending 1, revision 250 against the server's 250); untitled-20260918-9l8x at /edit/untitled-20260918-9l8x#s/title, revision 1, second slide split-1; 0 canvas(es); covers past the sheet none; sheet 1128x635 in a stage of 1184x691; at the title centre h1 (inside the run true); at the sheet div.in (inside the sheet true)",
+      "ok": true,
+      "ms": 5917
+    },
+    {
+      "n": 203,
+      "step": "setup: a slide for the arrange rows",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-1",
+      "ok": true,
+      "ms": 996
+    },
+    {
+      "n": 204,
+      "step": "setup: three text boxes at the audit's homes",
+      "expected": "block.insert through the window API",
+      "observed": "3 placed",
+      "ok": true,
+      "ms": 3037
+    },
+    {
+      "n": 205,
+      "id": "arrange.select.click",
+      "step": "one click at the centre of a text box (its text)",
+      "expected": "chip, eight handles, the ring; no caret, no session (A1 rule 1)",
+      "observed": "move handle true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false",
+      "ok": true,
+      "ms": 1039
+    },
+    {
+      "n": 206,
+      "id": "arrange.select.shift-add",
+      "step": "Shift click a second object",
+      "expected": "chip 2 objects",
+      "observed": "chip \"2 objects\"",
+      "ok": true,
+      "ms": 475
+    },
+    {
+      "n": 207,
+      "id": "arrange.multi.drag-inside-moves-all",
+      "step": "with a1 and a2 selected, a pointer down inside a2 (its text) and a move",
+      "expected": "both boxes move by the same distance and a3 stays",
+      "observed": "chip \"2 objects\" -> \"2 objects\"; a1 moved {\"x\":100,\"y\":80}, a2 {\"x\":100,\"y\":80}, a3 {\"x\":0,\"y\":0}; during the drag session false, text selected \"\"",
+      "ok": true,
+      "ms": 5411
+    },
+    {
+      "n": 208,
+      "id": "arrange.select.shift-remove",
+      "step": "Shift click the selected object again",
+      "expected": "it leaves the selection",
+      "observed": "chip \"Text box\"; selected a1",
+      "ok": true,
+      "ms": 494
+    },
+    {
+      "n": 209,
+      "id": "arrange.select.marquee",
+      "step": "drag a box on the empty slide across two objects",
+      "expected": "both are selected",
+      "observed": "chip \"2 objects\"; handles for a1",
+      "ok": true,
+      "ms": 1458
+    },
+    {
+      "n": 210,
+      "id": "arrange.select.marquee-partial",
+      "step": "a marquee that crosses only a corner of an object",
+      "expected": "the object is selected",
+      "observed": "selected a3; chip \"Text box\"",
+      "ok": true,
+      "ms": 1591
+    },
+    {
+      "n": 211,
+      "id": "arrange.select.click-away",
+      "step": "a click on the empty slide",
+      "expected": "the selection clears",
+      "observed": "selected none",
+      "ok": true,
+      "ms": 480
+    },
+    {
+      "n": 212,
+      "id": "arrange.select.cmd-a",
+      "step": "Cmd+A with the stage focused",
+      "expected": "every object is selected",
+      "observed": "chip \"3 objects\"",
+      "ok": true,
+      "ms": 872
+    },
+    {
+      "n": 213,
+      "id": "arrange.select.escape",
+      "step": "Escape",
+      "expected": "the selection clears",
+      "observed": "selected none",
+      "ok": true,
+      "ms": 385
+    },
+    {
+      "n": 214,
+      "id": "arrange.order.bring-to-front",
+      "step": "Arrange > Order > Bring to front on a1; Cmd+Z; Cmd+Shift+Z",
+      "expected": "a1 is on top, then not, then again",
+      "observed": "z {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":2002,\"a2\":0,\"a3\":1001} -> undo true -> redo true; snackbar none; rejects none; Order rows with a1 selected: bringToFront, bringForward, sendBackward (disabled), sendToBack (disabled)",
+      "ok": true,
+      "ms": 8270
+    },
+    {
+      "n": 215,
+      "id": "arrange.order.send-to-back",
+      "step": "Arrange > Order > Send to back on a1; the toolbar Undo and Redo",
+      "expected": "a1 is at the back, then not, then again",
+      "observed": "z {\"a1\":2002,\"a2\":0,\"a3\":1001} -> {\"a1\":0,\"a2\":1001,\"a3\":2002} -> undo true -> redo true; snackbar none; rejects none",
+      "ok": true,
+      "ms": 6555
+    },
+    {
+      "n": 216,
+      "id": "arrange.order.bring-forward",
+      "step": "Arrange > Order > Bring forward on a1; Edit > Undo and Edit > Redo",
+      "expected": "a1 moves up one, back, up again",
+      "observed": "rank of a1 0 -> 1; undo true; redo true; snackbar none; rejects none",
+      "ok": true,
+      "ms": 7077
+    },
+    {
+      "n": 217,
+      "id": "arrange.order.send-backward",
+      "step": "Arrange > Order > Send backward on a1",
+      "expected": "a1 moves down one",
+      "observed": "rank of a1 1 -> 0; snackbar none; rejects none",
+      "ok": true,
+      "ms": 4328
+    },
+    {
+      "n": 218,
+      "id": "arrange.order.keys",
+      "step": "Cmd+Shift+Up then Cmd+Down on a1",
+      "expected": "to the front, then one step back",
+      "observed": "z {\"a1\":0,\"a2\":1001,\"a3\":2002} -> {\"a1\":2002,\"a2\":0,\"a3\":1001} -> {\"a1\":1001,\"a2\":0,\"a3\":2002}",
+      "ok": true,
+      "ms": 2424
+    },
+    {
+      "n": 219,
+      "id": "arrange.align.left",
+      "step": "Arrange > Align > Left",
+      "expected": "every l lands on 152",
+      "observed": "l 152, 600, 1100 -> 152, 152, 152",
+      "ok": true,
+      "ms": 3540
+    },
+    {
+      "n": 220,
+      "id": "arrange.align.center",
+      "step": "Arrange > Align > Center",
+      "expected": "every cx lands on one shared value",
+      "observed": "cx 272, 720, 1220 -> 746, 746, 746",
+      "ok": true,
+      "ms": 6259
+    },
+    {
+      "n": 221,
+      "id": "arrange.align.right",
+      "step": "Arrange > Align > Right",
+      "expected": "every r lands on 1340",
+      "observed": "r 392, 840, 1340 -> 1340, 1340, 1340",
+      "ok": true,
+      "ms": 5738
+    },
+    {
+      "n": 222,
+      "id": "arrange.align.top",
+      "step": "Arrange > Align > Top",
+      "expected": "every t lands on 150",
+      "observed": "t 150, 240, 500 -> 150, 150, 150",
+      "ok": true,
+      "ms": 6051
+    },
+    {
+      "n": 223,
+      "id": "arrange.align.middle",
+      "step": "Arrange > Align > Middle",
+      "expected": "every cy lands on one shared value",
+      "observed": "cy 225, 315, 575 -> 400, 400, 400",
+      "ok": true,
+      "ms": 5028
+    },
+    {
+      "n": 224,
+      "id": "arrange.align.bottom",
+      "step": "Arrange > Align > Bottom",
+      "expected": "every b lands on 650",
+      "observed": "b 300, 390, 650 -> 650, 650, 650",
+      "ok": true,
+      "ms": 6762
+    },
+    {
+      "n": 225,
+      "id": "arrange.align.single-to-slide",
+      "step": "one object, Align > Left",
+      "expected": "it lines up with the slide edge",
+      "observed": "x 600 -> 0",
+      "ok": true,
+      "ms": 4292
+    },
+    {
+      "n": 226,
+      "id": "arrange.center.horizontal",
+      "step": "Arrange > Center on page > Horizontally",
+      "expected": "the centre lands on 800",
+      "observed": "centre x 800",
+      "ok": true,
+      "ms": 3784
+    },
+    {
+      "n": 227,
+      "id": "arrange.center.vertical",
+      "step": "Arrange > Center on page > Vertically",
+      "expected": "the centre lands on 450",
+      "observed": "centre y 450",
+      "ok": true,
+      "ms": 3858
+    },
+    {
+      "n": 228,
+      "id": "arrange.undo.toolbar-on-arrange",
+      "step": "the toolbar Undo and Redo on an align step",
+      "expected": "the positions go back and forward",
+      "observed": "undo true; redo true",
+      "ok": true,
+      "ms": 6563
+    },
+    {
+      "n": 229,
+      "id": "arrange.undo.menu-on-arrange",
+      "step": "Edit > Undo and Edit > Redo on a centre step",
+      "expected": "the position goes back and forward",
+      "observed": "undo true; redo true",
+      "ok": true,
+      "ms": 7725
+    },
+    {
+      "n": 230,
+      "id": "arrange.clipboard.copy-paste",
+      "step": "Cmd+C then Cmd+V on a2",
+      "expected": "the copy lands 16 px right and down, selected",
+      "observed": "a2-2 at 616,256 240x150; selected a2-2",
+      "ok": true,
+      "ms": 2601
+    },
+    {
+      "n": 231,
+      "id": "arrange.clipboard.delete",
+      "step": "Delete on a selected copy",
+      "expected": "the copy leaves",
+      "observed": "4 -> 3",
+      "ok": true,
+      "ms": 1714
+    },
+    {
+      "n": 232,
+      "id": "arrange.clipboard.undo-redo-delete",
+      "step": "Cmd+Z and Cmd+Shift+Z after the delete",
+      "expected": "the object returns and leaves",
+      "observed": "3 -> 4 -> 3",
+      "ok": true,
+      "ms": 2765
+    },
+    {
+      "n": 233,
+      "id": "arrange.clipboard.cut-paste-undo",
+      "step": "Cmd+X, Cmd+V, then two Cmd+Z half a second apart",
+      "expected": "the cut object is back",
+      "observed": "3 -> 2 -> 3; a3 back true; count 3",
+      "ok": true,
+      "ms": 3369
+    },
+    {
+      "n": 234,
+      "id": "arrange.clipboard.menu-copy-paste",
+      "step": "Edit > Copy then Edit > Paste on a clean stage",
+      "expected": "a copy lands",
+      "observed": "3 -> 4",
+      "ok": true,
+      "ms": 4943
+    },
+    {
+      "n": 235,
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "step": "copy an object, click New slide in the toolbar, Cmd+V",
+      "expected": "the copy lands on the new slide",
+      "observed": "objects on the new slide 1 -> 2; focus before the paste div",
+      "ok": true,
+      "ms": 5253
+    },
+    {
+      "n": 236,
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "step": "copy an object, click another slide's card, Cmd+V",
+      "expected": "the copy lands on that slide",
+      "observed": "objects on the other slide 3 -> 4",
+      "ok": true,
+      "ms": 4977
+    },
+    {
+      "n": 237,
+      "id": "arrange.clipboard.paste-keeps-position",
+      "step": "copy a1, paste onto another slide from its stage",
+      "expected": "the copy keeps the source position",
+      "observed": "a1 at 152,150 240x150 (source 152,150 240x150)",
+      "ok": true,
+      "ms": 6468
+    },
+    {
+      "n": 238,
+      "id": "arrange.duplicate.cmd-d",
+      "step": "Cmd+D on a selected object",
+      "expected": "one more object",
+      "observed": "3 -> 4",
+      "ok": true,
+      "ms": 2778
+    },
+    {
+      "n": 239,
+      "id": "arrange.duplicate.menu-selects-copy",
+      "step": "Edit > Duplicate then Edit > Delete",
+      "expected": "the copy is removed and the original stays",
+      "observed": "selected after Duplicate a2-2; a2 still there true",
+      "ok": true,
+      "ms": 4170
+    },
+    {
+      "n": 240,
+      "id": "arrange.duplicate.nothing-selected",
+      "step": "Cmd+D with nothing selected",
+      "expected": "the current slide is duplicated",
+      "observed": "slides 3 -> 4",
+      "ok": true,
+      "ms": 3441
+    },
+    {
+      "n": 241,
+      "id": "arrange.redo.after-undone-duplicate",
+      "step": "Cmd+D, Cmd+Z, then Cmd+Shift+Z (Cmd+Y, the toolbar Redo, Edit > Redo when needed)",
+      "expected": "the duplicate comes back",
+      "observed": "Cmd+Shift+Z: back; toolbar Redo aria-disabled true",
+      "ok": true,
+      "ms": 5446
+    },
+    {
+      "n": 242,
+      "id": "arrange.keys.backspace-empty-selection",
+      "step": "Backspace and Delete with the stage focused and nothing selected",
+      "expected": "no slide is removed",
+      "observed": "slides 3 -> 3 after Backspace -> 3 after Delete",
+      "ok": true,
+      "ms": 2580
+    },
+    {
+      "n": 243,
+      "id": "arrange.nudge.arrows",
+      "step": "ArrowRight and ArrowDown on a selected object",
+      "expected": "1 px each",
+      "observed": "dx 1; dy 1",
+      "ok": true,
+      "ms": 2783
+    },
+    {
+      "n": 244,
+      "id": "arrange.nudge.shift",
+      "step": "Shift+ArrowRight",
+      "expected": "10 px",
+      "observed": "dx 10",
+      "ok": true,
+      "ms": 1299
+    },
+    {
+      "n": 245,
+      "id": "arrange.nudge.undo",
+      "step": "Cmd+Z three times",
+      "expected": "the nudges walk back one step each",
+      "observed": "steps 10,0 | 0,1 | 1,0; final 152,150 240x150",
+      "ok": true,
+      "ms": 2709
+    },
+    {
+      "n": 246,
+      "id": "arrange.zoom.box-reads",
+      "step": "read the zoom box at fit, after a preset and after a typed value",
+      "expected": "Fit, then the numbers",
+      "observed": "\"Fit\" then \"150%\" (stage 150%)",
+      "ok": true,
+      "ms": 6435
+    },
+    {
+      "n": 247,
+      "id": "arrange.zoom.type-percent",
+      "step": "type 150 in the zoom box and press Enter",
+      "expected": "the stage draws 150%",
+      "observed": "stage 150%; box \"150%\"",
+      "ok": true,
+      "ms": 1369
+    },
+    {
+      "n": 248,
+      "id": "arrange.zoom.cmd-0",
+      "step": "Cmd+0",
+      "expected": "100%",
+      "observed": "stage 100%; box \"100%\"",
+      "ok": true,
+      "ms": 892
+    },
+    {
+      "n": 249,
+      "id": "arrange.zoom.cmd-plus",
+      "step": "Cmd+Plus from 100",
+      "expected": "125%",
+      "observed": "stage 125% after Meta+Equal; box \"125%\"",
+      "ok": true,
+      "ms": 93
+    },
+    {
+      "n": 250,
+      "id": "arrange.zoom.cmd-minus",
+      "step": "Cmd+Minus",
+      "expected": "one rung down",
+      "observed": "stage 125% -> 100% (expected 100); box \"100%\"",
+      "ok": true,
+      "ms": 77
+    },
+    {
+      "n": 251,
+      "id": "arrange.zoom.menu-in",
+      "step": "View > Zoom > Zoom in from Fit",
+      "expected": "the next rung up from the current zoom",
+      "observed": "stage 71% -> 75% (expected 75); box \"75%\"",
+      "ok": true,
+      "ms": 4402
+    },
+    {
+      "n": 252,
+      "id": "arrange.zoom.menu-out",
+      "step": "View > Zoom > Zoom out",
+      "expected": "one rung down",
+      "observed": "stage 75% -> 50% (expected 50); box \"50%\"",
+      "ok": true,
+      "ms": 1747
+    },
+    {
+      "n": 253,
+      "id": "arrange.zoom.fit",
+      "step": "View > Zoom > Fit from 150 on its first click",
+      "expected": "the whole slide in the window",
+      "observed": "stage 150% -> 71%; sheet inside the stage true; box \"Fit\"",
+      "ok": true,
+      "ms": 3081
+    },
+    {
+      "n": 254,
+      "id": "arrange.zoom.arrow-menu",
+      "step": "the arrow beside the zoom box, 200%",
+      "expected": "200%",
+      "observed": "stage 200%; box \"200%\"",
+      "ok": true,
+      "ms": 822
+    },
+    {
+      "n": 255,
+      "id": "arrange.zoom.menu-presets",
+      "step": "View > Zoom > 50%, 100% and 200%",
+      "expected": "each sets the stage and reads checked",
+      "observed": "50: stage 50%, checked true; 100: stage 100%, checked true; 200: stage 200%, checked true",
+      "ok": true,
+      "ms": 11248
+    },
+    {
+      "n": 256,
+      "id": "arrange.readout.fit",
+      "step": "drag the se handle of a1 at fit",
+      "expected": "the readout shows W × H during and is gone after",
+      "observed": "during \"280 × 180\"; after none",
+      "ok": true,
+      "ms": 6065
+    },
+    {
+      "n": 257,
+      "id": "arrange.readout.200",
+      "step": "drag the se handle of a1 at 200",
+      "expected": "the readout shows W × H during and is gone after",
+      "observed": "during \"280 × 180\"; after none",
+      "ok": true,
+      "ms": 5207
+    },
+    {
+      "n": 258,
+      "id": "arrange.selection-colour.dark",
+      "step": "select an object on the dark appearance (the /new default)",
+      "expected": "the ring and chip are #3d86f0",
+      "observed": "theme dark; chip rgb(61, 134, 240)",
+      "ok": true,
+      "ms": 847
+    },
+    {
+      "n": 259,
+      "id": "arrange.selection-colour.light",
+      "step": "a setup write of the light appearance, then select an object",
+      "expected": "the ring and chip are #1a73e8",
+      "observed": "chip rgb(26, 115, 232) on the light appearance; dark restored",
+      "ok": true,
+      "ms": 3051
+    },
+    {
+      "n": 260,
+      "id": "arrange.escape.text-then-selection",
+      "step": "double click a text box, Escape, Escape",
+      "expected": "the session ends, then the selection clears",
+      "observed": "editing true -> false; selected esc-box -> none",
+      "ok": true,
+      "ms": 2101
+    },
+    {
+      "n": 261,
+      "id": "arrange.toolbar.select",
+      "step": "arm the Text box tool, click the toolbar Select button, click an object",
+      "expected": "the pointer returns and the click selects",
+      "observed": "tool armed text; after Select null; a click selected a2 true; objects 4 -> 4",
+      "ok": true,
+      "ms": 2257
+    },
+    {
+      "n": 262,
+      "step": "setup: a slide for the shapes",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-3",
+      "ok": true,
+      "ms": 426
+    },
+    {
+      "n": 263,
+      "step": "setup: Insert > Shape in the menu, or the switch on for the parked shapes and lines rows",
+      "expected": "the Shape row is reachable",
+      "observed": "Insert > Shape is parked (ruling (1)); Tools > Advanced tools turned on true; the row drawn true",
+      "ok": true,
+      "ms": 3404
+    },
+    {
+      "n": 264,
+      "id": "shapes.insert.rectangle-click",
+      "step": "Insert > Shape > Rectangle, one click on the sheet",
+      "expected": "a 240 by 160 rectangle drawn as a rectangle",
+      "observed": "the named row; shape shape 200,200 240x160; data-shape null; path ",
+      "ok": true,
+      "ms": 3130
+    },
+    {
+      "n": 265,
+      "id": "shapes.insert.rounded-click",
+      "step": "Insert > Shape > Rounded rectangle, one click",
+      "expected": "the svg path has rounded corners",
+      "observed": "the named row; shape-2 600,200 240x160; data-shape null; path ; rx 8",
+      "ok": true,
+      "ms": 3338
+    },
+    {
+      "n": 266,
+      "id": "shapes.insert.ellipse-click",
+      "step": "Insert > Shape > Ellipse, one click",
+      "expected": "an ellipse",
+      "observed": "the named row; shape-3; data-shape null; ellipse ",
+      "ok": true,
+      "ms": 3700
+    },
+    {
+      "n": 267,
+      "id": "shapes.insert.rectangle-drag",
+      "step": "Rectangle drawn by a drag",
+      "expected": "the shape lands at the drawn box",
+      "observed": "the named row; 200,520 320x180",
+      "ok": true,
+      "ms": 5304
+    },
+    {
+      "n": 268,
+      "id": "shapes.insert.ellipse-drag",
+      "step": "Ellipse drawn by a drag",
+      "expected": "the ellipse lands at the drawn box",
+      "observed": "the named row; 700,520 300x200",
+      "ok": true,
+      "ms": 5285
+    },
+    {
+      "n": 269,
+      "id": "shapes.insert.named-rows",
+      "step": "open Insert > Shape > Shapes and the toolbar Shape arrow",
+      "expected": "Rectangle, Rounded rectangle and Ellipse as named rows in both",
+      "observed": "menu rows insert.shape.shapes.rectangle, insert.shape.shapes.rounded, insert.shape.shapes.ellipse; plate drawn false; arrow rows menu.insert.shape.shapes.rectangle, menu.insert.shape.shapes.rounded, menu.insert.shape.shapes.ellipse",
+      "ok": true,
+      "ms": 3146
+    },
+    {
+      "n": 270,
+      "id": "shapes.default-look",
+      "step": "read the fresh rectangle's fill and stroke on both appearances",
+      "expected": "a fill or a stroke the seller can see",
+      "observed": "dark: fill rgba(242, 242, 240, 0.05), stroke rgb(242, 242, 240) 1px on rgb(7, 7, 7): fill seen true, stroke seen true | light: fill rgba(7, 7, 7, 0.035), stroke rgb(7, 7, 7) 1px on rgb(255, 255, 255): fill seen true, stroke seen true",
+      "ok": true,
+      "ms": 1711
+    },
+    {
+      "n": 271,
+      "id": "shapes.select",
+      "step": "click the rectangle",
+      "expected": "chip Shape, eight handles, the ring",
+      "observed": "chip \"Shape\"; handles nw,n,ne,e,se,s,sw,w",
+      "ok": true,
+      "ms": 854
+    },
+    {
+      "n": 272,
+      "id": "shapes.move",
+      "step": "drag the shape by its frame by 120 by 80 px",
+      "expected": "pos moves by 120, 80 within the snap",
+      "observed": "moved 115,80",
+      "ok": true,
+      "ms": 3402
+    },
+    {
+      "n": 273,
+      "id": "shapes.resize.eight-handles",
+      "step": "drag each handle plain, with Shift and with Alt; Undo after each",
+      "expected": "the box follows, the svg fills the box, Undo restores",
+      "observed": "nw plain: ok 200,200 240x160 -> 137,160 303x200, svg fills true, readout \"303 × 200\", undo true | n plain: ok 200,200 240x160 -> 200,160 240x200, svg fills true, readout \"240 × 200\", undo true | ne plain: ok 200,200 240x160 -> 200,160 300x200, svg fills true, readout \"300 × 200\", undo true | e plain: ok 200,200 240x160 -> 200,200 300x160, svg fills true, readout \"300 × 160\", undo true | se plain: ok 200,200 240x160 -> 200,200 300x200, svg fills true, readout \"300 × 200\", undo true | s plain: ok 200,200 240x160 -> 200,200 240x200, svg fills true, readout \"240 × 200\", undo true | sw plain: ok 200,200 240x160 -> 137,200 303x200, svg fills true, readout \"303 × 200\", undo true | w plain: ok 200,200 240x160 -> 137,200 303x160, svg fills true, readout \"303 × 160\", undo true | nw shift: ok 200,200 240x160 -> 140,160 300x200, svg fills true, readout \"300 × 200\", undo true | n shift: ok 200,200 240x160 -> 200,160 300x200, svg fills true, readout \"300 × 200\", undo true | ne shift: ok 200,200 240x160 -> 200,160 300x200, svg fills true, readout \"300 × 200\", undo true | e shift: ok 200,200 240x160 -> 200,200 300x200, svg fills true, readout \"300 × 200\", undo true | se shift: ok 200,200 240x160 -> 200,200 300x200, svg fills true, readout \"300 × 200\", undo true | s shift: ok 200,200 240x160 -> 200,200 300x200, svg fills true, readout \"300 × 200\", undo true | sw shift: ok 200,200 240x160 -> 140,200 300x200, svg fills true, readout \"300 × 200\", undo true | w shift: ok 200,200 240x160 -> 137,200 303x202, svg fills true, readout \"303 × 202\", undo true | nw alt: ok 200,200 240x160 -> 137,160 366x240, svg fills true, readout \"366 × 240\", undo true | n alt: ok 200,200 240x160 -> 200,160 240x240, svg fills true, readout \"240 × 240\", undo true | ne alt: ok 200,200 240x160 -> 140,160 360x240, svg fills true, readout \"360 × 240\", undo true | e alt: ok 200,200 240x160 -> 140,200 360x160, svg fills true, readout \"360 × 160\", undo true | se alt: ok 200,200 240x160 -> 140,160 360x240, svg fills true, readout \"360 × 240\", undo true | s alt: ok 200,200 240x160 -> 200,160 240x240, svg fills true, readout \"240 × 240\", undo true | sw alt: ok 200,200 240x160 -> 137,160 366x240, svg fills true, readout \"366 × 240\", undo true | w alt: ok 200,200 240x160 -> 137,200 366x160, svg fills true, readout \"366 × 160\", undo true",
+      "ok": true,
+      "ms": 93251
+    },
+    {
+      "n": 274,
+      "id": "shapes.rotate",
+      "step": "drag the ring to about 35 degrees, Undo",
+      "expected": "pos.rotate near 35, then 0",
+      "observed": "rotate 35; readout \"35°\"; after undo 0",
+      "ok": true,
+      "ms": 3680
+    },
+    {
+      "n": 275,
+      "id": "shapes.fill.colour",
+      "step": "the toolbar Fill color: a swatch, then a hex value; Undo",
+      "expected": "the shape paints each; Undo takes it back",
+      "observed": "fill rgba(242, 242, 240, 0.05) -> rgb(47, 92, 224) (stored blue true) -> rgb(47, 92, 224); after two undos rgba(7, 7, 7, 0.035)",
+      "ok": false,
+      "ms": 14964
+    },
+    {
+      "n": 276,
+      "id": "shapes.border.colour-weight-dash",
+      "step": "the toolbar Border color, Border weight and Border dash, then Format > Borders & lines; Undo",
+      "expected": "the stroke changes each time and Undo takes it back",
+      "observed": "colour rgb(7, 7, 7) -> rgb(229, 72, 77); weight 1px -> 2px (menu.toolbar.borderWeight.weight-2); dash none -> 8px, 6px (toolbar.borderDash.pick.dash); Format > Borders & lines > Border color (plate format.bordersLines.borderColor.plate,format.bordersLines.borderColor.plate) rgb(229, 72, 77) -> rgb(18, 163, 122); after four undos stroke rgb(7, 7, 7) 1px dash none",
+      "ok": true,
+      "ms": 14698
+    },
+    {
+      "n": 277,
+      "id": "shapes.text.type-align-bold",
+      "step": "double click the shape (Enter as the fallback), type, align centre, Cmd+B",
+      "expected": "the text sits inside the shape",
+      "observed": "double click; run shape/text \"Inside\" inside the box true; stored {\"id\":\"shape\",\"pos\":{\"x\":200,\"y\":200,\"w\":240,\"h\":160,\"z\":1},\"type\":\"shape\",\"shape\":\"rectangle\",\"fill\":\"plate\",\"stroke\":\"ink\",\"text\":\"*Inside*\",\"typography\":{\"al",
+      "ok": true,
+      "ms": 3566
+    },
+    {
+      "n": 278,
+      "id": "shapes.duplicate-delete-undo-redo",
+      "step": "Cmd+D, Delete, Cmd+Z, Cmd+Shift+Z on the shape",
+      "expected": "one more, one fewer, back, gone",
+      "observed": "3 -> 4 -> 3 -> 4 -> 3",
+      "ok": true,
+      "ms": 5452
+    },
+    {
+      "n": 279,
+      "id": "shapes.format-options.size-position",
+      "step": "Format > Format options on the shape, type a width",
+      "expected": "Size and Position show and the width applies",
+      "observed": "sections size, position, textFitting, text, colour, shadow, shape, altText, block; width 240 -> 300",
+      "ok": true,
+      "ms": 5627
+    },
+    {
+      "n": 280,
+      "id": "shapes.context.shape",
+      "step": "right click the shape, read the rows, Duplicate from it",
+      "expected": "the rows and a copy",
+      "observed": "rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, arrange.distribute, arrange.group, arrange.ungroup, insert.link, format.textFitting, format.dropShadow, format.formatOptions, format.changeShape, format.altText, insert.comment; missing none; duplicated true",
+      "ok": true,
+      "ms": 3227
+    },
+    {
+      "n": 281,
+      "id": "shapes.reload-and-viewer",
+      "step": "give the shape a fill, reload /edit and open /deck",
+      "expected": "the shapes and their paint are the same",
+      "observed": "fill rgb(18, 163, 122) -> after reload rgb(18, 163, 122) -> viewer rgb(18, 163, 122); path same true; objects shape,shape-2,shape-3 -> shape,shape-2,shape-3",
+      "ok": true,
+      "ms": 3999
+    },
+    {
+      "n": 282,
+      "step": "setup: a slide for the lines",
+      "expected": "slide.new through the window API",
+      "observed": "slide blank-4",
+      "ok": true,
+      "ms": 1065
+    },
+    {
+      "n": 283,
+      "id": "lines.insert.line-drag",
+      "step": "Insert > Line > Line drawn by a drag, then the toolbar Line button the same way",
+      "expected": "a line lands each time along the drag",
+      "observed": "menu: shape shape 200,200 400x120; toolbar: shape shape-2 200,500 400x120",
+      "ok": true,
+      "ms": 6967
+    },
+    {
+      "n": 284,
+      "id": "lines.insert.arrow-drag",
+      "step": "Insert > Line > Arrow drawn by a drag",
+      "expected": "the line ends in an arrow head",
+      "observed": "shape-2 800,200 500x120; marker-end none; markers 0; drawn parts 2; stored {\"id\":\"shape-2\",\"pos\":{\"x\":800,\"y\":200,\"w\":500,\"h\":120,\"z\":2},\"type\":\"shape\",\"shape\":\"arrow\",\"orientation\":\"diagonal-dow",
+      "ok": true,
+      "ms": 3490
+    },
+    {
+      "n": 285,
+      "id": "lines.end-handle",
+      "step": "drag the end handle of the line by 80 by 40 px",
+      "expected": "the end moves and the start holds",
+      "observed": "pos 200,200 400x120 -> 200,200 480x160; start held true",
+      "ok": true,
+      "ms": 3329
+    },
+    {
+      "n": 286,
+      "id": "lines.tail.colour-weight-dash-ends",
+      "step": "the line toolbar's Line color, Line weight, Line dash, Line start and Line end; Undo",
+      "expected": "each applies and Undo takes them back",
+      "observed": "colour rgb(7, 7, 7) -> rgb(229, 72, 77); weight 1px -> 1.5px (menu.toolbar.lineWeight.line-1.5); dash none -> 6px, 4.5px (toolbar.lineDash.pick.dash); start true (toolbar.lineStart.pick.fillCircle); end true (toolbar.lineEnd.pick.fillArrow); marker-end none; after 5 undos stroke rgb(7, 7, 7) 1px dash none, block restored true",
+      "ok": true,
+      "ms": 15987
+    },
+    {
+      "n": 287,
+      "id": "lines.context.line",
+      "step": "right click the line, read the rows, Line end > Arrow from it",
+      "expected": "the rows and the head",
+      "observed": "rows edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, arrange.distribute, arrange.group, arrange.ungroup, insert.link, format.dropShadow, format.formatOptions, format.bordersLines.lineStart, format.bordersLines.lineEnd, format.altText, insert.comment; missing none; picked menu.format.bordersLines.lineEnd.fillArrow; head true",
+      "ok": true,
+      "ms": 3422
+    },
+    {
+      "n": 288,
+      "step": "setup: Tools > Advanced tools off again after the shapes and lines rows",
+      "expected": "the default view is back",
+      "observed": "advanced tools off true",
+      "ok": true,
+      "ms": 1796
+    },
+    {
+      "n": 289,
+      "id": "share.file-menu-share-with-others",
+      "step": "File > Share > Share with others",
+      "expected": "the Share dialog opens",
+      "observed": "shown true; closed on Escape true",
+      "ok": true,
+      "ms": 1961
+    },
+    {
+      "n": 290,
+      "id": "versions.open-from-last-edit",
+      "step": "click the Last edit words in the title row",
+      "expected": "Version history opens with the day window",
+      "observed": "windows versionHistory.window.w197; Today heading true",
+      "ok": true,
+      "ms": 837
+    },
+    {
+      "n": 291,
+      "id": "versions.pick",
+      "step": "pick a version in the panel",
+      "expected": "the version is shown as picked",
+      "observed": "197 rows; picked versionHistory.196.pick: aria null, class \"ts-version is-in-window is-picked\"",
+      "ok": true,
+      "ms": 1818
+    },
+    {
+      "n": 292,
+      "id": "versions.name-current",
+      "step": "Name current version, type a name, Save",
+      "expected": "the name is saved and listed",
+      "observed": "listed true; snackbar Version 198 saved at r197",
+      "ok": true,
+      "ms": 3175
+    },
+    {
+      "n": 293,
+      "id": "versions.undo-restore",
+      "step": "Restore an earlier version, then Cmd+Z",
+      "expected": "the current version comes back",
+      "observed": "restore changed the deck true (versionHistory.1.restore; snackbar Version 198 saved at r197; panel notice Restored the version of Sep 17, 11:01 PM; state.error none); Cmd+Z brought the current version back true",
+      "ok": true,
+      "ms": 2530
+    },
+    {
+      "n": 294,
+      "id": "export.download-submenu",
+      "step": "File > Download",
+      "expected": "the PowerPoint and PDF rows are listed",
+      "observed": "file.download.pptx, file.download.pdf",
+      "ok": true,
+      "ms": 1461
+    },
+    {
+      "n": 295,
+      "id": "export.pdf.dialog",
+      "step": "File > Download > PDF Document",
+      "expected": "the dialog with its sentence, the skipped slides checkbox off, Cancel and Download",
+      "observed": "sentence true; skipped false; buttons Cancel, Download",
+      "ok": true,
+      "ms": 1814
+    },
+    {
+      "n": 296,
+      "id": "export.pdf.skipped-check",
+      "step": "Include skipped slides on, then off",
+      "expected": "the checkbox toggles",
+      "observed": "true then false",
+      "ok": true,
+      "ms": 786
+    },
+    {
+      "n": 297,
+      "id": "export.pdf.close-paths",
+      "step": "Escape, Cancel and the X",
+      "expected": "each closes the dialog",
+      "observed": "Escape true; Cancel true; X true",
+      "ok": true,
+      "ms": 4860
+    },
+    {
+      "n": 298,
+      "id": "export.pptx.dialog",
+      "step": "File > Download > Microsoft PowerPoint",
+      "expected": "Perfect selected and Editable text as the other radio",
+      "observed": "Perfect checked true; Editable text checked false; labels PerfectEvery slide looks exactly like the screen; the text is there but not editable | Editable textText boxes you can edit in PowerPoint; layout within a few pixels | Include speaker notes | Include skipped slides | AppearanceLightDarkBoth | FontsExactStandard | Embed fonts | Headings as pictures",
+      "ok": true,
+      "ms": 1944
+    },
+    {
+      "n": 299,
+      "step": "setup: a talk track for the print rows",
+      "expected": "the title slide holds a note",
+      "observed": "note stored true",
+      "ok": true,
+      "ms": 6366
+    },
+    {
+      "n": 300,
+      "step": "setup: a skipped slide for the print rows",
+      "expected": "one card carries the skip and the server holds it",
+      "observed": "split-1: marked true, held by the server true, title row \"All changes saved\"",
+      "ok": true,
+      "ms": 2789
+    },
+    {
+      "n": 301,
+      "id": "export.print.preview-page",
+      "step": "File > Print settings and preview",
+      "expected": "/print/<id> with the pages and the layout dropdown",
+      "observed": "/print/untitled-20260918-9l8x; data-count 5; page nodes 11; layout dropdown true",
+      "ok": true,
+      "ms": 1949
+    },
+    {
+      "n": 302,
+      "id": "export.print.layout-with-notes",
+      "step": "pick 1 slide with notes",
+      "expected": "the talk track shows under the slide",
+      "observed": "layout notes; notes blocks 5; talk track shown true",
+      "ok": true,
+      "ms": 608
+    },
+    {
+      "n": 303,
+      "id": "export.print.include-skipped",
+      "step": "Include skipped slides",
+      "expected": "the skipped page joins and is marked",
+      "observed": "pages 5 -> 6; marked 1",
+      "ok": true,
+      "ms": 354
+    },
+    {
+      "n": 304,
+      "id": "export.print.print-button",
+      "step": "click Print with window.print spied",
+      "expected": "the browser's print is called once",
+      "observed": "window.print called 1 time(s); the OS dialog's Save as PDF is the manual checklist's",
+      "ok": true,
+      "ms": 1230
+    },
+    {
+      "n": 305,
+      "id": "export.print.close-preview",
+      "step": "Close preview",
+      "expected": "back in the editor",
+      "observed": "/edit/untitled-20260918-9l8x",
+      "ok": true,
+      "ms": 469
+    },
+    {
+      "n": 306,
+      "id": "export.print.file-menu-after-close",
+      "step": "the first click on File after Close preview",
+      "expected": "the menu opens",
+      "observed": "File menu open after one click true",
+      "ok": true,
+      "ms": 1547
+    },
+    {
+      "n": 307,
+      "id": "export.print.menu-row",
+      "step": "File > Print",
+      "expected": "the print page",
+      "observed": "landed on /print",
+      "ok": true,
+      "ms": 2414
+    },
+    {
+      "n": 308,
+      "id": "export.print.cmd-p",
+      "step": "Cmd+P",
+      "expected": "the print page",
+      "observed": "landed on /print",
+      "ok": true,
+      "ms": 2116
+    },
+    {
+      "n": 309,
+      "id": "help.help-dialog",
+      "step": "Help > Help, read the how-tos, Done",
+      "expected": "the dialog lists the how-tos and Done closes it",
+      "observed": "how-tos 10; closed true",
+      "ok": true,
+      "ms": 1760
+    },
+    {
+      "n": 310,
+      "id": "help.documentation-link",
+      "step": "read the Documentation link in Help > Help and GET it",
+      "expected": "the link answers 200",
+      "observed": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md -> 429, 200",
+      "ok": true,
+      "ms": 17747
+    },
+    {
+      "n": 311,
+      "id": "help.keyboard-shortcuts",
+      "step": "Help > Keyboard shortcuts, type in the search, Escape",
+      "expected": "the dialog opens, filters, closes",
+      "observed": "rows 122 -> 1 on \"undo\"; closed true",
+      "ok": true,
+      "ms": 2753
+    },
+    {
+      "n": 312,
+      "id": "help.search-the-menus",
+      "step": "Help > Search the menus, type a row name; then the toolbar Search",
+      "expected": "the row is found by name both ways",
+      "observed": "Help > Search the menus found Move to trash true; the toolbar Search found Keyboard shortcuts true",
+      "ok": true,
+      "ms": 4975
+    },
+    {
+      "n": 313,
+      "id": "surface.menus.open-close-escape",
+      "step": "open every menu of the bar and close it with Escape",
+      "expected": "each shows rows, Escape removes it, no console error",
+      "observed": "9 menus (file, edit, view, insert, format, slide, arrange, tools, help); file: 9 rows, closed true, errors 0; edit: 10 rows, closed true, errors 0; view: 3 rows, closed true, errors 0; insert: 5 rows, closed true, errors 0; format: 8 rows, closed true, errors 0; slide: 7 rows, closed true, errors 0; arrange: 3 rows, closed true, errors 0; tools: 2 rows, closed true, errors 0; help: 3 rows, closed true, errors 0",
+      "ok": true,
+      "ms": 8691
+    },
+    {
+      "n": 314,
+      "id": "decks.save.acknowledged",
+      "step": "every window API write of the walk is acknowledged within 60 s",
+      "expected": "no call runs to its bound; the title row leaves Saving",
+      "observed": "1 unanswered call(s): block.insert at 2026-09-18T06:01:34.376Z on untitled-20260918-273j in images (setup: a picture on the slide); 1 fresh deck(s) made for the areas after",
+      "ok": false
+    },
+    {
+      "n": 315,
+      "id": "decks.editor.move-to-trash",
+      "step": "File > Move to trash",
+      "expected": "the address moves to /decks and the deck is not listed",
+      "observed": "/decks; card listed false",
+      "ok": true,
+      "ms": 11810
+    },
+    {
+      "n": 316,
+      "id": "surface.cleanup",
+      "step": "Delete forever on /decks/trash, then GET /edit/<id> and /deck/<id>",
+      "expected": "the card leaves the trash and both addresses answer 404 within 20 s",
+      "observed": "the trash page; /edit 404, /deck 404; retired by the stall: untitled-20260918-273j /edit 404, /deck 404",
+      "ok": true,
+      "ms": 8254
+    }
+  ]
+}

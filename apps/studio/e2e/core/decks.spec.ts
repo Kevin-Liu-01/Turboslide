@@ -54,6 +54,9 @@ test.beforeAll(async ({ browser }) => {
   await settled(page);
 });
 test.afterAll(async () => {
+  /* the teardown runs past a failed row and past the file's own test timeout, so no scratch deck
+     is left behind (VERIFICATION.md C2-F29) */
+  test.setTimeout(180_000);
   try {
     await teardownAll(page, scratch);
   } finally {
@@ -503,7 +506,8 @@ test(title('decks.nav.back-forward'), async () => {
   await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
   await gotoDecks();
   await ctl(page, `trash`).count();
-  /* the deck sits in the trash from the row above; a trashed deck still opens */
+  /* the deck sits in the trash since delete-forever-cancel; a trashed deck still opens, read only
+     under its banner, and `decks.access.paint` restores it before its own setup write */
   await page.goto(`/edit/${deck}`);
   await waitEditor(page);
   await page.goto('/new');
@@ -538,35 +542,31 @@ test(title('decks.access.unknown-edit'), async () => {
 });
 
 test(title('decks.access.paint'), async () => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
+  /* the deck sits in the trash since `decks.trash.delete-forever-cancel` (its Cancel leaves it
+     there, and `decks.nav.back-forward` opens it trashed on purpose), and a trashed presentation
+     is read only under its banner (gslides-parity SPEC 6.4), so the setup write of the appearance
+     below needs it restored first (VERIFICATION.md C2-F6, b7's C2-R19: the row failed on every
+     tier by its own setup, "mode viewing, role owner", and its second load waited 20 s for a mode
+     that could not come) */
+  await gotoTrash();
+  if ((await ctl(page, `trash.card.${deck}`).count()) > 0) await restoreFromTrash(deck);
   /* the editor used on the light appearance first: the setup write of the appearance */
   await openEditor(page, deck);
-  /* the setup write needs the editor in Editing mode; right after the trash rows the reopened
-     deck can still carry its trash stamp or read its owner as a viewer for the record's flight
-     time (VERIFICATION.md pass 2 F-restore-mode: "deck.set needs Editing mode"), so the mode is
-     waited for, with one more load when it has not come, and the miss names the mode and role */
   const mode = () =>
     page
       .locator('.pt-viewer:not(.ts-skeleton)')
       .first()
       .getAttribute('data-edit-mode')
       .catch(() => null);
-  let editing = await expect
+  const editing = await expect
     .poll(mode, { timeout: 20_000 })
     .toBe('editing')
     .then(() => true)
     .catch(() => false);
-  if (!editing) {
-    await openEditor(page, deck);
-    editing = await expect
-      .poll(mode, { timeout: 20_000 })
-      .toBe('editing')
-      .then(() => true)
-      .catch(() => false);
-  }
   expect(
     editing,
-    `the reopened deck is in Editing mode for its owner (mode ${await mode()}, role ${(await state(page)).access?.role})`,
+    `the restored deck is in Editing mode for its owner (mode ${await mode()}, role ${(await state(page)).access?.role})`,
   ).toBe(true);
   const s = await state(page);
   await invoke(page, 'deck.set', {

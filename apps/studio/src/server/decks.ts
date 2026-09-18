@@ -28,7 +28,6 @@ import {
   deckCardFacts,
   ensureDecks,
   hostingFacts,
-  isHosted,
   openDeckStore,
   listStoredDecks,
 } from './root';
@@ -43,13 +42,14 @@ import {
  * the file, tmp and Blob stores. createServerFn lives only under apps/studio/src/server (SPEC 3.3
  * item 4).
  *
- * Fallback, checkout only: a request for a missing deck id is served from decks/fixture with
- * `fallback` set, so the M1 viewer spec runs against the two-slide fixture before an import. A
- * hosted studio has no fixture and answers 404 for a deck it does not hold.
+ * A missing deck answers null, and the routes 404, on every store (the focus round, cycle 3;
+ * VERIFICATION C2-F19 and C2-F20). Before this a checkout served `decks/fixture` for any id it
+ * did not hold, with `fallback` set on the payload (the M1 viewer spec's stand in before the
+ * first import; the spec has opened /deck/gt-brand since), so on the check's file store server
+ * `/deck/<unknown id>` answered 200 with the fixture and `/deck/<id>` answered 200 after Delete
+ * forever had removed the deck's folder, while the preview and the tmp store answered 404. The
+ * `fallback` field of the viewer payload stays for the type; nothing sets it.
  */
-
-/** The fixture deck served for a missing id in a checkout. */
-const FALLBACK_DECK = 'fixture';
 
 /** The author the home page writes as (Rename); the editor's default author (editor/EditorRoot.tsx). */
 const HOME_AUTHOR: Author = { kind: 'human', name: 'studio' };
@@ -87,28 +87,23 @@ export type DeckSlidesPayload = {
 
 type Loaded = { servedId: string; document: DeckDocument; issues: string[] };
 
-/** Reads a deck through its store; null when neither the deck nor the fixture can be read. */
+/** Reads a deck through its store; null when the store does not hold it. */
 async function loadDeck(deckId: string): Promise<Loaded | null> {
-  const candidates = [deckId];
-  if (!isHosted() && deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
-  for (const servedId of candidates) {
-    try {
-      const read = await (await openDeckStore(servedId)).read();
-      return {
-        servedId,
-        document: read.document,
-        issues: read.issues
-          .filter((issue) => issue.severity === 3)
-          .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
-      };
-    } catch (error) {
-      // a missing deck is a RangeError, a folder that is not a deck a TypeError; anything else
-      // (the store unreachable) is the route's error
-      if (error instanceof RangeError || error instanceof TypeError) continue;
-      throw error;
-    }
+  try {
+    const read = await (await openDeckStore(deckId)).read();
+    return {
+      servedId: deckId,
+      document: read.document,
+      issues: read.issues
+        .filter((issue) => issue.severity === 3)
+        .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
+    };
+  } catch (error) {
+    // a missing deck is a RangeError, a folder that is not a deck a TypeError; anything else
+    // (the store unreachable) is the route's error
+    if (error instanceof RangeError || error instanceof TypeError) return null;
+    throw error;
   }
-  return null;
 }
 
 /** The sprite the stage carries: the same markup the renderer inlines (SPEC 5.1). */
@@ -817,17 +812,12 @@ export const deckRevision = createServerFn({ method: 'GET' })
         // outside a request: nothing to set
       }
     }
-    const candidates = [data.deckId];
-    if (!isHosted() && data.deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
-    for (const servedId of candidates) {
-      try {
-        return { revision: await (await openDeckStore(servedId)).revision() };
-      } catch (error) {
-        if (error instanceof RangeError || error instanceof TypeError) continue;
-        throw error;
-      }
+    try {
+      return { revision: await (await openDeckStore(data.deckId)).revision() };
+    } catch (error) {
+      if (error instanceof RangeError || error instanceof TypeError) return null;
+      throw error;
     }
-    return null;
   });
 
 /**

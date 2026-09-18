@@ -60,11 +60,18 @@ export const AREAS = [
 /** The rows the finally block proves, outside any area. */
 export const CLEANUP_IDS = ['decks.editor.move-to-trash', 'surface.cleanup'];
 
+/**
+ * The row the whole walk proves (VERIFICATION.md C2-F24): every window API write answered within
+ * its bound. Recorded from the toolkit's stall list at the end, outside any section.
+ */
+export const WALK_IDS = ['decks.save.acknowledged'];
+
 /** Every id the walk declares, by area, so a test can compare it with `probeRows()`. */
 export function declaredIds() {
   const out = new Map();
   for (const area of AREAS) for (const id of area.IDS) out.set(id, area.NAME);
   for (const id of CLEANUP_IDS) out.set(id, 'cleanup');
+  for (const id of WALK_IDS) out.set(id, 'walk');
   return out;
 }
 
@@ -139,13 +146,18 @@ export async function runCoreWalk({
     report,
     options: { downloads, popups, headed: HEADED },
   });
-  /** The shared state of the walk: the deck and the slides the areas made. */
-  t.deck = { id: '', titleSlide: '', head: null, body: null, build: null };
+  /**
+   * The shared state of the walk: the deck and the slides the areas made. `retired` holds the
+   * decks a stall left behind (VERIFICATION.md C2-F24), trashed and removed by the finally block.
+   */
+  t.deck = { id: '', titleSlide: '', head: null, body: null, build: null, retired: [] };
+  /** The areas this run drives, in order (a partial run keeps the decks area, which makes the deck). */
+  const planned = AREAS.filter((area) => !only || only.has(area.NAME) || area.NAME === 'decks');
+  /** How many stalls the walk had answered with a fresh deck. */
+  let rotated = 0;
 
   try {
-    for (const area of AREAS) {
-      // the decks area creates the scratch deck, so a partial run always starts with it
-      if (only && !only.has(area.NAME) && area.NAME !== 'decks') continue;
+    for (const [index, area] of planned.entries()) {
       await t.section(area.NAME, area.IDS, () => area.run(t));
       if (!t.deck.id) {
         report.rows.push({
@@ -157,6 +169,40 @@ export async function runCoreWalk({
         });
         break;
       }
+      /* the stall (C2-F24): a window API write of this area did not answer within its bound, so
+         the deck's later setups would each run to the bound as well (the cycle 2 run of record
+         lost 162 rows to five `slide.new` calls of 60 s); the next area gets a fresh deck and the
+         stuck one is retired for the cleanup. The stall itself is judged at the end. */
+      const next = planned[index + 1];
+      if (t.stalls.length > rotated && next) {
+        const last = t.stalls[t.stalls.length - 1];
+        rotated = t.stalls.length;
+        console.log(
+          `\n==== the window API stalled on ${t.deck.id} (${last.action} in ${last.area ?? 'no area'}, ${last.step ?? 'no step'}); a fresh deck for ${next.NAME}`,
+        );
+        const made = await t.freshDeck(
+          `${last.action} did not answer in ${last.area ?? 'the walk'}`,
+        );
+        if (!made) {
+          report.rows.push({
+            n: report.rows.length + 1,
+            step: 'the walk has a deck',
+            expected: 'a fresh deck after the stall',
+            observed: `no fresh deck could be made after ${last.action} stalled; the walk stops`,
+            ok: false,
+          });
+          for (const later of planned.slice(index + 1))
+            for (const id of later.IDS)
+              t.recordRow(
+                id,
+                `${later.NAME}: ${id}`,
+                'driven',
+                `not driven: no fresh deck could be made after the stall (${last.action} did not answer within ${last.ms / 1000} s)`,
+                null,
+              );
+          break;
+        }
+      }
     }
   } catch (error) {
     report.rows.push({
@@ -167,11 +213,30 @@ export async function runCoreWalk({
       ok: false,
     });
   } finally {
+    // ---- the stall row (C2-F24): every window API call answered within its bound, or the list
+    if (t.deck.build)
+      t.recordRow(
+        WALK_IDS[0],
+        'every window API write of the walk is acknowledged within 60 s',
+        'no call runs to its bound; the title row leaves Saving',
+        t.stalls.length === 0
+          ? `${report.rows.filter((r) => r.ok !== null).length} steps, no window API call ran to its ${t.INVOKE_TIMEOUT_MS / 1000} s bound`
+          : `${t.fakeStall ? `a fake stall was set (TURBOSLIDE_WALK_FAKE_STALL=${t.fakeStall}), the driver's own test; ` : ''}${t.stalls.length} unanswered call(s): ${t.stalls
+              .map(
+                (x) =>
+                  `${x.action} at ${x.at} on ${x.deck ?? 'no deck'} in ${x.area ?? 'no area'} (${x.step ?? 'no step'})`,
+              )
+              .join('; ')}; ${rotated} fresh deck(s) made for the areas after`,
+        t.stalls.length === 0,
+      );
     // ---- the trash path: File > Move to trash, Delete forever, the 404 on /edit and /deck
     if (t.deck.id && (!only || only.has('cleanup') || only.has('decks'))) {
+      /* `surface.cleanup` covers the decks a stall retired as well */
       await t.section('cleanup', CLEANUP_IDS, () => cleanup(t));
     } else if (t.deck.id) {
-      await cleanupQuiet(t);
+      await cleanupQuiet(t, t.deck.id);
+      /* the decks a stall retired: each trashed and removed through the window API, its 404 read */
+      for (const retired of t.deck.retired) await cleanupQuiet(t, retired);
     }
     await browser.close().catch(() => undefined);
 
@@ -209,6 +274,10 @@ export async function runCoreWalk({
       matrix: CORE_MATRIX_PATH,
       build: t.deck.build,
       deckId: t.deck.id,
+      retiredDecks: t.deck.retired,
+      stalls: t.stalls,
+      fakeStall: t.fakeStall,
+      invokeTimeoutMs: t.INVOKE_TIMEOUT_MS,
       startedAt: new Date(startedAt).toISOString(),
       ms: Date.now() - startedAt,
       steps: report.rows.length,
@@ -351,18 +420,30 @@ async function cleanup(t) {
         if ((status.edit === 404 && status.deck === 404) || Date.now() > until) break;
         await t.sleep(2000);
       }
+      /* the decks a stall retired (C2-F24) are this walk's too: each is trashed and removed
+         through the window API and has to answer 404 as well, so nothing the walk made stays */
+      const retired = [];
+      for (const id of t.deck.retired) {
+        const gone = await cleanupQuiet(t, id);
+        retired.push(`${id} /edit ${gone.edit}, /deck ${gone.deck}`);
+      }
+      const retiredGone =
+        t.deck.retired.length === retired.filter((x) => /\/edit 404, \/deck 404$/.test(x)).length;
       return {
-        ok: status.edit === 404 && status.deck === 404,
-        observed: `${how}; /edit ${status.edit}, /deck ${status.deck}`,
+        ok: status.edit === 404 && status.deck === 404 && retiredGone,
+        observed: `${how}; /edit ${status.edit}, /deck ${status.deck}${retired.length > 0 ? `; retired by the stall: ${retired.join('; ')}` : ''}`,
       };
     },
   );
 }
 
-/** The trash path without rows, for a partial run (--only) that made a deck. */
-async function cleanupQuiet(t) {
+/**
+ * The trash path without rows: for a partial run (--only) that made a deck, and for every deck a
+ * stall retired. Trash and remove through the window API, then the status of /edit and /deck.
+ */
+async function cleanupQuiet(t, deckId) {
   const { page, BASE } = t;
-  const deckId = t.deck.id;
+  const status = { edit: 0, deck: 0 };
   try {
     await page
       .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
@@ -382,16 +463,25 @@ async function cleanupQuiet(t) {
         })
         .catch(() => undefined);
     }
-    const res = await page.request.get(`${BASE}/edit/${deckId}`, {
-      headers: t.headers,
-      maxRedirects: 0,
-    });
-    console.log(`cleanup (quiet): /edit/${deckId} answers ${res.status()}`);
+    const until = Date.now() + 20_000;
+    for (;;) {
+      for (const route of ['edit', 'deck']) {
+        const res = await page.request.get(`${BASE}/${route}/${deckId}`, {
+          headers: t.headers,
+          maxRedirects: 0,
+        });
+        status[route] = res.status();
+      }
+      if ((status.edit === 404 && status.deck === 404) || Date.now() > until) break;
+      await t.sleep(2000);
+    }
+    console.log(`cleanup (quiet): /edit/${deckId} answers ${status.edit}, /deck ${status.deck}`);
   } catch (error) {
     console.log(
-      `cleanup (quiet) failed: ${error instanceof Error ? error.message : String(error)}`,
+      `cleanup (quiet) of ${deckId} failed: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
+  return status;
 }
 
 /** The matrix table of the run: every probe row with its result and reason. */

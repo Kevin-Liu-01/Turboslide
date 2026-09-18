@@ -61,6 +61,9 @@ test.beforeAll(async ({ browser }) => {
   deck = await newDeck(page, scratch, 'Advanced tools deck');
 });
 test.afterAll(async () => {
+  /* the teardown runs past a failed row and past the file's own test timeout, so no scratch deck
+     is left behind (VERIFICATION.md C2-F29) */
+  test.setTimeout(180_000);
   try {
     await teardownAll(page, scratch);
   } finally {

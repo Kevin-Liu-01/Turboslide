@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -124,5 +124,165 @@ describe('the core gate renders its verdict from a finished run', () => {
     const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
     expect(summary.noStep.length).toBe(1);
     expect(readFileSync(join(out, 'core-matrix.md'), 'utf8')).toContain('## No step');
+  }, 30_000);
+});
+
+// The gate's start (C2-F29 and C3-F9). These tests spawn the real gate against a localhost base
+// nobody answers, so they run with `--dry-run` (the gate stops after the scratch check, before the
+// lock and the drivers) and `--lock <temp folder>` (the lock a run would take is the test's own,
+// never the checkout's). Before C3-F9 the second test ran the gate past the check: `takeLock()`
+// made the repository's `.turboslide/e2e.lock`, `runSpecs()` started Playwright against the dead
+// port, `spawnSync`'s timeout killed the gate and the `finally` never released the lock; under the
+// whole suite's load (check step 5) the lock stayed behind and blocked every Playwright step after.
+// Since the fix round the gate holds the rule itself: under vitest a localhost run that names
+// neither `--dry-run` nor `--lock` is refused before the scratch check (the last two tests below).
+describe('the core gate refuses to start over scratch decks (C2-F29)', () => {
+  /** A decks folder outside the repository: git does not answer for it, so the name rule decides. */
+  function decksDir(names) {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-decks-'));
+    for (const name of names) mkdirSync(join(dir, name), { recursive: true });
+    return dir;
+  }
+  /** Starts the gate in a dry run with its own out folder and its own lock path under tmp. */
+  function start(decks, extra = [], base = 'http://127.0.0.1:1') {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-out-'));
+    const out = join(dir, 'out');
+    const lock = join(dir, 'e2e.lock');
+    const run = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        base,
+        '--only',
+        'specs',
+        '--decks',
+        decks,
+        '--out',
+        out,
+        '--lock',
+        lock,
+        '--dry-run',
+        ...extra,
+      ],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    return { run, out, lock };
+  }
+
+  it('names every scratch deck, runs nothing and exits 2', () => {
+    const decks = decksDir(['untitled-20260917-abcd', 'e2e-realtime-xyz', 'gt-brand', 'fixture']);
+    const { run, out, lock } = start(decks);
+    expect(run.status).toBe(2);
+    expect(run.stderr).toContain('2 scratch deck(s)');
+    expect(run.stderr).toContain('untitled-20260917-abcd');
+    expect(run.stderr).toContain('e2e-realtime-xyz');
+    expect(run.stderr).not.toContain('gt-brand');
+    expect(run.stderr).toContain('--allow-scratch');
+    expect(existsSync(join(out, 'core-gate.json'))).toBe(false);
+    expect(existsSync(lock)).toBe(false);
+  }, 30_000);
+
+  it('starts over an empty decks folder and over scratch with --allow-scratch', () => {
+    /* the dry run stops right after the check, so a start is exit 0 with the plan line and no
+       scratch sentence; the refusal would have been exit 2 on stderr */
+    const clean = start(decksDir(['gt-brand']));
+    expect(clean.run.stderr, clean.run.stderr).toBe('');
+    expect(clean.run.status).toBe(0);
+    expect(clean.run.stdout).toContain('core-gate: dry run against http://127.0.0.1:1');
+    expect(clean.run.stdout).toContain('(0 scratch deck(s))');
+    const allowed = start(decksDir(['untitled-20260917-abcd']), ['--allow-scratch']);
+    expect(allowed.run.status).toBe(0);
+    expect(allowed.run.stdout).toContain('by --allow-scratch: untitled-20260917-abcd');
+    expect(allowed.run.stdout).toContain('(1 scratch deck(s))');
+  }, 30_000);
+});
+
+describe('the core gate never takes the checkout lock from a unit test (C3-F9)', () => {
+  function start(base) {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-lock-'));
+    const decks = join(dir, 'decks');
+    mkdirSync(join(decks, 'gt-brand'), { recursive: true });
+    const lock = join(dir, 'e2e.lock');
+    const run = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        base,
+        '--only',
+        'specs',
+        '--decks',
+        decks,
+        '--out',
+        join(dir, 'out'),
+        '--lock',
+        lock,
+        '--dry-run',
+      ],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    return { run, lock, out: join(dir, 'out') };
+  }
+
+  it('plans the --lock path for a localhost base and takes it in no dry run', () => {
+    const { run, lock, out } = start('http://127.0.0.1:1');
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain(`the run would take the lock ${lock}`);
+    expect(run.stdout).not.toContain(join('.turboslide', 'e2e.lock'));
+    expect(run.stdout).toContain('Nothing ran and no lock was taken');
+    expect(existsSync(lock)).toBe(false);
+    expect(existsSync(join(out, 'core-gate.json'))).toBe(false);
+    expect(existsSync(join(out, 'core-matrix.md'))).toBe(false);
+  }, 30_000);
+
+  it('plans no lock for a deployment base', () => {
+    const { run, lock } = start('https://stub.invalid');
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('the run would take no lock (a deployment)');
+    expect(existsSync(lock)).toBe(false);
+  }, 30_000);
+
+  /**
+   * Starts the gate past the dry run, with VITEST set as a worker sets it, over a decks folder that
+   * holds one scratch deck: were the guard gone, the scratch check would refuse next with its own
+   * sentence, so neither test below reaches takeLock() whatever the gate does.
+   */
+  function startPast(withLock) {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-guard-'));
+    const decks = join(dir, 'decks');
+    mkdirSync(join(decks, 'untitled-20260917-abcd'), { recursive: true });
+    const lock = join(dir, 'e2e.lock');
+    const args = [GATE, '--base', 'http://127.0.0.1:1', '--only', 'specs', '--decks', decks];
+    args.push('--out', join(dir, 'out'));
+    if (withLock) args.push('--lock', lock);
+    const run = spawnSync('node', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: 20_000,
+      env: { ...process.env, VITEST: 'true' },
+    });
+    return { run, lock, out: join(dir, 'out') };
+  }
+
+  it('refuses a localhost run under vitest that names neither --dry-run nor --lock, before the scratch check', () => {
+    const { run, lock, out } = startPast(false);
+    expect(run.status).toBe(2);
+    expect(run.stderr).toContain('under vitest');
+    expect(run.stderr).toContain('--lock');
+    expect(run.stderr).toContain(join('.turboslide', 'e2e.lock'));
+    expect(run.stderr).not.toContain('scratch deck(s)');
+    expect(existsSync(lock)).toBe(false);
+    expect(existsSync(join(out, 'core-gate.json'))).toBe(false);
+  }, 30_000);
+
+  it('lets --lock past the guard, and the scratch check refuses next before the named lock is made', () => {
+    const { run, lock, out } = startPast(true);
+    expect(run.status).toBe(2);
+    expect(run.stderr).not.toContain('under vitest');
+    expect(run.stderr).toContain('1 scratch deck(s)');
+    expect(run.stderr).toContain('untitled-20260917-abcd');
+    expect(existsSync(lock)).toBe(false);
+    expect(existsSync(join(out, 'core-gate.json'))).toBe(false);
   }, 30_000);
 });

@@ -6,9 +6,21 @@
 // revisions so a probe records them on every refused write.
 import { describe, expect, it } from 'vitest';
 
+import type { DeckDocument } from '@turboslide/schema/deck';
+import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { validateDocument } from '@turboslide/schema/validate';
 
-import { blobRefusal, liveAtLeast, undoOfSplices } from './room';
+import {
+  admitOnBlob,
+  blobAdmittedBefore,
+  blobRefusal,
+  closeRoom,
+  liveAtLeast,
+  rememberBlobAdmitted,
+  storeBusyResult,
+  undoOfSplices,
+} from './room';
 
 const splice = (at: number, remove: number, insert: string): Mutation => ({
   op: 'text.splice',
@@ -128,5 +140,135 @@ describe('liveAtLeast', () => {
     const { room, syncs } = roomAt([5, 9], 'memory');
     expect((await liveAtLeast(room, 9)).document.deck.revision).toBe(5);
     expect(syncs).toEqual([]);
+  });
+});
+
+describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERIFICATION C2-F24)', () => {
+  type Room = Parameters<typeof admitOnBlob>[0];
+  type Input = Parameters<typeof admitOnBlob>[1];
+
+  const documentAt = (revision: number): DeckDocument => {
+    const result = validateDocument(workedDocument());
+    if (!result.ok || result.deck === null) throw new Error('fixture');
+    return { deck: { ...result.deck, revision }, slides: result.slides };
+  };
+
+  /** A blob tier room over one document: the appends are recorded and answered at the next revision. */
+  const roomOver = (deckId: string, revision: number) => {
+    const appends: { base: number; opIds: string[] }[] = [];
+    const room = {
+      deckId,
+      tier: 'blob',
+      live: async () => ({ seq: revision, document: documentAt(revision) }),
+      store: { sync: async () => undefined },
+      channel: {
+        append: async (_deckId: string, base: number, entries: { opId: string }[]) => {
+          appends.push({ base, opIds: entries.map((entry) => entry.opId) });
+          return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
+        },
+      },
+    } as unknown as Room;
+    return { room, appends };
+  };
+
+  const post = (opId: string, insert: string): Input =>
+    ({
+      post: {
+        clientId: 'c1',
+        base: { seq: 7 },
+        entries: [{ opId, kind: 'edit', mutations: [splice(0, 0, insert)] }],
+      },
+      bytes: 128,
+      identity: { kind: 'anonymous', identity: 'anon' },
+      author: { kind: 'human', name: 'Titanium 471' },
+      role: 'editor',
+    }) as unknown as Input;
+
+  it('answers a resent op id with the entry its first admission made and appends nothing twice', async () => {
+    const { room, appends } = roomOver('dedup-deck', 7);
+    const first = await admitOnBlob(room, post('c1:1', 'q'));
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    expect(first.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 8]]);
+    expect(appends).toHaveLength(1);
+    // the client gave up on the POST and sends the same op again
+    const again = await admitOnBlob(room, post('c1:1', 'q'));
+    expect(again.ok).toBe(true);
+    if (!again.ok) return;
+    expect(again.entries).toEqual(first.entries);
+    expect(appends).toHaveLength(1);
+    // a new op id is admitted as before
+    const next = await admitOnBlob(room, post('c1:2', 'r'));
+    expect(next.ok).toBe(true);
+    expect(appends).toHaveLength(2);
+    expect(blobAdmittedBefore('dedup-deck', 'c1:2')?.seq).toBe(8);
+  });
+
+  it("answers a write the store did not move for as the transient 503, never a resync at the client's own base (C3-F1 `decks.access.paint`)", async () => {
+    const appends: number[] = [];
+    const room = {
+      deckId: 'same-revision-deck',
+      tier: 'blob',
+      live: async () => ({ seq: 7, document: documentAt(7) }),
+      store: { sync: async () => undefined },
+      channel: {
+        append: async (_deckId: string, base: number) => {
+          appends.push(base);
+          // the store did not move and the write did not land (a claim held elsewhere)
+          return { ok: false, head: base, count: 0 };
+        },
+      },
+    } as unknown as Room;
+    const result = await admitOnBlob(room, post('c1:1', 'q'));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result).toMatchObject({ status: 503, code: 'store_busy', retryAfterMs: 1000 });
+    expect(appends).toEqual([7]);
+    // the store moved: the resync at its head, as before
+    const moved = {
+      ...room,
+      channel: { append: async () => ({ ok: false, head: 9, count: 2 }) },
+    } as unknown as Room;
+    const resync = await admitOnBlob(moved, post('c1:2', 'r'));
+    expect(resync.ok).toBe(false);
+    if (!resync.ok) expect(resync).toMatchObject({ status: 409, code: 'resync', head: 9 });
+  });
+
+  it("shapes the store's refusal as a 503 with the wait it named, in the product's words", () => {
+    const rateLimited = new Error(
+      'Vercel Blob: Too many requests please lower the number of concurrent requests  - try again in 60 seconds.',
+    );
+    (rateLimited as { retryAfter?: number }).retryAfter = 60;
+    const busy = storeBusyResult(rateLimited);
+    expect(busy).toMatchObject({
+      ok: false,
+      status: 503,
+      code: 'store_busy',
+      retryAfterMs: 60_000,
+    });
+    if (!busy.ok)
+      expect(busy.message).toBe('The store did not answer; the change is sent again in 60 s');
+    const timeout = storeBusyResult(null);
+    if (!timeout.ok) expect(timeout.retryAfterMs).toBe(1000);
+  });
+
+  it('keeps the last 512 op ids of a deck and forgets the deck with its room', async () => {
+    const entries = Array.from({ length: 600 }, (_, i) => ({
+      seq: i + 1,
+      rev: i,
+      kind: 'edit' as const,
+      author: { kind: 'human' as const, name: 'Titanium 471' },
+      clientId: 'c1',
+      opId: `c1:${i + 1}`,
+      mutations: [],
+      at: '2026-09-17T00:00:00.000Z',
+    }));
+    rememberBlobAdmitted('cap-deck', entries);
+    expect(blobAdmittedBefore('cap-deck', 'c1:1')).toBeUndefined();
+    expect(blobAdmittedBefore('cap-deck', 'c1:88')).toBeUndefined();
+    expect(blobAdmittedBefore('cap-deck', 'c1:89')?.seq).toBe(89);
+    expect(blobAdmittedBefore('cap-deck', 'c1:600')?.seq).toBe(600);
+    await closeRoom('cap-deck');
+    expect(blobAdmittedBefore('cap-deck', 'c1:600')).toBeUndefined();
   });
 });

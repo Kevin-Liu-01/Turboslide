@@ -172,25 +172,27 @@ export function splitBlobClient(
   const forWrite = async (pathname: string): Promise<BlobClient> =>
     isPublicPath(pathname) ? legacy : (await documentsStore()).primary;
   return {
-    async head(pathname) {
-      if (isPublicPath(pathname)) return legacy.head(pathname);
+    // the caller's options (the deadline's signal, blob-store.ts BlobCallOptions) reach the
+    // client that makes the request
+    async head(pathname, options) {
+      if (isPublicPath(pathname)) return legacy.head(pathname, options);
       const { primary, fallback } = await documentsStore();
-      const found = await primary.head(pathname);
-      return found ?? (fallback === null ? null : fallback.head(pathname));
+      const found = await primary.head(pathname, options);
+      return found ?? (fallback === null ? null : fallback.head(pathname, options));
     },
-    async get(pathname) {
-      if (isPublicPath(pathname)) return legacy.get(pathname);
+    async get(pathname, options) {
+      if (isPublicPath(pathname)) return legacy.get(pathname, options);
       const { primary, fallback } = await documentsStore();
-      const found = await primary.get(pathname);
-      return found ?? (fallback === null ? null : fallback.get(pathname));
+      const found = await primary.get(pathname, options);
+      return found ?? (fallback === null ? null : fallback.get(pathname, options));
     },
-    async list(prefix) {
+    async list(prefix, options) {
       const { primary, fallback } = await documentsStore();
       const seen = new Map<string, BlobEntry>();
       const sources: BlobClient[] =
         primary === legacy ? [legacy] : [primary, legacy, ...(fallback === null ? [] : [fallback])];
       for (const source of new Set(sources)) {
-        for (const entry of await source.list(prefix)) {
+        for (const entry of await source.list(prefix, options)) {
           const publicPath = isPublicPath(entry.pathname);
           // a document listed on the public store counts only while the public store is a document source
           if (source === legacy && !publicPath && primary !== legacy && fallback !== legacy)
@@ -201,25 +203,25 @@ export function splitBlobClient(
       }
       return [...seen.values()].sort((a, b) => a.pathname.localeCompare(b.pathname));
     },
-    async folders(prefix) {
+    async folders(prefix, options) {
       const { primary, fallback } = await documentsStore();
       const out = new Set<string>();
       for (const source of new Set([primary, legacy, ...(fallback === null ? [] : [fallback])])) {
-        for (const folder of await source.folders(prefix)) out.add(folder);
+        for (const folder of await source.folders(prefix, options)) out.add(folder);
       }
       return [...out].sort();
     },
     async put(pathname, bytes, putOptions: BlobPutOptions) {
       return (await forWrite(pathname)).put(pathname, bytes, putOptions);
     },
-    async del(pathnames) {
+    async del(pathnames, options) {
       const publicPaths = pathnames.filter(isPublicPath);
       const documentPaths = pathnames.filter((pathname) => !isPublicPath(pathname));
-      if (publicPaths.length > 0) await legacy.del(publicPaths);
+      if (publicPaths.length > 0) await legacy.del(publicPaths, options);
       if (documentPaths.length > 0) {
         const { primary, fallback } = await documentsStore();
-        await primary.del(documentPaths);
-        if (fallback !== null) await fallback.del(documentPaths);
+        await primary.del(documentPaths, options);
+        if (fallback !== null) await fallback.del(documentPaths, options);
       }
     },
   };

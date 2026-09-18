@@ -24,8 +24,10 @@ import type {
   RejectReason,
   Role,
   RoomEvent,
+  RoomMutation,
   RosterEntry,
 } from '../src/channel.ts';
+import { foldMutation } from '../src/coalesce.ts';
 import {
   OPS_POST_MAX_BYTES,
   OPS_POST_MAX_ENTRIES,
@@ -119,6 +121,12 @@ export type SyncStatus = {
   connected: boolean;
   /** the stream is down and the last POST failed */
   offline: boolean;
+  /**
+   * The room's store refuses its poll (a `store` event with `ok: false`; the blob tier alone
+   * sends one): the title row reads Reconnecting until a poll succeeds (the focus round, cycle 3
+   * fix round, VERIFICATION C3-F2). False on every other tier.
+   */
+  storeDegraded: boolean;
   clientId: string | null;
   role: Role | null;
   /** editing connections at the last hello; at 100 the tab opens in Viewing mode (SPEC-3 0.9) */
@@ -328,6 +336,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let overCeiling = false;
   let connected = false;
   let offline = false;
+  let storeDegraded = false;
   /** the head the last hello named; a resync moves the position here */
   let helloSeq = options.seq;
   /**
@@ -347,6 +356,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let posting: Promise<void> | null = null;
   let backoff = 0;
   let stopped = false;
+  /**
+   * The POSTs of this client on the blob tier whose commit may reach this tab as a store echo
+   * before, or instead of, their answer: the one in flight and every one whose answer was lost
+   * (the transport threw at the 30 s deadline, a dropped connection, a 5xx). Each carries its
+   * base and the fold of its mutations as the blob channel commits them (blob.ts `append` folds
+   * a POST's entries with `foldMutation`). On the blob tier a record carries `clientId: 'store'`
+   * and no client op id, so before this an echo of the tab's own write was taken for another
+   * author's: the pending ops moved past their own content, the fold applied them a second time
+   * and the resend committed them a second time (the focus round, cycle 3, VERIFICATION C2-F24: a
+   * doubled word after a stalled save); and an echo arriving while the POST was still in flight
+   * doubled the text until the answer landed (cycle 3 fix round, C3-F1). `settleOwnEcho` reads
+   * an echo against these records and acknowledges the ops instead. An answered POST leaves the
+   * list; a resync clears it.
+   */
+  type PostedBatch = { base: number; opIds: string[]; folded: string; answered: boolean };
+  let posted: PostedBatch[] = [];
   let roster: RosterEntry[] = [];
   let presence: Omit<PresencePost, 'clientId' | 'clock'> = { pointerOn: false, presenting: false };
   let presenceClock = 0;
@@ -365,6 +390,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     transport: 'sse',
     connected,
     offline,
+    storeDegraded,
     clientId,
     role,
     editing,
@@ -483,6 +509,85 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (recent.length > RECENT_ENTRIES) recent.splice(0, recent.length - RECENT_ENTRIES);
   };
 
+  /** The fold of a batch's edit mutations, as the blob channel commits one POST (blob.ts `append`). */
+  const foldOf = (batch: readonly PendingOp[]): string => {
+    const folded: RoomMutation[] = [];
+    for (const op of batch) {
+      if (op.kind !== 'edit') continue;
+      for (const mutation of op.mutations ?? []) foldMutation(folded, mutation);
+    }
+    return JSON.stringify(folded);
+  };
+
+  /**
+   * A store echo that is the commit of one of this client's own POSTs (in flight or lost): its
+   * base at or above the POST's and its mutations the POST's fold, byte for byte. The ops of
+   * that POST still pending are acknowledged at the echo's seq, the server document takes the
+   * echo once, and nothing is resent; the answer of the POST, when it comes, finds its ops
+   * settled and repeats nothing (`held`). False for any other echo.
+   */
+  const settleOwnEcho = (entry: Entry): boolean => {
+    if (tier !== 'blob' || posted.length === 0) return false;
+    const folded = JSON.stringify(entry.mutations ?? []);
+    const batch = posted.find(
+      (row) => !row.answered && entry.rev >= row.base && row.folded === folded,
+    );
+    if (batch === undefined) return false;
+    batch.answered = true;
+    posted = posted.filter((row) => row !== batch);
+    const own = pending.filter((op) => batch.opIds.includes(op.opId));
+    pending = pending.filter((op) => !own.includes(op));
+    for (const op of own) {
+      op.settle?.({ seq: entry.seq });
+      if (!retained.some((row) => row.opId === op.opId)) {
+        retained.push({
+          opId: op.opId,
+          seq: entry.seq,
+          ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+        });
+      }
+    }
+    try {
+      server = applyMutations(server, entry.mutations ?? [], { now: entry.at }).document;
+    } catch {
+      scheduleResync(Math.max(entry.seq, revision));
+    }
+    const refolded = fold();
+    emitChange(refolded.document, 'all', 'ack');
+    options.onEvent?.({ type: 'op', entry });
+    persist();
+    emitStatus();
+    return true;
+  };
+
+  /**
+   * An entry of this client's own at or behind the position (the answer of a resent POST, which
+   * the server replays with the seq its first admission made; VERIFICATION C3-F1): the op it
+   * names is acknowledged and leaves the pending set. The document holds its content already,
+   * through the echo applied at that seq or the resync that brought the revision in, so nothing
+   * is applied again. Before this such an entry was dropped as a duplicate of the position and
+   * its op stayed pending and in flight for good: the title row read Saving with the tab and
+   * the server at one revision (the stall of C2-F24 and C3-F1 on the blob tier).
+   */
+  const settleBehind = (entry: Entry): void => {
+    if (!myClientIds.has(entry.clientId)) return;
+    const own = pending.find((op) => op.opId === entry.opId);
+    if (own === undefined) return;
+    pending = pending.filter((op) => op !== own);
+    own.settle?.({ seq: entry.seq });
+    if (entry.kind === 'edit' && !retained.some((row) => row.opId === own.opId)) {
+      retained.push({
+        opId: own.opId,
+        seq: entry.seq,
+        ...(own.mutations === undefined ? {} : { mutations: own.mutations }),
+      });
+    }
+    const folded = fold();
+    emitChange(folded.document, 'all', 'ack');
+    persist();
+    emitStatus();
+  };
+
   /** One admitted entry in stream order. */
   const applyEntry = (entry: Entry): void => {
     if (entry.seq !== seq) appliedAtSeq.clear();
@@ -503,14 +608,24 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const mutations = entry.mutations ?? [];
     // a store entry (the follower's copy of a record) that the document holds already is skipped
     if (entry.clientId === 'store' && entry.rev < server.deck.revision) return;
+    if (entry.clientId === 'store' && settleOwnEcho(entry)) return;
     if (mine) {
       const own = pending.find((op) => op.opId === entry.opId);
+      // acknowledged before this entry arrived (the store echo of its POST, settleOwnEcho): its
+      // content is in the server document already
+      const acknowledged = own === undefined && retained.some((row) => row.opId === entry.opId);
       pending = pending.filter((op) => op.opId !== entry.opId);
       own?.settle?.({ seq: entry.seq });
-      retained.push({ opId: entry.opId, seq: entry.seq, mutations });
+      if (!retained.some((row) => row.opId === entry.opId))
+        retained.push({ opId: entry.opId, seq: entry.seq, mutations });
+      // on the blob tier the seq is the revision the record made: an entry at or under the
+      // revision the server document already holds (a resent POST answered with its first
+      // admission after a resync brought that revision in), or one acknowledged from its echo,
+      // is in the document, and applying it again would double it
+      const held = tier === 'blob' && (entry.seq <= server.deck.revision || acknowledged);
       let next: DeckDocument;
       try {
-        next = applyMutations(server, mutations, { now: entry.at }).document;
+        next = held ? server : applyMutations(server, mutations, { now: entry.at }).document;
       } catch {
         next = server;
       }
@@ -603,9 +718,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * batch's entries already carried and is dropped. Above the position it is buffered by seq.
    */
   const take = (entry: Entry): void => {
-    if (entry.seq < seq) return;
+    if (entry.seq < seq) {
+      settleBehind(entry);
+      return;
+    }
     if (entry.seq === seq) {
-      if (entry.clientId === 'store' || appliedAtSeq.has(entry.opId)) return;
+      if (entry.clientId === 'store') return;
+      if (appliedAtSeq.has(entry.opId)) {
+        settleBehind(entry);
+        return;
+      }
       applyEntry(entry);
       return;
     }
@@ -649,6 +771,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     caughtUp = true;
     incoming.clear();
     retained = [];
+    posted = [];
     for (const op of pending) op.inflight = false;
     const folded = fold();
     emitChange(folded.document, 'all', 'resync');
@@ -700,7 +823,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       case 'checkpoint': {
         retained = retained.filter((op) => op.seq > event.toSeq);
         if (event.external === true) {
-          void resync(event.revision);
+          void resync(event.revision).catch(() => undefined);
         } else {
           // never backwards: on the blob tier the ops POST answer names the revision first and
           // the stream's instance delivers the checkpoint frames of earlier revisions after it,
@@ -744,7 +867,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       case 'resync':
-        void resync(event.revision);
+        void resync(event.revision).catch(() => undefined);
+        return;
+      case 'store':
+        // the room's store refuses its poll, or answers again: the title row's word
+        storeDegraded = !event.ok;
+        options.onEvent?.(event);
+        emitStatus();
         return;
       case 'inbox':
       case 'access':
@@ -813,12 +942,26 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
             },
       ),
     };
+    // the POST's record (blob tier): its commit may reach this tab as a store echo before its
+    // answer, and the echo is matched against this record (settleOwnEcho)
+    const record: PostedBatch | null =
+      tier === 'blob'
+        ? {
+            base: body.base.seq,
+            opIds: batch.map((op) => op.opId),
+            folded: foldOf(batch),
+            answered: false,
+          }
+        : null;
+    if (record !== null) posted.push(record);
     posting = (async () => {
       let response: OpsResponse;
       try {
         response = await transport.postOps(body);
       } catch (error) {
         void error;
+        // the answer is lost, the write may not be: the record stays for the store echo of its
+        // commit, which settles the ops before they are resent
         for (const op of batch) op.inflight = false;
         offline = true;
         emitStatus();
@@ -829,6 +972,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       offline = false;
       if (response.ok) {
         backoff = 0;
+        if (record !== null) posted = posted.filter((row) => row !== record);
         for (const entry of response.entries) take(entry);
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
@@ -864,6 +1008,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       if (response.status === 429) {
+        // the room's budget or the store's window: the ops stay pending and go again after the
+        // wait the answer named; the record stays, since a 429 may follow the store's commit
         timers.setTimeout(() => void flush(), response.retryAfterMs ?? 1000);
         return;
       }
@@ -886,6 +1032,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       }
       // a refusal that will not change on a retry (a forbidden write): the ops return to the author
+      if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {
         pending = pending.filter((row) => row !== op);
         const notice = {

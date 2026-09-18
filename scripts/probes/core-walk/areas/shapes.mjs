@@ -666,10 +666,15 @@ export async function run(t) {
           .filter((el) => el.getClientRects().length > 0)
           .map((el) => el.getAttribute('data-control')),
       );
-      const swatch = await page.evaluate(() =>
-        [...document.querySelectorAll('[data-control$=".green"]')]
-          .filter((el) => el.getClientRects().length > 0)
-          .map((el) => el.getAttribute('data-control')),
+      /* the index reads the array, not the promise (b1 cycle 3 R39, applied by the integrator at
+         the cycle 3 merge): with `[0]` on the promise the swatch was never clicked and the row
+         read the same stroke before and after on every origin, VERIFICATION C2-F11 */
+      const swatch = (
+        await page.evaluate(() =>
+          [...document.querySelectorAll('[data-control$=".green"]')]
+            .filter((el) => el.getClientRects().length > 0)
+            .map((el) => el.getAttribute('data-control')),
+        )
       )[0];
       if (swatch) await t.clickControl(swatch);
       await t.settled();

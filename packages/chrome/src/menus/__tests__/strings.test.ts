@@ -20,7 +20,7 @@ import {
 
 // The strings of round three (SPEC-3 6.8, 15; 16.6 "strings.test.ts"): every refusal of 6.8 is
 // present verbatim, every new default view string of 15 is present, Google's labels are Google's
-// words, the Turboslide additions of 15 exist as rows or words, and the five save phrases stack in
+// words, the Turboslide additions of 15 exist as rows or words, and the six save phrases stack in
 // one cell. The wording is data here so the e2e fixtures and the surfaces read one source.
 
 /** The plain strings of a strings block, its functions and nested blocks left out. */
@@ -102,6 +102,8 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(ACCOUNT.signInDialog.passkeysLater).toBe('Passkeys arrive once the address is final');
     expect(TITLE_ROW.offline).toBe('Offline. Changes will save when you reconnect');
     expect(TITLE_ROW.retrying).toBe("Couldn't save, retrying");
+    /* the blob tier budget's word for a store that refuses the room's poll (build/b7.md FR3-R5) */
+    expect(TITLE_ROW.reconnecting).toBe('Reconnecting…');
     expect(DITHER.uploading('6.2')).toBe('Uploading 6.2 MB');
     expect(DITHER.help).toBe(
       'The deck’s two tone screen over the picture; change it under Format options',
@@ -117,15 +119,19 @@ describe('the default view strings of SPEC-3 15', () => {
     );
   });
 
-  it('stack the five save phrases in one cell and count the inbox to two digits', () => {
+  it('stack the six save phrases in one cell and count the inbox to two digits', () => {
     const phrases = [
       TITLE_ROW.saving,
       TITLE_ROW.saved,
       TITLE_ROW.retrying,
       TITLE_ROW.offline,
       TITLE_ROW.notSaved,
+      TITLE_ROW.reconnecting,
     ];
-    expect(new Set(phrases).size).toBe(5);
+    expect(new Set(phrases).size).toBe(6);
+    /* the cell's width rule (SPEC-3 15, 9.2 E5): the offline sentence stays the longest phrase */
+    for (const phrase of phrases)
+      expect(phrase.length).toBeLessThanOrEqual(TITLE_ROW.offline.length);
     expect(TITLE_ROW.unread(7)).toBe('7');
     expect(TITLE_ROW.unread(99)).toBe('99');
     expect(TITLE_ROW.unread(100)).toBe('99+');

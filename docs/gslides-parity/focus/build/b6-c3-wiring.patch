@@ -1,0 +1,383 @@
+--- a/packages/realtime/src/blob.ts
++++ b/packages/realtime/src/blob.ts
+@@ -3,12 +3,18 @@
+ // stream: every append is one commit through the deck's store (`BlobStore.write` hosted, a
+ // `FileStore` on a checkout), so the seq of an entry is the revision its record made, `since`
+ // reads the version log, `head` is the revision, and `subscribe` follows the store's watch
+-// channel (the Blob mirror's one second head poll, `fs.watch` on a checkout). Presence, locks,
+-// budgets and flags are per instance, from memory.ts; the title row says so (select.ts
+-// BLOB_TIER_NOTICE). One write per second per deck per instance keeps the deployment under the
+-// Blob operation cap. Comment entries go straight to the sidecar through `applyComments`, which
++// channel (the Blob mirror's head poll, `fs.watch` on a checkout). Locks, budgets and flags are
++// per instance, from memory.ts. Presence is shared when `shared` is given (the focus round, cycle
++// 3; VERIFICATION C2-F28): the roster lives in the store's presence record (store/presence-store.ts)
++// and the comments index other instances push is polled beside it (comments-store.ts
++// `watchSidecarIndex`) and announced as the checkpoint frame with `comments`, so a second browser
++// on another instance sees the chips, the leaves and a new thread; without it presence stays per
++// instance. One write per second per deck per instance keeps the deployment under the Blob
++// operation cap. Comment entries go straight to the sidecar through `applyComments`, which
+ // the comments store supplies (SPEC-3 5.2); without it a comment entry is refused. No `node:`.
+ import { ConflictError } from '@turboslide/schema/errors';
++import type { SidecarIndexChange } from '@turboslide/store/comments-store';
++import type { SharedPresence } from '@turboslide/store/presence-store';
+ import type { DeckStore, VersionRecord } from '@turboslide/store/store';
+ 
+ import type {
+@@ -19,6 +25,7 @@
+   RoomEvent,
+   RoomListener,
+   RoomMutation,
++  RosterEntry,
+ } from './channel.ts';
+ import { foldMutation } from './coalesce.ts';
+ import type { FlagName } from './keys.ts';
+@@ -27,6 +34,17 @@
+ import type { MemoryChannel } from './memory.ts';
+ import { REPLAY_MAX_ENTRIES } from './protocol.ts';
+ 
++/** The cross instance half of the blob tier (store/presence-store.ts, comments-store.ts). */
++export type BlobSharedDeps = {
++  /** the roster every instance agrees on, over the store's presence record */
++  presence: SharedPresence<RosterEntry>;
++  /**
++   * starts a poll of the deck's comments index and hands over every version another instance
++   * pushed; the return value stops it
++   */
++  watchComments?: (deckId: string, onChange: (change: SidecarIndexChange) => void) => () => void;
++};
++
+ export type BlobChannelDeps = {
+   /** the deck's store on this instance (`openDeckStore`); a RangeError for a missing deck */
+   open: (deckId: string) => Promise<DeckStore>;
+@@ -38,6 +56,8 @@
+   applyComments?: (deckId: string, entries: NewEntry[]) => Promise<void>;
+   /** kill switch values (SPEC-3 0.33) */
+   flags?: Partial<Record<FlagName, boolean>>;
++  /** the shared roster and the comments index poll; absent, presence is per instance */
++  shared?: BlobSharedDeps;
+   onError?: (error: unknown, context: string) => void;
+ };
+ 
+@@ -52,6 +72,9 @@
+   lastSeq: number;
+   watching: Promise<() => void> | undefined;
+   store: Promise<DeckStore> | undefined;
++  /** the listeners subscribed on this instance; the shared polls run while there is one */
++  listeners: number;
++  sharedStop: (() => void) | undefined;
+ };
+ 
+ /** A record as one stream entry: the writer's author, its mutations, the revision as the seq. */
+@@ -132,6 +155,8 @@
+         lastSeq: -1,
+         watching: undefined,
+         store: undefined,
++        listeners: 0,
++        sharedStop: undefined,
+       };
+       decks.set(id, state);
+     }
+@@ -289,6 +314,30 @@
+     subscribe(deckId, onEvent: RoomListener): () => void {
+       const state = stateOf(deckId);
+       const stop = local.subscribe(deckId, onEvent);
++      state.listeners += 1;
++      if (state.sharedStop === undefined && deps.shared !== undefined) {
++        // the record every instance agrees on, polled while a stream of the deck is open here;
++        // a moved comments index becomes the checkpoint frame with `comments` the memory tier's
++        // checkpointer sends, at the revision this instance announced last, so every tab reads
++        // the sidecar again (docs/FOCUS.md ranks 20 and 36; VERIFICATION C2-F28)
++        const stopPresence = deps.shared.presence.watch(deckId);
++        const stopComments = deps.shared.watchComments?.(deckId, (change) => {
++          const revision = Math.max(0, state.lastSeq);
++          void local.publish(deckId, {
++            type: 'checkpoint',
++            revision,
++            fromSeq: revision,
++            toSeq: revision,
++            author: { kind: 'agent', name: 'store' },
++            note: '',
++            comments: { revision: change.revision, threadIds: change.threadIds },
++          });
++        });
++        state.sharedStop = () => {
++          stopPresence();
++          stopComments?.();
++        };
++      }
+       if (state.watching === undefined) {
+         // the position first, then the watch; both on the deck's queue so a poll never runs
+         // beside an append of this instance
+@@ -303,7 +352,17 @@
+         });
+         state.watching.catch((error: unknown) => onError(error, `blob: watching ${deckId} failed`));
+       }
+-      return stop;
++      let released = false;
++      return () => {
++        if (released) return;
++        released = true;
++        stop();
++        state.listeners -= 1;
++        if (state.listeners <= 0 && state.sharedStop !== undefined) {
++          state.sharedStop();
++          state.sharedStop = undefined;
++        }
++      };
+     },
+ 
+     async publish(deckId, event): Promise<void> {
+@@ -314,7 +373,19 @@
+       // the version log is the stream; retention is the store's (snapshots, records)
+     },
+ 
+-    presence: local.presence,
++    presence:
++      deps.shared === undefined
++        ? local.presence
++        : {
++            set: (deckId, clientId, state, ttlMs) =>
++              deps.shared!.presence.set(deckId, clientId, state, ttlMs),
++            roster: (deckId) => deps.shared!.presence.roster(deckId),
++            leave: (deckId, clientId) => deps.shared!.presence.leave(deckId, clientId),
++            // the client bindings stay per instance: the id's own MAC decides on another one
++            // (apps/studio/src/server/room.ts clientBoundTo)
++            bind: local.presence.bind,
++            owner: local.presence.owner,
++          },
+     lock: local.lock,
+     heartbeat: local.heartbeat,
+     unlock: local.unlock,
+@@ -325,6 +396,8 @@
+     async close(): Promise<void> {
+       for (const [deckId, state] of decks) {
+         decks.delete(deckId);
++        state.sharedStop?.();
++        state.sharedStop = undefined;
+         if (state.watching !== undefined) {
+           try {
+             (await state.watching)();
+@@ -333,6 +406,7 @@
+           }
+         }
+       }
++      await deps.shared?.presence.close();
+       await local.close();
+     },
+   };
+--- a/packages/realtime/src/blob.test.ts
++++ b/packages/realtime/src/blob.test.ts
+@@ -1,7 +1,8 @@
+ // The blob channel over a deck store (SPEC-3 2.5, 3.7 e): every append is a commit whose
+ // revision is the seq, `since` reads the version log, a stale base answers the head, two
+ // channels over one store see each other's records through the watch channel, comment entries
+-// need the comments store, and presence stays per instance.
++// need the comments store, presence stays per instance without the shared half and travels
++// through the store's presence record with it (the focus round, cycle 3; VERIFICATION C2-F28).
+ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+@@ -10,21 +11,26 @@
+ 
+ import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
+ import { canonicalJson } from '@turboslide/schema/json';
++import { memoryBlobClient } from '@turboslide/store/blob-fake';
++import { applyAndPush, localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
+ import { openFileStore } from '@turboslide/store/file-store';
+ import type { FileStore } from '@turboslide/store/file-store';
++import { sharedPresence } from '@turboslide/store/presence-store';
+ 
+ import { ConflictError } from '@turboslide/schema/errors';
+ 
+ import { blobChannel, isLostRace } from './blob.ts';
+-import type { RoomEvent } from './channel.ts';
++import type { RoomEvent, RosterEntry } from './channel.ts';
+ import {
+   CLIENT_A,
+   CLIENT_B,
++  THREAD_ID,
+   commentEntry,
+   editEntry,
+   kevin,
+   maya,
+   rosterEntry,
++  threadFixture,
+   until,
+ } from './channel-contract.ts';
+ 
+@@ -145,10 +151,72 @@
+       revision: 413,
+     });
+     expect(await b.head('gt-brand')).toBe(413);
+-    // presence is per instance on this tier
++    // presence is per instance on this tier without the shared half (the test below has it)
+     await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 5000);
+     expect(await a.presence.roster('gt-brand')).toHaveLength(1);
++    expect(await b.presence.roster('gt-brand')).toEqual([]);
++    stop();
++    await a.close();
++    await b.close();
++  });
++
++  it('shares presence and a pushed comment across two instances through the store\'s presence record and the comments index poll (VERIFICATION C2-F28)', async () => {
++    const blob = memoryBlobClient();
++    const proven = { fetchFresh: async () => null, retries: 0, sleep: async () => {} };
++    const dirB = join(root, 'b', 'decks', 'gt-brand');
++    writeRawDeck(dirB);
++    const instance = (mirror: string) => {
++      const channel = blobChannel({
++        open: async () => openFileStore({ dir: mirror, now: () => now }),
++        minWriteSpacingMs: 0,
++        shared: {
++          presence: sharedPresence<RosterEntry>({
++            client: blob,
++            publish: (deckId, event) => void channel.publish(deckId, event),
++            pollMs: 20,
++            pushSpacingMs: 0,
++            proven,
++          }),
++          watchComments: (deckId, onChange) =>
++            watchSidecarIndex(blob, deckId, onChange, {
++              pollMs: 20,
++              localEtag: () => localIndexEtag(mirror),
++              proven,
++            }).stop,
++        },
++      });
++      return channel;
++    };
++    const a = instance(dir);
++    const b = instance(dirB);
++    const seen: RoomEvent[] = [];
++    const stop = b.subscribe('gt-brand', (event) => seen.push(event));
++    await new Promise((resolve) => setTimeout(resolve, 50));
++    // a presence write on a reaches b's listeners and b's roster (the hello of a later stream)
++    await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);
++    await until(() => seen.some((event) => event.type === 'presence'), 4000);
++    expect(seen.find((event) => event.type === 'presence')).toMatchObject({
++      type: 'presence',
++      clientId: CLIENT_A,
++      state: { label: 'Titanium 471' },
++    });
++    expect((await b.presence.roster('gt-brand')).map((row) => row.clientId)).toEqual([CLIENT_A]);
++    // the leave (a closed tab's beacon, on a) clears the chip on b
++    await a.presence.leave('gt-brand', CLIENT_A);
++    await until(() => seen.some((event) => event.type === 'leave'), 4000);
+     expect(await b.presence.roster('gt-brand')).toEqual([]);
++    // a comment pushed to the sidecar from a's mirror becomes a checkpoint frame with
++    // `comments` on b, which every tab answers with comment.list
++    await applyAndPush(blob, 'gt-brand', dir, [{ op: 'add', thread: threadFixture() }], now, 4, proven);
++    await until(
++      () =>
++        seen.some(
++          (event) => event.type === 'checkpoint' && event.comments?.threadIds.includes(THREAD_ID) === true,
++        ),
++      4000,
++    );
++    const frame = seen.find((event) => event.type === 'checkpoint' && event.comments !== undefined);
++    expect(frame).toMatchObject({ type: 'checkpoint', comments: { revision: 1, threadIds: [THREAD_ID] } });
+     stop();
+     await a.close();
+     await b.close();
+--- a/apps/studio/src/server/room.ts
++++ b/apps/studio/src/server/room.ts
+@@ -49,6 +49,8 @@
+ import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
+ import { validateDocument } from '@turboslide/schema/validate';
+ import type { Issue } from '@turboslide/schema/validate';
++import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
++import { sharedPresence } from '@turboslide/store/presence-store';
+ import { touchedSlides } from '@turboslide/store/store';
+ import type { DeckStore, VersionRecord } from '@turboslide/store/store';
+ 
+@@ -64,7 +66,7 @@
+ import type { CommentActionId, CommentCaller } from './comments';
+ import type { Checkpointer } from './checkpoint';
+ import { logSecurityEvent } from './log';
+-import { hasStoredDeck, isHosted, openDeckStore, stateDir } from './root';
++import { deckDir, exportBlobClient, hasStoredDeck, isHosted, openDeckStore, stateDir } from './root';
+ 
+ /**
+  * The room (gslides-parity SPEC-3 2.3, 3.2 to 3.8; MILESTONES-3 B2 day 3): one process wide
+@@ -121,23 +123,55 @@
+         redis,
+       };
+     }
+-    case 'blob':
+-      return {
+-        channel: blobChannel({
+-          open: (deckId) => openDeckStore(deckId),
+-          // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
+-          // since the version log carries no comment entries for the checkpointer to fold
+-          // (VERIFICATION-3 finding 6: without it every comment write answered 400)
+-          applyComments: async (deckId, entries) => {
+-            // strict: a comment op the sidecar refuses fails the append with its sentence, so
+-            // the seller's action is refused instead of admitted and dropped (comments.ts)
+-            await commentsApplierFor(deckId, { strict: true }).apply(entries);
++    case 'blob': {
++      const onError = (error: unknown, context: string): void =>
++        log(`${context}: ${error instanceof Error ? error.message : String(error)}`);
++      // the roster every instance agrees on and the comments index other instances push, over
++      // the export Blob client (store/presence-store.ts, comments-store.ts `watchSidecarIndex`;
++      // the focus round cycle 3, VERIFICATION C2-F28). `channel` is assigned below; the sink
++      // runs only once a presence write reaches the room, so the reference is settled by then.
++      let channel: RealtimeChannel | undefined;
++      const presence = sharedPresence<RosterEntry>({
++        client: () => exportBlobClient(),
++        publish: (deckId, event) => void channel?.publish(deckId, event),
++        onError,
++      });
++      channel = blobChannel({
++        open: (deckId) => openDeckStore(deckId),
++        // the comments store (SPEC-3 5.2): on this tier an append writes the sidecar itself,
++        // since the version log carries no comment entries for the checkpointer to fold
++        // (VERIFICATION-3 finding 6: without it every comment write answered 400)
++        applyComments: async (deckId, entries) => {
++          // strict: a comment op the sidecar refuses fails the append with its sentence, so
++          // the seller's action is refused instead of admitted and dropped (comments.ts)
++          await commentsApplierFor(deckId, { strict: true }).apply(entries);
++        },
++        shared: {
++          presence,
++          watchComments: (deckId, onChange) => {
++            let stopped = false;
++            let stop: (() => void) | undefined;
++            void exportBlobClient()
++              .then((client) => {
++                if (client === null || stopped) return;
++                // this instance's own pushes carry the etag of its mirror's index and are not
++                // announced twice (its append published the op already)
++                stop = watchSidecarIndex(client, deckId, onChange, {
++                  localEtag: () => localIndexEtag(deckDir(deckId)),
++                  onError,
++                }).stop;
++              })
++              .catch((error: unknown) => onError(error, 'comments: the Blob client'));
++            return () => {
++              stopped = true;
++              stop?.();
++            };
+           },
+-          onError: (error, context) =>
+-            log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
+-        }),
+-        redis: null,
+-      };
++        },
++        onError,
++      });
++      return { channel, redis: null };
++    }
+   }
+ }
+ 
+--- a/packages/store/package.json
++++ b/packages/store/package.json
+@@ -19,6 +19,7 @@
+     "./hosted": "./src/hosted.ts",
+     "./access-store": "./src/access-store.ts",
+     "./comments-store": "./src/comments-store.ts",
++    "./presence-store": "./src/presence-store.ts",
+     "./inbox": "./src/inbox.ts",
+     "./migrate": "./src/migrate.ts",
+     "./tmp-store": "./src/tmp-store.ts",

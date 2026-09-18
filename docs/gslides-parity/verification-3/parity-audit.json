@@ -1,14 +1,14 @@
 {
   "base": "http://localhost:4321",
-  "at": "2026-09-17T07:17:14.416Z",
+  "at": "2026-09-18T04:13:47.927Z",
   "commit": "b50e38f",
-  "seconds": 1013,
-  "scratchDeck": "untitled-20260917-dk4n",
+  "seconds": 1224,
+  "scratchDeck": "untitled-20260918-xzbx",
   "namePromptAnswered": 1,
   "summary": {
-    "pass": 3489,
-    "fail": 5,
-    "skip": 337
+    "pass": 3494,
+    "fail": 1,
+    "skip": 336
   },
   "perSection": {
     "firstOpen": {
@@ -42,8 +42,8 @@
       "skip": 0
     },
     "advanced": {
-      "pass": 3,
-      "fail": 1,
+      "pass": 4,
+      "fail": 0,
       "skip": 0
     },
     "rows:scratch-advanced": {
@@ -62,8 +62,8 @@
       "skip": 0
     },
     "effects:scratch": {
-      "pass": 143,
-      "fail": 1,
+      "pass": 144,
+      "fail": 0,
       "skip": 122
     },
     "effects:twoSlides": {
@@ -82,8 +82,8 @@
       "skip": 0
     },
     "toolbar:scratch": {
-      "pass": 4,
-      "fail": 1,
+      "pass": 5,
+      "fail": 0,
       "skip": 0
     },
     "rows:textBlock": {
@@ -102,13 +102,13 @@
       "skip": 3
     },
     "effects:textBlock2": {
-      "pass": 18,
+      "pass": 19,
       "fail": 0,
-      "skip": 1
+      "skip": 0
     },
     "pickers:objects": {
-      "pass": 9,
-      "fail": 1,
+      "pass": 10,
+      "fail": 0,
       "skip": 0
     },
     "shortcuts:text": {
@@ -1734,7 +1734,7 @@
     {
       "section": "firstOpen",
       "id": "the first write creates the deck and moves the address",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n; save words \"All changes saved\"; title \"Audit scratch\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx; save words \"All changes saved\"; title \"Audit scratch\"",
       "pass": true
     },
     {
@@ -5437,7 +5437,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260917-dk4n",
+      "where": "/edit/untitled-20260918-xzbx",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -9285,7 +9285,7 @@
       "menu": "title",
       "effect": "route",
       "label": "Turboslide home",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n -> http://localhost:4321/decks",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx -> http://localhost:4321/decks",
       "pass": true
     },
     {
@@ -9375,7 +9375,7 @@
       "menu": "title",
       "effect": "client",
       "label": "Presenter view",
-      "evidence": "second window http://localhost:4321/present/untitled-20260917-dk4n; this window presenting",
+      "evidence": "second window http://localhost:4321/present/untitled-20260918-xzbx; this window presenting",
       "pass": true
     },
     {
@@ -9399,7 +9399,7 @@
       "menu": "title",
       "effect": "dialog",
       "label": "Share",
-      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: BODY",
+      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: share.open",
       "pass": true
     },
     {
@@ -9588,7 +9588,7 @@
       "menu": "file",
       "effect": "client",
       "label": "Copy link",
-      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260917-dk4n\" wanted \"http://localhost:4321/deck/untitled-20260917-dk4n\"; snackbar \"Link copied\"",
+      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260918-xzbx\" wanted \"http://localhost:4321/deck/untitled-20260918-xzbx\"; snackbar \"Link copied\"",
       "pass": true
     },
     {
@@ -9627,7 +9627,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Plain Text (.txt)",
-      "evidence": "download untitled-20260917-dk4n.txt",
+      "evidence": "download untitled-20260918-xzbx.txt",
       "pass": true
     },
     {
@@ -9636,7 +9636,7 @@
       "menu": "file",
       "effect": "action",
       "label": "JPEG image (.jpg, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260917-dk4n&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260918-xzbx&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -9645,7 +9645,7 @@
       "menu": "file",
       "effect": "action",
       "label": "PNG image (.png, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260917-dk4n&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260918-xzbx&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -9663,7 +9663,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Turboslide bundle (.zip)",
-      "evidence": "download untitled-20260917-dk4n-r3.zip",
+      "evidence": "download untitled-20260918-xzbx-r3.zip",
       "pass": true
     },
     {
@@ -9729,7 +9729,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print settings and preview",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n#s/title -> http://localhost:4321/print/untitled-20260917-dk4n",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx#s/title -> http://localhost:4321/print/untitled-20260918-xzbx",
       "pass": true
     },
     {
@@ -9738,7 +9738,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n#s/title -> http://localhost:4321/print/untitled-20260917-dk4n",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx#s/title -> http://localhost:4321/print/untitled-20260918-xzbx",
       "pass": true
     },
     {
@@ -9870,7 +9870,7 @@
       "menu": "view",
       "effect": "client",
       "label": "Zoom in",
-      "evidence": "zoom \"fit\" -> 0.75",
+      "evidence": "zoom \"fit\" -> 0.75; back to fit",
       "pass": true
     },
     {
@@ -9879,7 +9879,7 @@
       "menu": "view",
       "effect": "client",
       "label": "Zoom out",
-      "evidence": "zoom 0.75 -> 0.5",
+      "evidence": "zoom \"fit\" -> 0.5; back to fit",
       "pass": true
     },
     {
@@ -9897,7 +9897,7 @@
       "menu": "view",
       "effect": "action",
       "label": "50%",
-      "evidence": "zoom 0.5",
+      "evidence": "zoom 0.5; back to fit",
       "pass": true
     },
     {
@@ -9906,7 +9906,7 @@
       "menu": "view",
       "effect": "action",
       "label": "100%",
-      "evidence": "zoom 1",
+      "evidence": "zoom 1; back to fit",
       "pass": true
     },
     {
@@ -9915,7 +9915,7 @@
       "menu": "view",
       "effect": "action",
       "label": "200%",
-      "evidence": "zoom 2",
+      "evidence": "zoom 2; back to fit",
       "pass": true
     },
     {
@@ -9987,7 +9987,7 @@
       "menu": "view",
       "effect": "toggle",
       "label": "Show all comments",
-      "evidence": "aria-checked true -> true; comments null -> null -> null",
+      "evidence": "aria-checked true -> true; comments \"all\" -> \"all\" -> \"all\"",
       "pass": true
     },
     {
@@ -9996,7 +9996,7 @@
       "menu": "view",
       "effect": "toggle",
       "label": "Expand comments",
-      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "evidence": "aria-checked false -> true; comments \"all\" -> \"expanded\" -> \"all\"",
       "pass": true
     },
     {
@@ -10005,7 +10005,7 @@
       "menu": "view",
       "effect": "toggle",
       "label": "Minimize comments",
-      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "evidence": "aria-checked false -> true; comments \"all\" -> \"minimized\" -> \"all\"",
       "pass": true
     },
     {
@@ -10014,7 +10014,7 @@
       "menu": "view",
       "effect": "toggle",
       "label": "Hide comments",
-      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "evidence": "aria-checked false -> true; comments \"all\" -> \"hidden\" -> \"all\"",
       "pass": true
     },
     {
@@ -10257,8 +10257,8 @@
       "menu": "insert",
       "effect": "client",
       "label": "Comment",
-      "evidence": "no comment card opened; snackbar \"\"",
-      "pass": false
+      "evidence": "card opened with the field \"Comment or add others with @\"; threads 0 -> 1; 1 marker(s)",
+      "pass": true
     },
     {
       "section": "effects:scratch",
@@ -11430,7 +11430,7 @@
       "menu": "tools",
       "effect": "action",
       "label": "Render this slide",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260917-dk4n&theme=light&scale=1&revision=19",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260918-xzbx&theme=light&scale=1&revision=19",
       "pass": true
     },
     {
@@ -11952,7 +11952,7 @@
       "id": "file.print",
       "key": "Cmd+P",
       "chord": "Cmd+P",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n#s/title -> http://localhost:4321/print/untitled-20260917-dk4n",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx#s/title -> http://localhost:4321/print/untitled-20260918-xzbx",
       "pass": true
     },
     {
@@ -12419,13 +12419,34 @@
         "toolbar.print",
         "toolbar.paintFormat",
         "toolbar.zoom",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.fillColor",
+        "toolbar.mergeCells",
+        "toolbar.unmergeCells",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.numberedList",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
         "toolbar.formatOptions",
-        "toolbar.replaceImage",
         "toolbar.hideMenus"
       ],
-      "evidence": "wanted toolbar.search, toolbar.newSlide, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.fillColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.font, toolbar.fontSize, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.bulletedList, toolbar.numberedList, toolbar.decreaseIndent, toolbar.increaseIndent, toolbar.clearFormatting, toolbar.formatOptions, toolbar.hideMenus; observed toolbar.search, toolbar.newSlide, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.formatOptions, toolbar.replaceImage, toolbar.hideMenus",
+      "evidence": "31 controls in the order of SPEC 3 with Tools > Advanced tools on",
       "check": "order",
-      "pass": false
+      "pass": true
     },
     {
       "section": "rows:textBlock",
@@ -16323,8 +16344,11 @@
     {
       "section": "effects:textBlock2",
       "id": "format.text.italic",
-      "evidence": "could not select the text",
-      "pass": null
+      "menu": "format",
+      "effect": "action",
+      "label": "Italic",
+      "evidence": "revision 103 -> 104; text \"[The audit paragraph carries a sentence for the marks]{i}\" carries {i}: true",
+      "pass": true
     },
     {
       "section": "effects:textBlock2",
@@ -16332,7 +16356,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Underline",
-      "evidence": "revision 103 -> 104; text \"[The audit paragraph carries a sentence for the marks]{u}\" carries {u}: true",
+      "evidence": "revision 105 -> 106; text \"[The audit paragraph carries a sentence for the marks]{u}\" carries {u}: true",
       "pass": true
     },
     {
@@ -16341,7 +16365,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Strikethrough",
-      "evidence": "revision 105 -> 106; text \"[The audit paragraph carries a sentence for the marks]{s}\" carries {s}: true",
+      "evidence": "revision 107 -> 108; text \"[The audit paragraph carries a sentence for the marks]{s}\" carries {s}: true",
       "pass": true
     },
     {
@@ -16350,7 +16374,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Superscript",
-      "evidence": "revision 107 -> 108; text \"[The audit paragraph carries a sentence for the marks]{sup}\" carries {sup}: true",
+      "evidence": "revision 109 -> 110; text \"[The audit paragraph carries a sentence for the marks]{sup}\" carries {sup}: true",
       "pass": true
     },
     {
@@ -16359,7 +16383,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Subscript",
-      "evidence": "revision 109 -> 110; text \"[The audit paragraph carries a sentence for the marks]{sub}\" carries {sub}: true",
+      "evidence": "revision 111 -> 112; text \"[The audit paragraph carries a sentence for the marks]{sub}\" carries {sub}: true",
       "pass": true
     },
     {
@@ -16368,7 +16392,7 @@
       "menu": "format",
       "effect": "action",
       "label": "lowercase",
-      "evidence": "revision 111 -> 112; lower: \"The audit paragraph carries a sentence f\" -> \"the audit paragraph carries a sentence f\"",
+      "evidence": "revision 113 -> 114; lower: \"The audit paragraph carries a sentence f\" -> \"the audit paragraph carries a sentence f\"",
       "pass": true
     },
     {
@@ -16377,7 +16401,7 @@
       "menu": "format",
       "effect": "action",
       "label": "UPPERCASE",
-      "evidence": "revision 113 -> 114; upper: \"The audit paragraph carries a sentence f\" -> \"THE AUDIT PARAGRAPH CARRIES A SENTENCE F\"",
+      "evidence": "revision 115 -> 116; upper: \"The audit paragraph carries a sentence f\" -> \"THE AUDIT PARAGRAPH CARRIES A SENTENCE F\"",
       "pass": true
     },
     {
@@ -16386,7 +16410,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Title Case",
-      "evidence": "revision 115 -> 116; title: \"The audit paragraph carries a sentence f\" -> \"The Audit Paragraph Carries A Sentence F\"",
+      "evidence": "revision 117 -> 118; title: \"The audit paragraph carries a sentence f\" -> \"The Audit Paragraph Carries A Sentence F\"",
       "pass": true
     },
     {
@@ -16395,7 +16419,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Justified",
-      "evidence": "revision 117 -> 118; align start -> justify",
+      "evidence": "revision 119 -> 120; align start -> justify",
       "pass": true
     },
     {
@@ -16404,7 +16428,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Increase indent",
-      "evidence": "revision 119 -> 120; indent 0 -> 64",
+      "evidence": "revision 121 -> 122; indent 0 -> 64",
       "pass": true
     },
     {
@@ -16413,7 +16437,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Decrease indent",
-      "evidence": "revision 122 -> 123; indent 64 -> 0",
+      "evidence": "revision 124 -> 125; indent 64 -> 0",
       "pass": true
     },
     {
@@ -16422,7 +16446,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Add space before paragraph",
-      "evidence": "revision 125 -> 126; spaceBefore 0 -> 8",
+      "evidence": "revision 127 -> 128; spaceBefore 0 -> 8",
       "pass": true
     },
     {
@@ -16431,7 +16455,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Add space after paragraph",
-      "evidence": "revision 127 -> 128; spaceAfter 0 -> 8",
+      "evidence": "revision 129 -> 130; spaceAfter 0 -> 8",
       "pass": true
     },
     {
@@ -16464,62 +16488,62 @@
     {
       "section": "pickers:objects",
       "id": "format.bulletsNumbering.bulleted.pick",
-      "evidence": "picked disc-circle-square; revision 129 -> 130; block now plain marker bullet preset disc-circle-square",
+      "evidence": "picked disc-circle-square; revision 131 -> 132; block now plain marker bullet preset disc-circle-square",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "format.bulletsNumbering.numbered.pick",
-      "evidence": "picked digit-alpha-roman; revision 131 -> 132; block now plain marker number preset digit-alpha-roman",
+      "evidence": "picked digit-alpha-roman; revision 133 -> 134; block now plain marker number preset digit-alpha-roman",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.italic",
       "key": "Cmd+I",
-      "evidence": "revision 133 -> 134; paragraph block p1 text \"[The ]{i}audit paragraph carries a sentence for the marks\"",
+      "evidence": "revision 135 -> 136; paragraph block p1 text \"[The ]{i}audit paragraph carries a sentence for the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.underline",
       "key": "Cmd+U",
-      "evidence": "revision 135 -> 136; paragraph block p1 text \"[The ]{u}audit paragraph carries a sentence for the marks\"",
+      "evidence": "revision 137 -> 138; paragraph block p1 text \"[The ]{u}audit paragraph carries a sentence for the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.strikethrough",
       "key": "Cmd+Shift+X",
-      "evidence": "revision 137 -> 138; paragraph block p1 text \"[The ]{s}audit paragraph carries a sentence for the marks\"",
+      "evidence": "revision 139 -> 140; paragraph block p1 text \"[The ]{s}audit paragraph carries a sentence for the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.superscript",
       "key": "Cmd+.",
-      "evidence": "revision 139 -> 140; paragraph block p1 text \"[The ]{sup}audit paragraph carries a sentence for the marks\"",
+      "evidence": "revision 141 -> 142; paragraph block p1 text \"[The ]{sup}audit paragraph carries a sentence for the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.subscript",
       "key": "Cmd+,",
-      "evidence": "revision 141 -> 142; paragraph block p1 text \"[The ]{sub}audit paragraph carries a sentence for the marks\"",
+      "evidence": "revision 143 -> 144; paragraph block p1 text \"[The ]{sub}audit paragraph carries a sentence for the marks\"",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.justify",
       "key": "Cmd+Shift+J",
-      "evidence": "revision 143 -> 144; align justify; page still at /edit/untitled-20260917-dk4n",
+      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260918-xzbx",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.indentMore",
       "key": "Cmd+]",
-      "evidence": "revision 145 -> 146; indent 64; page still at /edit/untitled-20260917-dk4n",
+      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260918-xzbx",
       "pass": true
     },
     {
@@ -20309,7 +20333,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate clockwise 90°",
-      "evidence": "revision 147 -> 148; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
+      "evidence": "revision 149 -> 150; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20318,7 +20342,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate counter-clockwise 90°",
-      "evidence": "revision 149 -> 150; rotate 0 -> 270 (wanted 270); the slide converted to the canvas in the same write",
+      "evidence": "revision 151 -> 152; rotate 0 -> 270 (wanted 270); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20327,7 +20351,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip horizontally",
-      "evidence": "revision 151 -> 152; flip none -> h; the slide converted to the canvas in the same write",
+      "evidence": "revision 153 -> 154; flip none -> h; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20336,7 +20360,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip vertically",
-      "evidence": "revision 153 -> 154; flip none -> v; the slide converted to the canvas in the same write",
+      "evidence": "revision 155 -> 156; flip none -> v; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20345,7 +20369,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Horizontally",
-      "evidence": "revision 155 -> 156; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 157 -> 158; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20354,7 +20378,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Vertically",
-      "evidence": "revision 157 -> 158; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 159 -> 160; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20363,7 +20387,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Left",
-      "evidence": "revision 159 -> 160; left of one object to the slide: 0 (wanted 0); pos {\"x\":0,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 161 -> 162; left of one object to the slide: 0 (wanted 0); pos {\"x\":0,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20372,7 +20396,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Center",
-      "evidence": "revision 161 -> 162; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 163 -> 164; center of one object to the slide: 800 (wanted 800); pos {\"x\":382,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20381,7 +20405,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Right",
-      "evidence": "revision 163 -> 164; right of one object to the slide: 1600 (wanted 1600); pos {\"x\":764,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 165 -> 166; right of one object to the slide: 1600 (wanted 1600); pos {\"x\":764,\"y\":853.125,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20390,7 +20414,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Top",
-      "evidence": "revision 165 -> 166; top of one object to the slide: 0 (wanted 0); pos {\"x\":137,\"y\":0,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 167 -> 168; top of one object to the slide: 0 (wanted 0); pos {\"x\":137,\"y\":0,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20399,7 +20423,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Middle",
-      "evidence": "revision 167 -> 168; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 169 -> 170; middle of one object to the slide: 450 (wanted 450); pos {\"x\":137,\"y\":390,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20408,7 +20432,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bottom",
-      "evidence": "revision 169 -> 170; bottom of one object to the slide: 900 (wanted 900); pos {\"x\":137,\"y\":780,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
+      "evidence": "revision 171 -> 172; bottom of one object to the slide: 900 (wanted 900); pos {\"x\":137,\"y\":780,\"w\":836,\"h\":120,\"z\":4}; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -20417,7 +20441,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bring to front",
-      "evidence": "revision 171 -> 172",
+      "evidence": "revision 173 -> 174",
       "pass": true
     },
     {
@@ -20426,7 +20450,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Bring forward",
-      "evidence": "revision 173 -> 174",
+      "evidence": "revision 175 -> 176",
       "pass": true
     },
     {
@@ -20435,7 +20459,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Send backward",
-      "evidence": "revision 175 -> 176",
+      "evidence": "revision 177 -> 178",
       "pass": true
     },
     {
@@ -20444,7 +20468,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Send to back",
-      "evidence": "revision 177 -> 178",
+      "evidence": "revision 179 -> 180",
       "pass": true
     },
     {
@@ -20453,7 +20477,7 @@
       "menu": "format",
       "effect": "client",
       "label": "Border color",
-      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderColor.ink; revision 179 -> 180; stroke now \"ink\"",
+      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderColor.ink; revision 181 -> 182; stroke now \"ink\"",
       "pass": true
     },
     {
@@ -20462,7 +20486,7 @@
       "menu": "format",
       "effect": "client",
       "label": "Border weight",
-      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderWeight.2; revision 181 -> 182; strokeWidth now 2",
+      "evidence": "plate opened anchored to the row; picked format.bordersLines.borderWeight.2; revision 183 -> 184; strokeWidth now 2",
       "pass": true
     },
     {
@@ -20471,7 +20495,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Dot",
-      "evidence": "revision 183 -> 184; dash solid -> dot (wanted dot)",
+      "evidence": "revision 185 -> 186; dash solid -> dot (wanted dot)",
       "pass": true
     },
     {
@@ -20480,7 +20504,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Long dash",
-      "evidence": "revision 185 -> 186; dash solid -> longDash (wanted longDash)",
+      "evidence": "revision 187 -> 188; dash solid -> longDash (wanted longDash)",
       "pass": true
     },
     {
@@ -20489,7 +20513,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Italic",
-      "evidence": "revision 187 -> 188; text \"[Shape text]{i}\" carries {i}: true",
+      "evidence": "revision 189 -> 190; text \"[Shape text]{i}\" carries {i}: true",
       "pass": true
     },
     {
@@ -20506,35 +20530,35 @@
       "id": "format.changeShape",
       "menu": "context",
       "label": "Change shape",
-      "evidence": "picked hexagon; revision 189 -> 190; shape rectangle -> hexagon",
+      "evidence": "picked hexagon; revision 191 -> 192; shape rectangle -> hexagon",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.rotate.right15",
       "key": "Option+Right",
-      "evidence": "revision 191 -> 192; rotate 0 -> 15; the slide converted in the same write",
+      "evidence": "revision 193 -> 194; rotate 0 -> 15; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.rotate.left1",
       "key": "Option+Shift+Left",
-      "evidence": "revision 193 -> 194; rotate 0 -> 359; the slide converted in the same write",
+      "evidence": "revision 195 -> 196; rotate 0 -> 359; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.right1",
       "key": "Right",
-      "evidence": "revision 195 -> 196; x 137 -> 138; the slide converted in the same write",
+      "evidence": "revision 197 -> 198; x 137 -> 138; the slide converted in the same write",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.down10",
       "key": "Shift+Down",
-      "evidence": "revision 197 -> 198; y 853.125 -> 863.125; the slide converted in the same write",
+      "evidence": "revision 199 -> 200; y 853.125 -> 863.125; the slide converted in the same write",
       "pass": true
     },
     {
@@ -20548,7 +20572,7 @@
       "section": "shortcuts:objects",
       "id": "key.duplicate",
       "key": "Cmd+D",
-      "evidence": "revision 201 -> 202; objects 7 -> 8; copy audit-shape-2 at {\"x\":153,\"y\":869.125,\"w\":836,\"h\":120,\"z\":7}",
+      "evidence": "revision 203 -> 204; objects 7 -> 8; copy audit-shape-2 at {\"x\":153,\"y\":869.125,\"w\":836,\"h\":120,\"z\":7}",
       "pass": true
     },
     {
@@ -20569,21 +20593,21 @@
       "section": "shortcuts:objects",
       "id": "key.group",
       "key": "Cmd+Option+G",
-      "evidence": "chip \"2 objects\"; revision 203 -> 204; group group with 2 members; chip now \"Group\"",
+      "evidence": "chip \"2 objects\"; revision 205 -> 206; group group with 2 members; chip now \"Group\"",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.ungroup",
       "key": "Cmd+Option+Shift+G",
-      "evidence": "revision 204 -> 205; 0 members left in group",
+      "evidence": "revision 206 -> 207; 0 members left in group",
       "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.delete",
       "key": "Delete",
-      "evidence": "chip \"Shape\"; revision 207 -> 208; objects 7 -> 6; snackbar \"Shape deletedUndo\"",
+      "evidence": "chip \"Shape\"; revision 209 -> 210; objects 7 -> 6; snackbar \"Shape deletedUndo\"",
       "pass": true
     },
     {
@@ -20659,7 +20683,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Circle",
-      "evidence": "revision 209 -> 210; lineStart none -> fillCircle (wanted fillCircle)",
+      "evidence": "revision 211 -> 212; lineStart none -> fillCircle (wanted fillCircle)",
       "pass": true
     },
     {
@@ -20668,7 +20692,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Arrow",
-      "evidence": "revision 211 -> 212; lineEnd none -> fillArrow (wanted fillArrow)",
+      "evidence": "revision 213 -> 214; lineEnd none -> fillArrow (wanted fillArrow)",
       "pass": true
     },
     {
@@ -20677,7 +20701,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Open diamond",
-      "evidence": "revision 213 -> 214; lineEnd none -> openDiamond (wanted openDiamond)",
+      "evidence": "revision 215 -> 216; lineEnd none -> openDiamond (wanted openDiamond)",
       "pass": true
     },
     {
@@ -20686,7 +20710,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Dash",
-      "evidence": "revision 215 -> 216; dash solid -> dash (wanted dash)",
+      "evidence": "revision 217 -> 218; dash solid -> dash (wanted dash)",
       "pass": true
     },
     {
@@ -20695,7 +20719,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate clockwise 90°",
-      "evidence": "revision 217 -> 218; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
+      "evidence": "revision 219 -> 220; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -24455,20 +24479,20 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip horizontally",
-      "evidence": "revision 219 -> 220; flip none -> h; the slide converted to the canvas in the same write",
+      "evidence": "revision 221 -> 222; flip none -> h; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "format.image.maskImage.pick",
-      "evidence": "picked ellipse; revision 221 -> 222; mask none -> ellipse",
+      "evidence": "picked ellipse; revision 223 -> 224; mask none -> ellipse",
       "pass": true
     },
     {
       "section": "effects:image",
       "id": "format.image.resetImage",
       "menu": "format",
-      "evidence": "revision 224 -> 225; mask ellipse -> none",
+      "evidence": "revision 226 -> 227; mask ellipse -> none",
       "pass": true
     },
     {
@@ -24670,7 +24694,7 @@
       "id": "format.chartType",
       "menu": "context",
       "label": "Chart type",
-      "evidence": "revision 229 -> 230; kind bar -> pie",
+      "evidence": "revision 231 -> 232; kind bar -> pie",
       "pass": true
     },
     {
@@ -28349,7 +28373,7 @@
       "section": "effects:objects",
       "id": "arrange.group",
       "menu": "arrange",
-      "evidence": "revision 232 -> 233; group group with 2 members",
+      "evidence": "revision 234 -> 235; group group with 2 members",
       "pass": true
     },
     {
@@ -28468,14 +28492,14 @@
       "section": "effects:objects",
       "id": "arrange.ungroup",
       "menu": "arrange",
-      "evidence": "revision 233 -> 234; 0 members left",
+      "evidence": "revision 235 -> 236; 0 members left",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "arrange.regroup",
       "menu": "arrange",
-      "evidence": "revision 234 -> 235; group group",
+      "evidence": "revision 236 -> 237; group group",
       "pass": true
     },
     {
@@ -28589,37 +28613,37 @@
     {
       "section": "pickers:objects",
       "id": "insert.table.pick",
-      "evidence": "picked 4x3; revision 243 -> 244; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
+      "evidence": "picked 4x3; revision 245 -> 246; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
       "pass": true
     },
     {
       "section": "pickers:objects",
-      "id": "insert.shape.shapes.pick",
-      "evidence": "no tile insert.shape.shapes.pick.hexagon (plate shows nothing)",
-      "pass": false
+      "id": "insert.shape.gallery.pick",
+      "evidence": "picked hexagon; revision 247 -> 248; objects 7 -> 8; hexagon at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.arrows.pick",
-      "evidence": "picked rightArrow; revision 245 -> 246; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked rightArrow; revision 249 -> 250; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.callouts.pick",
-      "evidence": "picked wedgeRectCallout; revision 247 -> 248; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked wedgeRectCallout; revision 251 -> 252; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.equation.pick",
-      "evidence": "picked mathPlus; revision 249 -> 250; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked mathPlus; revision 253 -> 254; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.specialCharacters.pick",
-      "evidence": "picked dialog.specialCharacters.pick.8592; revision 251 -> 252; objects 7 -> 8; the dialog stays open",
+      "evidence": "picked dialog.specialCharacters.pick.8592; revision 255 -> 256; objects 7 -> 8; the dialog stays open",
       "pass": true
     },
     {
@@ -28631,21 +28655,21 @@
     {
       "section": "pickers:objects",
       "id": "insert.diagram.insert",
-      "evidence": "revision 253 -> 254; objects 7 -> 18; groups process",
+      "evidence": "revision 257 -> 258; objects 7 -> 18; groups process",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.color",
       "menu": "slide",
-      "evidence": "picked dialog.background.color.ink; Done clicked; revision 255 -> 256; background {\"color\":\"ink\"}",
+      "evidence": "picked dialog.background.color.ink; Done clicked; revision 259 -> 260; background {\"color\":\"ink\"}",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.choose",
       "menu": "slide",
-      "evidence": "chose dialog.background.choose.opener-brand; revision 257 -> 258; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
+      "evidence": "chose dialog.background.choose.opener-brand; revision 261 -> 262; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
       "pass": true
     },
     {
@@ -28677,7 +28701,7 @@
     {
       "section": "dither:scratch",
       "id": "dialog.background.upload",
-      "evidence": "the covering picture picture (asset ref-rosetta) landed in 328 ms; revision 259 -> 260",
+      "evidence": "the covering picture picture (asset ref-rosetta) landed in 353 ms; revision 263 -> 264",
       "pass": true
     },
     {
@@ -28720,7 +28744,7 @@
     {
       "section": "roles:scratch",
       "id": "owner.record",
-      "evidence": "record revision 0, owner anon_a21a40d…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260917-dk4n\",\"revision\":0,\"owner\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
+      "evidence": "record revision 0, owner anon_56c444e…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260918-xzbx\",\"revision\":0,\"owner\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
       "pass": true
     },
     {
@@ -28732,13 +28756,13 @@
     {
       "section": "roles:scratch",
       "id": "viewer.landing",
-      "evidence": "the viewer link landed on /deck/untitled-20260917-dk4n; address carries a token: false",
+      "evidence": "the viewer link landed on /deck/untitled-20260918-xzbx; address carries a token: false",
       "pass": true
     },
     {
       "section": "roles:scratch",
       "id": "viewer.mode",
-      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260917-dk4n\",\"revision\":1,\"owner\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk__Ua0TklBif6dqLHJ\",\"role\":\"viewer\",\"createdAt\":\"2026-09-17T07:16:38.751Z\",\"createdBy\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
+      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260918-xzbx\",\"revision\":1,\"owner\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_xMnTz5-tdFu2XaTY\",\"role\":\"viewer\",\"createdAt\":\"2026-09-18T04:12:46.958Z\",\"createdBy\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
       "pass": true
     },
     {
@@ -32241,7 +32265,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260917-dk4n as a viewer",
+      "where": "/edit/untitled-20260918-xzbx as a viewer",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -32254,7 +32278,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.landing",
-      "evidence": "the commenter link landed on /edit/untitled-20260917-dk4n",
+      "evidence": "the commenter link landed on /edit/untitled-20260918-xzbx",
       "pass": true
     },
     {
@@ -32266,7 +32290,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.role",
-      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260917-dk4n\",\"revision\":2,\"owner\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk__Ua0TklBif6dqLHJ\",\"role\":\"viewer\",\"createdAt\":\"2026-09-17T07:16:38.751Z\",\"createdBy\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_B6zHwq1AnUmxaXfa\",\"role\":\"commenter\",\"createdAt\":\"2026-09-17T07:16:43.253Z\",\"createdBy\":\"anon_a21a40d1-7c73-498f-ba59-78847b5a01cb\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
+      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260918-xzbx\",\"revision\":2,\"owner\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_xMnTz5-tdFu2XaTY\",\"role\":\"viewer\",\"createdAt\":\"2026-09-18T04:12:46.958Z\",\"createdBy\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_JTnHtjqQfmCm3moi\",\"role\":\"commenter\",\"createdAt\":\"2026-09-18T04:12:53.764Z\",\"createdBy\":\"anon_56c444ec-9fe9-4d78-9345-ecd984b67a8a\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
       "pass": true
     },
     {
@@ -35745,7 +35769,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260917-dk4n as a commenter",
+      "where": "/edit/untitled-20260918-xzbx as a commenter",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -35759,14 +35783,14 @@
       "section": "advanced",
       "id": "tools.advancedTools",
       "check": "turn on",
-      "evidence": "the row is not in the Tools menu on http://localhost:4321/edit/untitled-20260917-dk4n; rows drawn: tools.accessibilitySettings",
-      "pass": false
+      "evidence": "the root carries data-advanced-tools after the row",
+      "pass": true
     },
     {
       "section": "advanced",
       "id": "tools.advancedTools",
       "check": "turn on",
-      "evidence": "the root carries data-advanced-tools after the row",
+      "evidence": "no row on http://localhost:4321/edit/untitled-20260918-xzbx; turned on on /new and the page loaded again",
       "pass": true
     },
     {
@@ -35775,13 +35799,13 @@
       "menu": "title",
       "effect": "action",
       "label": "Forget this browser",
-      "evidence": "own chip \"null\" -> \"Carbon 899 (you)\"; the page's principal unchanged; confirm dialog \"Forget this browser\" confirmed",
+      "evidence": "own chip \"null\" -> \"Brass 374 (you)\"; the page's principal unchanged; confirm dialog \"Forget this browser\" confirmed",
       "pass": true
     },
     {
       "section": "tooltipAudit",
       "id": "tooltip-audit",
-      "evidence": "exit 1; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260917-dk4n\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[{\"tag\":\"a\",\"role\":null,\"control\":null,\"label\":\"01Audit scratchAudit scratchL+1\",\"className\":\"pt-orow is-active\"},{\"tag\":\"a\",\"role\":null,\"control\":null,\"label\":\"02AB12Shape textThe audit paragraph carries a sentence for t\",\"className\":\"pt-orow\"}]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0",
+      "evidence": "exit 1; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260918-xzbx\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[{\"tag\":\"a\",\"role\":null,\"control\":null,\"label\":\"01Audit scratchAudit scratchT+1\",\"className\":\"pt-orow is-active\"},{\"tag\":\"a\",\"role\":null,\"control\":null,\"label\":\"02AB12Shape textThe audit paragraph carries a sentence for t\",\"className\":\"pt-orow\"}]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0",
       "pass": false
     },
     {
@@ -35790,7 +35814,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Move to trash",
-      "evidence": "http://localhost:4321/edit/untitled-20260917-dk4n -> /decks \"\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260918-xzbx -> /decks \"\"",
       "pass": true
     },
     {
@@ -35798,7 +35822,7 @@
       "id": "trash.delete",
       "menu": "home",
       "label": "Delete forever",
-      "evidence": "the card of untitled-20260917-dk4n left the trash",
+      "evidence": "the card of untitled-20260918-xzbx left the trash",
       "pass": true
     },
     {

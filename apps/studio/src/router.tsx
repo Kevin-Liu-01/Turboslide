@@ -1,9 +1,11 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
+import type { ParsedLocation } from '@tanstack/react-router';
 import { getGlobalStartContext } from '@tanstack/react-start';
 
 import { setDitherWorkerFactory } from '@turboslide/viewer/dither';
 
 import { routeTree } from './routeTree.gen';
+import { PageRefused } from './routes/-refused-page';
 
 /**
  * The dither preview worker of the block level dither (gslides-parity SPEC-3 10.2, 10.3;
@@ -46,8 +48,23 @@ function requestNonce(): string | undefined {
  * rendering for the snapshot pair. A search or hash change on the same path (a view toggle, a
  * slide change) runs no transition; SlideView.tsx keeps its keyed fade for the slides. Firefox
  * has no view transitions and the router falls back to a plain update.
+ *
+ * The first load of a document runs no transition either (the focus round, b1 cycle 3 R40;
+ * VERIFICATION C2-F26): `pathChanged` is true on the initial navigation too, and with the pending
+ * skeleton's `.pt-stagewrap` and the editor's sharing the `pt-stage` name the skeleton's dither
+ * curtain was shown as the stage's old image over the sheet for the fade, taking the title's
+ * clicks with it (6 of 12 fresh `/new` loads under CPU throttling). `fromLocation` is undefined
+ * on that first navigation alone, so the skeleton is replaced in place, as SPEC-4 0.15 describes
+ * the curtain.
  */
-function routeTransitionTypes({ pathChanged }: { pathChanged: boolean }): string[] | false {
+function routeTransitionTypes({
+  fromLocation,
+  pathChanged,
+}: {
+  fromLocation?: ParsedLocation;
+  pathChanged: boolean;
+}): string[] | false {
+  if (fromLocation === undefined) return false;
   if (!pathChanged) return false;
   if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
@@ -70,6 +87,14 @@ export function getRouter() {
     // another instance in the 30 s after a hover opens one revision behind, for that latency.
     defaultPreloadStaleTime: 30_000,
     defaultViewTransition: { types: routeTransitionTypes },
+    // The product's error page for every route without one of its own (the focus round, cycle 3
+    // fix round; VERIFICATION C3-F3): without it a thrown error fell through to the router's
+    // global catch boundary and its built in page, "Something went wrong!" with a "Show Error"
+    // button on bare paper, which the cycle 3 text walk met over the editor. With a default every
+    // route match carries a catch boundary of its own, so an error stays inside its route and the
+    // shell around it stands; the page's Reload is `router.invalidate()`. The /edit route names
+    // its own component for its two headings (routes/edit.$deckId.tsx EditRefused).
+    defaultErrorComponent: PageRefused,
     ...(nonce === undefined ? {} : { ssr: { nonce } }),
   });
 

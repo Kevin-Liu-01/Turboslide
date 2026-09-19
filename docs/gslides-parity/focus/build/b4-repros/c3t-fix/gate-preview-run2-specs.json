@@ -1,0 +1,780 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/share.spec.ts",
+      "--reporter=list,json",
+      "--output",
+      "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/playwright"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [["list"], ["json"]],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/share.spec.ts",
+      "file": "core/share.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "share.dialog.open: Share in the title row opens the dialog with the View, Present and Edit links",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19761,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:16:39.937Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-92ccb82ce6b9235bb30e",
+          "file": "core/share.spec.ts",
+          "line": 270,
+          "column": 1
+        },
+        {
+          "title": "share.copy-view-link: Copy link on the View link row copies a link that opens /deck/<id> as a viewer (the copied address is <origin>/s/<token>)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17254,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:17:08.412Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-ae168d6173dd32152263",
+          "file": "core/share.spec.ts",
+          "line": 285,
+          "column": 1
+        },
+        {
+          "title": "share.copy-present-link: Copy link on the Present link row copies a link that opens /deck/<id>?present=1 as a viewer (the copied address is <origin>/s/<token>?present=1)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17141,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:17:25.679Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-2b19c0d7dabd956e7441",
+          "file": "core/share.spec.ts",
+          "line": 299,
+          "column": 1
+        },
+        {
+          "title": "share.copy-edit-link: Copy link on the Edit link row copies a link that opens /edit/<id> as an editor (the copied address is <origin>/s/<token>)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16867,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:17:42.834Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-3614392a7215dcce65eb",
+          "file": "core/share.spec.ts",
+          "line": 313,
+          "column": 1
+        },
+        {
+          "title": "share.escape: Escape closes the dialog",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 593,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:17:59.712Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-b9589f50cc59652cb0e6",
+          "file": "core/share.spec.ts",
+          "line": 325,
+          "column": 1
+        },
+        {
+          "title": "share.file-menu-copy-link: File > Share > Copy link copies the view address",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1409,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:00.312Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-64ec64c53b22114aeeb2",
+          "file": "core/share.spec.ts",
+          "line": 331,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-lands-viewer: A second browser on the View link lands on the read only viewer with no editor chrome",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2171,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:01.729Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-6af0c71dd1269a206432",
+          "file": "core/share.spec.ts",
+          "line": 339,
+          "column": 1
+        },
+        {
+          "title": "share.edit-link-lands-editor: A third browser on the Edit link lands in the editor",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1891,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:03.909Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-03bed674cc82a53a0fbf",
+          "file": "core/share.spec.ts",
+          "line": 357,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-cannot-edit: A browser that arrived by the View link and changes /deck/ to /edit/ cannot edit the deck",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10995,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:05.811Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-d380c8a41df2c41c68a0",
+          "file": "core/share.spec.ts",
+          "line": 422,
+          "column": 1
+        },
+        {
+          "title": "share.stranger-cannot-edit: A browser with no link that opens /edit/<id> of a deck never shared cannot edit it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5811,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:16.814Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-d50cd4f03d49fcb76982",
+          "file": "core/share.spec.ts",
+          "line": 454,
+          "column": 1
+        },
+        {
+          "title": "collab.edit-from-second-browser: Text typed in a second browser reaches the owner within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13351,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:22.632Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-886ac6a6d7041e965d0f",
+          "file": "core/share.spec.ts",
+          "line": 515,
+          "column": 1
+        },
+        {
+          "title": "collab.edit-from-owner: Text typed by the owner reaches the second browser within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13920,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:35.994Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-1ddef6f8f0f1d292bf4e",
+          "file": "core/share.spec.ts",
+          "line": 548,
+          "column": 1
+        },
+        {
+          "title": "collab.slide-added-appears: A slide added in the second browser appears in the owner's filmstrip within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8530,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:49.930Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-52d476dfb85b59c07882",
+          "file": "core/share.spec.ts",
+          "line": 582,
+          "column": 1
+        },
+        {
+          "title": "collab.presence-chips: Presence chips show the other person in both tabs within 10 s, and a chip leaves within 30 s of its tab closing",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "presence roster before",
+                  "description": "3 row(s) of closed tabs in the owner's roster at the row's start (651a49fe left 26117 ms ago, cb09d16f left 12046 ms ago, f9e87d50 left 3538 ms ago); 3 after 12 ms"
+                },
+                {
+                  "type": "presence join",
+                  "description": "the owner's tab showed the second tab's chip 81 ms after its hello; both tabs show the other within 85 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 32191,
+                  "error": {
+                    "message": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\u001b[22m\n\u001b[2m    64 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n",
+                    "stack": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\u001b[22m\n\u001b[2m    64 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:689:7",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                      "column": 7,
+                      "line": 689
+                    },
+                    "snippet": "  687 |       chipOf(page, guest),\n  688 |       \"the second tab's chip leaves the owner's tab within 30 s of its tab closing\",\n> 689 |     ).toHaveCount(0, { timeout: 30_000 });\n      |       ^\n  690 |     const gone = Date.now() - t;\n  691 |     const listed = (await othersOf(page)).includes(guest);\n  692 |     test.info().annotations.push({"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                        "column": 7,
+                        "line": 689
+                      },
+                      "message": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.9d7b7e26f6b2f7c90d8ff1dbf4a516da\"]')\u001b[22m\n\u001b[2m    64 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n\n  687 |       chipOf(page, guest),\n  688 |       \"the second tab's chip leaves the owner's tab within 30 s of its tab closing\",\n> 689 |     ).toHaveCount(0, { timeout: 30_000 });\n      |       ^\n  690 |     const gone = Date.now() - t;\n  691 |     const listed = (await othersOf(page)).includes(guest);\n  692 |     test.info().annotations.push({\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:689:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:18:58.470Z",
+                  "annotations": [
+                    {
+                      "type": "presence roster before",
+                      "description": "3 row(s) of closed tabs in the owner's roster at the row's start (651a49fe left 26117 ms ago, cb09d16f left 12046 ms ago, f9e87d50 left 3538 ms ago); 3 after 12 ms"
+                    },
+                    {
+                      "type": "presence join",
+                      "description": "the owner's tab showed the second tab's chip 81 ms after its hello; both tabs show the other within 85 ms"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                    "column": 7,
+                    "line": 689
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-91c03b7a5eb3dd6dc6a4",
+          "file": "core/share.spec.ts",
+          "line": 610,
+          "column": 1
+        },
+        {
+          "title": "collab.rename-reaches-second-browser: A rename reaches the second browser's name field within 5 s and its tab title reads the new name without a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12545,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:19:47.135Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-33eb492a7426c022989a",
+          "file": "core/share.spec.ts",
+          "line": 701,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-excludes-skipped-and-notes: A second browser on the View link sees no skipped slide and no note text, in the page and in the payload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4991,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:20:11.782Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-0b62b386f09ce9d20619",
+          "file": "core/share.spec.ts",
+          "line": 722,
+          "column": 1
+        },
+        {
+          "title": "share.present-link-excludes-skipped: A second browser on the Present link shows the unskipped slides only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1752,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:20:16.785Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-31328e2d9693825dfce4",
+          "file": "core/share.spec.ts",
+          "line": 761,
+          "column": 1
+        },
+        {
+          "title": "comments.reaches-second-browser: A comment added in one browser is listed in a second browser's Comments panel within 10 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9222,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:20:18.551Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-8b694651f67f61a407dc",
+          "file": "core/share.spec.ts",
+          "line": 784,
+          "column": 1
+        },
+        {
+          "title": "versions.restore: Restore this version returns the deck to that version within 5 s, on a deck a second browser has also written into",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21958,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:20:27.786Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-2bfc1bc1bd664c9670d9",
+          "file": "core/share.spec.ts",
+          "line": 828,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-18T23:16:39.339Z",
+    "duration": 264401.78,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

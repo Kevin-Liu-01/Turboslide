@@ -190,6 +190,16 @@ export const Route = createFileRoute('/api/decks/bundle')({
         }
         try {
           const result = await importDeckBundle(read.zip, options);
+          // the deck a bundle upload makes is the uploader's, as a deck.create or deck.copy is its
+          // caller's (server/decks.ts, actions.ts registerHostedDeckActions record()): without the
+          // record decide() synthesized the legacy open record, the uploader stood on the copy as
+          // editor by open access, and enforce refused their deck.trash and deck.remove, so the
+          // Open and Import slides copies stayed on the shared store (return/build/b4.md, the fix
+          // round, request 1; VERIFICATION.md R1-F2). A replaced deck keeps its record.
+          if (!result.replaced) {
+            const { recordNewDeck } = await import('../../server/access');
+            await recordNewDeck(result.deckId, ctx);
+          }
           return Response.json(result, {
             status: result.replaced ? 200 : 201,
             headers: { location: result.editUrl, 'cache-control': 'no-store' },

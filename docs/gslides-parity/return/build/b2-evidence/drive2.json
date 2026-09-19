@@ -1,0 +1,152 @@
+{
+  "base": "http://localhost:4402",
+  "deckId": "untitled-20260919-xv7a",
+  "rows": [
+    {
+      "id": "decks.name.follows-heading",
+      "name": "type 8 then 24 characters of a 32 character title with a save between",
+      "ok": false,
+      "observed": "session true; after 8 characters save state saved, title row \"Renewal\" (deck.info \"Renewal\"), address /edit/untitled-20260919-xv7a; after 32: title row \"Renewal review for Acme, Q3 2026\", deck.info \"Renewal review for Acme, Q3 2026\", Details carries it true, Share dialog carries it false (\"\"); revision 2",
+      "ms": 43321
+    },
+    {
+      "id": "text.title.one-click-tail",
+      "name": "one click on the cover title",
+      "ok": true,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; text tail true (toolbar.fontSize, toolbar.bold, toolbar.textColor, toolbar.align)",
+      "ms": 1334
+    },
+    {
+      "id": "text.title.bold-menu",
+      "name": "Format > Text > Bold; the criterion here is the stored weight 500 drawn at 500 (the theme draws an h1 at 500 already)",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored {\"weight\":500}, text \"Renewal review for Acme, Q3 2026\"; slide title/null -> content/freeform); revision 3 -> 3; snackbar none; no write, no Cmd+Z",
+      "ms": 4052
+    },
+    {
+      "id": "text.title.bold-menu (heavier than before)",
+      "name": "the walk's criterion: the drawn weight grows",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored null, text \"Renewal review for Acme, Q3 2026\"; slide content/freeform -> content/freeform); revision 4 -> 5; snackbar none; one Cmd+Z restored true (kind content, text same true)",
+      "ms": 11218
+    },
+    {
+      "id": "text.title.bold-cmd-b",
+      "name": "Cmd+B (stored weight 500)",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored null, text \"Renewal review for Acme, Q3 2026\"; slide content/freeform -> content/freeform); revision 6 -> 7; snackbar none; one Cmd+Z restored true (kind content, text same true)",
+      "ms": 10325
+    },
+    {
+      "id": "text.title.align-menu",
+      "name": "Format > Align & indent > Center",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} (stored {\"weight\":500,\"align\":\"center\"}, text \"Renewal review for Acme, Q3 2026\"; slide content/freeform -> content/freeform); revision 8 -> 8; snackbar none; no write, no Cmd+Z",
+      "ms": 4547
+    },
+    {
+      "id": "text.title.size-menu",
+      "name": "Format > Text > Size > Decrease",
+      "ok": false,
+      "observed": "threw: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.format.text.size\"]')\n",
+      "ms": 36327
+    },
+    {
+      "id": "text.title.italic-menu (extra)",
+      "name": "Format > Text > Italic on the selected title: the whole heading turns italic",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} (stored {\"weight\":500,\"align\":\"center\"}, text \"[Renewal review for Acme, Q3 2026]{i}\"; slide content/freeform -> content/freeform); revision 9 -> 9; snackbar none; no write, no Cmd+Z",
+      "ms": 4170
+    },
+    {
+      "id": "text.title.uppercase-menu (extra)",
+      "name": "Format > Text > Capitalization > UPPERCASE on the selected title",
+      "ok": false,
+      "observed": "threw: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.format.text.capitalization\"]')\n",
+      "ms": 36220
+    },
+    {
+      "id": "text.title.format-options-marks",
+      "name": "Format options, the B toggle (stored weight 500)",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Title\"; session false; {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} (stored {\"align\":\"center\"}, text \"[Renewal review for Acme, Q3 2026]{i}\"; slide content/freeform -> content/freeform); revision 10 -> 11; snackbar none; one Cmd+Z restored true (kind content, text same true)",
+      "ms": 11009
+    },
+    {
+      "id": "tables.cell.align-menu",
+      "name": "a cell session open in column 2 (a body row), Format > Align & indent > Center; Escape; the cell draws centred",
+      "ok": false,
+      "observed": "session true, still open after the row true; columns 0:- 1:center 2:-; cell text \"12 000\" drawn text-align center after Escape; revision 13 -> 13; snackbar none",
+      "ms": 5625
+    },
+    {
+      "id": "tables.cell.align-toolbar",
+      "name": "a cell session open, the table tail Align list, Right",
+      "ok": true,
+      "observed": "session true; tail before toolbar.borderColor, toolbar.fillColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.align; list options format.alignIndent.left, format.alignIndent.center, format.alignIndent.right, format.alignIndent.justified, valign-top, valign-middle, valign-bottom; columns 0:- 1:right 2:-; session after the pick true; tail after toolbar.mergeCells, toolbar.unmergeCells, toolbar.align; drawn text-align after Escape right",
+      "ms": 2995
+    },
+    {
+      "id": "tables.menu.format-table-selected (kept cell)",
+      "name": "the table selected by one click after the session: Format > Table rows enabled and Insert column right lands on the kept cell",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Table\"; session false; Insert column right present true disabled false; columns 3 -> 4 -> after Cmd+Z 4; tail toolbar.borderColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.align, toolbar.formatOptions",
+      "ms": 5296
+    },
+    {
+      "id": "shapes.text.colour-toolbar",
+      "name": "select the rectangle, toolbar Text color, Paper; the label draws in it; Cmd+Z",
+      "ok": false,
+      "observed": "move true; handles 8; ring true; chip \"Shape\"; session false; picked toolbar.textColor.paper; block.color \"paper\"; label drawn rgb(7, 7, 7); revision 16 -> 17; after Cmd+Z color undefined",
+      "ms": 8926
+    },
+    {
+      "id": "formatting.clear.inline-marks",
+      "name": "a box with an italic word and a bold word; select it; Clear formatting; no snackbar Nothing to clear; Cmd+Z restores",
+      "ok": false,
+      "observed": "marks before i:italic, b:bold; move true; handles 8; ring true; chip \"Text box\"; session false; stored after \"One italic word and a bold word here\", drawn marks 0; snackbar none; revision 18 -> 18; after Cmd+Z stored \"One [italic]{i} word and a *bold* word here\", drawn marks i:italic, b:bold",
+      "ms": 4115
+    },
+    {
+      "id": "formatting.clear.inline-marks (a range in a session)",
+      "name": "double click italic, Clear formatting on the toolbar; the word alone loses its mark, the bold word stays",
+      "ok": false,
+      "observed": "selection \"italic\"; stored after \"One italic word and a *bold* word here\"; snackbar none; revision 19 -> 19; after Cmd+Z \"One [italic]{i} word and a *bold* word here\"",
+      "ms": 4639
+    },
+    {
+      "id": "text.fontsize.type-one-undo",
+      "name": "select the text box, type 28 in the size field, Enter; one Cmd+Z restores",
+      "ok": false,
+      "observed": "size null -> 26 (snackbar Font size 26: the nearest step of the type ladder); revision 20 -> 20; one Cmd+Z -> null",
+      "ms": 4357
+    },
+    {
+      "id": "text.fontsize.type-one-undo (a list)",
+      "name": "make the box a bulleted list, type 28 in the size field, Enter; the list size steps its ladder; one Cmd+Z restores",
+      "ok": true,
+      "observed": "list plain; field showed \"20\"; size null -> 24 (snackbar Font size 24: the nearest step of the list's ladder; save words \"Saving…\"); revision 20 -> 21; one Cmd+Z -> null",
+      "ms": 5719
+    },
+    {
+      "id": "insert.textbox.while-parked (extra)",
+      "name": "a session parked on the menu bar: Insert > Text box, then a click on the sheet places a box",
+      "ok": true,
+      "observed": "session true; after Insert > Text box the session still parked true; new runs text/text",
+      "ms": 5300
+    },
+    {
+      "id": "menu.pick.returns-focus (extra)",
+      "name": "a word selected, Format > Text > Italic from the menu, then typing lands in the text (Google continues at the caret)",
+      "ok": true,
+      "observed": "focus after the pick h1[contenteditable]; \"Renewal review for Acme, Q3 2026\" -> \"Renewal review for Acme, Q3 2026x\"; snackbar none",
+      "ms": 5149
+    },
+    {
+      "id": "cleanup",
+      "ok": true,
+      "observed": "/edit/untitled-20260919-xv7a 404"
+    }
+  ],
+  "errors": []
+}

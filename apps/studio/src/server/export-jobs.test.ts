@@ -33,8 +33,12 @@ import { storedExportPath } from './export-sync';
 // from it on the instance that never held the job, the refusal for a job no record names, and
 // the prune. The runtime half (the part store, the worker client) is a fake here.
 
-const NOW = '2026-09-18T18:00:00.000Z';
-const LATER = '2026-09-18T18:00:09.000Z';
+/* the fixtures' clock is the real one less ten minutes, whole seconds: the follow prunes records
+   older than a day by the store's upload time (export-batch.ts followExportJob, export-jobs.ts
+   pruneExportJobs), so an absolute date failed the follow test once the calendar passed it by a
+   day (2026-09-19T18:00Z, read by the return round's ship step; the test was written on the 18th) */
+const NOW = new Date(Math.floor(Date.now() / 1000) * 1000 - 10 * 60_000).toISOString();
+const LATER = new Date(Date.parse(NOW) + 9_000).toISOString();
 /** The worker queue's id shape (render-worker queue.ts): base36 time, a dash, six hex. */
 const JOB = `${Date.parse(NOW).toString(36)}-0922ac`;
 

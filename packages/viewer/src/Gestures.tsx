@@ -111,7 +111,7 @@ export type Handle = {
   kind: HandleKind;
   /** the hit box in sheet pixels */
   box: Box;
-  /** the block the handle edits; absent for the slide-level handles (seam, plate) */
+  /** the block the handle edits; absent for the slide-level handles (seam, plate), present on a table's column seam (table-seam.ts) */
   blockId?: string;
   /** the item the handle edits: a scales row, a pair figure, a line end (0 start, 1 end) */
   index?: number;

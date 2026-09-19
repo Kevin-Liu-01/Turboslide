@@ -57,10 +57,17 @@ export function NumberField({
   unit?: string;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
+  /* the draft as the handlers read it: Enter commits and blurs in one event, and the blur's
+     commit read the draft of the render its handler was bound in, so one typed width made two
+     writes and two history entries and the first Cmd+Z restored nothing (docs/RETURN.md 2.14
+     item 3; audit-formatting rows 13, 64 to 66). The ref is cleared before the write */
+  const draftRef = useRef<string | null>(null);
   const clamp = (n: number) => Math.min(max ?? Infinity, Math.max(min ?? -Infinity, n));
   const commit = () => {
-    if (draft === null) return;
-    const n = Number(draft);
+    const typed = draftRef.current;
+    if (typed === null) return;
+    draftRef.current = null;
+    const n = Number(typed);
     setDraft(null);
     if (Number.isFinite(n) && n !== value) onCommit(clamp(n));
   };
@@ -79,7 +86,10 @@ export function NumberField({
           autoComplete="off"
           spellCheck={false}
           {...tip}
-          onChange={(event) => setDraft(event.target.value)}
+          onChange={(event) => {
+            draftRef.current = event.target.value;
+            setDraft(event.target.value);
+          }}
           onKeyDown={(event) => {
             tip.onKeyDown(event);
             if (event.key === 'Enter') {
@@ -89,12 +99,15 @@ export function NumberField({
             } else if (event.key === 'Escape') {
               event.preventDefault();
               event.stopPropagation();
+              draftRef.current = null;
               setDraft(null);
               event.currentTarget.blur();
             } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
               event.preventDefault();
-              const base = draft === null ? (value ?? 0) : Number(draft) || 0;
+              const typed = draftRef.current;
+              const base = typed === null ? (value ?? 0) : Number(typed) || 0;
               const next = clamp(base + (event.key === 'ArrowUp' ? step : -step));
+              draftRef.current = null;
               setDraft(null);
               onCommit(Math.round(next * 100) / 100);
             }

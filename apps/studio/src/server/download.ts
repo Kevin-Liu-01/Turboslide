@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createServerFn } from '@tanstack/react-start';
@@ -17,7 +17,7 @@ import type {
 import type { ExportJobDownload, ExportJobPoll } from './export-jobs';
 import type { jsonBody } from './export-sync';
 import type { QuotaContext } from './ratelimit';
-import { deckDir, ensureDeckAssets, isHosted, workerClientOptions } from './root';
+import { deckDir, ensureDeckAssets, exportBlobClient, isHosted, workerClientOptions } from './root';
 import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
 
 /**
@@ -615,15 +615,39 @@ const runBuildFn = createServerFn({ method: 'POST' })
         },
       ],
       ms: run.ms,
-      download: existsSync(out)
-        ? {
-            name,
-            bytes,
-            url: downloadUrl(signDownloadToken({ k: 'build', d: data.deckId, n: name })),
-          }
-        : null,
+      download: existsSync(out) ? await builtFileLink(data.deckId, name, out, bytes) : null,
     };
   });
+
+/**
+ * Where the browser downloads the built page from. On the blob backend the file is stored under
+ * `builds/<deck id>/<random folder>/<name>` and the link is the stored copy, which any instance
+ * serves (the sync export stores its files the same way, export-sync.ts storeExportFiles; the
+ * folder is random so a restricted deck's page has no guessable address, as the export copies
+ * have none). The one time token named this instance's file, and a fluid function's next request
+ * lands on any instance, so the download route answered 404 for the file the build had just
+ * written: the return drive's three cancelled web page downloads of six (return-drive.md rows 13
+ * to 16, "canceled" before the first byte, then a GET of the same url answering 200), and the
+ * fixer's probe on the enforce preview reading the 404 at 27 s (return/build/integrator.md, the
+ * fix round). The file and tmp backends keep the token: one instance holds the file.
+ */
+async function builtFileLink(
+  deckId: string,
+  name: string,
+  path: string,
+  bytes: number,
+): Promise<ExportDownloadLink> {
+  const client = await exportBlobClient();
+  if (client !== null) {
+    const folder = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 12)}`;
+    const entry = await client.put(`builds/${deckId}/${folder}/${name}`, readFileSync(path), {
+      overwrite: false,
+      contentType: 'text/html; charset=utf-8',
+    });
+    return { name, bytes, url: entry.url };
+  }
+  return { name, bytes, url: downloadUrl(signDownloadToken({ k: 'build', d: deckId, n: name })) };
+}
 
 /** build.run for the editor: the standalone file through the CLI, with its download URL. */
 export async function runBuild(input: RunBuildInput): Promise<RunBuildResult> {

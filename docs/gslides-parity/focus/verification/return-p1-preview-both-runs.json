@@ -1,0 +1,6003 @@
+{
+  "base": "https://turboslide-7errarh2r-kl01s-projects.vercel.app",
+  "run1": {
+    "startedAt": "2026-09-19T12:29:47.251Z",
+    "ms": 3911222,
+    "passed": 549,
+    "failed": 15,
+    "notDriven": 1
+  },
+  "run2": {
+    "startedAt": "2026-09-19T13:35:14.781Z",
+    "ms": 3952178,
+    "passed": 551,
+    "failed": 13,
+    "notDriven": 1
+  },
+  "counts": {
+    "rows": 565,
+    "passed": 549,
+    "flaky": 2,
+    "failed": 13,
+    "notDriven": 1,
+    "other": 0
+  },
+  "byFeature": {
+    "decks": {
+      "rows": 52,
+      "passed": 49,
+      "flaky": 2,
+      "failed": 1,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "decks.trash.delete-forever-button (failed)",
+        "decks.file.open-list-search (flaky)",
+        "decks.file.import-slides-deck (flaky)"
+      ]
+    },
+    "slides": {
+      "rows": 79,
+      "passed": 79,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "text": {
+      "rows": 81,
+      "passed": 80,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 1,
+      "other": 0,
+      "misses": [
+        "text.clipboard.paste-without-formatting (not driven)"
+      ]
+    },
+    "images": {
+      "rows": 42,
+      "passed": 42,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "arrange": {
+      "rows": 77,
+      "passed": 77,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "shapes": {
+      "rows": 23,
+      "passed": 23,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "lines": {
+      "rows": 11,
+      "passed": 11,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "present": {
+      "rows": 18,
+      "passed": 18,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "share": {
+      "rows": 19,
+      "passed": 18,
+      "flaky": 0,
+      "failed": 1,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "collab.presence-chips (failed)"
+      ]
+    },
+    "comments": {
+      "rows": 7,
+      "passed": 7,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "versions": {
+      "rows": 7,
+      "passed": 6,
+      "flaky": 0,
+      "failed": 1,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "versions.show-changes-marks (failed)"
+      ]
+    },
+    "export": {
+      "rows": 24,
+      "passed": 20,
+      "flaky": 0,
+      "failed": 4,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "export.zip.bundle (failed)",
+        "export.html.web-page (failed)",
+        "export.jpg.current-slide (failed)",
+        "export.png.current-slide (failed)"
+      ]
+    },
+    "help": {
+      "rows": 6,
+      "passed": 6,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "surface": {
+      "rows": 8,
+      "passed": 8,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "tables": {
+      "rows": 25,
+      "passed": 23,
+      "flaky": 0,
+      "failed": 2,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "tables.cells.merge-unmerge (failed)",
+        "tables.tail.merge-unmerge-buttons (failed)"
+      ]
+    },
+    "charts": {
+      "rows": 22,
+      "passed": 22,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "diagrams": {
+      "rows": 7,
+      "passed": 7,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "wordart": {
+      "rows": 4,
+      "passed": 4,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "formatting": {
+      "rows": 24,
+      "passed": 24,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "chrome": {
+      "rows": 15,
+      "passed": 15,
+      "flaky": 0,
+      "failed": 0,
+      "notDriven": 0,
+      "other": 0,
+      "misses": []
+    },
+    "view": {
+      "rows": 11,
+      "passed": 10,
+      "flaky": 0,
+      "failed": 1,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "view.live-pointers.second-browser (failed)"
+      ]
+    },
+    "inbox": {
+      "rows": 3,
+      "passed": 0,
+      "flaky": 0,
+      "failed": 3,
+      "notDriven": 0,
+      "other": 0,
+      "misses": [
+        "inbox.bell-panel-toggle (failed)",
+        "inbox.settings-persist (failed)",
+        "inbox.notification-arrives (failed)"
+      ]
+    }
+  },
+  "rows": {
+    "decks.home.new-presentation": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.home.your-presentations": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.root.redirect": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.new.draft": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.new.ground-paint": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.new.first-write": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.save-words": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.rename-enter": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.rename-escape": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.rename-blur": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.rename-empty": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.file-rename": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.tab-title-after-rename": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.title.mark-to-list": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.edit.reload-keeps-slide": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.save.acknowledged": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.list.read": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.list.search": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.list.open-thumbnail": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.list.open-title": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.list.open-recent": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.menu-open-escape": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.rename-enter": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.rename-escape": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.row.rename-enter": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.make-a-copy": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.open-in-new-tab": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.present": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.move-to-trash-undo": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.list.gt-brand-deck": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.editor.move-to-trash": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.trash.listed-after-move": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.trash.restore": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.trash.lists-after-restore": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.trash.delete-forever-cancel": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.trash.delete-forever-button": {
+      "feature": "decks",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: every scratch deck is trashed, deleted forever and answers 404",
+      "reason2": "Error: every scratch deck is trashed, deleted forever and answers 404",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.trash.delete-forever-enter": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.nav.back-forward": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.access.unknown-edit": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.access.paint": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.access.sign-in-link": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.access.unknown-deck": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.notfound.page": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.file.make-a-copy": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.card.download": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "slides.new.toolbar": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.arrow-layout": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.menu": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.ctrl-m-card": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.ctrl-m-canvas": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.context": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.new.undo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.context": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.menu": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.cmd-d": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.undo-toolbar": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.undo-redo-keys": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.two-selected-cmd-d": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.duplicate.two-selected-menu": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.key": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.undo-snackbar": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.context": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.undo-cmd-z": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.menu-undo-redo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.two-selected-key-undo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.two-selected-menu": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.two-selected-edit-menu": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.canvas-focus-undo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.delete.undo-redo-saved": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.select.click": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.select.arrows-shift": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.select.shift-cmd-click": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.select.cmd-click-toggle": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.drag-above": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.drag-below": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.cmd-up-down": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.menu-to-end-undo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.undo-drag": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.two-selected-drag": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.skip.context": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.skip.context-two": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.skip.menu-unskip": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.skip.menu-two": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.picker-open-escape": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.title": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.opener": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.split": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.cols": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.title-only": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.one-column": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.statement": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.section-description": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.mood": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.big-number": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.blank": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.rows": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.plain": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.table": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.figure": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.pair": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.tiles": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.details": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.board": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.matrix": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.apply.closing": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.reopen-ring": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.context-apply": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.menu-apply-undo": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.fresh-slide-two-picks-no-carry": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.typed-title-round-trip": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.snackbar-counts-typed-only": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.layout.undo-typed": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.notes.type": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.notes.per-slide": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.notes.resize-handle": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.notes.reload": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.counter.footer-and-cards": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.hash.click-and-reload": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.clipboard.copy-paste-card": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.menu-up-down-beginning": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.reorder.cmd-shift-up-down": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.notes.view-menu-toggle": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "slides.context.empty-canvas": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "text.title.single-click": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.double-click": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.type-escape": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.selected.typing-replaces": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.selected.enter-appends": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.double-click-enters": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.click-mid-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.home-end": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.shift-arrow-replace": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.shift-home-end": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.backspace-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.option-backspace": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.delete": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.caret.cmd-a": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.enter-commits": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.session.escape-twice": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.subtitle.double-click-type": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.subtitle.enter-new-line": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.subtitle.shift-enter": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.subtitle.arrows-backspace-join": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.subtitle.escape-commits": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.textbox.insert-click-type": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.textbox.insert-drag": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.textbox.drag-inside-moves": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.textbox.burst-reliability": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.toolbar.swaps-on-select": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.fontsize.type-enter": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.fontsize.plus-minus": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.bold.toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.bold.cmd-b-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.italic.toolbar-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.italic.cmd-i-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.underline.cmd-u-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.underline.toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.strikethrough.cmd-shift-x": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.strikethrough.menu": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.color.swatch-on-word": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.align.toolbar-and-key": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.spacing.toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.list.bulleted-toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.list.numbered-toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.list.bulleted-menu-preset": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.indent.toolbar": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.indent.keys": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.link.cmd-k-enter": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.link.present-click": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.clear-formatting": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.rows-enabled": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.size-increase": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.align-left": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.spacing-double": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.text-fitting": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.autofit.title-wraps": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.autofit.textbox-grow": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.clipboard.within-box": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.clipboard.between-boxes": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.clipboard.paste-without-formatting": {
+      "feature": "text",
+      "run1": "not driven",
+      "run2": "not driven",
+      "verdict": "not driven",
+      "reason1": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+      "reason2": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.find-replace.replace-all": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.find-replace.shortcut": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.persistence.reload": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.list.numbered-menu-preset": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.list.chords": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.link.toolbar-button": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-options.panel": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.layout-runs.type": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.context.text-block": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.context.text-selection": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.context.inside-session": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.size-decrease": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.spacing-single-1-15": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-menu.align-indent-rows": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.textbox.toolbar-button": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "images.insert.first-on-new-deck": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.insert.upload": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.insert.upload-while-pending": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.insert.drop": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.insert.paste": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.insert.toolbar-sources": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.select.chip-handles-tail": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.delete.key": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.move.drag-frame": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.guides.edge-snap": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.guides.centre-y": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.guides.centre-x": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.nudge.arrows": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.resize.eight-handles": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.resize.eight-handles-shift": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.resize.edge-fill": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.resize.alt-centre": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.rotate.ring": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.double-click": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.east-edge": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.south-edge": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.enter": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.undo": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.redo": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.menu-escape": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.crop.toolbar-escape-cancels": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.options.panel": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.options.transparency": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.options.reset": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.reset-image.menu": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.replace.upload": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.colour": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.toolbar": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.upload-picture": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.remove-picture": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.reset": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.present.picture-and-ground": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.export.pdf-with-picture": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.replace.drop-on-picture": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.context.image": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.options.menu-row": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "images.background.hex-field": {
+      "feature": "images",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.click": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.shift-add": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.multi.drag-inside-moves-all": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.shift-remove": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.marquee": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.marquee-partial": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.click-away": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.cmd-a": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select.escape": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.order.bring-to-front": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.order.send-to-back": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.order.bring-forward": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.order.send-backward": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.order.keys": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.left": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.center": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.right": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.top": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.middle": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.bottom": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.align.single-to-slide": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.center.horizontal": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.center.vertical": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.undo.toolbar-on-arrange": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.undo.menu-on-arrange": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.copy-paste": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.delete": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.undo-redo-delete": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.cut-paste-undo": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.menu-copy-paste": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.paste-after-new-slide-button": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.paste-with-filmstrip-focus": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.clipboard.paste-keeps-position": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.duplicate.cmd-d": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.duplicate.menu-selects-copy": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.duplicate.nothing-selected": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.redo.after-undone-duplicate": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.keys.backspace-empty-selection": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.nudge.arrows": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.nudge.shift": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.nudge.undo": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.box-reads": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.menu-in": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.cmd-minus": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.cmd-plus": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.fit": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.type-percent": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.arrow-menu": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.cmd-0": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.menu-out": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.readout.fit": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.readout.200": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.selection-colour.light": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.selection-colour.dark": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.escape.text-then-selection": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.zoom.menu-presets": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.toolbar.select": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.rectangle-click": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.rounded-click": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.ellipse-click": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.rectangle-drag": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.ellipse-drag": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.insert.named-rows": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.default-look": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.select": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.move": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.resize.eight-handles": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.rotate": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.fill.colour": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.border.colour-weight-dash": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.text.type-align-bold": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.duplicate-delete-undo-redo": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.format-options.size-position": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.export.pdf": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.export.pptx": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.reload-and-viewer": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.context.shape": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.insert.line-drag": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.insert.arrow-drag": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.end-handle": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.tail.colour-weight-dash-ends": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.context.line": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "present.slideshow.button": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.slideshow.cmd-enter": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.arrow-right": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.arrow-left": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.space": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.digit-enter": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.home": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.end": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.click-advances": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.counter": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.laser": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.escape": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.presenter-view.arrow": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.presenter-view.s-key": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.notes-in-presenter": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.slideshow.from-beginning": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.keys.blank-black-white": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "present.skipped-left-out": {
+      "feature": "present",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "share.dialog.open": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.copy-view-link": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.copy-edit-link": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.escape": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.file-menu-copy-link": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.view-link-lands-viewer": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.edit-link-lands-editor": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.view-link-cannot-edit": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.stranger-cannot-edit": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "collab.edit-from-second-browser": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "collab.edit-from-owner": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "collab.slide-added-appears": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "collab.presence-chips": {
+      "feature": "share",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing",
+      "reason2": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "collab.rename-reaches-second-browser": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.view-link-excludes-skipped-and-notes": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.present-link-excludes-skipped": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.copy-present-link": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "share.file-menu-share-with-others": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7 with B4"
+    },
+    "comments.on-title-placeholder": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.on-slide": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.on-object": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.reply": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.resolve": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.toolbar-and-menu-routes": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "comments.reaches-second-browser": {
+      "feature": "comments",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "versions.open-from-last-edit": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "the stream fix round two fixer"
+    },
+    "versions.pick": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "the stream fix round two fixer"
+    },
+    "versions.name-current": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "the stream fix round two fixer"
+    },
+    "versions.restore": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "the stream fix round two fixer"
+    },
+    "versions.undo-restore": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "the stream fix round two fixer"
+    },
+    "export.download-submenu": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.dialog": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.skipped-check": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.close-paths": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.file": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.include-skipped": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pdf.notes-honest": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pptx.dialog": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pptx.perfect": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pptx.editable": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.pptx.notes-and-skipped": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.preview-page": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.layout-with-notes": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.include-skipped": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.download-pdf-follows-preview": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.print-button": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.close-preview": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.file-menu-after-close": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.menu-row": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "export.print.cmd-p": {
+      "feature": "export",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B7"
+    },
+    "help.help-dialog": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "help.documentation-link": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "help.keyboard-shortcuts": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "help.search-the-menus": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.menus.open-close-escape": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.advanced.off-by-default": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.advanced.on-shows-parked": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.advanced.remembered": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.parked-blocks-render": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.cleanup": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1",
+      "run3": "passed"
+    },
+    "surface.parked-shortcut-unbound": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "surface.parked-block-core-rows": {
+      "feature": "surface",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "shapes.text.colour-toolbar": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.text.enter-opens-label": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "shapes.borders-lines.menu": {
+      "feature": "shapes",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.connector.elbow": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.connector.curved": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.connector.re-end": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.insert.arrow-head": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.tail.line-start-end-menu": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "lines.connector.export-pptx": {
+      "feature": "lines",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "tables.insert.grid": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.double-click-type": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.tab-from-written": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.tab-from-empty": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.shift-tab": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.tab-last-appends-row": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.menu.format-table-with-session": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.menu.format-table-selected": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.menu.format-table-rows": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.context.rows": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.context.insert-delete": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.column.insert-keeps-widths": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.column.resize-seam": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.align-menu": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.align-toolbar": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.select.resize": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.cell.fill-border-tail": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash"
+      ],
+      "owner": "B5"
+    },
+    "tables.cells.merge-unmerge": {
+      "feature": "tables",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "select cells 1,0 to 1,1 as a range, right click > Merge cells, then Unmerge cells: no range: chip \"Table\" after a drag across the cells; Merge cells absent in the cell menu (rows format.table.insertRowAbove, format.table.insertRowBelow, format.table.insertColumnLeft, format.table.insertColumnRight, format.table.deleteRow, format.table.deleteColumn, format.table.deleteTable, format.table.distributeRows, format.table.distributeColumns, edit.cut, edit.copy, edit.paste, insert.link, format.formatOptions)",
+      "reason2": "select cells 1,0 to 1,1 as a range, right click > Merge cells, then Unmerge cells: no range: chip \"Table\" after a drag across the cells; Merge cells absent in the cell menu (rows format.table.insertRowAbove, format.table.insertRowBelow, format.table.insertColumnLeft, format.table.insertColumnRight, format.table.deleteRow, format.table.deleteColumn, format.table.deleteTable, format.table.distributeRows, format.table.distributeColumns, edit.cut, edit.copy, edit.paste, insert.link, format.formatOptions)",
+      "parks": [
+        "format.table.mergeCells",
+        "format.table.unmergeCells"
+      ],
+      "owner": "B5"
+    },
+    "tables.tail.merge-unmerge-buttons": {
+      "feature": "tables",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "with two cells selected the tail's Merge cells, then Unmerge cells: range by a drag across the cells (chip \"Table\"); the tail's Merge cells absent",
+      "reason2": "with two cells selected the tail's Merge cells, then Unmerge cells: range by a drag across the cells (chip \"Table\"); the tail's Merge cells absent",
+      "parks": [
+        "toolbar.mergeCells",
+        "toolbar.unmergeCells"
+      ],
+      "owner": "B5"
+    },
+    "tables.distribute.rows-columns": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "format.table.distributeRows",
+        "format.table.distributeColumns"
+      ],
+      "owner": "B5"
+    },
+    "tables.light-appearance": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.present": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.export.pdf": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.export.pptx-editable": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "tables.reload": {
+      "feature": "tables",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.insert.bar": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.insert.column": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.insert.line": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.insert.pie": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.select.tail": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.resize": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.type.panel-legible": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.type.toolbar": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.type.menu": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.data.add-series-category": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.data.edit-cell": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.data.toolbar-edit-data": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.data.menu-edit-data": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.legend.toolbar": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.number-format.toolbar": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.data.paste-rows": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.context": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.light-appearance": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.present": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.export.pdf": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.export.pptx-native": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "charts.reload": {
+      "feature": "charts",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.panel": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.insert.group": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.select-move": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.edit-label": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.light-appearance": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.present": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "diagrams.reload": {
+      "feature": "diagrams",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "wordart.insert": {
+      "feature": "wordart",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "wordart.edit": {
+      "feature": "wordart",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "wordart.light-appearance": {
+      "feature": "wordart",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "wordart.export.pdf": {
+      "feature": "wordart",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B5"
+    },
+    "formatting.superscript.chord": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.subscript.chord": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.superscript.menu-word": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.subscript.menu-word": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.italic.menu-word": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.context.selection-rows": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.capitalization.upper": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.capitalization.lower": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.capitalization.title": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.align.justified-menu": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.align.justified-chord": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.align.toolbar-justify": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.spacing.add-before-remove": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.spacing.add-after": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.spacing.custom-dialog": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.spacing.1-15-value": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.highlight.word": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.paint-format.button": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.paint-format.chords": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.clear.inline-marks": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.theme.panel-appearance": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.theme.toolbar-button": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.theme.import-hidden": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "formatting.persistence": {
+      "feature": "formatting",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.one-click-tail": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.bold-menu": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.bold-cmd-b": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.align-menu": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.size-menu": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.format-options-marks": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.title.apply-layout-after-format": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.fontsize.type-one-undo": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "text.format-options.field-one-undo": {
+      "feature": "text",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2"
+    },
+    "arrange.distribute.horizontal": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.distribute.vertical": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.distribute.needs-three": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.rotate.quarter-turns": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.rotate.flips-menu": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.group.chords": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.group.menu-regroup": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.group.context-rows": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.context.rotate-distribute": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.ruler.show-hide": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.guides.from-ruler": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.guides.show-toggle": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.guides.add-vertical-horizontal": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.guides.drag": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.snap.guides-on-off": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.snap.grid-toggle": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.snapTo.grid"
+      ],
+      "owner": "B3"
+    },
+    "arrange.snap.grid-effect": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.snapTo.grid"
+      ],
+      "owner": "B3"
+    },
+    "arrange.guides.context": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.guides.clear": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "arrange.select-none.menu": {
+      "feature": "arrange",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B3"
+    },
+    "chrome.split.one-box": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.hover-no-inversion": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.click-show": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.chevron-menu-aligned": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.enter-chevron": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.enter-label": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.space-both": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.arrow-down-label": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.tab-order": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.aria": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.split.collapse-900": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.separators.once": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.separators.toolbar-dividers": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.cluster.gaps-heights": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "chrome.comments-glyph.toggle": {
+      "feature": "chrome",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.appearance.rows": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.show-filmstrip": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.mode.rows": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.mode.viewing-hides-toolbar": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.full-screen": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B1"
+    },
+    "view.hide-menus-chevron": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "toolbar.hideMenus"
+      ],
+      "owner": "B1"
+    },
+    "view.live-pointers.toggles": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "owner": "B1"
+    },
+    "view.live-pointers.second-browser": {
+      "feature": "view",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: the second browser's pointer is drawn on the first within 10 s",
+      "reason2": "Error: the second browser's pointer is drawn on the first within 10 s",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "owner": "B1"
+    },
+    "view.comments.radios": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide"
+      ],
+      "owner": "B1"
+    },
+    "view.comments.show-all-panel": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide"
+      ],
+      "owner": "B1"
+    },
+    "view.comments.modes-markers": {
+      "feature": "view",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide"
+      ],
+      "owner": "B1"
+    },
+    "decks.name.follows-heading": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": null,
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.file.template-gallery": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "file.new.templateGallery"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.file.open-list-search": {
+      "feature": "decks",
+      "run1": "failed",
+      "run2": "passed",
+      "verdict": "flaky",
+      "reason1": "File > Open; read the list; type in the search; clear it: 0 decks listed after 30028 ms, first undefined; filtered by nonsense 0; cleared 0",
+      "reason2": "",
+      "parks": [
+        "file.open"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "decks.file.open-upload-bundle": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "file.open"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.file.import-slides-deck": {
+      "feature": "decks",
+      "run1": "failed",
+      "run2": "passed",
+      "verdict": "flaky",
+      "reason1": "a copy of this deck (a setup write); File > Import slides, pick the copy, All, Import slides: error: locator.waitFor: Timeout 10000ms exceeded.",
+      "reason2": "",
+      "parks": [
+        "file.importSlides"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "failed"
+    },
+    "decks.file.import-slides-bundle": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "file.importSlides"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)"
+    },
+    "decks.file.details": {
+      "feature": "decks",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "file.details"
+      ],
+      "owner": "B2 (decks.name) or B4 (the spec) or B7 (the store)",
+      "run3": "passed"
+    },
+    "slides.numbers.apply": {
+      "feature": "slides",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "insert.slideNumbers"
+      ],
+      "owner": "B5 (slides.numbers) or B2"
+    },
+    "versions.show-changes-toggle": {
+      "feature": "versions",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "owner": "the stream fix round two fixer"
+    },
+    "versions.show-changes-marks": {
+      "feature": "versions",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.763.pick (named row versionHistory.763.pick); marks with Show changes on 0 (); off 0",
+      "reason2": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.766.pick (named row versionHistory.766.pick); marks with Show changes on 0 (); off 0",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "owner": "the stream fix round two fixer"
+    },
+    "export.zip.bundle": {
+      "feature": "export",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "reason2": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "parks": [
+        "file.download.zip"
+      ],
+      "owner": "B7"
+    },
+    "export.html.web-page": {
+      "feature": "export",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "reason2": "TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"",
+      "parks": [
+        "file.download.html"
+      ],
+      "owner": "B7"
+    },
+    "export.jpg.current-slide": {
+      "feature": "export",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: a jpg file or a tab within 30 s",
+      "reason2": "Error: a jpg file or a tab within 30 s",
+      "parks": [
+        "file.download.jpg"
+      ],
+      "owner": "B7"
+    },
+    "export.png.current-slide": {
+      "feature": "export",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: a png file or a tab within 30 s",
+      "reason2": "Error: a png file or a tab within 30 s",
+      "parks": [
+        "file.download.png"
+      ],
+      "owner": "B7"
+    },
+    "help.check-slides": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "tools.checkSlides"
+      ],
+      "owner": "B1"
+    },
+    "help.improve-link": {
+      "feature": "help",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "help.improve"
+      ],
+      "owner": "B1"
+    },
+    "inbox.bell-panel-toggle": {
+      "feature": "inbox",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "click the bell; read the panel; click the bell again: with the switch on; panel open true (aria-pressed true); words \"NotificationsMark all readNothing newNotification settings\"; Mark all read true; settings link true; panel still open after the second click true (aria-pressed true)",
+      "reason2": "click the bell; read the panel; click the bell again: with the switch on; panel open true (aria-pressed true); words \"NotificationsMark all readNothing newNotification settings\"; Mark all read true; settings link true; panel still open after the second click true (aria-pressed true)",
+      "parks": null,
+      "owner": "B1"
+    },
+    "inbox.settings-persist": {
+      "feature": "inbox",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Tools > Notification settings, None, Save; reopen; reload: level forYou -> picked none; Save closed true; reopened forYou; after a reload forYou",
+      "reason2": "Tools > Notification settings, None, Save; reopen; reload: level forYou -> picked none; Save closed true; reopened forYou; after a reload forYou",
+      "parks": null,
+      "owner": "B1"
+    },
+    "inbox.notification-arrives": {
+      "feature": "inbox",
+      "run1": "failed",
+      "run2": "failed",
+      "verdict": "failed",
+      "reason1": "Error: the first browser's bell shows a count of 1 within 10 s",
+      "reason2": "Error: the first browser's bell shows a count of 1 within 10 s",
+      "parks": null,
+      "owner": "B1"
+    },
+    "collab.roster.go-to-slide": {
+      "feature": "share",
+      "run1": "passed",
+      "run2": "passed",
+      "verdict": "passed",
+      "reason1": "",
+      "reason2": "",
+      "parks": [
+        "title.presence.goTo"
+      ],
+      "owner": "B7 with B4"
+    }
+  },
+  "run3": {
+    "what": "the decks area walk (--only decks) on the same deployment",
+    "startedAt": "2026-09-19T14:41:44.148Z",
+    "ms": 98325,
+    "deck": "untitled-20260919-8ciz",
+    "driven": 19,
+    "failed": [
+      "decks.file.import-slides-deck"
+    ]
+  }
+}

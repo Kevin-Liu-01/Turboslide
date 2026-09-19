@@ -102,14 +102,21 @@ describe('the core gate renders its verdict from a finished run', () => {
   }, 30_000);
 
   it('lists a failed row by id, names it in the verdict line and exits 1', () => {
-    const victim = specRows.find((row) => row.feature === 'decks').id;
-    const { run, out } = runGate(stubReport([victim]));
+    /* decks is unparkable (RETURN.md rule 2): its failed row blocks; a tables row without parks parks tables; a parks row parks its controls alone */
+    const victim = specRows.find((row) => row.feature === 'decks' && row.parks === undefined).id;
+    const parkable = specRows.find((row) => row.feature === 'tables' && row.parks === undefined).id;
+    const withParks = specRows.find((row) => row.parks !== undefined);
+    const { run, out } = runGate(stubReport([victim, parkable, withParks.id]));
     expect(run.status).toBe(1);
     const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
-    expect(summary.failed).toBe(1);
+    expect(summary.failed).toBe(3);
     expect(summary.results[victim]).toBe('failed');
     expect(summary.verdict.ok).toBe(false);
-    expect(summary.wouldPark).toContain('decks');
+    expect(summary.wouldPark).toEqual(['tables']);
+    expect(summary.blocking.map((b) => b.id)).toEqual([victim]);
+    expect(summary.wouldParkRows).toEqual([
+      { id: withParks.id, parks: [...withParks.parks], result: 'failed' },
+    ]);
     const table = readFileSync(join(out, 'core-matrix.md'), 'utf8');
     expect(table).toContain(`- \`${victim}\`: Error: the stub failed this row`);
     expect(run.stdout).toContain(`failing the gate: ${victim} (failed)`);

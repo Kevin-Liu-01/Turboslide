@@ -1,0 +1,220 @@
+{
+  "base": "https://turboslide-kn55yu3xd-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-19T16:00:35.329Z",
+  "ms": 307242,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 307239,
+    "report": "/Users/kevinliu/repos/Turboslide/.turboslide/int-fix/gate/preview4-export-1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "rows": 20,
+  "passed": 20,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "noStep": [],
+  "commit": "7d19326",
+  "origin": "https://turboslide-kn55yu3xd-kl01s-projects.vercel.app",
+  "date": "2026-09-19",
+  "results": {
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.jpg.current-slide": "passed",
+    "export.png.current-slide": "passed",
+    "tables.export.pdf": "passed",
+    "tables.export.pptx-editable": "passed",
+    "charts.export.pdf": "passed",
+    "charts.export.pptx-native": "passed",
+    "wordart.export.pdf": "passed",
+    "lines.connector.export-pptx": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.connector.export-pptx",
+      "feature": "lines",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pdf",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pptx-editable",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pdf",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pptx-native",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.export.pdf",
+      "feature": "wordart",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.jpg.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.png.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

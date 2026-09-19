@@ -294,6 +294,75 @@ export function tableSizeProblem(
   return null;
 }
 
+/** The px a sized grid declares: the set widths, an unset column counted at their mean. */
+function declaredTotal(columns: ReadonlyArray<TableColumn>): number {
+  const set = columns.flatMap((column) => (column.width === undefined ? [] : [column.width]));
+  if (set.length === 0) return 0;
+  const mean = set.reduce((sum, w) => sum + w, 0) / set.length;
+  return columns.reduce((sum, column) => sum + (column.width ?? mean), 0);
+}
+
+/** A column width as stored: whole hundredths of a px, never below the smallest column. */
+function roundWidth(width: number): number {
+  return Math.max(TABLE_MIN_COLUMN_PX, Math.round(width * 100) / 100);
+}
+
+/** The narrowest a column drag or a column insert leaves a column, in sheet px (docs/RETURN.md 2.4 fix 5). */
+export const TABLE_MIN_COLUMN_PX = 40;
+
+/**
+ * The widths the columns draw at inside a table `total` px wide, the grid template's own rule
+ * (packages/render blocks/table.ts tableColumnsTemplate): equal shares when no column carries a
+ * width; the widths scaled to the total when every column carries one (the template is
+ * proportional, so a resized table scales its columns and a sum that drifted from the box still
+ * fills it); a width kept in px where set and the remainder shared by the others otherwise.
+ * Never negative; a total of 0 gives zeros. The seam handle and the column commands read it.
+ */
+export function columnShares(columns: ReadonlyArray<TableColumn>, total: number): number[] {
+  const n = columns.length;
+  if (n === 0) return [];
+  const set = columns.filter((column) => column.width !== undefined);
+  if (set.length === 0) return columns.map(() => total / n);
+  if (set.length === n) {
+    const sum = columns.reduce((acc, column) => acc + (column.width ?? 0), 0);
+    return columns.map((column) => (sum > 0 ? ((column.width ?? 0) * total) / sum : total / n));
+  }
+  const fixed = set.reduce((acc, column) => acc + (column.width ?? 0), 0);
+  const rest = Math.max(0, total - fixed) / (n - set.length);
+  return columns.map((column) => column.width ?? rest);
+}
+
+/**
+ * The columns after a seam between `index` and `index + 1` moved by `dx` px inside a table
+ * `total` px wide (docs/RETURN.md 2.4 fix 5; Google drags a gridline, research 05 A6): the left
+ * column widens by dx and its neighbour narrows, neither below TABLE_MIN_COLUMN_PX, the others
+ * keep their drawn widths, and every column carries a width so the grid stays proportional.
+ * Null when nothing would change (a click, a seam at its limit, an index off the grid).
+ */
+export function columnsAfterSeamDrag(
+  columns: ReadonlyArray<TableColumn>,
+  total: number,
+  index: number,
+  dx: number,
+): { columns: TableColumn[]; left: number; right: number } | null {
+  if (index < 0 || index >= columns.length - 1 || !Number.isFinite(dx)) return null;
+  const shares = columnShares(columns, total);
+  const left = shares[index] ?? 0;
+  const right = shares[index + 1] ?? 0;
+  const pair = left + right;
+  if (pair < TABLE_MIN_COLUMN_PX * 2) return null;
+  const nextLeft = Math.round(
+    Math.min(pair - TABLE_MIN_COLUMN_PX, Math.max(TABLE_MIN_COLUMN_PX, left + dx)),
+  );
+  const nextRight = Math.round(pair) - nextLeft;
+  if (nextLeft === Math.round(left)) return null;
+  const next = columns.map((column, i) => ({
+    ...column,
+    width: roundWidth(i === index ? nextLeft : i === index + 1 ? nextRight : (shares[i] ?? 0)),
+  }));
+  return { columns: next, left: nextLeft, right: nextRight };
+}
+
 /** An empty table of the given size with a header row: what the grid picker inserts (SPEC 7.3). */
 export function emptyTable(
   id: BlockId,
@@ -394,10 +463,32 @@ function insertRowsAt(working: Working, at: number, count: number): void {
   for (const cell of working.cells) if (cell.row >= at) cell.row += room;
 }
 
+/**
+ * Inserts `count` columns at `at` (before the column there). A grid whose columns carry widths
+ * keeps its total: the new columns take an equal share and every other width scales down, so no
+ * column is left as `{}` beside sized neighbours (the grid template then gave it the remainder or
+ * nothing at all, and the Editable text PowerPoint wrote a gridCol the file could not hold;
+ * docs/RETURN.md 2.4 fix 4, audit-objects rows 85 and 97).
+ */
 function insertColumnsAt(working: Working, at: number, count: number): void {
   const room = Math.max(0, Math.min(count, TABLE_MAX_COLUMNS - working.columns.length));
   if (room === 0) return;
+  const sized = working.columns.some((column) => column.width !== undefined);
+  const before = working.columns.length;
+  const total = sized ? declaredTotal(working.columns) : 0;
+  const shares = sized ? columnShares(working.columns, total) : [];
   working.columns.splice(at, 0, ...Array.from({ length: room }, () => ({})));
+  if (sized) {
+    const each = total / (before + room);
+    const scale = before / (before + room);
+    let from = 0;
+    working.columns = working.columns.map((column, i) => {
+      if (i >= at && i < at + room) return { ...column, width: roundWidth(each) };
+      const width = shares[from] ?? each;
+      from += 1;
+      return { ...column, width: roundWidth(width * scale) };
+    });
+  }
   for (const row of working.rows)
     row.cells.splice(at, 0, ...Array.from({ length: room }, () => ''));
   for (const span of working.spans) {
@@ -435,7 +526,17 @@ function deleteColumnRange(working: Working, from: number, to: number): TableEdi
   const end = clampIndex(to, working.columns.length - 1);
   const count = end - start + 1;
   if (count >= working.columns.length) return { deleted: true };
+  const sized = working.columns.some((column) => column.width !== undefined);
+  const total = sized ? declaredTotal(working.columns) : 0;
   working.columns.splice(start, count);
+  if (sized) {
+    /* the columns left take the removed ones' room, so the grid keeps filling the table */
+    const shares = columnShares(working.columns, total);
+    working.columns = working.columns.map((column, i) => ({
+      ...column,
+      width: roundWidth(shares[i] ?? total / working.columns.length),
+    }));
+  }
   for (const row of working.rows) row.cells.splice(start, count);
   working.spans = working.spans.flatMap((span) => {
     const spanEnd = span.column + span.columns - 1;

@@ -188,7 +188,11 @@ Google`, so the exact build is 147.0.7727.0, the same as the worker image's.
   arrived while an export ran on the same instance waited in the local queue for it (measured:
   183.6 s for a 320 px thumbnail, the export's 187.9 s). Renders and exports on one instance are
   sequential by design (one Chromium at a time); the second cached read of a thumbnail is 220 to
-  280 ms, a warm-instance render of another slide 1.6 to 2.2 s.
+  280 ms, a warm-instance render of another slide 1.6 to 2.2 s. Since the focus round a queued
+  export enters the local queue ahead of the pending thumbnail renders and behind everything else,
+  never interrupting the running job (`apps/render-worker/src/queue.ts` `queuePosition`; a
+  checkout's PDF download had waited 14 s behind the `/decks` cards' renders, VERIFICATION
+  C3T-F6); the hosted studio takes the synchronous export and never queues one.
 - A whole-deck flatten export of the GT deck (85 slides, light) took 187.9 s cold in the function,
   16,277,245 bytes; over the 4.5 MB cap it answers 302 to the stored copy on the Blob store (the
   route's `?sync=1`), which `python-pptx` reopens with 85 slides and `turboslide export check`

@@ -10,7 +10,10 @@
 // a short interval and announces the rows of other instances to its listeners as `presence` and
 // `leave` events, so the stream's frames are the same on every tier. A row lives at most 30 s
 // without a refresh whatever ttl the caller gave (the client's heartbeat is 5 s), so a tab whose
-// beacon was lost leaves every roster inside the matrix's 30 s bound; a leave writes a tombstone
+// beacon was lost leaves every roster inside the matrix's 30 s bound, and the expiry is announced
+// as `leave` to this instance's listeners on the tick whether the row was this instance's own or
+// the record's (the return round fix round, R1-F1: an expired local row left without a word and
+// the owner's chip of a gone tab stayed); a leave writes a tombstone
 // for the client, so a set another instance pushes late cannot bring the row back. The record
 // goes up with an immutable copy under its md5 first and is read through `provenGet`
 // (access-store.ts): the public store's url serves an overwritten body stale for a while, and the
@@ -26,9 +29,14 @@
 // nothing else, and is pushed once the row's remaining life is under half; a selection or a
 // follow change rides the next push and starts none (PRESENCE_VOLATILE_FIELDS). A push is one
 // attempt under `ifMatch`: a lost race leaves the changes pending for the next push after the
-// floor, never a loop inside one push. Framework free and generic over the row: the blob channel
-// wires it (realtime/blob.ts) and the studio builds it over the export Blob client
-// (server/room.ts).
+// floor, never a loop inside one push; a read that proved nothing (the copy under the head's
+// version not yet readable) leaves them pending the same way and schedules the one push at the
+// floor, so a closed tab's leave lands without another event of that deck on this instance
+// (b4.md C3T-R1). A tombstone keeps the clock the leave beacon carried (presenceClock + 1 on the
+// wire, above every set of that tab): a set at or below it is a post the tab made before it left
+// and never lands, on this instance or pushed from another (C3T-R2); a set above it is a tab
+// that came back and lands. Framework free and generic over the row: the blob channel wires it
+// (realtime/blob.ts) and the studio builds it over the export Blob client (server/room.ts).
 import { createHash } from 'node:crypto';
 
 import { canonicalJson } from '@turboslide/schema/json';
@@ -118,13 +126,17 @@ export type SharedPresence<T extends PresenceRow> = {
   set: (deckId: string, clientId: string, state: T, ttlMs: number) => Promise<void>;
   /** the live rows of every instance, this instance's own pointer included */
   roster: (deckId: string) => Promise<T[]>;
-  /** removes a row everywhere, announces `leave` here and pushes the tombstone when due */
-  leave: (deckId: string, clientId: string) => Promise<void>;
+  /**
+   * removes a row everywhere, announces `leave` here and pushes the tombstone when due; `clock`
+   * is the beacon's (above every set of that tab), kept in the tombstone so a set at or below it
+   * never lands
+   */
+  leave: (deckId: string, clientId: string, clock?: number) => Promise<void>;
   /** polls the record while at least one watcher holds the deck; the return value releases this one */
   watch: (deckId: string) => () => void;
   /** one read of the record now (the pulse moved, or a caller without the pulse) and the announcements it brings */
   poll: (deckId: string) => Promise<void>;
-  /** the record did not move (the pulse says so): the last read counts as fresh from now */
+  /** the record did not move (the pulse says so): the last read counts as fresh from now, and the rows that ran out since are announced as `leave` */
   confirm: (deckId: string) => void;
   /** pushes the pending changes now, the spacing and the refresh rule aside (the tests) */
   flush: (deckId: string) => Promise<void>;
@@ -151,15 +163,25 @@ const storedRowSchema = z.object({
 const storedRecordSchema = z.object({
   v: z.literal(1),
   rows: z.array(storedRowSchema),
-  left: z.array(z.object({ clientId: z.string().regex(CLIENT_ID), at: z.number().int() })),
+  left: z.array(
+    z.object({
+      clientId: z.string().regex(CLIENT_ID),
+      at: z.number().int(),
+      /** the beacon's clock; absent in a record an earlier build wrote */
+      clock: z.number().int().nonnegative().optional(),
+    }),
+  ),
 });
 
 type StoredRow<T> = { at: number; expiresAt: number; state: T };
 
+/** A tombstone: when the leave was written and, when the beacon carried it, its clock. */
+export type PresenceTombstone = { at: number; clock?: number };
+
 type RemoteRecord<T> = {
   rows: Map<string, StoredRow<T>>;
-  /** the tombstones: client id to the leave's time */
-  left: Map<string, number>;
+  /** the tombstones by client id */
+  left: Map<string, PresenceTombstone>;
   version: string | null;
   /** when this instance last read or wrote it, in ms; 0 before the first read */
   readAt: number;
@@ -167,7 +189,8 @@ type RemoteRecord<T> = {
   proven: boolean;
 };
 
-type PendingChange = { kind: 'set'; n: number } | { kind: 'leave'; n: number; at: number };
+type PendingChange =
+  { kind: 'set'; n: number } | { kind: 'leave'; n: number; at: number; clock?: number };
 
 type DeckPresence<T> = {
   /** this instance's rows, from the posts that landed here */
@@ -185,7 +208,14 @@ type DeckPresence<T> = {
   /** the copies this instance wrote, oldest first */
   copies: { pathname: string; at: number }[];
   chain: Promise<unknown>;
+  /** the record was there at some read or write of this instance (a later miss is a removed deck, `pushNow`) */
+  sawRecord: boolean;
+  /** when this instance found the deck's manifest gone, in ms; no push for PRESENCE_GONE_MEMORY_MS after */
+  goneAt: number | undefined;
 };
+
+/** How long a deck found gone (its manifest deleted) stays so for this instance's pushes before the manifest is headed again. */
+export const PRESENCE_GONE_MEMORY_MS = 60_000;
 
 function quotedMd5(bytes: Uint8Array): string {
   return `"${createHash('md5').update(bytes).digest('hex')}"`;
@@ -222,7 +252,7 @@ function emptyRemote<T>(): RemoteRecord<T> {
 /** Parses a stored record; anything but a version 1 record reads as empty. */
 export function parsePresenceRecord<T extends PresenceRow>(
   bytes: Uint8Array,
-): { rows: Map<string, StoredRow<T>>; left: Map<string, number> } {
+): { rows: Map<string, StoredRow<T>>; left: Map<string, PresenceTombstone> } {
   let value: unknown;
   try {
     value = JSON.parse(new TextDecoder().decode(bytes));
@@ -239,22 +269,30 @@ export function parsePresenceRecord<T extends PresenceRow>(
       state: row.state as unknown as T,
     });
   }
-  const left = new Map<string, number>();
-  for (const row of parsed.data.left) left.set(row.clientId, row.at);
+  const left = new Map<string, PresenceTombstone>();
+  for (const row of parsed.data.left)
+    left.set(
+      row.clientId,
+      row.clock === undefined ? { at: row.at } : { at: row.at, clock: row.clock },
+    );
   return { rows, left };
 }
 
 /** The bytes a record is stored as: canonical JSON with the rows and tombstones sorted by client id. */
 export function presenceRecordBytes<T extends PresenceRow>(
   rows: ReadonlyMap<string, StoredRow<T>>,
-  left: ReadonlyMap<string, number>,
+  left: ReadonlyMap<string, PresenceTombstone>,
 ): Uint8Array {
   const record = {
     v: 1,
     rows: [...rows.values()].sort((a, b) => a.state.clientId.localeCompare(b.state.clientId)),
     left: [...left.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([clientId, at]) => ({ clientId, at })),
+      .map(([clientId, tomb]) => ({
+        clientId,
+        at: tomb.at,
+        ...(tomb.clock === undefined ? {} : { clock: tomb.clock }),
+      })),
   };
   return new TextEncoder().encode(canonicalJson(record));
 }
@@ -304,6 +342,8 @@ export function sharedPresence<T extends PresenceRow>(
         pollTimer: undefined,
         copies: [],
         chain: Promise.resolve(),
+        sawRecord: false,
+        goneAt: undefined,
       };
       decks.set(deckId, d);
     }
@@ -321,10 +361,37 @@ export function sharedPresence<T extends PresenceRow>(
   const alive = (row: StoredRow<T> | undefined, t: number): row is StoredRow<T> =>
     row !== undefined && row.expiresAt > t;
 
-  /** True when a tombstone at or after the row's set time names its client. */
-  const buried = (row: StoredRow<T>, left: ReadonlyMap<string, number>): boolean => {
-    const at = left.get(row.state.clientId);
-    return at !== undefined && at >= row.at;
+  /**
+   * True when a tombstone names the row's client and is at or after the row's set time, or
+   * carries the beacon's clock and the row's clock is at or below it (a set the tab posted
+   * before it left, landing late; C3T-R2).
+   */
+  const buried = (row: StoredRow<T>, left: ReadonlyMap<string, PresenceTombstone>): boolean => {
+    const tomb = left.get(row.state.clientId);
+    if (tomb === undefined) return false;
+    return tomb.at >= row.at || (tomb.clock !== undefined && tomb.clock >= row.state.clock);
+  };
+
+  /**
+   * True when this instance holds a leave for the row's client that the record does not carry
+   * yet (the floor holds the push) and the row is not a later post of a tab that came back: the
+   * roster and the announcements here read the leave as a fact from the moment it landed, not
+   * from the moment its tombstone reaches the record.
+   */
+  const leftPending = (d: DeckPresence<T>, row: StoredRow<T>): boolean => {
+    const pending = d.pending.get(row.state.clientId);
+    if (pending?.kind !== 'leave') return false;
+    return pending.clock === undefined || row.state.clock <= pending.clock;
+  };
+
+  /** The clock a set of this client must exceed to land: the pending leave's or the record's tombstone's, whichever is higher. */
+  const tombstoneClock = (d: DeckPresence<T>, clientId: string): number | undefined => {
+    const pending = d.pending.get(clientId);
+    const local = pending?.kind === 'leave' ? pending.clock : undefined;
+    const remote = d.remote.left.get(clientId)?.clock;
+    if (local === undefined) return remote;
+    if (remote === undefined) return local;
+    return Math.max(local, remote);
   };
 
   const stripped = (state: T): T => {
@@ -340,11 +407,12 @@ export function sharedPresence<T extends PresenceRow>(
     return canonicalJson(out);
   };
 
-  /** The rows every instance agrees on, this instance's live rows over the record's. */
+  /** The rows every instance agrees on, this instance's live rows over the record's, less the clients whose leave this instance holds. */
   const merged = (d: DeckPresence<T>, t: number): Map<string, StoredRow<T>> => {
     const out = new Map<string, StoredRow<T>>();
     for (const [clientId, row] of d.remote.rows) {
-      if (alive(row, t) && !buried(row, d.remote.left)) out.set(clientId, row);
+      if (alive(row, t) && !buried(row, d.remote.left) && !leftPending(d, row))
+        out.set(clientId, row);
     }
     for (const [clientId, row] of d.local) {
       if (!alive(row, t) || buried(row, d.remote.left)) continue;
@@ -394,7 +462,10 @@ export function sharedPresence<T extends PresenceRow>(
     const t = now();
     const rows = new Map<string, StoredRow<T>>();
     for (const [clientId, row] of d.remote.rows) {
-      if (alive(row, t) && !buried(row, d.remote.left)) rows.set(clientId, row);
+      // a client whose leave is pending here is not announced back from the record's copy of
+      // its row while the floor holds the tombstone's push
+      if (alive(row, t) && !buried(row, d.remote.left) && !leftPending(d, row))
+        rows.set(clientId, row);
     }
     for (const [clientId, row] of rows) {
       const local = d.local.get(clientId);
@@ -420,13 +491,28 @@ export function sharedPresence<T extends PresenceRow>(
       if (alive(local, t) && !buried(local, d.remote.left)) continue;
       options.publish(deckId, { type: 'leave', clientId });
     }
+    // a local row that ran out its life (no heartbeat of its tab reached this instance for
+    // maxTtl) leaves whatever the record says and whether or not the read proved it: the clock
+    // alone decides an expiry. The listeners here were told of the row when it was set and hear
+    // the leave, unless the record holds a live row of the same client from another instance
+    // (its heartbeats land there now), which the loop above announced in its place. Before this
+    // the row was dropped without a word (`if (alive(local, t))` guarded the leave below), so a
+    // tab whose collaborator's set had landed on its own stream instance kept the chip for good
+    // once the leave beacon was lost, while the record had let the row go at 30 s
+    // (VERIFICATION R1-F1; the return round fix round, return/build/b7.md)
+    for (const [clientId, local] of [...d.local]) {
+      if (alive(local, t)) continue;
+      d.local.delete(clientId);
+      d.pending.delete(clientId);
+      if (!rows.has(clientId)) options.publish(deckId, { type: 'leave', clientId });
+    }
     if (!d.remote.proven) return;
     for (const [clientId, local] of [...d.local]) {
       if (d.pending.has(clientId) && !buried(local, d.remote.left)) continue;
-      if (rows.has(clientId) && alive(local, t) && !buried(local, d.remote.left)) continue;
+      if (rows.has(clientId) && !buried(local, d.remote.left)) continue;
       d.local.delete(clientId);
       d.pending.delete(clientId);
-      if (alive(local, t)) options.publish(deckId, { type: 'leave', clientId });
+      options.publish(deckId, { type: 'leave', clientId });
     }
   };
 
@@ -456,6 +542,7 @@ export function sharedPresence<T extends PresenceRow>(
       return;
     }
     const parsed = parsePresenceRecord<T>(got.bytes);
+    d.sawRecord = true;
     d.remote = {
       rows: parsed.rows,
       left: parsed.left,
@@ -477,9 +564,37 @@ export function sharedPresence<T extends PresenceRow>(
     const path = presencePath(deckId);
     {
       await readRemote(deckId, d, client);
+      if (d.remote.version === null && d.remote.proven && d.sawRecord) {
+        // the record this instance knew is gone: nobody deletes it but the deck's removal
+        // (blob-store.ts `remove`), so the manifest says whether the deck went with it. A push
+        // here would write the record, its copy and the pulse back under a folder the removal
+        // emptied, and every listing on every instance would head that folder for good (the
+        // return round fix round, R1-F3: 489 such folders, one per removed deck, for 65 decks).
+        // The head costs once per removed deck per instance, the miss is remembered for
+        // PRESENCE_GONE_MEMORY_MS, and the heartbeats of a tab that has not noticed yet cost
+        // nothing until then; a deck that is there (the record alone was removed) pushes as before
+        const manifest = await client.head(`${deckPrefix(deckId)}deck.json`);
+        if (manifest === null) {
+          onError(
+            new Error(`${path}: the deck is gone; its presence is dropped`),
+            'presence: push',
+          );
+          d.goneAt = now();
+          d.pending.clear();
+          d.local.clear();
+          return;
+        }
+      }
       if (!d.remote.proven) {
-        // no read proved the body: a merge over a stale base would drop another instance's rows
+        // no read proved the body: a merge over a stale base would drop another instance's rows.
+        // The changes stay pending and one push is scheduled at the floor over a fresh read, the
+        // lost race's own shape below (b4.md C3T-R1: before it nothing was scheduled, so a
+        // closed tab's leave waited for the next event of the deck on this instance, which the
+        // instance's only tab of the deck never sends, and the row lived out its 30 s elsewhere)
         onError(new Error(`${path}: no read proved the record; the push waits`), 'presence: push');
+        const waitedAt = now();
+        d.lastPushAt = waitedAt;
+        scheduleAt(deckId, d, waitedAt + spacing);
         return;
       }
       const t = now();
@@ -487,13 +602,25 @@ export function sharedPresence<T extends PresenceRow>(
       for (const [clientId, row] of d.remote.rows) {
         if (alive(row, t) && !buried(row, d.remote.left)) rows.set(clientId, row);
       }
-      const left = new Map<string, number>();
-      for (const [clientId, at] of d.remote.left) if (at + maxTtl > t) left.set(clientId, at);
+      const left = new Map<string, PresenceTombstone>();
+      for (const [clientId, tomb] of d.remote.left)
+        if (tomb.at + maxTtl > t) left.set(clientId, tomb);
       const snapshot = new Map(d.pending);
       for (const [clientId, change] of snapshot) {
         if (change.kind === 'leave') {
           rows.delete(clientId);
-          left.set(clientId, Math.max(change.at, left.get(clientId) ?? 0));
+          // the later time and the higher clock of the two tombstones win
+          const previous = left.get(clientId);
+          const clock =
+            previous?.clock === undefined
+              ? change.clock
+              : change.clock === undefined
+                ? previous.clock
+                : Math.max(previous.clock, change.clock);
+          left.set(clientId, {
+            at: Math.max(change.at, previous?.at ?? 0),
+            ...(clock === undefined ? {} : { clock }),
+          });
           continue;
         }
         const local = d.local.get(clientId);
@@ -536,6 +663,7 @@ export function sharedPresence<T extends PresenceRow>(
         return;
       }
       d.remote = { rows, left, version: entry.version, readAt: t, proven: true };
+      d.sawRecord = true;
       d.lastPushAt = t;
       settle();
       // the deck's pulse (pulse.ts): the one head every instance's poll makes moves with this push
@@ -559,6 +687,16 @@ export function sharedPresence<T extends PresenceRow>(
       const d = deckOf(deckId);
       if (d.pending.size === 0) return;
       const t = now();
+      if (d.goneAt !== undefined) {
+        // the deck was found gone under a push a moment ago (pushNow): its heartbeats write
+        // nothing for a minute, then the manifest is headed again
+        if (d.goneAt + PRESENCE_GONE_MEMORY_MS > t) {
+          d.pending.clear();
+          d.local.clear();
+          return;
+        }
+        d.goneAt = undefined;
+      }
       if (!force) {
         if (!needsPush(d, t)) {
           scheduleAt(deckId, d, nextRefreshAt(d, t));
@@ -618,6 +756,12 @@ export function sharedPresence<T extends PresenceRow>(
       const current = d.local.get(clientId);
       // an older clock is a late batch; the roster keeps the newer state (SPEC-3 3.8)
       if (alive(current, t) && current.state.clock > state.clock) return;
+      // a set at or below the tombstone's clock is a post the tab made before its leave beacon
+      // (the beacon carries presenceClock + 1): it never lands and never replaces the pending
+      // leave (C3T-R2: the route's set handler runs after a `?leave=1` for the same id when the
+      // roster read it awaits takes longer, and `pending` is keyed by the client id)
+      const tomb = tombstoneClock(d, clientId);
+      if (tomb !== undefined && state.clock <= tomb) return;
       d.seq += 1;
       d.local.set(clientId, { at: t, expiresAt: t + Math.min(ttlMs, maxTtl), state });
       d.pending.set(clientId, { kind: 'set', n: d.seq });
@@ -631,7 +775,7 @@ export function sharedPresence<T extends PresenceRow>(
       return [...merged(d, now()).values()].map((row) => row.state);
     },
 
-    async leave(deckId, clientId) {
+    async leave(deckId, clientId, clock) {
       const d = deckOf(deckId);
       const t = now();
       const known =
@@ -641,7 +785,12 @@ export function sharedPresence<T extends PresenceRow>(
       d.seq += 1;
       d.local.delete(clientId);
       d.announced.delete(clientId);
-      d.pending.set(clientId, { kind: 'leave', n: d.seq, at: t });
+      d.pending.set(clientId, {
+        kind: 'leave',
+        n: d.seq,
+        at: t,
+        ...(clock === undefined ? {} : { clock }),
+      });
       if (known) options.publish(deckId, { type: 'leave', clientId });
       await pushIfDue(deckId);
     },
@@ -670,7 +819,13 @@ export function sharedPresence<T extends PresenceRow>(
 
     confirm(deckId) {
       const d = decks.get(deckId);
-      if (d !== undefined && d.remote.readAt > 0) d.remote.readAt = now();
+      if (d === undefined || d.remote.readAt <= 0) return;
+      d.remote.readAt = now();
+      // the rows that ran out since the last read leave now, on the tick: an expiry is the
+      // clock's and needs no read, and a deck whose pulse stands still (nobody writes, the
+      // collaborator's tab is gone) would otherwise announce its expiries only when the pulse
+      // next moved (R1-F1). No store call: the tick's one head is the pulse's
+      reconcile(deckId, d);
     },
 
     flush(deckId) {

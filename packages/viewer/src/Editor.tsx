@@ -31,6 +31,7 @@ import type {
 } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
@@ -207,9 +208,34 @@ import {
   toggleSelected,
 } from './Selection';
 import type { BlockFamily, Selection } from './Selection';
+import {
+  cellAtPoint,
+  cellInBounds,
+  cellRunPointer,
+  isMultiCell,
+  rangeBounds,
+  rangeBox,
+  rangeStands,
+  rowsWithRangeCleared,
+  tableRangeShapeOf,
+} from './table-range';
+import type { CellAddress, CellBounds, CellRange, TableRangeShape } from './table-range';
+import { isTableSeamHandle, tableSeamHandles, tableSeamMutation } from './table-seam';
+import { movedCellPointer, tableShapeOf } from './table-session';
+import type { TableShape } from './table-session';
 import { fitSheetAt, Sheet, SHEET_PAD } from './Sheet';
 import type { SheetZoom } from './Sheet';
 import { boxSnapLines, deckGuideLines, sheetEdgeLines, sheetSnapLines } from './snap';
+import {
+  GUIDE_HIT_PX,
+  crossingGuide,
+  drawReadout,
+  drawReadoutStyle,
+  guideForTravel,
+  sizeLabel,
+  stageOwnsTab,
+} from './stage-rules';
+import type { GuidePress } from './stage-rules';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
 import { centerKeepingPoint, clampZoom, scrollForCenter, stepZoom, zoomFromWheel } from './zoom';
@@ -323,6 +349,8 @@ export type EditorOverlayView = {
   rotation: number | null;
   /** the live size while a resize is down, in sheet pixels */
   sizeReadout: { w: number; h: number } | null;
+  /** the moved column's width while a table's column seam is down, in sheet pixels (docs/RETURN.md 2.4 fix 5) */
+  widthReadout: number | null;
   /** the rulers (SPEC-2 6.1 row 29); null while View > Show ruler is off */
   rulers: RulersView | null;
   /** the deck's guides while View > Guides > Show guides is on */
@@ -413,6 +441,8 @@ export type EditorMenuSelection = {
   imageEdited: boolean;
   /** the selected list item's level */
   listLevel?: number;
+  /** the range of table cells selected on the anchor table, ordered and grown over its merged cells (table-range.ts; docs/RETURN.md 2.4) */
+  cells?: CellBounds;
 };
 
 /** A line for the snackbar (gslides-parity SPEC 12); `undo` asks for the Undo action. */
@@ -469,6 +499,12 @@ export type EditorHandle = {
   regroup: () => void;
   cropMode: () => void;
   exitCrop: () => void;
+  /**
+   * True while a crop is open (docs/RETURN.md 4.1; build/b1.md R4): the shell's `key.commit`
+   * reads it so a bare Enter with no crop is left to the focused element (the Slideshow button)
+   * instead of being consumed by `exitCrop`.
+   */
+  cropOpen: () => boolean;
   mask: (shape: string | null) => void;
   centerOnPage: (axis: 'x' | 'y') => void;
   addGuide: (axis: 'x' | 'y', at?: number) => void;
@@ -849,6 +885,10 @@ export function Editor({
   const [guides, setGuides] = useState<Guide[]>([]);
   const [marquee, setMarquee] = useState<Box | null>(null);
   const [editing, setEditing] = useState<Editing | null>(null);
+  /* the range of table cells on the selected table (table-range.ts; docs/RETURN.md 2.4): a Shift
+     click on a second cell or a drag from an open cell into another makes it, Escape, a session,
+     another selection or a change of the grid ends it */
+  const [cellRange, setCellRange] = useState<CellRange | null>(null);
   const [alt, setAlt] = useState(false);
   const [paint, setPaint] = useState<{ format: PaintFormat; keep: boolean } | null>(null);
   /* round two */
@@ -898,6 +938,15 @@ export function Editor({
   extraRef.current = extra;
   const editingRef = useRef(editing);
   editingRef.current = editing;
+  const cellRangeRef = useRef(cellRange);
+  cellRangeRef.current = cellRange;
+  /* the grid the range was made on: a row, a column or a merged cell added or removed under it
+     ends the range (table-range.ts rangeStands) */
+  const cellRangeShape = useRef<TableRangeShape | null>(null);
+  /* the cell the last session on the selected table sat in: the anchor of a Shift click made
+     after that session ended (a parked session ends in the press's capture phase, before the
+     stage reads it; the kept cell pointer of the chrome is the same cell, docs/RETURN.md 2.4 fix 2) */
+  const lastCell = useRef<{ blockId: string; cell: CellAddress } | null>(null);
   const paintRef = useRef(paint);
   paintRef.current = paint;
   const toolRef = useRef(tool);
@@ -948,6 +997,9 @@ export function Editor({
   const reconcileTimer = useRef(0);
   const pendingEdit = useRef<PendingEdit | null>(null);
   const pendingSelect = useRef<string[] | null>(null);
+  /* the grid of the table a cell session began in: a row or column added or removed under the
+     session moves what its positional pointer names (table-session.ts; RETURN.md 2.4) */
+  const sessionTableShape = useRef<TableShape | null>(null);
   /* the printable key that opened the session on a selected text object (AMENDMENTS.md A1 rule
      4): typed into the session once its handle is up, over the whole text the entry selected */
   const pendingInsert = useRef<string | null>(null);
@@ -1016,6 +1068,34 @@ export function Editor({
         : expandGroups(slideNow, ids);
     const picked = selectionOf(widened);
     select(picked.selection, picked.extra);
+  };
+
+  /**
+   * The cell range set or cleared (table-range.ts). The page reads the range through
+   * `menuSelection()` (EditorMenuSelection.cells), so a change is announced the way the rest of a
+   * multi-selection is: `onMultiSelectionChange` with a fresh array is the page's signal to read
+   * the facts again (its comment above), because the route's selection keeps the same anchor
+   * while the range grows, shrinks or ends.
+   */
+  const setRange = (next: CellRange | null) => {
+    const slideNow = slideRef.current;
+    const block = slideNow && next ? blockById(slideNow, next.blockId) : undefined;
+    const kept = next !== null && block?.type === 'table' ? next : null;
+    cellRangeShape.current =
+      kept !== null && block?.type === 'table' ? tableRangeShapeOf(block) : null;
+    if (jsonEqual(kept, cellRangeRef.current)) return;
+    cellRangeRef.current = kept;
+    setCellRange(kept);
+    onMultiRef.current?.([...extraRef.current]);
+  };
+
+  /** The bounds of the range on `blockId`, or null when the range names another table or none. */
+  const rangeOn = (blockId: string | null): CellBounds | null => {
+    const range = cellRangeRef.current;
+    const slideNow = slideRef.current;
+    if (range === null || blockId === null || range.blockId !== blockId || !slideNow) return null;
+    const block = blockById(slideNow, blockId);
+    return block?.type === 'table' ? rangeBounds(block, range) : null;
   };
 
   /* an anchor the page changed from outside the group (the inspector, Tab) ends the
@@ -1437,6 +1517,11 @@ export function Editor({
     const slideNow = slideRef.current;
     if (!slideNow) return;
     const block = blockById(slideNow, run.blockId);
+    /* a session is one cell: it ends the cell range and becomes the anchor of the next Shift
+       click on this table (table-range.ts) */
+    if (cellRangeRef.current !== null) setRange(null);
+    const sessionCell = block?.type === 'table' ? cellPointer(run.pointer) : null;
+    lastCell.current = sessionCell ? { blockId: run.blockId, cell: sessionCell } : null;
     /* a title or statement slide's text run is a slide field, not a block (blockById finds none);
        its type comes from blockTypeOf, and a title's lead is a paragraph, whose /text is
        multiline, so Enter in the subtitle placeholder breaks the line (hotfix-4 cause W4) */
@@ -1452,6 +1537,7 @@ export function Editor({
     committedText.current = readRunText(slideNow, run.blockId, run.pointer) ?? '';
     expectedDocText.current = committedText.current;
     frozenHtml.current = htmlRef.current;
+    sessionTableShape.current = block?.type === 'table' ? tableShapeOf(block) : null;
     setEditing({ ...run, caret, multiline, ...(options.link ? { link: true } : {}) });
     select({ kind: 'run', blockId: run.blockId, pointer: run.pointer });
   };
@@ -1512,6 +1598,32 @@ export function Editor({
     const slideNow = slideRef.current;
     const expected = expectedDocText.current;
     if (!current || !slideNow || expected === null) return;
+    /* a row or column added or removed under a cell session (Format > Table, the cell menu, with
+       the session parked; docs/RETURN.md 2.4): the pointer names its cell by position, so the
+       re-send below wrote the editable's text into whatever cell now sat there (measured on the
+       checkout: Insert row above put "Q1 revenue" into the new row as well, and Cmd+Z took that
+       write back instead of the row; build/b5.md section 7). The session ends with no re-send;
+       its last write follows the cell that moved, or is dropped when the cell is gone; the table
+       stays selected and the sheet redraws its new grid at once. */
+    const tableNow = blockById(slideNow, current.blockId);
+    const shape = sessionTableShape.current;
+    if (
+      tableNow?.type === 'table' &&
+      shape !== null &&
+      (tableNow.rows.length !== shape.rows || tableNow.columns.length !== shape.columns)
+    ) {
+      const moved = movedCellPointer(tableNow, shape, current.pointer, expected);
+      if (moved === null) {
+        committedText.current = textFromNode(current.element, { multiline: current.multiline });
+      } else if (moved !== current.pointer) {
+        editingRef.current = { ...current, pointer: moved };
+      }
+      sessionTableShape.current = null;
+      window.clearTimeout(reconcileTimer.current);
+      reconcileTimer.current = 0;
+      inlineRef.current?.end('blur');
+      return;
+    }
     const docText = readRunText(slideNow, current.blockId, current.pointer);
     if (docText === undefined) return;
     const verdict = sessionReconcile(expected, docText);
@@ -1544,6 +1656,49 @@ export function Editor({
     // the session's refs are read here, not the render's values
   }, [doc]);
 
+  /* the cell range follows the table it names (table-range.ts): a row, a column or a merged cell
+     added or removed under it ends it, Merge cells among them, and after a merge the merged cell
+     stands selected, as in Google Slides, so Unmerge cells in the cell menu and on the table tail
+     act on it at once (the matrix rows tables.cells.merge-unmerge and
+     tables.tail.merge-unmerge-buttons); a text write never ends a range */
+  useEffect(() => {
+    const range = cellRangeRef.current;
+    const shape = cellRangeShape.current;
+    const slideNow = slideRef.current;
+    if (range === null || !slideNow) return;
+    const block = blockById(slideNow, range.blockId);
+    if (block?.type !== 'table') {
+      setRange(null);
+      return;
+    }
+    if (shape !== null && rangeStands(shape, block)) return;
+    const bounds = rangeBounds(block, range);
+    const spansChanged = shape !== null && shape.spans !== JSON.stringify(block.spans ?? []);
+    setRange(null);
+    const anchor: CellAddress = { row: bounds.r0, col: bounds.c0 };
+    if (
+      spansChanged &&
+      editingRef.current === null &&
+      anchor.row < block.rows.length &&
+      anchor.col < block.columns.length
+    )
+      select({ kind: 'run', blockId: block.id, pointer: cellRunPointer(anchor) });
+    // the range's refs are read here, not the render's values
+  }, [doc]);
+
+  /* the range names the selected table alone: a selection that moves to another object or to
+     nothing ends it, and so does another slide; a run of the same table keeps it (a right click
+     inside the range selects nothing else). The last session cell goes with the selection too. */
+  const rangeSlide = useRef(slideId);
+  useEffect(() => {
+    const slideChanged = rangeSlide.current !== slideId;
+    rangeSlide.current = slideId;
+    const range = cellRangeRef.current;
+    if (range !== null && (slideChanged || range.blockId !== anchorId)) setRange(null);
+    const last = lastCell.current;
+    if (last !== null && (slideChanged || last.blockId !== anchorId)) lastCell.current = null;
+  }, [anchorId, slideId]);
+
   const onBurst = (text: Markup) => {
     const current = editingRef.current;
     if (current) writeText(current, text);
@@ -1564,6 +1719,7 @@ export function Editor({
        edited arms the tool and the click places nothing */
     editingRef.current = null;
     frozenHtml.current = null;
+    sessionTableShape.current = null;
     caretRef.current = null;
     onCaretRef.current?.(null);
     const written = writeText(current, text);
@@ -1596,11 +1752,13 @@ export function Editor({
           notice('Row added', true);
           return;
         }
-        const el = body.current ? runElement(body.current, block.id, next.pointer) : null;
-        if (el && !written) {
-          startEdit({ blockId: block.id, pointer: next.pointer, element: el }, 'all');
-          return;
-        }
+        /* the next cell opens from the layout effect below, on the markup this session's end
+           commits, never on the element under the pointer now: the stage shows the markup frozen
+           at the session's start, so once a burst had landed the cell element read here belonged
+           to markup the re-render replaced, and the session opened on it ended at once with the
+           table selected and the next keys replacing its first cell (docs/RETURN.md 2.4 fix 1;
+           audit-objects rows 51, 93, 94). The effect runs on the session's end whether or not
+           the markup changes, so an empty cell's Tab takes the same path (row 92). */
         pendingEdit.current = { blockId: block.id, pointer: next.pointer, caret: 'all' };
         return;
       }
@@ -1767,8 +1925,10 @@ export function Editor({
       cancelled = true;
       el.removeEventListener('load', onLoad, true);
     };
-    // the boxes follow the markup and the theme; measure, select and startEdit are closures over refs
-  }, [shownHtml, theme]);
+    // the boxes follow the markup and the theme; measure, select and startEdit are closures over
+    // refs; a session's end runs it too, so a queued cell (Tab, Shift+Tab) opens on the markup
+    // that end committed even when that markup did not change (docs/RETURN.md 2.4 fix 1)
+  }, [shownHtml, theme, editing]);
 
   /* a selection that names an object the slide no longer has is dropped */
   useEffect(() => {
@@ -1906,8 +2066,39 @@ export function Editor({
       if (g.duplicate && kind === 'free-move') mutations = duplicateMutations(g, mutations);
       return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [], readout };
     }
+    if (isTableSeamHandle(g.handle)) {
+      /* the table's column seam (docs/RETURN.md 2.4 fix 5): the left column widens by the drag
+         and its neighbour narrows, in the table's own width; the readout is the moved column's
+         new width (return/build/b5.md request 3) */
+      const seam = tableSeamAt(g.handle.blockId, g.handle.index, g.ctx, now.x - g.start.x);
+      return {
+        mutations: seam === null ? [] : [seam.mutation],
+        guides: [],
+        sites: [],
+        readout: seam === null ? null : { kind: 'width', value: seam.left },
+      };
+    }
     const mutation = gestureMutation(g.handle, g.ctx, g.start, now);
     return { mutations: mutation === null ? [] : [mutation], guides: [], sites: [], readout: null };
+  };
+
+  /**
+   * The seam drag of a table's column `index` by `dx` sheet px over the gesture's context: the
+   * table's width is its `pos` on a canvas, else its measured box (a table in a layout slot).
+   */
+  const tableSeamAt = (
+    blockId: string,
+    index: number,
+    ctx: GestureContext,
+    dx: number,
+  ): { mutation: Mutation; left: number; right: number; height: number } | null => {
+    const block = blockById(ctx.slide, blockId);
+    if (block?.type !== 'table') return null;
+    const box = ctx.boxes.blocks[blockId];
+    const width = block.pos?.w ?? box?.[2];
+    if (width === undefined || width <= 0) return null;
+    const seam = tableSeamMutation(ctx.slide, block, width, index, dx);
+    return seam === null ? null : { ...seam, height: Math.round(block.pos?.h ?? box?.[3] ?? 0) };
   };
 
   /** The end of the gesture that is down, by whatever event ended it: every live state clears. */
@@ -2499,6 +2690,36 @@ export function Editor({
     if (paintRef.current) setPaint(null);
   };
 
+  /**
+   * The format Cmd+Option+C copied (Google's copy formatting), kept until the next copy: unlike the
+   * toolbar's Paint format, the chord arms no click to paint, so an Escape or a click on another
+   * object between the copy and Cmd+Option+V leaves it in place (docs/RETURN.md section 5
+   * formatting.paint-format.chords; the walk's Escape between the two chords disarmed the click
+   * paint and pasted nothing, return/build/integrator.md).
+   */
+  const copiedFormat = useRef<PaintFormat | null>(null);
+  const copyFormat = (): boolean => {
+    const source = selectedBlocks()[0];
+    if (!source) return false;
+    const format = paintFormatOf(source, caretRef.current?.marks);
+    if (Object.keys(format).length === 0) return false;
+    copiedFormat.current = format;
+    return true;
+  };
+  /** Cmd+Option+V: the armed paint's format when the brush is armed, else the copied one, on every selected object. */
+  const pasteFormat = (ids: readonly string[]): boolean => {
+    const slideNow = slideRef.current;
+    const format = paintRef.current?.format ?? copiedFormat.current;
+    if (!slideNow || !format || ids.length === 0) return false;
+    const mutations = ids.flatMap((id) => {
+      const target = blockById(slideNow, id);
+      return target ? paintMutations(slideNow, target, format) : [];
+    });
+    if (mutations.length > 0) commit(mutations);
+    if (paintRef.current && !paintRef.current.keep) setPaint(null);
+    return true;
+  };
+
   /** Paint format on an object: one block.set per field the target takes, plus the marks over its text (SPEC 3.1 row 6, SPEC-2 0.37). */
   const applyPaint = (blockId: string): boolean => {
     const armed = paintRef.current;
@@ -2512,10 +2733,15 @@ export function Editor({
     return true;
   };
 
-  /** Cmd B with a text block selected: the display weight on the whole block (SPEC 3.2 row 14). */
-  const toggleWeight = () => {
+  /**
+   * Cmd B with a text block selected: the display weight on the whole block (SPEC 3.2 row 14).
+   * Answers whether it wrote: the cover title's heading is a field object with no block, so the
+   * key falls through to the shell's `format.text.bold` plan, whose write the studio converts
+   * (docs/RETURN.md 2.14 item 1; return/build/b2.md R1, `text.title.bold-cmd-b`).
+   */
+  const toggleWeight = (): boolean => {
     const slideNow = slideRef.current;
-    if (!slideNow) return;
+    if (!slideNow) return false;
     const mutations = selectedBlocks().flatMap((block): Mutation[] => {
       if (!isTextBlockType(block.type) || block.type === 'table') return [];
       const typography = (block as { typography?: Record<string, unknown> }).typography ?? {};
@@ -2535,20 +2761,24 @@ export function Editor({
             },
       ];
     });
+    if (mutations.length === 0) return false;
     commit(mutations);
+    return true;
   };
 
   /**
    * A mark on the caret's range while a run is being edited, else over the whole text of every
-   * selected text object as one text.replace per object (SPEC-2 6.2 "Text marks").
+   * selected text object as one text.replace per object (SPEC-2 6.2 "Text marks"). Answers
+   * whether it wrote, as `toggleWeight` does, so the chords on a selected field object (Cmd+I,
+   * Cmd+U, Cmd+Shift+X, Cmd+., Cmd+,) reach the shell's `text.style` plans.
    */
-  const toggleMarkOnSelection = (mark: ToggleMark) => {
+  const toggleMarkOnSelection = (mark: ToggleMark): boolean => {
     if (inlineRef.current) {
       inlineRef.current.toggleMark(mark);
-      return;
+      return true;
     }
     const slideNow = slideRef.current;
-    if (!slideNow) return;
+    if (!slideNow) return false;
     const mutations = selectedBlocks().flatMap((block): Mutation[] => {
       const path =
         block.type === 'heading' || block.type === 'paragraph' || block.type === 'text'
@@ -2573,7 +2803,9 @@ export function Editor({
         },
       ];
     });
+    if (mutations.length === 0) return false;
     commit(mutations);
+    return true;
   };
 
   const openLink = () => {
@@ -3035,9 +3267,11 @@ export function Editor({
     const imageEdited =
       isCroppable(block) &&
       (block.trim !== undefined || block.mask !== undefined || block.adjust !== undefined);
+    const cells = rangeOn(anchor ?? null);
     return {
       blocks: ids.length,
       blockIds: ids,
+      ...(cells !== null ? { cells } : {}),
       ...(anchor !== undefined ? { block: blockFamily(type) } : {}),
       textBlock:
         isTextBlockType(type) ||
@@ -3116,6 +3350,7 @@ export function Editor({
         if (anchor !== null) enterCrop(anchor);
       },
       exitCrop: () => exitCrop(true),
+      cropOpen: () => cropRef.current !== null,
       mask: maskSelection,
       centerOnPage: (axis) => alignSelection(axis === 'x' ? 'center' : 'middle', 'sheet'),
       addGuide,
@@ -3243,9 +3478,18 @@ export function Editor({
            first object and Shift Tab the last (cycleSelection from -1); from a field or a chrome
            button the browser's focus order runs instead; the order is paint order on a canvas and
            document order otherwise (SPEC-2 0.83) */
-        const inside = e.target instanceof Node && root.current?.contains(e.target);
+        const inside = e.target instanceof Node && root.current?.contains(e.target) === true;
         const fromPage = e.target === document.body;
-        if (current === null && !inside && !fromPage) return;
+        /* a Tab from a chrome control outside the stage and the overlay (the Slideshow half, a
+           toolbar button, a panel field) is the browser's whether or not an object is selected
+           (docs/RETURN.md 4.1, chrome.split.tab-order: the stage took the Tab from the Slideshow
+           half with the title selected and moved the selection to the subtitle); an overlay
+           handle keeps the walk, so Tab after a drag from a handle still cycles the objects */
+        const fromOverlay = e.target instanceof Element && e.target.closest('.ts-overlay') !== null;
+        if (
+          !stageOwnsTab({ selected: current !== null, fromControl, fromOverlay, inside, fromPage })
+        )
+          return;
         const order = objectIds(slideNow, boxesRef.current, blockOrder(el));
         const next = cycleSelection(order, current, e.shiftKey ? -1 : 1);
         setGroupEntered(null);
@@ -3316,7 +3560,7 @@ export function Editor({
            Slides; with a block selected and nothing to type into the letter is consumed, so a
            stray keystroke never reaches a shell key */
         if (current !== null && isBareCharacterKey(e)) {
-          const run = ids.length === 1 ? firstRunOf(el, current.blockId) : null;
+          const run = ids.length === 1 ? entryRunOf(el, current.blockId) : null;
           const char = typingEntry(e, {
             textObject:
               run !== null && readRunText(slideNow, run.blockId, run.pointer) !== undefined,
@@ -3367,6 +3611,13 @@ export function Editor({
             stop();
             return;
           }
+          if (cellRangeRef.current !== null) {
+            /* Esc on a cell range leaves the table selected: one more step in A1 rule 4's chain
+               (the session, the object, nothing) */
+            setRange(null);
+            stop();
+            return;
+          }
           select(escapeSelection(current));
           stop();
           return;
@@ -3381,14 +3632,34 @@ export function Editor({
           /* Enter on a selected text object opens its session with the caret at the end
              (AMENDMENTS.md A1 rule 4; SPEC 6.9) */
           if (current === null) return;
-          const run = firstRunOf(el, current.blockId);
+          const run = entryRunOf(el, current.blockId);
           if (run) {
             startEdit(run, entryCaret('enter', null));
             stop();
           }
           return;
         }
-        case 'delete':
+        case 'delete': {
+          /* Delete and Backspace on a cell range clear the cells' text and keep the cells, as in
+             Google Slides (table-range.ts), never the table; one write, one Cmd+Z */
+          const bounds = rangeOn(current?.blockId ?? null);
+          const table =
+            current !== null && bounds !== null ? blockById(slideNow, current.blockId) : undefined;
+          if (bounds !== null && table?.type === 'table') {
+            const rows = rowsWithRangeCleared(table, bounds);
+            if (rows !== null)
+              commit([
+                {
+                  op: 'block.set',
+                  slideId: slideNow.id,
+                  blockId: table.id,
+                  path: '/rows',
+                  value: rows,
+                },
+              ]);
+            stop();
+            return;
+          }
           /* the stage owns Delete and Backspace whenever it owns the key: with nothing selected
              they do nothing, and never fall through to the document's key table, where
              `edit.delete` would remove the current slide with no prompt (docs/FOCUS.md rank 4;
@@ -3396,6 +3667,7 @@ export function Editor({
           removeSelected();
           stop();
           return;
+        }
         case 'order':
           if (current !== null) {
             orderSelection(action.move);
@@ -3436,19 +3708,16 @@ export function Editor({
           stop();
           return;
         case 'bold':
-          toggleWeight();
-          stop();
+          /* consumed only when the stage wrote: on a selected field object (the cover title's
+             heading) the key reaches the shell's key table and its format.text.bold plan */
+          if (toggleWeight()) stop();
           return;
         case 'paintCopy':
-          if (armPaint()) stop();
+          if (copyFormat()) stop();
           return;
-        case 'paintPaste': {
-          const armed = paintRef.current;
-          if (!armed) return;
-          for (const id of ids) applyPaint(id);
-          stop();
+        case 'paintPaste':
+          if (pasteFormat(ids)) stop();
           return;
-        }
         case 'rotate':
           rotateSelection(action.by);
           stop();
@@ -3462,9 +3731,9 @@ export function Editor({
           stop();
           return;
         case 'mark':
-          /* Cmd Shift X on a selected list item keeps the round one `no` flag through the menu row */
-          toggleMarkOnSelection(action.mark);
-          stop();
+          /* Cmd Shift X on a selected list item keeps the round one `no` flag through the menu row;
+             a selected field object lets the key through to the shell's text.style plans */
+          if (toggleMarkOnSelection(action.mark)) stop();
           return;
         case 'indent':
           indentBlocks(ids, action.by);
@@ -3575,6 +3844,16 @@ export function Editor({
       rotateSelection(delta);
       return;
     }
+    if (isTableSeamHandle(handle)) {
+      const seam = tableSeamAt(
+        handle.blockId,
+        handle.index,
+        { slide: slideNow, boxes: boxesRef.current },
+        delta,
+      );
+      if (seam) commit([seam.mutation]);
+      return;
+    }
     if (handle.kind === 'free-resize' && handle.blockId !== undefined) {
       void commitCanvas((canvas, boxesNow) => {
         const mutation = nudgeMutation(
@@ -3601,28 +3880,52 @@ export function Editor({
     orderBlock(handle.blockId, move);
   };
 
-  /** A press on a deck guide drags it; the release writes deck.guides move (SPEC-2 6.1 row 30). */
+  /**
+   * A press on a deck guide drags it; the release writes deck.guides move (SPEC-2 6.1 row 30).
+   * Where two guides cross under the press (the horizontal guide is drawn last and takes the
+   * pointer at the crossing, so a press at a vertical guide's centre landed on the horizontal
+   * guide at the sheet centre and a horizontal drag wrote nothing: audit-surface row 45, the
+   * mechanism measured in build/b3.md), the drag waits for the first travel and moves the guide
+   * that lies across it (stage-rules.ts crossingGuide, guideForTravel); the readout appears once
+   * the guide is picked.
+   */
   const onGuideDown = (axis: 'x' | 'y', at: number, e: PointerEvent) => {
     if (e.button !== 0) return;
     e.preventDefault();
     const rect = stageRect();
     if (!rect) return;
+    const k = rect.width / 1600 || 1;
+    const pressed: GuidePress = { axis, at };
+    const crossing = crossingGuide(
+      pressed,
+      sheetPoint(rect, e.clientX, e.clientY),
+      deckGuidesRef.current ?? { x: [], y: [] },
+      GUIDE_HIT_PX / 2 / k,
+    );
+    let target: GuidePress | null = crossing === null ? pressed : null;
     let last = at;
-    setDraggingGuide({ axis, at, label: inchesLabel(at), from: at });
+    if (target !== null) setDraggingGuide({ axis, at, label: inchesLabel(at), from: at });
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
+      if (target === null) {
+        if (crossing === null) return;
+        target = guideForTravel(pressed, crossing, ev.clientX - e.clientX, ev.clientY - e.clientY);
+        if (target === null) return;
+        last = target.at;
+      }
       const point = sheetPoint(r, ev.clientX, ev.clientY);
-      last = Math.round(axis === 'x' ? point.x : point.y);
-      last = Math.max(0, Math.min(axis === 'x' ? 1600 : 900, last));
-      setDraggingGuide({ axis, at: last, label: inchesLabel(last), from: at });
+      last = Math.round(target.axis === 'x' ? point.x : point.y);
+      last = Math.max(0, Math.min(target.axis === 'x' ? 1600 : 900, last));
+      setDraggingGuide({ axis: target.axis, at: last, label: inchesLabel(last), from: target.at });
     };
     const up = () => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
       setDraggingGuide(null);
-      if (last !== at) onGuidesRef.current?.({ move: [{ axis, from: at, to: last }] });
+      if (target !== null && last !== target.at)
+        onGuidesRef.current?.({ move: [{ axis: target.axis, from: target.at, to: last }] });
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
@@ -3680,6 +3983,142 @@ export function Editor({
       const rect = stageRect();
       if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
     }
+  };
+
+  /**
+   * A Shift click on a cell of the edited or selected table selects the cells from the anchor
+   * cell to it (Google Slides; table-range.ts, docs/RETURN.md 2.4 "a drag over cells to select a
+   * range"; the matrix row tables.cells.merge-unmerge). The anchor is the open session's cell,
+   * else the range's own anchor, else the selected run's cell, else the cell of the last session
+   * on this table while it stays selected; the session ends with its write and the table stands
+   * selected with the range drawn over its cells. With no anchor on a selected table the click
+   * selects the cell's run, so the next Shift click has one. Answers true when it took the press.
+   */
+  const shiftClickOnCell = (
+    e: ReactPointerEvent<HTMLDivElement>,
+    el: HTMLElement,
+    slideNow: Slide,
+  ): boolean => {
+    if (
+      !e.shiftKey ||
+      e.metaKey ||
+      e.ctrlKey ||
+      !editableRef.current ||
+      toolRef.current !== 'select' ||
+      cropRef.current !== null ||
+      spaceRef.current
+    )
+      return false;
+    const run = resolveRun(e.target, el);
+    const cell = run === null ? null : cellPointer(run.pointer);
+    if (run === null || cell === null) return false;
+    const block = blockById(slideNow, run.blockId);
+    if (block?.type !== 'table') return false;
+    const current = editingRef.current;
+    const rangeNow = cellRangeRef.current;
+    const selectedNow = selectionRef.current;
+    const held = selectedIds(selectedNow, extraRef.current);
+    const onThisTable = held.length === 1 && held[0] === run.blockId;
+    const anchor: CellAddress | null =
+      current !== null && current.blockId === run.blockId
+        ? cellPointer(current.pointer)
+        : rangeNow !== null && rangeNow.blockId === run.blockId
+          ? rangeNow.anchor
+          : selectedNow?.kind === 'run' && selectedNow.blockId === run.blockId
+            ? cellPointer(selectedNow.pointer)
+            : onThisTable && lastCell.current?.blockId === run.blockId
+              ? lastCell.current.cell
+              : null;
+    if (anchor === null) {
+      if (!onThisTable || current !== null) return false;
+      e.preventDefault();
+      select({ kind: 'run', blockId: run.blockId, pointer: run.pointer });
+      return true;
+    }
+    e.preventDefault();
+    if (current !== null) endSessionForPress(current);
+    if (editingRef.current !== null) return true;
+    const next: CellRange = { blockId: run.blockId, anchor, focus: cell };
+    if (isMultiCell(block, next)) {
+      select({ kind: 'block', blockId: run.blockId });
+      setRange(next);
+    } else {
+      /* the click landed on the anchor cell: one cell, no range */
+      setRange(null);
+      select({ kind: 'run', blockId: run.blockId, pointer: cellRunPointer(anchor) });
+    }
+    return true;
+  };
+
+  /**
+   * A press inside an open table cell that travels into another cell of the same table selects
+   * the cells between them (Google Slides; table-range.ts). The session ends with its write when
+   * the pointer first reaches another cell, the range follows the pointer from then on, and the
+   * browser's own text selection, which the press began in the editable, is cleared on every move
+   * so no text of the static cells reads as selected. The cell under the pointer is read from the
+   * measured cell boxes (the overlay layer covers the sheet). A drag that stays inside the cell
+   * is the browser's text selection and nothing here runs.
+   */
+  const armCellRangeDrag = (current: Editing, clientX: number, clientY: number) => {
+    const anchor = cellPointer(current.pointer);
+    const slideNow = slideRef.current;
+    if (anchor === null || !slideNow || blockById(slideNow, current.blockId)?.type !== 'table')
+      return;
+    const blockId = current.blockId;
+    let live = false;
+    const cellUnder = (ev: PointerEvent): CellAddress | null => {
+      const rect = stageRect();
+      if (!rect) return null;
+      return cellAtPoint(blockId, boxesRef.current.runs, sheetPoint(rect, ev.clientX, ev.clientY));
+    };
+    const detach = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+    const move = (ev: PointerEvent) => {
+      if (!live) {
+        if (editingRef.current !== current) {
+          detach();
+          return;
+        }
+        if (Math.hypot(ev.clientX - clientX, ev.clientY - clientY) < DRAG_START_PX) return;
+        const cell = cellUnder(ev);
+        if (cell === null || (cell.row === anchor.row && cell.col === anchor.col)) return;
+        live = true;
+        endSessionForPress(current);
+        if (editingRef.current !== null) {
+          detach();
+          return;
+        }
+        window.getSelection()?.removeAllRanges();
+        select({ kind: 'block', blockId });
+        setRange({ blockId, anchor, focus: cell });
+        return;
+      }
+      window.getSelection()?.removeAllRanges();
+      const cell = cellUnder(ev);
+      if (cell === null) return;
+      setRange({ blockId, anchor, focus: cell });
+    };
+    const up = () => {
+      detach();
+      if (live) window.getSelection()?.removeAllRanges();
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
+
+  /** The run a key opens on a selected object: the anchor cell of its cell range, else its first run (A1 rule 4). */
+  const entryRunOf = (el: HTMLElement, blockId: string) => {
+    const range = cellRangeRef.current;
+    if (range !== null && range.blockId === blockId) {
+      const pointer = cellRunPointer(range.anchor);
+      const element = runElement(el, blockId, pointer);
+      if (element) return { blockId, pointer, element };
+    }
+    return firstRunOf(el, blockId);
   };
 
   /** A press on a block's body arms a drag: past DRAG_START_PX it becomes the chip's gesture. */
@@ -3914,12 +4353,19 @@ export function Editor({
       return;
     }
     let current = mods;
+    /* the draw is a gesture of the stage's life like a resize (gesture-life.ts), so the size it
+       would store shows while the pointer is down and clears with the release, the cancel or a
+       selection (docs/RETURN.md 2.1 "the drawing by drag with the readout"; stage-rules.ts
+       drawReadout) */
+    stepLife({ type: 'down' });
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
       current = { shift: ev.shiftKey, alt: ev.altKey };
       const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY), current);
       setMarquee(drawn.dragged ? drawn.box : null);
+      const size = drawReadout(drawn.box, drawn.dragged, settingsRef.current.snapGrid);
+      stepLife({ type: 'move', readout: size ? { kind: 'size', w: size.w, h: size.h } : null });
     };
     const finishDraw = (ev: PointerEvent) => {
       window.removeEventListener('pointermove', move);
@@ -3927,6 +4373,7 @@ export function Editor({
       window.removeEventListener('pointercancel', cancel);
       setMarquee(null);
       setSites([]);
+      stepLife({ type: 'pointerup' });
       const r = stageRect();
       if (!r) return;
       const end = sheetPoint(r, ev.clientX, ev.clientY);
@@ -3946,6 +4393,7 @@ export function Editor({
       window.removeEventListener('pointerup', finishDraw);
       window.removeEventListener('pointercancel', cancel);
       setMarquee(null);
+      stepLife({ type: 'pointercancel' });
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', finishDraw);
@@ -3998,6 +4446,7 @@ export function Editor({
     const el = body.current;
     const slideNow = slideRef.current;
     if (!el || !slideNow || e.button !== 0) return;
+    if (shiftClickOnCell(e, el, slideNow)) return;
     const current = editingRef.current;
     if (current) {
       /* a click inside the editable run is the caret's; one on the edited block's padding keeps
@@ -4010,10 +4459,19 @@ export function Editor({
         under: resolveObject(e.target, el, slideNow),
         blockId: current.blockId,
       });
-      if (verdict === 'caret' || verdict === 'keep') return;
+      if (verdict === 'caret') {
+        /* a press inside an open table cell that travels into another cell selects the cells
+           between them (armCellRangeDrag); inside the cell it stays the browser's text selection */
+        armCellRangeDrag(current, e.clientX, e.clientY);
+        return;
+      }
+      if (verdict === 'keep') return;
       endSessionForPress(current);
       if (editingRef.current !== null || verdict === 'end') return;
     }
+    /* a plain press on the sheet ends the cell range: on the table it is the press of A1 rule 2
+       (the drag that follows moves the table), elsewhere it is the other object's or the sheet's */
+    if (cellRangeRef.current !== null && !e.shiftKey && !e.metaKey && !e.ctrlKey) setRange(null);
     if (spaceRef.current) {
       e.preventDefault();
       armPan(e.clientX, e.clientY);
@@ -4211,6 +4669,15 @@ export function Editor({
     const el = body.current;
     const slideNow = slideRef.current;
     if (!cb || !el || !slideNow) return;
+    /* a right click an overlay child already answered (a guide's Delete guide menu,
+       onGuideContextMenu) bubbles to the overlay layer's own handler; it stays that child's
+       (the re-walk read the empty sheet's menu over a guide's, return/build/integrator.md) */
+    if (
+      e.target instanceof Element &&
+      e.target.closest('.ts-overlay') !== null &&
+      (e.nativeEvent.defaultPrevented || e.target.closest('[data-control^="guide."]') !== null)
+    )
+      return;
     const current = editingRef.current;
     if (current && e.target instanceof Node && current.element.contains(e.target)) {
       e.preventDefault();
@@ -4282,7 +4749,23 @@ export function Editor({
       selectObjects([id]);
     }
     const cell = block?.type === 'table' && run ? cellPointer(run.pointer) : null;
+    const bounds = cell !== null ? rangeOn(id) : null;
+    if (cell && run && bounds !== null && cellInBounds(bounds, cell)) {
+      /* a right click inside the cell range: the range's menu over the selection as it is (Merge
+         cells and the other Table rows act on the range through EditorSelection.cells) */
+      cb({
+        target: 'cellRange',
+        x: e.clientX,
+        y: e.clientY,
+        element,
+        blockId: id,
+        cell: { ...cell, pointer: run.pointer },
+      });
+      return;
+    }
     if (cell && run) {
+      /* a right click on a cell outside the range ends the range, as Google's does */
+      if (bounds !== null) setRange(null);
       select({ kind: 'run', blockId: id, pointer: run.pointer });
       cb({
         target: 'tableCell',
@@ -4351,18 +4834,56 @@ export function Editor({
     const box = boxes.blocks[id];
     return box ? [box] : [];
   });
+  /* the cell range's ring (table-range.ts): the union of its measured cells, inside the table's
+     own ring; none while a session is open */
+  const rangeRing = ((): { box: Box; label: string } | null => {
+    if (cellRange === null || !slide || editing) return null;
+    const rangeTable = blockById(slide, cellRange.blockId);
+    if (rangeTable?.type !== 'table') return null;
+    const bounds = rangeBounds(rangeTable, cellRange);
+    const box = rangeBox(rangeTable, bounds, boxes.runs);
+    return box === null
+      ? null
+      : { box, label: `${bounds.r0},${bounds.c0}:${bounds.r1},${bounds.c1}` };
+  })();
   const group =
     ids.length > 1 && slide ? (selectionUnion(slide, ids, boxes) ?? groupBoxOf(ids, boxes)) : null;
   const groupTag = slide ? sharedGroup(slide, ids) : null;
   const hoverBox =
     hover !== null && !ids.includes(hover) && !activeHandle ? (boxes.blocks[hover] ?? null) : null;
+  /* a table cell or a cell range is active: the work is inside the table, so its outer transform
+     handles (the eight resize squares, the rotation ring) and the column seams are not drawn, as
+     Google draws them only for the whole-table selection (docs/RETURN.md 2.4). A single click
+     selects the table block (chip Table, no cell), where they do show; a Shift click, a drag
+     across cells or the cell left after a merge selects a cell, where they do not. Without this a
+     merged cell's centre, which sits on a resize square, took a right click meant for its menu. */
+  const cellActive =
+    anchorBlock?.type === 'table' &&
+    ((selection?.kind === 'run' && cellPointer(selection.pointer) !== null) ||
+      (cellRange !== null && cellRange.blockId === anchorId));
   const handles =
-    shownSlide && !editing && editable
+    shownSlide && !editing && editable && !cellActive
       ? handlesFor(shownSlide, boxes, selection, {
           ids,
           ...(crop ? { crop: { frame: crop.frame } } : {}),
         })
       : [];
+  /* the column seams of one selected table (docs/RETURN.md 2.4 fix 5), from the header row's
+     measured cells, beside its eight handles; none while a cell is edited, a cell or range is
+     active, or in crop mode */
+  if (
+    shownSlide &&
+    !editing &&
+    editable &&
+    !crop &&
+    !cellActive &&
+    ids.length === 1 &&
+    anchorId !== null
+  ) {
+    const seamBlock = blockById(shownSlide, anchorId);
+    if (seamBlock?.type === 'table')
+      handles.push(...tableSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs));
+  }
   const lint: LintBox[] =
     lintLayer && findings
       ? findings.flatMap((finding): LintBox[] => {
@@ -4442,6 +4963,7 @@ export function Editor({
     paint: paint !== null,
     rotation: readout?.kind === 'angle' ? readout.value : null,
     sizeReadout: readout?.kind === 'size' ? { w: readout.w, h: readout.h } : null,
+    widthReadout: readout?.kind === 'width' ? readout.value : null,
     rulers: showRuler
       ? {
           on: true,
@@ -4524,7 +5046,15 @@ export function Editor({
           scrollerRef={scroller}
           onScroll={setScroll}
         >
-          <Frame index={index} total={total} />
+          {/* the counter follows the deck's Slide numbers (Insert > Slide numbers: on, off, skip
+              title slides) the way the show, the PDF and the PowerPoint do through the render's
+              slideCounter; the Frame drew it on every slide before (docs/RETURN.md section 5
+              slides.numbers.apply; build/b5.md section 7) */}
+          <Frame
+            index={index}
+            total={total}
+            counter={slide === undefined || slideCounter(doc.deck, slide, index + 1, total) !== ''}
+          />
           <div
             key={slideId}
             ref={body}
@@ -4541,13 +5071,19 @@ export function Editor({
           <MaterialMount body={body} html={shownHtml} onError={onError} />
         </Sheet>
       </div>
-      {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels; it follows the stage's scroll while zoomed */}
+      {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels; it follows the stage's scroll while zoomed.
+          A right click on it (a frame edge, a handle) is the selected object's menu: the layer is a
+          sibling of the stage root, so without this the right click on a selected thin line, whose
+          frame edges cover its whole stroke, opened no menu at all (return/build/integrator.md,
+          arrange.context.rotate-distribute; onContextMenuEvent reads the selection for a target
+          on the overlay) */}
       <div
         className="ts-overlay ts-chrome"
         data-active-handle={activeHandle ?? undefined}
         data-alt={alt ? '' : undefined}
         data-freeform={freeform ? '' : undefined}
         data-crop={crop ? '' : undefined}
+        onContextMenu={onContextMenuEvent}
         style={{
           left: fit.left + 1 - (zoom === 'fit' ? 0 : scroll.left),
           top: fit.top + 1 - (zoom === 'fit' ? 0 : scroll.top),
@@ -4557,6 +5093,31 @@ export function Editor({
         hidden={stageSize.width <= 0}
       >
         {overlay ? overlay(view) : null}
+        {/* the cell range on the selected table (table-range.ts; docs/RETURN.md 2.4): one ring in
+            the selection colour over the union of its cells, inside the table's own ring (the
+            Overlay's .ts-select rule; the chrome lint's `select` role); the plans read the same
+            bounds through EditorMenuSelection.cells */}
+        {rangeRing !== null ? (
+          <div
+            className="ts-select is-selected is-cells"
+            data-cell-range={rangeRing.label}
+            style={{
+              left: rangeRing.box[0] * k,
+              top: rangeRing.box[1] * k,
+              width: rangeRing.box[2] * k,
+              height: rangeRing.box[3] * k,
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
+        {/* the size a draw drag would store, while the drawn box is down (stage-rules.ts
+            drawReadout); the chrome's Overlay draws the resize readout by the ring, and a draw
+            has no ring yet */}
+        {marquee !== null && toolName !== undefined && readout?.kind === 'size' ? (
+          <span className="ts-readout" role="status" style={drawReadoutStyle(marquee, k)}>
+            {sizeLabel(readout.w, readout.h)}
+          </span>
+        ) : null}
         {editing && editingBox ? (
           <InlineText
             key={`${slideId}:${editing.blockId}/${editing.pointer}`}

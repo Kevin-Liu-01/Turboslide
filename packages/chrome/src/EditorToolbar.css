@@ -49,6 +49,10 @@
   flex: 1 1 auto;
 }
 
+/* a vertical divider inside the row (docs/RETURN.md 4.2 item 2): --pt-hair like the row
+   boundaries, 1 px wide, a fixed 20 px in the 40 px row, `margin: 0 4px` in the 4 px gap row so
+   each neighbour has 8 px of air; --pt-hair-soft was proposed and not adopted (its composite is
+   under the lighter hairline's 1.51:1) */
 .ts-tb-sep {
   display: inline-block;
   width: 1px;

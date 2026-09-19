@@ -148,3 +148,66 @@ describe2('the cancel token and the thumbnail grant (SPEC-3 8.13)', () => {
     expect2(verifyThumbGrant('q4-review', undefined, now)).toBeNull();
   });
 });
+
+import { describe as describe3, expect as expect3, it as it3 } from 'vitest';
+
+import {
+  RENDER_GRANT_QUERY,
+  RENDER_GRANT_TTL_MS,
+  renderFileName,
+  signRenderGrant,
+  verifyRenderGrant,
+} from './tokens';
+import type { RenderGrantTarget } from './tokens';
+
+describe3('the render grant (docs/RETURN.md 2.19; audit-surface rows 27 and 28)', () => {
+  const target: RenderGrantTarget = {
+    deckId: 'q4-review',
+    slideId: 'title',
+    theme: 'light',
+    scale: 2,
+    format: 'jpg',
+  };
+
+  it3('spells the query as render.ts appends it and signs one picture for ten minutes', () => {
+    expect3(RENDER_GRANT_QUERY).toBe('g');
+    expect3(RENDER_GRANT_TTL_MS).toBe(10 * 60 * 1000);
+    const now = 1_000_000;
+    const grant = signRenderGrant(target, now);
+    expect3(grant).toMatch(/^\d+\.[0-9a-f]{32}$/);
+    expect3(verifyRenderGrant(target, grant, now + 1000)).toBe(true);
+    expect3(verifyRenderGrant(target, grant, now + RENDER_GRANT_TTL_MS)).toBe(true);
+    expect3(verifyRenderGrant(target, grant, now + RENDER_GRANT_TTL_MS + 1)).toBe(false);
+  });
+
+  it3(
+    'refuses every other picture: another deck, slide, theme, scale or format, a missing or tampered grant',
+    () => {
+      const now = 1_000_000;
+      const grant = signRenderGrant(target, now);
+      expect3(verifyRenderGrant({ ...target, deckId: 'other-deck' }, grant, now)).toBe(false);
+      expect3(verifyRenderGrant({ ...target, slideId: 'split-3' }, grant, now)).toBe(false);
+      expect3(verifyRenderGrant({ ...target, theme: 'dark' }, grant, now)).toBe(false);
+      expect3(verifyRenderGrant({ ...target, scale: 1 }, grant, now)).toBe(false);
+      expect3(verifyRenderGrant({ ...target, format: 'png' }, grant, now)).toBe(false);
+      expect3(verifyRenderGrant(target, null, now)).toBe(false);
+      expect3(verifyRenderGrant(target, undefined, now)).toBe(false);
+      expect3(verifyRenderGrant(target, '', now)).toBe(false);
+      expect3(verifyRenderGrant(target, grant.slice(0, -1), now)).toBe(false);
+      // the last digit flipped to one that differs (the cancel token test's own shape)
+      const flipped = grant.endsWith('0') ? `${grant.slice(0, -1)}1` : `${grant.slice(0, -1)}0`;
+      expect3(verifyRenderGrant(target, flipped, now)).toBe(false);
+      // a moved expiry: the mac covers it
+      const [exp, mac] = grant.split('.');
+      expect3(verifyRenderGrant(target, `${Number(exp) + 60_000}.${mac}`, now)).toBe(false);
+      // the ids must be slugs before anything is signed or checked
+      expect3(() => signRenderGrant({ ...target, deckId: '../x' }, now)).toThrow(TypeError);
+      expect3(verifyRenderGrant({ ...target, slideId: 'a/b' }, grant, now)).toBe(false);
+    },
+  );
+
+  it3('names the attachment after the deck and the slide with the format as its extension', () => {
+    expect3(renderFileName(target)).toBe('q4-review-title.jpg');
+    expect3(renderFileName({ ...target, format: 'png', scale: 1 })).toBe('q4-review-title.png');
+  });
+});

@@ -127,8 +127,22 @@ const remotePresence = async (page) =>
     pointers: document.querySelectorAll('.ts-remote-pointer-group').length,
     flags: document.querySelectorAll('.ts-flag').length,
   }));
-/** Opens the roster menu, counts its rows and the self row, closes it. */
+/**
+ * Opens the roster menu, counts its rows and the self row, closes it. With nobody else present
+ * the opener is not drawn (docs/RETURN.md 4.3: `.ts-presence-more.is-empty` takes no pointer;
+ * return/build/b7.md B7-R6), so the roster is read through the window API's `presence.list`
+ * instead, the same rows the menu would list: the self row and the others.
+ */
 const rosterRows = async (page) => {
+  const hidden = await page
+    .locator('[data-control="presence.more"]')
+    .evaluate((el) => el.classList.contains('is-empty'))
+    .catch(() => false);
+  if (hidden) {
+    const list = await invoke(page, 'presence.list', {}).catch(() => ({ self: null, others: [] }));
+    const self = list.self ? 1 : 0;
+    return { total: self + (list.others?.length ?? 0), self, via: 'presence.list' };
+  }
   await page.locator('[data-control="presence.more"]').click();
   await page.locator('#ts-menu-roster').waitFor({ timeout: 5000 });
   const rows = await page.evaluate(() => {

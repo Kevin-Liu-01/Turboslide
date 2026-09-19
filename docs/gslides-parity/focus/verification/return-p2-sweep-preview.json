@@ -1,0 +1,2131 @@
+{
+  "base": "https://turboslide-5sw6p6url-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-19T16:18:48.913Z",
+  "model": {
+    "items": 364,
+    "parkedMenuIds": 83,
+    "laterStubs": 22,
+    "parkedToolbarControls": [
+      "toolbar.fillColor",
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.changeShape",
+      "toolbar.dither",
+      "toolbar.formatOptions",
+      "toolbar.replaceImage"
+    ],
+    "parkedByTail": {
+      "default": [],
+      "text": [
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash"
+      ],
+      "shape": [
+        "toolbar.changeShape"
+      ],
+      "image": [
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.dither"
+      ],
+      "line": [],
+      "table": [],
+      "chart": [],
+      "group": [],
+      "other": [
+        "toolbar.formatOptions",
+        "toolbar.replaceImage"
+      ],
+      "none": []
+    },
+    "contextEntryFlags": 0
+  },
+  "parkedMenuIds": [
+    "title.presence.follow",
+    "title.presence.joinChat",
+    "title.presence.me",
+    "title.inbox",
+    "title.slideshow.presentOnAnotherScreen",
+    "title.account",
+    "title.account.changeName",
+    "title.account.changeAvatar",
+    "title.account.signIn",
+    "title.account.signOut",
+    "title.account.forget",
+    "title.account.sessions",
+    "file.makeCopy.selected",
+    "file.share.publish",
+    "file.email",
+    "file.email.collaborators",
+    "file.download.odp",
+    "file.download.txt",
+    "file.download.svg",
+    "file.versionHistory.showChanges",
+    "file.versionHistory.deleteOlder",
+    "file.versionHistory.deleteHistory",
+    "file.pageSetup",
+    "view.gridView",
+    "view.guides.edit",
+    "view.livePointers",
+    "view.livePointers.mine",
+    "view.livePointers.collaborators",
+    "view.showSections",
+    "insert.image.byUrl",
+    "insert.image.fromThisPresentation",
+    "insert.audio",
+    "insert.video",
+    "insert.shape.gallery",
+    "insert.shape.arrows",
+    "insert.shape.arrows.arrow",
+    "insert.shape.callouts",
+    "insert.shape.equation",
+    "insert.line.rule",
+    "insert.line.curve",
+    "insert.line.polyline",
+    "insert.line.scribble",
+    "insert.specialCharacters",
+    "insert.templates",
+    "insert.buildingBlocks",
+    "insert.icon",
+    "insert.material",
+    "format.alignIndent.indentationOptions",
+    "format.bulletsNumbering.listOptions",
+    "format.bulletsNumbering.listOptions.restart",
+    "format.bulletsNumbering.listOptions.prefixSuffix",
+    "format.bulletsNumbering.listOptions.moreBullets",
+    "format.image.maskImage",
+    "format.image.replaceImage.byUrl",
+    "format.image.replaceImage.fromThisPresentation",
+    "format.image.dither",
+    "format.altText",
+    "format.dropShadow",
+    "format.changeShape",
+    "format.editHtml",
+    "slide.transition",
+    "slide.editTheme",
+    "tools.spelling",
+    "tools.spelling.spellCheck",
+    "tools.spelling.underlineErrors",
+    "tools.spelling.personalDictionary",
+    "tools.notificationSettings",
+    "tools.preferences",
+    "tools.activityDashboard",
+    "tools.activityDashboard.viewers",
+    "tools.advanced",
+    "tools.advanced.showSource",
+    "tools.advanced.sideBySide",
+    "tools.advanced.suggestionMarks",
+    "tools.advanced.showIds",
+    "tools.advanced.renderSlide",
+    "tools.advanced.changeHistory",
+    "tools.advanced.sectionsTree",
+    "tools.advanced.readAsBook",
+    "tools.advanced.picturesMaterials",
+    "tools.advanced.runAction",
+    "extensions.agentAccess",
+    "extensions.embedInSite"
+  ],
+  "views": [
+    {
+      "name": "default",
+      "width": 1440,
+      "on": false,
+      "state": {
+        "setting": false,
+        "attr": null
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "help"
+      ],
+      "menuRows": {
+        "file": 25,
+        "edit": 11,
+        "view": 33,
+        "insert": 25,
+        "format": 53,
+        "slide": 12,
+        "arrange": 8,
+        "tools": 4,
+        "help": 4
+      },
+      "rowsRead": 175,
+      "uniqueRows": 175,
+      "parkedTotal": 83,
+      "parkedVisible": [],
+      "parkedVisibleCount": 0,
+      "forbiddenWordHits": [],
+      "rows": [
+        "file.new",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy",
+        "file.share",
+        "file.download",
+        "file.rename",
+        "file.moveToTrash",
+        "file.versionHistory",
+        "file.details",
+        "file.printPreview",
+        "file.print",
+        "file.new.presentation",
+        "file.new.templateGallery",
+        "file.makeCopy.entire",
+        "file.share.withOthers",
+        "file.share.copyLink",
+        "file.download.pptx",
+        "file.download.pdf",
+        "file.download.jpg",
+        "file.download.png",
+        "file.download.html",
+        "file.download.zip",
+        "file.versionHistory.nameCurrent",
+        "file.versionHistory.see",
+        "edit.undo",
+        "edit.redo",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.pasteWithoutFormatting",
+        "edit.delete",
+        "edit.duplicate",
+        "edit.selectAll",
+        "edit.selectNone",
+        "edit.findReplace",
+        "view.slideshow",
+        "view.zoom",
+        "view.showRuler",
+        "view.guides",
+        "view.snapTo",
+        "view.comments",
+        "view.showSpeakerNotes",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.fullScreen",
+        "view.appearance",
+        "view.zoom.in",
+        "view.zoom.out",
+        "view.zoom.fit",
+        "view.zoom.50",
+        "view.zoom.100",
+        "view.zoom.200",
+        "view.guides.show",
+        "view.guides.addVertical",
+        "view.guides.addHorizontal",
+        "view.guides.clear",
+        "view.snapTo.guides",
+        "view.snapTo.grid",
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide",
+        "view.mode.editing",
+        "view.mode.commenting",
+        "view.mode.viewing",
+        "view.appearance.light",
+        "view.appearance.dark",
+        "view.appearance.match",
+        "insert.image",
+        "insert.textBox",
+        "insert.shape",
+        "insert.table",
+        "insert.chart",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.link",
+        "insert.comment",
+        "insert.newSlide",
+        "insert.slideNumbers",
+        "insert.image.upload",
+        "insert.shape.shapes",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "insert.chart.bar",
+        "insert.chart.column",
+        "insert.chart.line",
+        "insert.chart.pie",
+        "insert.line.line",
+        "insert.line.arrow",
+        "insert.line.elbowConnector",
+        "insert.line.curvedConnector",
+        "format.text",
+        "format.alignIndent",
+        "format.spacing",
+        "format.bulletsNumbering",
+        "format.table",
+        "format.image",
+        "format.bordersLines",
+        "format.formatOptions",
+        "format.clearFormatting",
+        "format.textFitting",
+        "format.text.bold",
+        "format.text.italic",
+        "format.text.underline",
+        "format.text.strikethrough",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.size",
+        "format.text.capitalization",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.alignIndent.left",
+        "format.alignIndent.center",
+        "format.alignIndent.right",
+        "format.alignIndent.justified",
+        "format.alignIndent.increaseIndent",
+        "format.alignIndent.decreaseIndent",
+        "format.spacing.single",
+        "format.spacing.1_15",
+        "format.spacing.1_5",
+        "format.spacing.double",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.numbered",
+        "format.bulletsNumbering.bulleted",
+        "format.image.cropImage",
+        "format.image.replaceImage",
+        "format.image.resetImage",
+        "format.image.imageOptions",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "slide.moveSlide",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.moveSlide.up",
+        "slide.moveSlide.down",
+        "slide.moveSlide.toBeginning",
+        "slide.moveSlide.toEnd",
+        "arrange.order",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.centerOnPage",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.accessibilitySettings",
+        "tools.checkSlides",
+        "tools.advancedTools",
+        "tools.accessibilitySettings.collaboratorAnnouncements",
+        "help.searchMenus",
+        "help.help",
+        "help.improve",
+        "help.keyboardShortcuts"
+      ],
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertLine.arrow",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailBare": "default",
+      "blockSelected": true,
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailSelected": "shape",
+      "contextBlock": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "insert.link",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "format.textFitting",
+          "label": "Text fitting"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        }
+      ],
+      "parkedToolbarVisible": [],
+      "contextSheet": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "slide.changeBackground",
+          "label": "Change background"
+        },
+        {
+          "id": "view.guides",
+          "label": "Guides"
+        }
+      ],
+      "parkedContextVisible": [],
+      "titleRow": [
+        "title.home",
+        "deck.name",
+        "deck.saveState",
+        "deck.lastEdit.slot",
+        "deck.lastEdit",
+        "title.presence",
+        "presence.more",
+        "title.comments.slot",
+        "title.comments",
+        "present.split",
+        "present.open",
+        "present.arrow",
+        "share.slot",
+        "share.open"
+      ],
+      "parkedTitleVisible": []
+    },
+    {
+      "name": "advanced",
+      "width": 1440,
+      "on": true,
+      "state": {
+        "setting": true,
+        "attr": ""
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "extensions",
+        "help"
+      ],
+      "menuRows": {
+        "file": 32,
+        "edit": 11,
+        "view": 39,
+        "insert": 42,
+        "format": 57,
+        "slide": 14,
+        "arrange": 8,
+        "tools": 21,
+        "extensions": 2,
+        "help": 4
+      },
+      "rowsRead": 230,
+      "uniqueRows": 230,
+      "parkedTotal": 83,
+      "parkedVisible": [
+        "file.email",
+        "file.pageSetup",
+        "file.makeCopy.selected",
+        "file.share.publish",
+        "file.download.odp",
+        "file.download.txt",
+        "file.download.svg",
+        "view.gridView",
+        "view.livePointers",
+        "view.showSections",
+        "view.guides.edit",
+        "view.livePointers.mine",
+        "view.livePointers.collaborators",
+        "insert.audio",
+        "insert.video",
+        "insert.specialCharacters",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "insert.line.rule",
+        "insert.line.curve",
+        "insert.line.polyline",
+        "insert.line.scribble",
+        "format.alignIndent.indentationOptions",
+        "format.bulletsNumbering.listOptions",
+        "format.image.maskImage",
+        "format.image.dither",
+        "slide.transition",
+        "slide.editTheme",
+        "tools.spelling",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.activityDashboard",
+        "tools.advanced",
+        "tools.spelling.spellCheck",
+        "tools.spelling.underlineErrors",
+        "tools.advanced.showSource",
+        "tools.advanced.sideBySide",
+        "tools.advanced.suggestionMarks",
+        "tools.advanced.showIds",
+        "tools.advanced.renderSlide",
+        "tools.advanced.changeHistory",
+        "tools.advanced.sectionsTree",
+        "tools.advanced.readAsBook",
+        "tools.advanced.picturesMaterials",
+        "tools.advanced.runAction",
+        "extensions.agentAccess",
+        "extensions.embedInSite"
+      ],
+      "parkedVisibleCount": 55,
+      "forbiddenWordHits": [
+        {
+          "id": "tools.advanced.showSource",
+          "words": [
+            "source"
+          ]
+        },
+        {
+          "id": "tools.advanced.runAction",
+          "words": [
+            "run"
+          ]
+        },
+        {
+          "id": "extensions.agentAccess",
+          "words": [
+            "agent"
+          ]
+        }
+      ],
+      "rows": [
+        "file.new",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy",
+        "file.share",
+        "file.email",
+        "file.download",
+        "file.rename",
+        "file.moveToTrash",
+        "file.versionHistory",
+        "file.details",
+        "file.pageSetup",
+        "file.printPreview",
+        "file.print",
+        "file.new.presentation",
+        "file.new.templateGallery",
+        "file.makeCopy.entire",
+        "file.makeCopy.selected",
+        "file.share.withOthers",
+        "file.share.publish",
+        "file.share.copyLink",
+        "file.download.pptx",
+        "file.download.odp",
+        "file.download.pdf",
+        "file.download.txt",
+        "file.download.jpg",
+        "file.download.png",
+        "file.download.svg",
+        "file.download.html",
+        "file.download.zip",
+        "file.versionHistory.nameCurrent",
+        "file.versionHistory.see",
+        "edit.undo",
+        "edit.redo",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.pasteWithoutFormatting",
+        "edit.delete",
+        "edit.duplicate",
+        "edit.selectAll",
+        "edit.selectNone",
+        "edit.findReplace",
+        "view.slideshow",
+        "view.gridView",
+        "view.zoom",
+        "view.showRuler",
+        "view.guides",
+        "view.snapTo",
+        "view.comments",
+        "view.livePointers",
+        "view.showSpeakerNotes",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.fullScreen",
+        "view.showSections",
+        "view.appearance",
+        "view.zoom.in",
+        "view.zoom.out",
+        "view.zoom.fit",
+        "view.zoom.50",
+        "view.zoom.100",
+        "view.zoom.200",
+        "view.guides.show",
+        "view.guides.addVertical",
+        "view.guides.addHorizontal",
+        "view.guides.edit",
+        "view.guides.clear",
+        "view.snapTo.guides",
+        "view.snapTo.grid",
+        "view.comments.showAll",
+        "view.comments.expand",
+        "view.comments.minimize",
+        "view.comments.hide",
+        "view.livePointers.mine",
+        "view.livePointers.collaborators",
+        "view.mode.editing",
+        "view.mode.commenting",
+        "view.mode.viewing",
+        "view.appearance.light",
+        "view.appearance.dark",
+        "view.appearance.match",
+        "insert.image",
+        "insert.textBox",
+        "insert.audio",
+        "insert.video",
+        "insert.shape",
+        "insert.table",
+        "insert.chart",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.specialCharacters",
+        "insert.link",
+        "insert.comment",
+        "insert.newSlide",
+        "insert.slideNumbers",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "insert.image.upload",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.shape.shapes",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "insert.chart.bar",
+        "insert.chart.column",
+        "insert.chart.line",
+        "insert.chart.pie",
+        "insert.line.line",
+        "insert.line.arrow",
+        "insert.line.rule",
+        "insert.line.elbowConnector",
+        "insert.line.curvedConnector",
+        "insert.line.curve",
+        "insert.line.polyline",
+        "insert.line.scribble",
+        "format.text",
+        "format.alignIndent",
+        "format.spacing",
+        "format.bulletsNumbering",
+        "format.table",
+        "format.image",
+        "format.bordersLines",
+        "format.formatOptions",
+        "format.clearFormatting",
+        "format.textFitting",
+        "format.text.bold",
+        "format.text.italic",
+        "format.text.underline",
+        "format.text.strikethrough",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.size",
+        "format.text.capitalization",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.alignIndent.left",
+        "format.alignIndent.center",
+        "format.alignIndent.right",
+        "format.alignIndent.justified",
+        "format.alignIndent.increaseIndent",
+        "format.alignIndent.decreaseIndent",
+        "format.alignIndent.indentationOptions",
+        "format.spacing.single",
+        "format.spacing.1_15",
+        "format.spacing.1_5",
+        "format.spacing.double",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.numbered",
+        "format.bulletsNumbering.bulleted",
+        "format.bulletsNumbering.listOptions",
+        "format.image.cropImage",
+        "format.image.maskImage",
+        "format.image.replaceImage",
+        "format.image.resetImage",
+        "format.image.dither",
+        "format.image.imageOptions",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "slide.moveSlide",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.transition",
+        "slide.editTheme",
+        "slide.changeTheme",
+        "slide.moveSlide.up",
+        "slide.moveSlide.down",
+        "slide.moveSlide.toBeginning",
+        "slide.moveSlide.toEnd",
+        "arrange.order",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.centerOnPage",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.spelling",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.accessibilitySettings",
+        "tools.activityDashboard",
+        "tools.checkSlides",
+        "tools.advancedTools",
+        "tools.advanced",
+        "tools.spelling.spellCheck",
+        "tools.spelling.underlineErrors",
+        "tools.accessibilitySettings.collaboratorAnnouncements",
+        "tools.advanced.showSource",
+        "tools.advanced.sideBySide",
+        "tools.advanced.suggestionMarks",
+        "tools.advanced.showIds",
+        "tools.advanced.renderSlide",
+        "tools.advanced.changeHistory",
+        "tools.advanced.sectionsTree",
+        "tools.advanced.readAsBook",
+        "tools.advanced.picturesMaterials",
+        "tools.advanced.runAction",
+        "extensions.agentAccess",
+        "extensions.embedInSite",
+        "help.searchMenus",
+        "help.help",
+        "help.improve",
+        "help.keyboardShortcuts"
+      ],
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertLine.arrow",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailBare": "default",
+      "blockSelected": true,
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.changeShape",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailSelected": "shape",
+      "contextBlock": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "insert.link",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "format.textFitting",
+          "label": "Text fitting"
+        },
+        {
+          "id": "format.dropShadow",
+          "label": "Drop shadow"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "format.changeShape",
+          "label": "Change shape"
+        },
+        {
+          "id": "format.altText",
+          "label": "Alt text⌥⌘Y"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        }
+      ],
+      "parkedToolbarVisible": [
+        "toolbar.changeShape"
+      ],
+      "contextSheet": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.maskImage",
+          "label": "Mask image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.dither",
+          "label": "Dither"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "format.altText",
+          "label": "Alt text⌥⌘Y"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "slide.changeBackground",
+          "label": "Change background"
+        },
+        {
+          "id": "view.guides",
+          "label": "Guides"
+        }
+      ],
+      "parkedContextVisible": [
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.altText",
+        "format.dropShadow",
+        "format.changeShape",
+        "format.altText"
+      ],
+      "titleRow": [
+        "title.home",
+        "deck.name",
+        "deck.saveState",
+        "deck.lastEdit.slot",
+        "deck.lastEdit",
+        "title.presence",
+        "presence.more",
+        "title.account",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot",
+        "title.inbox",
+        "present.split",
+        "present.open",
+        "present.arrow",
+        "share.slot",
+        "share.open"
+      ],
+      "parkedTitleVisible": [
+        "title.account",
+        "title.inbox"
+      ]
+    },
+    {
+      "name": "default",
+      "width": 390,
+      "on": false,
+      "state": {
+        "setting": false,
+        "attr": null
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "help"
+      ],
+      "menuRows": {
+        "file": 19,
+        "edit": 11,
+        "view": 20,
+        "insert": 17,
+        "format": 55,
+        "slide": 12,
+        "arrange": 8,
+        "tools": 3,
+        "help": 4
+      },
+      "rowsRead": 149,
+      "uniqueRows": 149,
+      "parkedTotal": 83,
+      "parkedVisible": [],
+      "parkedVisibleCount": 0,
+      "forbiddenWordHits": [],
+      "rows": [
+        "file.new",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy",
+        "file.share",
+        "file.download",
+        "file.rename",
+        "file.moveToTrash",
+        "file.versionHistory",
+        "file.details",
+        "file.printPreview",
+        "file.print",
+        "file.new.presentation",
+        "file.new.templateGallery",
+        "file.makeCopy.entire",
+        "file.share.withOthers",
+        "file.share.copyLink",
+        "file.versionHistory.nameCurrent",
+        "file.versionHistory.see",
+        "edit.undo",
+        "edit.redo",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.pasteWithoutFormatting",
+        "edit.delete",
+        "edit.duplicate",
+        "edit.selectAll",
+        "edit.selectNone",
+        "edit.findReplace",
+        "view.slideshow",
+        "view.zoom",
+        "view.showRuler",
+        "view.guides",
+        "view.snapTo",
+        "view.comments",
+        "view.showSpeakerNotes",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.fullScreen",
+        "view.appearance",
+        "view.zoom.in",
+        "view.zoom.out",
+        "view.zoom.fit",
+        "view.zoom.50",
+        "view.zoom.100",
+        "view.zoom.200",
+        "view.mode.editing",
+        "view.mode.commenting",
+        "view.mode.viewing",
+        "insert.image",
+        "insert.textBox",
+        "insert.shape",
+        "insert.table",
+        "insert.chart",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.link",
+        "insert.comment",
+        "insert.newSlide",
+        "insert.slideNumbers",
+        "insert.image.upload",
+        "insert.shape.shapes",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "format.text",
+        "format.alignIndent",
+        "format.spacing",
+        "format.bulletsNumbering",
+        "format.table",
+        "format.image",
+        "format.bordersLines",
+        "format.formatOptions",
+        "format.clearFormatting",
+        "format.textFitting",
+        "format.text.bold",
+        "format.text.italic",
+        "format.text.underline",
+        "format.text.strikethrough",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.size",
+        "format.text.capitalization",
+        "format.text.size.increase",
+        "format.text.size.decrease",
+        "format.alignIndent.left",
+        "format.alignIndent.center",
+        "format.alignIndent.right",
+        "format.alignIndent.justified",
+        "format.alignIndent.increaseIndent",
+        "format.alignIndent.decreaseIndent",
+        "format.spacing.single",
+        "format.spacing.1_15",
+        "format.spacing.1_5",
+        "format.spacing.double",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.numbered",
+        "format.bulletsNumbering.bulleted",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.image.cropImage",
+        "format.image.replaceImage",
+        "format.image.resetImage",
+        "format.image.imageOptions",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "slide.moveSlide",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.moveSlide.up",
+        "slide.moveSlide.down",
+        "slide.moveSlide.toBeginning",
+        "slide.moveSlide.toEnd",
+        "arrange.order",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.centerOnPage",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.accessibilitySettings",
+        "tools.checkSlides",
+        "tools.advancedTools",
+        "help.searchMenus",
+        "help.help",
+        "help.improve",
+        "help.keyboardShortcuts"
+      ],
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailBare": "default",
+      "blockSelected": true,
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailSelected": "shape",
+      "contextBlock": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "insert.link",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "format.textFitting",
+          "label": "Text fitting"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        }
+      ],
+      "parkedToolbarVisible": [],
+      "contextSheet": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "slide.changeBackground",
+          "label": "Change background"
+        },
+        {
+          "id": "view.guides",
+          "label": "Guides"
+        }
+      ],
+      "parkedContextVisible": [],
+      "titleRow": [
+        "title.home",
+        "deck.name",
+        "deck.saveState",
+        "deck.lastEdit.slot",
+        "deck.lastEdit",
+        "title.presence",
+        "presence.more",
+        "title.comments.slot",
+        "title.comments",
+        "present.split",
+        "present.open",
+        "present.arrow",
+        "share.slot",
+        "share.open"
+      ],
+      "parkedTitleVisible": []
+    },
+    {
+      "name": "advanced",
+      "width": 390,
+      "on": true,
+      "state": {
+        "setting": true,
+        "attr": ""
+      },
+      "menus": [
+        "file",
+        "edit",
+        "view",
+        "insert",
+        "format",
+        "slide",
+        "arrange",
+        "tools",
+        "extensions",
+        "help"
+      ],
+      "menuRows": {
+        "file": 27,
+        "edit": 11,
+        "view": 26,
+        "insert": 30,
+        "format": 59,
+        "slide": 14,
+        "arrange": 8,
+        "tools": 8,
+        "extensions": 2,
+        "help": 4
+      },
+      "rowsRead": 189,
+      "uniqueRows": 189,
+      "parkedTotal": 83,
+      "parkedVisible": [
+        "file.email",
+        "file.pageSetup",
+        "file.makeCopy.selected",
+        "file.download.odp",
+        "file.download.txt",
+        "file.download.svg",
+        "view.gridView",
+        "view.livePointers",
+        "view.showSections",
+        "insert.audio",
+        "insert.video",
+        "insert.specialCharacters",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "format.alignIndent.indentationOptions",
+        "format.bulletsNumbering.listOptions",
+        "format.image.maskImage",
+        "format.image.dither",
+        "slide.transition",
+        "slide.editTheme",
+        "tools.spelling",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.activityDashboard",
+        "tools.advanced",
+        "extensions.agentAccess",
+        "extensions.embedInSite"
+      ],
+      "parkedVisibleCount": 35,
+      "forbiddenWordHits": [
+        {
+          "id": "extensions.agentAccess",
+          "words": [
+            "agent"
+          ]
+        }
+      ],
+      "rows": [
+        "file.new",
+        "file.open",
+        "file.importSlides",
+        "file.makeCopy",
+        "file.share",
+        "file.email",
+        "file.download",
+        "file.rename",
+        "file.moveToTrash",
+        "file.versionHistory",
+        "file.details",
+        "file.pageSetup",
+        "file.printPreview",
+        "file.print",
+        "file.new.presentation",
+        "file.new.templateGallery",
+        "file.makeCopy.entire",
+        "file.makeCopy.selected",
+        "file.download.pptx",
+        "file.download.odp",
+        "file.download.pdf",
+        "file.download.txt",
+        "file.download.jpg",
+        "file.download.png",
+        "file.download.svg",
+        "file.download.html",
+        "file.download.zip",
+        "edit.undo",
+        "edit.redo",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.pasteWithoutFormatting",
+        "edit.delete",
+        "edit.duplicate",
+        "edit.selectAll",
+        "edit.selectNone",
+        "edit.findReplace",
+        "view.slideshow",
+        "view.gridView",
+        "view.zoom",
+        "view.showRuler",
+        "view.guides",
+        "view.snapTo",
+        "view.comments",
+        "view.livePointers",
+        "view.showSpeakerNotes",
+        "view.showFilmstrip",
+        "view.mode",
+        "view.fullScreen",
+        "view.showSections",
+        "view.appearance",
+        "view.zoom.in",
+        "view.zoom.out",
+        "view.zoom.fit",
+        "view.zoom.50",
+        "view.zoom.100",
+        "view.zoom.200",
+        "view.mode.editing",
+        "view.mode.commenting",
+        "view.mode.viewing",
+        "view.appearance.light",
+        "view.appearance.dark",
+        "view.appearance.match",
+        "insert.image",
+        "insert.textBox",
+        "insert.audio",
+        "insert.video",
+        "insert.shape",
+        "insert.table",
+        "insert.chart",
+        "insert.diagram",
+        "insert.wordArt",
+        "insert.line",
+        "insert.specialCharacters",
+        "insert.link",
+        "insert.comment",
+        "insert.newSlide",
+        "insert.slideNumbers",
+        "insert.templates",
+        "insert.buildingBlocks",
+        "insert.icon",
+        "insert.material",
+        "insert.image.upload",
+        "insert.image.byUrl",
+        "insert.image.fromThisPresentation",
+        "insert.shape.shapes",
+        "insert.shape.gallery",
+        "insert.shape.arrows",
+        "insert.shape.callouts",
+        "insert.shape.equation",
+        "insert.shape.shapes.rectangle",
+        "insert.shape.shapes.rounded",
+        "insert.shape.shapes.ellipse",
+        "format.text",
+        "format.alignIndent",
+        "format.spacing",
+        "format.bulletsNumbering",
+        "format.table",
+        "format.image",
+        "format.bordersLines",
+        "format.formatOptions",
+        "format.clearFormatting",
+        "format.textFitting",
+        "format.text.bold",
+        "format.text.italic",
+        "format.text.underline",
+        "format.text.strikethrough",
+        "format.text.superscript",
+        "format.text.subscript",
+        "format.text.size",
+        "format.text.capitalization",
+        "format.text.size.increase",
+        "format.text.size.decrease",
+        "format.alignIndent.left",
+        "format.alignIndent.center",
+        "format.alignIndent.right",
+        "format.alignIndent.justified",
+        "format.alignIndent.increaseIndent",
+        "format.alignIndent.decreaseIndent",
+        "format.alignIndent.indentationOptions",
+        "format.spacing.single",
+        "format.spacing.1_15",
+        "format.spacing.1_5",
+        "format.spacing.double",
+        "format.spacing.addBefore",
+        "format.spacing.addAfter",
+        "format.spacing.custom",
+        "format.bulletsNumbering.numbered",
+        "format.bulletsNumbering.bulleted",
+        "format.bulletsNumbering.listOptions",
+        "format.table.insertRowAbove",
+        "format.table.insertRowBelow",
+        "format.table.insertColumnLeft",
+        "format.table.insertColumnRight",
+        "format.table.deleteRow",
+        "format.table.deleteColumn",
+        "format.table.deleteTable",
+        "format.table.distributeRows",
+        "format.table.distributeColumns",
+        "format.table.mergeCells",
+        "format.table.unmergeCells",
+        "format.image.cropImage",
+        "format.image.maskImage",
+        "format.image.replaceImage",
+        "format.image.resetImage",
+        "format.image.dither",
+        "format.image.imageOptions",
+        "format.bordersLines.borderColor",
+        "format.bordersLines.borderWeight",
+        "format.bordersLines.borderDash",
+        "format.bordersLines.lineStart",
+        "format.bordersLines.lineEnd",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "slide.moveSlide",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.transition",
+        "slide.editTheme",
+        "slide.changeTheme",
+        "slide.moveSlide.up",
+        "slide.moveSlide.down",
+        "slide.moveSlide.toBeginning",
+        "slide.moveSlide.toEnd",
+        "arrange.order",
+        "arrange.align",
+        "arrange.distribute",
+        "arrange.centerOnPage",
+        "arrange.rotate",
+        "arrange.group",
+        "arrange.ungroup",
+        "arrange.regroup",
+        "tools.spelling",
+        "tools.notificationSettings",
+        "tools.preferences",
+        "tools.accessibilitySettings",
+        "tools.activityDashboard",
+        "tools.checkSlides",
+        "tools.advancedTools",
+        "tools.advanced",
+        "extensions.agentAccess",
+        "extensions.embedInSite",
+        "help.searchMenus",
+        "help.help",
+        "help.improve",
+        "help.keyboardShortcuts"
+      ],
+      "toolbarBare": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailBare": "default",
+      "blockSelected": true,
+      "toolbarSelected": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "view.zoom.value",
+        "view.zoom.arrow",
+        "toolbar.tail",
+        "toolbar.more",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tailSelected": "shape",
+      "contextBlock": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "arrange.distribute",
+          "label": "Distribute"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.ungroup",
+          "label": "Ungroup⌥⇧⌘G"
+        },
+        {
+          "id": "insert.link",
+          "label": "Link⌘K"
+        },
+        {
+          "id": "format.textFitting",
+          "label": "Text fitting"
+        },
+        {
+          "id": "format.dropShadow",
+          "label": "Drop shadow"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "format.changeShape",
+          "label": "Change shape"
+        },
+        {
+          "id": "format.altText",
+          "label": "Alt text⌥⌘Y"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        }
+      ],
+      "parkedToolbarVisible": [],
+      "contextSheet": [
+        {
+          "id": "edit.cut",
+          "label": "Cut⌘X"
+        },
+        {
+          "id": "edit.copy",
+          "label": "Copy⌘C"
+        },
+        {
+          "id": "edit.paste",
+          "label": "Paste⌘V"
+        },
+        {
+          "id": "edit.delete",
+          "label": "Delete⌫"
+        },
+        {
+          "id": "edit.duplicate",
+          "label": "Duplicate⌘D"
+        },
+        {
+          "id": "arrange.order",
+          "label": "Order"
+        },
+        {
+          "id": "arrange.rotate",
+          "label": "Rotate"
+        },
+        {
+          "id": "arrange.group",
+          "label": "Group⌥⌘G"
+        },
+        {
+          "id": "arrange.centerOnPage",
+          "label": "Center on page"
+        },
+        {
+          "id": "arrange.align",
+          "label": "Align"
+        },
+        {
+          "id": "format.image.replaceImage",
+          "label": "Replace image"
+        },
+        {
+          "id": "format.image.cropImage",
+          "label": "Crop image"
+        },
+        {
+          "id": "format.image.maskImage",
+          "label": "Mask image"
+        },
+        {
+          "id": "format.image.resetImage",
+          "label": "Reset image"
+        },
+        {
+          "id": "format.image.dither",
+          "label": "Dither"
+        },
+        {
+          "id": "format.image.imageOptions",
+          "label": "Image options"
+        },
+        {
+          "id": "format.formatOptions",
+          "label": "Format options"
+        },
+        {
+          "id": "format.altText",
+          "label": "Alt text⌥⌘Y"
+        },
+        {
+          "id": "insert.comment",
+          "label": "Comment⌥⌘M"
+        },
+        {
+          "id": "slide.changeBackground",
+          "label": "Change background"
+        },
+        {
+          "id": "view.guides",
+          "label": "Guides"
+        }
+      ],
+      "parkedContextVisible": [
+        "format.image.maskImage",
+        "format.image.dither",
+        "format.altText",
+        "format.dropShadow",
+        "format.changeShape",
+        "format.altText"
+      ],
+      "titleRow": [
+        "title.home",
+        "deck.name",
+        "deck.saveState",
+        "deck.lastEdit.slot",
+        "deck.lastEdit",
+        "title.presence",
+        "presence.more",
+        "title.account",
+        "title.comments.slot",
+        "title.comments",
+        "title.inbox.slot",
+        "title.inbox",
+        "present.split",
+        "present.open",
+        "present.arrow",
+        "share.slot",
+        "share.open"
+      ],
+      "parkedTitleVisible": [
+        "title.account",
+        "title.inbox"
+      ]
+    }
+  ],
+  "errors": [],
+  "initial": {
+    "setting": false,
+    "attr": null
+  },
+  "afterReload": {
+    "setting": true,
+    "attr": "",
+    "ms": 1414
+  },
+  "afterNavigation": {
+    "setting": true,
+    "attr": "",
+    "ms": 1407
+  },
+  "freshContext": {
+    "setting": false,
+    "attr": null,
+    "ms": 1820
+  },
+  "atEnd1440": {
+    "setting": false,
+    "attr": null
+  },
+  "atEnd390": {
+    "setting": false,
+    "attr": null
+  },
+  "finishedAt": "2026-09-19T16:22:26.145Z"
+}

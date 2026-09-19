@@ -1,0 +1,119 @@
+{
+  "base": "turboslide-5sw6p6url-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-19T16:27:37.890Z",
+  "endedAt": "2026-09-19T16:28:38.954Z",
+  "deckId": "untitled-20260919-bfj9",
+  "rows": [
+    {
+      "n": 1,
+      "id": "setup.deck",
+      "step": "Double click the title on /new, type, Escape",
+      "expected": "a deck at /edit/<id>",
+      "observed": "/edit/untitled-20260919-bfj9; revision 1",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "id": "setup.switch-off",
+      "step": "Tools > Advanced tools reads off",
+      "expected": "the default view",
+      "observed": "settings.advancedTools false; data-advanced-tools false",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "id": "tables.insert.grid",
+      "step": "Insert > Table, point at 4 by 3, click",
+      "expected": "the size words read 4 x 3; a 960 by 320 table with a header row lands",
+      "observed": "size words \"4 x 3\"; table table 960x320; columns 4, rows 3, header true",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "id": "tables.cells.merge-unmerge",
+      "step": "double click cell 1,0, Shift click cell 1,1; right click > Merge cells; right click the merged cell > Unmerge cells",
+      "expected": "a range ring over the two cells; one span after Merge cells; two cells again after Unmerge cells; in the default view",
+      "observed": "range ring true, chip \"Table\", session ended true; cell menu 15 rows with Merge cells enabled; spans after Merge cells [{\"row\":1,\"column\":0,\"rows\":1,\"columns\":2}] (chip \"Table\"); Unmerge cells picked; spans after []",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "id": "tables.tail.merge-unmerge-buttons",
+      "step": "the range again (double click 1,0, Shift click 1,1); the table tail Merge cells button; then its Unmerge cells button",
+      "expected": "the tail shows Merge cells enabled; one span; Unmerge cells restores two cells",
+      "observed": "range ring true, chip \"Table\"; tail toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.fillColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.font, toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.bulletedList, toolbar.bulletedList.arrow, toolbar.numberedList, toolbar.numberedList.arrow, toolbar.decreaseIndent, toolbar.increaseIndent, toolbar.clearFormatting, toolbar.formatOptions, toolbar.end, toolbar.pointer, toolbar.hideMenus; Merge cells enabled; spans after the button [{\"row\":1,\"column\":0,\"rows\":1,\"columns\":2}]; Unmerge cells clicked; spans after []",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "id": "export.html.web-page",
+      "step": "File > Download > Web page (.html) in the default view",
+      "expected": "the file arrives through the page within 30 s (the editor still the page); \\.html$ named; the bytes are the format's",
+      "observed": "\"untitled-20260919-bfj9.html\" 564181 B in 3029 ms; magic \"<!\"; the deck title in the page true; snackbar \"The web page is ready\"; editor still the page true",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "id": "export.jpg.current-slide",
+      "step": "File > Download > JPEG image (.jpg, current slide) in the default view",
+      "expected": "the file arrives through the page within 30 s (the editor still the page); \\.jpe?g$ named; the bytes are the format's",
+      "observed": "\"untitled-20260919-bfj9-blank-1.jpg\" 56564 B in 4415 ms; magic \"ÿØÿ\"; a JPEG; snackbar \"\"; editor still the page true",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "id": "export.png.current-slide",
+      "step": "File > Download > PNG image (.png, current slide) in the default view",
+      "expected": "the file arrives through the page within 30 s (the editor still the page); \\.png$ named; the bytes are the format's",
+      "observed": "\"untitled-20260919-bfj9-blank-1.png\" 24934 B in 4592 ms; magic \"PNG\"; a PNG; snackbar \"\"; editor still the page true",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "id": "export.zip.bundle",
+      "step": "File > Download > Turboslide bundle (.zip) in the default view",
+      "expected": "the file arrives through the page within 30 s (the editor still the page); \\.zip$ named; the bytes are the format's",
+      "observed": "\"untitled-20260919-bfj9-r7.zip\" 402974 B in 2073 ms; magic \"PK\"; deck.json named in the zip true; snackbar \"The bundle is at untitled-20260919-bfj9.zip\"; editor still the page true",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "id": "setup.switch-off-end",
+      "step": "Tools > Advanced tools still reads off at the end",
+      "expected": "the default view throughout",
+      "observed": "settings.advancedTools false",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "id": "cleanup.trash",
+      "step": "File > Move to trash",
+      "expected": "/decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "id": "cleanup.delete-forever",
+      "step": "Delete forever on /decks/trash",
+      "expected": "the card leaves",
+      "observed": "untitled-20260919-bfj9",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "id": "cleanup.404",
+      "step": "GET /edit/<id> after the delete",
+      "expected": "404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

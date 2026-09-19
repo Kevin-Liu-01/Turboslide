@@ -67,7 +67,10 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
     attempts.push(r);
     if (r.shot) shotPath = r.shot;
@@ -91,15 +94,23 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     evidence:
       attempts.length > 1
         ? attempts.map((a, i) => `attempt ${i + 1}: ${a.evidence}`).join(' | ')
-        : attempts[0]?.evidence ?? '',
+        : (attempts[0]?.evidence ?? ''),
     shot: shotPath,
     consoleErrors: errs,
   };
   rows.push(entry);
   save();
   const tag =
-    result === 'works' ? 'ok  ' : result === 'broken' ? 'FAIL' : result === 'flaky' ? 'FLKY' : 'n/d ';
-  console.log(`${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`);
+    result === 'works'
+      ? 'ok  '
+      : result === 'broken'
+        ? 'FAIL'
+        : result === 'flaky'
+          ? 'FLKY'
+          : 'n/d ';
+  console.log(
+    `${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`,
+  );
   return entry;
 }
 
@@ -176,9 +187,17 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
   }
 };
 const settled = async (page, timeout = 20_000) =>
-  pollUntil(() => state(page), (s) => (s.sync?.pending ?? s.pending ?? 0) === 0, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => (s.sync?.pending ?? s.pending ?? 0) === 0,
+    timeout,
+  );
 const connected = (page) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, 45_000);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    45_000,
+  );
 const activeSlide = async (page) => (await state(page)).slideId;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
@@ -327,7 +346,10 @@ const counter = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('[data-control="view.count"]');
     return el
-      ? { text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), label: el.getAttribute('aria-label') }
+      ? {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          label: el.getAttribute('aria-label'),
+        }
       : null;
   });
 const hashOf = (page) => page.evaluate(() => window.location.hash);
@@ -376,8 +398,12 @@ const gridFacts = (page) =>
     return {
       grid: Boolean(grid),
       tiles: grid ? grid.querySelectorAll('.pt-thumb').length : 0,
-      tileIds: grid ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id')) : [],
-      activeTile: grid ? grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null : null,
+      tileIds: grid
+        ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id'))
+        : [],
+      activeTile: grid
+        ? (grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null)
+        : null,
       selectedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-selected').length : 0,
       skippedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-skipped').length : 0,
       filmHidden: film
@@ -385,7 +411,9 @@ const gridFacts = (page) =>
         : null,
       filmWidth: film ? Math.round(film.getBoundingClientRect().width) : null,
       stageShown: stage ? stage.getBoundingClientRect().width > 0 : false,
-      gridPressed: document.querySelector('[data-control="view.gridView"]')?.getAttribute('aria-pressed'),
+      gridPressed: document
+        .querySelector('[data-control="view.gridView"]')
+        ?.getAttribute('aria-pressed'),
       filmPressed: document
         .querySelector('[data-control="view.filmstripView"]')
         ?.getAttribute('aria-pressed'),
@@ -424,23 +452,32 @@ const focusWorkspace = async (page) => {
   await clearAll(page);
   const wrap = await rectOf(page, '.ts-stagewrap.ts-editor');
   const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-  if (wrap && sheet) await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
+  if (wrap && sheet)
+    await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
   await sleep(200);
 };
 /** Focuses a card by clicking it, the way a person does; answers whether the card took focus. */
 const focusCard = async (page, id) => {
   await clickCard(page, id);
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await sleep(300);
   return page.evaluate((sid) => document.activeElement?.getAttribute('data-id') === sid, id);
 };
-const waitOrder = (page, test, timeout = 20_000) => pollUntil(() => slideOrder(page), test, timeout);
+const waitOrder = (page, test, timeout = 20_000) =>
+  pollUntil(() => slideOrder(page), test, timeout);
 
 // ---------------------------------------------------------------------------------------------
 // the run: the modifier click rows of the filmstrip (run 1 drove them without the keys held)
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
@@ -476,7 +513,11 @@ try {
   await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
   await typeHuman(page, 'Q3 pipeline review for Acme');
   await press(page, 'Escape');
-  await pollUntil(() => state(page), (v) => v.revision >= 1, 30_000);
+  await pollUntil(
+    () => state(page),
+    (v) => v.revision >= 1,
+    30_000,
+  );
   await settled(page, 30_000);
   await closeNamePrompt(page);
   await connected(page);
@@ -489,72 +530,110 @@ try {
   }
   console.log(`deck ${deckId} with ${(await slideOrder(page)).length} slides`);
 
-  await row('Filmstrip selection', 'Shift click the fourth card with the second current, then Cmd click the first, then a plain click (Shift and Cmd held on the keyboard)', async () => {
-    const order = await slideOrder(page);
-    await clearAll(page);
-    await clickCard(page, order[1]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
-    await clickCard(page, order[3], { modifiers: ['Shift'] });
-    await sleep(400);
-    const shifted = await cards(page);
-    const sh = await shot('filmstrip-shift-select');
-    await clickCard(page, order[0], { modifiers: ['Meta'] });
-    await sleep(400);
-    const meta = await cards(page);
-    await clickCard(page, order[0]);
-    await sleep(300);
-    const single = await cards(page);
-    const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
-    return {
-      ok: sel(shifted).join() === order.slice(1, 4).join() && sel(meta).join() === order.slice(0, 4).join() && sel(single).join() === order[0],
-      evidence: `after Shift click ${cardsBrief(shifted)}; after Cmd click ${cardsBrief(meta)}; after a plain click ${cardsBrief(single)}; active ${await activeSlide(page)} (* current, + selected, @ focused)`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Filmstrip selection',
+    'Shift click the fourth card with the second current, then Cmd click the first, then a plain click (Shift and Cmd held on the keyboard)',
+    async () => {
+      const order = await slideOrder(page);
+      await clearAll(page);
+      await clickCard(page, order[1]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        8000,
+      );
+      await clickCard(page, order[3], { modifiers: ['Shift'] });
+      await sleep(400);
+      const shifted = await cards(page);
+      const sh = await shot('filmstrip-shift-select');
+      await clickCard(page, order[0], { modifiers: ['Meta'] });
+      await sleep(400);
+      const meta = await cards(page);
+      await clickCard(page, order[0]);
+      await sleep(300);
+      const single = await cards(page);
+      const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
+      return {
+        ok:
+          sel(shifted).join() === order.slice(1, 4).join() &&
+          sel(meta).join() === order.slice(0, 4).join() &&
+          sel(single).join() === order[0],
+        evidence: `after Shift click ${cardsBrief(shifted)}; after Cmd click ${cardsBrief(meta)}; after a plain click ${cardsBrief(single)}; active ${await activeSlide(page)} (* current, + selected, @ focused)`,
+        shot: sh,
+      };
+    },
+  );
 
-  await row('Filmstrip selection', 'Cmd click a second card, then Cmd click it again to drop it from the selection', async () => {
-    const order = await slideOrder(page);
-    await clearAll(page);
-    await clickCard(page, order[0]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[0], 8000);
-    await clickCard(page, order[2], { modifiers: ['Meta'] });
-    await sleep(400);
-    const added = await cards(page);
-    await clickCard(page, order[2], { modifiers: ['Meta'] });
-    await sleep(400);
-    const dropped = await cards(page);
-    const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
-    return {
-      ok: sel(added).join() === [order[0], order[2]].join() && sel(dropped).join() === order[0],
-      evidence: `after Cmd click ${cardsBrief(added)}; after Cmd click again ${cardsBrief(dropped)}`,
-    };
-  });
+  await row(
+    'Filmstrip selection',
+    'Cmd click a second card, then Cmd click it again to drop it from the selection',
+    async () => {
+      const order = await slideOrder(page);
+      await clearAll(page);
+      await clickCard(page, order[0]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[0],
+        8000,
+      );
+      await clickCard(page, order[2], { modifiers: ['Meta'] });
+      await sleep(400);
+      const added = await cards(page);
+      await clickCard(page, order[2], { modifiers: ['Meta'] });
+      await sleep(400);
+      const dropped = await cards(page);
+      const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
+      return {
+        ok: sel(added).join() === [order[0], order[2]].join() && sel(dropped).join() === order[0],
+        evidence: `after Cmd click ${cardsBrief(added)}; after Cmd click again ${cardsBrief(dropped)}`,
+      };
+    },
+  );
 
-  await row('Delete slide', 'Select two cards with Shift click, press Delete, then Undo from the snackbar', async () => {
-    const before = await slideOrder(page);
-    const a = before[before.length - 2];
-    const b = before[before.length - 1];
-    await clearAll(page);
-    await clickCard(page, a);
-    await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
-    await clickCard(page, b, { modifiers: ['Shift'] });
-    await sleep(400);
-    const cs = await cards(page);
-    const focused = await page.evaluate(() => document.activeElement?.classList.contains('ts-card'));
-    await press(page, 'Delete');
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null && v.action !== null, 4000);
-    const sh = await shot('delete-two-snackbar');
-    const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
-    if (!sb || sb.action === null) return { ok: false, evidence: `selected ${cardsBrief(cs)}; ${before.length} -> ${mid.length}; snackbar ${JSON.stringify(sb)}`, shot: sh };
-    await clickControl(page, 'snackbar.action');
-    const after = await waitOrder(page, (o) => o.length === before.length);
-    await settled(page);
-    return {
-      ok: mid.length === before.length - 2 && after.join(',') === before.join(','),
-      evidence: `selected ${cardsBrief(cs)}; focused card ${focused}; ${before.length} -> ${mid.length} (snackbar "${sb.text}" [${sb.action}]) -> ${after.length}; order restored ${after.join(',') === before.join(',')}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Delete slide',
+    'Select two cards with Shift click, press Delete, then Undo from the snackbar',
+    async () => {
+      const before = await slideOrder(page);
+      const a = before[before.length - 2];
+      const b = before[before.length - 1];
+      await clearAll(page);
+      await clickCard(page, a);
+      await pollUntil(
+        () => activeSlide(page),
+        (x) => x === a,
+        8000,
+      );
+      await clickCard(page, b, { modifiers: ['Shift'] });
+      await sleep(400);
+      const cs = await cards(page);
+      const focused = await page.evaluate(() =>
+        document.activeElement?.classList.contains('ts-card'),
+      );
+      await press(page, 'Delete');
+      const sb = await pollUntil(
+        () => snackbar(page),
+        (v) => v !== null && v.action !== null,
+        4000,
+      );
+      const sh = await shot('delete-two-snackbar');
+      const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
+      if (!sb || sb.action === null)
+        return {
+          ok: false,
+          evidence: `selected ${cardsBrief(cs)}; ${before.length} -> ${mid.length}; snackbar ${JSON.stringify(sb)}`,
+          shot: sh,
+        };
+      await clickControl(page, 'snackbar.action');
+      const after = await waitOrder(page, (o) => o.length === before.length);
+      await settled(page);
+      return {
+        ok: mid.length === before.length - 2 && after.join(',') === before.join(','),
+        evidence: `selected ${cardsBrief(cs)}; focused card ${focused}; ${before.length} -> ${mid.length} (snackbar "${sb.text}" [${sb.action}]) -> ${after.length}; order restored ${after.join(',') === before.join(',')}`,
+        shot: sh,
+      };
+    },
+  );
 
   await row('Duplicate slide', 'Select two cards with Shift click and press Cmd+D', async () => {
     const before = await slideOrder(page);
@@ -562,7 +641,11 @@ try {
     const b = before[2];
     await clearAll(page);
     await clickCard(page, a);
-    await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
+    await pollUntil(
+      () => activeSlide(page),
+      (x) => x === a,
+      8000,
+    );
     await clickCard(page, b, { modifiers: ['Shift'] });
     await sleep(400);
     const cs = await cards(page);
@@ -579,121 +662,194 @@ try {
     };
   });
 
-  await row('Reorder slides', 'Select two cards with Shift click and drag them above the first card', async () => {
-    const before = await slideOrder(page);
-    const a = before[2];
-    const b = before[3];
-    await clearAll(page);
-    await clickCard(page, a);
-    await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
-    await clickCard(page, b, { modifiers: ['Shift'] });
-    await sleep(400);
-    const cs = await cards(page);
-    const from = center(await cardRect(page, b));
-    const to = await cardRect(page, before[0]);
-    await dragCard(page, from, { x: to.x + to.w / 2, y: to.y + 6 });
-    const after = await waitOrder(page, (o) => o[0] === a && o[1] === b, 12_000);
-    await settled(page);
-    const sh = await shot('reorder-two-drag');
-    if (after[0] === a) {
-      await press(page, 'Meta+z');
-      await waitOrder(page, (o) => o.join(',') === before.join(','), 12_000);
+  await row(
+    'Reorder slides',
+    'Select two cards with Shift click and drag them above the first card',
+    async () => {
+      const before = await slideOrder(page);
+      const a = before[2];
+      const b = before[3];
+      await clearAll(page);
+      await clickCard(page, a);
+      await pollUntil(
+        () => activeSlide(page),
+        (x) => x === a,
+        8000,
+      );
+      await clickCard(page, b, { modifiers: ['Shift'] });
+      await sleep(400);
+      const cs = await cards(page);
+      const from = center(await cardRect(page, b));
+      const to = await cardRect(page, before[0]);
+      await dragCard(page, from, { x: to.x + to.w / 2, y: to.y + 6 });
+      const after = await waitOrder(page, (o) => o[0] === a && o[1] === b, 12_000);
       await settled(page);
-    }
-    return { ok: after[0] === a && after[1] === b, evidence: `selected ${cardsBrief(cs)}; ${before.join(',')} -> ${after.join(',')}`, shot: sh };
-  });
-
-  await row('Skip slide', 'Select two cards with Shift click, right click, Skip slide; both fade; the snackbar counts them', async () => {
-    const before = await slideOrder(page);
-    const a = before[before.length - 2];
-    const b = before[before.length - 1];
-    await clearAll(page);
-    await clickCard(page, a);
-    await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
-    await clickCard(page, b, { modifiers: ['Shift'] });
-    await sleep(400);
-    await openCardMenu(page, b);
-    await clickIn(page, CTX, 'menu.slide.skipSlide');
-    const sa = await pollUntil(() => slideJson(page, a), (s) => s.skip === true, 15_000);
-    const sb2 = await slideJson(page, b);
-    const sb = await snackbar(page);
-    await sleep(400);
-    const cs = await cards(page);
-    const sh = await shot('skip-two');
-    await openCardMenu(page, b);
-    const label = await rowState(page, CTX, 'menu.slide.skipSlide');
-    await clickIn(page, CTX, 'menu.slide.skipSlide');
-    const back = await pollUntil(() => slideJson(page, a), (s) => s.skip !== true, 15_000);
-    await settled(page);
-    return {
-      ok: sa.skip === true && sb2.skip === true && cs.filter((c) => c.skipped).length === 2 && back.skip !== true,
-      evidence: `skip ${a} ${sa.skip}, ${b} ${sb2.skip}; cards ${cardsBrief(cs)}; snackbar ${JSON.stringify(sb)}; row then "${label.label}"; after Unskip ${back.skip}`,
-      shot: sh,
-    };
-  });
-
-  await row('Grid view', 'In the grid, Shift click a second tile then Delete removes both; Undo restores them', async () => {
-    const before = await slideOrder(page);
-    await clearAll(page);
-    await clickControl(page, 'view.gridView');
-    await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === before.length, 8000);
-    const a = before[before.length - 2];
-    const b = before[before.length - 1];
-    const ra = await rectOf(page, `.pt-grid .pt-thumb[data-id="${a}"]`);
-    const rb = await rectOf(page, `.pt-grid .pt-thumb[data-id="${b}"]`);
-    await clickAt(page, ra.x + ra.w / 2, ra.y + ra.h / 2);
-    await sleep(300);
-    await clickAt(page, rb.x + rb.w / 2, rb.y + rb.h / 2, { modifiers: ['Shift'] });
-    await sleep(400);
-    const g = await gridFacts(page);
-    const sh = await shot('grid-shift-select');
-    await press(page, 'Delete');
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 4000);
-    const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
-    let after = mid;
-    if (mid.length !== before.length) {
-      if (sb?.action) await clickControl(page, 'snackbar.action');
-      else {
+      const sh = await shot('reorder-two-drag');
+      if (after[0] === a) {
         await press(page, 'Meta+z');
-        if (mid.length === before.length - 2) await press(page, 'Meta+z');
+        await waitOrder(page, (o) => o.join(',') === before.join(','), 12_000);
+        await settled(page);
       }
-      after = await waitOrder(page, (o) => o.length === before.length, 15_000);
+      return {
+        ok: after[0] === a && after[1] === b,
+        evidence: `selected ${cardsBrief(cs)}; ${before.join(',')} -> ${after.join(',')}`,
+        shot: sh,
+      };
+    },
+  );
+
+  await row(
+    'Skip slide',
+    'Select two cards with Shift click, right click, Skip slide; both fade; the snackbar counts them',
+    async () => {
+      const before = await slideOrder(page);
+      const a = before[before.length - 2];
+      const b = before[before.length - 1];
+      await clearAll(page);
+      await clickCard(page, a);
+      await pollUntil(
+        () => activeSlide(page),
+        (x) => x === a,
+        8000,
+      );
+      await clickCard(page, b, { modifiers: ['Shift'] });
+      await sleep(400);
+      await openCardMenu(page, b);
+      await clickIn(page, CTX, 'menu.slide.skipSlide');
+      const sa = await pollUntil(
+        () => slideJson(page, a),
+        (s) => s.skip === true,
+        15_000,
+      );
+      const sb2 = await slideJson(page, b);
+      const sb = await snackbar(page);
+      await sleep(400);
+      const cs = await cards(page);
+      const sh = await shot('skip-two');
+      await openCardMenu(page, b);
+      const label = await rowState(page, CTX, 'menu.slide.skipSlide');
+      await clickIn(page, CTX, 'menu.slide.skipSlide');
+      const back = await pollUntil(
+        () => slideJson(page, a),
+        (s) => s.skip !== true,
+        15_000,
+      );
       await settled(page);
-    }
-    await clickControl(page, 'view.filmstripView');
-    await pollUntil(() => gridFacts(page), (gg) => !gg.grid, 8000);
-    return {
-      ok: g.selectedTiles === 2 && mid.length === before.length - 2 && after.join(',') === before.join(','),
-      evidence: `selected tiles ${g.selectedTiles}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}) -> ${after.length}; restored ${after.join(',') === before.join(',')}`,
-      shot: sh,
-    };
-  });
-  await row('Slide counter', 'The sheet footer counter follows a card click, a New slide and a Delete', async () => {
-    const order = await slideOrder(page);
-    await clearAll(page);
-    await clickCard(page, order[2]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[2], 8000);
-    await sleep(500);
-    const c0 = await footerCounter(page);
-    const cs = await cards(page);
-    await clickControl(page, 'toolbar.newSlide');
-    const mid = await waitOrder(page, (o) => o.length === order.length + 1);
-    await sleep(600);
-    const c1 = await footerCounter(page);
-    const added = mid.find((id) => !order.includes(id));
-    await focusCard(page, added);
-    await press(page, 'Delete');
-    await waitOrder(page, (o) => o.length === order.length);
-    await sleep(800);
-    const c2 = await footerCounter(page);
-    await settled(page);
-    return {
-      ok: c0?.n === 3 && c0?.total === order.length && c1?.n === 4 && c1?.total === order.length + 1 && c2?.total === order.length,
-      evidence: `on card 3 footer ${JSON.stringify(c0)} (cards ${cs.map((c) => c.n).join(',')}); after New slide ${JSON.stringify(c1)}; after Delete ${JSON.stringify(c2)}; toolbar view.count ${await has(page, '[data-control="view.count"]')}`,
-    };
-  });
+      return {
+        ok:
+          sa.skip === true &&
+          sb2.skip === true &&
+          cs.filter((c) => c.skipped).length === 2 &&
+          back.skip !== true,
+        evidence: `skip ${a} ${sa.skip}, ${b} ${sb2.skip}; cards ${cardsBrief(cs)}; snackbar ${JSON.stringify(sb)}; row then "${label.label}"; after Unskip ${back.skip}`,
+        shot: sh,
+      };
+    },
+  );
+
+  await row(
+    'Grid view',
+    'In the grid, Shift click a second tile then Delete removes both; Undo restores them',
+    async () => {
+      const before = await slideOrder(page);
+      await clearAll(page);
+      await clickControl(page, 'view.gridView');
+      await pollUntil(
+        () => gridFacts(page),
+        (g) => g.grid && g.tiles === before.length,
+        8000,
+      );
+      const a = before[before.length - 2];
+      const b = before[before.length - 1];
+      const ra = await rectOf(page, `.pt-grid .pt-thumb[data-id="${a}"]`);
+      const rb = await rectOf(page, `.pt-grid .pt-thumb[data-id="${b}"]`);
+      await clickAt(page, ra.x + ra.w / 2, ra.y + ra.h / 2);
+      await sleep(300);
+      await clickAt(page, rb.x + rb.w / 2, rb.y + rb.h / 2, { modifiers: ['Shift'] });
+      await sleep(400);
+      const g = await gridFacts(page);
+      const sh = await shot('grid-shift-select');
+      await press(page, 'Delete');
+      const sb = await pollUntil(
+        () => snackbar(page),
+        (v) => v !== null,
+        4000,
+      );
+      const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
+      let after = mid;
+      if (mid.length !== before.length) {
+        if (sb?.action) await clickControl(page, 'snackbar.action');
+        else {
+          await press(page, 'Meta+z');
+          if (mid.length === before.length - 2) await press(page, 'Meta+z');
+        }
+        after = await waitOrder(page, (o) => o.length === before.length, 15_000);
+        await settled(page);
+      }
+      await clickControl(page, 'view.filmstripView');
+      await pollUntil(
+        () => gridFacts(page),
+        (gg) => !gg.grid,
+        8000,
+      );
+      return {
+        ok:
+          g.selectedTiles === 2 &&
+          mid.length === before.length - 2 &&
+          after.join(',') === before.join(','),
+        evidence: `selected tiles ${g.selectedTiles}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}) -> ${after.length}; restored ${after.join(',') === before.join(',')}`,
+        shot: sh,
+      };
+    },
+  );
+  await row(
+    'Slide counter',
+    'The sheet footer counter follows a card click, a New slide and a Delete',
+    async () => {
+      const order = await slideOrder(page);
+      await clearAll(page);
+      await clickCard(page, order[2]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[2],
+        8000,
+      );
+      await sleep(500);
+      const c0 = await footerCounter(page);
+      const cs = await cards(page);
+      await clickControl(page, 'toolbar.newSlide');
+      const mid = await waitOrder(page, (o) => o.length === order.length + 1);
+      await sleep(600);
+      const c1 = await footerCounter(page);
+      const added = mid.find((id) => !order.includes(id));
+      await focusCard(page, added);
+      await press(page, 'Delete');
+      await waitOrder(page, (o) => o.length === order.length);
+      await sleep(800);
+      const c2 = await footerCounter(page);
+      await settled(page);
+      return {
+        ok:
+          c0?.n === 3 &&
+          c0?.total === order.length &&
+          c1?.n === 4 &&
+          c1?.total === order.length + 1 &&
+          c2?.total === order.length,
+        evidence: `on card 3 footer ${JSON.stringify(c0)} (cards ${cs.map((c) => c.n).join(',')}); after New slide ${JSON.stringify(c1)}; after Delete ${JSON.stringify(c2)}; toolbar view.count ${await has(page, '[data-control="view.count"]')}`,
+      };
+    },
+  );
 } catch (error) {
-  rows.push({ n: rows.length + 1, feature: 'the run', interaction: 'ran to completion', result: 'broken', attempts: 1, evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`, shot: null, consoleErrors: [] });
+  rows.push({
+    n: rows.length + 1,
+    feature: 'the run',
+    interaction: 'ran to completion',
+    result: 'broken',
+    attempts: 1,
+    evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+    shot: null,
+    consoleErrors: [],
+  });
   save();
 } finally {
   if (deckId && /^untitled-/.test(deckId)) {
@@ -715,19 +871,45 @@ try {
       await clickControl(page, 'trash.confirm.ok');
       await card.waitFor({ state: 'detached', timeout: 30_000 });
       trashed = true;
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash (run 2)', result: 'works', attempts: 1, evidence: `deck ${deckId} left the trash`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash (run 2)',
+        result: 'works',
+        attempts: 1,
+        evidence: `deck ${deckId} left the trash`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash (run 2)', result: 'broken', attempts: 1, evidence: `failed: ${error instanceof Error ? error.message : String(error)}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash (run 2)',
+        result: 'broken',
+        attempts: 1,
+        evidence: `failed: ${error instanceof Error ? error.message : String(error)}`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe tells the truth
@@ -742,10 +924,21 @@ try {
       if ((statusDeck === 404 && statusEdit === 404) || Date.now() > until) break;
       await sleep(2000);
     }
-    rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> and /edit/<id> after the delete (run 2)', result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken', attempts: 1, evidence: `/deck ${statusDeck}, /edit ${statusEdit}`, shot: null, consoleErrors: [] });
+    rows.push({
+      n: rows.length + 1,
+      feature: 'cleanup',
+      interaction: 'GET /deck/<id> and /edit/<id> after the delete (run 2)',
+      result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken',
+      attempts: 1,
+      evidence: `/deck ${statusDeck}, /edit ${statusEdit}`,
+      shot: null,
+      consoleErrors: [],
+    });
   }
   save();
   await browser.close().catch(() => undefined);
   const counts = rows.reduce((acc, r) => ({ ...acc, [r.result]: (acc[r.result] ?? 0) + 1 }), {});
-  console.log(`\naudit-slides run 2: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`);
+  console.log(
+    `\naudit-slides run 2: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`,
+  );
 }

@@ -202,8 +202,16 @@ describe('the editor shell in its default state', () => {
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
     expect(comment.getAttribute('aria-disabled')).toBeNull();
     expect(toolbar.querySelector('[data-control="toolbar.transition"]')).toBeNull();
-    for (const parked of ['toolbar.paintFormat', 'toolbar.theme', 'toolbar.hideMenus'])
-      expect(toolbar.querySelector(`[data-control="${parked}"]`), parked).toBeNull();
+    /* the return round (docs/RETURN.md 3.2): Paint format, Insert shape, Insert line, Theme and
+       the Hide the menus chevron are back in the default view */
+    for (const returned of [
+      'toolbar.paintFormat',
+      'toolbar.insertShape',
+      'toolbar.insertLine',
+      'toolbar.theme',
+      'toolbar.hideMenus',
+    ])
+      expect(toolbar.querySelector(`[data-control="${returned}"]`), returned).not.toBeNull();
     expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
     expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();
     /* the bottom bar's view buttons follow View > Grid view, parked with the switch off (3.1, 3.2) */
@@ -272,9 +280,10 @@ describe('the editor shell in its default state', () => {
     fireEvent.click(file);
     const menu = screen.getByRole('menu', { name: 'File menu' });
     expect(menu.querySelector('[data-menu-item="file.makeCopy"]')).not.toBeNull();
-    /* SPEC-3 13.3's Email row is Later and Open is parked, so both are absent while Tools >
-       Advanced tools is off (docs/FOCUS.md 3.1, 3.2); the test above asserts Email behind the switch */
-    expect(menu.querySelector('[data-menu-item="file.open"]')).toBeNull();
+    /* SPEC-3 13.3's Email row is Later, so it is absent while Tools > Advanced tools is off
+       (docs/FOCUS.md 3.1; the test above asserts it behind the switch); Open returned to the
+       default view in the return round (docs/RETURN.md 2.17) */
+    expect(menu.querySelector('[data-menu-item="file.open"]')).not.toBeNull();
     expect(menu.querySelector('[data-menu-item="file.email"]')).toBeNull();
     expect(menu.querySelector('[data-menu-item="file.move"]')).toBeNull();
     for (const text of defaultViewText(menu)) expect(forbiddenWordsIn(text), text).toEqual([]);
@@ -312,13 +321,14 @@ describe('the editor shell in its default state', () => {
     const ids = [...toolbar.querySelectorAll<HTMLElement>('[data-control^="toolbar."]')].map(
       (el) => el.dataset.control as string,
     );
-    /* the parked controls of the text tail are absent, the core ones present, Font disabled */
+    /* the parked controls of the text tail are absent (the fill and border controls, question 8
+       of docs/RETURN.md section 9), the core ones present with Highlight color back (RETURN.md
+       2.11), Font disabled */
     for (const parked of [
       'toolbar.fillColor',
       'toolbar.borderColor',
       'toolbar.borderWeight',
       'toolbar.borderDash',
-      'toolbar.highlightColor',
     ])
       expect(ids, parked).not.toContain(parked);
     for (const core of [
@@ -328,6 +338,7 @@ describe('the editor shell in its default state', () => {
       'toolbar.italic',
       'toolbar.underline',
       'toolbar.textColor',
+      'toolbar.highlightColor',
       'toolbar.insertLink',
       'toolbar.align',
       'toolbar.spacing',
@@ -388,11 +399,13 @@ describe('the editor shell in its default state', () => {
     probe.remove();
   });
 
-  it('the Full screen chord and the Hide the menus chevron do nothing while Advanced tools is off (docs/FOCUS.md 3.2, 3.3)', () => {
+  it('the Full screen chord and the Hide the menus chevron work with Advanced tools off since the return round (docs/RETURN.md 2.16, 3.2)', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
-    expect(container.querySelector('[data-control="toolbar.hideMenus"]')).toBeNull();
+    expect(container.querySelector('[data-control="toolbar.hideMenus"]')).not.toBeNull();
     fireEvent.keyDown(document.body, { key: 'F', code: 'KeyF', ctrlKey: true, shiftKey: true });
-    expect(container.querySelector('[data-control="toolbar.showMenus"]')).toBeNull();
+    expect(container.querySelector('[data-control="toolbar.showMenus"]')).not.toBeNull();
+    expect(container.querySelector('.pt-viewer')?.classList.contains('is-compact')).toBe(true);
+    fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(container.querySelector('.pt-viewer')?.classList.contains('is-compact')).toBe(false);
   });
 
@@ -492,18 +505,30 @@ describe('the Insert menu, compact mode and the title row', () => {
     clickMenuPath(first.container, 'insert', 'insert.textBox');
     expect(onDrawTool).toHaveBeenCalledWith({ kind: 'text' });
     expect(dispatch).not.toHaveBeenCalled();
-    /* docs/FOCUS.md section 4 under the orchestrator's ruling (1), cycle 2 (build/b3.md R14): Insert >
-       Shape and Insert > Line leave the default view whole, with the two toolbar buttons; the
-       Insert menu keeps the seller's rows. The rows were asserted as named rows in the default view
-       in cycle 1 and are asserted behind the switch below, never deleted */
+    /* docs/FOCUS.md section 4 under the orchestrator's ruling (1), cycle 2 (build/b3.md R14) took
+       Insert > Shape and Insert > Line out of the default view whole, with the two toolbar
+       buttons; the return round brought them back (docs/RETURN.md 2.2, 2.3, 3.2), so the Insert
+       menu lists them beside the seller's rows with the switch off, and the parked kinds (the
+       galleries, Rule, Curve, Polyline, Scribble) stay behind the switch */
     clickMenuPath(first.container, 'insert');
-    for (const parked of ['insert.shape', 'insert.line'])
-      expect(document.querySelector(`[data-menu-item="${parked}"]`), parked).toBeNull();
-    for (const kept of ['insert.newSlide', 'insert.textBox', 'insert.image', 'insert.link'])
+    for (const kept of [
+      'insert.newSlide',
+      'insert.textBox',
+      'insert.image',
+      'insert.link',
+      'insert.shape',
+      'insert.line',
+      'insert.table',
+      'insert.chart',
+      'insert.diagram',
+      'insert.wordArt',
+    ])
       expect(document.querySelector(`[data-menu-item="${kept}"]`), kept).not.toBeNull();
+    for (const parked of ['insert.specialCharacters', 'insert.icon', 'insert.material'])
+      expect(document.querySelector(`[data-menu-item="${parked}"]`), parked).toBeNull();
     fireEvent.keyDown(document.body, { key: 'Escape' });
     for (const control of ['toolbar.insertShape', 'toolbar.insertLine'])
-      expect(first.container.querySelector(`[data-control="${control}"]`), control).toBeNull();
+      expect(first.container.querySelector(`[data-control="${control}"]`), control).not.toBeNull();
     cleanup();
     /* with the switch on the two menus and the two buttons are back: the Shapes row lists the
        three named rows (docs/FOCUS.md section 4; the matrix row `shapes.insert.named-rows` is

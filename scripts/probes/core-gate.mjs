@@ -5,7 +5,8 @@
 // under apps/studio/e2e/core/ with Playwright's JSON reporter, merges every row's result by its
 // matrix id, writes the matrix table with every row id and its result, and exits 1 on any
 // failed or not driven driven row unless its feature is in the committed parked list (6.2;
-// `surface` cannot be listed). A row no driver recorded is "no step" and fails the run whatever
+// an unparkable feature cannot be listed) or the row is one of the list's `parkedRows` (a row
+// carrying `parks`, docs/RETURN.md section 1 rule 2; the run's `wouldParkRows` names them). A row no driver recorded is "no step" and fails the run whatever
 // the list says. Not driven rows are listed by id and reason and are never counted as passed.
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
@@ -148,7 +149,7 @@ mkdirSync(OUT, { recursive: true });
 
 const parked = PARKED
   ? readParkedList(resolve(ROOT, PARKED))
-  : { commit: null, parkedFeatures: [] };
+  : { commit: null, parkedFeatures: [], parkedRows: [] };
 const startedAt = Date.now();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -404,7 +405,7 @@ const noStep = table.filter((r) => r.result === 'no step').map((r) => r.id);
 const manual = table
   .filter((r) => r.result === 'not driven' && isManualRow(coreRow(r.id)))
   .map((r) => r.id);
-const verdict = shipVerdict(results, parked.parkedFeatures, judged);
+const verdict = shipVerdict(results, parked, judged);
 const parking = parkedFeaturesOf(results, judged);
 const retriesOk = specs === null || (specs.retries === 0 && specs.retried === 0);
 const count = (word) => table.filter((r) => r.result === word).length;
@@ -444,6 +445,8 @@ const summary = {
   results,
   verdict,
   wouldPark: parking.parked,
+  /* docs/RETURN.md section 1 rule 2: the red rows whose own controls a ship would keep parked */
+  wouldParkRows: parking.parkedRows,
   blocking: parking.blocking,
   retriesOk,
   exitCode,
@@ -464,7 +467,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1): ${parking.parked.join(', ') || 'none'}; surface rows blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',

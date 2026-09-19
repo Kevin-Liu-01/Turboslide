@@ -1,0 +1,2107 @@
+{
+  "base": "http://localhost:4401",
+  "at": "2026-09-19T01:12:42.291Z",
+  "deckId": null,
+  "rows": [
+    {
+      "n": 1,
+      "area": "Scratch deck",
+      "interaction": "Double click the title on /new, type, Escape: the first write creates the deck",
+      "result": "broken",
+      "evidence": "/new; revision 0"
+    },
+    {
+      "n": 2,
+      "area": "Appearance",
+      "interaction": "The appearance the fresh browser boots into",
+      "result": "works",
+      "evidence": "data-theme dark"
+    },
+    {
+      "n": 3,
+      "area": "Appearance",
+      "interaction": "View > Appearance > dark with the switch off",
+      "result": "works",
+      "evidence": "already dark"
+    },
+    {
+      "n": 4,
+      "area": "Separators",
+      "interaction": "The eleven seams from the pixels (dark-1x)",
+      "result": "works",
+      "evidence": "title -> menu bar: 1px #3a3a3a 1.77; menu bar -> toolbar: none; toolbar -> sheet: 1px #3a3a3a 1.77; toolbar -> filmstrip: 1px #3a3a3a 1.77; stage -> notes pane: 1px #3a3a3a 1.77; notes pane -> bottom bar: 1px #3a3a3a 1.77; filmstrip -> bottom bar: 1px #3a3a3a 1.77; filmstrip -> sheet (vertical): 1px #3a3a3a 1.77; filmstrip -> sheet, upper (vertical): 1px #3a3a3a 1.77"
+    },
+    {
+      "n": 5,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (dark-1x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px 8px 8px 8px border 1px rgb(242, 242, 240) bg rgb(242, 242, 240); label half 102.9 by 30 radius 0px 0px 0px 0px padding 0px 10px 0px 12px dir row gap 6px; arrow 28 by 30 border-left 1px rgba(7, 7, 7, 0.26) radius 0px 0px 0px 0px; divider at mid [{\"at\":1313,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrast\":1.83}] contrast 1.83; 1 px under the top [{\"at\":1313,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrast\":1.83}]; 2 px under [{\"at\":1313,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrast\":1.83}]"
+    },
+    {
+      "n": 6,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (dark-1x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32,\"y\":5.5},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32,\"y\":5.5},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32,\"y\":5.5},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32,\"y\":5.5}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12,\"rowWidth\":1440}; share 77.6 by 32 radius 8px 8px 8px 8px; comments 32 by 32; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 7,
+      "area": "Toolbar dividers",
+      "interaction": "The .ts-tb-sep dividers (dark-1x)",
+      "result": "works",
+      "evidence": "[{\"rect\":{\"x\":334,\"y\":81.5,\"w\":1,\"h\":20},\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"rect\":{\"x\":615,\"y\":81.5,\"w\":1,\"h\":20},\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}]"
+    },
+    {
+      "n": 8,
+      "area": "Appearance",
+      "interaction": "View > Appearance > light with the switch off",
+      "result": "works",
+      "evidence": "data-theme light"
+    },
+    {
+      "n": 9,
+      "area": "Separators",
+      "interaction": "The eleven seams from the pixels (light-1x)",
+      "result": "works",
+      "evidence": "title -> menu bar: 1px #d2d2d2 1.51; menu bar -> toolbar: none; toolbar -> sheet: 1px #d2d2d2 1.51; toolbar -> filmstrip: 1px #d2d2d2 1.51; stage -> notes pane: 1px #d2d2d2 1.51; notes pane -> bottom bar: 1px #d2d2d2 1.51; filmstrip -> bottom bar: 1px #d2d2d2 1.51; filmstrip -> sheet (vertical): 1px #d2d2d2 1.51; filmstrip -> sheet, upper (vertical): 1px #d2d2d2 1.51"
+    },
+    {
+      "n": 10,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (light-1x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px 8px 8px 8px border 1px rgb(7, 7, 7) bg rgb(7, 7, 7); label half 102.9 by 30 radius 0px 0px 0px 0px padding 0px 10px 0px 12px dir row gap 6px; arrow 28 by 30 border-left 1px rgba(255, 255, 255, 0.26) radius 0px 0px 0px 0px; divider at mid [{\"at\":1313,\"thickness\":1,\"color\":\"#474747\",\"contrast\":2.17}] contrast 2.17; 1 px under the top [{\"at\":1313,\"thickness\":1,\"color\":\"#474747\",\"contrast\":2.17}]; 2 px under [{\"at\":1313,\"thickness\":1,\"color\":\"#474747\",\"contrast\":2.17}]"
+    },
+    {
+      "n": 11,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (light-1x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32,\"y\":5.5},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32,\"y\":5.5},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32,\"y\":5.5},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32,\"y\":5.5}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12,\"rowWidth\":1440}; share 77.6 by 32 radius 8px 8px 8px 8px; comments 32 by 32; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 12,
+      "area": "Toolbar dividers",
+      "interaction": "The .ts-tb-sep dividers (light-1x)",
+      "result": "works",
+      "evidence": "[{\"rect\":{\"x\":334,\"y\":81.5,\"w\":1,\"h\":20},\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"rect\":{\"x\":615,\"y\":81.5,\"w\":1,\"h\":20},\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}]"
+    },
+    {
+      "n": 13,
+      "area": "Split button",
+      "interaction": "Hover the Slideshow half: it shades, nothing inverts",
+      "result": "works",
+      "evidence": "hovered true; label bg rgba(255, 255, 255, 0.16) color rgb(255, 255, 255); arrow bg rgba(0, 0, 0, 0) color rgb(255, 255, 255); wrapper bg rgb(7, 7, 7)"
+    },
+    {
+      "n": 14,
+      "area": "Split button",
+      "interaction": "Hover the chevron half: it shades, nothing inverts",
+      "result": "works",
+      "evidence": "hovered true; arrow bg rgba(255, 255, 255, 0.16) color rgb(255, 255, 255); label bg rgba(0, 0, 0, 0) color rgb(255, 255, 255)"
+    },
+    {
+      "n": 15,
+      "area": "Split button",
+      "interaction": "Click the chevron: the menu hangs under the control with its right edge on the control, aria-expanded and aria-controls set; Escape closes and returns focus",
+      "result": "works",
+      "evidence": "rows [\"menu.title.slideshow.presenterView\",\"menu.title.slideshow.startFromBeginning\"]; menu right 1342 vs control right 1342.40625; menu top 40 vs control bottom 37.5; aria-expanded true aria-controls ts-menu-slideshow; after Escape expanded false controls null; focus button[present.arrow]"
+    },
+    {
+      "n": 16,
+      "area": "Split button",
+      "interaction": "ArrowDown on the Slideshow half opens the menu with the first row focused; Escape returns focus to the Slideshow half",
+      "result": "works",
+      "evidence": "open true; first row focused true (div[menu.title.slideshow.presenterView]{menuitem}); aria-controls ts-menu-slideshow; focus after Escape button[present.open]"
+    },
+    {
+      "n": 17,
+      "area": "Split button",
+      "interaction": "Enter on the chevron opens the menu and the key is not prevented; Escape closes",
+      "result": "works",
+      "evidence": "menu open true; keys [{\"key\":\"Enter\",\"prevented\":false,\"target\":\"present.arrow\"}]"
+    },
+    {
+      "n": 18,
+      "area": "Split button",
+      "interaction": "Enter on the Slideshow half opens the show; Escape leaves it",
+      "result": "works",
+      "evidence": "present true; keys [{\"key\":\"Enter\",\"prevented\":false,\"target\":\"present.open\"}]; after Escape present false true"
+    },
+    {
+      "n": 19,
+      "area": "Split button",
+      "interaction": "Enter with the title selected by one click: the chevron still opens",
+      "result": "works",
+      "evidence": "chip null; menu open true; keys [{\"key\":\"Enter\",\"prevented\":false,\"target\":\"present.arrow\"}]"
+    },
+    {
+      "n": 20,
+      "area": "Split button",
+      "interaction": "Space on the chevron opens the menu; Space on the Slideshow half opens the show",
+      "result": "works",
+      "evidence": "menu by Space true; show by Space true"
+    },
+    {
+      "n": 21,
+      "area": "Split button",
+      "interaction": "Tab from the Slideshow half reaches the chevron with nothing selected and with the title selected (Editor.tsx, B3)",
+      "result": "works",
+      "evidence": "nothing selected: focus button[present.arrow]; title selected: focus button[present.arrow]"
+    },
+    {
+      "n": 22,
+      "area": "Split button",
+      "interaction": "Keyboard focus on the chevron half draws the ring inside the half",
+      "result": "works",
+      "evidence": "after Tab from the label: arrow focus-visible true outline 1px rgb(255, 255, 255) -3px; after Tab from the comments glyph: label focus-visible true outline 1px rgb(255, 255, 255) -3px"
+    },
+    {
+      "n": 23,
+      "area": "Comments glyph",
+      "interaction": "Click Show all comments: the panel opens with aria-pressed true; click again: it closes",
+      "result": "works",
+      "evidence": "open true aria-pressed true; after the second click open false aria-pressed false"
+    },
+    {
+      "n": 24,
+      "area": "View > Comments",
+      "interaction": "Show all comments opens the Comments panel; Hide comments closes it",
+      "result": "works",
+      "evidence": "after Show all: panel true; after Hide: panel false"
+    },
+    {
+      "n": 25,
+      "area": "View > Mode",
+      "interaction": "Viewing draws no toolbar and the body moves up; Editing brings it back",
+      "result": "works",
+      "evidence": "before: toolbar true main y 112; viewing: data-edit-mode viewing toolbar false main y 72 --pt-tool-h 0px; editing: toolbar true main y 112"
+    },
+    {
+      "n": 26,
+      "area": "Themes panel",
+      "interaction": "The toolbar Theme button opens Themes with the two tiles and no Import theme control",
+      "result": "works",
+      "evidence": "panel true \"Themes\"; tiles 4; Import theme present false; second click closed true"
+    },
+    {
+      "n": 27,
+      "area": "Menus",
+      "interaction": "The default view lists the returned rows: Insert > Shape, Line, Table, Chart, Diagram, Word art; Format > Borders & lines, Table; Arrange > Distribute, Rotate, Group; Slide > Change theme; View > Appearance, Mode, Guides",
+      "result": "works",
+      "evidence": "31 rows present"
+    },
+    {
+      "n": 28,
+      "area": "Toolbar",
+      "interaction": "The default view draws Paint format, Insert shape, Insert line, Theme and the Hide the menus chevron; no Transition",
+      "result": "works",
+      "evidence": "{\"toolbar.paintFormat\":true,\"toolbar.insertShape\":true,\"toolbar.insertLine\":true,\"toolbar.theme\":true,\"toolbar.hideMenus\":true,\"toolbar.transition\":false}"
+    },
+    {
+      "n": 29,
+      "area": "Collapse",
+      "interaction": "At 900 px the word leaves and the control is 58 px of two 28 px halves; Share is 32 px (dark)",
+      "result": "works",
+      "evidence": "wrapper 58.0 by 32; label half 28.0 padding 0px 8px word display none; arrow 28; share 32.0 by 32; seams title -> menu bar: 1px; menu bar -> toolbar: none; toolbar -> sheet: 1px; toolbar -> filmstrip: 1px; stage -> notes pane: none; notes pane -> bottom bar: 2px; filmstrip -> bottom bar: 2px|1px|1px|1px|1px|1px"
+    },
+    {
+      "n": 30,
+      "area": "Collapse",
+      "interaction": "At 900 px the word leaves and the control is 58 px of two 28 px halves; Share is 32 px (light)",
+      "result": "works",
+      "evidence": "wrapper 58.0 by 32; label half 28.0 padding 0px 8px word display none; arrow 28; share 32.0 by 32; seams title -> menu bar: 1px; menu bar -> toolbar: none; toolbar -> sheet: 1px; toolbar -> filmstrip: 1px; stage -> notes pane: none; notes pane -> bottom bar: 2px; filmstrip -> bottom bar: 2px|1px|1px|1px|1px|1px"
+    },
+    {
+      "n": 31,
+      "area": "The run",
+      "interaction": "The run itself",
+      "result": "broken",
+      "evidence": "error: page.waitForFunction: Timeout 90000ms exceeded.\n    at editorReady (/Users/kevinliu/repos/Turboslide/docs/gslides-parity/return/build/b1/shoot-chrome.mjs:111:14)\n    at /Users/kevinliu/repos/Turboslide/docs/gslides-parity/return/build/b1/shoot-chrome.mjs:1008:11"
+    }
+  ],
+  "notes": {
+    "dark-1x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tokens": {
+        "--pt-paper": "#070707",
+        "--pt-ink": "#f2f2f0",
+        "--pt-hair": "rgba(242, 242, 240, 0.22)",
+        "--pt-hair-soft": "rgba(242, 242, 240, 0.1)",
+        "--pt-hair-on-ink": "rgba(7, 7, 7, 0.26)",
+        "--pt-plate-on-ink": "rgba(7, 7, 7, 0.16)",
+        "--pt-plate-on-ink-open": "rgba(7, 7, 7, 0.24)",
+        "--pt-ctl-h": "32px",
+        "--pt-edge": "rgba(242, 242, 240, 0.55)",
+        "theme": "dark"
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "top": "0px rgb(242, 242, 240)",
+          "right": "0px rgb(242, 242, 240)",
+          "bottom": "0px rgb(242, 242, 240)",
+          "left": "0px rgb(242, 242, 240)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "32px",
+          "width": "450.531px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "top": "0px rgb(242, 242, 240)",
+          "right": "0px rgb(242, 242, 240)",
+          "bottom": "0px rgb(242, 242, 240)",
+          "left": "0px rgb(242, 242, 240)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "32px",
+          "width": "184px",
+          "display": "grid",
+          "opacity": "1"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "top": "1px rgba(242, 242, 240, 0.55)",
+          "right": "1px rgba(242, 242, 240, 0.55)",
+          "bottom": "1px rgba(242, 242, 240, 0.55)",
+          "left": "1px rgba(242, 242, 240, 0.55)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "24px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "0"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "top": "0px rgb(242, 242, 240)",
+          "right": "0px rgb(242, 242, 240)",
+          "bottom": "0px rgb(242, 242, 240)",
+          "left": "0px rgb(242, 242, 240)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "32px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-comments": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "top": "1px rgba(0, 0, 0, 0)",
+          "right": "1px rgba(0, 0, 0, 0)",
+          "bottom": "1px rgba(0, 0, 0, 0)",
+          "left": "1px rgba(0, 0, 0, 0)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "outline": "3px rgb(138, 143, 152) none 0px",
+          "height": "32px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "top": "0px rgb(242, 242, 240)",
+          "right": "0px rgb(242, 242, 240)",
+          "bottom": "0px rgb(242, 242, 240)",
+          "left": "0px rgb(242, 242, 240)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "32px",
+          "width": "60px",
+          "display": "none",
+          "opacity": "1"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "top": "1px rgb(242, 242, 240)",
+          "right": "1px rgb(242, 242, 240)",
+          "bottom": "1px rgb(242, 242, 240)",
+          "left": "1px rgb(242, 242, 240)",
+          "radius": "8px 8px 8px 8px",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "132.938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "30px",
+          "width": "102.938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present svg": {
+          "rect": {
+            "x": 1222.46875,
+            "y": 15.5,
+            "w": 12,
+            "h": 12
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "12px",
+          "width": "12px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "13px",
+          "width": "62.9375px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "1px rgba(7, 7, 7, 0.26)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "30px",
+          "width": "28px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present-arrow svg": {
+          "rect": {
+            "x": 1320.90625,
+            "y": 14.5,
+            "w": 14,
+            "h": 14
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "14px",
+          "width": "14px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-share-slot": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "top": "0px rgb(242, 242, 240)",
+          "right": "0px rgb(242, 242, 240)",
+          "bottom": "0px rgb(242, 242, 240)",
+          "left": "0px rgb(242, 242, 240)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(242, 242, 240) none 0px",
+          "height": "32px",
+          "width": "77.5938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "top": "1px rgba(242, 242, 240, 0.22)",
+          "right": "1px rgba(242, 242, 240, 0.22)",
+          "bottom": "1px rgba(242, 242, 240, 0.22)",
+          "left": "1px rgba(242, 242, 240, 0.22)",
+          "radius": "8px 8px 8px 8px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(185, 188, 195) none 0px",
+          "height": "32px",
+          "width": "77.5938px",
+          "display": "flex",
+          "opacity": "1"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32,
+            "y": 5.5
+          }
+        ],
+        "hidden": ["title.inbox.slot"],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12,
+        "rowWidth": 1440
+      },
+      "dividers": [
+        {
+          "rect": {
+            "x": 334,
+            "y": 81.5,
+            "w": 1,
+            "h": 20
+          },
+          "background": "rgba(242, 242, 240, 0.22)",
+          "margin": "0px 4px",
+          "gapBefore": 8,
+          "gapAfter": null
+        },
+        {
+          "rect": {
+            "x": 615,
+            "y": 81.5,
+            "w": 1,
+            "h": 20
+          },
+          "background": "rgba(242, 242, 240, 0.22)",
+          "margin": "0px 4px",
+          "gapBefore": null,
+          "gapAfter": 8
+        }
+      ],
+      "seams": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 43,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "lines": []
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 552
+          },
+          "lines": [
+            {
+              "at": 804,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "lines": [
+            {
+              "at": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "lines": [
+            {
+              "at": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "lines": [
+            {
+              "at": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        }
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrast": 1.83
+          }
+        ],
+        "dividerContrast": 1.83,
+        "dividerColor": "#b5b5b4",
+        "top1": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrast": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrast": 1.83
+          }
+        ],
+        "top4": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrast": 1.83
+          }
+        ]
+      },
+      "corner": {
+        "topRow": [
+          {
+            "at": 1213,
+            "thickness": 1,
+            "color": "#101010",
+            "contrast": 1.06
+          },
+          {
+            "at": 1214,
+            "thickness": 1,
+            "color": "#848483",
+            "contrast": 5.08
+          },
+          {
+            "at": 1215,
+            "thickness": 1,
+            "color": "#bfbfbe",
+            "contrast": 2.03
+          },
+          {
+            "at": 1216,
+            "thickness": 1,
+            "color": "#e5e5e3",
+            "contrast": 1.46
+          }
+        ],
+        "segments": [
+          {
+            "x": 1207,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1213,
+            "thickness": 1,
+            "color": "#101010"
+          },
+          {
+            "x": 1214,
+            "thickness": 1,
+            "color": "#848483"
+          },
+          {
+            "x": 1215,
+            "thickness": 1,
+            "color": "#bfbfbe"
+          },
+          {
+            "x": 1216,
+            "thickness": 1,
+            "color": "#e5e5e3"
+          },
+          {
+            "x": 1217,
+            "thickness": 5,
+            "color": "#f2f2f0"
+          }
+        ]
+      },
+      "aria": {
+        "split": {
+          "tag": "span",
+          "text": "Slideshow",
+          "role": "group",
+          "aria-label": "Slideshow",
+          "data-control": "present.split"
+        },
+        "present": {
+          "tag": "button",
+          "text": "Slideshow",
+          "data-control": "present.open"
+        },
+        "arrow": {
+          "tag": "button",
+          "text": "",
+          "aria-label": "Presentation options",
+          "aria-haspopup": "menu",
+          "aria-expanded": "false",
+          "data-control": "present.arrow"
+        },
+        "share": {
+          "tag": "button",
+          "text": "Share",
+          "data-control": "share.open"
+        },
+        "comments": {
+          "tag": "button",
+          "text": "",
+          "aria-label": "Show all comments",
+          "aria-pressed": "false",
+          "data-control": "title.comments"
+        }
+      }
+    },
+    "light-1x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tokens": {
+        "--pt-paper": "#ffffff",
+        "--pt-ink": "#070707",
+        "--pt-hair": "rgba(7, 7, 7, 0.18)",
+        "--pt-hair-soft": "rgba(7, 7, 7, 0.09)",
+        "--pt-hair-on-ink": "rgba(255, 255, 255, 0.26)",
+        "--pt-plate-on-ink": "rgba(255, 255, 255, 0.16)",
+        "--pt-plate-on-ink-open": "rgba(255, 255, 255, 0.24)",
+        "--pt-ctl-h": "32px",
+        "--pt-edge": "rgba(7, 7, 7, 0.62)",
+        "theme": "light"
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "450.531px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "184px",
+          "display": "grid",
+          "opacity": "1"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "top": "1px rgba(7, 7, 7, 0.62)",
+          "right": "1px rgba(7, 7, 7, 0.62)",
+          "bottom": "1px rgba(7, 7, 7, 0.62)",
+          "left": "1px rgba(7, 7, 7, 0.62)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "24px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "0"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-comments": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "top": "1px rgba(0, 0, 0, 0)",
+          "right": "1px rgba(0, 0, 0, 0)",
+          "bottom": "1px rgba(0, 0, 0, 0)",
+          "left": "1px rgba(0, 0, 0, 0)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "outline": "3px rgb(138, 143, 152) none 0px",
+          "height": "32px",
+          "width": "32px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "60px",
+          "display": "none",
+          "opacity": "1"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "top": "1px rgb(7, 7, 7)",
+          "right": "1px rgb(7, 7, 7)",
+          "bottom": "1px rgb(7, 7, 7)",
+          "left": "1px rgb(7, 7, 7)",
+          "radius": "8px 8px 8px 8px",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "32px",
+          "width": "132.938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "top": "0px rgb(255, 255, 255)",
+          "right": "0px rgb(255, 255, 255)",
+          "bottom": "0px rgb(255, 255, 255)",
+          "left": "0px rgb(255, 255, 255)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "30px",
+          "width": "102.938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present svg": {
+          "rect": {
+            "x": 1222.46875,
+            "y": 15.5,
+            "w": 12,
+            "h": 12
+          },
+          "top": "0px rgb(255, 255, 255)",
+          "right": "0px rgb(255, 255, 255)",
+          "bottom": "0px rgb(255, 255, 255)",
+          "left": "0px rgb(255, 255, 255)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "12px",
+          "width": "12px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "top": "0px rgb(255, 255, 255)",
+          "right": "0px rgb(255, 255, 255)",
+          "bottom": "0px rgb(255, 255, 255)",
+          "left": "0px rgb(255, 255, 255)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "13px",
+          "width": "62.9375px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "top": "0px rgb(255, 255, 255)",
+          "right": "0px rgb(255, 255, 255)",
+          "bottom": "0px rgb(255, 255, 255)",
+          "left": "1px rgba(255, 255, 255, 0.26)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "30px",
+          "width": "28px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-present-arrow svg": {
+          "rect": {
+            "x": 1320.90625,
+            "y": 14.5,
+            "w": 14,
+            "h": 14
+          },
+          "top": "0px rgb(255, 255, 255)",
+          "right": "0px rgb(255, 255, 255)",
+          "bottom": "0px rgb(255, 255, 255)",
+          "left": "0px rgb(255, 255, 255)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(255, 255, 255) none 0px",
+          "height": "14px",
+          "width": "14px",
+          "display": "block",
+          "opacity": "1"
+        },
+        ".ts-title-share-slot": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "top": "0px rgb(7, 7, 7)",
+          "right": "0px rgb(7, 7, 7)",
+          "bottom": "0px rgb(7, 7, 7)",
+          "left": "0px rgb(7, 7, 7)",
+          "radius": "0px 0px 0px 0px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "outline": "3px rgb(7, 7, 7) none 0px",
+          "height": "32px",
+          "width": "77.5938px",
+          "display": "flex",
+          "opacity": "1"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "top": "1px rgba(7, 7, 7, 0.18)",
+          "right": "1px rgba(7, 7, 7, 0.18)",
+          "bottom": "1px rgba(7, 7, 7, 0.18)",
+          "left": "1px rgba(7, 7, 7, 0.18)",
+          "radius": "8px 8px 8px 8px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "outline": "3px rgb(58, 61, 68) none 0px",
+          "height": "32px",
+          "width": "77.5938px",
+          "display": "flex",
+          "opacity": "1"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32,
+            "y": 5.5
+          }
+        ],
+        "hidden": ["title.inbox.slot"],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12,
+        "rowWidth": 1440
+      },
+      "dividers": [
+        {
+          "rect": {
+            "x": 334,
+            "y": 81.5,
+            "w": 1,
+            "h": 20
+          },
+          "background": "rgba(7, 7, 7, 0.18)",
+          "margin": "0px 4px",
+          "gapBefore": 8,
+          "gapAfter": null
+        },
+        {
+          "rect": {
+            "x": 615,
+            "y": 81.5,
+            "w": 1,
+            "h": 20
+          },
+          "background": "rgba(7, 7, 7, 0.18)",
+          "margin": "0px 4px",
+          "gapBefore": null,
+          "gapAfter": 8
+        }
+      ],
+      "seams": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 43,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "lines": []
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 552
+          },
+          "lines": [
+            {
+              "at": 804,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "lines": [
+            {
+              "at": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "lines": [
+            {
+              "at": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "lines": [
+            {
+              "at": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        }
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrast": 2.17
+          }
+        ],
+        "dividerContrast": 2.17,
+        "dividerColor": "#474747",
+        "top1": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrast": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrast": 2.17
+          }
+        ],
+        "top4": [
+          {
+            "at": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrast": 2.17
+          }
+        ]
+      },
+      "corner": {
+        "topRow": [
+          {
+            "at": 1213,
+            "thickness": 1,
+            "color": "#f5f5f5",
+            "contrast": 1.09
+          },
+          {
+            "at": 1214,
+            "thickness": 1,
+            "color": "#797979",
+            "contrast": 3.99
+          },
+          {
+            "at": 1215,
+            "thickness": 1,
+            "color": "#3b3b3b",
+            "contrast": 2.57
+          },
+          {
+            "at": 1216,
+            "thickness": 1,
+            "color": "#141414",
+            "contrast": 1.64
+          }
+        ],
+        "segments": [
+          {
+            "x": 1207,
+            "thickness": 6,
+            "color": "#ffffff"
+          },
+          {
+            "x": 1213,
+            "thickness": 1,
+            "color": "#f5f5f5"
+          },
+          {
+            "x": 1214,
+            "thickness": 1,
+            "color": "#797979"
+          },
+          {
+            "x": 1215,
+            "thickness": 1,
+            "color": "#3b3b3b"
+          },
+          {
+            "x": 1216,
+            "thickness": 1,
+            "color": "#141414"
+          },
+          {
+            "x": 1217,
+            "thickness": 5,
+            "color": "#070707"
+          }
+        ]
+      },
+      "aria": {
+        "split": {
+          "tag": "span",
+          "text": "Slideshow",
+          "role": "group",
+          "aria-label": "Slideshow",
+          "data-control": "present.split"
+        },
+        "present": {
+          "tag": "button",
+          "text": "Slideshow",
+          "data-control": "present.open"
+        },
+        "arrow": {
+          "tag": "button",
+          "text": "",
+          "aria-label": "Presentation options",
+          "aria-haspopup": "menu",
+          "aria-expanded": "false",
+          "data-control": "present.arrow"
+        },
+        "share": {
+          "tag": "button",
+          "text": "Share",
+          "data-control": "share.open"
+        },
+        "comments": {
+          "tag": "button",
+          "text": "",
+          "aria-label": "Show all comments",
+          "aria-pressed": "false",
+          "data-control": "title.comments"
+        }
+      }
+    },
+    "dark-900": {
+      "wrapper": {
+        "rect": {
+          "x": 790,
+          "y": 5.5,
+          "w": 58,
+          "h": 32
+        },
+        "top": "1px rgb(242, 242, 240)",
+        "right": "1px rgb(242, 242, 240)",
+        "bottom": "1px rgb(242, 242, 240)",
+        "left": "1px rgb(242, 242, 240)",
+        "radius": "8px 8px 8px 8px",
+        "background": "rgb(242, 242, 240)",
+        "color": "rgb(7, 7, 7)",
+        "padding": "0px",
+        "gap": "normal",
+        "flexDirection": "row",
+        "outline": "3px rgb(7, 7, 7) none 0px",
+        "height": "32px",
+        "width": "58px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "present": {
+        "rect": {
+          "x": 791,
+          "y": 6.5,
+          "w": 28,
+          "h": 30
+        },
+        "top": "0px rgb(7, 7, 7)",
+        "right": "0px rgb(7, 7, 7)",
+        "bottom": "0px rgb(7, 7, 7)",
+        "left": "0px rgb(7, 7, 7)",
+        "radius": "0px 0px 0px 0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(7, 7, 7)",
+        "padding": "0px 8px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(7, 7, 7) none 0px",
+        "height": "30px",
+        "width": "28px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "arrow": {
+        "rect": {
+          "x": 819,
+          "y": 6.5,
+          "w": 28,
+          "h": 30
+        },
+        "top": "0px rgb(7, 7, 7)",
+        "right": "0px rgb(7, 7, 7)",
+        "bottom": "0px rgb(7, 7, 7)",
+        "left": "1px rgba(7, 7, 7, 0.26)",
+        "radius": "0px 0px 0px 0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(7, 7, 7)",
+        "padding": "0px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(7, 7, 7) none 0px",
+        "height": "30px",
+        "width": "28px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "share": {
+        "rect": {
+          "x": 856,
+          "y": 5.5,
+          "w": 32,
+          "h": 32
+        },
+        "top": "1px rgba(242, 242, 240, 0.22)",
+        "right": "1px rgba(242, 242, 240, 0.22)",
+        "bottom": "1px rgba(242, 242, 240, 0.22)",
+        "left": "1px rgba(242, 242, 240, 0.22)",
+        "radius": "8px 8px 8px 8px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(185, 188, 195)",
+        "padding": "0px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(185, 188, 195) none 0px",
+        "height": "32px",
+        "width": "32px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "seams": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 43,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "lines": []
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 0,
+            "x": 0
+          },
+          "lines": []
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 80
+          },
+          "lines": [
+            {
+              "at": 862,
+              "thickness": 2,
+              "color": "#070707"
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 862,
+              "thickness": 2,
+              "color": "#070707"
+            },
+            {
+              "at": 864,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrast": 1.77
+            },
+            {
+              "at": 871,
+              "thickness": 1,
+              "color": "#252524",
+              "contrast": 1.31
+            },
+            {
+              "at": 872,
+              "thickness": 1,
+              "color": "#aaaaa8",
+              "contrast": 6.59
+            },
+            {
+              "at": 873,
+              "thickness": 1,
+              "color": "#070707",
+              "contrast": 8.66
+            },
+            {
+              "at": 874,
+              "thickness": 1,
+              "color": "#4e4e4e",
+              "contrast": 2.42
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "lines": []
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "lines": []
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 558,
+            "w": 184,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 750,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "present.split",
+            "x": 790,
+            "w": 58,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "share.slot",
+            "x": 856,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          }
+        ],
+        "hidden": ["title.inbox.slot"],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12,
+        "rowWidth": 900
+      }
+    },
+    "light-900": {
+      "wrapper": {
+        "rect": {
+          "x": 790,
+          "y": 5.5,
+          "w": 58,
+          "h": 32
+        },
+        "top": "1px rgb(7, 7, 7)",
+        "right": "1px rgb(7, 7, 7)",
+        "bottom": "1px rgb(7, 7, 7)",
+        "left": "1px rgb(7, 7, 7)",
+        "radius": "8px 8px 8px 8px",
+        "background": "rgb(7, 7, 7)",
+        "color": "rgb(255, 255, 255)",
+        "padding": "0px",
+        "gap": "normal",
+        "flexDirection": "row",
+        "outline": "3px rgb(255, 255, 255) none 0px",
+        "height": "32px",
+        "width": "58px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "present": {
+        "rect": {
+          "x": 791,
+          "y": 6.5,
+          "w": 28,
+          "h": 30
+        },
+        "top": "0px rgb(255, 255, 255)",
+        "right": "0px rgb(255, 255, 255)",
+        "bottom": "0px rgb(255, 255, 255)",
+        "left": "0px rgb(255, 255, 255)",
+        "radius": "0px 0px 0px 0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "padding": "0px 8px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(255, 255, 255) none 0px",
+        "height": "30px",
+        "width": "28px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "arrow": {
+        "rect": {
+          "x": 819,
+          "y": 6.5,
+          "w": 28,
+          "h": 30
+        },
+        "top": "0px rgb(255, 255, 255)",
+        "right": "0px rgb(255, 255, 255)",
+        "bottom": "0px rgb(255, 255, 255)",
+        "left": "1px rgba(255, 255, 255, 0.26)",
+        "radius": "0px 0px 0px 0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "padding": "0px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(255, 255, 255) none 0px",
+        "height": "30px",
+        "width": "28px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "share": {
+        "rect": {
+          "x": 856,
+          "y": 5.5,
+          "w": 32,
+          "h": 32
+        },
+        "top": "1px rgba(7, 7, 7, 0.18)",
+        "right": "1px rgba(7, 7, 7, 0.18)",
+        "bottom": "1px rgba(7, 7, 7, 0.18)",
+        "left": "1px rgba(7, 7, 7, 0.18)",
+        "radius": "8px 8px 8px 8px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(58, 61, 68)",
+        "padding": "0px",
+        "gap": "6px",
+        "flexDirection": "row",
+        "outline": "3px rgb(58, 61, 68) none 0px",
+        "height": "32px",
+        "width": "32px",
+        "display": "flex",
+        "opacity": "1"
+      },
+      "seams": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 43,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "lines": []
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 0,
+            "x": 0
+          },
+          "lines": []
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 80
+          },
+          "lines": [
+            {
+              "at": 862,
+              "thickness": 2,
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 128
+          },
+          "lines": [
+            {
+              "at": 862,
+              "thickness": 2,
+              "color": "#ffffff"
+            },
+            {
+              "at": 864,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrast": 1.51
+            },
+            {
+              "at": 871,
+              "thickness": 1,
+              "color": "#dfdfdf",
+              "contrast": 1.33
+            },
+            {
+              "at": 872,
+              "thickness": 1,
+              "color": "#525252",
+              "contrast": 5.86
+            },
+            {
+              "at": 873,
+              "thickness": 1,
+              "color": "#ffffff",
+              "contrast": 7.81
+            },
+            {
+              "at": 874,
+              "thickness": 1,
+              "color": "#b3b3b3",
+              "contrast": 2.1
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "lines": []
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "lines": []
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 558,
+            "w": 184,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 750,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "present.split",
+            "x": 790,
+            "w": 58,
+            "h": 32,
+            "y": 5.5
+          },
+          {
+            "control": "share.slot",
+            "x": 856,
+            "w": 32,
+            "h": 32,
+            "y": 5.5
+          }
+        ],
+        "hidden": ["title.inbox.slot"],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12,
+        "rowWidth": 900
+      }
+    }
+  },
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4401/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 3"
+  ]
+}

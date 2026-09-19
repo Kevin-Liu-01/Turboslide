@@ -43,15 +43,27 @@ export function StepperControl({ spec, onChange, disabled }: ControlProps) {
     onChange((current ?? 0) + direction);
   };
 
+  /* the value the last commit wrote, until the document carries it: the browser fires the change
+     event on Enter and again on the blur that follows it before the write has landed, and the
+     second commit compared the typed value with the old `current` and wrote it a second time, so
+     one typed value made two history entries (docs/RETURN.md 2.14 item 3; audit-formatting rows
+     12, 13, 64 to 66). One history entry per changed value. */
+  const written = useRef<number | undefined | null>(null);
+  if (written.current !== null && written.current === current) written.current = null;
   const commit = (raw: string) => {
     setDraft(null);
     const trimmed = raw.trim();
     if (trimmed === '') {
-      if (spec.optional) onChange(undefined);
+      if (spec.optional && current !== undefined && written.current !== undefined) {
+        written.current = undefined;
+        onChange(undefined);
+      }
       return;
     }
     const value = Number(trimmed);
     if (!Number.isFinite(value) || value === current) return;
+    if (written.current !== null && written.current === value) return;
+    written.current = value;
     onChange(value);
   };
   const commitRef = useRef(commit);

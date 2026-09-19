@@ -15,8 +15,25 @@ try {
     for (const el of document.querySelectorAll('body *')) {
       const b = el.getBoundingClientRect();
       if (b.width === 0 || b.height === 0) continue;
-      if (b.left > r.right - 160 && b.right <= r.right + 2 && b.top > r.bottom - 60 && b.bottom <= r.bottom + 2 && b.width < 160) {
-        out.push({ tag: el.tagName, cls: (el.getAttribute('class') ?? '').slice(0, 60), text: (el.textContent ?? '').replace(/\s+/g, ' ').slice(0, 30), attrs: [...el.attributes].filter((a) => /data-/.test(a.name)).map((a) => `${a.name}=${a.value}`).join(' ').slice(0, 80), after: getComputedStyle(el, '::after').content, before: getComputedStyle(el, '::before').content });
+      if (
+        b.left > r.right - 160 &&
+        b.right <= r.right + 2 &&
+        b.top > r.bottom - 60 &&
+        b.bottom <= r.bottom + 2 &&
+        b.width < 160
+      ) {
+        out.push({
+          tag: el.tagName,
+          cls: (el.getAttribute('class') ?? '').slice(0, 60),
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').slice(0, 30),
+          attrs: [...el.attributes]
+            .filter((a) => /data-/.test(a.name))
+            .map((a) => `${a.name}=${a.value}`)
+            .join(' ')
+            .slice(0, 80),
+          after: getComputedStyle(el, '::after').content,
+          before: getComputedStyle(el, '::before').content,
+        });
       }
     }
     return out.slice(0, 12);

@@ -1,0 +1,112 @@
+{
+  "base": "http://localhost:4402",
+  "deckId": "untitled-20260919-qobj",
+  "rows": [
+    {
+      "id": "decks.name.follows-heading",
+      "name": "type 8 then 24 characters of a 32 character title with a save between",
+      "ok": false,
+      "observed": "session true; after 8 characters save state saved, name \"R\" (deck.info \"Renewal\"), address /edit/untitled-20260919-qobj; after 32: title row \"Renewal review for Acme, Q3 2026\", deck.info \"Renewal review for Acme, Q3 2026\", Details true, Share heading \"null\"; revision 1",
+      "ms": 40072
+    },
+    {
+      "id": "text.title.one-click-tail",
+      "name": "one click on the cover title",
+      "ok": false,
+      "observed": "handles 0, session false, chip null; text tail true (toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.textColor, toolbar.align)",
+      "ms": 1359
+    },
+    {
+      "id": "text.title.bold-menu",
+      "name": "Format > Text > Bold",
+      "ok": false,
+      "observed": "selected (handles 0, session false); {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored {\"weight\":500}; slide title/null -> content/freeform); revision 2 -> 2; snackbar none; Cmd+Z restored true (kind after undo title, text same true)",
+      "ms": 3910
+    },
+    {
+      "id": "text.title.bold-cmd-b",
+      "name": "Cmd+B",
+      "ok": false,
+      "observed": "selected (handles 0, session false); {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored \"field\"; slide title/null -> title/null); revision 2 -> 3; snackbar none; Cmd+Z restored false (kind after undo title, text same false)",
+      "ms": 2537
+    },
+    {
+      "id": "text.title.align-menu",
+      "name": "Format > Align & indent > Center",
+      "ok": false,
+      "observed": "selected (handles 0, session false); {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"center\"} (stored {\"align\":\"center\"}; slide title/null -> content/freeform); revision 3 -> 4; snackbar none; Cmd+Z restored true (kind after undo title, text same true)",
+      "ms": 4005
+    },
+    {
+      "id": "text.title.size-menu",
+      "name": "Format > Text > Size > Decrease",
+      "ok": false,
+      "observed": "threw: locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.format.text.size.decrease\"]').first() to be visible\n",
+      "ms": 8508
+    },
+    {
+      "id": "text.title.italic-menu (extra)",
+      "name": "Format > Text > Italic on the selected title",
+      "ok": false,
+      "observed": "selected (handles 0, session false); {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored null; slide title/null -> content/freeform); revision 5 -> 5; snackbar none; Cmd+Z restored true (kind after undo title, text same true)",
+      "ms": 4064
+    },
+    {
+      "id": "text.title.format-options-marks",
+      "name": "Format options, the B toggle",
+      "ok": false,
+      "observed": "selected (handles 0, session false); {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} -> {\"weight\":\"500\",\"size\":88,\"align\":\"start\"} (stored {\"weight\":500}; slide title/null -> content/freeform); revision 5 -> 6; snackbar none; Cmd+Z restored true (kind after undo title, text same true)",
+      "ms": 3607
+    },
+    {
+      "id": "text.title.italic-drawn (extra)",
+      "name": "after Italic from the menu the heading run draws italic and the slide converted",
+      "ok": true,
+      "observed": "italic drawn true (<i>Renewal review for Acme, Q</i>); slide kind content layout freeform heading \"[Renewal review for Acme, Q]{i}\"; revision 6 -> 7; after undo kind title",
+      "ms": 3869
+    },
+    {
+      "id": "tables.cell.align-menu",
+      "name": "a cell session open in column 2, Format > Align & indent > Center",
+      "ok": false,
+      "observed": "session true (still open after the row true); columns 0:- 1:center 2:-; drawn text-align start; revision 9 -> 9; snackbar none",
+      "ms": 3942
+    },
+    {
+      "id": "tables.cell.align-toolbar",
+      "name": "a cell session open, the table tail Align list, Right",
+      "ok": true,
+      "observed": "session true; tail before toolbar.fillColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.align; list open true (menu.toolbar.align.format.alignIndent.left, menu.toolbar.align.format.alignIndent.center, menu.toolbar.align.format.alignIndent.right, menu.toolbar.align.format.alignIndent.justified, menu.toolbar.align.valign-top, menu.toolbar.align.valign-middle, menu.toolbar.align.valign-bottom); columns 0:- 1:right 2:-; tail after toolbar.mergeCells, toolbar.unmergeCells, toolbar.align",
+      "ms": 2565
+    },
+    {
+      "id": "tables.kept-cell.format-table-rows (extra)",
+      "name": "the table selected by one click after the session: Format > Table rows enabled and Insert column right lands",
+      "ok": false,
+      "observed": "handles 0, session false, chip null; Insert column right present true disabled false; columns 3 -> 4; tail toolbar.borderColor, toolbar.mergeCells, toolbar.unmergeCells, toolbar.align, toolbar.formatOptions",
+      "ms": 5298
+    },
+    {
+      "id": "shapes.text.colour-toolbar",
+      "name": "select the rectangle, toolbar Text color, Paper",
+      "ok": false,
+      "observed": "handles 0; swatches toolbar.textColor.plate, toolbar.textColor.none, toolbar.textColor.ink, toolbar.textColor.paper, toolbar.textColor.ink-2, toolbar.textColor.titanium...; picked toolbar.textColor.paper; block.color \"paper\"; drawn rgb(7, 7, 7); revision 12 -> 12; after Cmd+Z color undefined",
+      "ms": 3453
+    },
+    {
+      "id": "insert.textbox.while-parked (extra)",
+      "name": "a session parked on the menu bar: Insert > Text box, then a click on the sheet places a box",
+      "ok": true,
+      "observed": "session true; after Insert > Text box the session still parked true; new runs text/text",
+      "ms": 5147
+    },
+    {
+      "id": "cleanup",
+      "ok": true,
+      "observed": "/edit/untitled-20260919-qobj 404"
+    }
+  ],
+  "errors": [
+    "console: A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={some"
+  ]
+}

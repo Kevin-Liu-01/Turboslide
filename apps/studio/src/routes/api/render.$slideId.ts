@@ -14,7 +14,14 @@ import { logSecurityEvent } from '../../server/log';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbStamp, isThumbWidth, thumbResponse } from '../../server/thumbs';
 import type { ThumbRequest } from '../../server/thumbs';
-import { THUMB_GRANT_QUERY, verifyThumbGrant } from '../../server/tokens';
+import {
+  RENDER_GRANT_QUERY,
+  THUMB_GRANT_QUERY,
+  renderFileName,
+  verifyRenderGrant,
+  verifyThumbGrant,
+} from '../../server/tokens';
+import type { RenderGrantTarget } from '../../server/tokens';
 
 // GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json|jpg]: the facade over the
 // render worker (SPEC 3.4; MILESTONES M2 item 6). With ?w=160|320|640 the response is the
@@ -42,6 +49,15 @@ import { THUMB_GRANT_QUERY, verifyThumbGrant } from '../../server/tokens';
 // full-size renders go through the renderSlideImages server function (server/render.ts), never
 // this route, so the token set on the production and preview environments of the `turboslide`
 // project since 2026-09-11 (docs/hosting.md section 6, option 2) costs the page nothing.
+//
+// The render grant (the return round, docs/RETURN.md 2.19; audit-surface rows 27 and 28): the
+// picture urls renderSlideImages answers carry `?g=<grant>` (server/tokens.ts signRenderGrant),
+// minted after authorize(read) passed for the caller and naming the deck, the slide, the theme,
+// the scale and the format for ten minutes. A request whose grant verifies for exactly the
+// picture it asks for is served without the bearer and without a second authorize call, and its
+// picture is an attachment named `<deck id>-<slide id>.<png|jpg>`, so File > Download > JPEG
+// image and PNG image download the current slide instead of opening a 401 tab. A grant never
+// opens the JSON variant or a thumbnail: the target it signs is the full size picture alone.
 
 let client: WorkerClient | undefined;
 
@@ -56,11 +72,12 @@ function sameToken(given: string, expected: string): boolean {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-/** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, except for thumbnails. */
-function unauthorized(request: Request, url: URL): Response | null {
+/** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, except for thumbnails and a granted picture. */
+function unauthorized(request: Request, url: URL, granted: boolean): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return null;
   if (url.searchParams.has('w')) return null;
+  if (granted) return null;
   const given = bearerToken(request);
   if (given !== undefined && sameToken(given, token)) return null;
   return refuse(
@@ -70,12 +87,35 @@ function unauthorized(request: Request, url: URL): Response | null {
   );
 }
 
+/**
+ * The full size picture a render grant can name, read from the request: null for a thumbnail,
+ * for the JSON variant, and for ids that are not slugs (the route refuses those with 400 below).
+ */
+function grantTargetOf(url: URL, slideId: string): RenderGrantTarget | null {
+  if (url.searchParams.has('w')) return null;
+  const format = url.searchParams.get('format');
+  if (format !== null && format !== 'png' && format !== 'jpg') return null;
+  const deckId = url.searchParams.get('deck') ?? 'gt-brand';
+  if (!SLUG_PATTERN.test(deckId) || !SLUG_PATTERN.test(slideId)) return null;
+  return {
+    deckId,
+    slideId,
+    theme: url.searchParams.get('theme') === 'dark' ? 'dark' : 'light',
+    scale: url.searchParams.get('scale') === '2' ? 2 : 1,
+    format: format === 'jpg' ? 'jpg' : 'png',
+  };
+}
+
 export const Route = createFileRoute('/api/render/$slideId')({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
         const url = new URL(request.url);
-        const denied = unauthorized(request, url);
+        // the grant stands for the bearer and for authorize(read) on this one picture
+        const target = grantTargetOf(url, params.slideId);
+        const granted =
+          target !== null && verifyRenderGrant(target, url.searchParams.get(RENDER_GRANT_QUERY));
+        const denied = unauthorized(request, url, granted);
         if (denied) return denied;
         const deckId = url.searchParams.get('deck') ?? 'gt-brand';
         const slideId = params.slideId;
@@ -145,17 +185,22 @@ export const Route = createFileRoute('/api/render/$slideId')({
             return Response.json({ error: { message, status } }, { status });
           }
         }
+        // a granted request is a download: the picture, never the record
         const wantsJson =
-          url.searchParams.get('format') === 'json' ||
-          (request.headers.get('accept') ?? '').includes('application/json');
-        // the full size render: authorize(read) for the bearer or the cookie (SPEC-3 6.2)
-        const ctx = await requestContext(request);
-        const decision = await authorize(ctx, deckId, 'read', {
-          action: 'render.slide',
-          transport: 'route',
-        });
-        if (!decision.ok)
-          return Response.json(denialBody(decision, 'read'), { status: decision.status });
+          !granted &&
+          (url.searchParams.get('format') === 'json' ||
+            (request.headers.get('accept') ?? '').includes('application/json'));
+        if (!granted) {
+          // the full size render: authorize(read) for the bearer or the cookie (SPEC-3 6.2); a
+          // grant was minted after that decision passed for the caller (server/render.ts)
+          const ctx = await requestContext(request);
+          const decision = await authorize(ctx, deckId, 'read', {
+            action: 'render.slide',
+            transport: 'route',
+          });
+          if (!decision.ok)
+            return Response.json(denialBody(decision, 'read'), { status: decision.status });
+        }
         try {
           // the hosted seed and the deck's twins are on disk before the job runs (server/root.ts)
           await ensureDeckAssets(deckId);
@@ -176,11 +221,21 @@ export const Route = createFileRoute('/api/render/$slideId')({
               exec: worker().exec,
             });
           }
+          // the download's headers: the attachment named after the deck and the slide, not
+          // cached, never sniffed (the download route's own headers)
+          const download: Record<string, string> =
+            granted && target !== null
+              ? {
+                  'content-disposition': `attachment; filename="${renderFileName(target)}"`,
+                  'cache-control': 'private, no-store',
+                  'x-content-type-options': 'nosniff',
+                }
+              : { 'cache-control': 'private, max-age=60' };
           return new Response(rendered.png, {
             headers: {
               'content-type': jpg ? 'image/jpeg' : 'image/png',
               'content-length': String(rendered.png.byteLength),
-              'cache-control': 'private, max-age=60',
+              ...download,
               'x-turboslide-record': JSON.stringify(rendered.record),
               'x-turboslide-job': rendered.jobId,
               'x-turboslide-worker': worker().mode,

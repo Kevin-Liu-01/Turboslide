@@ -278,23 +278,33 @@ describe('editorKeyAction', () => {
     expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, selected)).toBeNull();
   });
 
-  it("matches nothing for the parked rows' chords while Tools > Advanced tools is off (surface.parked-shortcut-unbound)", () => {
+  it('keeps the Group, Ungroup and Paint format chords whatever Tools > Advanced tools says: their rows are in the default view since the return round (docs/RETURN.md 2.11, 2.12; formatting.paint-format.chords, arrange.group.chords)', () => {
     const off: EditorKeyContext = { ...selected, advanced: false };
-    expect(editorKeyAction({ key: 'g', metaKey: true, altKey: true }, off)).toBeNull();
-    expect(
-      editorKeyAction({ key: 'G', metaKey: true, altKey: true, shiftKey: true }, off),
-    ).toBeNull();
-    expect(editorKeyAction({ key: 'c', metaKey: true, altKey: true }, off)).toBeNull();
-    expect(editorKeyAction({ key: 'v', metaKey: true, altKey: true }, off)).toBeNull();
+    expect(editorKeyAction({ key: 'g', metaKey: true, altKey: true }, off)).toEqual({
+      type: 'group',
+    });
+    expect(editorKeyAction({ key: 'G', metaKey: true, altKey: true, shiftKey: true }, off)).toEqual(
+      { type: 'ungroup' },
+    );
+    expect(editorKeyAction({ key: 'c', metaKey: true, altKey: true }, off)).toEqual({
+      type: 'paintCopy',
+    });
+    expect(editorKeyAction({ key: 'v', metaKey: true, altKey: true }, off)).toEqual({
+      type: 'paintPaste',
+    });
     /* the rotate aliases belong to no menu row and stand */
     expect(editorKeyAction({ key: 'ArrowRight', metaKey: true, altKey: true }, off)).toEqual({
       type: 'rotate',
       by: 15,
     });
-    /* on, or unstated (a stage outside the shell), the chords stand */
+    /* on, or unstated (a stage outside the shell), the same */
     expect(
       editorKeyAction({ key: 'g', metaKey: true, altKey: true }, { ...selected, advanced: true }),
     ).toEqual({ type: 'group' });
+    /* nothing selected: the chords match nothing, as before */
+    expect(
+      editorKeyAction({ key: 'g', metaKey: true, altKey: true }, { ...off, selected: false }),
+    ).toBeNull();
   });
 
   it('groups with Cmd Option G and ungroups with Shift; the marks and the indents apply to a selected object', () => {

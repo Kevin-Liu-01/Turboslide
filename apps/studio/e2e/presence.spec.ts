@@ -239,20 +239,22 @@ test('the five fixed slots exist at first paint with nobody present and the page
   expect(box?.height).toBe(32);
   await expect(presence.locator('.ts-presence-slot.is-empty')).toHaveCount(4);
   await expect(page.locator('[data-control="presence.more"]')).toHaveText('');
-  /* docs/FOCUS.md 3.2 parks title.inbox: in the default view the slot is drawn fixed and empty
-     and no plate is inside it; the plate is asserted with Tools > Advanced tools on, through the
-     product's own row (C2-F17, b7's C2-R21: a parked row is asserted behind the switch, never
-     deleted) */
+  /* docs/FOCUS.md 3.2 parks title.inbox and docs/RETURN.md 4.3 draws no inbox slot while the
+     plate is parked (the matrix row chrome.cluster.gaps-heights): in the default view the slot is
+     in the DOM, empty and without a box; the plate is asserted with Tools > Advanced tools on,
+     through the product's own row (C2-F17, b7's C2-R21: a parked row is asserted behind the
+     switch, never deleted), where the slot takes the plate's 32 px height. The switch is a
+     seller's own act, so the row moving for it is not a layout shift of the load. */
   const inboxSlot = page.locator('[data-control="title.inbox.slot"]');
   await expect(inboxSlot).toHaveClass(/is-empty/);
   await expect(page.locator('[data-control="title.inbox"]')).toHaveCount(0);
   await page.waitForTimeout(3000);
   const entries = await shifts(page);
   expect(entries.filter((entry) => entry.value > 0)).toEqual([]);
-  const slotBox = await inboxSlot.boundingBox();
+  expect(await inboxSlot.boundingBox()).toBeNull();
   await setAdvancedTools(page, true);
   await expect(page.locator('[data-control="title.inbox"]')).toHaveAttribute('data-unread', '0');
-  expect(await inboxSlot.boundingBox()).toEqual(slotBox);
+  expect((await inboxSlot.boundingBox())?.height).toBe(32);
   await context.close();
 });
 

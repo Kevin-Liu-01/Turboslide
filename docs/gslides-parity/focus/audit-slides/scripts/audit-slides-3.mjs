@@ -67,7 +67,10 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
     attempts.push(r);
     if (r.shot) shotPath = r.shot;
@@ -91,15 +94,23 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     evidence:
       attempts.length > 1
         ? attempts.map((a, i) => `attempt ${i + 1}: ${a.evidence}`).join(' | ')
-        : attempts[0]?.evidence ?? '',
+        : (attempts[0]?.evidence ?? ''),
     shot: shotPath,
     consoleErrors: errs,
   };
   rows.push(entry);
   save();
   const tag =
-    result === 'works' ? 'ok  ' : result === 'broken' ? 'FAIL' : result === 'flaky' ? 'FLKY' : 'n/d ';
-  console.log(`${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`);
+    result === 'works'
+      ? 'ok  '
+      : result === 'broken'
+        ? 'FAIL'
+        : result === 'flaky'
+          ? 'FLKY'
+          : 'n/d ';
+  console.log(
+    `${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`,
+  );
   return entry;
 }
 
@@ -169,9 +180,17 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
   }
 };
 const settled = async (page, timeout = 20_000) =>
-  pollUntil(() => state(page), (s) => (s.sync?.pending ?? s.pending ?? 0) === 0, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => (s.sync?.pending ?? s.pending ?? 0) === 0,
+    timeout,
+  );
 const connected = (page) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, 45_000);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    45_000,
+  );
 const activeSlide = async (page) => (await state(page)).slideId;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
@@ -320,7 +339,10 @@ const counter = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('[data-control="view.count"]');
     return el
-      ? { text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), label: el.getAttribute('aria-label') }
+      ? {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          label: el.getAttribute('aria-label'),
+        }
       : null;
   });
 const hashOf = (page) => page.evaluate(() => window.location.hash);
@@ -369,8 +391,12 @@ const gridFacts = (page) =>
     return {
       grid: Boolean(grid),
       tiles: grid ? grid.querySelectorAll('.pt-thumb').length : 0,
-      tileIds: grid ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id')) : [],
-      activeTile: grid ? grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null : null,
+      tileIds: grid
+        ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id'))
+        : [],
+      activeTile: grid
+        ? (grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null)
+        : null,
       selectedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-selected').length : 0,
       skippedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-skipped').length : 0,
       filmHidden: film
@@ -378,7 +404,9 @@ const gridFacts = (page) =>
         : null,
       filmWidth: film ? Math.round(film.getBoundingClientRect().width) : null,
       stageShown: stage ? stage.getBoundingClientRect().width > 0 : false,
-      gridPressed: document.querySelector('[data-control="view.gridView"]')?.getAttribute('aria-pressed'),
+      gridPressed: document
+        .querySelector('[data-control="view.gridView"]')
+        ?.getAttribute('aria-pressed'),
       filmPressed: document
         .querySelector('[data-control="view.filmstripView"]')
         ?.getAttribute('aria-pressed'),
@@ -417,23 +445,32 @@ const focusWorkspace = async (page) => {
   await clearAll(page);
   const wrap = await rectOf(page, '.ts-stagewrap.ts-editor');
   const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-  if (wrap && sheet) await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
+  if (wrap && sheet)
+    await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
   await sleep(200);
 };
 /** Focuses a card by clicking it, the way a person does; answers whether the card took focus. */
 const focusCard = async (page, id) => {
   await clickCard(page, id);
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await sleep(300);
   return page.evaluate((sid) => document.activeElement?.getAttribute('data-id') === sid, id);
 };
-const waitOrder = (page, test, timeout = 20_000) => pollUntil(() => slideOrder(page), test, timeout);
+const waitOrder = (page, test, timeout = 20_000) =>
+  pollUntil(() => slideOrder(page), test, timeout);
 
 // ---------------------------------------------------------------------------------------------
 // the run: the layout picker phase on a fresh deck (run 1 lost its content slide before this phase)
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
@@ -444,12 +481,16 @@ context.on('page', (p) => p.close().catch(() => undefined));
 const shot = async (name, clip) => {
   shotN += 1;
   const file = `${String(shotN).padStart(2, '0')}-${name}.png`;
-  await page.screenshot({ path: path.join(SHOTS, file), ...(clip ? { clip } : {}) }).catch(() => undefined);
+  await page
+    .screenshot({ path: path.join(SHOTS, file), ...(clip ? { clip } : {}) })
+    .catch(() => undefined);
   return `audit-slides/${file}`;
 };
 const stageClip = async () => {
   const r = await rectOf(page, '.ts-stagewrap.ts-editor');
-  return r ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 } : undefined;
+  return r
+    ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 }
+    : undefined;
 };
 const TITLE = 'title';
 const HEAD = 'heading/text';
@@ -464,7 +505,11 @@ try {
   await dblclickAt(page, r0.x + r0.w / 2, r0.y + r0.h / 2);
   await typeHuman(page, 'Q3 pipeline review for Acme');
   await press(page, 'Escape');
-  await pollUntil(() => state(page), (v) => v.revision >= 1, 30_000);
+  await pollUntil(
+    () => state(page),
+    (v) => v.revision >= 1,
+    30_000,
+  );
   await settled(page, 30_000);
   await closeNamePrompt(page);
   await connected(page);
@@ -483,96 +528,150 @@ try {
   const openLayoutPlate = async () => {
     await clearAll(page);
     let via = 'toolbar.layout';
-    if (await has(page, '[data-control="toolbar.layout"]')) await clickControl(page, 'toolbar.layout');
+    if (await has(page, '[data-control="toolbar.layout"]'))
+      await clickControl(page, 'toolbar.layout');
     else {
       await clickControl(page, 'toolbar.more');
       await page.locator('#ts-menu-toolbar-more').waitFor({ timeout: 5000 });
       await clickControl(page, 'toolbar.more.toolbar.layout');
       via = 'toolbar.more.toolbar.layout';
     }
-    await page.locator('[data-control="layout.apply.plate"]').waitFor({ timeout: 8000 }).catch(() => undefined);
+    await page
+      .locator('[data-control="layout.apply.plate"]')
+      .waitFor({ timeout: 8000 })
+      .catch(() => undefined);
     return via;
   };
   const APPLY = '[data-control="layout.apply.plate"]';
   if (!contentSlide) contentSlide = (await slideOrder(page)).find((id) => id !== TITLE) ?? TITLE;
 
-  await row('Layout picker', 'Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it', async () => {
-    await clickCard(page, contentSlide);
-    await pollUntil(() => activeSlide(page), (a) => a === contentSlide, 8000);
-    const via = await openLayoutPlate();
-    const shown = await has(page, APPLY);
-    const tiles = (await plateTiles(page, APPLY)) ?? [];
-    const sj = await slideJson(page, contentSlide);
-    const sh = await shot('layout-picker-open');
-    await press(page, 'Escape');
-    await sleep(400);
-    const gone = !(await has(page, APPLY));
-    if (!gone) await closeMenus(page);
-    return {
-      ok: shown && tiles.length === 21 && tiles.filter((t) => t.current).length === 1 && gone,
-      evidence: `via ${via}; shown ${shown}; tiles ${tiles.length} [${tiles.map((t) => t.id).join(',')}]; ringed ${tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none'} (slide ${layoutFacts(sj)}); missing ${tiles.filter((t) => t.missing).map((t) => t.id).join(',') || 'none'}; gone after Escape ${gone}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Layout picker',
+    'Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it',
+    async () => {
+      await clickCard(page, contentSlide);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === contentSlide,
+        8000,
+      );
+      const via = await openLayoutPlate();
+      const shown = await has(page, APPLY);
+      const tiles = (await plateTiles(page, APPLY)) ?? [];
+      const sj = await slideJson(page, contentSlide);
+      const sh = await shot('layout-picker-open');
+      await press(page, 'Escape');
+      await sleep(400);
+      const gone = !(await has(page, APPLY));
+      if (!gone) await closeMenus(page);
+      return {
+        ok: shown && tiles.length === 21 && tiles.filter((t) => t.current).length === 1 && gone,
+        evidence: `via ${via}; shown ${shown}; tiles ${tiles.length} [${tiles.map((t) => t.id).join(',')}]; ringed ${
+          tiles
+            .filter((t) => t.current)
+            .map((t) => t.id)
+            .join(',') || 'none'
+        } (slide ${layoutFacts(sj)}); missing ${
+          tiles
+            .filter((t) => t.missing)
+            .map((t) => t.id)
+            .join(',') || 'none'
+        }; gone after Escape ${gone}`,
+        shot: sh,
+      };
+    },
+  );
 
   // every layout, applied to the content slide through the toolbar picker
   let previous = null;
-  const firstTiles = (await (async () => {
+  const firstTiles = await (async () => {
     await openLayoutPlate();
     const t = (await plateTiles(page, APPLY)) ?? [];
     await press(page, 'Escape');
     await sleep(300);
     return t;
-  })());
+  })();
   for (const tile of firstTiles) {
-    await row('Apply layout', `Apply the layout "${tile.label}" (${tile.id}) from the toolbar picker to slide ${contentSlide}`, async () => {
-      await clickCard(page, contentSlide);
-      await pollUntil(() => activeSlide(page), (a) => a === contentSlide, 8000);
-      const before = await slideJson(page, contentSlide);
+    await row(
+      'Apply layout',
+      `Apply the layout "${tile.label}" (${tile.id}) from the toolbar picker to slide ${contentSlide}`,
+      async () => {
+        await clickCard(page, contentSlide);
+        await pollUntil(
+          () => activeSlide(page),
+          (a) => a === contentSlide,
+          8000,
+        );
+        const before = await slideJson(page, contentSlide);
+        await openLayoutPlate();
+        const tiles = (await plateTiles(page, APPLY)) ?? [];
+        const ringed =
+          tiles
+            .filter((t) => t.current)
+            .map((t) => t.id)
+            .join(',') || 'none';
+        const ringNote = previous
+          ? `; picker rings ${ringed} after the previous apply of ${previous}`
+          : '';
+        const me = tiles.find((t) => t.id === tile.id);
+        if (!me) {
+          await press(page, 'Escape');
+          return {
+            ok: false,
+            evidence: `no tile ${tile.id} among ${tiles.map((t) => t.id).join(',')}`,
+          };
+        }
+        if (me.missing) {
+          await press(page, 'Escape');
+          await sleep(300);
+          return {
+            ok: false,
+            notDriven: true,
+            evidence: `the tile reads "Add a picture first" (is-missing); a click opens the file picker, so it was not clicked${ringNote}`,
+          };
+        }
+        await clickIn(page, APPLY, `layout.apply.${tile.id}`);
+        const changed = await pollUntil(
+          () => slideJson(page, contentSlide),
+          (s) =>
+            JSON.stringify(s) !== JSON.stringify(before) || layoutFacts(before).includes(tile.id),
+          15_000,
+        );
+        await sleep(600);
+        await settled(page);
+        const st = await stageFacts(page);
+        const sb = await snackbar(page);
+        const gone = !(await has(page, APPLY));
+        const sh = await shot(`layout-${tile.id}`, await stageClip());
+        previous = tile.id;
+        const facts = layoutFacts(changed);
+        const matches = facts.includes(tile.id) || (tile.id === 'blank' && /freeform/.test(facts));
+        return {
+          ok: gone && (matches || JSON.stringify(changed) !== JSON.stringify(before)),
+          evidence: `slide ${layoutFacts(before)} -> ${facts}${matches ? '' : ' (id not in the facts)'}; runs ${st?.runs.join(',') || 'none'}; prompts "${st?.prompts.join('" / "')}"; blocks ${st?.blocks}; snackbar ${JSON.stringify(sb)}; plate closed ${gone}${ringNote}`,
+          shot: sh,
+        };
+      },
+      { tries: 2 },
+    );
+  }
+  await row(
+    'Apply layout',
+    'Reopen the picker after the last apply and read which tile is ringed',
+    async () => {
       await openLayoutPlate();
       const tiles = (await plateTiles(page, APPLY)) ?? [];
-      const ringed = tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none';
-      const ringNote = previous ? `; picker rings ${ringed} after the previous apply of ${previous}` : '';
-      const me = tiles.find((t) => t.id === tile.id);
-      if (!me) {
-        await press(page, 'Escape');
-        return { ok: false, evidence: `no tile ${tile.id} among ${tiles.map((t) => t.id).join(',')}` };
-      }
-      if (me.missing) {
-        await press(page, 'Escape');
-        await sleep(300);
-        return { ok: false, notDriven: true, evidence: `the tile reads "Add a picture first" (is-missing); a click opens the file picker, so it was not clicked${ringNote}` };
-      }
-      await clickIn(page, APPLY, `layout.apply.${tile.id}`);
-      const changed = await pollUntil(
-        () => slideJson(page, contentSlide),
-        (s) => JSON.stringify(s) !== JSON.stringify(before) || layoutFacts(before).includes(tile.id),
-        15_000,
-      );
-      await sleep(600);
-      await settled(page);
-      const st = await stageFacts(page);
-      const sb = await snackbar(page);
-      const gone = !(await has(page, APPLY));
-      const sh = await shot(`layout-${tile.id}`, await stageClip());
-      previous = tile.id;
-      const facts = layoutFacts(changed);
-      const matches = facts.includes(tile.id) || (tile.id === 'blank' && /freeform/.test(facts));
-      return {
-        ok: gone && (matches || JSON.stringify(changed) !== JSON.stringify(before)),
-        evidence: `slide ${layoutFacts(before)} -> ${facts}${matches ? '' : ' (id not in the facts)'}; runs ${st?.runs.join(',') || 'none'}; prompts "${st?.prompts.join('" / "')}"; blocks ${st?.blocks}; snackbar ${JSON.stringify(sb)}; plate closed ${gone}${ringNote}`,
-        shot: sh,
-      };
-    }, { tries: 2 });
-  }
-  await row('Apply layout', 'Reopen the picker after the last apply and read which tile is ringed', async () => {
-    await openLayoutPlate();
-    const tiles = (await plateTiles(page, APPLY)) ?? [];
-    const ringed = tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none';
-    await press(page, 'Escape');
-    await sleep(300);
-    return { ok: ringed === previous, evidence: `ringed ${ringed}; last applied ${previous}` };
-  }, { tries: 1 });
+      const ringed =
+        tiles
+          .filter((t) => t.current)
+          .map((t) => t.id)
+          .join(',') || 'none';
+      await press(page, 'Escape');
+      await sleep(300);
+      return { ok: ringed === previous, evidence: `ringed ${ringed}; last applied ${previous}` };
+    },
+    { tries: 1 },
+  );
 
   await row('Apply layout', 'Right click a card > Apply layout > Title and body', async () => {
     await clearAll(page);
@@ -587,9 +686,17 @@ try {
     else if (asTiles) await clickControl(page, 'layout.apply.split');
     else {
       await closeMenus(page);
-      return { ok: false, evidence: 'the Apply layout submenu showed neither rows nor tiles', shot: sh };
+      return {
+        ok: false,
+        evidence: 'the Apply layout submenu showed neither rows nor tiles',
+        shot: sh,
+      };
     }
-    const after = await pollUntil(() => slideJson(page, contentSlide), (s) => /split/.test(layoutFacts(s)), 15_000);
+    const after = await pollUntil(
+      () => slideJson(page, contentSlide),
+      (s) => /split/.test(layoutFacts(s)),
+      15_000,
+    );
     await settled(page);
     const gone = !(await has(page, CTX));
     return {
@@ -599,37 +706,62 @@ try {
     };
   });
 
-  await row('Apply layout', 'Slide menu > Apply layout > Title and two columns, then Cmd+Z', async () => {
-    await clearAll(page);
-    const before = await slideJson(page, contentSlide);
-    await openMenu(page, 'slide');
-    await hoverIn(page, menuRoot('slide'), 'menu.slide.applyLayout');
-    await sleep(400);
-    const asTiles = await has(page, '[data-control="layout.apply.cols"]');
-    const asRows = await has(page, '[data-control="menu.slide.applyLayout.cols"]');
-    const sh = await shot('menu-apply-layout');
-    if (asTiles) await clickControl(page, 'layout.apply.cols');
-    else if (asRows) await clickControl(page, 'menu.slide.applyLayout.cols');
-    else {
-      await closeMenus(page);
-      return { ok: false, evidence: 'the Apply layout submenu showed neither tiles nor rows', shot: sh };
-    }
-    const after = await pollUntil(() => slideJson(page, contentSlide), (s) => /cols/.test(layoutFacts(s)), 15_000);
-    await settled(page);
-    await focusWorkspace(page);
-    await press(page, 'Meta+z');
-    const undone = await pollUntil(() => slideJson(page, contentSlide), (s) => layoutFacts(s) === layoutFacts(before), 15_000);
-    await settled(page);
-    return {
-      ok: /cols/.test(layoutFacts(after)) && layoutFacts(undone) === layoutFacts(before),
-      evidence: `submenu as ${asTiles ? 'tiles' : 'rows'}; ${layoutFacts(before)} -> ${layoutFacts(after)} -> undo ${layoutFacts(undone)}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Apply layout',
+    'Slide menu > Apply layout > Title and two columns, then Cmd+Z',
+    async () => {
+      await clearAll(page);
+      const before = await slideJson(page, contentSlide);
+      await openMenu(page, 'slide');
+      await hoverIn(page, menuRoot('slide'), 'menu.slide.applyLayout');
+      await sleep(400);
+      const asTiles = await has(page, '[data-control="layout.apply.cols"]');
+      const asRows = await has(page, '[data-control="menu.slide.applyLayout.cols"]');
+      const sh = await shot('menu-apply-layout');
+      if (asTiles) await clickControl(page, 'layout.apply.cols');
+      else if (asRows) await clickControl(page, 'menu.slide.applyLayout.cols');
+      else {
+        await closeMenus(page);
+        return {
+          ok: false,
+          evidence: 'the Apply layout submenu showed neither tiles nor rows',
+          shot: sh,
+        };
+      }
+      const after = await pollUntil(
+        () => slideJson(page, contentSlide),
+        (s) => /cols/.test(layoutFacts(s)),
+        15_000,
+      );
+      await settled(page);
+      await focusWorkspace(page);
+      await press(page, 'Meta+z');
+      const undone = await pollUntil(
+        () => slideJson(page, contentSlide),
+        (s) => layoutFacts(s) === layoutFacts(before),
+        15_000,
+      );
+      await settled(page);
+      return {
+        ok: /cols/.test(layoutFacts(after)) && layoutFacts(undone) === layoutFacts(before),
+        evidence: `submenu as ${asTiles ? 'tiles' : 'rows'}; ${layoutFacts(before)} -> ${layoutFacts(after)} -> undo ${layoutFacts(undone)}`,
+        shot: sh,
+      };
+    },
+  );
 
   await shot('end-run-3');
 } catch (error) {
-  rows.push({ n: rows.length + 1, feature: 'the run', interaction: 'ran to completion', result: 'broken', attempts: 1, evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`, shot: null, consoleErrors: [] });
+  rows.push({
+    n: rows.length + 1,
+    feature: 'the run',
+    interaction: 'ran to completion',
+    result: 'broken',
+    attempts: 1,
+    evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+    shot: null,
+    consoleErrors: [],
+  });
   save();
 } finally {
   // ---- cleanup: File > Move to trash, Delete forever, a 404 on the deck
@@ -652,19 +784,45 @@ try {
       await clickControl(page, 'trash.confirm.ok');
       await card.waitFor({ state: 'detached', timeout: 30_000 });
       trashed = true;
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'works', attempts: 1, evidence: `deck ${deckId} left the trash`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'works',
+        attempts: 1,
+        evidence: `deck ${deckId} left the trash`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'broken', attempts: 1, evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'broken',
+        attempts: 1,
+        evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -675,18 +833,42 @@ try {
       let statusEdit = 0;
       const until = Date.now() + 25_000;
       for (;;) {
-        statusDeck = (await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })).status();
-        statusEdit = (await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })).status();
+        statusDeck = (
+          await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        ).status();
+        statusEdit = (
+          await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })
+        ).status();
         if ((statusDeck === 404 && statusEdit === 404) || Date.now() > until) break;
         await sleep(2000);
       }
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> and /edit/<id> after the delete', result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken', attempts: 1, evidence: `/deck ${statusDeck}, /edit ${statusEdit}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> and /edit/<id> after the delete',
+        result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken',
+        attempts: 1,
+        evidence: `/deck ${statusDeck}, /edit ${statusEdit}`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> after the delete', result: 'broken', attempts: 1, evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> after the delete',
+        result: 'broken',
+        attempts: 1,
+        evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
   }
   save();
   await browser.close().catch(() => undefined);
   const counts = rows.reduce((acc, r) => ({ ...acc, [r.result]: (acc[r.result] ?? 0) + 1 }), {});
-  console.log(`\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`);
+  console.log(
+    `\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`,
+  );
 }

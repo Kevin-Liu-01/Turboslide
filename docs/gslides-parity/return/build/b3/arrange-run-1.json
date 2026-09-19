@@ -1,0 +1,82 @@
+{
+  "base": "http://localhost:4403",
+  "deck": "untitled-20260919-v9gu",
+  "at": "2026-09-19T01:25:42.626Z",
+  "rows": [
+    {
+      "name": "setup",
+      "ok": true,
+      "observed": "objects box-a,box-b,box-c,line-1,note-1; Distribute present with the switch off true; the Arrange rows are in the default view; the switch stays off",
+      "ms": 11033
+    },
+    {
+      "name": "arrange.distribute.horizontal",
+      "ok": true,
+      "observed": "chip \"3 objects\"; x 200,600,1100 -> 200,650,1100; gaps 210,210; undo restored true",
+      "ms": 4072
+    },
+    {
+      "name": "arrange.distribute.vertical",
+      "ok": true,
+      "observed": "y 200,500,300 -> 200,500,350; gaps -10,-10; undo restored true",
+      "ms": 4124
+    },
+    {
+      "name": "arrange.distribute.needs-three",
+      "ok": false,
+      "observed": "two selected (chip \"2 objects\"): Distribute disabled true; three selected: disabled true",
+      "ms": 3864
+    },
+    {
+      "name": "arrange.rotate.quarter-turns",
+      "ok": true,
+      "observed": "clockwise -> 90, undo 0; counter -> 270, undo 0",
+      "ms": 6472
+    },
+    {
+      "name": "arrange.rotate.flips-menu",
+      "ok": true,
+      "observed": "flip h -> h, undo undefined; flip v -> v, undo undefined",
+      "ms": 6477
+    },
+    {
+      "name": "arrange.group.chords",
+      "ok": true,
+      "observed": "chip \"2 objects\" -> Cmd+Option+G chip \"Group\" group group; Right twice x 200,600 -> 202,602; Cmd+Option+Shift+G group undefined; undos restored true",
+      "ms": 3561
+    },
+    {
+      "name": "arrange.group.menu-regroup",
+      "ok": false,
+      "observed": "Group enabled true, Regroup disabled before false; Group -> undefined; Ungroup enabled false -> undefined; Regroup enabled after true -> group; three undos -> undefined",
+      "ms": 19021
+    },
+    {
+      "name": "arrange.group.context-rows",
+      "ok": true,
+      "observed": "two selected: Group listed true -> group group, chip \"Group\"; group right click: Ungroup listed true -> undefined",
+      "ms": 3817
+    },
+    {
+      "name": "arrange.context.rotate-distribute",
+      "ok": false,
+      "observed": "threw: TypeError: Cannot read properties of null (reading 'x')",
+      "ms": 2838
+    },
+    {
+      "name": "lines.tail.line-start-end-menu",
+      "ok": false,
+      "observed": "threw: TypeError: Cannot read properties of null (reading 'x')",
+      "ms": 206
+    },
+    {
+      "name": "arrange.reload-show-pdf",
+      "ok": false,
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"dialog.download.pdf\"]').first() to be visible\n",
+      "ms": 20173
+    }
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

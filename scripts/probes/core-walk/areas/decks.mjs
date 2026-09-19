@@ -18,9 +18,18 @@ export const IDS = [
   'decks.title.tab-title-after-rename',
   'decks.title.mark-to-list',
   'decks.edit.reload-keeps-slide',
+  'decks.name.follows-heading',
+  'decks.file.open-list-search',
+  'decks.file.import-slides-deck',
+  'decks.file.details',
 ];
 
-const TITLE = 'Pipeline review: Acme, Q3 2026';
+/**
+ * The scratch deck's title, 32 characters, typed in two bursts by the first write (the return
+ * round's `decks.name.follows-heading`: the deck used to take its name from the first burst that
+ * landed, audit-chrome row 2, audit-surface row 5).
+ */
+const TITLE = 'Pipeline review: Acme Q3 2026 v2';
 
 /** Clicks the deck name in the title row and waits for its field; returns the field's value. */
 async function openNameField(t) {
@@ -130,10 +139,22 @@ export async function run(t) {
           await t.sleep(60);
         }
       })();
-      await t.typeHuman(TITLE);
+      /* the first eight characters, then the save and the address, then the rest: the two bursts
+         of decks.name.follows-heading (RETURN.md 2.18), the row driven right after this one */
+      await t.typeHuman(TITLE.slice(0, 8));
+      await t.waitRevision(1, 30_000);
+      await page.waitForURL(/\/edit\//, { timeout: 30_000 }).catch(() => undefined);
+      await t
+        .pollUntil(
+          () => t.attr('[data-control="deck.saveState"]', 'data-state'),
+          (x) => x === 'saved',
+          20_000,
+        )
+        .catch(() => undefined);
+      t.deck.firstBurstName = await t.textOf('deck.name');
+      await t.typeHuman(TITLE.slice(8));
       await t.sleep(300);
       await t.press('Escape');
-      await t.waitRevision(1, 30_000);
       const s = await t.settled();
       await watcher;
       const words = await t.pollUntil(t.saveWords, (w) => w === 'All changes saved', 10_000);
@@ -152,6 +173,53 @@ export async function run(t) {
     },
   );
 
+  await t.step(
+    'decks.name.follows-heading',
+    'after the first write in two bursts, read the title row, deck.info, Details and the Share dialog heading',
+    'every one reads the whole 32 characters',
+    async () => {
+      await t.clearAll();
+      const shownName = await t.textOf('deck.name');
+      const info = await t.invoke('deck.info');
+      await t.menuPath('file', 'file.details').catch(() => undefined);
+      const details = await t
+        .waitControl('dialog.details.title', 6000)
+        .then(() => t.textOf('dialog.details.title'))
+        .catch(() => null);
+      if (await t.visible('dialog.details.done')) await t.clickControl('dialog.details.done');
+      else await t.press('Escape');
+      await t.waitGone('[data-control="dialog.details"]', 4000);
+      await t.clickControl('share.open');
+      await t.waitControl('dialog.share', 8000);
+      const shareHeading = await page.evaluate(
+        () =>
+          document
+            .querySelector(
+              '[data-control="dialog.share"] .ts-dialog-title, [data-control="dialog.share"] h2',
+            )
+            ?.textContent?.trim() ?? null,
+      );
+      if (await t.visible('dialog.share.done')) await t.clickControl('dialog.share.done');
+      else await t.press('Escape');
+      /* the dialog leaves before the next row edits the heading: on the blob tier under enforce
+         its close waited past 4 s once and the save words row found the heading covered by the
+         dialog's rows (the third enforce preview's chrome walk, build/integrator.md section 8) */
+      if (!(await t.waitGone('[data-control="dialog.share"]', 4000))) {
+        await t.press('Escape');
+        await t.waitGone('[data-control="dialog.share"]', 8000);
+      }
+      const heading = ((await t.runInfo(t.deck.head))?.text ?? '').replace(/\u00a0/g, ' ').trim();
+      return {
+        ok:
+          heading === TITLE &&
+          shownName === TITLE &&
+          info.title === TITLE &&
+          details === TITLE &&
+          (shareHeading ?? '').includes(TITLE),
+        observed: `heading "${heading}"; title row "${shownName}" (after the first burst "${t.deck.firstBurstName ?? 'unread'}"); deck.info "${info.title}"; Details "${details}"; Share heading "${shareHeading}"`,
+      };
+    },
+  );
   await t.step(
     'decks.title.save-words',
     'a second edit',
@@ -344,6 +412,221 @@ export async function run(t) {
       return {
         ok: hash === `#s/${second}` && active === second,
         observed: `hash before reload ${hash}; active after ${active}; hash after ${hashAfter}`,
+      };
+    },
+  );
+
+  // ---- the return round's rows (docs/RETURN.md 2.17, section 5)
+  await t.step(
+    'decks.file.open-list-search',
+    'File > Open; read the list; type in the search; clear it',
+    "this studio's decks are listed newest first and the search filters them",
+    async () => {
+      const r = await t.reachRow('file', 'file.open');
+      if (!r.present) return { ok: false, observed: 'File > Open is not reachable' };
+      await t.menuPath('file', 'file.open');
+      await t.waitControl('dialog.open', 8000);
+      const rows = () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll('[data-control^="dialog.open.deck."]')]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.getAttribute('data-control').replace('dialog.open.deck.', '')),
+        );
+      /* the blob tier's deck.list reads every manifest of the store, four at a time (blob-store.ts
+         `list`): 66 decks answered in 4.5 to 5.5 s on the return round's enforce preview, and the
+         dialog showed Loading for that long, so a bound of 8 s read 0 decks (the first preview
+         drive; return/build/integrator.md). The row's words carry no bound; the list is waited for
+         up to 30 s and the wait is on record in the observation */
+      const t0 = Date.now();
+      const listed = await t.pollUntil(rows, (l) => l.length > 0, 30_000).catch(rows);
+      const listMs = Date.now() - t0;
+      await t.clickControl('dialog.open.search');
+      await t.typeHuman('zzqqxx nothing');
+      await t.sleep(400);
+      const filtered = await rows();
+      await t.press('Meta+a');
+      await t.press('Backspace');
+      await t.sleep(400);
+      const restored = await rows();
+      await t.press('Escape');
+      await t.waitGone('[data-control="dialog.open"]', 4000);
+      if (await t.visible('dialog.open'))
+        await t.clickControl('dialog.open.close').catch(() => t.press('Escape'));
+      return {
+        ok:
+          listed.length > 0 &&
+          listed[0] === t.deck.id &&
+          filtered.length === 0 &&
+          restored.length === listed.length,
+        observed: `${r.switched ? 'with the switch on; ' : ''}${listed.length} decks listed after ${listMs} ms, first ${listed[0]}; filtered by nonsense ${filtered.length}; cleared ${restored.length}`,
+      };
+    },
+  );
+  await t.step(
+    'decks.file.import-slides-deck',
+    'a copy of this deck (a setup write); File > Import slides, pick the copy, All, Import slides',
+    'the slides land after the current one; the copy is removed after',
+    async () => {
+      const r = await t.reachRow('file', 'file.importSlides');
+      if (!r.present) return { ok: false, observed: 'File > Import slides is not reachable' };
+      const s = await t.state();
+      const copy = await t
+        .invoke('deck.copy', {
+          id: t.deck.id,
+          name: `Import source ${t.deck.id.replace(/^untitled-/, '')}`,
+          baseRevision: s.revision,
+        })
+        .catch((e) => ({ error: String(e) }));
+      const copyId = copy?.deckId ?? copy?.id ?? copy?.deck?.id ?? null;
+      if (!copyId)
+        return {
+          ok: false,
+          observed: `the setup copy failed: ${copy?.error ?? JSON.stringify(copy)}`,
+        };
+      await t.clickCard(t.deck.titleSlide);
+      const before = await t.slideOrder();
+      /* everything after the copy runs inside one try, and the copy's trash and remove (with the
+         imported slides' removal) in its finally: a picker that never offered the copy left it on
+         the store in the verifier's runs (VERIFICATION.md R1-F4, `import-source-20260919-cd2a`
+         and `-8ciz`; b7.md's fix round request to B4) */
+      let offered = 0;
+      let after = before;
+      let landedAfterCurrent = false;
+      let pickedMs = null;
+      let gone = null;
+      let fault = null;
+      try {
+        /* the picker's list is the store's `deck.list`; on the blob tier the copy made through
+           this instance's window API lists at once on this instance and on another only once the
+           folder listing of `decks/` shows it, up to a minute later (blob-store.ts `deckIds`, the
+           note on `pull`). The bound follows that mechanism: the dialog is asked for the copy
+           for 10 s, closed and opened again, to 65 s in all, and the time recorded; a copy the
+           picker never offers fails the row with that reason. On the memory tier the copy is in
+           the first list */
+        const t0 = Date.now();
+        for (;;) {
+          await t.menuPath('file', 'file.importSlides');
+          await t.waitControl('dialog.importSlides', 8000);
+          const present = await t
+            .waitControl(`dialog.importSlides.deck.${copyId}`, 10_000)
+            .then(() => true)
+            .catch(() => false);
+          if (present) {
+            pickedMs = Date.now() - t0;
+            break;
+          }
+          if (Date.now() - t0 > 65_000) break;
+          await t.press('Escape');
+          await t.waitGone('[data-control="dialog.importSlides"]', 4000).catch(() => undefined);
+          await t.sleep(3000);
+        }
+        if (pickedMs === null) {
+          await t.press('Escape');
+          await t.waitGone('[data-control="dialog.importSlides"]', 4000).catch(() => undefined);
+        } else {
+          await t.clickControl(`dialog.importSlides.deck.${copyId}`);
+          await t.waitControl('dialog.importSlides.all', 8000);
+          offered = await t.count('[data-control^="dialog.importSlides.slide."]');
+          await t.clickControl('dialog.importSlides.all');
+          await t.clickControl('dialog.importSlides.ok');
+          after = await t
+            .pollUntil(t.slideOrder, (o) => o.length === before.length + offered, 20_000)
+            .catch(t.slideOrder);
+          await t.settled();
+          landedAfterCurrent = after.slice(1, 1 + offered).every((id) => !before.includes(id));
+        }
+      } catch (error) {
+        fault = String(error).split('\n')[0];
+      } finally {
+        /* the imported slides leave again (setup writes), so the areas after this one meet the deck the decks area built */
+        for (const id of after.filter((x) => !before.includes(x))) {
+          const st = await t.state();
+          await t
+            .invoke('slide.remove', { baseRevision: st.revision, slideId: id })
+            .catch(() => undefined);
+          await t.settled().catch(() => undefined);
+        }
+        /* the copy is trashed and removed through the window API and its 404 read */
+        try {
+          await page.goto(`${BASE}/edit/${copyId}`, { waitUntil: 'domcontentloaded' });
+          await t.editorReady();
+          const info = await t.invoke('deck.info');
+          await t
+            .invoke('deck.trash', { id: copyId, baseRevision: info.revision })
+            .catch(() => undefined);
+          const again = await t.invoke('deck.info').catch(() => info);
+          await t
+            .invoke('deck.remove', { id: copyId, baseRevision: again.revision, confirm: true })
+            .catch(() => undefined);
+        } catch {
+          /* the 404 read below says whether the copy is gone */
+        } finally {
+          await page.goto(`${BASE}/edit/${t.deck.id}`, { waitUntil: 'domcontentloaded' });
+          await t.editorReady();
+          await t.settled().catch(() => undefined);
+          const until = Date.now() + 20_000;
+          for (;;) {
+            gone = (
+              await page.request.get(`${BASE}/edit/${copyId}`, {
+                headers: t.headers,
+                maxRedirects: 0,
+              })
+            ).status();
+            if (gone === 404 || Date.now() > until) break;
+            await t.sleep(2000);
+          }
+        }
+      }
+      if (fault !== null)
+        return {
+          ok: false,
+          observed: `${r.switched ? 'with the switch on; ' : ''}copy ${copyId} ${pickedMs === null ? 'not offered by the picker' : `offered after ${pickedMs} ms`}; the step stopped on ${fault}; the imports removed again; the copy answers ${gone}`,
+        };
+      if (pickedMs === null)
+        return {
+          ok: false,
+          observed: `${r.switched ? 'with the switch on; ' : ''}copy ${copyId} was not offered by the Import slides picker within 65 s (the store's deck.list; on the blob tier the folder listing lags a fresh deck by up to a minute); the copy answers ${gone}`,
+        };
+      return {
+        ok:
+          offered === before.length &&
+          after.length === before.length + offered &&
+          landedAfterCurrent &&
+          gone === 404,
+        observed: `${r.switched ? 'with the switch on; ' : ''}copy ${copyId} offered ${offered} slides after ${pickedMs} ms; slides ${before.length} -> ${after.length}, landed after the current ${landedAfterCurrent}; the imports removed again; the copy answers ${gone}`,
+      };
+    },
+  );
+  await t.step(
+    'decks.file.details',
+    'File > Details; read the five rows; Done',
+    'the name, slide count, sections, created and last edit read; Done closes',
+    async () => {
+      const r = await t.reachRow('file', 'file.details');
+      if (!r.present) return { ok: false, observed: 'File > Details is not reachable' };
+      await t.menuPath('file', 'file.details');
+      await t.waitControl('dialog.details', 8000);
+      const read = async (k) => t.textOf(`dialog.details.${k}`);
+      const facts = {
+        title: await read('title'),
+        slides: await read('slides'),
+        sections: await read('sections'),
+        created: await read('created'),
+        lastEdit: await read('lastEdit'),
+      };
+      const name = await t.textOf('deck.name');
+      const order = await t.slideOrder();
+      await t.clickControl('dialog.details.done');
+      const closed = await t.waitGone('[data-control="dialog.details"]', 4000);
+      return {
+        ok:
+          facts.title === name &&
+          Number(facts.slides) === order.length &&
+          Number(facts.sections) >= 1 &&
+          Boolean(facts.created) &&
+          Boolean(facts.lastEdit) &&
+          closed,
+        observed: `${r.switched ? 'with the switch on; ' : ''}${JSON.stringify(facts)}; name "${name}"; slides ${order.length}; Done closed ${closed}`,
       };
     },
   );

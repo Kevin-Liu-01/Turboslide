@@ -93,6 +93,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     groupMembers: [],
     rotation: null,
     sizeReadout: null,
+    widthReadout: null,
     rulers: null,
     deckGuides: null,
     draggingGuide: null,

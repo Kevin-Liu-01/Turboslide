@@ -366,8 +366,12 @@ export function textBurstMutation(
   // burst consumes the marker, one with nothing to send included: a marker that outlived its
   // session became the base of the next session on the same run and sent the whole run back at
   // the old offsets (VERIFICATION.md C3-F8, b7.md FR3.8)
-  const absorbed = takeAbsorbed(runKey(slide.id, blockId, pointer));
+  const key = runKey(slide.id, blockId, pointer);
+  const absorbed = takeAbsorbed(key);
   if (from === to) return null;
+  // the document holds `to` once this write lands, or holds it already when nothing is sent:
+  // the session's next absorb diffs against it (handedText)
+  noteHanded(key, to);
   if (isSlideField(slide, blockId) || blockById(slide, blockId) === undefined) {
     return textCommitMutation(slide, blockId, pointer, to);
   }
@@ -549,18 +553,23 @@ export function sessionContextTarget(input: {
 /**
  * The chrome surfaces a focus move into keeps the session alive on (docs/FOCUS.md section 5 rank
  * 10): the toolbar and its tails, an anchored plate (the swatches, the align list), the layout
- * plate and the right click menu. A button in one of them takes the focus on its mousedown before
+ * plate, the right click menu, and since the return round the menu bar and every menu plate
+ * (`.ts-menubar`, `.ts-menu`). A button in one of them takes the focus on its mousedown before
  * its click runs; today that blur ended the session, the Editor dropped the caret facts, and the
  * shell's `text.style` fell back to the whole text ("[Renewal terms apply]{i}", audit-text row
  * 28). Parked, the session keeps its range and the Italic marks the word. A field anywhere (the
- * font size box, a dialog's input) still ends the session, and so does the menu bar: the menus'
- * rows read the focus as the caret's while a session is parked, and Insert > Text box (a
- * `block.insert` plan) refused itself under that focus (measured on the dev server), where the
- * blur had ended the session before the row ran; the Format menu rows therefore keep acting on the
- * selected box, which is what the matrix drives them with.
+ * font size box, a dialog's input) still ends the session. The menu bar parked no session in the
+ * focus round, so a Format > Text row on a selected word marked the whole box (docs/RETURN.md 2.14
+ * item 2; audit-formatting rows 20, 29, 31: "[Onboarding plan for Acme in three phases]{sup}" for
+ * a double clicked "Acme"); the rule the toolbar had reaches the menus, so the Format rows act on
+ * the parked range like the buttons and the chords, and the Align and spacing lists of the tails
+ * (a `Menu` plate, not a `.ts-plate-anchored`) park the session instead of ending it, which is
+ * what let the table tail's Align list open on a cell (RETURN.md 2.4 fix 3). A row that arms a
+ * draw tool (Insert > Text box) still finds the stage free: the press that places the box lands
+ * outside every transient surface and ends the parked session in its capture phase (onDocPointerDown).
  */
 export const CHROME_TRANSIENT_SELECTOR =
-  '[role="toolbar"], .ts-tb-tail, .ts-plate-anchored, .ts-layout-plate, .ts-context-menu';
+  '[role="toolbar"], .ts-tb-tail, .ts-plate-anchored, .ts-layout-plate, .ts-context-menu, .ts-menubar, .ts-menu';
 
 /** What a blur does to the session: end it, park it, or park it and take the focus back on the next tick. */
 export type BlurVerdict = 'end' | 'park' | 'park-and-refocus';
@@ -596,6 +605,9 @@ function isTransientTarget(target: EventTarget | null): boolean {
 /** The menus among the transient surfaces: their rows keep the focus for the keyboard's walk, so a row that is a button parks without the refocus. */
 const MENU_SELECTOR = '[role="menu"], [role="menubar"], .ts-context-menu, .ts-menu-root';
 
+/** A chrome plate or menu that is open: while one is, a parked session leaves the focus with it. */
+const OPEN_PLATE_SELECTOR = '.ts-menu, .ts-plate-anchored, .ts-context-menu, .ts-layout-plate';
+
 /** The verdict for the element a blur handed the focus to. */
 export function blurVerdictOf(to: EventTarget | null): BlurVerdict {
   if (!(to instanceof Element)) return 'end';
@@ -625,9 +637,32 @@ export function takeAbsorbed(key: string): Markup | undefined {
   return text;
 }
 
-/** Drops the marker of a run without reading it: a session opened or ended on the run. */
+/* the markup the document holds for a run as far as its session knows, per run. Every write of
+   the run passes through textBurstMutation (a burst, the Editor's re-send of the editable after a
+   refusal or a collaborator's change, the final write) and notes the text it hands the document;
+   the session notes what it absorbs from a collaborator. The session's absorb diffs against this
+   record and not against its own last burst: the Editor's re-send (text-fit.ts sessionReconcile
+   'resend') writes the unflushed keystrokes past the burst timer, so the last burst fell behind
+   the document by those keystrokes and the next absorb read them as the collaborator's change,
+   moved the caret by their count plus the remote insert and landed them a second time
+   (VERIFICATION.md C3S-F12, seam.md SEAM2-F1: 98 A's, "Ever", 7 A's for 100 typed at the start).
+   Forgotten with the marker when a session opens or ends on the run (forgetAbsorbed) */
+const handedTexts = new Map<string, Markup>();
+
+/** Notes the markup the document holds for a run, as its session knows it. */
+export function noteHanded(key: string, text: Markup): void {
+  handedTexts.set(key, text);
+}
+
+/** The markup last handed to the document for a run, or undefined outside a session. */
+export function handedText(key: string): Markup | undefined {
+  return handedTexts.get(key);
+}
+
+/** Drops the marker and the handed record of a run without reading them: a session opened or ended on the run. */
 export function forgetAbsorbed(key: string): void {
   absorbedBases.delete(key);
+  handedTexts.delete(key);
 }
 
 /** Tells every open inline session that a Text changed under it. */
@@ -639,8 +674,9 @@ export function announceTextChanged(detail: TextChangedDetail): void {
 /**
  * The editable after a collaborator's change (SPEC-3 3.5): the document's new markup with this
  * person's unflushed keystrokes re-applied at their shifted offset, and the caret moved by the
- * remote splice when it landed before the caret. Pure: `base` is the markup the session last
- * handed out, `dom` what the editable holds now, `remote` the document's markup now.
+ * remote splice when it landed before the caret. Pure: `base` is the markup the session and
+ * the document last agreed on (handedText: the last burst, the Editor's re-send or the last
+ * absorb), `dom` what the editable holds now, `remote` the document's markup now.
  */
 export function absorbedText(
   base: Markup,
@@ -654,18 +690,36 @@ export function absorbedText(
   const shift = (offset: number): number =>
     change.start <= offset ? Math.max(change.start, offset + delta) : offset;
   const untouched = local.text === '' && local.end === local.start;
+  const at = shift(local.start);
+  const remove = Math.min(Math.max(at, shift(local.end)) - at, plainLength(remote) - at);
   let text = remote;
+  let applied = false;
   if (!untouched) {
-    const at = shift(local.start);
-    const end = Math.max(at, shift(local.end));
     try {
-      text = spliceText(remote, at, Math.min(end - at, plainLength(remote) - at), local.text);
+      text = spliceText(remote, at, remove, local.text);
+      applied = true;
     } catch {
       text = remote;
     }
   }
+  /* a plain offset of the editable carried into the absorbed text. Before the unflushed
+     keystrokes it is an offset of the base and moves with the remote change; inside them it
+     follows their landing point; after them it is an offset of the base past the local span, moved
+     with the remote change and then past the keystrokes as they landed. The editable's offsets
+     were shifted as if they were the base's, so a caret after this person's keystrokes moved by
+     the remote delta whenever the collaborator's change began between the two (four characters
+     typed at 6 of the base, two landing at 8: the caret restored at 12 for 10) */
+  const inserted = applied ? local.text.length : 0;
+  const carry = (offset: number): number => {
+    if (offset <= local.start) return shift(offset);
+    if (offset < local.start + local.text.length) {
+      return at + Math.min(offset - local.start, inserted);
+    }
+    const shifted = shift(offset - local.text.length + (local.end - local.start));
+    return applied ? at + inserted + Math.max(0, shifted - (at + remove)) : shifted;
+  };
   const length = plainLength(text);
-  const clamp = (offset: number): number => Math.min(length, Math.max(0, shift(offset)));
+  const clamp = (offset: number): number => Math.min(length, Math.max(0, carry(offset)));
   return {
     text,
     selection: selection === null ? null : [clamp(selection[0]), clamp(selection[1])],
@@ -1297,6 +1351,27 @@ export function InlineText({
 
   const readText = (): Markup => textFromNode(element, { multiline: options.current.multiline });
 
+  /** The run's key for the module records (the marker, the handed text): the slide the element sits in and its `data-run`. */
+  const keyOf = (): string | null => {
+    const run = element.getAttribute('data-run');
+    const slide = element.closest('[data-slide]')?.getAttribute('data-slide');
+    if (run === null || slide === null || slide === undefined) return null;
+    return `${slide}:${run}`;
+  };
+
+  /** The markup the document holds as far as this session knows: the handed record, else the last burst (an element outside a slide). */
+  const handed = (): Markup => {
+    const key = keyOf();
+    return (key === null ? undefined : handedText(key)) ?? lastBurst.current;
+  };
+
+  /** The session handed `text` to the document or absorbed it from there: the record and the last burst follow. */
+  const setHanded = (text: Markup) => {
+    lastBurst.current = text;
+    const key = keyOf();
+    if (key !== null) noteHanded(key, text);
+  };
+
   /** The caret's range and marks, for the toolbar (SPEC-2 6.2). */
   const reportCaret = () => {
     if (done.current) return;
@@ -1342,8 +1417,11 @@ export function InlineText({
     const rewrite = burstRewrite(raw);
     if (rewrite !== null && text !== '' && document.activeElement === element)
       rewriteEditable(rewrite);
-    if (text === lastBurst.current) return;
-    lastBurst.current = text;
+    if (text === handed()) {
+      lastBurst.current = text;
+      return;
+    }
+    setHanded(text);
     callbacks.current.onBurst?.(text);
   };
 
@@ -1425,17 +1503,22 @@ export function InlineText({
 
   /**
    * A collaborator's op changed this run (SPEC-3 3.5): the editable takes the document's markup
-   * with the unflushed keystrokes re-applied and the caret shifted (`absorbedText`); the next
-   * burst then diffs against the document's text (textBurstMutation), so nothing lands twice and
-   * nothing is lost. The route announces every remote Text change through TEXT_CHANGED_EVENT.
+   * with the unflushed keystrokes re-applied and the caret shifted (`absorbedText`, against the
+   * text the session and the document last agreed on, `handed`); the next burst then diffs
+   * against the document's text (textBurstMutation), so nothing lands twice and nothing is lost.
+   * The route announces every remote Text change through TEXT_CHANGED_EVENT.
    */
   const absorbRemote = (remote: Markup) => {
     if (done.current) return;
-    if (remote === lastBurst.current) return;
+    const base = handed();
+    if (remote === base) {
+      lastBurst.current = remote;
+      return;
+    }
     const dom = readText();
     const wasParked = parked.current;
     const selection = currentRange();
-    const next = absorbedText(lastBurst.current, dom, remote, selection);
+    const next = absorbedText(base, dom, remote, selection);
     element.innerHTML = editableHtml(next.text, options.current.multiline);
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
       mark.contentEditable = 'false';
@@ -1446,7 +1529,7 @@ export function InlineText({
     else if (next.selection !== null && document.activeElement === element) {
       restoreSelection(element, options.current.multiline, next.selection);
     }
-    lastBurst.current = remote;
+    setHanded(remote);
     callbacks.current.onInput?.();
     reportCaret();
     if (next.text !== remote) scheduleBurst();
@@ -1462,7 +1545,10 @@ export function InlineText({
     if (run !== `${detail.blockId}/${detail.pointer}`) return;
     const slide = element.closest('[data-slide]')?.getAttribute('data-slide');
     if (slide !== null && slide !== undefined && slide !== detail.slideId) return;
-    if (detail.text === lastBurst.current) return;
+    if (detail.text === handed()) {
+      lastBurst.current = detail.text;
+      return;
+    }
     noteAbsorbed(runKey(detail.slideId, detail.blockId, detail.pointer), detail.text);
     absorbRemote(detail.text);
   };
@@ -1534,7 +1620,7 @@ export function InlineText({
     }
     originalHtml.current = element.innerHTML;
     originalText.current = readText();
-    lastBurst.current = originalText.current;
+    setHanded(originalText.current);
     // the prompt of an empty placeholder is not content: it leaves for the session (SPEC 5.4)
     element.querySelectorAll('[data-prompt]').forEach((prompt) => prompt.remove());
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
@@ -1706,6 +1792,39 @@ export function InlineText({
       parked.current = false;
       parkedRange.current = null;
     };
+    /* a pointer button is held: the press that opens a plate or a menu; the run takes the focus
+       back after a chrome surface only once the button is up (resumeAfterChrome) */
+    let pressing = false;
+    const onDocPointerUp = () => {
+      pressing = false;
+    };
+    /**
+     * The focus left a transient chrome surface for the body (a menu row or a plate option was
+     * picked and its plate unmounted) or came back to the button or title a closing plate returns
+     * it to (Escape on a menu): the parked session takes the focus back with its range on the next
+     * tick, so the next keystroke lands in the text as after a toolbar button's click and as Google
+     * Slides continues at the caret after a Format menu pick (docs/RETURN.md 2.14 item 2). Nothing
+     * moves while a plate or menu is still open, while a pointer button is down (the press that
+     * opens one), when a field or a dialog took the focus, or when the pick armed a draw tool or
+     * Paint format on the stage (`data-tool`, `data-paint`): the press that places the box must
+     * find the stage free, and it does when the session stays parked (onDocPointerDown ends it).
+     */
+    const resumeAfterChrome = () => {
+      window.setTimeout(() => {
+        if (done.current || !parked.current || pressing) return;
+        if (document.querySelector(OPEN_PLATE_SELECTOR) !== null) return;
+        if (
+          document.querySelector(
+            '.ts-stagewrap.ts-editor[data-tool], .ts-stagewrap.ts-editor[data-paint]',
+          ) !== null
+        )
+          return;
+        const active = document.activeElement;
+        if (active === element || isFieldElement(active)) return;
+        if (active !== null && active !== document.body && !isTransientTarget(active)) return;
+        resumeFocus(parkedRange.current);
+      }, 0);
+    };
     /* while parked, the focus settling anywhere but the run, the popover or a transient chrome
        surface ends the session (a dialog's field, the notes pane, a filmstrip card) */
     const onDocFocusIn = (e: FocusEvent) => {
@@ -1713,7 +1832,10 @@ export function InlineText({
       const target = e.target;
       if (!(target instanceof Node)) return;
       if (element.contains(target) || popover.current?.contains(target)) return;
-      if (isTransientTarget(target) && !isFieldElement(target)) return;
+      if (isTransientTarget(target) && !isFieldElement(target)) {
+        resumeAfterChrome();
+        return;
+      }
       /* a closing menu returns the focus to the block it opened on (ContextMenu returnFocusTo);
          the run is inside it, so the session takes the focus back rather than ending */
       if (target.contains(element)) {
@@ -1751,10 +1873,17 @@ export function InlineText({
        menu while the run was parked (Insert > Text box) must find the stage free on the press
        that places the box */
     const onDocPointerDown = (e: PointerEvent) => {
+      pressing = true;
       if (!parked.current || done.current) return;
       if (e.target instanceof Node && element.contains(e.target)) return;
       const inPopover = e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
       if (!inPopover && !isTransientTarget(e.target)) finish('blur');
+    };
+    /* the focus left a chrome surface for the body: a menu or plate pick unmounted it */
+    const onDocFocusOut = (e: FocusEvent) => {
+      if (!parked.current || done.current) return;
+      if (e.relatedTarget !== null) return;
+      if (e.target instanceof Element && isTransientTarget(e.target)) resumeAfterChrome();
     };
     const onPaste = (e: ClipboardEvent) => {
       // pasted text lands as plain text; a line break is a paragraph break on a multiline
@@ -1773,7 +1902,10 @@ export function InlineText({
     element.addEventListener('paste', onPaste);
     document.addEventListener('mousedown', onDocMouseDown, true);
     document.addEventListener('pointerdown', onDocPointerDown, true);
+    document.addEventListener('pointerup', onDocPointerUp, true);
+    document.addEventListener('pointercancel', onDocPointerUp, true);
     document.addEventListener('focusin', onDocFocusIn);
+    document.addEventListener('focusout', onDocFocusOut);
     window.addEventListener(TEXT_CHANGED_EVENT, onTextChanged);
     listeners.current = () => {
       element.removeEventListener('keydown', onKey);
@@ -1783,7 +1915,10 @@ export function InlineText({
       element.removeEventListener('paste', onPaste);
       document.removeEventListener('mousedown', onDocMouseDown, true);
       document.removeEventListener('pointerdown', onDocPointerDown, true);
+      document.removeEventListener('pointerup', onDocPointerUp, true);
+      document.removeEventListener('pointercancel', onDocPointerUp, true);
       document.removeEventListener('focusin', onDocFocusIn);
+      document.removeEventListener('focusout', onDocFocusOut);
       window.removeEventListener(TEXT_CHANGED_EVENT, onTextChanged);
       document.removeEventListener('selectionchange', onSelectionChange);
       callbacks.current.onHandle?.(null);

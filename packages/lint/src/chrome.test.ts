@@ -42,7 +42,11 @@ describe('chrome audit configuration', () => {
   });
 
   test('the scopes read the prefixed tokens first and keep the rendered sheet as content', () => {
+    /* --pt-hair-on-ink joined in the return round as a role of its own: the hairline over a solid
+       ink ground, read near an active state like ink (docs/RETURN.md 4.1 rule 3) */
     expect(SHELL_CHROME.tokens.hair).toEqual(['--pt-hair', '--hair']);
+    expect(SHELL_CHROME.tokens.hairOnInk).toEqual(['--pt-hair-on-ink']);
+    expect(TURBOSLIDE_CHROME.active).toContain('.ts-title-slideshow');
     expect(TURBOSLIDE_CHROME.content).toContain('.ts-sheet');
     expect(TURBOSLIDE_CHROME.roots).toContain('.pt-viewer');
     expect(DECK_CHROME.prefix).toBeNull();

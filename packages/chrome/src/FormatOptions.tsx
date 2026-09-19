@@ -456,69 +456,80 @@ export function FormatOptions({
       selected.type === 'table' ||
       (selected.type === 'shape' && !isLineKind(selected.shape)));
 
-  const sectionsShown = presentFormatSections(FORMAT_SECTIONS, advancedTools).filter((section) => {
-    switch (section.id) {
-      case 'size':
-      case 'position':
-        return isObject;
-      case 'layout':
-        return selected === undefined || !freeform;
-      case 'textFitting':
-        return (
-          selected !== undefined && !many && (hasTextFitting(selected) || selected.type === 'table')
-        );
-      case 'text':
-        return (
-          textish ||
-          (byBlockSection.get('text')?.controls.length ?? 0) > 0 ||
-          (many && blocks.some((b) => 'typography' in b))
-        );
-      case 'colour':
-        return (
-          (byBlockSection.get('colour')?.controls.length ?? 0) > 0 ||
-          (selected?.type === 'text' && selected.outline !== undefined)
-        );
-      case 'picture':
-        return (
-          (selected !== undefined && !many && hasPicture(selected)) ||
-          (byBlockSection.get('picture')?.controls.length ?? 0) +
-            (byBlockSection.get('picture')?.arrays.length ?? 0) >
-            0 ||
-          (selected === undefined && slidePictureRows.length > 0)
-        );
-      case 'adjustments':
-        return selected !== undefined && !many && hasAdjustments(selected);
-      case 'dither':
-        // the deck's two tone screen over a picture object or a shot (gslides-parity SPEC-3 10.3;
-        // the integrator at merge 2 for b5.md request 7)
-        return selected !== undefined && !many && hasDither(selected);
-      case 'shadow':
-        return selected !== undefined && (many ? blocks.some(hasShadow) : hasShadow(selected));
-      case 'table':
-        return selected?.type === 'table' && !many;
-      case 'chart':
-        return selected?.type === 'chart' && !many;
-      case 'line':
-        return selected?.type === 'shape' && isLineKind(selected.shape) && !many;
-      case 'shape':
-        return selected?.type === 'shape' && !isLineKind(selected.shape) && !many;
-      case 'list':
-        return (
-          selected?.type === 'plain' ||
-          (byBlockSection.get('list')?.controls.length ?? 0) +
-            (byBlockSection.get('list')?.arrays.length ?? 0) >
-            0
-        );
-      case 'altText':
-        return selected !== undefined && !many;
-      case 'block': {
-        const entry = byBlockSection.get('block');
-        return entry !== undefined && entry.controls.length + entry.arrays.length > 0;
+  const sectionsFiltered = presentFormatSections(FORMAT_SECTIONS, advancedTools).filter(
+    (section) => {
+      switch (section.id) {
+        case 'size':
+        case 'position':
+          return isObject;
+        case 'layout':
+          return selected === undefined || !freeform;
+        case 'textFitting':
+          return (
+            selected !== undefined &&
+            !many &&
+            (hasTextFitting(selected) || selected.type === 'table')
+          );
+        case 'text':
+          return (
+            textish ||
+            (byBlockSection.get('text')?.controls.length ?? 0) > 0 ||
+            (many && blocks.some((b) => 'typography' in b))
+          );
+        case 'colour':
+          return (
+            (byBlockSection.get('colour')?.controls.length ?? 0) > 0 ||
+            (selected?.type === 'text' && selected.outline !== undefined)
+          );
+        case 'picture':
+          return (
+            (selected !== undefined && !many && hasPicture(selected)) ||
+            (byBlockSection.get('picture')?.controls.length ?? 0) +
+              (byBlockSection.get('picture')?.arrays.length ?? 0) >
+              0 ||
+            (selected === undefined && slidePictureRows.length > 0)
+          );
+        case 'adjustments':
+          return selected !== undefined && !many && hasAdjustments(selected);
+        case 'dither':
+          // the deck's two tone screen over a picture object or a shot (gslides-parity SPEC-3 10.3;
+          // the integrator at merge 2 for b5.md request 7)
+          return selected !== undefined && !many && hasDither(selected);
+        case 'shadow':
+          return selected !== undefined && (many ? blocks.some(hasShadow) : hasShadow(selected));
+        case 'table':
+          return selected?.type === 'table' && !many;
+        case 'chart':
+          return selected?.type === 'chart' && !many;
+        case 'line':
+          return selected?.type === 'shape' && isLineKind(selected.shape) && !many;
+        case 'shape':
+          return selected?.type === 'shape' && !isLineKind(selected.shape) && !many;
+        case 'list':
+          return (
+            selected?.type === 'plain' ||
+            (byBlockSection.get('list')?.controls.length ?? 0) +
+              (byBlockSection.get('list')?.arrays.length ?? 0) >
+              0
+          );
+        case 'altText':
+          return selected !== undefined && !many;
+        case 'block': {
+          const entry = byBlockSection.get('block');
+          return entry !== undefined && entry.controls.length + entry.arrays.length > 0;
+        }
+        default:
+          return false;
       }
-      default:
-        return false;
-    }
-  });
+    },
+  );
+  /* a chart's data is what a seller opens the panel for (docs/RETURN.md 2.5: "the round makes the
+     grid the first thing the panel shows for a chart"): its section leads; the sort is stable, so
+     every other section keeps its order (return/build/b5.md request 4) */
+  const sectionsShown =
+    selected?.type === 'chart'
+      ? [...sectionsFiltered].sort((a, b) => (a.id === 'chart' ? -1 : b.id === 'chart' ? 1 : 0))
+      : sectionsFiltered;
 
   const empty =
     selected === undefined &&

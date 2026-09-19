@@ -69,12 +69,28 @@ describe('renderTable', () => {
     expect(tableColumnsTemplate([{}, { width: 200.5 }])).toBe('minmax(0, 1fr) 200.5px');
   });
 
-  it('marks the alignment and the edges as classes and the column fill inline', () => {
+  it('draws a fully sized grid as proportional shares so the row always fills the table (RETURN.md 2.4 fix 4)', () => {
+    expect(tableColumnsTemplate([{ width: 240 }, { width: 480 }, { width: 240 }])).toBe(
+      'minmax(0, 240fr) minmax(0, 480fr) minmax(0, 240fr)',
+    );
+    // one unset column keeps the px form: the set width is a designer's px, the rest shares
+    expect(tableColumnsTemplate([{ width: 240 }, {}])).toBe('240px minmax(0, 1fr)');
+    expect(tableColumnsTemplate([])).toBe('');
+  });
+
+  it('marks the edges as classes and the alignment and the column fill inline', () => {
     const html = renderTable(pricing, context());
     expect(html).toContain('class="td first"');
-    expect(html).toContain('class="td right"');
-    expect(html).toContain('class="td right last" style="background:var(--plate)"');
-    expect(html).not.toContain('text-align:');
+    expect(html).toContain('class="td" style="text-align:right"');
+    expect(html).toContain('class="td last" style="text-align:right;background:var(--plate)"');
+    /* never the `center` or `right` class: the sheet's layout helper `.ts-sheet .center` placed a
+       centre aligned cell absolutely over its whole row (audit-objects row 97) */
+    expect(html).not.toMatch(/class="td[^"]*\b(center|right)\b/);
+    const centred = renderTable(
+      { ...pricing, columns: [{ align: 'center' }, ...pricing.columns.slice(1)] },
+      context(),
+    );
+    expect(centred).toContain('class="td first" style="text-align:center"');
   });
 
   it('renders each paragraph of a cell in its own span and the text markup inside', () => {

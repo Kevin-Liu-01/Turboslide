@@ -45,9 +45,10 @@ export type FormatSectionMeta = {
   doc: string;
   /**
    * A parked section (docs/FOCUS.md 3.2, 3.3): drawn only while Tools > Advanced tools is on. The
-   * Dither, Drop shadow, Table, Chart data, Shape and Alt text sections belong to parked rows
-   * (`format.image.dither`, `format.dropShadow`, `format.table.*`, `format.editData`,
-   * `format.changeShape`, `format.altText`); `presentFormatSections` applies the flag.
+   * Dither, Drop shadow and Alt text sections belong to parked rows (`format.image.dither`,
+   * `format.dropShadow`, `format.altText`; docs/RETURN.md 2.15, 3.4 and questions 6 and 7 of its
+   * section 9). The Table, Chart data and Shape sections returned with their features in the
+   * return round (RETURN.md 2.2, 2.4, 2.5). `presentFormatSections` applies the flag.
    */
   advanced?: true;
 };
@@ -111,14 +112,12 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     title: 'Table',
     icon: 'table',
     doc: 'Header row, columns, fill, border and vertical alignment',
-    advanced: true,
   },
   {
     id: 'chart',
     title: 'Chart data',
     icon: 'chart-bar',
     doc: 'The categories and series of the chart',
-    advanced: true,
   },
   {
     id: 'line',
@@ -131,7 +130,6 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     title: 'Shape',
     icon: 'cube',
     doc: 'The shape and its adjustable sides',
-    advanced: true,
   },
   { id: 'list', title: 'List', icon: 'list-bullet', doc: 'The items and how the list draws them' },
   {

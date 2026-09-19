@@ -119,6 +119,12 @@ export type SlideBase = {
    * print, thumbnails' play list, PDF and PPTX omit the slide unless asked; the filmstrip dims it.
    */
   skip?: true;
+  /**
+   * Slide numbers > Apply to selected (gslides-parity SPEC 7.2.4; docs/RETURN.md section 5
+   * `slides.numbers.apply`): this slide's number on or off whatever the deck's counter mode says;
+   * absent, the slide follows the deck.
+   */
+  counter?: 'on' | 'off';
   /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
   template?: LayoutId;
   /**
@@ -438,6 +444,13 @@ const slideBase = {
     control: 'toggle',
     group: 'Slide',
     help: 'A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).',
+  }),
+  counter: annotate(z.enum(['on', 'off']).optional(), {
+    label: 'Slide number',
+    control: 'select',
+    snap: ['on', 'off'],
+    group: 'Slide',
+    help: 'Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).',
   }),
   template: annotate(z.enum(LAYOUT_IDS).optional(), {
     label: 'Layout',

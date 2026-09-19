@@ -483,6 +483,8 @@ export const DIALOGS = {
     off: 'Off',
     skipTitles: 'Skip title slides',
     apply: 'Apply',
+    /* one slide's number on or off whatever the deck says (SPEC 7.2.4; return/build/b5.md request 7) */
+    applyToSelected: 'Apply to selected',
   },
   details: {
     title: 'Details',
@@ -603,6 +605,8 @@ export const CANVAS = {
   rotation: (degrees: number) => `${degrees}°`,
   /* the size chip while a handle is down, in sheet pixels: "480 × 64" */
   size: (width: number, height: number) => `${width} × ${height}`,
+  /* the width chip while a table's column seam is down (docs/RETURN.md 2.4 fix 5): "400 px" */
+  width: (px: number) => `${px} px`,
 } as const;
 
 /**

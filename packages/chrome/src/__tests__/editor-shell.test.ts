@@ -6,6 +6,7 @@ import type { TableBlock } from '@turboslide/schema/blocks/table';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { FREEFORM_SLIDE, freeformDocument, workedDocument } from '@turboslide/schema/fixtures';
 import { LAYOUTS } from '@turboslide/schema/layouts';
+import { TYPE_LEADING } from '@turboslide/schema/typography';
 
 import {
   DEFAULT_SETTINGS,
@@ -13,8 +14,16 @@ import {
   DIALOG_IDS,
   PANEL_IDS,
   STORED_SETTINGS,
+  CLEARED_FLAGS,
+  SPACING_STEPS,
   buildMenuContext,
   dialogIdOf,
+  flagEditOf,
+  forgetKeptCells,
+  hasClearableMarks,
+  rememberCell,
+  textStylePlan,
+  withKeptCell,
   drawToolBlock,
   drawToolBlockType,
   factsOf,
@@ -31,7 +40,7 @@ import {
   tailKindOf,
   writeStoredSettings,
 } from '../editor-shell';
-import type { ActionFacts, EditorSelection, InsertIntent } from '../editor-shell';
+import type { ActionFacts, EditorSelection, EditorShellInput, InsertIntent } from '../editor-shell';
 import {
   FIRST_BULLET_PRESET,
   FIRST_NUMBER_PRESET,
@@ -156,8 +165,344 @@ describe('tailKindOf', () => {
     };
     expect(tailKindOf(shot, { blockId: 'pic' })).toBe('image');
     expect(tailKindOf(shot, { blockId: 'ln' })).toBe('line');
-    expect(tailKindOf(shot, { blockId: 'tb' })).toBe('other');
+    /* the return round (RETURN.md 2.4 fixes 2 and 3): a selected table takes the table tail with
+       or without a cell; its controls act on the caret's cell, the kept cell, or cell 1,1 */
+    expect(tailKindOf(shot, { blockId: 'tb' })).toBe('table');
     expect(tailKindOf(shot, { blockId: 'tb', cell: { row: 0, column: 0 } })).toBe('table');
+  });
+
+  it('is the text tail for the cover title selected by one click (RETURN.md 2.14 item 1)', () => {
+    const title = document.slides['title'] as Slide;
+    expect(title.kind).toBe('title');
+    expect(tailKindOf(title, { blockId: 'heading' })).toBe('text');
+    expect(tailKindOf(title, { blockId: 'lead' })).toBe('text');
+    expect(tailKindOf(title, { blockId: 'mark' })).toBe('other');
+    const statement = document.slides['thesis'] as Slide;
+    expect(tailKindOf(statement, { blockId: 'big' })).toBe('text');
+  });
+});
+
+describe('the kept cell pointer (RETURN.md 2.4 fixes 2 and 3)', () => {
+  const table: Slide = {
+    schemaVersion: 1,
+    id: 'tbl',
+    kind: 'content',
+    layout: { type: 'center' },
+    slots: {
+      main: [
+        {
+          id: 'tb',
+          type: 'table',
+          columns: [{}, {}, {}],
+          rows: [{ cells: ['a', 'b', 'c'] }, { cells: ['d', 'e', 'f'] }],
+        } as Block,
+      ],
+    },
+  };
+  const doc: DeckDocument = { deck: document.deck, slides: { ...document.slides, tbl: table } };
+  const input = (selection: EditorSelection | null): EditorShellInput => ({
+    deckId: doc.deck.id,
+    document: doc,
+    slideId: 'tbl',
+    selection,
+    revision: 1,
+    dispatch: async () => undefined,
+  });
+
+  it("remembers the caret's cell and fills it in when the session has ended", () => {
+    forgetKeptCells();
+    const inSession: EditorSelection = { blockId: 'tb', text: true, cell: { row: 1, column: 2 } };
+    expect(withKeptCell(table, inSession)).toBe(inSession);
+    const afterwards = withKeptCell(table, { blockId: 'tb' });
+    expect(afterwards).toEqual({ blockId: 'tb', cell: { row: 1, column: 2 } });
+    /* the plans and the menu context read the kept cell */
+    expect(factsOf(input({ blockId: 'tb' })).selection?.cell).toEqual({ row: 1, column: 2 });
+    const ctx = buildMenuContext(input({ blockId: 'tb' }), DEFAULT_SETTINGS, 'mac');
+    expect(ctx.selection.tableCell).toBe(true);
+    const center = menuActionPlan(
+      itemById('format.alignIndent.center'),
+      factsOf(input({ blockId: 'tb' })),
+    );
+    expect(center).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'tb', path: '/columns' },
+    });
+    if (!('refused' in center)) expect(center.input.value).toEqual([{}, {}, { align: 'center' }]);
+  });
+
+  it('has no cell for a table never entered, enables the Format > Table rows on one click, and clamps a deleted cell', () => {
+    forgetKeptCells();
+    expect(withKeptCell(table, { blockId: 'tb' })).toEqual({ blockId: 'tb' });
+    const ctx = buildMenuContext(input({ blockId: 'tb' }), DEFAULT_SETTINGS, 'mac');
+    expect(ctx.selection.tableCell).toBe(true);
+    rememberCell('tbl', { blockId: 'tb', cell: { row: 7, column: 9 } });
+    expect(withKeptCell(table, { blockId: 'tb' })?.cell).toEqual({ row: 1, column: 2 });
+    /* another block of the slide is untouched */
+    expect(withKeptCell(table, { blockId: 'other' })).toEqual({ blockId: 'other' });
+    forgetKeptCells();
+  });
+});
+
+describe("the cover title before it converts (RETURN.md 2.14 item 1): the plans carry the reducer's mutations", () => {
+  const heading: EditorSelection = { blockId: 'heading' };
+
+  it('Bold, Center, the size and the spacings plan block.set on the field object as on a block', () => {
+    const bold = menuActionPlan(itemById('format.text.bold'), facts('title', heading));
+    expect(bold).toMatchObject({
+      action: 'block.set',
+      input: { slideId: 'title', blockId: 'heading', path: '/typography', value: { weight: 500 } },
+    });
+    const center = menuActionPlan(itemById('format.alignIndent.center'), facts('title', heading));
+    expect(center).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'heading', path: '/typography', value: { align: 'center' } },
+    });
+    const smaller = menuActionPlan(itemById('format.text.size.decrease'), facts('title', heading));
+    expect(smaller).toMatchObject({ action: 'block.set', input: { blockId: 'heading' } });
+    /* the cover title draws at the theme's h1 size 88; one step down the ladder is 72 */
+    if (!('refused' in smaller)) expect((smaller.input.value as { size: number }).size).toBe(72);
+    const spacing = menuActionPlan(itemById('format.spacing.1_15'), facts('title', heading));
+    expect(spacing).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'heading', path: '/typography', value: { leading: 1.15 } },
+    });
+  });
+
+  it('a mark, a colour and a case on the field object are one slide.update of text.mark over the range', () => {
+    const word: [number, number] = [8, 19];
+    const italic = menuActionPlan(
+      itemById('format.text.italic'),
+      facts('title', { ...heading, text: true, range: word, marks: {} }),
+    );
+    expect(italic).toEqual({
+      action: 'slide.update',
+      input: {
+        slideId: 'title',
+        mutations: [
+          {
+            op: 'text.mark',
+            slideId: 'title',
+            blockId: 'heading',
+            path: '/text',
+            range: word,
+            edit: { kind: 'marks', set: { i: true } },
+          },
+        ],
+        baseRevision: 412,
+      },
+      label: 'Italic',
+    });
+    const off = menuActionPlan(
+      itemById('format.text.superscript'),
+      facts('title', { ...heading, text: true, range: word, marks: { sup: true } }),
+    );
+    if ('refused' in off) throw new Error(off.refused);
+    expect((off.input.mutations as Array<{ edit: unknown }>)[0]?.edit).toEqual({
+      kind: 'marks',
+      clear: ['sup'],
+    });
+    const on = menuActionPlan(
+      itemById('format.text.subscript'),
+      facts('title', { ...heading, text: true, range: word, marks: {} }),
+    );
+    if ('refused' in on) throw new Error(on.refused);
+    expect((on.input.mutations as Array<{ edit: unknown }>)[0]?.edit).toEqual({
+      kind: 'marks',
+      set: { sub: true },
+      clear: ['sup'],
+    });
+    const upper = menuActionPlan(
+      itemById('format.text.capitalization.upper'),
+      facts('title', heading),
+    );
+    expect(upper).toMatchObject({
+      action: 'slide.update',
+      input: {
+        mutations: [
+          {
+            op: 'text.mark',
+            blockId: 'heading',
+            path: '/text',
+            range: [0, 'General Translation'.length],
+            edit: { kind: 'case', mode: 'upper' },
+          },
+        ],
+      },
+    });
+    const colour = textStylePlan(
+      facts('title', { ...heading, text: true, range: word }),
+      { color: 'red' },
+      'Red',
+    );
+    if ('refused' in colour) throw new Error(colour.refused);
+    expect((colour.input.mutations as Array<{ edit: unknown }>)[0]?.edit).toEqual({
+      kind: 'marks',
+      set: { color: 'red' },
+    });
+    const noColour = textStylePlan(facts('title', heading), { color: null }, 'None');
+    if ('refused' in noColour) throw new Error(noColour.refused);
+    expect((noColour.input.mutations as Array<{ edit: unknown }>)[0]?.edit).toEqual({
+      kind: 'marks',
+      clear: ['color'],
+    });
+  });
+
+  it('a real block keeps text.style and text.case', () => {
+    const slide = document.slides[RULE] as Slide;
+    const block = firstBlockOf(slide, 'heading') as Block;
+    const italic = menuActionPlan(
+      itemById('format.text.italic'),
+      facts(RULE, { blockId: block.id }),
+    );
+    expect(italic).toMatchObject({ action: 'text.style' });
+    const upper = menuActionPlan(
+      itemById('format.text.capitalization.upper'),
+      facts(RULE, { blockId: block.id }),
+    );
+    expect(upper).toMatchObject({ action: 'text.case' });
+  });
+
+  it("Add space before and the indent write the field object's typography", () => {
+    const before = menuActionPlan(itemById('format.spacing.addBefore'), facts('title', heading));
+    expect(before).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'heading', path: '/typography', value: { spaceBefore: 8 } },
+      label: 'Add space before paragraph',
+    });
+    const indent = menuActionPlan(
+      itemById('format.alignIndent.increaseIndent'),
+      facts('title', heading),
+    );
+    expect(indent).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'heading', path: '/typography', value: { indent: 64 } },
+    });
+    const outdent = menuActionPlan(
+      itemById('format.alignIndent.decreaseIndent'),
+      facts('title', heading),
+    );
+    expect(outdent).toMatchObject({
+      action: 'block.set',
+      input: { blockId: 'heading', path: '/typography' },
+    });
+    if (!('refused' in outdent)) expect('value' in outdent.input).toBe(false);
+  });
+
+  it("flagEditOf turns text.style marks into the reducer's set and clear", () => {
+    expect(flagEditOf({ i: true })).toEqual({ set: { i: true } });
+    expect(flagEditOf({ i: false })).toEqual({ clear: ['i'] });
+    expect(flagEditOf({ sup: true, sub: false })).toEqual({ set: { sup: true }, clear: ['sub'] });
+    expect(flagEditOf({ highlight: 'amber' })).toEqual({ set: { hl: 'amber' } });
+    expect(flagEditOf({ highlight: null })).toEqual({ clear: ['hl'] });
+  });
+});
+
+describe('the spacing rows write the value their label names (RETURN.md 2.14 item 4)', () => {
+  it('1.15 writes 1.15, Single 1 and Double 2, every one a step of the leading ladder', () => {
+    expect(SPACING_STEPS.map((step) => [step.label, step.leading])).toEqual([
+      ['Single', 1],
+      ['1.15', 1.15],
+      ['1.5', 1.5],
+      ['Double', 2],
+    ]);
+    for (const step of SPACING_STEPS) expect(TYPE_LEADING).toContain(step.leading);
+    const slide = document.slides[RULE] as Slide;
+    const block = firstBlockOf(slide, 'heading') as Block;
+    const plan = menuActionPlan(
+      itemById('format.spacing.1_15'),
+      facts(RULE, { blockId: block.id }),
+    );
+    expect(plan).toMatchObject({ input: { path: '/typography', value: { leading: 1.15 } } });
+  });
+});
+
+describe('Clear formatting clears the inline marks too (RETURN.md 2.14 item 5)', () => {
+  const marked: Slide = {
+    schemaVersion: 1,
+    id: 'mk',
+    kind: 'content',
+    layout: { type: 'center' },
+    slots: {
+      main: [
+        {
+          id: 'p',
+          type: 'paragraph',
+          text: 'One [italic]{i} word and a *bold* [red]{c:red} one',
+        } as Block,
+        { id: 'q', type: 'paragraph', text: 'Plain words with a [link](https://x.y)' } as Block,
+        {
+          id: 'r',
+          type: 'paragraph',
+          text: 'Sized [italic]{i} word',
+          typography: { size: 34 },
+        } as Block,
+      ],
+    },
+  };
+  const doc: DeckDocument = { deck: document.deck, slides: { ...document.slides, mk: marked } };
+  const on = (selection: EditorSelection) => ({ ...facts('mk', selection), document: doc });
+
+  it('a box with only marks: one text.mark clearing every mark, colour and bold run over the whole Text, and no refusal', () => {
+    const plan = menuActionPlan(itemById('format.clearFormatting'), on({ blockId: 'p' }));
+    expect(plan).toEqual({
+      action: 'slide.update',
+      input: {
+        slideId: 'mk',
+        mutations: [
+          {
+            op: 'text.mark',
+            slideId: 'mk',
+            blockId: 'p',
+            path: '/text',
+            range: [0, 'One italic word and a bold red one'.length],
+            edit: { kind: 'marks', clear: [...CLEARED_FLAGS] },
+          },
+        ],
+        baseRevision: 412,
+      },
+      label: 'Clear formatting',
+    });
+    expect(CLEARED_FLAGS).not.toContain('link');
+  });
+
+  it('a plain box with a link alone has nothing to clear; a link stays', () => {
+    expect(menuActionPlan(itemById('format.clearFormatting'), on({ blockId: 'q' }))).toEqual({
+      refused: 'Nothing to clear',
+    });
+    expect(hasClearableMarks('Plain [link](https://x.y)', [0, 10])).toBe(false);
+    expect(hasClearableMarks('Plain *bold*', [0, 10])).toBe(true);
+    expect(hasClearableMarks('Plain *bold*', [0, 5])).toBe(false);
+  });
+
+  it('a box with an override and a mark clears both in one write; a range clears its marks alone', () => {
+    const both = menuActionPlan(itemById('format.clearFormatting'), on({ blockId: 'r' }));
+    if ('refused' in both) throw new Error(both.refused);
+    expect(
+      (both.input.mutations as Array<{ op: string; path: string }>).map((m) => [m.op, m.path]),
+    ).toEqual([
+      ['block.set', '/typography'],
+      ['text.mark', '/text'],
+    ]);
+    const range = menuActionPlan(
+      itemById('format.clearFormatting'),
+      on({ blockId: 'r', text: true, range: [6, 12] }),
+    );
+    if ('refused' in range) throw new Error(range.refused);
+    expect(range.input.mutations).toEqual([
+      {
+        op: 'text.mark',
+        slideId: 'mk',
+        blockId: 'r',
+        path: '/text',
+        range: [6, 12],
+        edit: { kind: 'marks', clear: [...CLEARED_FLAGS] },
+      },
+    ]);
+    const plainRange = menuActionPlan(
+      itemById('format.clearFormatting'),
+      on({ blockId: 'r', text: true, range: [0, 5] }),
+    );
+    expect(plainRange).toEqual({ refused: 'Nothing to clear' });
   });
 });
 

@@ -20,6 +20,7 @@ import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
 
 import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
+import { slideCounter } from '@turboslide/render/deck';
 
 import type { AuthContext } from './authorize';
 import { renderSlide } from './render';
@@ -207,6 +208,9 @@ function buildViewerDeck(
         sectionId: section.id,
         html: rendered.html,
         picture,
+        /* the show's, the view route's and the print route's frames follow Insert > Slide numbers
+           through the same rule the editor stage and the exports read (return/build/b5.md request 12) */
+        counter: slideCounter(deck, slide, 1, 1) !== '',
         ...(options.notes && slide.notes !== undefined ? { notes: slide.notes } : {}),
       });
     }

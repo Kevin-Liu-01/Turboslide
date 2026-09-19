@@ -37,6 +37,11 @@ export type ViewerSlide = {
   shot?: { light: string; dark?: string };
   /** Skip slide (gslides-parity SPEC 7.2.1): the filmstrip and the grid dim the card */
   skip?: boolean;
+  /**
+   * whether the frame draws this slide's counter under the deck's Slide numbers and the slide's own
+   * word (render/deck.ts slideCounter; docs/RETURN.md section 5 slides.numbers.apply); true when absent
+   */
+  counter?: boolean;
   /** the layout the slide was made from (gslides-parity SPEC 7.2.2), for the Apply layout check */
   template?: string;
 };

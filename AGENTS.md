@@ -272,7 +272,12 @@ secret.ts` refuses a shorter session secret and the server answers 500 on every 
   counted as passed, parks no feature and fails no ship; a failed manual row fails like any other.
   A not driven row is never reported as passed, anywhere. Step 19 also runs `node
 docs/readme/what-works.mjs --check`: the README section "What works today" is rendered from the
-  matrix and a stale one fails the chain. The acceptance of a ship (6.2): every core row of every
+  matrix and a stale one fails the chain. The evidence the gate, the probes, the layout shift
+  audit and the audit scripts write under `docs/gslides-parity/focus/verification/` (the JSON and
+  the generated layout shift reports) and the audits' JSON under `focus/audit-*/` and
+  `return/audit-*/` are in `.prettierignore` as written, the rule the earlier rounds' evidence
+  folders carry, so a regenerated file never fails step 19; the hand written notes beside them
+  stay under the formatter. The acceptance of a ship (6.2): every core row of every
   feature not in the committed parked list passes on the preview built from the ship's commit and
   on production after the alias moves, in the last run of each origin, with the run ledger in the
   ship note and `retries` zero; a row that passes only on a rerun with no code change is flaky and

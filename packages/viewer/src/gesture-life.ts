@@ -7,9 +7,13 @@
 // release, no cancel, no lost capture, no blur and no Escape can leave a readout behind, and the
 // selection that follows starts from the idle state. Framework free, no DOM.
 
-/** What the overlay shows while a resize or a rotation is down; null shows nothing. */
+/** What the overlay shows while a resize, a rotation or a table column seam is down; null shows nothing. */
 export type GestureReadout =
-  { kind: 'angle'; value: number } | { kind: 'size'; w: number; h: number } | null;
+  | { kind: 'angle'; value: number }
+  | { kind: 'size'; w: number; h: number }
+  /* the moved column's width while a table's column seam drags (docs/RETURN.md 2.4 fix 5) */
+  | { kind: 'width'; value: number }
+  | null;
 
 /**
  * The events that end a gesture, whatever the handle kind: the pointer's release, the browser's

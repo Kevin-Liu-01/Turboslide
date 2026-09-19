@@ -1,0 +1,3733 @@
+{
+  "base": "turboslide-7errarh2r-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-19T12:58:16.369Z",
+  "endedAt": "2026-09-19T12:59:48.377Z",
+  "deckId": "untitled-20260919-ftr6",
+  "rows": [
+    {
+      "n": 1,
+      "area": "Scratch deck",
+      "interaction": "Double click the title on /new, type, Escape",
+      "result": "works",
+      "evidence": "/edit/untitled-20260919-ftr6; revision 1"
+    },
+    {
+      "n": 2,
+      "area": "Appearance",
+      "interaction": "The appearance the fresh browser boots into",
+      "result": "works",
+      "evidence": "data-theme dark"
+    },
+    {
+      "n": 3,
+      "area": "Appearance",
+      "interaction": "View > Appearance > dark (1x)",
+      "result": "works",
+      "evidence": "already dark"
+    },
+    {
+      "n": 4,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (dark-1x)",
+      "result": "works",
+      "evidence": "10 seams; title -> menu bar: #3a3a3ax1; menu bar -> toolbar: none; toolbar -> sheet: #3a3a3ax1; toolbar -> filmstrip: #3a3a3ax1; stage -> notes pane: #3a3a3ax1; notes pane -> bottom bar: #3a3a3ax1; filmstrip -> bottom bar: #3a3a3ax1; filmstrip -> sheet (vertical): #3a3a3ax1; filmstrip -> sheet, upper (vertical): #3a3a3ax1; sheet -> right panel (vertical): #3a3a3ax1"
+    },
+    {
+      "n": 5,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (dark-1x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(242, 242, 240) bg rgb(242, 242, 240); label half 102.9 by 30 radius 0px padding 0px 10px 0px 12px gap 6px direction row; arrow 28 by 30 border-left 1px solid rgba(7, 7, 7, 0.26); divider at mid #f2f2f0x6 #b5b5b4x1 #f2f2f0x6 contrast 1.83; 1 px under the top #f2f2f0x6 #b5b5b4x1 #f2f2f0x6; 2 px under #f2f2f0x6 #b5b5b4x1 #f2f2f0x6; paper notches 0"
+    },
+    {
+      "n": 6,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (dark-1x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; comments glyph 32 by 32; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 7,
+      "area": "Separators",
+      "interaction": "Every separator's computed style (dark-1x)",
+      "result": "works",
+      "evidence": ".ts-title-row: top 0px none rgb(242, 242, 240); bottom 1px solid rgba(242, 242, 240, 0.22); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-menubar: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-toolbar: top 0px none rgb(242, 242, 240); bottom 1px solid rgba(242, 242, 240, 0.22); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-sb: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 1px solid rgba(242, 242, 240, 0.22) || .pt-viewer.is-editor > .ts-rpanel: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes: top 1px solid rgba(242, 242, 240, 0.22); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-bottombar: top 1px solid rgba(242, 242, 240, 0.22); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-title-present-arrow: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 1px solid rgba(7, 7, 7, 0.26); right 0px none rgb(7, 7, 7) || .ts-tb-sep: [{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8},{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8},{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8},{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}] || .ts-presence-rule: [] || tokens {\"--pt-hair\":\"#f2f2f038\",\"--pt-hair-soft\":\"#f2f2f01a\",\"--pt-hair-on-ink\":\"#07070742\",\"--pt-plate-on-ink\":\"#07070729\",\"--pt-plate-on-ink-open\":\"#0707073d\",\"--pt-ctl-h\":\"32px\",\"--pt-radius\":\"6px\",\"--pt-ink\":\"#f2f2f0\",\"--pt-paper\":\"#070707\",\"--pt-edge\":\"#f2f2f08c\"}"
+    },
+    {
+      "n": 8,
+      "area": "Split states",
+      "interaction": "Hover the Slideshow half (dark-1x)",
+      "result": "works",
+      "evidence": "label bg rgba(7, 7, 7, 0.16) (token composite null); arrow bg rgba(0, 0, 0, 0); wrapper bg rgb(242, 242, 240) color rgb(7, 7, 7); label color rgb(7, 7, 7)"
+    },
+    {
+      "n": 9,
+      "area": "Split states",
+      "interaction": "Hover the chevron half (dark-1x)",
+      "result": "works",
+      "evidence": "arrow bg rgba(7, 7, 7, 0.16) (token composite null); label bg rgba(0, 0, 0, 0); arrow color rgb(7, 7, 7)"
+    },
+    {
+      "n": 10,
+      "area": "Split states",
+      "interaction": "Click the chevron: the menu, its alignment, ARIA open, Escape returns focus (dark-1x)",
+      "result": "works",
+      "evidence": "closed {\"role\":\"group\",\"label\":\"Slideshow\",\"haspopup\":\"menu\",\"expanded\":\"false\",\"controls\":null,\"arrowLabel\":\"Presentation options\",\"labelText\":\"Slideshow\",\"mounted\":false,\"classes\":\"pt-ib is-solid ts-title-present | pt-ib is-solid ts-title-present-arrow\"}; open: right 1342 vs control right 1342.4, expanded true, controls ts-menu-slideshow, rows [\"Presenter view\",\"Start from beginning⇧⌘↩\"], chevron bg rgba(7, 7, 7, 0.24) (token composite null); after Escape: open false, controls null, focus present.arrow"
+    },
+    {
+      "n": 11,
+      "area": "Split keys",
+      "interaction": "Enter on the chevron with nothing selected (dark-1x)",
+      "result": "works",
+      "evidence": "menu open true; defaultPrevented false; focus after Escape present.arrow"
+    },
+    {
+      "n": 12,
+      "area": "Split keys",
+      "interaction": "Enter on the chevron with the title selected by one click (dark-1x)",
+      "result": "works",
+      "evidence": "selection null; menu open true; defaultPrevented false"
+    },
+    {
+      "n": 13,
+      "area": "Split keys",
+      "interaction": "Enter on the Slideshow half opens the show; Escape leaves (dark-1x)",
+      "result": "works",
+      "evidence": "show true; defaultPrevented false; left on Escape true"
+    },
+    {
+      "n": 14,
+      "area": "Split keys",
+      "interaction": "Space on the chevron and on the label (dark-1x)",
+      "result": "works",
+      "evidence": "menu on Space true; show on Space true"
+    },
+    {
+      "n": 15,
+      "area": "Split keys",
+      "interaction": "ArrowDown on the Slideshow half opens the menu with the first row focused; Escape returns focus to the label (dark-1x)",
+      "result": "works",
+      "evidence": "menu open true; focus in menu true first row true (menu.title.slideshow.presenterView); focus after Escape present.open"
+    },
+    {
+      "n": 16,
+      "area": "Split keys",
+      "interaction": "Tab from the Slideshow half reaches the chevron, with nothing selected and with the title selected (dark-1x)",
+      "result": "works",
+      "evidence": "nothing selected: focus after Tab present.arrow, chevron outline 1px solid rgb(7, 7, 7) offset -3px; title selected: focus after Tab present.arrow, selection before null after null"
+    },
+    {
+      "n": 17,
+      "area": "Comments glyph",
+      "interaction": "Click Show all comments, then again (dark-1x)",
+      "result": "works",
+      "evidence": "panel open true aria-pressed true; second click closed true aria-pressed false"
+    },
+    {
+      "n": 18,
+      "area": "Split at 900",
+      "interaction": "The title row at 900 px (dark-1x)",
+      "result": "works",
+      "evidence": "control 58.0 by 32; label half 28.0 padding 0px 8px; chevron half 28; word gone; Share 32.0 by 32; gaps [{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}] inset 12"
+    },
+    {
+      "n": 19,
+      "area": "Appearance",
+      "interaction": "View > Appearance > light (1x)",
+      "result": "works",
+      "evidence": "data-theme light"
+    },
+    {
+      "n": 20,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (light-1x)",
+      "result": "works",
+      "evidence": "10 seams; title -> menu bar: #d2d2d2x1; menu bar -> toolbar: none; toolbar -> sheet: #d2d2d2x1; toolbar -> filmstrip: #d2d2d2x1; stage -> notes pane: #d2d2d2x1; notes pane -> bottom bar: #d2d2d2x1; filmstrip -> bottom bar: #d2d2d2x1; filmstrip -> sheet (vertical): #d2d2d2x1; filmstrip -> sheet, upper (vertical): #d2d2d2x1; sheet -> right panel (vertical): #d2d2d2x1"
+    },
+    {
+      "n": 21,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (light-1x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(7, 7, 7) bg rgb(7, 7, 7); label half 102.9 by 30 radius 0px padding 0px 10px 0px 12px gap 6px direction row; arrow 28 by 30 border-left 1px solid rgba(255, 255, 255, 0.26); divider at mid #070707x6 #474747x1 #070707x6 contrast 2.17; 1 px under the top #070707x6 #474747x1 #070707x6; 2 px under #070707x6 #474747x1 #070707x6; paper notches 0"
+    },
+    {
+      "n": 22,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (light-1x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; comments glyph 32 by 32; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 23,
+      "area": "Separators",
+      "interaction": "Every separator's computed style (light-1x)",
+      "result": "works",
+      "evidence": ".ts-title-row: top 0px none rgb(7, 7, 7); bottom 1px solid rgba(7, 7, 7, 0.18); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-menubar: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-toolbar: top 0px none rgb(7, 7, 7); bottom 1px solid rgba(7, 7, 7, 0.18); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-sb: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 1px solid rgba(7, 7, 7, 0.18) || .pt-viewer.is-editor > .ts-rpanel: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes: top 1px solid rgba(7, 7, 7, 0.18); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-bottombar: top 1px solid rgba(7, 7, 7, 0.18); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-title-present-arrow: top 0px none rgb(255, 255, 255); bottom 0px none rgb(255, 255, 255); left 1px solid rgba(255, 255, 255, 0.26); right 0px none rgb(255, 255, 255) || .ts-tb-sep: [{\"w\":1,\"h\":20,\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"w\":1,\"h\":20,\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}] || .ts-presence-rule: [] || tokens {\"--pt-hair\":\"#0707072e\",\"--pt-hair-soft\":\"#07070717\",\"--pt-hair-on-ink\":\"#ffffff42\",\"--pt-plate-on-ink\":\"#ffffff29\",\"--pt-plate-on-ink-open\":\"#ffffff3d\",\"--pt-ctl-h\":\"32px\",\"--pt-radius\":\"6px\",\"--pt-ink\":\"#070707\",\"--pt-paper\":\"#fff\",\"--pt-edge\":\"#0707079e\"}"
+    },
+    {
+      "n": 24,
+      "area": "Split states",
+      "interaction": "Hover the Slideshow half (light-1x)",
+      "result": "works",
+      "evidence": "label bg rgba(255, 255, 255, 0.16) (token composite null); arrow bg rgba(0, 0, 0, 0); wrapper bg rgb(7, 7, 7) color rgb(255, 255, 255); label color rgb(255, 255, 255)"
+    },
+    {
+      "n": 25,
+      "area": "Split states",
+      "interaction": "Hover the chevron half (light-1x)",
+      "result": "works",
+      "evidence": "arrow bg rgba(255, 255, 255, 0.16) (token composite null); label bg rgba(0, 0, 0, 0); arrow color rgb(255, 255, 255)"
+    },
+    {
+      "n": 26,
+      "area": "Split states",
+      "interaction": "Click the chevron: the menu, its alignment, ARIA open, Escape returns focus (light-1x)",
+      "result": "works",
+      "evidence": "closed {\"role\":\"group\",\"label\":\"Slideshow\",\"haspopup\":\"menu\",\"expanded\":\"false\",\"controls\":null,\"arrowLabel\":\"Presentation options\",\"labelText\":\"Slideshow\",\"mounted\":false,\"classes\":\"pt-ib is-solid ts-title-present | pt-ib is-solid ts-title-present-arrow\"}; open: right 1342 vs control right 1342.4, expanded true, controls ts-menu-slideshow, rows [\"Presenter view\",\"Start from beginning⇧⌘↩\"], chevron bg rgba(255, 255, 255, 0.24) (token composite null); after Escape: open false, controls null, focus present.arrow"
+    },
+    {
+      "n": 27,
+      "area": "Split keys",
+      "interaction": "Enter on the chevron with nothing selected (light-1x)",
+      "result": "works",
+      "evidence": "menu open true; defaultPrevented false; focus after Escape present.arrow"
+    },
+    {
+      "n": 28,
+      "area": "Split keys",
+      "interaction": "Enter on the chevron with the title selected by one click (light-1x)",
+      "result": "works",
+      "evidence": "selection null; menu open true; defaultPrevented false"
+    },
+    {
+      "n": 29,
+      "area": "Split keys",
+      "interaction": "Enter on the Slideshow half opens the show; Escape leaves (light-1x)",
+      "result": "works",
+      "evidence": "show true; defaultPrevented false; left on Escape true"
+    },
+    {
+      "n": 30,
+      "area": "Split keys",
+      "interaction": "Space on the chevron and on the label (light-1x)",
+      "result": "works",
+      "evidence": "menu on Space true; show on Space true"
+    },
+    {
+      "n": 31,
+      "area": "Split keys",
+      "interaction": "ArrowDown on the Slideshow half opens the menu with the first row focused; Escape returns focus to the label (light-1x)",
+      "result": "works",
+      "evidence": "menu open true; focus in menu true first row true (menu.title.slideshow.presenterView); focus after Escape present.open"
+    },
+    {
+      "n": 32,
+      "area": "Split keys",
+      "interaction": "Tab from the Slideshow half reaches the chevron, with nothing selected and with the title selected (light-1x)",
+      "result": "works",
+      "evidence": "nothing selected: focus after Tab present.arrow, chevron outline 1px solid rgb(255, 255, 255) offset -3px; title selected: focus after Tab present.arrow, selection before null after null"
+    },
+    {
+      "n": 33,
+      "area": "Comments glyph",
+      "interaction": "Click Show all comments, then again (light-1x)",
+      "result": "works",
+      "evidence": "panel open true aria-pressed true; second click closed true aria-pressed false"
+    },
+    {
+      "n": 34,
+      "area": "Split at 900",
+      "interaction": "The title row at 900 px (light-1x)",
+      "result": "works",
+      "evidence": "control 58.0 by 32; label half 28.0 padding 0px 8px; chevron half 28; word gone; Share 32.0 by 32; gaps [{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}] inset 12"
+    },
+    {
+      "n": 35,
+      "area": "Appearance",
+      "interaction": "View > Appearance > dark (2x)",
+      "result": "works",
+      "evidence": "already dark"
+    },
+    {
+      "n": 36,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (dark-2x)",
+      "result": "works",
+      "evidence": "10 seams; title -> menu bar: #3a3a3ax1; menu bar -> toolbar: none; toolbar -> sheet: #3a3a3ax1; toolbar -> filmstrip: #3a3a3ax1; stage -> notes pane: #3a3a3ax1; notes pane -> bottom bar: #3a3a3ax1; filmstrip -> bottom bar: #3a3a3ax1; filmstrip -> sheet (vertical): #3a3a3ax1; filmstrip -> sheet, upper (vertical): #3a3a3ax1; sheet -> right panel (vertical): #3a3a3ax1"
+    },
+    {
+      "n": 37,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (dark-2x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(242, 242, 240) bg rgb(242, 242, 240); label half 102.9 by 30 radius 0px padding 0px 10px 0px 12px gap 6px direction row; arrow 28 by 30 border-left 1px solid rgba(7, 7, 7, 0.26); divider at mid #f2f2f0x5 #b5b5b4x2 #f2f2f0x6 contrast 1.83; 1 px under the top #f2f2f0x5 #b5b5b4x2 #f2f2f0x6; 2 px under #f2f2f0x5 #b5b5b4x2 #f2f2f0x6; paper notches 0"
+    },
+    {
+      "n": 38,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (dark-2x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; comments glyph 32 by 32; +N chip opacity 1 w 32; inbox slot display none"
+    },
+    {
+      "n": 39,
+      "area": "Separators",
+      "interaction": "Every separator's computed style (dark-2x)",
+      "result": "works",
+      "evidence": ".ts-title-row: top 0px none rgb(242, 242, 240); bottom 1px solid rgba(242, 242, 240, 0.22); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-menubar: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-toolbar: top 0px none rgb(242, 242, 240); bottom 1px solid rgba(242, 242, 240, 0.22); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-sb: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 1px solid rgba(242, 242, 240, 0.22) || .pt-viewer.is-editor > .ts-rpanel: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot: top 0px none rgb(242, 242, 240); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes: top 1px solid rgba(242, 242, 240, 0.22); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-bottombar: top 1px solid rgba(242, 242, 240, 0.22); bottom 0px none rgb(242, 242, 240); left 0px none rgb(242, 242, 240); right 0px none rgb(242, 242, 240) || .ts-title-present-arrow: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 1px solid rgba(7, 7, 7, 0.26); right 0px none rgb(7, 7, 7) || .ts-tb-sep: [{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"w\":1,\"h\":20,\"background\":\"rgba(242, 242, 240, 0.22)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}] || .ts-presence-rule: [] || tokens {\"--pt-hair\":\"#f2f2f038\",\"--pt-hair-soft\":\"#f2f2f01a\",\"--pt-hair-on-ink\":\"#07070742\",\"--pt-plate-on-ink\":\"#07070729\",\"--pt-plate-on-ink-open\":\"#0707073d\",\"--pt-ctl-h\":\"32px\",\"--pt-radius\":\"6px\",\"--pt-ink\":\"#f2f2f0\",\"--pt-paper\":\"#070707\",\"--pt-edge\":\"#f2f2f08c\"}"
+    },
+    {
+      "n": 40,
+      "area": "Appearance",
+      "interaction": "View > Appearance > light (2x)",
+      "result": "works",
+      "evidence": "data-theme light"
+    },
+    {
+      "n": 41,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (light-2x)",
+      "result": "works",
+      "evidence": "10 seams; title -> menu bar: #d2d2d2x1; menu bar -> toolbar: none; toolbar -> sheet: #d2d2d2x1; toolbar -> filmstrip: #d2d2d2x1; stage -> notes pane: #d2d2d2x1; notes pane -> bottom bar: #d2d2d2x1; filmstrip -> bottom bar: #d2d2d2x1; filmstrip -> sheet (vertical): #d2d2d2x1; filmstrip -> sheet, upper (vertical): #d2d2d2x1; sheet -> right panel (vertical): #d2d2d2x1"
+    },
+    {
+      "n": 42,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (light-2x)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(7, 7, 7) bg rgb(7, 7, 7); label half 102.9 by 30 radius 0px padding 0px 10px 0px 12px gap 6px direction row; arrow 28 by 30 border-left 1px solid rgba(255, 255, 255, 0.26); divider at mid #070707x5 #474747x2 #070707x6 contrast 2.17; 1 px under the top #070707x5 #474747x2 #070707x6; 2 px under #070707x5 #474747x2 #070707x6; paper notches 0"
+    },
+    {
+      "n": 43,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (light-2x)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; comments glyph 32 by 32; +N chip opacity 1 w 32; inbox slot display none"
+    },
+    {
+      "n": 44,
+      "area": "Separators",
+      "interaction": "Every separator's computed style (light-2x)",
+      "result": "works",
+      "evidence": ".ts-title-row: top 0px none rgb(7, 7, 7); bottom 1px solid rgba(7, 7, 7, 0.18); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-menubar: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-toolbar: top 0px none rgb(7, 7, 7); bottom 1px solid rgba(7, 7, 7, 0.18); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-sb: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 1px solid rgba(7, 7, 7, 0.18) || .pt-viewer.is-editor > .ts-rpanel: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot: top 0px none rgb(7, 7, 7); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes: top 1px solid rgba(7, 7, 7, 0.18); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-bottombar: top 1px solid rgba(7, 7, 7, 0.18); bottom 0px none rgb(7, 7, 7); left 0px none rgb(7, 7, 7); right 0px none rgb(7, 7, 7) || .ts-title-present-arrow: top 0px none rgb(255, 255, 255); bottom 0px none rgb(255, 255, 255); left 1px solid rgba(255, 255, 255, 0.26); right 0px none rgb(255, 255, 255) || .ts-tb-sep: [{\"w\":1,\"h\":20,\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":8,\"gapAfter\":null},{\"w\":1,\"h\":20,\"background\":\"rgba(7, 7, 7, 0.18)\",\"margin\":\"0px 4px\",\"gapBefore\":null,\"gapAfter\":8}] || .ts-presence-rule: [] || tokens {\"--pt-hair\":\"#0707072e\",\"--pt-hair-soft\":\"#07070717\",\"--pt-hair-on-ink\":\"#ffffff42\",\"--pt-plate-on-ink\":\"#ffffff29\",\"--pt-plate-on-ink-open\":\"#ffffff3d\",\"--pt-ctl-h\":\"32px\",\"--pt-radius\":\"6px\",\"--pt-ink\":\"#070707\",\"--pt-paper\":\"#fff\",\"--pt-edge\":\"#0707079e\"}"
+    },
+    {
+      "n": 45,
+      "area": "Scratch deck",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks"
+    },
+    {
+      "n": 46,
+      "area": "Scratch deck",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260919-ftr6"
+    },
+    {
+      "n": 47,
+      "area": "Scratch deck",
+      "interaction": "GET /edit/<id> after the delete",
+      "result": "works",
+      "evidence": "status 404"
+    }
+  ],
+  "notes": {
+    "dark-1x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "tokens": {
+        "--pt-hair": "#f2f2f038",
+        "--pt-hair-soft": "#f2f2f01a",
+        "--pt-hair-on-ink": "#07070742",
+        "--pt-plate-on-ink": "#07070729",
+        "--pt-plate-on-ink-open": "#0707073d",
+        "--pt-ctl-h": "32px",
+        "--pt-radius": "6px",
+        "--pt-ink": "#f2f2f0",
+        "--pt-paper": "#070707",
+        "--pt-edge": "#f2f2f08c"
+      },
+      "separators": {
+        ".ts-title-row": {
+          "rule": "the title row draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 44
+          }
+        },
+        ".ts-menubar": {
+          "rule": "the menu bar draws none",
+          "side": "all",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 28
+          }
+        },
+        ".ts-toolbar": {
+          "rule": "the toolbar draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 40
+          }
+        },
+        ".pt-viewer.is-editor > .pt-sb": {
+          "rule": "the filmstrip draws its right",
+          "side": "borderRight",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "1px solid rgba(242, 242, 240, 0.22)",
+          "rect": {
+            "w": 256,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .ts-rpanel": {
+          "rule": "the right panel draws its left",
+          "side": "borderLeft",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 320,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot": {
+          "rule": "the slot draws none",
+          "side": "borderTop",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes": {
+          "rule": "the notes pane draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(242, 242, 240, 0.22)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".ts-bottombar": {
+          "rule": "the bottom bar draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(242, 242, 240, 0.22)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 32
+          }
+        },
+        ".ts-title-present-arrow": {
+          "rule": "the chevron half's divider in --pt-hair-on-ink",
+          "side": "borderLeft",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "1px solid rgba(7, 7, 7, 0.26)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 28,
+            "h": 30
+          }
+        },
+        ".ts-tb-sep": [
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": 8,
+            "gapAfter": null
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          }
+        ],
+        ".ts-presence-rule": []
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "sheet -> right panel (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        }
+      },
+      "seamRuns": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 38,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 43,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 44,
+              "thickness": 7,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "runs": [
+            {
+              "y": 66,
+              "thickness": 13,
+              "color": "#070707"
+            }
+          ]
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 112,
+              "thickness": 7,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 112,
+              "thickness": 7,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 472
+          },
+          "runs": [
+            {
+              "y": 798,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 804,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 805,
+              "thickness": 6,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 869,
+              "thickness": 6,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 4
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 869,
+              "thickness": 6,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 256,
+              "thickness": 7,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 256,
+              "thickness": 7,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "sheet -> right panel (vertical)": {
+          "at": {
+            "x": 1120,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 1114,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "x": 1120,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 1121,
+              "thickness": 6,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        }
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "grid",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.55)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "0",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"title.comments\"]": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(0, 0, 0, 0)",
+          "borderBottom": "1px solid rgba(0, 0, 0, 0)",
+          "borderLeft": "1px solid rgba(0, 0, 0, 0)",
+          "borderRight": "1px solid rgba(0, 0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(138, 143, 152) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "none",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgb(242, 242, 240)",
+          "borderBottom": "1px solid rgb(242, 242, 240)",
+          "borderLeft": "1px solid rgb(242, 242, 240)",
+          "borderRight": "1px solid rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.26)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "block",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(185, 188, 195) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"share.open\"]": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(185, 188, 195) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top4": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ]
+      },
+      "divider": {
+        "x": 1313,
+        "thickness": 1,
+        "color": "#b5b5b4",
+        "contrastToPrevious": 1.83
+      },
+      "dividerContrast": 1.83,
+      "notch": 0
+    },
+    "light-1x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "tokens": {
+        "--pt-hair": "#0707072e",
+        "--pt-hair-soft": "#07070717",
+        "--pt-hair-on-ink": "#ffffff42",
+        "--pt-plate-on-ink": "#ffffff29",
+        "--pt-plate-on-ink-open": "#ffffff3d",
+        "--pt-ctl-h": "32px",
+        "--pt-radius": "6px",
+        "--pt-ink": "#070707",
+        "--pt-paper": "#fff",
+        "--pt-edge": "#0707079e"
+      },
+      "separators": {
+        ".ts-title-row": {
+          "rule": "the title row draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 44
+          }
+        },
+        ".ts-menubar": {
+          "rule": "the menu bar draws none",
+          "side": "all",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 28
+          }
+        },
+        ".ts-toolbar": {
+          "rule": "the toolbar draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 40
+          }
+        },
+        ".pt-viewer.is-editor > .pt-sb": {
+          "rule": "the filmstrip draws its right",
+          "side": "borderRight",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "1px solid rgba(7, 7, 7, 0.18)",
+          "rect": {
+            "w": 256,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .ts-rpanel": {
+          "rule": "the right panel draws its left",
+          "side": "borderLeft",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 320,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot": {
+          "rule": "the slot draws none",
+          "side": "borderTop",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes": {
+          "rule": "the notes pane draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(7, 7, 7, 0.18)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".ts-bottombar": {
+          "rule": "the bottom bar draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(7, 7, 7, 0.18)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 32
+          }
+        },
+        ".ts-title-present-arrow": {
+          "rule": "the chevron half's divider in --pt-hair-on-ink",
+          "side": "borderLeft",
+          "top": "0px none rgb(255, 255, 255)",
+          "bottom": "0px none rgb(255, 255, 255)",
+          "left": "1px solid rgba(255, 255, 255, 0.26)",
+          "right": "0px none rgb(255, 255, 255)",
+          "rect": {
+            "w": 28,
+            "h": 30
+          }
+        },
+        ".ts-tb-sep": [
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(7, 7, 7, 0.18)",
+            "margin": "0px 4px",
+            "gapBefore": 8,
+            "gapAfter": null
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(7, 7, 7, 0.18)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          }
+        ],
+        ".ts-presence-rule": []
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "sheet -> right panel (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        }
+      },
+      "seamRuns": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 38,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 43,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 44,
+              "thickness": 7,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "runs": [
+            {
+              "y": 66,
+              "thickness": 13,
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 112,
+              "thickness": 7,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 112,
+              "thickness": 7,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 472
+          },
+          "runs": [
+            {
+              "y": 798,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 804,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 805,
+              "thickness": 6,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 869,
+              "thickness": 6,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 4
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 869,
+              "thickness": 6,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 256,
+              "thickness": 7,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 256,
+              "thickness": 7,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "sheet -> right panel (vertical)": {
+          "at": {
+            "x": 1120,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 1114,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "x": 1120,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 1121,
+              "thickness": 6,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        }
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "grid",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.62)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "0",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"title.comments\"]": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(0, 0, 0, 0)",
+          "borderBottom": "1px solid rgba(0, 0, 0, 0)",
+          "borderLeft": "1px solid rgba(0, 0, 0, 0)",
+          "borderRight": "1px solid rgba(0, 0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(138, 143, 152) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "none",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgb(7, 7, 7)",
+          "borderBottom": "1px solid rgb(7, 7, 7)",
+          "borderLeft": "1px solid rgb(7, 7, 7)",
+          "borderRight": "1px solid rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "0px none rgb(255, 255, 255)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "1px solid rgba(255, 255, 255, 0.26)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "0px none rgb(255, 255, 255)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "block",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(58, 61, 68) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"share.open\"]": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(58, 61, 68) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top4": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ]
+      },
+      "divider": {
+        "x": 1313,
+        "thickness": 1,
+        "color": "#474747",
+        "contrastToPrevious": 2.17
+      },
+      "dividerContrast": 2.17,
+      "notch": 0
+    },
+    "dark-2x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 2,
+      "tokens": {
+        "--pt-hair": "#f2f2f038",
+        "--pt-hair-soft": "#f2f2f01a",
+        "--pt-hair-on-ink": "#07070742",
+        "--pt-plate-on-ink": "#07070729",
+        "--pt-plate-on-ink-open": "#0707073d",
+        "--pt-ctl-h": "32px",
+        "--pt-radius": "6px",
+        "--pt-ink": "#f2f2f0",
+        "--pt-paper": "#070707",
+        "--pt-edge": "#f2f2f08c"
+      },
+      "separators": {
+        ".ts-title-row": {
+          "rule": "the title row draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 44
+          }
+        },
+        ".ts-menubar": {
+          "rule": "the menu bar draws none",
+          "side": "all",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 28
+          }
+        },
+        ".ts-toolbar": {
+          "rule": "the toolbar draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 40
+          }
+        },
+        ".pt-viewer.is-editor > .pt-sb": {
+          "rule": "the filmstrip draws its right",
+          "side": "borderRight",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "1px solid rgba(242, 242, 240, 0.22)",
+          "rect": {
+            "w": 256,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .ts-rpanel": {
+          "rule": "the right panel draws its left",
+          "side": "borderLeft",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 320,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot": {
+          "rule": "the slot draws none",
+          "side": "borderTop",
+          "top": "0px none rgb(242, 242, 240)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes": {
+          "rule": "the notes pane draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(242, 242, 240, 0.22)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".ts-bottombar": {
+          "rule": "the bottom bar draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(242, 242, 240, 0.22)",
+          "bottom": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "right": "0px none rgb(242, 242, 240)",
+          "rect": {
+            "w": 1440,
+            "h": 32
+          }
+        },
+        ".ts-title-present-arrow": {
+          "rule": "the chevron half's divider in --pt-hair-on-ink",
+          "side": "borderLeft",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "1px solid rgba(7, 7, 7, 0.26)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 28,
+            "h": 30
+          }
+        },
+        ".ts-tb-sep": [
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": 8,
+            "gapAfter": null
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(242, 242, 240, 0.22)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          }
+        ],
+        ".ts-presence-rule": []
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "sheet -> right panel (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        }
+      },
+      "seamRuns": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 38,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 43,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 44,
+              "thickness": 6.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "runs": [
+            {
+              "y": 66,
+              "thickness": 12.5,
+              "color": "#070707"
+            }
+          ]
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 112,
+              "thickness": 6.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 112,
+              "thickness": 6.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 472
+          },
+          "runs": [
+            {
+              "y": 798,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 804,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 805,
+              "thickness": 5.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 869,
+              "thickness": 5.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 4
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "y": 869,
+              "thickness": 5.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 256,
+              "thickness": 6.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#070707"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 256,
+              "thickness": 6.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        },
+        "sheet -> right panel (vertical)": {
+          "at": {
+            "x": 1120,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 1114,
+              "thickness": 6,
+              "color": "#070707"
+            },
+            {
+              "x": 1120,
+              "thickness": 1,
+              "color": "#3a3a3a",
+              "contrastToPrevious": 1.77
+            },
+            {
+              "x": 1121,
+              "thickness": 5.5,
+              "color": "#070707",
+              "contrastToPrevious": 1.77
+            }
+          ]
+        }
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "grid",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.55)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.55)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"title.comments\"]": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(0, 0, 0, 0)",
+          "borderBottom": "1px solid rgba(0, 0, 0, 0)",
+          "borderLeft": "1px solid rgba(0, 0, 0, 0)",
+          "borderRight": "1px solid rgba(0, 0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(138, 143, 152) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(242, 242, 240)",
+          "borderBottom": "0px none rgb(242, 242, 240)",
+          "borderLeft": "0px none rgb(242, 242, 240)",
+          "borderRight": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "none",
+          "outline": "3px none rgb(242, 242, 240) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgb(242, 242, 240)",
+          "borderBottom": "1px solid rgb(242, 242, 240)",
+          "borderLeft": "1px solid rgb(242, 242, 240)",
+          "borderRight": "1px solid rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.26)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "block",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(185, 188, 195) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"share.open\"]": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderBottom": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderLeft": "1px solid rgba(242, 242, 240, 0.22)",
+          "borderRight": "1px solid rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(185, 188, 195) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top1": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top4": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ]
+      },
+      "divider": {
+        "x": 2626,
+        "thickness": 2,
+        "color": "#b5b5b4",
+        "contrastToPrevious": 1.83
+      },
+      "dividerContrast": 1.83,
+      "notch": 0
+    },
+    "light-2x": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 2,
+      "tokens": {
+        "--pt-hair": "#0707072e",
+        "--pt-hair-soft": "#07070717",
+        "--pt-hair-on-ink": "#ffffff42",
+        "--pt-plate-on-ink": "#ffffff29",
+        "--pt-plate-on-ink-open": "#ffffff3d",
+        "--pt-ctl-h": "32px",
+        "--pt-radius": "6px",
+        "--pt-ink": "#070707",
+        "--pt-paper": "#fff",
+        "--pt-edge": "#0707079e"
+      },
+      "separators": {
+        ".ts-title-row": {
+          "rule": "the title row draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 44
+          }
+        },
+        ".ts-menubar": {
+          "rule": "the menu bar draws none",
+          "side": "all",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 28
+          }
+        },
+        ".ts-toolbar": {
+          "rule": "the toolbar draws its bottom",
+          "side": "borderBottom",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 40
+          }
+        },
+        ".pt-viewer.is-editor > .pt-sb": {
+          "rule": "the filmstrip draws its right",
+          "side": "borderRight",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "1px solid rgba(7, 7, 7, 0.18)",
+          "rect": {
+            "w": 256,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .ts-rpanel": {
+          "rule": "the right panel draws its left",
+          "side": "borderLeft",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 320,
+            "h": 756
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot": {
+          "rule": "the slot draws none",
+          "side": "borderTop",
+          "top": "0px none rgb(7, 7, 7)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes": {
+          "rule": "the notes pane draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(7, 7, 7, 0.18)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 864,
+            "h": 64
+          }
+        },
+        ".ts-bottombar": {
+          "rule": "the bottom bar draws its top",
+          "side": "borderTop",
+          "top": "1px solid rgba(7, 7, 7, 0.18)",
+          "bottom": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "rect": {
+            "w": 1440,
+            "h": 32
+          }
+        },
+        ".ts-title-present-arrow": {
+          "rule": "the chevron half's divider in --pt-hair-on-ink",
+          "side": "borderLeft",
+          "top": "0px none rgb(255, 255, 255)",
+          "bottom": "0px none rgb(255, 255, 255)",
+          "left": "1px solid rgba(255, 255, 255, 0.26)",
+          "right": "0px none rgb(255, 255, 255)",
+          "rect": {
+            "w": 28,
+            "h": 30
+          }
+        },
+        ".ts-tb-sep": [
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(7, 7, 7, 0.18)",
+            "margin": "0px 4px",
+            "gapBefore": 8,
+            "gapAfter": null
+          },
+          {
+            "w": 1,
+            "h": 20,
+            "background": "rgba(7, 7, 7, 0.18)",
+            "margin": "0px 4px",
+            "gapBefore": null,
+            "gapAfter": 8
+          }
+        ],
+        ".ts-presence-rule": []
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "sheet -> right panel (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        }
+      },
+      "seamRuns": {
+        "title -> menu bar": {
+          "at": {
+            "y": 44,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 38,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 43,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 44,
+              "thickness": 6.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "menu bar -> toolbar": {
+          "at": {
+            "y": 72,
+            "x": 340
+          },
+          "runs": [
+            {
+              "y": 66,
+              "thickness": 12.5,
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "toolbar -> sheet": {
+          "at": {
+            "y": 112,
+            "x": 300
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 112,
+              "thickness": 6.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "toolbar -> filmstrip": {
+          "at": {
+            "y": 112,
+            "x": 128
+          },
+          "runs": [
+            {
+              "y": 106,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "y": 111,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 112,
+              "thickness": 6.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "stage -> notes pane": {
+          "at": {
+            "y": 804,
+            "x": 472
+          },
+          "runs": [
+            {
+              "y": 798,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 804,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 805,
+              "thickness": 5.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "notes pane -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 336
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 869,
+              "thickness": 5.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> bottom bar": {
+          "at": {
+            "y": 868,
+            "x": 4
+          },
+          "runs": [
+            {
+              "y": 862,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "y": 868,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "y": 869,
+              "thickness": 5.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 256,
+              "thickness": 6.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "at": {
+            "x": 256,
+            "y": 142
+          },
+          "runs": [
+            {
+              "x": 250,
+              "thickness": 5,
+              "color": "#ffffff"
+            },
+            {
+              "x": 255,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 256,
+              "thickness": 6.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        },
+        "sheet -> right panel (vertical)": {
+          "at": {
+            "x": 1120,
+            "y": 490
+          },
+          "runs": [
+            {
+              "x": 1114,
+              "thickness": 6,
+              "color": "#ffffff"
+            },
+            {
+              "x": 1120,
+              "thickness": 1,
+              "color": "#d2d2d2",
+              "contrastToPrevious": 1.51
+            },
+            {
+              "x": 1121,
+              "thickness": 5.5,
+              "color": "#ffffff",
+              "contrastToPrevious": 1.51
+            }
+          ]
+        }
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "grid",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.62)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.62)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"title.comments\"]": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "borderTop": "1px solid rgba(0, 0, 0, 0)",
+          "borderBottom": "1px solid rgba(0, 0, 0, 0)",
+          "borderLeft": "1px solid rgba(0, 0, 0, 0)",
+          "borderRight": "1px solid rgba(0, 0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(138, 143, 152)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(138, 143, 152) offset 0px",
+          "padding": "0px",
+          "gap": "8px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(7, 7, 7)",
+          "borderBottom": "0px none rgb(7, 7, 7)",
+          "borderLeft": "0px none rgb(7, 7, 7)",
+          "borderRight": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "none",
+          "outline": "3px none rgb(7, 7, 7) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgb(7, 7, 7)",
+          "borderBottom": "1px solid rgb(7, 7, 7)",
+          "borderLeft": "1px solid rgb(7, 7, 7)",
+          "borderRight": "1px solid rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "0px none rgb(255, 255, 255)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px 10px 0px 12px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "1px solid rgba(255, 255, 255, 0.26)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-present .pt-lb": {
+          "rect": {
+            "x": 1240.46875,
+            "y": 15,
+            "w": 62.9375,
+            "h": 13
+          },
+          "radius": "0px",
+          "borderTop": "0px none rgb(255, 255, 255)",
+          "borderBottom": "0px none rgb(255, 255, 255)",
+          "borderLeft": "0px none rgb(255, 255, 255)",
+          "borderRight": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "display": "block",
+          "outline": "3px none rgb(255, 255, 255) offset 0px",
+          "padding": "0px",
+          "gap": "normal",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(58, 61, 68) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        },
+        "[data-control=\"share.open\"]": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "borderTop": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderBottom": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderLeft": "1px solid rgba(7, 7, 7, 0.18)",
+          "borderRight": "1px solid rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "opacity": "1",
+          "display": "flex",
+          "outline": "3px none rgb(58, 61, 68) offset 0px",
+          "padding": "0px 10px",
+          "gap": "6px",
+          "flexDirection": "row",
+          "margin": "0px",
+          "boxShadow": "none"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#070707"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top1": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#070707"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#070707"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top4": [
+          {
+            "x": 2621,
+            "thickness": 5,
+            "color": "#070707"
+          },
+          {
+            "x": 2626,
+            "thickness": 2,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 2628,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ]
+      },
+      "divider": {
+        "x": 2626,
+        "thickness": 2,
+        "color": "#474747",
+        "contrastToPrevious": 2.17
+      },
+      "dividerContrast": 2.17,
+      "notch": 0
+    }
+  },
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

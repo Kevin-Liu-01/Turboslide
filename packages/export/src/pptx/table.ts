@@ -152,6 +152,22 @@ export function tableCell(
 }
 
 /**
+ * The column widths `a:tbl` takes, in sheet px, summing to the table's measured box: the scene's
+ * cell boxes as measured, scaled when their sum drifted from the box (a grid the browser laid
+ * out past or short of the table, or a measurement of a cell that spanned the row while a
+ * session was open); a `gridCol` wider than the frame is a width the file cannot hold
+ * (docs/RETURN.md 2.4 fix 4; audit-objects row 85 read 240, 240, 240 and 960 for a 960 px table).
+ * Columns of zero total, or a box of zero width, are written as measured.
+ */
+export function normalisedColumnWidths(table: Pick<SceneTable, 'columns' | 'box'>): number[] {
+  const widths = table.columns.map((column) => Math.max(0, column.w));
+  const sum = widths.reduce((acc, w) => acc + w, 0);
+  const target = table.box[2];
+  if (sum <= 0 || target <= 0 || Math.abs(sum - target) <= 0.5) return widths;
+  return widths.map((w) => (w * target) / sum);
+}
+
+/**
  * Adds one measured table to a slide as `a:tbl`. `texts` are the scene's texts; the cells find
  * theirs by `textId`. Returns the rows and columns written.
  */
@@ -169,7 +185,7 @@ export function addSceneTable(
       return tableCell(table, r, cell, byId.get(cell.textId), options);
     }),
   );
-  const colW = table.columns.map((column) => pxToIn(column.w));
+  const colW = normalisedColumnWidths(table).map((w) => pxToIn(w));
   const rowH = table.rows.map((row) => pxToIn(row.h));
   const [x, y] = table.box;
   // pptxgenjs's TableProps carry no rotate, shadow or altText (4.0.1 declarations): a rotated

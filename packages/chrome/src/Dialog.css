@@ -219,6 +219,9 @@
   box-sizing: border-box;
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
+  /* the drawn box and dot sit over the native input that carries data-control; a click aimed at
+     the input's box must reach the input, not the drawing (return/build/b5.md request 11) */
+  pointer-events: none;
 }
 
 .ts-dialog-radio-dot {

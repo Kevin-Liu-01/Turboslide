@@ -290,6 +290,19 @@ describe('the counter modes and the play list (SPEC 7.2.1, 7.2.4)', () => {
     expect(rendered[0]?.rendered.html).toContain('data-counter=""');
   });
 
+  it("reads the slide's own counter word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md slides.numbers.apply)", () => {
+    const off: Deck = { ...base, defaults: { counter: 'off' } };
+    const skipTitle: Deck = { ...base, defaults: { counter: 'skip-title' } };
+    /* off on a numbered deck blanks the one slide; on under an off deck numbers it */
+    expect(slideCounter(base, { ...a, counter: 'off' }, 2, 4)).toBe('');
+    expect(slideCounter(off, { ...a, counter: 'on' }, 2, 4)).toBe('02 / 04');
+    /* on beats skip-title for a title slide; off holds under skip-title for a content slide */
+    expect(slideCounter(skipTitle, { ...title, counter: 'on' }, 1, 4)).toBe('01 / 04');
+    expect(slideCounter(skipTitle, { ...a, counter: 'off' }, 2, 4)).toBe('');
+    /* a slide outside the play list stays uncounted whatever its word */
+    expect(slideCounter(base, { ...a, counter: 'on' }, 0, 4)).toBe('');
+  });
+
   it('renders the deck document with the first slide counter and the runtime reading data-counter', () => {
     const rendered = renderDeck(base, [title, a, skipped, c], {
       ...options,

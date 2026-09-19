@@ -55,6 +55,16 @@
   flex: 0 0 auto;
 }
 
+/* the Chart type segments size to their labels: the shared small Seg (Seg.css) is the sidebar's
+   two icon squares at a fixed 28 px, which clipped "Column" at 37 px (audit-objects row 114;
+   docs/RETURN.md 2.5); the inspector's enum Segs take the same text sizing (seg.css) */
+.ts-chart-kind.pt-seg.is-small .pt-ib {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
 .ts-chartgrid-wrap {
   overflow-x: auto;
   padding: 0 4px;

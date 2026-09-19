@@ -19,6 +19,11 @@ export const IDS = [
   'lines.end-handle',
   'lines.tail.colour-weight-dash-ends',
   'lines.context.line',
+  'lines.connector.elbow',
+  'lines.connector.curved',
+  'lines.connector.re-end',
+  'lines.insert.arrow-head',
+  'lines.tail.line-start-end-menu',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -368,6 +373,318 @@ export async function run(t) {
       return {
         ok: missing.length === 0 && head,
         observed: `rows ${rows.join(', ')}; missing ${missing.join(', ') || 'none'}; picked ${picked}; head ${head}`,
+      };
+    },
+  );
+
+  // ---- the return round's rows (docs/RETURN.md 2.3, section 5): the connectors between two
+  // rectangles placed as setup, the arrow head and the Line start and Line end menu rows
+  const A = { id: 'con-a', pos: { x: 200, y: 600, w: 240, h: 160 } };
+  const B = { id: 'con-b', pos: { x: 900, y: 600, w: 240, h: 160 } };
+  const C = { id: 'con-c', pos: { x: 1300, y: 380, w: 240, h: 160 } };
+  const placedAB = await t
+    .step(
+      null,
+      'setup: two rectangles for the connectors',
+      'block.insert through the window API',
+      async () => {
+        const a = await t.placeBlock(S, {
+          id: A.id,
+          type: 'shape',
+          shape: 'rectangle',
+          fill: 'plate',
+          stroke: 'ink',
+          pos: A.pos,
+        });
+        const b = await t.placeBlock(S, {
+          id: B.id,
+          type: 'shape',
+          shape: 'rectangle',
+          fill: 'plate',
+          stroke: 'ink',
+          pos: B.pos,
+        });
+        return { ok: Boolean(a && b), observed: `placed ${[a, b].filter(Boolean).length} of 2` };
+      },
+    )
+    .then((r) => r.ok === true);
+  const posOf = async (blockId) => (await t.blockOf(S, blockId))?.pos ?? null;
+  const rightSite = async (blockId) => {
+    const p = await posOf(blockId);
+    return { x: p.x + p.w, y: p.y + p.h / 2 };
+  };
+  const leftSite = async (blockId) => {
+    const p = await posOf(blockId);
+    return { x: p.x, y: p.y + p.h / 2 };
+  };
+  const connectOf = async (blockId) => (await blockOf(blockId))?.connect ?? null;
+  /** Moves a block by a drag from inside after selecting it (A1 rule 2). */
+  const moveBlock = async (blockId, dx, dy) => {
+    await t.clearAll();
+    await t.selectObject(blockId);
+    return t.dragInside(S, blockId, dx, dy);
+  };
+  const connectorRow = async (rowId, kind, expectFollow) => {
+    let made = null;
+    await t.step(
+      rowId,
+      `Insert > Line > ${kind === 'elbowConnector' ? 'Elbow' : 'Curved'} connector dragged from A's right site to B's left site; B moved by 150 px`,
+      'both ends connect; the connector follows the moved shape',
+      async () => {
+        if (!placedAB) return { ok: false, observed: 'the two rectangles were not placed' };
+        await t.clearAll();
+        const from = await rightSite(A.id);
+        const to = await leftSite(B.id);
+        const r = await t.insertByTool(S, ['insert.line', `insert.line.${kind}`], from, to, {
+          text: null,
+        });
+        await t.press('Escape');
+        await t.settled();
+        made = r.obj;
+        if (!made) return { ok: false, observed: `nothing inserted: ${r.error}` };
+        const connect = await t
+          .pollUntil(
+            () => connectOf(made.id),
+            (c) => c?.start?.block !== undefined && c?.end?.block !== undefined,
+            8000,
+          )
+          .catch(() => connectOf(made.id));
+        const before = await posOf(made.id);
+        const moved = await moveBlock(B.id, 150, 0);
+        const after = await t
+          .pollUntil(
+            () => posOf(made.id),
+            (p) => p && !same(p, before),
+            8000,
+          )
+          .catch(() => posOf(made.id));
+        await t.settled();
+        const connectAfter = await connectOf(made.id);
+        const followed =
+          Boolean(after) &&
+          !same(after, before) &&
+          t.near(after.x + after.w, (await posOf(B.id)).x, 6);
+        return {
+          ok:
+            connect?.start?.block === A.id &&
+            connect?.end?.block === B.id &&
+            t.near((moved.after?.x ?? 0) - (moved.before?.x ?? 0), 150, 8) &&
+            followed &&
+            connectAfter?.end?.block === B.id,
+          observed: `${made.type} ${made.id} ${t.posStr(made.pos)}; connect ${JSON.stringify(connect)}; B ${t.posStr(moved.before)} -> ${t.posStr(moved.after)}; connector ${t.posStr(before)} -> ${t.posStr(after)}; followed ${followed}`,
+        };
+      },
+    );
+    return made;
+  };
+  const elbow = await connectorRow('lines.connector.elbow', 'elbowConnector');
+  await connectorRow('lines.connector.curved', 'curvedConnector');
+  await t.step(
+    'lines.connector.re-end',
+    "a third rectangle C; select the elbow connector, drag its end handle from B's site to C's left site; move C",
+    'the end connects to C and follows C',
+    async () => {
+      if (!elbow) return { ok: false, observed: 'no elbow connector to re-end' };
+      const c = await t.placeBlock(S, {
+        id: C.id,
+        type: 'shape',
+        shape: 'rectangle',
+        fill: 'plate',
+        stroke: 'ink',
+        pos: C.pos,
+      });
+      if (!c) return { ok: false, observed: 'the third rectangle was not placed' };
+      await t.clearAll();
+      /* a click on the path itself: the connector's box centre can be off its stroke */
+      const onPath = await page.evaluate((blockId) => {
+        const inner = document.querySelector(
+          `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+        );
+        const el = inner?.querySelector('path, polyline, line') ?? null;
+        if (!el) return null;
+        let pt;
+        if (typeof el.getTotalLength === 'function' && typeof el.getPointAtLength === 'function') {
+          pt = el.getPointAtLength(el.getTotalLength() / 2);
+        } else {
+          const r = el.getBoundingClientRect();
+          return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+        }
+        const m = el.getScreenCTM();
+        return m ? { x: m.a * pt.x + m.c * pt.y + m.e, y: m.b * pt.x + m.d * pt.y + m.f } : null;
+      }, elbow.id);
+      let ctrls = null;
+      if (onPath) {
+        await t.clickAt(onPath.x, onPath.y);
+        await t.sleep(200);
+        ctrls = await t.handleControls();
+      }
+      /* the elbow's own end handle, never another block's: the curved connector of the row before
+         runs A to B on the same y, so a click on "the elbow's path" selects whichever is drawn on
+         top, and the first drive dragged the curved connector's end to C and read the elbow's
+         connect unchanged (return/build/integrator.md) */
+      const own = `handle.${elbow.id}.end`;
+      /* the two connectors coincide, so a click reaches the one drawn on top whatever the point:
+         Tab walks the stage's objects from the selected one (Editor.tsx, the Tab branch) until the
+         elbow's own handles are up, the way a person reaches an object under another */
+      let walked = 0;
+      while (!ctrls?.includes(own) && walked < 12) {
+        await t.press('Tab');
+        await t.sleep(150);
+        ctrls = await t.handleControls();
+        walked += 1;
+      }
+      if (!ctrls?.includes(own)) ctrls = await t.selectObject(elbow.id);
+      const endCtl = ctrls?.includes(own) ? own : null;
+      if (!endCtl)
+        return {
+          ok: false,
+          observed: `no end handle of the elbow connector (handles ${(ctrls ?? []).join(',')})`,
+        };
+      const h = await t.handleRect(endCtl);
+      const target = await t.sheetPoint(C.pos.x, C.pos.y + C.pos.h / 2);
+      await t.drag(t.center(h), target, { steps: 18 });
+      await t.settled();
+      const connect = await t
+        .pollUntil(
+          () => connectOf(elbow.id),
+          (x) => x?.end?.block === C.id,
+          8000,
+        )
+        .catch(() => connectOf(elbow.id));
+      const before = await posOf(elbow.id);
+      const moved = await moveBlock(C.id, 0, 100);
+      const after = await t
+        .pollUntil(
+          () => posOf(elbow.id),
+          (p) => p && !same(p, before),
+          8000,
+        )
+        .catch(() => posOf(elbow.id));
+      await t.settled();
+      return {
+        ok:
+          connect?.end?.block === C.id &&
+          connect?.start?.block === A.id &&
+          Boolean(after) &&
+          !same(after, before),
+        observed: `connect after the drag ${JSON.stringify(connect)}; C moved ${t.posStr(moved.before)} -> ${t.posStr(moved.after)}; connector ${t.posStr(before)} -> ${t.posStr(after)}`,
+      };
+    },
+  );
+  await t.step(
+    'lines.insert.arrow-head',
+    'Insert > Line > Arrow by a drag; read the svg',
+    'one polygon head with data-heads end',
+    async () => {
+      await t.clearAll();
+      const r = await t.insertByTool(
+        S,
+        ['insert.line', 'insert.line.arrow'],
+        { x: 200, y: 820 },
+        { x: 700, y: 880 },
+        { text: null },
+      );
+      await t.press('Escape');
+      await t.settled();
+      if (!r.obj) return { ok: false, observed: `nothing inserted: ${r.error}` };
+      const facts = await page.evaluate((blockId) => {
+        const inner = document.querySelector(
+          `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+        );
+        const svg = inner?.tagName.toLowerCase() === 'svg' ? inner : inner?.querySelector('svg');
+        return svg
+          ? {
+              heads: svg.getAttribute('data-heads'),
+              polygons: svg.querySelectorAll('polygon').length,
+              lines: svg.querySelectorAll('line, path').length,
+            }
+          : null;
+      }, r.obj.id);
+      await t.selectObject(r.obj.id);
+      await t.press('Delete');
+      await t.settled();
+      return {
+        ok: facts !== null && facts.heads === 'end' && facts.polygons === 1,
+        observed: `${r.obj.id} ${t.posStr(r.obj.pos)}; data-heads ${facts?.heads}; polygons ${facts?.polygons}; line parts ${facts?.lines}`,
+      };
+    },
+  );
+  await t.step(
+    'lines.tail.line-start-end-menu',
+    'select the line; Format > Borders & lines > Line start > Arrow, Cmd+Z; Line end > None, Cmd+Z',
+    'the svg heads follow each pick and each Cmd+Z takes it back',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      const json0 = JSON.stringify(await blockOf(id));
+      const facts0 = await lineFacts(id);
+      await t.menuPath(
+        'format',
+        'format.bordersLines',
+        'format.bordersLines.lineStart',
+        'format.bordersLines.lineStart.fillArrow',
+      );
+      await t.settled();
+      const j1 = await t
+        .pollUntil(
+          async () => JSON.stringify(await blockOf(id)),
+          (j) => START_FIELD.test(j) && /[Aa]rrow/.test(j),
+          8000,
+        )
+        .catch(async () => JSON.stringify(await blockOf(id)));
+      const facts1 = await lineFacts(id);
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const j2 = JSON.stringify(await blockOf(id));
+      await t.selectObject(id);
+      await t.menuPath(
+        'format',
+        'format.bordersLines',
+        'format.bordersLines.lineEnd',
+        'format.bordersLines.lineEnd.fillArrow',
+      );
+      await t.settled();
+      const j3 = await t
+        .pollUntil(
+          async () => JSON.stringify(await blockOf(id)),
+          (j) => END_ARROW.test(j),
+          8000,
+        )
+        .catch(async () => JSON.stringify(await blockOf(id)));
+      await t.selectObject(id);
+      await t.menuPath(
+        'format',
+        'format.bordersLines',
+        'format.bordersLines.lineEnd',
+        'format.bordersLines.lineEnd.none',
+      );
+      await t.settled();
+      const j4 = await t
+        .pollUntil(
+          async () => JSON.stringify(await blockOf(id)),
+          (j) => !END_ARROW.test(j),
+          8000,
+        )
+        .catch(async () => JSON.stringify(await blockOf(id)));
+      const facts4 = await lineFacts(id);
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const j5 = JSON.stringify(await blockOf(id));
+      return {
+        ok:
+          START_FIELD.test(j1) &&
+          /[Aa]rrow/.test(j1) &&
+          j2 === json0 &&
+          END_ARROW.test(j3) &&
+          !END_ARROW.test(j4) &&
+          j5 === json0,
+        observed: `Line start > Arrow: start field ${START_FIELD.test(j1)} (drawn parts ${facts0?.paths} -> ${facts1?.paths}), Cmd+Z restored ${j2 === json0}; Line end > Arrow then None: arrow ${END_ARROW.test(j3)} -> ${END_ARROW.test(j4)} (drawn parts ${facts4?.paths}); two Cmd+Z restored ${j5 === json0}`,
       };
     },
   );

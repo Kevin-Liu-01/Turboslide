@@ -31,6 +31,12 @@ import { logSecurityEvent } from './log';
  * thumbnail grant (`signThumbGrant`, an HMAC over deck id, role and an expiry of 10 minutes,
  * handed to the page by the `thumbGrant` server function) gates the `?w=` variant of the render
  * route in enforce mode.
+ *
+ * The return round (docs/RETURN.md 2.19): the render grant (`signRenderGrant`, an HMAC over the
+ * deck, the slide, the theme, the scale, the format and an expiry of 10 minutes), appended by the
+ * `renderSlideImages` server function to every picture url it answers, so the tab File > Download
+ * > JPEG image or PNG image opens on the render route is served without the bearer and as an
+ * attachment named after the deck and the slide.
  */
 
 export const DOWNLOAD_SECRET_ENV = 'TURBOSLIDE_DOWNLOAD_SECRET';
@@ -265,6 +271,7 @@ const TYPES: Record<string, string> = {
   '.json': 'application/json',
   '.pdf': 'application/pdf',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
 };
 
 function contentType(name: string): string {
@@ -371,4 +378,60 @@ export function verifyThumbGrant(
   if (!Number.isFinite(exp) || exp < now || !/^[a-z]{1,16}$/.test(role)) return null;
   if (!sameHex(mac, sign(`${deckId}|${role}|${exp}`, 'thumb').slice(0, 32))) return null;
   return { deckId, role, exp };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The render grant (the return round, docs/RETURN.md 2.19; audit-surface rows 27 and 28): File >
+// Download > JPEG image and PNG image run `render.slide` and open the first picture url in a tab,
+// which carries no header, so on a deployment with TURBOSLIDE_TOKEN set the render route answered
+// 401 "bearer token required". The `renderSlideImages` server function, which runs `authorize(read)`
+// first, appends this grant to every url it answers; the route accepts it in place of the bearer
+// for the one picture it names and answers that picture as an attachment.
+
+/** How long a render grant is good for: 10 minutes; the tab opens the moment the row runs. */
+export const RENDER_GRANT_TTL_MS = 10 * 60 * 1000;
+export const RENDER_GRANT_QUERY = 'g';
+
+/** The one picture a grant names: the full size render's own parameters, never a thumbnail or the JSON variant. */
+export type RenderGrantTarget = {
+  deckId: string;
+  slideId: string;
+  theme: 'light' | 'dark';
+  scale: 1 | 2;
+  format: 'png' | 'jpg';
+};
+
+function renderGrantBody(target: RenderGrantTarget, exp: number): string {
+  return `${target.deckId}|${target.slideId}|${target.theme}|${target.scale}|${target.format}|${exp}`;
+}
+
+/** `<exp>.<hmac>` over the target and the expiry, under the download secret with its own purpose. */
+export function signRenderGrant(target: RenderGrantTarget, now: number = Date.now()): string {
+  if (!SLUG_PATTERN.test(target.deckId) || !SLUG_PATTERN.test(target.slideId))
+    throw new TypeError('the deck and slide ids must be slugs');
+  const exp = now + RENDER_GRANT_TTL_MS;
+  return `${exp}.${sign(renderGrantBody(target, exp), 'render').slice(0, 32)}`;
+}
+
+/** True when the grant verifies for exactly this picture and is not expired. */
+export function verifyRenderGrant(
+  target: RenderGrantTarget,
+  grant: string | null | undefined,
+  now: number = Date.now(),
+): boolean {
+  if (typeof grant !== 'string') return false;
+  if (!SLUG_PATTERN.test(target.deckId) || !SLUG_PATTERN.test(target.slideId)) return false;
+  const parts = grant.split('.');
+  if (parts.length !== 2) return false;
+  const exp = Number(parts[0]);
+  if (!Number.isFinite(exp) || exp < now) return false;
+  return sameHex(parts[1] ?? '', sign(renderGrantBody(target, exp), 'render').slice(0, 32));
+}
+
+/**
+ * The attachment's name, `<deck id>-<slide id>.<png|jpg>`: the deck id names the file, as the
+ * PowerPoint (`<deck id>-<theme>.pptx`) and the bundle (`<deck id>-<revision>.zip`) are named.
+ */
+export function renderFileName(target: RenderGrantTarget): string {
+  return `${target.deckId}-${target.slideId}.${target.format}`;
 }

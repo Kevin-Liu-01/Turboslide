@@ -25,9 +25,12 @@ page.on('response', async (res) => {
   } catch {
     body = '(no body)';
   }
-  responses.push(`${res.status()} ${url.replace(BASE, '').slice(0, 120)} :: ${body.replace(/\s+/g, ' ')}`);
+  responses.push(
+    `${res.status()} ${url.replace(BASE, '').slice(0, 120)} :: ${body.replace(/\s+/g, ' ')}`,
+  );
 });
-const invoke = (action, input = {}) => page.evaluate(([id, v]) => window.turboslide.studio.invoke(id, v), [action, input]);
+const invoke = (action, input = {}) =>
+  page.evaluate(([id, v]) => window.turboslide.studio.invoke(id, v), [action, input]);
 const state = () => page.evaluate(() => window.turboslide.studio.describe().state);
 const editorReady = async () => {
   await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, { timeout: 90_000 });
@@ -41,14 +44,24 @@ const status = async (id) => {
 const deleteForever = async (id) => {
   for (let round = 1; round <= 3; round += 1) {
     await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 }).catch(() => undefined);
+    await page
+      .waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 })
+      .catch(() => undefined);
     await sleep(3000);
-    const cards = await page.evaluate(() => [...document.querySelectorAll('[data-control^="trash.card."]')].map((el) => el.getAttribute('data-control')));
-    console.log(`trash round ${round}: cards ${cards.join(',') || 'none'}; page text ${(await page.evaluate(() => document.querySelector('.ts-home-page')?.textContent ?? '')).replace(/\s+/g, ' ').slice(0, 200)}`);
+    const cards = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-control^="trash.card."]')].map((el) =>
+        el.getAttribute('data-control'),
+      ),
+    );
+    console.log(
+      `trash round ${round}: cards ${cards.join(',') || 'none'}; page text ${(await page.evaluate(() => document.querySelector('.ts-home-page')?.textContent ?? '')).replace(/\s+/g, ' ').slice(0, 200)}`,
+    );
     if (cards.includes(`trash.card.${id}`)) {
       await page.locator(`[data-control="trash.delete.${id}"]`).click();
       await page.locator('[data-control="trash.confirm.ok"]').click();
-      await page.locator(`[data-control="trash.card.${id}"]`).waitFor({ state: 'detached', timeout: 30_000 });
+      await page
+        .locator(`[data-control="trash.card.${id}"]`)
+        .waitFor({ state: 'detached', timeout: 30_000 });
       console.log(`deleted forever ${id}`);
       return true;
     }
@@ -64,14 +77,22 @@ try {
     if (!done) {
       // open it and use the actions API
       await page.goto(`${BASE}/edit/${LEFT}`, { waitUntil: 'domcontentloaded' });
-      const ready = await editorReady().then(() => true).catch(() => false);
+      const ready = await editorReady()
+        .then(() => true)
+        .catch(() => false);
       console.log(`opened /edit/${LEFT}: editor ready ${ready}; url ${page.url()}`);
       if (ready) {
         const info = await invoke('deck.info').catch((e) => ({ error: String(e) }));
         console.log(`deck.info ${JSON.stringify(info).slice(0, 300)}`);
-        const t = await invoke('deck.trash', { id: LEFT, baseRevision: info.revision }).catch((e) => ({ error: String(e).slice(0, 200) }));
+        const t = await invoke('deck.trash', { id: LEFT, baseRevision: info.revision }).catch(
+          (e) => ({ error: String(e).slice(0, 200) }),
+        );
         console.log(`deck.trash ${JSON.stringify(t).slice(0, 200)}`);
-        const r = await invoke('deck.remove', { id: LEFT, baseRevision: t?.revision ?? info.revision, confirm: true }).catch((e) => ({ error: String(e).slice(0, 200) }));
+        const r = await invoke('deck.remove', {
+          id: LEFT,
+          baseRevision: t?.revision ?? info.revision,
+          confirm: true,
+        }).catch((e) => ({ error: String(e).slice(0, 200) }));
         console.log(`deck.remove ${JSON.stringify(r).slice(0, 200)}`);
       }
       done = await deleteForever(LEFT);
@@ -107,15 +128,22 @@ try {
             });
             return { ok: true, out: JSON.stringify(r).slice(0, 300) };
           } catch (e) {
-            return { ok: false, err: e instanceof Error ? e.message.slice(0, 300) : String(e).slice(0, 300) };
+            return {
+              ok: false,
+              err: e instanceof Error ? e.message.slice(0, 300) : String(e).slice(0, 300),
+            };
           }
         },
         [variant, dataUrl, s0.revision],
       );
       const ms = Date.now() - t0;
       const s1 = await state();
-      const assets = await page.evaluate(() => Object.keys(window.turboslide.studio.describe().document?.deck?.assets ?? {}).join(','));
-      console.log(`asset.add ${variant}: ${ms} ms; ${JSON.stringify(out)}; revision ${s0.revision} -> ${s1.revision}; pending ${JSON.stringify(s1.sync ?? s1.pending)}; assets ${assets}`);
+      const assets = await page.evaluate(() =>
+        Object.keys(window.turboslide.studio.describe().document?.deck?.assets ?? {}).join(','),
+      );
+      console.log(
+        `asset.add ${variant}: ${ms} ms; ${JSON.stringify(out)}; revision ${s0.revision} -> ${s1.revision}; pending ${JSON.stringify(s1.sync ?? s1.pending)}; assets ${assets}`,
+      );
       console.log(`  responses: ${responses.join('\n    ') || 'none captured'}`);
       // the asset landing over the next 20 s
       let landed = null;

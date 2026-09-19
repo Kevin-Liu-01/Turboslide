@@ -67,7 +67,10 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
     attempts.push(r);
     if (r.shot) shotPath = r.shot;
@@ -91,15 +94,23 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     evidence:
       attempts.length > 1
         ? attempts.map((a, i) => `attempt ${i + 1}: ${a.evidence}`).join(' | ')
-        : attempts[0]?.evidence ?? '',
+        : (attempts[0]?.evidence ?? ''),
     shot: shotPath,
     consoleErrors: errs,
   };
   rows.push(entry);
   save();
   const tag =
-    result === 'works' ? 'ok  ' : result === 'broken' ? 'FAIL' : result === 'flaky' ? 'FLKY' : 'n/d ';
-  console.log(`${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`);
+    result === 'works'
+      ? 'ok  '
+      : result === 'broken'
+        ? 'FAIL'
+        : result === 'flaky'
+          ? 'FLKY'
+          : 'n/d ';
+  console.log(
+    `${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`,
+  );
   return entry;
 }
 
@@ -169,9 +180,17 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
   }
 };
 const settled = async (page, timeout = 20_000) =>
-  pollUntil(() => state(page), (s) => (s.sync?.pending ?? s.pending ?? 0) === 0, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => (s.sync?.pending ?? s.pending ?? 0) === 0,
+    timeout,
+  );
 const connected = (page) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, 45_000);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    45_000,
+  );
 const activeSlide = async (page) => (await state(page)).slideId;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
@@ -320,7 +339,10 @@ const counter = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('[data-control="view.count"]');
     return el
-      ? { text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), label: el.getAttribute('aria-label') }
+      ? {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          label: el.getAttribute('aria-label'),
+        }
       : null;
   });
 const hashOf = (page) => page.evaluate(() => window.location.hash);
@@ -369,8 +391,12 @@ const gridFacts = (page) =>
     return {
       grid: Boolean(grid),
       tiles: grid ? grid.querySelectorAll('.pt-thumb').length : 0,
-      tileIds: grid ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id')) : [],
-      activeTile: grid ? grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null : null,
+      tileIds: grid
+        ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id'))
+        : [],
+      activeTile: grid
+        ? (grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null)
+        : null,
       selectedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-selected').length : 0,
       skippedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-skipped').length : 0,
       filmHidden: film
@@ -378,7 +404,9 @@ const gridFacts = (page) =>
         : null,
       filmWidth: film ? Math.round(film.getBoundingClientRect().width) : null,
       stageShown: stage ? stage.getBoundingClientRect().width > 0 : false,
-      gridPressed: document.querySelector('[data-control="view.gridView"]')?.getAttribute('aria-pressed'),
+      gridPressed: document
+        .querySelector('[data-control="view.gridView"]')
+        ?.getAttribute('aria-pressed'),
       filmPressed: document
         .querySelector('[data-control="view.filmstripView"]')
         ?.getAttribute('aria-pressed'),
@@ -417,24 +445,33 @@ const focusWorkspace = async (page) => {
   await clearAll(page);
   const wrap = await rectOf(page, '.ts-stagewrap.ts-editor');
   const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-  if (wrap && sheet) await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
+  if (wrap && sheet)
+    await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
   await sleep(200);
 };
 /** Focuses a card by clicking it, the way a person does; answers whether the card took focus. */
 const focusCard = async (page, id) => {
   await clickCard(page, id);
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await sleep(300);
   return page.evaluate((sid) => document.activeElement?.getAttribute('data-id') === sid, id);
 };
-const waitOrder = (page, test, timeout = 20_000) => pollUntil(() => slideOrder(page), test, timeout);
+const waitOrder = (page, test, timeout = 20_000) =>
+  pollUntil(() => slideOrder(page), test, timeout);
 
 // ---------------------------------------------------------------------------------------------
 // the run: does Apply layout carry a layout's own empty placeholders and sample content into the
 // next layout (run 3 rows 4 to 22)? Three fresh slides per case, the way a seller meets it.
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
@@ -445,25 +482,33 @@ context.on('page', (p) => p.close().catch(() => undefined));
 const shot = async (name, clip) => {
   shotN += 1;
   const file = `${String(shotN).padStart(2, '0')}-${name}.png`;
-  await page.screenshot({ path: path.join(SHOTS, file), ...(clip ? { clip } : {}) }).catch(() => undefined);
+  await page
+    .screenshot({ path: path.join(SHOTS, file), ...(clip ? { clip } : {}) })
+    .catch(() => undefined);
   return `audit-slides/${file}`;
 };
 const stageClip = async () => {
   const r = await rectOf(page, '.ts-stagewrap.ts-editor');
-  return r ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 } : undefined;
+  return r
+    ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 }
+    : undefined;
 };
 const TITLE = 'title';
 const HEAD = 'heading/text';
 const APPLY = '[data-control="layout.apply.plate"]';
 const openLayoutPlate = async () => {
   await clearAll(page);
-  if (await has(page, '[data-control="toolbar.layout"]')) await clickControl(page, 'toolbar.layout');
+  if (await has(page, '[data-control="toolbar.layout"]'))
+    await clickControl(page, 'toolbar.layout');
   else {
     await clickControl(page, 'toolbar.more');
     await page.locator('#ts-menu-toolbar-more').waitFor({ timeout: 5000 });
     await clickControl(page, 'toolbar.more.toolbar.layout');
   }
-  await page.locator(APPLY).waitFor({ timeout: 8000 }).catch(() => undefined);
+  await page
+    .locator(APPLY)
+    .waitFor({ timeout: 8000 })
+    .catch(() => undefined);
 };
 /** A fresh Title and body slide after the current one; answers its id. */
 const freshSlide = async () => {
@@ -472,7 +517,11 @@ const freshSlide = async () => {
   await clickControl(page, 'toolbar.newSlide');
   const after = await waitOrder(page, (o) => o.length === before.length + 1);
   const id = after.find((x) => !before.includes(x));
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await settled(page);
   return id;
 };
@@ -481,12 +530,27 @@ const applyTo = async (slideId, layout) => {
   const before = await slideJson(page, slideId);
   await openLayoutPlate();
   await clickIn(page, APPLY, `layout.apply.${layout}`);
-  const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 1500);
-  const after = await pollUntil(() => slideJson(page, slideId), (s) => JSON.stringify(s) !== JSON.stringify(before), 15_000);
+  const sb = await pollUntil(
+    () => snackbar(page),
+    (v) => v !== null,
+    1500,
+  );
+  const after = await pollUntil(
+    () => slideJson(page, slideId),
+    (s) => JSON.stringify(s) !== JSON.stringify(before),
+    15_000,
+  );
   await sleep(500);
   await settled(page);
   const st = await stageFacts(page);
-  return { facts: layoutFacts(after), blocks: st?.blocks, runs: st?.runs ?? [], prompts: st?.prompts ?? [], text: st?.text ?? '', snackbar: sb };
+  return {
+    facts: layoutFacts(after),
+    blocks: st?.blocks,
+    runs: st?.runs ?? [],
+    prompts: st?.prompts ?? [],
+    text: st?.text ?? '',
+    snackbar: sb,
+  };
 };
 
 try {
@@ -498,97 +562,144 @@ try {
   await dblclickAt(page, r0.x + r0.w / 2, r0.y + r0.h / 2);
   await typeHuman(page, 'Q3 pipeline review for Acme');
   await press(page, 'Escape');
-  await pollUntil(() => state(page), (v) => v.revision >= 1, 30_000);
+  await pollUntil(
+    () => state(page),
+    (v) => v.revision >= 1,
+    30_000,
+  );
   await settled(page, 30_000);
   await closeNamePrompt(page);
   await connected(page);
   console.log(`deck ${deckId}`);
 
   for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Apply layout', `Trial ${trial}: on a fresh empty Title and body slide apply Section header, then Title and body again; count the blocks left on the slide`, async () => {
-      const id = await freshSlide();
-      const start = await stageFacts(page);
-      const a = await applyTo(id, 'opener');
-      const b = await applyTo(id, 'split');
-      const sh = await shot(`carry-picture-${trial}`, await stageClip());
-      const extra = (b.blocks ?? 0) - (start?.blocks ?? 0);
-      return {
-        ok: extra === 0 && b.runs.join(',') === (start?.runs ?? []).join(','),
-        evidence: `fresh slide ${id}: ${start?.blocks} blocks, runs ${start?.runs.join(',')} -> Section header ${a.facts}, ${a.blocks} blocks -> Title and body ${b.facts}, ${b.blocks} blocks (${extra} more than the fresh slide), runs ${b.runs.join(',')}; snackbars ${JSON.stringify(a.snackbar)} / ${JSON.stringify(b.snackbar)}`,
-        shot: sh,
-      };
-    }, { tries: 1 });
+    await row(
+      'Apply layout',
+      `Trial ${trial}: on a fresh empty Title and body slide apply Section header, then Title and body again; count the blocks left on the slide`,
+      async () => {
+        const id = await freshSlide();
+        const start = await stageFacts(page);
+        const a = await applyTo(id, 'opener');
+        const b = await applyTo(id, 'split');
+        const sh = await shot(`carry-picture-${trial}`, await stageClip());
+        const extra = (b.blocks ?? 0) - (start?.blocks ?? 0);
+        return {
+          ok: extra === 0 && b.runs.join(',') === (start?.runs ?? []).join(','),
+          evidence: `fresh slide ${id}: ${start?.blocks} blocks, runs ${start?.runs.join(',')} -> Section header ${a.facts}, ${a.blocks} blocks -> Title and body ${b.facts}, ${b.blocks} blocks (${extra} more than the fresh slide), runs ${b.runs.join(',')}; snackbars ${JSON.stringify(a.snackbar)} / ${JSON.stringify(b.snackbar)}`,
+          shot: sh,
+        };
+      },
+      { tries: 1 },
+    );
   }
 
   for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Apply layout', `Trial ${trial}: on a fresh empty Title and body slide apply Ruled statement list, then Title and table; do the empty list rows stay`, async () => {
-      const id = await freshSlide();
-      const a = await applyTo(id, 'plain');
-      const b = await applyTo(id, 'table');
-      const sh = await shot(`carry-list-${trial}`, await stageClip());
-      const carried = b.runs.filter((r) => /^list\//.test(r)).length;
-      return {
-        ok: carried === 0,
-        evidence: `fresh slide ${id} -> Ruled statement list ${a.facts}, runs ${a.runs.join(',')} -> Title and table ${b.facts}, ${b.blocks} blocks, runs ${b.runs.join(',')}; list runs carried into the table layout ${carried}; snackbars ${JSON.stringify(a.snackbar)} / ${JSON.stringify(b.snackbar)}`,
-        shot: sh,
-      };
-    }, { tries: 1 });
+    await row(
+      'Apply layout',
+      `Trial ${trial}: on a fresh empty Title and body slide apply Ruled statement list, then Title and table; do the empty list rows stay`,
+      async () => {
+        const id = await freshSlide();
+        const a = await applyTo(id, 'plain');
+        const b = await applyTo(id, 'table');
+        const sh = await shot(`carry-list-${trial}`, await stageClip());
+        const carried = b.runs.filter((r) => /^list\//.test(r)).length;
+        return {
+          ok: carried === 0,
+          evidence: `fresh slide ${id} -> Ruled statement list ${a.facts}, runs ${a.runs.join(',')} -> Title and table ${b.facts}, ${b.blocks} blocks, runs ${b.runs.join(',')}; list runs carried into the table layout ${carried}; snackbars ${JSON.stringify(a.snackbar)} / ${JSON.stringify(b.snackbar)}`,
+          shot: sh,
+        };
+      },
+      { tries: 1 },
+    );
   }
 
   for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Apply layout', `Trial ${trial}: type a title on a fresh slide, apply Main point, then Title and body; the title must come back and nothing else`, async () => {
+    await row(
+      'Apply layout',
+      `Trial ${trial}: type a title on a fresh slide, apply Main point, then Title and body; the title must come back and nothing else`,
+      async () => {
+        const id = await freshSlide();
+        const rh = await runRect(page, 'h/text');
+        await dblclickAt(page, rh.x + rh.w / 2, rh.y + rh.h / 2);
+        await typeHuman(page, 'Agenda for today');
+        await press(page, 'Escape');
+        await settled(page);
+        const typed = await stageFacts(page);
+        const a = await applyTo(id, 'statement');
+        const b = await applyTo(id, 'split');
+        const sh = await shot(`carry-typed-${trial}`, await stageClip());
+        const sj = await slideJson(page, id);
+        const text = JSON.stringify(sj);
+        return {
+          ok:
+            b.runs.join(',') === 'h/text,p1/text,p2/text' &&
+            text.includes('Agenda for today') &&
+            b.blocks === typed?.blocks,
+          evidence: `typed slide ${typed?.blocks} blocks, text "${typed?.text.slice(0, 60)}" -> Main point ${a.facts}, runs ${a.runs.join(',')}, text "${a.text.slice(0, 60)}", snackbar ${JSON.stringify(a.snackbar)} -> Title and body ${b.facts}, ${b.blocks} blocks, runs ${b.runs.join(',')}, text "${b.text.slice(0, 80)}", title kept ${text.includes('Agenda for today')}, snackbar ${JSON.stringify(b.snackbar)}`,
+          shot: sh,
+        };
+      },
+      { tries: 1 },
+    );
+  }
+
+  for (let trial = 1; trial <= 3; trial += 1) {
+    await row(
+      'Apply layout',
+      `Trial ${trial}: apply Title slide to a fresh empty Title and body slide and read the snackbar at once`,
+      async () => {
+        const id = await freshSlide();
+        const a = await applyTo(id, 'title');
+        return {
+          ok: a.snackbar === null,
+          evidence: `fresh empty slide ${id} -> Title slide ${a.facts}, runs ${a.runs.join(',')}, ${a.blocks} blocks; snackbar ${JSON.stringify(a.snackbar)}`,
+        };
+      },
+      { tries: 1 },
+    );
+  }
+
+  await row(
+    'Apply layout',
+    'Undo after a layout change on a typed slide brings the previous layout and text back',
+    async () => {
       const id = await freshSlide();
       const rh = await runRect(page, 'h/text');
       await dblclickAt(page, rh.x + rh.w / 2, rh.y + rh.h / 2);
-      await typeHuman(page, 'Agenda for today');
+      await typeHuman(page, 'Pricing options');
       await press(page, 'Escape');
       await settled(page);
-      const typed = await stageFacts(page);
-      const a = await applyTo(id, 'statement');
-      const b = await applyTo(id, 'split');
-      const sh = await shot(`carry-typed-${trial}`, await stageClip());
-      const sj = await slideJson(page, id);
-      const text = JSON.stringify(sj);
+      const before = await slideJson(page, id);
+      const a = await applyTo(id, 'cols');
+      await focusWorkspace(page);
+      await press(page, 'Meta+z');
+      const undone = await pollUntil(
+        () => slideJson(page, id),
+        (s) => layoutFacts(s) === layoutFacts(before),
+        15_000,
+      );
+      await settled(page);
       return {
-        ok: b.runs.join(',') === 'h/text,p1/text,p2/text' && text.includes('Agenda for today') && b.blocks === typed?.blocks,
-        evidence: `typed slide ${typed?.blocks} blocks, text "${typed?.text.slice(0, 60)}" -> Main point ${a.facts}, runs ${a.runs.join(',')}, text "${a.text.slice(0, 60)}", snackbar ${JSON.stringify(a.snackbar)} -> Title and body ${b.facts}, ${b.blocks} blocks, runs ${b.runs.join(',')}, text "${b.text.slice(0, 80)}", title kept ${text.includes('Agenda for today')}, snackbar ${JSON.stringify(b.snackbar)}`,
-        shot: sh,
+        ok:
+          /cols/.test(a.facts) &&
+          layoutFacts(undone) === layoutFacts(before) &&
+          JSON.stringify(undone).includes('Pricing options'),
+        evidence: `${layoutFacts(before)} -> ${a.facts} (text "${a.text.slice(0, 50)}") -> undo ${layoutFacts(undone)}, title kept ${JSON.stringify(undone).includes('Pricing options')}`,
       };
-    }, { tries: 1 });
-  }
-
-  for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Apply layout', `Trial ${trial}: apply Title slide to a fresh empty Title and body slide and read the snackbar at once`, async () => {
-      const id = await freshSlide();
-      const a = await applyTo(id, 'title');
-      return {
-        ok: a.snackbar === null,
-        evidence: `fresh empty slide ${id} -> Title slide ${a.facts}, runs ${a.runs.join(',')}, ${a.blocks} blocks; snackbar ${JSON.stringify(a.snackbar)}`,
-      };
-    }, { tries: 1 });
-  }
-
-  await row('Apply layout', 'Undo after a layout change on a typed slide brings the previous layout and text back', async () => {
-    const id = await freshSlide();
-    const rh = await runRect(page, 'h/text');
-    await dblclickAt(page, rh.x + rh.w / 2, rh.y + rh.h / 2);
-    await typeHuman(page, 'Pricing options');
-    await press(page, 'Escape');
-    await settled(page);
-    const before = await slideJson(page, id);
-    const a = await applyTo(id, 'cols');
-    await focusWorkspace(page);
-    await press(page, 'Meta+z');
-    const undone = await pollUntil(() => slideJson(page, id), (s) => layoutFacts(s) === layoutFacts(before), 15_000);
-    await settled(page);
-    return {
-      ok: /cols/.test(a.facts) && layoutFacts(undone) === layoutFacts(before) && JSON.stringify(undone).includes('Pricing options'),
-      evidence: `${layoutFacts(before)} -> ${a.facts} (text "${a.text.slice(0, 50)}") -> undo ${layoutFacts(undone)}, title kept ${JSON.stringify(undone).includes('Pricing options')}`,
-    };
-  });
+    },
+  );
   await shot('end-run-4');
 } catch (error) {
-  rows.push({ n: rows.length + 1, feature: 'the run', interaction: 'ran to completion', result: 'broken', attempts: 1, evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`, shot: null, consoleErrors: [] });
+  rows.push({
+    n: rows.length + 1,
+    feature: 'the run',
+    interaction: 'ran to completion',
+    result: 'broken',
+    attempts: 1,
+    evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+    shot: null,
+    consoleErrors: [],
+  });
   save();
 } finally {
   // ---- cleanup: File > Move to trash, Delete forever, a 404 on the deck
@@ -611,19 +722,45 @@ try {
       await clickControl(page, 'trash.confirm.ok');
       await card.waitFor({ state: 'detached', timeout: 30_000 });
       trashed = true;
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'works', attempts: 1, evidence: `deck ${deckId} left the trash`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'works',
+        attempts: 1,
+        evidence: `deck ${deckId} left the trash`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'broken', attempts: 1, evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'broken',
+        attempts: 1,
+        evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -634,18 +771,42 @@ try {
       let statusEdit = 0;
       const until = Date.now() + 25_000;
       for (;;) {
-        statusDeck = (await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })).status();
-        statusEdit = (await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })).status();
+        statusDeck = (
+          await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        ).status();
+        statusEdit = (
+          await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })
+        ).status();
         if ((statusDeck === 404 && statusEdit === 404) || Date.now() > until) break;
         await sleep(2000);
       }
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> and /edit/<id> after the delete', result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken', attempts: 1, evidence: `/deck ${statusDeck}, /edit ${statusEdit}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> and /edit/<id> after the delete',
+        result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken',
+        attempts: 1,
+        evidence: `/deck ${statusDeck}, /edit ${statusEdit}`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> after the delete', result: 'broken', attempts: 1, evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> after the delete',
+        result: 'broken',
+        attempts: 1,
+        evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
   }
   save();
   await browser.close().catch(() => undefined);
   const counts = rows.reduce((acc, r) => ({ ...acc, [r.result]: (acc[r.result] ?? 0) + 1 }), {});
-  console.log(`\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`);
+  console.log(
+    `\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`,
+  );
 }

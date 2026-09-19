@@ -167,13 +167,15 @@ describe('the title row slots', () => {
     ).toBe(false);
   });
 
-  it('draws four chips and +16 for twenty people, the roster with every row; the Go to slide word and the Join chat stub are parked and return behind Tools > Advanced tools', () => {
+  it("draws four chips and +16 for twenty people, the roster with every row; the Go to slide word, the own row and the Join chat stub stay behind Tools > Advanced tools (the word re-parked at the return round's ship)", () => {
     const others = Array.from({ length: 20 }, (_, i) => person(i + 1));
     const self = person(0, { clientId: 'me', name: 'Kevin', trust: 'guest' });
     const onFollow = vi.fn();
     const onGoTo = vi.fn();
-    /* the default view first: the rows and chips stay, the parked words and the stub are absent
-       (docs/FOCUS.md 3.1, 3.2; b6's FR2) */
+    /* the default view first: the rows and chips stay, the own row and the stub are absent
+       (docs/FOCUS.md 3.1, 3.2; b6's FR2) and the Go to slide word is parked again: the matrix row
+       collab.roster.go-to-slide read red in both preview runs of the ship's tree and its `parks`
+       name title.presence.goTo (docs/RETURN.md section 1 rule 2; VERIFICATION.md R2-F1) */
     const plain = render(
       <Harness
         input={input({ presence: { self, others, onFollow, onGoTo } })}
@@ -186,10 +188,9 @@ describe('the title row slots', () => {
     expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(20);
     expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).toBeNull();
     expect(plainRoster.querySelector('[data-menu-item="title.presence.joinChat"]')).toBeNull();
-    expect(plainRoster.textContent ?? '').not.toContain('Go to slide');
-    expect(plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
-      'slide',
-    );
+    expect(
+      plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent,
+    ).not.toContain('Go to slide');
     fireEvent.keyDown(plainRoster, { key: 'Escape' });
     plain.unmount();
     /* the switch on, remembered per browser: the words and the stub return */
@@ -387,6 +388,37 @@ describe('the title row slots', () => {
     fireEvent.keyDown(roster!, { key: 'Escape' });
     expect(document.getElementById('ts-menu-roster')).toBeNull();
     expect(document.activeElement).toBe(container.querySelector('[data-control="presence.more"]'));
+  });
+
+  it('draws the roster opener from the first other person and hides it with nobody else present (docs/RETURN.md 4.3; return/build/b4.md request 6, collab.roster.go-to-slide)', () => {
+    const nobody = render(
+      <Harness input={input({ presence: { others: [] } })} shell={shellState()} />,
+    );
+    const hidden = nobody.container.querySelector('[data-control="presence.more"]')!;
+    expect(hidden.classList.contains('is-empty')).toBe(true);
+    expect(hidden.textContent).toBe('');
+    nobody.unmount();
+    const others = [person(1)];
+    const { container } = render(
+      <Harness input={input({ presence: { others } })} shell={shellState()} />,
+    );
+    const more = container.querySelector('[data-control="presence.more"]')!;
+    /* one collaborator: the chip fits, no +N, yet the opener is drawn (a people glyph) and opens
+       the roster with that person's row; the Go to slide word is parked again at the return
+       round's ship (title.presence.goTo behind the switch), the row itself stays */
+    expect(more.classList.contains('is-empty')).toBe(false);
+    expect(more.textContent).toBe('');
+    expect(more.querySelector('svg')).not.toBeNull();
+    fireEvent.click(more);
+    const roster = document.getElementById('ts-menu-roster')!;
+    expect(roster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(1);
+    expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+      person(1).label,
+    );
+    expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).not.toContain(
+      'Go to slide',
+    );
+    fireEvent.keyDown(roster, { key: 'Escape' });
   });
 
   it('opens the roster with focus from the key owner when the open menu does not hold focus', () => {

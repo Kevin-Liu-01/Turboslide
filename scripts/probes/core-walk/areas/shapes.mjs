@@ -25,6 +25,9 @@ export const IDS = [
   'shapes.format-options.size-position',
   'shapes.reload-and-viewer',
   'shapes.context.shape',
+  'shapes.text.colour-toolbar',
+  'shapes.text.enter-opens-label',
+  'shapes.borders-lines.menu',
 ];
 
 const DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -967,6 +970,157 @@ export async function run(t) {
           viewer.d === before.d &&
           same(ids, idsAfter),
         observed: `fill ${before?.fill} -> after reload ${after?.fill} -> viewer ${viewer?.fill}; path same ${after?.d === before?.d && viewer?.d === before?.d}; objects ${ids.join(',')} -> ${idsAfter.join(',')}`,
+      };
+    },
+  );
+
+  // ---- the return round's rows (docs/RETURN.md 2.2, section 5)
+  /** The colour of the shape's label as drawn, and the stroke facts. */
+  const labelColour = (blockId) =>
+    page.evaluate((bid) => {
+      const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${bid}"]`);
+      const box = el?.closest('.free') ?? el;
+      const run = box?.querySelector('[data-run]');
+      return run ? getComputedStyle(run).color : null;
+    }, blockId);
+  /** The stored block of a shape on the slide (the added rows' read). */
+  const blockOf = async (id) => (await t.blockOf(S, id))?.block ?? null;
+  await t.step(
+    'shapes.text.colour-toolbar',
+    'select the rectangle, toolbar Text color, a swatch; Cmd+Z',
+    'block.color is written and the label draws in it; Cmd+Z takes it back',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      const before = JSON.stringify(await blockOf(id));
+      const colourBefore = await labelColour(id);
+      await t.tailControl('toolbar.textColor');
+      await t.waitControl('toolbar.textColor.plate', 5000);
+      const pick = (await t.has('[data-control="toolbar.textColor.red"]'))
+        ? 'toolbar.textColor.red'
+        : await page.evaluate(
+            () =>
+              [...document.querySelectorAll('[data-control^="toolbar.textColor."]')]
+                .map((e) => e.getAttribute('data-control'))
+                .find((c) => !/plate|none|hex$/.test(c)) ?? null,
+          );
+      if (pick) await t.clickControl(pick);
+      await t.settled();
+      const written = await t
+        .pollUntil(
+          async () => (await blockOf(id))?.color ?? null,
+          (c) => c !== null,
+          8000,
+        )
+        .catch(async () => (await blockOf(id))?.color ?? null);
+      const colourAfter = await labelColour(id);
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const back = JSON.stringify(await blockOf(id));
+      return {
+        ok: pick !== null && written !== null && colourAfter !== colourBefore && back === before,
+        observed: `picked ${pick}; block.color ${written}; label ${colourBefore} -> ${colourAfter}; restored ${back === before}`,
+      };
+    },
+  );
+  await t.step(
+    'shapes.text.enter-opens-label',
+    'select the rounded rectangle, Enter, type Label, Escape',
+    'block.text is stored and drawn (A1 rule 4)',
+    async () => {
+      const target = rounded?.id ?? ellipse?.id ?? id;
+      await t.clearAll();
+      await t.selectObject(target);
+      await t.press('Enter');
+      await t.sleep(300);
+      const on = await t.editing();
+      const caret = await t.caretFacts((await t.runsOfBlock(target))[0] ?? '').catch(() => null);
+      await t.typeHuman('Label');
+      await t.sleep(200);
+      await t.press('Escape');
+      await t.settled();
+      const stored = await t
+        .pollUntil(
+          async () => (await blockOf(target))?.text ?? null,
+          (x) => typeof x === 'string' && x.includes('Label'),
+          8000,
+        )
+        .catch(async () => (await blockOf(target))?.text ?? null);
+      const run = (await t.runsOfBlock(target))[0];
+      const drawn = run ? ((await t.runInfo(run))?.text ?? '') : '';
+      return {
+        ok: on && typeof stored === 'string' && stored.includes('Label') && drawn.includes('Label'),
+        observed: `${target}: session on Enter ${on} (caret ${caret ? `offset ${caret.offset} of ${caret.length}` : 'unread'}); stored "${stored}"; drawn "${drawn}"`,
+      };
+    },
+  );
+  await t.step(
+    'shapes.borders-lines.menu',
+    'select the rectangle; Format > Borders & lines > Border color, a red swatch; Border dash > Dot; Cmd+Z each',
+    'the stroke writes from the menu and each Cmd+Z takes it back',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      const before = await pathOf(id);
+      const json0 = JSON.stringify(await blockOf(id));
+      await t.menuPath('format', 'format.bordersLines', 'format.bordersLines.borderColor');
+      await t.sleep(400);
+      const swatch = await page.evaluate(
+        () =>
+          [
+            ...document.querySelectorAll(
+              '[data-control*="borderColor."], [data-control*="bordersLines.borderColor."]',
+            ),
+          ]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.getAttribute('data-control'))
+            .find((c) => /red$/i.test(c)) ?? null,
+      );
+      if (swatch) await t.clickControl(swatch);
+      else await t.press('Escape');
+      await t.settled();
+      const coloured = await t
+        .pollUntil(
+          () => pathOf(id),
+          (f) => f && f.stroke !== before.stroke,
+          8000,
+        )
+        .catch(() => pathOf(id));
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const undone1 = await pathOf(id);
+      await t.selectObject(id);
+      await t.menuPath(
+        'format',
+        'format.bordersLines',
+        'format.bordersLines.borderDash',
+        'format.bordersLines.borderDash.dot',
+      );
+      await t.settled();
+      const dotted = await t
+        .pollUntil(
+          () => pathOf(id),
+          (f) => f && f.dash !== before.dash,
+          8000,
+        )
+        .catch(() => pathOf(id));
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const json2 = JSON.stringify(await blockOf(id));
+      return {
+        ok:
+          swatch !== null &&
+          coloured.stroke !== before.stroke &&
+          undone1.stroke === before.stroke &&
+          dotted.dash !== before.dash &&
+          json2 === json0,
+        observed: `swatch ${swatch}: stroke ${before.stroke} -> ${coloured.stroke} -> Cmd+Z ${undone1.stroke}; Dot: dash ${before.dash} -> ${dotted.dash}; block restored ${json2 === json0}`,
       };
     },
   );

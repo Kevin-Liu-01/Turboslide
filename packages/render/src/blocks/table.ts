@@ -38,8 +38,17 @@ export const TABLE_DEFAULT_SIZE = 20;
 /** 1, the sheet hairline; not the first weight of the list, which is Google's Transparent 0 since round two (SPEC-2 0.63). */
 export const TABLE_DEFAULT_BORDER: TableBorderWeight = 1;
 
-/** The grid template of the columns: a width in px where set, an equal share otherwise. */
+/**
+ * The grid template of the columns: an equal share when no column carries a width; a width in
+ * px where set and an equal share of the rest otherwise; and, once every column carries a width,
+ * proportional shares (`fr`) of the table's own width, so a table resized by its handles scales
+ * its columns and widths that drifted from the box still fill it with no gap and no overlap
+ * (docs/RETURN.md 2.4 fix 4; the seam handle and the column commands write every width). The
+ * numbers agree with `columnShares` in @turboslide/schema/blocks/table.
+ */
 export function tableColumnsTemplate(columns: BlockOf<'table'>['columns']): string {
+  if (columns.length > 0 && columns.every((column) => column.width !== undefined))
+    return columns.map((column) => `minmax(0, ${px(column.width ?? 0)}fr)`).join(' ');
   return columns
     .map((column) => (column.width !== undefined ? `${px(column.width)}px` : 'minmax(0, 1fr)'))
     .join(' ');
@@ -106,17 +115,22 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
           const own = cellStyleAt(block, r, c);
           const span = grid ? spanAt(block.spans ?? [], r, c) : undefined;
           const fill = own?.fill ?? column?.fill;
+          /* the alignment travels inline, never as a `center` or `right` class: the sheet's
+             layout helper `.ts-sheet .center` (sheet.css, position absolute over the slot) matched
+             a centre aligned cell and drew it across its whole row, over the other cells, in the
+             editor, the show and the exports (audit-objects rows 97 and 85, the "one column at
+             the whole table width"; measured on the checkout in docs/gslides-parity/return/build/b5.md) */
+          const align = column?.align;
           return el(
             'span',
             {
               class: classes(
                 'td',
-                column?.align === 'center' && 'center',
-                column?.align === 'right' && 'right',
                 c === 0 && 'first',
                 (span !== undefined ? c + span.columns - 1 : c) === last && 'last',
               ),
               style: style(
+                (align === 'center' || align === 'right') && `text-align:${align}`,
                 fill !== undefined && `background:${colorCss(fill)}`,
                 span !== undefined && span.rows > 1 && `grid-row:span ${span.rows}`,
                 span !== undefined && span.columns > 1 && `grid-column:span ${span.columns}`,

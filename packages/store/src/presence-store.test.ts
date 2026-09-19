@@ -5,7 +5,9 @@
 // set pushed late from another instance, two concurrent writers both land through the ifMatch
 // retry, a heartbeat alone pushes nothing until the row's remaining life is under half, the CDN's
 // stale body is read through the immutable copy, the pointer stays per instance and the old
-// copies are deleted.
+// copies are deleted. The stream fix round two fix round (b4.md C3T-R1, C3T-R2): a read that
+// proved nothing schedules the one push at the floor, and a tombstone keeps the beacon's clock so
+// a set at or below it never lands, on the same instance or pushed from another.
 import { describe, expect, it } from 'vitest';
 
 import { memoryBlobClient } from './blob-fake.ts';
@@ -146,6 +148,111 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect(await a.presence.roster(DECK)).toEqual([]);
   });
 
+  it("announces the leave of its own row that ran out its life, on the tick when the pulse stands still and on the poll, so the chip of a tab whose beacon was lost goes at the record's 30 s on the instance its set landed on (R1-F1)", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    // C2 is the owner's tab, streaming here and heartbeating; C1 is the collaborator whose set
+    // landed on this instance and whose leave beacon never arrived
+    const a = instance(client, time.now);
+    await a.presence.set(DECK, C2, row(C2, 1, 'Cobalt 12'), TTL);
+    await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    await a.presence.flush(DECK);
+    expect(a.seen.map((e) => e.type)).toEqual(['presence', 'presence']);
+    // the owner heartbeats on, the collaborator is silent; nothing else moves the pulse
+    time.advance(20_000);
+    await a.presence.set(DECK, C2, row(C2, 2, 'Cobalt 12'), TTL);
+    await a.presence.flush(DECK);
+    time.advance(9_000);
+    a.presence.confirm(DECK);
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([]);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId).sort()).toEqual([C1, C2]);
+    // 30 s after C1's last set the tick announces its leave without a read of the record
+    time.advance(1_500);
+    const reads = client.calls.length;
+    a.presence.confirm(DECK);
+    expect(client.calls.length).toBe(reads);
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([{ type: 'leave', clientId: C1 }]);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C2]);
+    // the poll path says the same on another instance that set a row and never heard again
+    const b = instance(client, time.now);
+    await b.presence.set(DECK, C1, row(C1, 5, 'Titanium 471'), TTL);
+    await b.presence.flush(DECK);
+    time.advance(30_500);
+    await b.presence.poll(DECK);
+    // (the owner's record row ran out as well by now, and b announces that leave too)
+    expect(b.seen.filter((e) => e.type === 'leave' && e.clientId === C1)).toEqual([
+      { type: 'leave', clientId: C1 },
+    ]);
+    expect(await b.presence.roster(DECK)).toEqual([]);
+  });
+
+  it('writes nothing back under a removed deck: a record that vanished after this instance knew it costs one manifest head, drops the pending rows and holds the heartbeats for a minute; a record that vanished alone pushes as before (R1-F3)', async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    const manifest = `decks/${DECK}/deck.json`;
+    await client.put(manifest, new TextEncoder().encode('{}'), {
+      overwrite: true,
+      contentType: 'application/json',
+    });
+    const a = instance(client, time.now, { pushSpacingMs: 5000 });
+    await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    expect(client.blobs.has(presencePath(DECK))).toBe(true);
+    // the deck is deleted forever on another instance: the manifest, the record and the pulse go
+    await client.del([manifest, presencePath(DECK), pulsePath(DECK)]);
+    const ops = (since: number): string[] => client.calls.slice(since).map((c) => c.op);
+    let mark = client.calls.length;
+    // the tab's heartbeats land here; the one at the row's half life is due to push
+    time.advance(16_000);
+    await a.presence.set(DECK, C1, row(C1, 2, 'Titanium 471'), TTL);
+    expect(ops(mark)).toEqual(['head', 'head']);
+    expect(client.blobs.has(presencePath(DECK))).toBe(false);
+    expect(client.blobs.has(pulsePath(DECK))).toBe(false);
+    expect(a.errors.at(-1)).toBe(
+      `presence: push: ${presencePath(DECK)}: the deck is gone; its presence is dropped`,
+    );
+    expect(await a.presence.roster(DECK)).toEqual([]);
+    // the heartbeats of the minute after cost the store nothing
+    mark = client.calls.length;
+    for (let i = 0; i < 6; i += 1) {
+      time.advance(5_000);
+      await a.presence.set(DECK, C1, row(C1, 3 + i, 'Titanium 471'), TTL);
+    }
+    expect(ops(mark)).toEqual([]);
+    // a record that vanished alone, with the deck still there, is written again
+    const b = instance(client, time.now);
+    await client.put(manifest, new TextEncoder().encode('{}'), {
+      overwrite: true,
+      contentType: 'application/json',
+    });
+    await b.presence.set(DECK, C2, row(C2, 1, 'Cobalt 12'), TTL);
+    expect(client.blobs.has(presencePath(DECK))).toBe(true);
+    await client.del([presencePath(DECK)]);
+    time.advance(30_000);
+    await b.presence.set(DECK, C2, row(C2, 2, 'Cobalt 12'), TTL);
+    expect(client.blobs.has(presencePath(DECK))).toBe(true);
+  });
+
+  it("keeps a client whose heartbeats moved to another instance: its expired row here is replaced by the record's live row and no leave is announced", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    const a = instance(client, time.now);
+    const b = instance(client, time.now);
+    await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    await a.presence.flush(DECK);
+    // the tab's later heartbeats land on b, which refreshes the record once the row is under half its life
+    time.advance(16_000);
+    await b.presence.set(DECK, C1, row(C1, 4, 'Titanium 471'), TTL);
+    await b.presence.flush(DECK);
+    // a's own row of C1 runs out at 30 s while the record's row (b's) lives on
+    time.advance(15_000);
+    await a.presence.poll(DECK);
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([]);
+    expect(a.seen.at(-1)).toMatchObject({ type: 'presence', clientId: C1, clock: 4 });
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    a.presence.confirm(DECK);
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([]);
+  });
+
   it('buries a set pushed late from another instance under the leave that came after it', async () => {
     const client = memoryBlobClient();
     const time = fakeClock();
@@ -169,7 +276,7 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     ]);
     const stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
     expect([...stored.rows.keys()]).toEqual([C2]);
-    expect(stored.left.get(C1)).toBe(leftAt);
+    expect(stored.left.get(C1)).toEqual({ at: leftAt });
     await b.presence.poll(DECK);
     expect(b.seen.filter((e) => e.type === 'presence').map((e) => e.clientId)).toEqual([C2]);
   });
@@ -374,6 +481,132 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect(client.calls.filter((call) => call.op === 'head').length).toBe(heads);
     await a.presence.close();
     await b.presence.close();
+  });
+
+  it("schedules one push at the floor when no read proved the record, so a closed tab's leave lands once the copy is readable without another event of the deck (b4.md C3T-R1)", async () => {
+    const base = memoryBlobClient();
+    // the copy under the head's version is not found while `copiesHidden` (the CDN lags the copy)
+    let copiesHidden = false;
+    const client = new Proxy(base, {
+      get(target, prop, receiver) {
+        if (prop === 'get')
+          return async (
+            pathname: string,
+            options?: Parameters<FakeBlobClient['get']>[1],
+          ): ReturnType<FakeBlobClient['get']> =>
+            copiesHidden && pathname.includes('/presence/') ? null : target.get(pathname, options);
+        return Reflect.get(target, prop, receiver) as unknown;
+      },
+    }) as FakeBlobClient;
+    const time = fakeClock();
+    const spacing = 20;
+    const a = instance(client, time.now, { pushSpacingMs: spacing });
+    const b = instance(client, time.now);
+    await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    // the store's body lags from here on: get() keeps answering the record a wrote
+    base.holdGet();
+    time.advance(spacing);
+    await b.presence.set(DECK, C2, row(C2, 1, 'Cobalt 12'), TTL);
+    copiesHidden = true;
+    time.advance(spacing);
+    const heads = (): number => base.calls.filter((call) => call.op === 'head').length;
+    const recordPuts = (): number =>
+      base.calls.filter((call) => call.op === 'put' && call.pathname === presencePath(DECK)).length;
+    const putsBefore = recordPuts();
+    const headsBefore = heads();
+    // the closed tab's beacon lands on a: one read, unproven, no write, the push waits
+    await a.presence.leave(DECK, C1);
+    expect(a.errors).toEqual([
+      `presence: push: ${presencePath(DECK)}: no read proved the record; the push waits`,
+    ]);
+    // one read: readRemote's head and provenGet's own; no write
+    expect(heads()).toBe(headsBefore + 2);
+    expect(recordPuts()).toBe(putsBefore);
+    expect(a.seen.at(-1)).toEqual({ type: 'leave', clientId: C1 });
+    // before the fix nothing was scheduled here and the tombstone waited for the next set, leave
+    // or timer of the deck on this instance. Now the store becomes readable, the floor passes and
+    // the one scheduled push lands the tombstone with no other call on a
+    copiesHidden = false;
+    base.releaseGet();
+    time.advance(spacing);
+    await new Promise((resolve) => setTimeout(resolve, spacing * 4));
+    expect(recordPuts()).toBe(putsBefore + 1);
+    const stored = parsePresenceRecord<Row>(base.blobs.get(presencePath(DECK))!.bytes);
+    expect([...stored.rows.keys()]).toEqual([C2]);
+    expect(stored.left.has(C1)).toBe(true);
+    expect(a.errors).toHaveLength(1);
+    await b.presence.poll(DECK);
+    expect(b.seen.at(-1)).toEqual({ type: 'leave', clientId: C1 });
+    expect(await b.presence.roster(DECK)).toHaveLength(1);
+  });
+
+  it("never lands a set posted before the tab's leave beacon on the same instance: a set at or below the tombstone's clock is refused and the pending leave stays (b4.md C3T-R2)", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    // a 20 s floor (under the 30 s a row lives) holds every push after the first, so the leave
+    // and the late set meet in `pending` and the came-back row is still alive at its flush
+    const a = instance(client, time.now, { pushSpacingMs: 20_000 });
+    await a.presence.set(DECK, C1, row(C1, 3, 'Titanium 471'), TTL);
+    time.advance(10);
+    // the beacon carries presenceClock + 1 (room-client.ts stop), above every set of the tab
+    await a.presence.leave(DECK, C1, 5);
+    const leftAt = time.now();
+    time.advance(10);
+    // the route's set handler for a post the tab made before it left runs after the leave
+    await a.presence.set(DECK, C1, row(C1, 4, 'Titanium 471', 'content-rule'), TTL);
+    expect(a.seen.map((e) => e.type)).toEqual(['presence', 'leave']);
+    expect(await a.presence.roster(DECK)).toEqual([]);
+    time.advance(20_000);
+    await a.presence.flush(DECK);
+    const stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect([...stored.rows.keys()]).toEqual([]);
+    expect(stored.left.get(C1)).toEqual({ at: leftAt, clock: 5 });
+    // a tab that came back posts above the beacon's clock and lands
+    time.advance(10);
+    await a.presence.set(DECK, C1, row(C1, 6, 'Titanium 471'), TTL);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    time.advance(20_000);
+    await a.presence.flush(DECK);
+    const again = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect([...again.rows.keys()]).toEqual([C1]);
+    expect([...a.errors]).toEqual([]);
+  });
+
+  it("keeps the beacon's clock in the record's tombstone, so a set with a lower clock pushed from another instance after the leave never lands and one above it does (b4.md C3T-R2)", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    const a = instance(client, time.now);
+    const b = instance(client, time.now, { pushSpacingMs: 60_000 });
+    await a.presence.set(DECK, C1, row(C1, 3, 'Titanium 471'), TTL);
+    await b.presence.poll(DECK);
+    expect(b.seen.map((e) => e.type)).toEqual(['presence']);
+    // the beacon lands on a and its tombstone is written with the clock
+    time.advance(10);
+    await a.presence.leave(DECK, C1, 5);
+    const leftAt = time.now();
+    let stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect(stored.left.get(C1)).toEqual({ at: leftAt, clock: 5 });
+    // b's set handler ran after the tombstone was written, for a post below the beacon's clock;
+    // its `at` is after the tombstone's, which the time rule alone would let land
+    time.advance(10);
+    await b.presence.set(DECK, C1, row(C1, 4, 'Titanium 471', 'content-rule'), TTL);
+    await b.presence.flush(DECK);
+    stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect([...stored.rows.keys()]).toEqual([]);
+    expect(stored.left.get(C1)).toEqual({ at: leftAt, clock: 5 });
+    expect(b.seen.at(-1)).toEqual({ type: 'leave', clientId: C1 });
+    expect(await b.presence.roster(DECK)).toEqual([]);
+    await a.presence.poll(DECK);
+    expect(await a.presence.roster(DECK)).toEqual([]);
+    // the tab came back: a set above the beacon's clock lands from any instance
+    time.advance(10);
+    await b.presence.set(DECK, C1, row(C1, 6, 'Titanium 471'), TTL);
+    await b.presence.flush(DECK);
+    stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect([...stored.rows.keys()]).toEqual([C1]);
+    await a.presence.poll(DECK);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    expect([...a.errors, ...b.errors]).toEqual([]);
   });
 
   it('keeps presence per instance when there is no Blob client', async () => {

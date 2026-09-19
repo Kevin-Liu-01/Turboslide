@@ -15,6 +15,7 @@ import type { Entry } from '@turboslide/realtime/channel';
 
 import {
   BETWEEN_MAX_ENTRIES,
+  BLOB_APPEND_RETRIES,
   admitOnBlob,
   betweenEntries,
   blobAdmittedBefore,
@@ -471,5 +472,154 @@ describe('the ops answer carries the entries under the admitted ones (the stream
     if (!current.ok) return;
     expect(current.between).toBeUndefined();
     expect(sinces).toHaveLength(1);
+  });
+});
+
+describe('the append that meets a store moved under it (the stream fix round two fix round; VERIFICATION C3T-F2)', () => {
+  type Room = Parameters<typeof admitOnBlob>[0];
+  type Input = Parameters<typeof admitOnBlob>[1];
+  const documentAt = (revision: number): DeckDocument => {
+    const result = validateDocument(workedDocument());
+    if (!result.ok || result.deck === null) throw new Error('fixture');
+    return { deck: { ...result.deck, revision }, slides: result.slides };
+  };
+  const storeEntry = (seq: number): Entry => ({
+    seq,
+    rev: seq - 1,
+    kind: 'edit',
+    author: { kind: 'human', name: 'Cobalt 118' },
+    clientId: 'store',
+    opId: `store:${seq}`,
+    mutations: [],
+    at: '2026-09-18T21:20:05.000Z',
+  });
+  const input = (base: number, opId: string): Input =>
+    ({
+      post: {
+        clientId: 'c1',
+        base: { seq: base },
+        entries: [{ opId, kind: 'edit', mutations: [splice(0, 0, 'g')] }],
+      },
+      bytes: 128,
+      identity: { kind: 'anonymous', identity: 'anon' },
+      author: { kind: 'human', name: 'Titanium 471' },
+      role: 'editor',
+    }) as unknown as Input;
+
+  it('syncs the mirror to the head the store named, places the entries against it and appends once more, in place of the resync the tab answered with a read and a resend', async () => {
+    // the instance's mirror is at 7 and the tab wrote against 7; the second upload's asset.add
+    // committed 8 on another instance while the first picture's insert was being placed here,
+    // so the first append meets the store at 8 (run 2's trace: the 409 in 387 ms, the resync
+    // read, the resend at base 8)
+    let revision = 7;
+    const syncs: boolean[] = [];
+    const appends: { base: number; opIds: string[] }[] = [];
+    const sinces: [number, number][] = [];
+    const room = {
+      deckId: 'moved-under-deck',
+      tier: 'blob',
+      live: async () => ({ seq: revision, document: documentAt(revision) }),
+      store: {
+        sync: async (force?: boolean) => {
+          syncs.push(force === true);
+          if (force === true) revision = 8;
+        },
+      },
+      channel: {
+        append: async (_deckId: string, base: number, entries: { opId: string }[]) => {
+          appends.push({ base, opIds: entries.map((entry) => entry.opId) });
+          if (base < 8) return { ok: false, head: 8, count: 8 - base };
+          return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
+        },
+        since: async (_deckId: string, seq: number, limit: number) => {
+          sinces.push([seq, limit]);
+          return [storeEntry(8)].filter((entry) => entry.seq > seq).slice(0, limit);
+        },
+      },
+    } as unknown as Room;
+    const result = await admitOnBlob(room, input(7, 'c1:1'));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    expect(result.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 9]]);
+    expect(result.rejected).toEqual([]);
+    expect(result.revision).toBe(9);
+    // one append at the mirror's revision, the forced sync, one append at the head
+    expect(appends).toEqual([
+      { base: 7, opIds: ['c1:1'] },
+      { base: 8, opIds: ['c1:1'] },
+    ]);
+    expect(syncs).toEqual([true]);
+    // the record committed between the tab's base and its write rides the answer (C3S-F8)
+    expect(result.between?.map((entry) => entry.seq)).toEqual([8]);
+    expect(sinces).toEqual([[7, 1]]);
+    expect(BLOB_APPEND_RETRIES).toBe(1);
+  });
+
+  it('keeps the resync when the mirror cannot reach the head the store named, and the 503 when the store did not move', async () => {
+    // the forced sync brings nothing (the pull could not prove the document yet)
+    const syncs: boolean[] = [];
+    let appends = 0;
+    const stuck = {
+      deckId: 'moved-under-stuck-deck',
+      tier: 'blob',
+      live: async () => ({ seq: 7, document: documentAt(7) }),
+      store: {
+        sync: async (force?: boolean) => {
+          syncs.push(force === true);
+        },
+      },
+      channel: {
+        append: async () => {
+          appends += 1;
+          return { ok: false, head: 8, count: 1 };
+        },
+      },
+    } as unknown as Room;
+    const refused = await admitOnBlob(stuck, input(7, 'c1:2'));
+    expect(refused.ok).toBe(false);
+    if (refused.ok) return;
+    expect(refused).toMatchObject({ status: 409, code: 'resync', head: 8 });
+    // the append ran once: a second attempt against the same mirror would meet the same head
+    expect(appends).toBe(1);
+    expect(syncs.length).toBeGreaterThan(0);
+    // the store at the mirror's revision that did not take the write is the transient, as before
+    const held = {
+      ...stuck,
+      deckId: 'moved-under-held-deck',
+      channel: { append: async () => ({ ok: false, head: 7, count: 0 }) },
+    } as unknown as Room;
+    const busy = await admitOnBlob(held, input(7, 'c1:3'));
+    expect(busy.ok).toBe(false);
+    if (!busy.ok) expect(busy).toMatchObject({ status: 503, code: 'store_busy' });
+  });
+
+  it('answers the resync at once when the entries do not place against the head the sync brought', async () => {
+    // the head deleted the slide the tab's splice names: invalid against a document at another
+    // revision than the base is the resync (blobRefusal), not a refusal of the write
+    let revision = 7;
+    const room = {
+      deckId: 'moved-under-gone-deck',
+      tier: 'blob',
+      live: async () => {
+        const document = documentAt(revision);
+        if (revision >= 8) {
+          const { ['content-rule']: _gone, ...slides } = document.slides;
+          return { seq: revision, document: { deck: document.deck, slides } };
+        }
+        return { seq: revision, document };
+      },
+      store: {
+        sync: async (force?: boolean) => {
+          if (force === true) revision = 8;
+        },
+      },
+      channel: {
+        append: async (_deckId: string, base: number) =>
+          base < 8 ? { ok: false, head: 8, count: 1 } : { ok: true, entries: [] },
+      },
+    } as unknown as Room;
+    const result = await admitOnBlob(room, input(7, 'c1:4'));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result).toMatchObject({ status: 409, code: 'resync', head: 8 });
   });
 });

@@ -24,11 +24,15 @@ const WORK = arg('work', path.dirname(new URL(import.meta.url).pathname));
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 mkdirSync(WORK, { recursive: true });
 
-const URL_EXTERNAL = 'https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png';
+const URL_EXTERNAL =
+  'https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png';
 const URL_GT = 'https://generaltranslation.com/api/og-home';
-const URL_A = 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
-const URL_B = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/500px-Python-logo-notext.svg.png';
-const URL_BG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/960px-Fronalpstock_big.jpg';
+const URL_A =
+  'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
+const URL_B =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/500px-Python-logo-notext.svg.png';
+const URL_BG =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/960px-Fronalpstock_big.jpg';
 
 // ---------------------------------------------------------------------------------------------
 // the table
@@ -68,7 +72,10 @@ const attempt = async (feature, interaction, fn, { reset, tries = 3 } = {}) => {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      };
     }
     log.push(`try ${i}: ${r.evidence}`);
     if (r.ok) {
@@ -283,7 +290,12 @@ const hoverRow = async (page, rowId, waitFor) => {
   const row = ctl(page, `menu.${rowId}`);
   const r = await row.boundingBox();
   if (!r) throw new Error(`no menu row ${rowId}`);
-  await moveHuman(page, { x: r.x - 20, y: r.y + r.height / 2 }, { x: r.x + r.width / 2, y: r.y + r.height / 2 }, 6);
+  await moveHuman(
+    page,
+    { x: r.x - 20, y: r.y + r.height / 2 },
+    { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+    6,
+  );
   await sleep(rand(250, 400));
   if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
 };
@@ -299,7 +311,12 @@ const clickControl = async (page, control) => {
   if (!r) throw new Error(`no control ${control}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
 };
-const has = (page, selector) => page.locator(selector).first().isVisible().catch(() => false);
+const has = (page, selector) =>
+  page
+    .locator(selector)
+    .first()
+    .isVisible()
+    .catch(() => false);
 const rowState = (page, rowId) =>
   page.evaluate((id) => {
     const el = document.querySelector(`[data-control="menu.${id}"]`);
@@ -332,7 +349,11 @@ try {
 const page = await context.newPage();
 /** The network facts a row may cite: failed requests and non 2xx responses, with the body head. */
 const net = [];
-page.on('requestfailed', (req) => net.push(`failed ${req.method()} ${req.url().slice(0, 140)} :: ${req.failure()?.errorText ?? '?'}`));
+page.on('requestfailed', (req) =>
+  net.push(
+    `failed ${req.method()} ${req.url().slice(0, 140)} :: ${req.failure()?.errorText ?? '?'}`,
+  ),
+);
 page.on('response', async (res) => {
   const url = res.url();
   const status = res.status();
@@ -403,12 +424,19 @@ try {
   });
   const info = await invoke(page, 'deck.info');
   deckId = info.id;
-  record('setup', 'open /new', /^untitled-/.test(deckId) ? 'works' : 'broken', `deck ${deckId}; state keys ${build.keys.join(',')}`);
+  record(
+    'setup',
+    'open /new',
+    /^untitled-/.test(deckId) ? 'works' : 'broken',
+    `deck ${deckId}; state keys ${build.keys.join(',')}`,
+  );
 
   // ---- 0. the first action on the fresh draft: a picture through the file chooser
   {
     const mark = net.length;
-    const sync0 = await page.evaluate(() => JSON.stringify(window.turboslide.studio.describe().state.sync ?? null));
+    const sync0 = await page.evaluate(() =>
+      JSON.stringify(window.turboslide.studio.describe().state.sync ?? null),
+    );
     let how = '';
     try {
       await openMenu(page, 'insert');
@@ -436,7 +464,12 @@ try {
       how = `error: ${e instanceof Error ? e.message.split('\n')[0] : String(e)}`;
     }
     await closeMenus(page);
-    record('Insert picture', 'on the fresh /new draft, before any other change, Insert > Image > Upload from computer with a PNG', /a shot block/.test(how) ? 'works' : 'broken', `sync before ${sync0}; ${how}; network ${netSince(mark)}; after ${await page.evaluate(() => JSON.stringify(window.turboslide.studio.describe().state.sync ?? null))}`);
+    record(
+      'Insert picture',
+      'on the fresh /new draft, before any other change, Insert > Image > Upload from computer with a PNG',
+      /a shot block/.test(how) ? 'works' : 'broken',
+      `sync before ${sync0}; ${how}; network ${netSince(mark)}; after ${await page.evaluate(() => JSON.stringify(window.turboslide.studio.describe().state.sync ?? null))}`,
+    );
   }
 
   // ---- 1b. a second slide, the click repeated until the slide list grows
@@ -445,14 +478,31 @@ try {
   for (let i = 0; i < 3 && order.length <= firstOrder.length; i += 1) {
     await clearAll(page);
     await clickControl(page, 'toolbar.newSlide');
-    order = await pollUntil(() => slideOrder(page), (o) => o.length > firstOrder.length, 15_000);
+    order = await pollUntil(
+      () => slideOrder(page),
+      (o) => o.length > firstOrder.length,
+      15_000,
+    );
   }
   SLIDE = order.find((id) => !firstOrder.includes(id)) ?? order[order.length - 1];
-  await pollUntil(() => state(page), (s) => s.slideId === SLIDE, 8000);
+  await pollUntil(
+    () => state(page),
+    (s) => s.slideId === SLIDE,
+    8000,
+  );
   await settled(page);
-  const connected = await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+  const connected = await pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    30_000,
+  );
   await sleep(500);
-  record('setup', 'New slide from the toolbar, then the room connected', SLIDE && SLIDE !== firstOrder[0] && connected.sync?.connected === true ? 'works' : 'broken', `slides ${order.length}; working slide ${SLIDE}; active ${(await state(page)).slideId}; sync ${JSON.stringify(connected.sync ?? null)}`);
+  record(
+    'setup',
+    'New slide from the toolbar, then the room connected',
+    SLIDE && SLIDE !== firstOrder[0] && connected.sync?.connected === true ? 'works' : 'broken',
+    `slides ${order.length}; working slide ${SLIDE}; active ${(await state(page)).slideId}; sync ${JSON.stringify(connected.sync ?? null)}`,
+  );
   let k = await kOf(page);
   const sheetPoint = async (sx, sy) => {
     const sheet = await rectOf(page, SHEET);
@@ -501,13 +551,20 @@ try {
     const sel = await selectObject(id);
     if (!sel) return false;
     await press(page, 'Delete');
-    const gone = await pollUntil(() => blockOf(page, SLIDE, id), (b) => b === null, 10_000);
+    const gone = await pollUntil(
+      () => blockOf(page, SLIDE, id),
+      (b) => b === null,
+      10_000,
+    );
     await settled(page);
     return gone === null;
   };
   const waitPos = (id, test, timeout = 12_000) =>
-    pollUntil(() => blockOf(page, SLIDE, id), (b) => b && b.pos && test(b.pos, b), timeout);
-
+    pollUntil(
+      () => blockOf(page, SLIDE, id),
+      (b) => b && b.pos && test(b.pos, b),
+      timeout,
+    );
 
   // the sync facts a row cites: the document revision the page holds, the server revision and the room
   const syncFacts = () =>
@@ -534,7 +591,11 @@ try {
     const t0 = Date.now();
     await clickControl(page, 'dialog.imageByUrl.ok');
     const obj = await newBlockAfter(before, 40_000);
-    const err = await page.evaluate(() => document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ?? null);
+    const err = await page.evaluate(
+      () =>
+        document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ??
+        null,
+    );
     const dialogOpen = await has(page, '[data-control="dialog.imageByUrl"]');
     if (dialogOpen) await closeMenus(page);
     await settled(page);
@@ -545,14 +606,24 @@ try {
     };
   };
 
-
   /** The refused write modal ("A change was not applied"): its text, then Dismiss, then the save state. */
   const refusedModal = async () => {
     const facts = await page.evaluate(() => {
-      const heads = [...document.querySelectorAll('h1, h2, h3, [role="heading"], .ts-dialog-title')].map((h) => (h.textContent ?? '').trim());
+      const heads = [
+        ...document.querySelectorAll('h1, h2, h3, [role="heading"], .ts-dialog-title'),
+      ].map((h) => (h.textContent ?? '').trim());
       const modal = heads.find((t) => /change was not applied/i.test(t)) ?? null;
-      const dismiss = [...document.querySelectorAll('button')].find((b) => /^dismiss$/i.test((b.textContent ?? '').trim()));
-      const save = document.querySelector('[data-control="deck.saveState"], .ts-save-state, .ts-title-row [role="status"]')?.textContent ?? [...document.querySelectorAll('.ts-titlerow *, header *')].map((e) => e.textContent ?? '').find((t) => /save|saving|retrying|saved/i.test(t)) ?? null;
+      const dismiss = [...document.querySelectorAll('button')].find((b) =>
+        /^dismiss$/i.test((b.textContent ?? '').trim()),
+      );
+      const save =
+        document.querySelector(
+          '[data-control="deck.saveState"], .ts-save-state, .ts-title-row [role="status"]',
+        )?.textContent ??
+        [...document.querySelectorAll('.ts-titlerow *, header *')]
+          .map((e) => e.textContent ?? '')
+          .find((t) => /save|saving|retrying|saved/i.test(t)) ??
+        null;
       return { modal, dismiss: Boolean(dismiss), save: save ? save.trim().slice(0, 60) : null };
     });
     return facts;
@@ -565,133 +636,185 @@ try {
     if (r) await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
     await sleep(1500);
     const after = await refusedModal();
-    return { ...before, dismissed: !after.modal, saveAfter: after.save, syncAfter: await syncFacts() };
+    return {
+      ...before,
+      dismissed: !after.modal,
+      saveAfter: after.save,
+      syncAfter: await syncFacts(),
+    };
   };
 
   // ---- A. the upload paths again, with the sync facts before and after every try
   let uploaded = null;
-  await attempt('Insert picture', 'Insert > Image > Upload from computer, a PNG through the file chooser (with the sync facts)', async () => {
-    await clearAll(page);
-    const before = await ids();
-    const mark = net.length;
-    const sync0 = await syncFacts();
-    await openMenu(page, 'insert');
-    await hoverRow(page, 'insert.image', '[data-control="menu.insert.image.upload"]');
-    const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
-    await clickRow(page, 'insert.image.upload');
-    const chooser = await chooserP;
-    if (!chooser) return { ok: false, evidence: `no file chooser opened within 8 s; before: ${sync0}` };
-    const t0 = Date.now();
-    await chooser.setFiles(PNG_A);
-    // the snackbar, watched for 45 s (it dismisses itself)
-    let said = null;
-    let obj = null;
-    const until = Date.now() + 45_000;
-    while (Date.now() < until) {
-      const s = await snackbar(page);
-      if (s && !said) said = s;
-      obj = (await blocksOf(page, SLIDE)).find((x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture')) ?? null;
-      if (obj) break;
-      await sleep(500);
-    }
-    await settled(page);
-    uploaded = obj;
-    return { ok: Boolean(obj), evidence: `before: ${sync0}; ${Date.now() - t0} ms; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}` };
-  }, { reset: () => closeMenus(page) });
-
-  let byUrl = null;
-  let dropped = null;
-  await attempt('Insert picture', 'drag a PNG file from the desktop and drop it on the slide (a DataTransfer built in the page, dispatched as dragover and drop at a point), with the sync facts', async () => {
-    await clearAll(page);
-    const before = await ids();
-    const b64 = readFileSync(PNG_B).toString('base64');
-    const dt = await page.evaluateHandle(async (data) => {
-      const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
-      const file = new File([blob], 'dropped-logo.png', { type: 'image/png' });
-      const t = new DataTransfer();
-      t.items.add(file);
-      return t;
-    }, b64);
-    const at = await sheetPoint(1000, 560);
-    const sync0 = await syncFacts();
-    const mark = net.length;
-    await page.mouse.move(at.x - 60, at.y - 40);
-    await page.dispatchEvent(SHEET, 'dragenter', { dataTransfer: dt, clientX: at.x, clientY: at.y });
-    await page.dispatchEvent(SHEET, 'dragover', { dataTransfer: dt, clientX: at.x, clientY: at.y });
-    await sleep(200);
-    await page.dispatchEvent(SHEET, 'drop', { dataTransfer: dt, clientX: at.x, clientY: at.y });
-    let said = null;
-    let obj = null;
-    const until = Date.now() + 45_000;
-    while (Date.now() < until) {
-      const s = await snackbar(page);
-      if (s && !said) said = s;
-      obj = (await blocksOf(page, SLIDE)).find((x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture')) ?? null;
-      if (obj) break;
-      await sleep(500);
-    }
-    await settled(page);
-    dropped = obj;
-    return { ok: Boolean(obj), evidence: `before: ${sync0}; dropped at sheet 1000,560; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}` };
-  });
-
-  let pasted = null;
-  await attempt('Insert picture', 'copy a PNG to the clipboard and press Cmd V on the slide, with the sync facts', async (i) => {
-    await clearAll(page);
-    const before = await ids();
-    const b64 = readFileSync(PNG_A).toString('base64');
-    const wrote = await page.evaluate(async (data) => {
-      try {
-        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        return 'clipboard.write ok';
-      } catch (e) {
-        return `clipboard.write failed: ${e instanceof Error ? e.message : String(e)}`;
-      }
-    }, b64);
-    const at = await sheetPoint(1400, 860);
-    await clickAt(page, at.x, at.y);
-    await clearAll(page);
-    const sync0 = await syncFacts();
-    const mark = net.length;
-    let how = `${wrote}; `;
-    await page.keyboard.press(i === 1 ? 'Meta+V' : 'Control+V');
-    how += i === 1 ? 'Meta+V' : 'Control+V';
-    let said = null;
-    let obj = null;
-    let until = Date.now() + 25_000;
-    while (Date.now() < until) {
-      const s = await snackbar(page);
-      if (s && !said) said = s;
-      obj = (await blocksOf(page, SLIDE)).find((x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture')) ?? null;
-      if (obj) break;
-      await sleep(500);
-    }
-    if (!obj && i === 3) {
-      const dt = await page.evaluateHandle(async (data) => {
-        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
-        const t = new DataTransfer();
-        t.items.add(new File([blob], 'pasted.png', { type: 'image/png' }));
-        return t;
-      }, b64);
-      await page.evaluate((t) => {
-        const ev = new ClipboardEvent('paste', { clipboardData: t, bubbles: true, cancelable: true });
-        document.body.dispatchEvent(ev);
-      }, dt);
-      how += '; then a synthetic paste event with the file';
-      until = Date.now() + 25_000;
+  await attempt(
+    'Insert picture',
+    'Insert > Image > Upload from computer, a PNG through the file chooser (with the sync facts)',
+    async () => {
+      await clearAll(page);
+      const before = await ids();
+      const mark = net.length;
+      const sync0 = await syncFacts();
+      await openMenu(page, 'insert');
+      await hoverRow(page, 'insert.image', '[data-control="menu.insert.image.upload"]');
+      const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
+      await clickRow(page, 'insert.image.upload');
+      const chooser = await chooserP;
+      if (!chooser)
+        return { ok: false, evidence: `no file chooser opened within 8 s; before: ${sync0}` };
+      const t0 = Date.now();
+      await chooser.setFiles(PNG_A);
+      // the snackbar, watched for 45 s (it dismisses itself)
+      let said = null;
+      let obj = null;
+      const until = Date.now() + 45_000;
       while (Date.now() < until) {
         const s = await snackbar(page);
         if (s && !said) said = s;
-        obj = (await blocksOf(page, SLIDE)).find((x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture')) ?? null;
+        obj =
+          (await blocksOf(page, SLIDE)).find(
+            (x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture'),
+          ) ?? null;
         if (obj) break;
         await sleep(500);
       }
-    }
-    await settled(page);
-    pasted = obj;
-    return { ok: Boolean(obj), evidence: `before: ${sync0}; ${how}; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}` };
-  });
+      await settled(page);
+      uploaded = obj;
+      return {
+        ok: Boolean(obj),
+        evidence: `before: ${sync0}; ${Date.now() - t0} ms; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
+
+  let byUrl = null;
+  let dropped = null;
+  await attempt(
+    'Insert picture',
+    'drag a PNG file from the desktop and drop it on the slide (a DataTransfer built in the page, dispatched as dragover and drop at a point), with the sync facts',
+    async () => {
+      await clearAll(page);
+      const before = await ids();
+      const b64 = readFileSync(PNG_B).toString('base64');
+      const dt = await page.evaluateHandle(async (data) => {
+        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+        const file = new File([blob], 'dropped-logo.png', { type: 'image/png' });
+        const t = new DataTransfer();
+        t.items.add(file);
+        return t;
+      }, b64);
+      const at = await sheetPoint(1000, 560);
+      const sync0 = await syncFacts();
+      const mark = net.length;
+      await page.mouse.move(at.x - 60, at.y - 40);
+      await page.dispatchEvent(SHEET, 'dragenter', {
+        dataTransfer: dt,
+        clientX: at.x,
+        clientY: at.y,
+      });
+      await page.dispatchEvent(SHEET, 'dragover', {
+        dataTransfer: dt,
+        clientX: at.x,
+        clientY: at.y,
+      });
+      await sleep(200);
+      await page.dispatchEvent(SHEET, 'drop', { dataTransfer: dt, clientX: at.x, clientY: at.y });
+      let said = null;
+      let obj = null;
+      const until = Date.now() + 45_000;
+      while (Date.now() < until) {
+        const s = await snackbar(page);
+        if (s && !said) said = s;
+        obj =
+          (await blocksOf(page, SLIDE)).find(
+            (x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture'),
+          ) ?? null;
+        if (obj) break;
+        await sleep(500);
+      }
+      await settled(page);
+      dropped = obj;
+      return {
+        ok: Boolean(obj),
+        evidence: `before: ${sync0}; dropped at sheet 1000,560; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}`,
+      };
+    },
+  );
+
+  let pasted = null;
+  await attempt(
+    'Insert picture',
+    'copy a PNG to the clipboard and press Cmd V on the slide, with the sync facts',
+    async (i) => {
+      await clearAll(page);
+      const before = await ids();
+      const b64 = readFileSync(PNG_A).toString('base64');
+      const wrote = await page.evaluate(async (data) => {
+        try {
+          const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          return 'clipboard.write ok';
+        } catch (e) {
+          return `clipboard.write failed: ${e instanceof Error ? e.message : String(e)}`;
+        }
+      }, b64);
+      const at = await sheetPoint(1400, 860);
+      await clickAt(page, at.x, at.y);
+      await clearAll(page);
+      const sync0 = await syncFacts();
+      const mark = net.length;
+      let how = `${wrote}; `;
+      await page.keyboard.press(i === 1 ? 'Meta+V' : 'Control+V');
+      how += i === 1 ? 'Meta+V' : 'Control+V';
+      let said = null;
+      let obj = null;
+      let until = Date.now() + 25_000;
+      while (Date.now() < until) {
+        const s = await snackbar(page);
+        if (s && !said) said = s;
+        obj =
+          (await blocksOf(page, SLIDE)).find(
+            (x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture'),
+          ) ?? null;
+        if (obj) break;
+        await sleep(500);
+      }
+      if (!obj && i === 3) {
+        const dt = await page.evaluateHandle(async (data) => {
+          const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+          const t = new DataTransfer();
+          t.items.add(new File([blob], 'pasted.png', { type: 'image/png' }));
+          return t;
+        }, b64);
+        await page.evaluate((t) => {
+          const ev = new ClipboardEvent('paste', {
+            clipboardData: t,
+            bubbles: true,
+            cancelable: true,
+          });
+          document.body.dispatchEvent(ev);
+        }, dt);
+        how += '; then a synthetic paste event with the file';
+        until = Date.now() + 25_000;
+        while (Date.now() < until) {
+          const s = await snackbar(page);
+          if (s && !said) said = s;
+          obj =
+            (await blocksOf(page, SLIDE)).find(
+              (x) => !before.includes(x.id) && (x.type === 'shot' || x.type === 'picture'),
+            ) ?? null;
+          if (obj) break;
+          await sleep(500);
+        }
+      }
+      await settled(page);
+      pasted = obj;
+      return {
+        ok: Boolean(obj),
+        evidence: `before: ${sync0}; ${how}; ${await describeBlock(obj)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}`,
+      };
+    },
+  );
 
   // ---- B. the subject (a UI picture when one landed, else the window API)
   let all = (await blocksOf(page, SLIDE)).filter((b) => b.type === 'shot' || b.type === 'picture');
@@ -702,16 +825,36 @@ try {
     try {
       const dataUrl = `data:image/png;base64,${readFileSync(PNG_A).toString('base64')}`;
       const s = await state(page);
-      const asset = await invoke(page, 'asset.add', { url: dataUrl, role: 'capture', alt: 'audit picture', baseRevision: s.revision });
+      const asset = await invoke(page, 'asset.add', {
+        url: dataUrl,
+        role: 'capture',
+        alt: 'audit picture',
+        baseRevision: s.revision,
+      });
       const s2 = await state(page);
-      await invoke(page, 'block.insert', { slideId: SLIDE, slot: 'main', block: { id: 'shot-audit', type: 'shot', asset: asset.id, pos: { x: 560, y: 300, w: 480, h: 300 } }, baseRevision: Math.max(s2.revision, asset.revision ?? 0) });
+      await invoke(page, 'block.insert', {
+        slideId: SLIDE,
+        slot: 'main',
+        block: {
+          id: 'shot-audit',
+          type: 'shot',
+          asset: asset.id,
+          pos: { x: 560, y: 300, w: 480, h: 300 },
+        },
+        baseRevision: Math.max(s2.revision, asset.revision ?? 0),
+      });
       how = `asset ${asset.id} revision ${asset.revision ?? '?'}`;
     } catch (e) {
       how = `failed: ${e instanceof Error ? e.message.slice(0, 200) : String(e)}`;
     }
     const obj = await newBlockAfter(before, 30_000);
     await settled(page);
-    record('setup', 'every UI insert path failed: the picture is placed through the window API (asset.add with a data URL, block.insert)', obj ? 'works' : 'broken', `${how}; ${await describeBlock(obj)}; network ${netSince(mark)}; ${await syncFacts()}`);
+    record(
+      'setup',
+      'every UI insert path failed: the picture is placed through the window API (asset.add with a data URL, block.insert)',
+      obj ? 'works' : 'broken',
+      `${how}; ${await describeBlock(obj)}; network ${netSince(mark)}; ${await syncFacts()}`,
+    );
     all = (await blocksOf(page, SLIDE)).filter((b) => b.type === 'shot' || b.type === 'picture');
   }
   const subject = uploaded ?? byUrl ?? dropped ?? pasted ?? all[0] ?? null;
@@ -722,7 +865,13 @@ try {
     const x = 120 + (cell % 3) * 500;
     const y = 120 + Math.floor(cell / 3) * 380;
     cell += 1;
-    await invoke(page, 'block.set', { slideId: SLIDE, blockId: b.id, path: '/pos', value: { x, y, w: 400, h: 250 }, baseRevision: s.revision }).catch(() => undefined);
+    await invoke(page, 'block.set', {
+      slideId: SLIDE,
+      blockId: b.id,
+      path: '/pos',
+      value: { x, y, w: 400, h: 250 },
+      baseRevision: s.revision,
+    }).catch(() => undefined);
     await waitPos(b.id, (p) => p.x === x && p.y === y, 8000);
     await settled(page);
   }
@@ -731,86 +880,178 @@ try {
     const sel = await selectObject(extra.id);
     if (!sel) {
       const s = await state(page);
-      await invoke(page, 'block.remove', { slideId: SLIDE, blockId: extra.id, baseRevision: s.revision }).catch(() => undefined);
-      await pollUntil(() => blockOf(page, SLIDE, extra.id), (b) => b === null, 10_000);
-      record('Delete picture', `select the ${extra.type} ${extra.id} and press Delete`, 'not driven', `a click did not select ${extra.id} (handles ${(await handleControls(page)).join(',') || 'none'}); removed through the window API instead`);
+      await invoke(page, 'block.remove', {
+        slideId: SLIDE,
+        blockId: extra.id,
+        baseRevision: s.revision,
+      }).catch(() => undefined);
+      await pollUntil(
+        () => blockOf(page, SLIDE, extra.id),
+        (b) => b === null,
+        10_000,
+      );
+      record(
+        'Delete picture',
+        `select the ${extra.type} ${extra.id} and press Delete`,
+        'not driven',
+        `a click did not select ${extra.id} (handles ${(await handleControls(page)).join(',') || 'none'}); removed through the window API instead`,
+      );
       continue;
     }
     await press(page, 'Delete');
-    const gone = await pollUntil(() => blockOf(page, SLIDE, extra.id), (b) => b === null, 10_000);
+    const gone = await pollUntil(
+      () => blockOf(page, SLIDE, extra.id),
+      (b) => b === null,
+      10_000,
+    );
     await settled(page);
-    record('Delete picture', `select the ${extra.type} ${extra.id} and press Delete`, gone === null ? 'works' : 'broken', gone === null ? 'the block left the slide' : `the block is still on the slide: ${posStr(gone.pos)}`);
+    record(
+      'Delete picture',
+      `select the ${extra.type} ${extra.id} and press Delete`,
+      gone === null ? 'works' : 'broken',
+      gone === null
+        ? 'the block left the slide'
+        : `the block is still on the slide: ${posStr(gone.pos)}`,
+    );
   }
   if (!subject) throw new Error('no picture object to drive; every insert path failed');
   const ID = subject.id;
   const placeSubject = async (x = 560, y = 300) => {
     await clearAll(page);
     const s = await state(page);
-    await invoke(page, 'block.set', { slideId: SLIDE, blockId: ID, path: '/pos', value: { x, y, w: 480, h: 300 }, baseRevision: s.revision }).catch(() => undefined);
+    await invoke(page, 'block.set', {
+      slideId: SLIDE,
+      blockId: ID,
+      path: '/pos',
+      value: { x, y, w: 480, h: 300 },
+      baseRevision: s.revision,
+    }).catch(() => undefined);
     await waitPos(ID, (p) => p.x === x && p.y === y);
     await settled(page);
     await sleep(1200);
   };
   await placeSubject(200, 300);
   k = await kOf(page);
-  record('setup', `the subject ${ID} placed at 200,300 480x300 through the window API`, 'works', `${await describeBlock(await blockOf(page, SLIDE, ID))}; k ${fmt(k)}`);
+  record(
+    'setup',
+    `the subject ${ID} placed at 200,300 480x300 through the window API`,
+    'works',
+    `${await describeBlock(await blockOf(page, SLIDE, ID))}; k ${fmt(k)}`,
+  );
 
   // ---- C. the centre snap from a far start
-  await attempt('Alignment guides', 'drag the picture from x 200 so its centre comes within 3 px of the slide centre: a guide shows and the centre snaps to 800', async () => {
-    await placeSubject(200, 300);
-    const sel = await selectObject(ID);
-    if (!sel) return { ok: false, evidence: `could not select ${ID}: handles ${(await handleControls(page)).join(',') || 'none'}` };
-    const before = await blockOf(page, SLIDE, ID);
-    const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
-    if (!edge) return { ok: false, evidence: 'no frame edge on the overlay' };
-    const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
-    const cx = before.pos.x + before.pos.w / 2;
-    const to = { x: from.x + (800 + 3 - cx) * k, y: from.y };
-    const mid = await drag(page, from, to, { steps: 24, during: async () => ({ guides: await guidesCount(page), axes: await page.evaluate(() => [...document.querySelectorAll('.ts-guide')].map((g) => `${g.getAttribute('data-axis')}@${Math.round(g.getBoundingClientRect().x)}`).join(',')) }) });
-    const after = await waitPos(ID, (p) => p.x !== before.pos.x);
-    await settled(page);
-    const centreAfter = after.pos.x + after.pos.w / 2;
-    const sheet = await rectOf(page, SHEET);
-    return { ok: mid.guides > 0 && near(centreAfter, 800, 0.5), evidence: `guides during ${mid.guides} (${mid.axes}; sheet centre at css x ${fmt(sheet.x + sheet.w / 2)}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 803); pos ${posStr(after.pos)}` };
-  }, { reset: () => placeSubject(200, 300) });
-  await attempt('Alignment guides', 'drag the picture so its centre comes within 3 px of the slide vertical centre (y 450): a guide shows and the centre snaps', async () => {
-    await placeSubject(200, 200);
-    const sel = await selectObject(ID);
-    if (!sel) return { ok: false, evidence: `could not select ${ID}: handles ${(await handleControls(page)).join(',') || 'none'}` };
-    const before = await blockOf(page, SLIDE, ID);
-    const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
-    if (!edge) return { ok: false, evidence: 'no frame edge on the overlay' };
-    const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
-    const cy = before.pos.y + before.pos.h / 2;
-    const to = { x: from.x, y: from.y + (450 + 3 - cy) * k };
-    const mid = await drag(page, from, to, { steps: 24, during: async () => ({ guides: await guidesCount(page), axes: await page.evaluate(() => [...document.querySelectorAll('.ts-guide')].map((g) => g.getAttribute('data-axis')).join(',')) }) });
-    const after = await waitPos(ID, (p) => p.y !== before.pos.y);
-    await settled(page);
-    const centreAfter = after.pos.y + after.pos.h / 2;
-    return { ok: mid.guides > 0 && near(centreAfter, 450, 0.5), evidence: `guides during ${mid.guides} (${mid.axes}); centre y ${fmt(cy)} -> ${fmt(centreAfter)} (aimed at 453); pos ${posStr(after.pos)}` };
-  }, { reset: () => placeSubject(200, 200) });
+  await attempt(
+    'Alignment guides',
+    'drag the picture from x 200 so its centre comes within 3 px of the slide centre: a guide shows and the centre snaps to 800',
+    async () => {
+      await placeSubject(200, 300);
+      const sel = await selectObject(ID);
+      if (!sel)
+        return {
+          ok: false,
+          evidence: `could not select ${ID}: handles ${(await handleControls(page)).join(',') || 'none'}`,
+        };
+      const before = await blockOf(page, SLIDE, ID);
+      const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
+      if (!edge) return { ok: false, evidence: 'no frame edge on the overlay' };
+      const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
+      const cx = before.pos.x + before.pos.w / 2;
+      const to = { x: from.x + (800 + 3 - cx) * k, y: from.y };
+      const mid = await drag(page, from, to, {
+        steps: 24,
+        during: async () => ({
+          guides: await guidesCount(page),
+          axes: await page.evaluate(() =>
+            [...document.querySelectorAll('.ts-guide')]
+              .map(
+                (g) => `${g.getAttribute('data-axis')}@${Math.round(g.getBoundingClientRect().x)}`,
+              )
+              .join(','),
+          ),
+        }),
+      });
+      const after = await waitPos(ID, (p) => p.x !== before.pos.x);
+      await settled(page);
+      const centreAfter = after.pos.x + after.pos.w / 2;
+      const sheet = await rectOf(page, SHEET);
+      return {
+        ok: mid.guides > 0 && near(centreAfter, 800, 0.5),
+        evidence: `guides during ${mid.guides} (${mid.axes}; sheet centre at css x ${fmt(sheet.x + sheet.w / 2)}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 803); pos ${posStr(after.pos)}`,
+      };
+    },
+    { reset: () => placeSubject(200, 300) },
+  );
+  await attempt(
+    'Alignment guides',
+    'drag the picture so its centre comes within 3 px of the slide vertical centre (y 450): a guide shows and the centre snaps',
+    async () => {
+      await placeSubject(200, 200);
+      const sel = await selectObject(ID);
+      if (!sel)
+        return {
+          ok: false,
+          evidence: `could not select ${ID}: handles ${(await handleControls(page)).join(',') || 'none'}`,
+        };
+      const before = await blockOf(page, SLIDE, ID);
+      const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
+      if (!edge) return { ok: false, evidence: 'no frame edge on the overlay' };
+      const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
+      const cy = before.pos.y + before.pos.h / 2;
+      const to = { x: from.x, y: from.y + (450 + 3 - cy) * k };
+      const mid = await drag(page, from, to, {
+        steps: 24,
+        during: async () => ({
+          guides: await guidesCount(page),
+          axes: await page.evaluate(() =>
+            [...document.querySelectorAll('.ts-guide')]
+              .map((g) => g.getAttribute('data-axis'))
+              .join(','),
+          ),
+        }),
+      });
+      const after = await waitPos(ID, (p) => p.y !== before.pos.y);
+      await settled(page);
+      const centreAfter = after.pos.y + after.pos.h / 2;
+      return {
+        ok: mid.guides > 0 && near(centreAfter, 450, 0.5),
+        evidence: `guides during ${mid.guides} (${mid.axes}); centre y ${fmt(cy)} -> ${fmt(centreAfter)} (aimed at 453); pos ${posStr(after.pos)}`,
+      };
+    },
+    { reset: () => placeSubject(200, 200) },
+  );
   await placeSubject(560, 300);
 
   // ---- D. the Format options sliders, scrolled into view, with a keyboard fallback
   const openFormatOptions = async () => {
     if (await has(page, '[data-control="panel.formatOptions"]')) return true;
-    const tail = await page.evaluate(() => document.querySelector('[data-control="toolbar.tail"]')?.getAttribute('data-tail') ?? 'none');
-    if (await has(page, '[data-control="toolbar.imageOptions"]')) await clickControl(page, 'toolbar.imageOptions');
-    else if (await has(page, '[data-control="toolbar.formatOptions"]')) await clickControl(page, 'toolbar.formatOptions');
+    const tail = await page.evaluate(
+      () =>
+        document.querySelector('[data-control="toolbar.tail"]')?.getAttribute('data-tail') ??
+        'none',
+    );
+    if (await has(page, '[data-control="toolbar.imageOptions"]'))
+      await clickControl(page, 'toolbar.imageOptions');
+    else if (await has(page, '[data-control="toolbar.formatOptions"]'))
+      await clickControl(page, 'toolbar.formatOptions');
     else {
       await openMenu(page, 'format');
       await clickRow(page, 'format.formatOptions');
     }
-    await page.locator('[data-control="panel.formatOptions"]').waitFor({ timeout: 8000 }).catch(() => {
-      throw new Error(`the Format options panel did not open (toolbar tail ${tail})`);
-    });
+    await page
+      .locator('[data-control="panel.formatOptions"]')
+      .waitFor({ timeout: 8000 })
+      .catch(() => {
+        throw new Error(`the Format options panel did not open (toolbar tail ${tail})`);
+      });
     return true;
   };
   const openSection = async (id) => {
     const head = page.locator(`[data-control="formatOptions.${id}"]`).first();
     if (!(await head.isVisible().catch(() => false))) return false;
     const section = page.locator(`[data-section="${id}"]`).first();
-    const closed = await section.evaluate((el) => el.classList.contains('is-closed')).catch(() => true);
+    const closed = await section
+      .evaluate((el) => el.classList.contains('is-closed'))
+      .catch(() => true);
     if (closed) {
       await head.scrollIntoViewIfNeeded();
       const r = await head.boundingBox();
@@ -828,7 +1069,12 @@ try {
     if (!r) throw new Error(`no slider ${control}`);
     const range = await page.evaluate((s) => {
       const el = document.querySelector(s);
-      return { min: Number(el.min), max: Number(el.max), value: Number(el.value), disabled: el.disabled };
+      return {
+        min: Number(el.min),
+        max: Number(el.max),
+        value: Number(el.value),
+        disabled: el.disabled,
+      };
     }, sel);
     const pad = 8;
     const x0 = r.x + pad + ((range.value - range.min) / (range.max - range.min)) * (r.w - 2 * pad);
@@ -841,7 +1087,7 @@ try {
     if (value === range.value) {
       // the keyboard: focus the slider, step with the arrows, leave with Tab
       await loc.focus();
-      const steps = Math.round(fraction * (range.max - range.min) / 1);
+      const steps = Math.round((fraction * (range.max - range.min)) / 1);
       await press(page, 'ArrowRight', Math.min(steps, 60));
       await press(page, 'Tab');
       await sleep(300);
@@ -850,41 +1096,82 @@ try {
     }
     return { value, how };
   };
-  await attempt('Format options', 'set the Transparency slider to about 40 percent: the picture fades on the slide and adjust.transparency is written', async () => {
-    await clearAll(page);
-    await selectObject(ID);
-    await openFormatOptions();
-    await openSection('adjustments');
-    const v = await setSlider('formatOptions.adjustments.transparency', 0.4);
-    const after = await waitPos(ID, (p, b) => b.block.adjust?.transparency !== undefined, 10_000);
-    await settled(page);
-    const box = await boxOf(page, ID);
-    const t = after?.block.adjust?.transparency;
-    return { ok: typeof t === 'number' && t > 0.25 && t < 0.65 && box?.img && Math.abs(Number(box.img.opacity) - (1 - t)) < 0.05, evidence: `${v.how}; adjust ${JSON.stringify(after?.block.adjust ?? null)}; img opacity on the sheet ${box?.img?.opacity}` };
-  }, { reset: () => clearAll(page) });
+  await attempt(
+    'Format options',
+    'set the Transparency slider to about 40 percent: the picture fades on the slide and adjust.transparency is written',
+    async () => {
+      await clearAll(page);
+      await selectObject(ID);
+      await openFormatOptions();
+      await openSection('adjustments');
+      const v = await setSlider('formatOptions.adjustments.transparency', 0.4);
+      const after = await waitPos(ID, (p, b) => b.block.adjust?.transparency !== undefined, 10_000);
+      await settled(page);
+      const box = await boxOf(page, ID);
+      const t = after?.block.adjust?.transparency;
+      return {
+        ok:
+          typeof t === 'number' &&
+          t > 0.25 &&
+          t < 0.65 &&
+          box?.img &&
+          Math.abs(Number(box.img.opacity) - (1 - t)) < 0.05,
+        evidence: `${v.how}; adjust ${JSON.stringify(after?.block.adjust ?? null)}; img opacity on the sheet ${box?.img?.opacity}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
   await shot('transparency');
-  await attempt('Format options', 'set the Brightness slider to about 70 percent: adjust.brightness is written and the picture filter changes', async () => {
-    await selectObject(ID);
-    await openFormatOptions();
-    await openSection('adjustments');
-    const v = await setSlider('formatOptions.adjustments.brightness', 0.7);
-    const after = await waitPos(ID, (p, b) => b.block.adjust?.brightness !== undefined, 10_000);
-    await settled(page);
-    const box = await boxOf(page, ID);
-    return { ok: typeof after?.block.adjust?.brightness === 'number' && after.block.adjust.brightness > 0, evidence: `${v.how}; adjust ${JSON.stringify(after?.block.adjust ?? null)}; img filter ${box?.img?.filter}` };
-  }, { reset: () => clearAll(page) });
-  await attempt('Format options', 'Adjustments > Reset clears the transparency and brightness', async () => {
-    await selectObject(ID);
-    await openFormatOptions();
-    await openSection('adjustments');
-    const before = await blockOf(page, SLIDE, ID);
-    await page.locator('[data-control="formatOptions.adjustments.reset"]').first().scrollIntoViewIfNeeded();
-    await clickControl(page, 'formatOptions.adjustments.reset');
-    const after = await waitPos(ID, (p, b) => b.block.adjust === undefined || (b.block.adjust.transparency === undefined && b.block.adjust.brightness === undefined), 10_000);
-    await settled(page);
-    const box = await boxOf(page, ID);
-    return { ok: Boolean(after) && (after.block.adjust === undefined || after.block.adjust.transparency === undefined), evidence: `adjust ${JSON.stringify(before?.block.adjust ?? null)} -> ${JSON.stringify(after?.block.adjust ?? null)}; img opacity ${box?.img?.opacity}` };
-  }, { reset: () => clearAll(page) });
+  await attempt(
+    'Format options',
+    'set the Brightness slider to about 70 percent: adjust.brightness is written and the picture filter changes',
+    async () => {
+      await selectObject(ID);
+      await openFormatOptions();
+      await openSection('adjustments');
+      const v = await setSlider('formatOptions.adjustments.brightness', 0.7);
+      const after = await waitPos(ID, (p, b) => b.block.adjust?.brightness !== undefined, 10_000);
+      await settled(page);
+      const box = await boxOf(page, ID);
+      return {
+        ok:
+          typeof after?.block.adjust?.brightness === 'number' && after.block.adjust.brightness > 0,
+        evidence: `${v.how}; adjust ${JSON.stringify(after?.block.adjust ?? null)}; img filter ${box?.img?.filter}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
+  await attempt(
+    'Format options',
+    'Adjustments > Reset clears the transparency and brightness',
+    async () => {
+      await selectObject(ID);
+      await openFormatOptions();
+      await openSection('adjustments');
+      const before = await blockOf(page, SLIDE, ID);
+      await page
+        .locator('[data-control="formatOptions.adjustments.reset"]')
+        .first()
+        .scrollIntoViewIfNeeded();
+      await clickControl(page, 'formatOptions.adjustments.reset');
+      const after = await waitPos(
+        ID,
+        (p, b) =>
+          b.block.adjust === undefined ||
+          (b.block.adjust.transparency === undefined && b.block.adjust.brightness === undefined),
+        10_000,
+      );
+      await settled(page);
+      const box = await boxOf(page, ID);
+      return {
+        ok:
+          Boolean(after) &&
+          (after.block.adjust === undefined || after.block.adjust.transparency === undefined),
+        evidence: `adjust ${JSON.stringify(before?.block.adjust ?? null)} -> ${JSON.stringify(after?.block.adjust ?? null)}; img opacity ${box?.img?.opacity}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
 
   // ---- E. dither, with the snackbar, the console and the network watched
   const ditherTry = async (how) => {
@@ -917,107 +1204,207 @@ try {
     }
     await settled(page);
     const box = await boxOf(page, ID);
-    const pressed = await page.evaluate(() => document.querySelector('[data-control="toolbar.dither"]')?.getAttribute('aria-pressed'));
-    return { ok: Boolean(after?.block.dither) && Boolean(box?.dither) && !box.dither.hidden, evidence: `before: ${sync0}; dither ${JSON.stringify(before?.block.dither ?? null)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 120)}; canvas ${box?.dither ? `${box.dither.w}x${box.dither.h} hidden ${box.dither.hidden}` : 'none'}; button aria-pressed ${pressed}; snackbar ${said}; console errors ${consoleErrors.slice(errs).join(' | ') || 'none'}; network ${netSince(mark)}` };
+    const pressed = await page.evaluate(() =>
+      document.querySelector('[data-control="toolbar.dither"]')?.getAttribute('aria-pressed'),
+    );
+    return {
+      ok: Boolean(after?.block.dither) && Boolean(box?.dither) && !box.dither.hidden,
+      evidence: `before: ${sync0}; dither ${JSON.stringify(before?.block.dither ?? null)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 120)}; canvas ${box?.dither ? `${box.dither.w}x${box.dither.h} hidden ${box.dither.hidden}` : 'none'}; button aria-pressed ${pressed}; snackbar ${said}; console errors ${consoleErrors.slice(errs).join(' | ') || 'none'}; network ${netSince(mark)}`,
+    };
   };
-  await attempt('Dither', 'the toolbar Dither button screens the picture: block.dither written and a dither canvas drawn over the picture', () => ditherTry('toolbar'), { reset: () => clearAll(page) });
-  await attempt('Dither', 'Format > Image > Dither screens the picture', () => ditherTry('menu'), { reset: () => closeMenus(page) });
-  await shot('dither');
-  await attempt('Dither', 'the same write through the window API (picture.dither with the Photograph preset): the field lands and the canvas draws', async () => {
-    const before = await blockOf(page, SLIDE, ID);
-    if (before?.block.dither) return { ok: true, evidence: `dither already on: ${JSON.stringify(before.block.dither).slice(0, 100)}` };
-    const s = await state(page);
-    let how;
-    try {
-      const out = await invoke(page, 'picture.dither', { slideId: SLIDE, blockId: ID, dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 }, baseRevision: s.revision });
-      how = `picture.dither answered keys ${Object.keys(out ?? {}).join(',')}`;
-    } catch (e) {
-      how = `picture.dither failed: ${e instanceof Error ? e.message.slice(0, 200) : String(e)}`;
-    }
-    const after = await waitPos(ID, (p, b) => b.block.dither !== undefined, 15_000);
-    const box = await pollUntil(() => boxOf(page, ID), (b) => b?.dither && !b.dither.hidden, 15_000);
-    return { ok: Boolean(after?.block.dither) && Boolean(box?.dither), evidence: `${how}; dither ${JSON.stringify(after?.block.dither ?? null).slice(0, 100)}; canvas ${box?.dither ? `${box.dither.w}x${box.dither.h} hidden ${box.dither.hidden}` : 'none'}` };
+  await attempt(
+    'Dither',
+    'the toolbar Dither button screens the picture: block.dither written and a dither canvas drawn over the picture',
+    () => ditherTry('toolbar'),
+    { reset: () => clearAll(page) },
+  );
+  await attempt('Dither', 'Format > Image > Dither screens the picture', () => ditherTry('menu'), {
+    reset: () => closeMenus(page),
   });
+  await shot('dither');
+  await attempt(
+    'Dither',
+    'the same write through the window API (picture.dither with the Photograph preset): the field lands and the canvas draws',
+    async () => {
+      const before = await blockOf(page, SLIDE, ID);
+      if (before?.block.dither)
+        return {
+          ok: true,
+          evidence: `dither already on: ${JSON.stringify(before.block.dither).slice(0, 100)}`,
+        };
+      const s = await state(page);
+      let how;
+      try {
+        const out = await invoke(page, 'picture.dither', {
+          slideId: SLIDE,
+          blockId: ID,
+          dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 },
+          baseRevision: s.revision,
+        });
+        how = `picture.dither answered keys ${Object.keys(out ?? {}).join(',')}`;
+      } catch (e) {
+        how = `picture.dither failed: ${e instanceof Error ? e.message.slice(0, 200) : String(e)}`;
+      }
+      const after = await waitPos(ID, (p, b) => b.block.dither !== undefined, 15_000);
+      const box = await pollUntil(
+        () => boxOf(page, ID),
+        (b) => b?.dither && !b.dither.hidden,
+        15_000,
+      );
+      return {
+        ok: Boolean(after?.block.dither) && Boolean(box?.dither),
+        evidence: `${how}; dither ${JSON.stringify(after?.block.dither ?? null).slice(0, 100)}; canvas ${box?.dither ? `${box.dither.w}x${box.dither.h} hidden ${box.dither.hidden}` : 'none'}`,
+      };
+    },
+  );
   await shot('dither-api');
-  await attempt('Dither', 'Format options > Dither: switch the preset to Neutral', async () => {
-    await selectObject(ID);
-    await openFormatOptions();
-    await openSection('dither');
-    const before = await blockOf(page, SLIDE, ID);
-    const present = await has(page, '[data-control="formatOptions.dither.preset.neutral"]');
-    if (!present) return { ok: false, evidence: `no Neutral preset chip in the Dither section; controls ${await page.evaluate(() => [...document.querySelectorAll('[data-control^="formatOptions.dither."]')].map((e) => e.getAttribute('data-control')).join(','))}` };
-    await page.locator('[data-control="formatOptions.dither.preset.neutral"]').first().scrollIntoViewIfNeeded();
-    await clickControl(page, 'formatOptions.dither.preset.neutral');
-    const after = await waitPos(ID, (p, b) => JSON.stringify(b.block.dither) !== JSON.stringify(before?.block.dither), 10_000);
-    await settled(page);
-    return { ok: Boolean(after) && JSON.stringify(after.block.dither) !== JSON.stringify(before?.block.dither), evidence: `dither ${JSON.stringify(before?.block.dither ?? null).slice(0, 80)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 80)}` };
-  }, { reset: () => clearAll(page) });
-  await attempt('Dither', 'the toolbar Dither button turns the screen off', async () => {
-    await clearAll(page);
-    await selectObject(ID);
-    const before = await blockOf(page, SLIDE, ID);
-    if (!before?.block.dither) return { ok: false, evidence: 'dither was not on, nothing to turn off' };
-    await clickControl(page, 'toolbar.dither');
-    const after = await waitPos(ID, (p, b) => b.block.dither === undefined, 15_000);
-    await settled(page);
-    const box = await boxOf(page, ID);
-    return { ok: Boolean(after) && after.block.dither === undefined && (!box?.dither || box.dither.hidden), evidence: `dither ${JSON.stringify(before.block.dither).slice(0, 60)} -> ${JSON.stringify(after?.block.dither ?? null)}; canvas ${box?.dither ? `hidden ${box.dither.hidden}` : 'none'}` };
-  }, { reset: () => clearAll(page) });
+  await attempt(
+    'Dither',
+    'Format options > Dither: switch the preset to Neutral',
+    async () => {
+      await selectObject(ID);
+      await openFormatOptions();
+      await openSection('dither');
+      const before = await blockOf(page, SLIDE, ID);
+      const present = await has(page, '[data-control="formatOptions.dither.preset.neutral"]');
+      if (!present)
+        return {
+          ok: false,
+          evidence: `no Neutral preset chip in the Dither section; controls ${await page.evaluate(() => [...document.querySelectorAll('[data-control^="formatOptions.dither."]')].map((e) => e.getAttribute('data-control')).join(','))}`,
+        };
+      await page
+        .locator('[data-control="formatOptions.dither.preset.neutral"]')
+        .first()
+        .scrollIntoViewIfNeeded();
+      await clickControl(page, 'formatOptions.dither.preset.neutral');
+      const after = await waitPos(
+        ID,
+        (p, b) => JSON.stringify(b.block.dither) !== JSON.stringify(before?.block.dither),
+        10_000,
+      );
+      await settled(page);
+      return {
+        ok:
+          Boolean(after) &&
+          JSON.stringify(after.block.dither) !== JSON.stringify(before?.block.dither),
+        evidence: `dither ${JSON.stringify(before?.block.dither ?? null).slice(0, 80)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 80)}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
+  await attempt(
+    'Dither',
+    'the toolbar Dither button turns the screen off',
+    async () => {
+      await clearAll(page);
+      await selectObject(ID);
+      const before = await blockOf(page, SLIDE, ID);
+      if (!before?.block.dither)
+        return { ok: false, evidence: 'dither was not on, nothing to turn off' };
+      await clickControl(page, 'toolbar.dither');
+      const after = await waitPos(ID, (p, b) => b.block.dither === undefined, 15_000);
+      await settled(page);
+      const box = await boxOf(page, ID);
+      return {
+        ok:
+          Boolean(after) && after.block.dither === undefined && (!box?.dither || box.dither.hidden),
+        evidence: `dither ${JSON.stringify(before.block.dither).slice(0, 60)} -> ${JSON.stringify(after?.block.dither ?? null)}; canvas ${box?.dither ? `hidden ${box.dither.hidden}` : 'none'}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
 
   // ---- F. replace image with an allowlisted own-domain URL and by upload, with the sync facts
-  await attempt('Replace image', 'right click the picture > Replace image > By URL with a PNG on the company domain, then Replace: the asset changes and the box stays', async () => {
-    await clearAll(page);
-    await selectObject(ID);
-    const before = await blockOf(page, SLIDE, ID);
-    const box = await boxOf(page, ID);
-    const c = center(box.free);
-    await moveHuman(page, { x: c.x - 30, y: c.y - 20 }, c, 6);
-    await page.mouse.click(c.x, c.y, { button: 'right' });
-    await page.locator('.ts-context-menu').waitFor({ timeout: 6000 });
-    await hoverRow(page, 'format.image.replaceImage', '[data-control="menu.format.image.replaceImage.byUrl"]');
-    await clickRow(page, 'format.image.replaceImage.byUrl');
-    await page.locator('[data-control="dialog.imageByUrl.url"]').waitFor({ timeout: 8000 });
-    await clickControl(page, 'dialog.imageByUrl.url');
-    await typeHuman(page, URL_GT);
-    await sleep(600);
-    const mark = net.length;
-    const sync0 = await syncFacts();
-    await clickControl(page, 'dialog.imageByUrl.ok');
-    const after = await waitPos(ID, (p, b) => b.block.asset !== before.block.asset, 40_000);
-    const err = await page.evaluate(() => document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ?? null);
-    await settled(page);
-    const dialogOpen = await has(page, '[data-control="dialog.imageByUrl"]');
-    if (dialogOpen) await closeMenus(page);
-    const boxAfter = await pollUntil(() => boxOf(page, ID), (b) => b?.img?.complete && b.img.natural !== box?.img?.natural, 15_000);
-    return { ok: Boolean(after) && after.block.asset !== before.block.asset && posStr(after.pos) === posStr(before.pos) && !dialogOpen, evidence: `before: ${sync0}; asset ${before.block.asset} -> ${after?.block.asset}; pos ${posStr(before.pos)} -> ${posStr(after?.pos)}; img natural ${box?.img?.natural} -> ${boxAfter?.img?.natural}; dialog still open ${dialogOpen}${err ? `; dialog said "${err}"` : ''}; network ${netSince(mark)}` };
-  }, { reset: () => closeMenus(page) });
+  await attempt(
+    'Replace image',
+    'right click the picture > Replace image > By URL with a PNG on the company domain, then Replace: the asset changes and the box stays',
+    async () => {
+      await clearAll(page);
+      await selectObject(ID);
+      const before = await blockOf(page, SLIDE, ID);
+      const box = await boxOf(page, ID);
+      const c = center(box.free);
+      await moveHuman(page, { x: c.x - 30, y: c.y - 20 }, c, 6);
+      await page.mouse.click(c.x, c.y, { button: 'right' });
+      await page.locator('.ts-context-menu').waitFor({ timeout: 6000 });
+      await hoverRow(
+        page,
+        'format.image.replaceImage',
+        '[data-control="menu.format.image.replaceImage.byUrl"]',
+      );
+      await clickRow(page, 'format.image.replaceImage.byUrl');
+      await page.locator('[data-control="dialog.imageByUrl.url"]').waitFor({ timeout: 8000 });
+      await clickControl(page, 'dialog.imageByUrl.url');
+      await typeHuman(page, URL_GT);
+      await sleep(600);
+      const mark = net.length;
+      const sync0 = await syncFacts();
+      await clickControl(page, 'dialog.imageByUrl.ok');
+      const after = await waitPos(ID, (p, b) => b.block.asset !== before.block.asset, 40_000);
+      const err = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')
+            ?.textContent ?? null,
+      );
+      await settled(page);
+      const dialogOpen = await has(page, '[data-control="dialog.imageByUrl"]');
+      if (dialogOpen) await closeMenus(page);
+      const boxAfter = await pollUntil(
+        () => boxOf(page, ID),
+        (b) => b?.img?.complete && b.img.natural !== box?.img?.natural,
+        15_000,
+      );
+      return {
+        ok:
+          Boolean(after) &&
+          after.block.asset !== before.block.asset &&
+          posStr(after.pos) === posStr(before.pos) &&
+          !dialogOpen,
+        evidence: `before: ${sync0}; asset ${before.block.asset} -> ${after?.block.asset}; pos ${posStr(before.pos)} -> ${posStr(after?.pos)}; img natural ${box?.img?.natural} -> ${boxAfter?.img?.natural}; dialog still open ${dialogOpen}${err ? `; dialog said "${err}"` : ''}; network ${netSince(mark)}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
   await shot('replaced-by-url');
-  await attempt('Replace image', 'the toolbar Replace image button > Upload from computer, a PNG through the file chooser, with the sync facts', async () => {
-    await clearAll(page);
-    await selectObject(ID);
-    const before = await blockOf(page, SLIDE, ID);
-    await clickControl(page, 'toolbar.replaceImage');
-    await page.locator('[data-control="menu.format.image.replaceImage.upload"]').waitFor({ timeout: 6000 });
-    const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
-    const mark = net.length;
-    const sync0 = await syncFacts();
-    await clickRow(page, 'format.image.replaceImage.upload');
-    const chooser = await chooserP;
-    if (!chooser) return { ok: false, evidence: 'no file chooser opened' };
-    await chooser.setFiles(PNG_B);
-    let said = null;
-    let after = null;
-    const until = Date.now() + 45_000;
-    while (Date.now() < until) {
-      const s = await snackbar(page);
-      if (s && !said) said = s;
-      after = await blockOf(page, SLIDE, ID);
-      if (after && after.block.asset !== before.block.asset) break;
-      await sleep(500);
-    }
-    await settled(page);
-    return { ok: Boolean(after) && after.block.asset !== before.block.asset && posStr(after.pos) === posStr(before.pos), evidence: `before: ${sync0}; asset ${before.block.asset} -> ${after?.block.asset}; pos ${posStr(before.pos)} -> ${posStr(after?.pos)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}` };
-  }, { reset: () => closeMenus(page) });
+  await attempt(
+    'Replace image',
+    'the toolbar Replace image button > Upload from computer, a PNG through the file chooser, with the sync facts',
+    async () => {
+      await clearAll(page);
+      await selectObject(ID);
+      const before = await blockOf(page, SLIDE, ID);
+      await clickControl(page, 'toolbar.replaceImage');
+      await page
+        .locator('[data-control="menu.format.image.replaceImage.upload"]')
+        .waitFor({ timeout: 6000 });
+      const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
+      const mark = net.length;
+      const sync0 = await syncFacts();
+      await clickRow(page, 'format.image.replaceImage.upload');
+      const chooser = await chooserP;
+      if (!chooser) return { ok: false, evidence: 'no file chooser opened' };
+      await chooser.setFiles(PNG_B);
+      let said = null;
+      let after = null;
+      const until = Date.now() + 45_000;
+      while (Date.now() < until) {
+        const s = await snackbar(page);
+        if (s && !said) said = s;
+        after = await blockOf(page, SLIDE, ID);
+        if (after && after.block.asset !== before.block.asset) break;
+        await sleep(500);
+      }
+      await settled(page);
+      return {
+        ok:
+          Boolean(after) &&
+          after.block.asset !== before.block.asset &&
+          posStr(after.pos) === posStr(before.pos),
+        evidence: `before: ${sync0}; asset ${before.block.asset} -> ${after?.block.asset}; pos ${posStr(before.pos)} -> ${posStr(after?.pos)}; snackbar ${said}; after: ${await syncFacts()}; network ${netSince(mark)}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
 
   // ---- G. the background picture by URL (own domain), its dither, Remove picture
   const bgFacts = () =>
@@ -1030,159 +1417,289 @@ try {
       const img = picture?.querySelector('img');
       return {
         bg: bg ? getComputedStyle(bg).backgroundColor : null,
-        picture: pr && sr ? `${Math.round(pr.width)}x${Math.round(pr.height)} at ${Math.round(pr.x - sr.x)},${Math.round(pr.y - sr.y)} of sheet ${Math.round(sr.width)}x${Math.round(sr.height)}` : null,
-        pictureImg: img ? `${img.naturalWidth}x${img.naturalHeight} complete ${img.complete}` : null,
+        picture:
+          pr && sr
+            ? `${Math.round(pr.width)}x${Math.round(pr.height)} at ${Math.round(pr.x - sr.x)},${Math.round(pr.y - sr.y)} of sheet ${Math.round(sr.width)}x${Math.round(sr.height)}`
+            : null,
+        pictureImg: img
+          ? `${img.naturalWidth}x${img.naturalHeight} complete ${img.complete}`
+          : null,
         dither: picture?.querySelector('canvas.picture-dither') ? 'canvas' : 'none',
       };
     }, SHEET);
   {
-    await attempt('Slide background', 'Change background > Choose image > Upload from computer (the file chooser): a picture object covers the slide at the bottom of the stack', async () => {
+    await attempt(
+      'Slide background',
+      'Change background > Choose image > Upload from computer (the file chooser): a picture object covers the slide at the bottom of the stack',
+      async () => {
+        await clearAll(page);
+        const before = await ids();
+        await openMenu(page, 'slide');
+        await clickRow(page, 'slide.changeBackground');
+        await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
+        const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
+        await clickControl(page, 'dialog.background.choose.upload');
+        const chooser = await chooserP;
+        if (!chooser) {
+          await closeMenus(page);
+          return { ok: false, evidence: 'no file chooser opened' };
+        }
+        const mark = net.length;
+        const sync0 = await syncFacts();
+        await chooser.setFiles(PNG_A);
+        const obj = await newBlockAfter(before, 45_000, ['picture']);
+        await settled(page);
+        await clickControl(page, 'dialog.background.done').catch(() => undefined);
+        await closeMenus(page);
+        const facts = await pollUntil(bgFacts, (f) => f.picture !== null, 15_000);
+        return {
+          ok: Boolean(obj) && obj.type === 'picture',
+          evidence: `before: ${sync0}; ${await describeBlock(obj)}; on the sheet ${facts.picture}; network ${netSince(mark)}`,
+        };
+      },
+      { reset: () => closeMenus(page) },
+    );
+  }
+  await shot('background-picture');
+  await attempt(
+    'Slide background',
+    'Change background > Dither toggle: the covering picture takes the two tone screen',
+    async () => {
+      await clearAll(page);
+      await openMenu(page, 'slide');
+      await clickRow(page, 'slide.changeBackground');
+      await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
+      const before = await blockOf(page, SLIDE, 'picture');
+      const toggle = page.locator('[data-control="dialog.background.dither"]').first();
+      const r = await toggle.boundingBox();
+      const controls = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="dialog.background."]')]
+          .map((e) => e.getAttribute('data-control'))
+          .join(','),
+      );
+      if (!r) {
+        await closeMenus(page);
+        return { ok: false, evidence: `no dither toggle; dialog controls ${controls}` };
+      }
+      const mark = net.length;
+      await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
+      const after = await pollUntil(
+        () => blockOf(page, SLIDE, 'picture'),
+        (b) => b && JSON.stringify(b.block.dither) !== JSON.stringify(before?.block.dither),
+        15_000,
+      );
+      await settled(page);
+      const facts = await pollUntil(bgFacts, (f) => f.dither === 'canvas', 15_000);
+      const said = await snackbar(page);
+      await clickControl(page, 'dialog.background.done').catch(() => undefined);
+      await closeMenus(page);
+      return {
+        ok: Boolean(after?.block.dither) && facts.dither === 'canvas',
+        evidence: `covering picture ${before ? before.id : 'none'}; dither ${JSON.stringify(before?.block.dither ?? null)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 100)}; canvas on the sheet ${facts.dither}; snackbar ${said}; dialog controls ${controls}; network ${netSince(mark)}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
+  await shot('background-dither');
+  await attempt(
+    'Slide background',
+    'Change background > Remove picture: the covering picture leaves',
+    async () => {
+      await clearAll(page);
+      await openMenu(page, 'slide');
+      await clickRow(page, 'slide.changeBackground');
+      await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
+      const present = await has(page, '[data-control="dialog.background.removePicture"]');
+      if (!present) {
+        const controls = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-control^="dialog.background."]')]
+            .map((e) => e.getAttribute('data-control'))
+            .join(','),
+        );
+        await closeMenus(page);
+        return {
+          ok: false,
+          evidence: `no Remove picture control; covering picture ${(await blockOf(page, SLIDE, 'picture')) ? 'present' : 'absent'}; dialog controls ${controls}`,
+        };
+      }
+      await clickControl(page, 'dialog.background.removePicture');
+      const gone = await pollUntil(
+        () => blockOf(page, SLIDE, 'picture'),
+        (b) => b === null,
+        15_000,
+      );
+      await settled(page);
+      await clickControl(page, 'dialog.background.done').catch(() => undefined);
+      await closeMenus(page);
+      const facts = await bgFacts();
+      return {
+        ok: gone === null && facts.picture === null,
+        evidence: `picture block after ${gone ? 'still there' : 'gone'}; on the sheet ${facts.picture ?? 'none'}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
+
+  // a colour for the present check
+  await attempt(
+    'Slide background',
+    'Change background, a colour swatch, Done (for the present check)',
+    async () => {
+      await clearAll(page);
+      await openMenu(page, 'slide');
+      await clickRow(page, 'slide.changeBackground');
+      await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
+      const swatches = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="dialog.background.color."]')]
+          .map((el) => el.getAttribute('data-control'))
+          .filter((c) => !/\.(none|hex)$/.test(c)),
+      );
+      const pick = swatches.find((c) => /\.ink$/.test(c)) ?? swatches[1];
+      await clickControl(page, pick);
+      await clickControl(page, 'dialog.background.done');
+      const slide = await pollUntil(
+        () => slideJson(page, SLIDE),
+        (s) => s.background !== undefined,
+        15_000,
+      );
+      await settled(page);
+      return {
+        ok: Boolean(slide.background),
+        evidence: `picked ${pick}; slide.background ${JSON.stringify(slide.background ?? null)}; .slide-bg ${(await bgFacts()).bg}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
+
+  // ---- H. present mode, the whole document searched for the picture and the ground
+  await attempt(
+    'Present',
+    'Slideshow from the title row: the slide shows the picture and the background colour',
+    async () => {
+      await clearAll(page);
+      const editorImgs = await page.evaluate(() => document.querySelectorAll('img').length);
+      await clickControl(page, 'present.open');
+      const facts = await pollUntil(
+        () =>
+          page.evaluate(() => {
+            const s = window.turboslide.studio.describe().state;
+            const show = document.querySelector('[data-control="present.show"]');
+            const root = show ?? document.body;
+            const imgs = [...root.querySelectorAll('img')]
+              .filter((i) => i.getBoundingClientRect().width > 50)
+              .map(
+                (i) =>
+                  `${i.naturalWidth}x${i.naturalHeight}/${i.complete}/${Math.round(i.getBoundingClientRect().width)}px`,
+              );
+            const bg = root.querySelector('.slide-bg');
+            const slide = root.querySelector('[data-slide]');
+            const cls = show ? show.className : null;
+            return {
+              present: s.present ?? null,
+              show: Boolean(show),
+              cls,
+              slideAttr: slide?.getAttribute('data-slide') ?? null,
+              imgs,
+              bg: bg ? getComputedStyle(bg).backgroundColor : null,
+              url: location.pathname,
+              editing: Boolean(document.querySelector('.ts-stagewrap.ts-editor')),
+            };
+          }),
+        (f) => f.show && f.imgs.some((i) => /\/true\//.test(i) && !/^0x0/.test(i)),
+        15_000,
+      );
+      await sleep(600);
+      const file = await shot('present');
+      await press(page, 'Escape');
+      const off = await pollUntil(
+        () => page.evaluate(() => Boolean(document.querySelector('[data-control="present.show"]'))),
+        (v) => v === false,
+        8000,
+      );
+      return {
+        ok:
+          facts.show &&
+          facts.imgs.some((i) => /\/true\//.test(i) && !/^0x0/.test(i)) &&
+          off === false,
+        evidence: `editor imgs before ${editorImgs}; present ${facts.present}; show ${facts.show} (${facts.cls}) at ${facts.url}; data-slide ${facts.slideAttr}; imgs in the present root ${facts.imgs.join(',') || 'none'}; .slide-bg ${facts.bg}; after Escape present view ${off}; shot ${file ? path.basename(file) : 'none'}`,
+      };
+    },
+    { reset: () => clearAll(page) },
+  );
+  // ---- I. the two By URL paths last: a refused write leaves a modal that blocks the editor
+  await attempt(
+    'Insert picture',
+    'Insert > Image > By URL with an https PNG on the company domain (generaltranslation.com, allowlisted), then Insert',
+    async () => {
+      const r = await insertByUrl(URL_GT);
+      const modal = await dismissRefused();
+      return { ...r, evidence: `${r.evidence}; refused write modal ${JSON.stringify(modal)}` };
+    },
+    { reset: () => closeMenus(page) },
+  );
+
+  await shot('after-url-insert');
+  await attempt(
+    'Slide background',
+    'Change background > Choose image > By URL with a PNG on the company domain: a picture object covers the slide at the bottom of the stack',
+    async () => {
       await clearAll(page);
       const before = await ids();
       await openMenu(page, 'slide');
       await clickRow(page, 'slide.changeBackground');
       await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
-      const chooserP = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
-      await clickControl(page, 'dialog.background.choose.upload');
-      const chooser = await chooserP;
-      if (!chooser) {
-        await closeMenus(page);
-        return { ok: false, evidence: 'no file chooser opened' };
-      }
+      await clickControl(page, 'dialog.background.choose.byUrl');
+      await page.locator('[data-control="dialog.imageByUrl.url"]').waitFor({ timeout: 8000 });
+      await clickControl(page, 'dialog.imageByUrl.url');
+      await typeHuman(page, URL_GT);
+      await sleep(600);
       const mark = net.length;
-      const sync0 = await syncFacts();
-      await chooser.setFiles(PNG_A);
-      const obj = await newBlockAfter(before, 45_000, ['picture']);
+      await clickControl(page, 'dialog.imageByUrl.ok');
+      const obj = await newBlockAfter(before, 40_000, ['picture']);
+      const err = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')
+            ?.textContent ?? null,
+      );
       await settled(page);
-      await clickControl(page, 'dialog.background.done').catch(() => undefined);
+      const dialogs = await page.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '[data-control^="dialog."][role="dialog"], .ts-dialog[data-control]',
+          ),
+        ]
+          .map((e) => e.getAttribute('data-control'))
+          .join(','),
+      );
       await closeMenus(page);
-      const facts = await pollUntil(bgFacts, (f) => f.picture !== null, 15_000);
-      return { ok: Boolean(obj) && obj.type === 'picture', evidence: `before: ${sync0}; ${await describeBlock(obj)}; on the sheet ${facts.picture}; network ${netSince(mark)}` };
-    }, { reset: () => closeMenus(page) });
-  }
-  await shot('background-picture');
-  await attempt('Slide background', 'Change background > Dither toggle: the covering picture takes the two tone screen', async () => {
-    await clearAll(page);
-    await openMenu(page, 'slide');
-    await clickRow(page, 'slide.changeBackground');
-    await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
-    const before = await blockOf(page, SLIDE, 'picture');
-    const toggle = page.locator('[data-control="dialog.background.dither"]').first();
-    const r = await toggle.boundingBox();
-    const controls = await page.evaluate(() => [...document.querySelectorAll('[data-control^="dialog.background."]')].map((e) => e.getAttribute('data-control')).join(','));
-    if (!r) {
-      await closeMenus(page);
-      return { ok: false, evidence: `no dither toggle; dialog controls ${controls}` };
-    }
-    const mark = net.length;
-    await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
-    const after = await pollUntil(() => blockOf(page, SLIDE, 'picture'), (b) => b && JSON.stringify(b.block.dither) !== JSON.stringify(before?.block.dither), 15_000);
-    await settled(page);
-    const facts = await pollUntil(bgFacts, (f) => f.dither === 'canvas', 15_000);
-    const said = await snackbar(page);
-    await clickControl(page, 'dialog.background.done').catch(() => undefined);
-    await closeMenus(page);
-    return { ok: Boolean(after?.block.dither) && facts.dither === 'canvas', evidence: `covering picture ${before ? before.id : 'none'}; dither ${JSON.stringify(before?.block.dither ?? null)} -> ${JSON.stringify(after?.block.dither ?? null).slice(0, 100)}; canvas on the sheet ${facts.dither}; snackbar ${said}; dialog controls ${controls}; network ${netSince(mark)}` };
-  }, { reset: () => closeMenus(page) });
-  await shot('background-dither');
-  await attempt('Slide background', 'Change background > Remove picture: the covering picture leaves', async () => {
-    await clearAll(page);
-    await openMenu(page, 'slide');
-    await clickRow(page, 'slide.changeBackground');
-    await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
-    const present = await has(page, '[data-control="dialog.background.removePicture"]');
-    if (!present) {
-      const controls = await page.evaluate(() => [...document.querySelectorAll('[data-control^="dialog.background."]')].map((e) => e.getAttribute('data-control')).join(','));
-      await closeMenus(page);
-      return { ok: false, evidence: `no Remove picture control; covering picture ${(await blockOf(page, SLIDE, 'picture')) ? 'present' : 'absent'}; dialog controls ${controls}` };
-    }
-    await clickControl(page, 'dialog.background.removePicture');
-    const gone = await pollUntil(() => blockOf(page, SLIDE, 'picture'), (b) => b === null, 15_000);
-    await settled(page);
-    await clickControl(page, 'dialog.background.done').catch(() => undefined);
-    await closeMenus(page);
-    const facts = await bgFacts();
-    return { ok: gone === null && facts.picture === null, evidence: `picture block after ${gone ? 'still there' : 'gone'}; on the sheet ${facts.picture ?? 'none'}` };
-  }, { reset: () => closeMenus(page) });
-
-  // a colour for the present check
-  await attempt('Slide background', 'Change background, a colour swatch, Done (for the present check)', async () => {
-    await clearAll(page);
-    await openMenu(page, 'slide');
-    await clickRow(page, 'slide.changeBackground');
-    await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
-    const swatches = await page.evaluate(() => [...document.querySelectorAll('[data-control^="dialog.background.color."]')].map((el) => el.getAttribute('data-control')).filter((c) => !/\.(none|hex)$/.test(c)));
-    const pick = swatches.find((c) => /\.ink$/.test(c)) ?? swatches[1];
-    await clickControl(page, pick);
-    await clickControl(page, 'dialog.background.done');
-    const slide = await pollUntil(() => slideJson(page, SLIDE), (s) => s.background !== undefined, 15_000);
-    await settled(page);
-    return { ok: Boolean(slide.background), evidence: `picked ${pick}; slide.background ${JSON.stringify(slide.background ?? null)}; .slide-bg ${(await bgFacts()).bg}` };
-  }, { reset: () => closeMenus(page) });
-
-  // ---- H. present mode, the whole document searched for the picture and the ground
-  await attempt('Present', 'Slideshow from the title row: the slide shows the picture and the background colour', async () => {
-    await clearAll(page);
-    const editorImgs = await page.evaluate(() => document.querySelectorAll('img').length);
-    await clickControl(page, 'present.open');
-    const facts = await pollUntil(
-      () =>
-        page.evaluate(() => {
-          const s = window.turboslide.studio.describe().state;
-          const show = document.querySelector('[data-control="present.show"]');
-          const root = show ?? document.body;
-          const imgs = [...root.querySelectorAll('img')].filter((i) => i.getBoundingClientRect().width > 50).map((i) => `${i.naturalWidth}x${i.naturalHeight}/${i.complete}/${Math.round(i.getBoundingClientRect().width)}px`);
-          const bg = root.querySelector('.slide-bg');
-          const slide = root.querySelector('[data-slide]');
-          const cls = show ? show.className : null;
-          return { present: s.present ?? null, show: Boolean(show), cls, slideAttr: slide?.getAttribute('data-slide') ?? null, imgs, bg: bg ? getComputedStyle(bg).backgroundColor : null, url: location.pathname, editing: Boolean(document.querySelector('.ts-stagewrap.ts-editor')) };
-        }),
-      (f) => f.show && f.imgs.some((i) => /\/true\//.test(i) && !/^0x0/.test(i)),
-      15_000,
-    );
-    await sleep(600);
-    const file = await shot('present');
-    await press(page, 'Escape');
-    const off = await pollUntil(() => page.evaluate(() => Boolean(document.querySelector('[data-control="present.show"]'))), (v) => v === false, 8000);
-    return { ok: facts.show && facts.imgs.some((i) => /\/true\//.test(i) && !/^0x0/.test(i)) && off === false, evidence: `editor imgs before ${editorImgs}; present ${facts.present}; show ${facts.show} (${facts.cls}) at ${facts.url}; data-slide ${facts.slideAttr}; imgs in the present root ${facts.imgs.join(',') || 'none'}; .slide-bg ${facts.bg}; after Escape present view ${off}; shot ${file ? path.basename(file) : 'none'}` };
-  }, { reset: () => clearAll(page) });
-  // ---- I. the two By URL paths last: a refused write leaves a modal that blocks the editor
-  await attempt('Insert picture', 'Insert > Image > By URL with an https PNG on the company domain (generaltranslation.com, allowlisted), then Insert', async () => {
-    const r = await insertByUrl(URL_GT);
-    const modal = await dismissRefused();
-    return { ...r, evidence: `${r.evidence}; refused write modal ${JSON.stringify(modal)}` };
-  }, { reset: () => closeMenus(page) });
-
-
-  await shot('after-url-insert');
-  await attempt('Slide background', 'Change background > Choose image > By URL with a PNG on the company domain: a picture object covers the slide at the bottom of the stack', async () => {
-    await clearAll(page);
-    const before = await ids();
-    await openMenu(page, 'slide');
-    await clickRow(page, 'slide.changeBackground');
-    await page.locator('[data-control="dialog.background"]').waitFor({ timeout: 8000 });
-    await clickControl(page, 'dialog.background.choose.byUrl');
-    await page.locator('[data-control="dialog.imageByUrl.url"]').waitFor({ timeout: 8000 });
-    await clickControl(page, 'dialog.imageByUrl.url');
-    await typeHuman(page, URL_GT);
-    await sleep(600);
-    const mark = net.length;
-    await clickControl(page, 'dialog.imageByUrl.ok');
-    const obj = await newBlockAfter(before, 40_000, ['picture']);
-    const err = await page.evaluate(() => document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ?? null);
-    await settled(page);
-    const dialogs = await page.evaluate(() => [...document.querySelectorAll('[data-control^="dialog."][role="dialog"], .ts-dialog[data-control]')].map((e) => e.getAttribute('data-control')).join(','));
-    await closeMenus(page);
-    const facts = await pollUntil(bgFacts, (f) => f.pictureImg && /complete true/.test(f.pictureImg), 15_000);
-    const order = (await blocksOf(page, SLIDE)).map((b) => b.id);
-    const modal = await dismissRefused();
-    return { ok: Boolean(obj) && obj.type === 'picture' && Boolean(facts.picture) && order.indexOf('picture') < order.indexOf(ID), evidence: `${await describeBlock(obj)}; on the sheet ${facts.picture}; img ${facts.pictureImg}; stack order ${order.join(' < ')}; dialogs open after ${dialogs || 'none'}${err ? `; dialog said "${err}"` : ''}; network ${netSince(mark)}; refused write modal ${JSON.stringify(modal)}` };
-  }, { reset: () => closeMenus(page) });
+      const facts = await pollUntil(
+        bgFacts,
+        (f) => f.pictureImg && /complete true/.test(f.pictureImg),
+        15_000,
+      );
+      const order = (await blocksOf(page, SLIDE)).map((b) => b.id);
+      const modal = await dismissRefused();
+      return {
+        ok:
+          Boolean(obj) &&
+          obj.type === 'picture' &&
+          Boolean(facts.picture) &&
+          order.indexOf('picture') < order.indexOf(ID),
+        evidence: `${await describeBlock(obj)}; on the sheet ${facts.picture}; img ${facts.pictureImg}; stack order ${order.join(' < ')}; dialogs open after ${dialogs || 'none'}${err ? `; dialog said "${err}"` : ''}; network ${netSince(mark)}; refused write modal ${JSON.stringify(modal)}`,
+      };
+    },
+    { reset: () => closeMenus(page) },
+  );
 
   await shot('after-url-background');
   await shot('end');
 } catch (error) {
-  record('the audit ran to completion', 'no exception outside a step', 'broken', error instanceof Error ? (error.stack ?? error.message) : String(error));
+  record(
+    'the audit ran to completion',
+    'no exception outside a step',
+    'broken',
+    error instanceof Error ? (error.stack ?? error.message) : String(error),
+  );
 } finally {
   // ---- File > Move to trash, Delete forever, and a 404 for the deck
   if (deckId) {
@@ -1190,7 +1707,11 @@ try {
     try {
       await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
       await editorReady(page);
-      await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+      await pollUntil(
+        () => state(page),
+        (s) => s.sync?.connected === true,
+        30_000,
+      );
       await settled(page);
       await clickControl(page, 'menubar.file');
       await page.locator('[data-control="menu.file.moveToTrash"]').waitFor({ timeout: 8000 });
@@ -1213,17 +1734,30 @@ try {
       record('cleanup', 'Delete forever on /decks/trash', 'works', deckId);
       trashed = true;
     } catch (error) {
-      record('cleanup', 'File > Move to trash then Delete forever', 'broken', `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`);
+      record(
+        'cleanup',
+        'File > Move to trash then Delete forever',
+        'broken',
+        `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`,
+      );
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -1241,9 +1775,19 @@ try {
         if (status === 404 || Date.now() > until) break;
         await sleep(2000);
       }
-      record('cleanup', `GET /edit/${deckId} and /deck/${deckId} answer 404`, status === 404 ? 'works' : 'broken', `/edit ${status}, /deck ${status2}`);
+      record(
+        'cleanup',
+        `GET /edit/${deckId} and /deck/${deckId} answer 404`,
+        status === 404 ? 'works' : 'broken',
+        `/edit ${status}, /deck ${status2}`,
+      );
     } catch (error) {
-      record('cleanup', 'the scratch deck answers 404', 'broken', `probe failed: ${error instanceof Error ? error.message : String(error)}`);
+      record(
+        'cleanup',
+        'the scratch deck answers 404',
+        'broken',
+        `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
   await browser.close().catch(() => undefined);
@@ -1267,5 +1811,7 @@ try {
     mkdirSync(path.dirname(JSON_OUT), { recursive: true });
     writeFileSync(JSON_OUT, JSON.stringify(summary, null, 2));
   }
-  console.log(`\naudit-images: ${rows.length} rows, ${summary.works} works, ${summary.flaky} flaky, ${summary.broken} broken, ${summary.notDriven} not driven, ${consoleErrors.length} console errors, ${Math.round(summary.ms / 1000)} s against ${BASE}; deck ${deckId}`);
+  console.log(
+    `\naudit-images: ${rows.length} rows, ${summary.works} works, ${summary.flaky} flaky, ${summary.broken} broken, ${summary.notDriven} not driven, ${consoleErrors.length} console errors, ${Math.round(summary.ms / 1000)} s against ${BASE}; deck ${deckId}`,
+  );
 }

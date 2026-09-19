@@ -4,10 +4,12 @@
    set: the title row (44), the menu bar (28), the toolbar (40), the body (the filmstrip column,
    the canvas column with the notes pane under the stage, the right panel column) and the bottom
    bar (32). Compact mode (Ctrl+Shift+F) zeroes the menu bar and toolbar rows; present mode zeroes
-   every row but the body and closes every column but the canvas. Lines (SPEC 1.2): the title row
-   and the toolbar draw their bottom edges, the filmstrip its right edge (Sidebar.css), the right
-   panel its left edge (Panel.css), the notes divider is --pt-hair with the handle on it, the
-   bottom bar draws --pt-hair above itself; the menu bar, the canvas and the body draw no rule.
+   every row but the body and closes every column but the canvas. Lines (SPEC 1.2; docs/RETURN.md
+   4.2, one --pt-hair line per boundary drawn once): the title row and the toolbar draw their
+   bottom edges, the filmstrip its right edge (Sidebar.css), the right panel its left edge
+   (Panel.css), the notes pane draws its own top edge with the handle on it (NotesPane.css) and
+   its slot draws none, the bottom bar draws --pt-hair above itself; the menu bar, the canvas and
+   the body draw no rule.
    At or below 900 px the filmstrip is the overlay Sidebar.css draws (offset under the three top
    rows here), the right panel floats over the canvas and the notes pane hides by default. */
 .pt-viewer.is-editor {
@@ -41,6 +43,28 @@
   display: none;
 }
 
+/* View > Mode > Viewing (docs/RETURN.md 2.14 item 6; the matrix row view.mode.viewing-hides-toolbar):
+   the toolbar row leaves as Google's does, and Commenting and Editing keep it. EditorShell.tsx
+   stamps the root's data-edit-mode (SPEC-3 5.3) and draws no toolbar in Viewing; the row height
+   goes to zero here so the body moves up and --ts-top-h (the overlay filmstrip's offset) follows. */
+.pt-viewer.is-editor[data-edit-mode='viewing'] {
+  --pt-tool-h: 0px;
+}
+
+.pt-viewer.is-editor[data-edit-mode='viewing'] > .ts-toolbar {
+  display: none;
+}
+
+/* a viewer's Viewing keeps the toolbar row for the tail's end alone, the View only button
+   (SPEC-3 6.3): the row height comes back and the toolbar is drawn without its head */
+.pt-viewer.is-editor[data-edit-mode='viewing']:has(> .ts-toolbar.is-view-only) {
+  --pt-tool-h: 40px;
+}
+
+.pt-viewer.is-editor[data-edit-mode='viewing'] > .ts-toolbar.is-view-only {
+  display: flex;
+}
+
 /* the filmstrip: the viewer shell's sidebar in the body row of the editor grid */
 .pt-viewer.is-editor > .pt-sb {
   grid-column: 1;
@@ -71,12 +95,14 @@
   grid-column: 1;
 }
 
-/* the notes pane slot: the divider is --pt-hair, the pane's own height comes from B4's NotesPane */
+/* the notes pane slot: the pane's own height comes from B4's NotesPane. The slot draws no line:
+   the pane `.ts-notes` draws the one --pt-hair divider with the handle on it (NotesPane.css), and
+   the slot's own border-top drew a second line 1 px above it, a 2 px seam (docs/RETURN.md 4.2
+   item 1; return/audit-chrome.md row 7) */
 .pt-viewer.is-editor > .pt-main > .ts-notes-slot {
   grid-row: 2;
   grid-column: 1;
   min-height: 0;
-  border-top: 1px solid var(--pt-hair);
   background: var(--pt-paper);
 }
 

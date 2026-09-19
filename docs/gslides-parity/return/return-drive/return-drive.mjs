@@ -258,7 +258,11 @@ const responses = [];
 page.on('response', (r) => {
   const u = r.url();
   if (/download|build|\.html|api\/x\.|blob\.vercel/.test(u))
-    responses.push({ url: u.replace(/token=[^&]+/g, 'token=<redacted>').slice(0, 200), status: r.status(), at: Date.now() });
+    responses.push({
+      url: u.replace(/token=[^&]+/g, 'token=<redacted>').slice(0, 200),
+      status: r.status(),
+      at: Date.now(),
+    });
 });
 
 let deckId = '';
@@ -299,7 +303,7 @@ try {
       window.__keys.push({
         key: e.key,
         defaultPrevented: e.defaultPrevented,
-        target: t && t.getAttribute ? t.getAttribute('data-control') ?? t.tagName : String(t),
+        target: t && t.getAttribute ? (t.getAttribute('data-control') ?? t.tagName) : String(t),
       });
     });
   });
@@ -455,17 +459,21 @@ try {
   });
 
   // ---- 4. the Box primitive through Tools > Advanced > Run an action
-  await attempt('slides.new.toolbar', 'Toolbar New slide, so the Box lands on a content slide', async () => {
-    const before = (await state(page)).revision;
-    await clickControl(page, 'toolbar.newSlide');
-    const rev = await waitRevision(page, before + 1, 20_000);
-    await settled(page);
-    const { slide } = await slideBlocks(page);
-    return {
-      result: rev > before ? 'works' : 'broken',
-      observed: `revision ${before} -> ${rev}; slide kind ${slide?.kind} layout ${JSON.stringify(slide?.layout?.type ?? slide?.layout)}`,
-    };
-  });
+  await attempt(
+    'slides.new.toolbar',
+    'Toolbar New slide, so the Box lands on a content slide',
+    async () => {
+      const before = (await state(page)).revision;
+      await clickControl(page, 'toolbar.newSlide');
+      const rev = await waitRevision(page, before + 1, 20_000);
+      await settled(page);
+      const { slide } = await slideBlocks(page);
+      return {
+        result: rev > before ? 'works' : 'broken',
+        observed: `revision ${before} -> ${rev}; slide kind ${slide?.kind} layout ${JSON.stringify(slide?.layout?.type ?? slide?.layout)}`,
+      };
+    },
+  );
   let boxId = null;
   await attempt(
     'boxes.palette.listed',
@@ -498,7 +506,9 @@ try {
         observed: `${all.length} rows before typing, ${inserts.length} Insert rows: ${inserts
           .slice(0, 12)
           .map((e) => e.control?.replace('palette.', ''))
-          .join(', ')}${inserts.length > 12 ? ' ...' : ''}; after typing box ${filtered.length} rows: ${filtered.map((e) => `${e.control?.replace('palette.', '')} "${e.text}"`).join(' | ')}; Box listed ${listed}; ${pic}`,
+          .join(
+            ', ',
+          )}${inserts.length > 12 ? ' ...' : ''}; after typing box ${filtered.length} rows: ${filtered.map((e) => `${e.control?.replace('palette.', '')} "${e.text}"`).join(' | ')}; Box listed ${listed}; ${pic}`,
         extra: { inserts, filtered },
       };
     },
@@ -572,7 +582,9 @@ try {
       const tail = await page.evaluate(() =>
         [...document.querySelectorAll('.ts-toolbar [data-control^="toolbar."]')]
           .map((el) => el.getAttribute('data-control'))
-          .filter((c) => c && !/^toolbar\.(search|newSlide|undo|redo|print|zoom|paintFormat)/.test(c)),
+          .filter(
+            (c) => c && !/^toolbar\.(search|newSlide|undo|redo|print|zoom|paintFormat)/.test(c),
+          ),
       );
       await page.mouse.click(r.x + r.w / 2, r.y + r.h / 2, { button: 'right' });
       await sleep(500);
@@ -610,8 +622,9 @@ try {
       const box = blockList(slide).find((b) => b.id === boxId);
       const drawn = await page.evaluate(
         (id) =>
-          document.querySelector(`.ts-stagewrap.ts-editor [data-block="${id}"]`)?.textContent?.trim() ??
-          null,
+          document
+            .querySelector(`.ts-stagewrap.ts-editor [data-block="${id}"]`)
+            ?.textContent?.trim() ?? null,
         boxId,
       );
       const pic = await shot(page, 'box-04-label');
@@ -688,7 +701,12 @@ try {
     await openMenu(page, 'insert');
     await hoverRow(page, 'insert.table', '[data-control="insert.table.grid"]');
     const cell = await ctl(page, 'insert.table.pick.3x2').boundingBox();
-    await moveHuman(page, { x: cell.x - 30, y: cell.y - 20 }, { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 }, 8);
+    await moveHuman(
+      page,
+      { x: cell.x - 30, y: cell.y - 20 },
+      { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 },
+      8,
+    );
     await sleep(300);
     const words = await page.evaluate(
       () => document.querySelector('[data-control="insert.table.size"]')?.textContent ?? null,
@@ -698,11 +716,14 @@ try {
     await settled(page);
     await sleep(500);
     const { slide } = await slideBlocks(page);
-    const freshStage = (await stageBlocks(page)).filter((b) => !stage0.has(b.id) && b.type === 'table');
+    const freshStage = (await stageBlocks(page)).filter(
+      (b) => !stage0.has(b.id) && b.type === 'table',
+    );
     const fresh = blockList(slide).filter((b) => !ids0.has(b.id) && b.type === 'table');
     tableId = fresh[0]?.id ?? freshStage[0]?.id ?? null;
     const runsNow = await page.evaluate(
-      (id) => [...document.querySelectorAll(`.ts-stagewrap.ts-editor [data-run^="${id}/rows/"]`)].length,
+      (id) =>
+        [...document.querySelectorAll(`.ts-stagewrap.ts-editor [data-run^="${id}/rows/"]`)].length,
       tableId ?? 'none',
     );
     return {
@@ -717,7 +738,10 @@ try {
       if (!tableId) return { result: 'not driven', observed: 'no table' };
       await press(page, 'Escape', 2);
       const typeCell = async (r, c, text) => {
-        const rect = await rectOf(page, `.ts-stagewrap.ts-editor [data-run="${tableId}/rows/${r}/cells/${c}"]`);
+        const rect = await rectOf(
+          page,
+          `.ts-stagewrap.ts-editor [data-run="${tableId}/rows/${r}/cells/${c}"]`,
+        );
         if (!rect) throw new Error(`no run for cell ${r},${c}`);
         await dblclickAt(page, rect.x + rect.w / 2, rect.y + rect.h / 2);
         await sleep(300);
@@ -772,12 +796,17 @@ try {
     let bytes = 0;
     let probe = null;
     const suggested = d.suggestedFilename();
-    const name = /\.(html|pdf|pptx|zip)$/.test(suggested) ? suggested : `<no extension, ${suggested.length} chars>`;
+    const name = /\.(html|pdf|pptx|zip)$/.test(suggested)
+      ? suggested
+      : `<no extension, ${suggested.length} chars>`;
     try {
       failure = await d.failure();
       if (failure === null) {
         const p = await d.path();
-        file = path.join(OUT, `${RUN}-${/\.(html|pdf|pptx|zip)$/.test(suggested) ? suggested : 'download.bin'}`);
+        file = path.join(
+          OUT,
+          `${RUN}-${/\.(html|pdf|pptx|zip)$/.test(suggested) ? suggested : 'download.bin'}`,
+        );
         writeFileSync(file, readFileSync(p));
         bytes = readFileSync(file).length;
       } else if (/\/api\/download\//.test(rawUrl)) {
@@ -785,9 +814,15 @@ try {
         try {
           const res = await page.request.get(rawUrl, { maxRedirects: 0, timeout: 30_000 });
           const body = (await res.text().catch(() => '')).slice(0, 240);
-          probe = { status: res.status(), contentType: res.headers()['content-type'] ?? null, body: redact(body) };
+          probe = {
+            status: res.status(),
+            contentType: res.headers()['content-type'] ?? null,
+            body: redact(body),
+          };
         } catch (error) {
-          probe = { error: redact(error instanceof Error ? error.message.split('\n')[0] : String(error)) };
+          probe = {
+            error: redact(error instanceof Error ? error.message.split('\n')[0] : String(error)),
+          };
         }
       }
     } catch (error) {
@@ -795,28 +830,39 @@ try {
     }
     return { ms: Date.now() - t, name, url, failure, file, bytes, probe };
   };
-  await attempt('tables.export.pdf.cell-text', 'File > Download > PDF; pdftotext; the two cell strings', async () => {
-    await press(page, 'Escape', 2);
-    await openMenu(page, 'file');
-    await hoverRow(page, 'file.download', '[data-control="menu.file.download.pdf"]');
-    await clickRow(page, 'file.download.pdf');
-    await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
-    await sleep(400);
-    const d = await download(() => clickControl(page, 'dialog.download.ok'), 90_000);
-    let text = '';
-    if (d.file) text = execFileSync('pdftotext', [d.file, '-']).toString();
-    const pages = d.file ? (readFileSync(d.file).toString('latin1').match(/\/Type\s*\/Page(?![s\w])/g) ?? []).length : 0;
-    await pollUntil(
-      () => has(page, '[data-control="dialog.download.pdf"]'),
-      (v) => v === false,
-      15_000,
-    );
-    await press(page, 'Escape');
-    return {
-      result: d.failure === null && /Q1 revenue/.test(text) && /12 000/.test(text) ? 'works' : 'broken',
-      observed: `${d.ms} ms; ${d.name} ${d.bytes} B; failure ${JSON.stringify(d.failure)}; pages ${pages}; "Q1 revenue" ${/Q1 revenue/.test(text)}; "12 000" ${/12 000/.test(text)}; "Box label" ${/Box label/.test(text)}; "Return drive" ${/Return drive/.test(text)}`,
-    };
-  });
+  await attempt(
+    'tables.export.pdf.cell-text',
+    'File > Download > PDF; pdftotext; the two cell strings',
+    async () => {
+      await press(page, 'Escape', 2);
+      await openMenu(page, 'file');
+      await hoverRow(page, 'file.download', '[data-control="menu.file.download.pdf"]');
+      await clickRow(page, 'file.download.pdf');
+      await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
+      await sleep(400);
+      const d = await download(() => clickControl(page, 'dialog.download.ok'), 90_000);
+      let text = '';
+      if (d.file) text = execFileSync('pdftotext', [d.file, '-']).toString();
+      const pages = d.file
+        ? (
+            readFileSync(d.file)
+              .toString('latin1')
+              .match(/\/Type\s*\/Page(?![s\w])/g) ?? []
+          ).length
+        : 0;
+      await pollUntil(
+        () => has(page, '[data-control="dialog.download.pdf"]'),
+        (v) => v === false,
+        15_000,
+      );
+      await press(page, 'Escape');
+      return {
+        result:
+          d.failure === null && /Q1 revenue/.test(text) && /12 000/.test(text) ? 'works' : 'broken',
+        observed: `${d.ms} ms; ${d.name} ${d.bytes} B; failure ${JSON.stringify(d.failure)}; pages ${pages}; "Q1 revenue" ${/Q1 revenue/.test(text)}; "12 000" ${/12 000/.test(text)}; "Box label" ${/Box label/.test(text)}; "Return drive" ${/Return drive/.test(text)}`,
+      };
+    },
+  );
   await attempt(
     'tables.export.pptx-editable.cell-text',
     'File > Download > PowerPoint, Editable text; the a:tbl and the two cell strings',
@@ -888,14 +934,23 @@ try {
   }
   await shot(page, 'end-editor');
 } catch (error) {
-  record('drive', 'the drive', 'broken', `stopped: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`);
+  record(
+    'drive',
+    'the drive',
+    'broken',
+    `stopped: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+  );
 } finally {
   if (deckId) {
     let trashed = false;
     try {
       await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
       await editorReady(page);
-      await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+      await pollUntil(
+        () => state(page),
+        (s) => s.sync?.connected === true,
+        30_000,
+      );
       await settled(page);
       await dismissNamePrompt(page);
       await clickControl(page, 'menubar.file');
@@ -913,17 +968,30 @@ try {
       record('deck.delete-forever', 'Delete forever on /decks/trash', 'works', deckId);
       trashed = true;
     } catch (error) {
-      record('deck.trash', 'The product trash path', 'broken', `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the window API`);
+      record(
+        'deck.trash',
+        'The product trash path',
+        'broken',
+        `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the window API`,
+      );
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -942,12 +1010,21 @@ try {
         if (status === 404 || Date.now() > until) break;
         await sleep(2000);
       }
-      record(`deck.404.${route}`, `GET /${route}/${deckId} answers 404`, status === 404 ? 'works' : 'broken', `status ${status}`);
+      record(
+        `deck.404.${route}`,
+        `GET /${route}/${deckId} answers 404`,
+        status === 404 ? 'works' : 'broken',
+        `status ${status}`,
+      );
     }
   }
   writeFileSync(
     path.join(OUT, `${RUN}-return-drive.json`),
-    JSON.stringify({ base: BASE, deckId, at: new Date().toISOString(), rows, consoleErrors }, null, 2),
+    JSON.stringify(
+      { base: BASE, deckId, at: new Date().toISOString(), rows, consoleErrors },
+      null,
+      2,
+    ),
   );
   writeFileSync(path.join(OUT, `${RUN}-return-drive.log`), logLines.join('\n'));
   await browser.close();

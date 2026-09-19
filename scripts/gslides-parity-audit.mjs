@@ -995,6 +995,21 @@ async function walkMenus(page, ctx, tag) {
       });
       continue;
     }
+    /* the return round (docs/RETURN.md 4.3; the matrix row chrome.cluster.gaps-heights): the
+       roster's opener is not drawn while nobody else is present (PresenceSlot.tsx is-empty), so a
+       page alone in the room has no roster to open; the rows are read where another person is */
+    const alone =
+      parentId === 'title.presence' &&
+      (await page.$(`${plate.opener}.is-empty, .ts-presence-more.is-empty`)) !== null;
+    if (alone) {
+      pass(`rows:${tag}`, {
+        id: parentId,
+        menu: 'title',
+        check: 'plate menu opens',
+        evidence: `${plate.opener} is hidden while nobody else is present (docs/RETURN.md 4.3); the roster's rows are read on a page with another person`,
+      });
+      continue;
+    }
     const opened = await openPlate(page, plate).catch(() => false);
     if (!opened) {
       fail(`rows:${tag}`, {
@@ -2715,8 +2730,22 @@ async function runActionEffect(page, context, item, ctx, deckId) {
       const snack = await snackbarText(page);
       return /bundle/i.test(snack) ? { ok: true, evidence: `snackbar "${snack}"` } : outcome;
     }
-    case 'render.slide':
-      return observePopupOrSnackbar(page, context, item, /Rendered|image/i, 90_000);
+    case 'render.slide': {
+      /* the return round (build/b7.md R2; build/integrator.md section 1): a same origin render
+         is saved through an anchor's download attribute, a cross origin one still opens a tab;
+         the download event, the tab and the snackbar are all a result */
+      const download = page
+        .waitForEvent('download', { timeout: 90_000 })
+        .then((d) => ({ download: d.suggestedFilename() }))
+        .catch(() => null);
+      const rest = observePopupOrSnackbar(page, context, item, /Rendered|image/i, 90_000);
+      const first = await Promise.race([download, rest]);
+      if (first && 'download' in first) return { ok: true, evidence: `download ${first.download}` };
+      const outcome = await rest;
+      if (outcome.ok) return outcome;
+      const late = await download;
+      return late ? { ok: true, evidence: `download ${late.download}` } : outcome;
+    }
     case 'build.run':
       return observePopupOrSnackbar(
         page,
@@ -3598,7 +3627,10 @@ async function checkFormatSections(page, type, tag) {
   const ids = shown.map((s) => s.id);
   const missing = (FORMAT_SECTIONS_FOR[type] ?? []).filter((id) => !ids.includes(id));
   const extra = (FORMAT_SECTIONS_NOT_FOR[type] ?? []).filter((id) => ids.includes(id));
-  const order = ids.map((id) => FORMAT_SECTION_ORDER.indexOf(id));
+  /* the return round (docs/RETURN.md 2.7; build/b5.md request 4): the Chart data section is the
+     first thing the panel shows for a chart, the other sections keep SPEC-2 section 5's order */
+  const orderedIds = type === 'chart' && ids[0] === 'chart' ? ids.slice(1) : ids;
+  const order = orderedIds.map((id) => FORMAT_SECTION_ORDER.indexOf(id));
   const ordered = order.every((n, i) => i === 0 || n >= order[i - 1]);
   const untipped = await page.$$eval(
     '.ts-rpanel [data-section] button, .ts-rpanel [data-section] input, .ts-rpanel [data-section] select, .ts-rpanel [data-section] [role="button"], .ts-rpanel [data-section] [role="radio"], .ts-rpanel [data-section] [role="checkbox"]',

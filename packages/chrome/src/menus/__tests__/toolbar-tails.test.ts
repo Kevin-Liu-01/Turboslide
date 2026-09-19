@@ -76,10 +76,13 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
         TOOLBAR_TAILS.shape.find((each) => each.control === control)?.enabled,
         control,
       ).toBeUndefined();
-    /* cycle 2 of the focus round (docs/FOCUS.md section 4 under ruling (1), build/b3.md R14): the
-       tail is parked whole with Insert > Shape, every control flagged, so a shape a deck carries
-       takes the default tail with the switch off and this tail with it on */
-    for (const control of TOOLBAR_TAILS.shape) expect(control.advanced, control.control).toBe(true);
+    /* cycle 2 of the focus round parked the tail whole with Insert > Shape (docs/FOCUS.md section
+       4 under ruling (1), build/b3.md R14); the return round brought it back (docs/RETURN.md 2.2,
+       3.2): only Change shape keeps the flag, with the galleries (2.9) */
+    for (const control of TOOLBAR_TAILS.shape)
+      expect(control.advanced, control.control).toBe(
+        control.control === 'toolbar.changeShape' ? true : undefined,
+      );
   });
 
   it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset, Dither (3.4; SPEC-3 13.2)', () => {
@@ -155,9 +158,11 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       'Format options',
     ]);
     for (const control of TOOLBAR_TAILS.line) expect(control.status, control.control).toBe('now');
-    /* cycle 2 (docs/FOCUS.md section 4 under ruling (1), build/b3.md R14): parked whole with
-       Insert > Line, every control flagged and still a `now` control */
-    for (const control of TOOLBAR_TAILS.line) expect(control.advanced, control.control).toBe(true);
+    /* cycle 2 parked the tail whole with Insert > Line (docs/FOCUS.md section 4 under ruling (1),
+       build/b3.md R14); the return round brought it back (docs/RETURN.md 2.3, 3.2): no control
+       carries the flag */
+    for (const control of TOOLBAR_TAILS.line)
+      expect(control.advanced, control.control).toBeUndefined();
   });
 
   it('a table cell: border first, then the fill, the merge buttons, then the text controls (3.6)', () => {
@@ -221,8 +226,9 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     );
     expect(TOOLBAR_TAIL_DEFAULT.at(-1)?.control).toBe(HIDE_MENUS_CONTROL);
     /* the Insert shape and Insert line dropdowns open the categories and kinds of SPEC-2 4.1;
-       since cycle 2 of the focus round both buttons are parked with their menus (docs/FOCUS.md
-       section 4 under ruling (1), build/b3.md R14) and draw with the switch on alone */
+       cycle 2 of the focus round parked both buttons with their menus (docs/FOCUS.md section 4
+       under ruling (1), build/b3.md R14) and the return round brought them back to the default
+       view (docs/RETURN.md 2.2, 2.3, 3.2) */
     const insertShape = TOOLBAR_TAILS.default.find(
       (control) => control.control === 'toolbar.insertShape',
     );
@@ -231,8 +237,8 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     );
     expect(insertShape?.arrow).toBe('insert.shape');
     expect(insertLine?.arrow).toBe('insert.line');
-    expect(insertShape?.advanced).toBe(true);
-    expect(insertLine?.advanced).toBe(true);
+    expect(insertShape?.advanced).toBeUndefined();
+    expect(insertLine?.advanced).toBeUndefined();
   });
 
   it('other blocks: Format options and Replace image (3.8)', () => {

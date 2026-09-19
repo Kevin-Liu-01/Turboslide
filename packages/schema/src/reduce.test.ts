@@ -683,6 +683,169 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
   });
 });
 
+describe('the text mutations and their inverses (the return round, docs/RETURN.md 2.14 items 2 and 5)', () => {
+  const p1 = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
+  const MARKED =
+    'One [italic]{i} word and a *bold* [red]{c:red} one, [lit]{h:amber} [link](https://x.y).';
+
+  function marked(): DeckDocument {
+    const document = base();
+    const result = applyWrite(document, write([{ op: 'block.set', ...p1, value: MARKED }]), {
+      now: NOW,
+    });
+    if (!result.ok) throw new Error(result.message);
+    return result.document;
+  }
+  function textOf(document: DeckDocument): string {
+    const slide = document.slides['content-rule'];
+    const block = slide?.kind === 'content' ? slide.slots.left?.[1] : undefined;
+    return block?.type === 'paragraph' ? block.text : '';
+  }
+  /** Applies a write, then its inverse as a write of its own, and returns both documents. */
+  function roundTrip(document: DeckDocument, mutations: Mutation[]) {
+    const forward = applyWrite(document, write(mutations, document.deck.revision), { now: NOW });
+    if (!forward.ok) throw new Error(forward.message);
+    const back = applyWrite(
+      forward.document,
+      write(forward.inverse, forward.document.deck.revision),
+      { now: NOW },
+    );
+    if (!back.ok) throw new Error(back.message);
+    return { forward: forward.document, back: back.document, inverse: forward.inverse };
+  }
+
+  it('Clear formatting: one text.mark clearing every mark, colour, highlight and bold run keeps the link, and its inverse restores each run', () => {
+    const { forward, back, inverse } = roundTrip(marked(), [
+      {
+        op: 'text.mark',
+        ...p1,
+        range: [0, 45],
+        edit: { kind: 'marks', clear: ['i', 'u', 's', 'sup', 'sub', 'color', 'hl', 'b'] },
+      },
+    ]);
+    expect(textOf(forward)).toBe('One italic word and a bold red one, lit [link](https://x.y).');
+    expect(inverse.every((m) => m.op === 'text.mark')).toBe(true);
+    expect(textOf(back)).toBe(MARKED);
+  });
+
+  it('a mark toggled on a word alone: set marks the word, the inverse clears it, and sup clears sub', () => {
+    const on = roundTrip(marked(), [
+      { op: 'text.mark', ...p1, range: [4, 10], edit: { kind: 'marks', set: { sup: true } } },
+    ]);
+    expect(textOf(on.forward)).toBe(MARKED.replace('[italic]{i}', '[italic]{i sup}'));
+    expect(on.inverse).toEqual([
+      { op: 'text.mark', ...p1, range: [4, 10], edit: { kind: 'marks', clear: ['sup'] } },
+    ]);
+    expect(textOf(on.back)).toBe(MARKED);
+    const swapped = roundTrip(on.forward, [
+      {
+        op: 'text.mark',
+        ...p1,
+        range: [4, 10],
+        edit: { kind: 'marks', set: { sub: true }, clear: ['sup'] },
+      },
+    ]);
+    expect(textOf(swapped.forward)).toBe(MARKED.replace('[italic]{i}', '[italic]{i sub}'));
+    expect(textOf(swapped.back)).toBe(textOf(on.forward));
+  });
+
+  it('a colour and a highlight set and cleared over a range come back exactly', () => {
+    const coloured = roundTrip(marked(), [
+      {
+        op: 'text.mark',
+        ...p1,
+        range: [0, 3],
+        edit: { kind: 'marks', set: { color: 'blue', hl: 'green' } },
+      },
+    ]);
+    expect(textOf(coloured.forward).startsWith('[One]{c:blue h:green}')).toBe(true);
+    expect(textOf(coloured.back)).toBe(MARKED);
+    const cleared = roundTrip(marked(), [
+      { op: 'text.mark', ...p1, range: [27, 30], edit: { kind: 'marks', clear: ['color'] } },
+    ]);
+    expect(textOf(cleared.forward)).toBe(MARKED.replace('[red]{c:red}', 'red'));
+    expect(textOf(cleared.back)).toBe(MARKED);
+  });
+
+  it('a case change over a word and over the whole Text keeps the marks, and its inverse restores the letters', () => {
+    const word = roundTrip(marked(), [
+      { op: 'text.mark', ...p1, range: [4, 10], edit: { kind: 'case', mode: 'upper' } },
+    ]);
+    expect(textOf(word.forward)).toBe(MARKED.replace('[italic]{i}', '[ITALIC]{i}'));
+    expect(textOf(word.back)).toBe(MARKED);
+    const whole = roundTrip(marked(), [
+      { op: 'text.mark', ...p1, range: [0, 45], edit: { kind: 'case', mode: 'title' } },
+    ]);
+    expect(textOf(whole.forward)).toBe(
+      'One [Italic]{i} Word And A *Bold* [Red]{c:red} One, [Lit]{h:amber} [Link](https://x.y).',
+    );
+    expect(textOf(whole.back)).toBe(MARKED);
+    const lower = roundTrip(whole.forward, [
+      { op: 'text.mark', ...p1, range: [0, 45], edit: { kind: 'case', mode: 'lower' } },
+    ]);
+    expect(textOf(lower.forward)).toBe(
+      'one [italic]{i} word and a *bold* [red]{c:red} one, [lit]{h:amber} [link](https://x.y).',
+    );
+    expect(textOf(lower.back)).toBe(textOf(whole.forward));
+  });
+
+  it('a splice through a marked run and a splice with flags both come back with the marks they removed', () => {
+    const through = roundTrip(marked(), [
+      { op: 'text.splice', ...p1, at: 2, remove: 6, insert: 'ce ' },
+    ]);
+    expect(textOf(through.forward)).toBe(MARKED.replace('One [italic]{i}', 'Once [ic]{i}'));
+    expect(textOf(through.back)).toBe(MARKED);
+    const flagged = roundTrip(marked(), [
+      { op: 'text.splice', ...p1, at: 45, remove: 0, insert: 'Done', flags: { b: true } },
+    ]);
+    expect(textOf(flagged.forward).endsWith('[link](https://x.y).*Done*')).toBe(true);
+    expect(textOf(flagged.back)).toBe(MARKED);
+  });
+
+  it('text.replace of the whole Text and its inverse', () => {
+    const next = 'Replaced [wholly]{u}.';
+    const { forward, back, inverse } = roundTrip(marked(), [
+      { op: 'text.replace', ...p1, range: [0, MARKED.length], text: next },
+    ]);
+    expect(textOf(forward)).toBe(next);
+    expect(inverse).toEqual([{ op: 'text.replace', ...p1, range: [0, next.length], text: MARKED }]);
+    expect(textOf(back)).toBe(MARKED);
+  });
+
+  it('refuses a range past the end and a mark on a field that is not a Text, and leaves the input untouched', () => {
+    const document = marked();
+    const past = applyWrite(
+      document,
+      write(
+        [{ op: 'text.mark', ...p1, range: [0, 99], edit: { kind: 'marks', set: { i: true } } }],
+        document.deck.revision,
+      ),
+      { now: NOW },
+    );
+    expect(past.ok).toBe(false);
+    if (!past.ok) expect(past.code).toBe('invalid');
+    const notText = applyWrite(
+      document,
+      write(
+        [
+          {
+            op: 'text.mark',
+            slideId: 'content-rule',
+            blockId: 'p1',
+            path: '/typography',
+            range: [0, 1],
+            edit: { kind: 'marks', set: { i: true } },
+          },
+        ],
+        document.deck.revision,
+      ),
+      { now: NOW },
+    );
+    expect(notText.ok).toBe(false);
+    expect(textOf(document)).toBe(MARKED);
+  });
+});
+
 describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
   const p1 = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
   const MARKED = 'Every *post* states [what](https://x.y) was [built]{i c:red}.';

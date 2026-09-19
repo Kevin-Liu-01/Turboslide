@@ -66,10 +66,13 @@ describe('ShortcutsDialog', () => {
     expect(dialog.querySelector('tr[data-binding="format.text.italic"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="insert.comment"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="edit.undo"]')).not.toBeNull();
-    /* a parked row's chord leaves the list, and so does a Later stub's greyed row */
-    expect(dialog.querySelector('tr[data-binding="arrange.group"]')).toBeNull();
-    expect(dialog.querySelector('tr[data-binding="format.text.superscript"]')).toBeNull();
-    expect(dialog.querySelector('tr[data-binding="view.fullScreen"]')).toBeNull();
+    /* a parked row's chord leaves the list (Alt text, docs/RETURN.md section 9 question 6), and so
+       does a Later stub's greyed row; the chords of the rows the return round brought back (Group,
+       Superscript, Full screen; RETURN.md 2.11, 2.12, 2.16) are listed with the switch off */
+    expect(dialog.querySelector('tr[data-binding="format.altText"]')).toBeNull();
+    expect(dialog.querySelector('tr[data-binding="arrange.group"]')).not.toBeNull();
+    expect(dialog.querySelector('tr[data-binding="format.text.superscript"]')).not.toBeNull();
+    expect(dialog.querySelector('tr[data-binding="view.fullScreen"]')).not.toBeNull();
     expect(dialog.querySelectorAll('tr.is-later').length).toBe(0);
     /* the filmstrip and canvas keys have no menu row and are always listed */
     expect(dialog.querySelector('tr[data-binding="key.find"]')).not.toBeNull();
@@ -81,7 +84,8 @@ describe('ShortcutsDialog', () => {
     expect(on).toEqual(all);
     expect(off.length).toBeLessThan(on.length);
     for (const id of off) expect(on).toContain(id);
-    expect(on.filter((id) => !off.includes(id))).toContain('arrange.group');
+    expect(on.filter((id) => !off.includes(id))).toContain('format.altText');
+    expect(off).toContain('arrange.group');
   });
 
   it('filters by a word of the action or the key', () => {

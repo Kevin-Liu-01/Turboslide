@@ -33,6 +33,12 @@ export type { Deck, Slide } from '@turboslide/schema/deck';
  * hour quota, and `thumbGrant`, the short lived grant the page appends to its thumbnail URLs so
  * the `?w=` variant of the render route can refuse an unsigned request in enforce mode (report 04
  * F6). The grant carries the deck and the caller's role; the width and revision stay in the URL.
+ *
+ * The return round (docs/RETURN.md 2.19): every picture url answered here carries a render grant
+ * (tokens.ts `signRenderGrant`, 10 minutes, the one picture's own parameters), so the tab File >
+ * Download > JPEG image or PNG image opens on the route is served without the bearer and as an
+ * attachment; before it the tab answered 401 "bearer token required" on production
+ * (audit-surface rows 27 and 28).
  */
 
 let client: WorkerClient | undefined;
@@ -53,7 +59,11 @@ export type RenderSlidesInput = {
 
 export type RenderSlidesResult = { records: RenderRecord[]; images: string[] };
 
-/** The facade URL for one render; the revision names the pixels, so two revisions never share a cache entry. */
+/**
+ * The facade URL for one render; the revision names the pixels, so two revisions never share a
+ * cache entry, and the grant (`grantQuery`, `grant`) lets the tab that opens it pass the route's
+ * bearer rule for this one picture.
+ */
 function imageUrl(
   deckId: string,
   slideId: string,
@@ -61,8 +71,10 @@ function imageUrl(
   scale: 1 | 2,
   revision: number,
   format: 'png' | 'jpg' = 'png',
+  grant?: { query: string; value: string },
 ): string {
-  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&scale=${scale}&revision=${revision}${format === 'jpg' ? '&format=jpg' : ''}`;
+  const signed = grant === undefined ? '' : `&${grant.query}=${encodeURIComponent(grant.value)}`;
+  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&scale=${scale}&revision=${revision}${format === 'jpg' ? '&format=jpg' : ''}${signed}`;
 }
 
 function isTheme(value: unknown): value is Theme {
@@ -96,6 +108,7 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
     // the security modules load here (DeckViewer imports this module for its client stubs)
     const { authorizeRequest, identityLabel } = await import('./authorize');
     const { assertQuota, tierOf } = await import('./ratelimit');
+    const { RENDER_GRANT_QUERY, signRenderGrant } = await import('./tokens');
     const { ctx } = await authorizeRequest(data.deckId, 'read', { action: 'render.slide' });
     // a RangeError when the deck is missing; the open syncs the store's copy, the twins follow
     const store = await openDeckStore(data.deckId);
@@ -133,7 +146,11 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
           scale,
           ...(format === 'jpg' ? { format: 'jpg' as const } : {}),
         });
-        const url = imageUrl(data.deckId, slideId, theme, scale, rendered.record.revision, format);
+        // the grant is minted after authorize(read) passed above and names this picture alone
+        const url = imageUrl(data.deckId, slideId, theme, scale, rendered.record.revision, format, {
+          query: RENDER_GRANT_QUERY,
+          value: signRenderGrant({ deckId: data.deckId, slideId, theme, scale, format }),
+        });
         records.push({ ...rendered.record, image: url });
         images.push(url);
       }

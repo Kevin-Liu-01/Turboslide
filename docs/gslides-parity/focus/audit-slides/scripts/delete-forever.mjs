@@ -12,18 +12,32 @@ try {
   for (const id of ids) {
     const t0 = Date.now();
     await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 60_000 }).catch(() => console.log(`${id}: trash page not hydrated in 60 s`));
+    await page
+      .waitForSelector('.ts-home-page[data-hydrated]', { timeout: 60_000 })
+      .catch(() => console.log(`${id}: trash page not hydrated in 60 s`));
     const card = page.locator(`[data-control="trash.card.${id}"]`);
-    const seen = await card.waitFor({ timeout: 120_000 }).then(() => true).catch(() => false);
-    console.log(`${id}: card ${seen ? 'shown' : 'not shown'} after ${Math.round((Date.now() - t0) / 1000)} s`);
+    const seen = await card
+      .waitFor({ timeout: 120_000 })
+      .then(() => true)
+      .catch(() => false);
+    console.log(
+      `${id}: card ${seen ? 'shown' : 'not shown'} after ${Math.round((Date.now() - t0) / 1000)} s`,
+    );
     if (!seen) {
-      const cards = await page.evaluate(() => [...document.querySelectorAll('[data-control^="trash.card."]')].map((el) => el.getAttribute('data-control')));
+      const cards = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="trash.card."]')].map((el) =>
+          el.getAttribute('data-control'),
+        ),
+      );
       console.log(`${id}: trash holds ${JSON.stringify(cards)}`);
       continue;
     }
     await page.locator(`[data-control="trash.delete.${id}"]`).click();
     await page.locator('[data-control="trash.confirm.ok"]').click();
-    const gone = await card.waitFor({ state: 'detached', timeout: 60_000 }).then(() => true).catch(() => false);
+    const gone = await card
+      .waitFor({ state: 'detached', timeout: 60_000 })
+      .then(() => true)
+      .catch(() => false);
     console.log(`${id}: card detached ${gone}`);
     let statuses = '';
     const until = Date.now() + 30_000;

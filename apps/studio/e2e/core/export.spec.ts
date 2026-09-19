@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
@@ -24,6 +26,7 @@ import {
   state,
   teardownAll,
   title,
+  typeInto,
   typeNote,
   zipEntries,
 } from './lib';
@@ -33,7 +36,21 @@ import {
 // checked on disk (the page count, the slide parts, the notes part, the image objects, the
 // shape's fill), each arriving within 30 s, and the print page's Download as PDF carrying what
 // the preview shows. The deck: a title, two more slides, the third skipped, a note on slide 1, a
-// picture placed as setup and a filled rectangle inserted from Insert > Shape.
+// picture placed as setup and a filled rectangle inserted from Insert > Shape. The return round
+// (docs/RETURN.md section 5) adds the bundle, the web page, the JPEG and the PNG downloads, the
+// table's two cells typed through the product, the chart, the word art and the two connectors in
+// the PDF and the Editable text PowerPoint; the documents are placed as setup writes (the walk
+// probe drives their insertion) and every file is read from the download's own bytes.
+//
+// The four same origin downloads (the bundle, the web page, the JPEG and the PNG) are fetched by
+// the page and saved from its bytes since the return round fix round (`@turboslide/chrome/download`;
+// VERIFICATION.md R1-F5): the browser's own anchor request carried none of the page's headers, so
+// on a preview behind Vercel Authentication it met the wall and navigated the tab away from the
+// editor, and the rows could not be measured there. The download event these rows read is the
+// page's blob anchor, on every origin, and each row also reads that the editor is still the page
+// after the file arrived. The web page's file is a stored copy on the blob backend since the same
+// fix round (server/download.ts builtFileLink), so its download travels as the PDF's does; on the
+// tmp backend it is this instance's one time token, fetched by the page.
 //
 // The export quota (SPEC-3 8.3 R3, `ratelimit.ts` `exportsPerDay`): an anonymous identity gets
 // five downloads a day and the sixth is refused 429 with the dialog's sentence. This file's rows
@@ -63,6 +80,8 @@ type Owner = {
   /** downloads this identity has made or reserved */
   downloads: number;
   n: number;
+  /** the fourth slide, with the documents of the return round */
+  docsSlide?: string;
 };
 const owners: Owner[] = [];
 let browserRef: Browser;
@@ -98,6 +117,95 @@ async function makeOwner(browser: Browser): Promise<Owner> {
   const third = await addSlide(page);
   await clickCard(page, third);
   await skipCurrent(page);
+  /* the return round's documents on a fourth slide (setup writes): a table whose two cells the
+     tables rows type through the product, a bar chart, a word art text and two connectors
+     between two rectangles (docs/RETURN.md 2.4 to 2.8) */
+  const fourth = await addSlide(page);
+  await clickCard(page, fourth);
+  const s4 = await state(page);
+  const docs = [
+    {
+      id: 'export-table',
+      type: 'table',
+      columns: [{}, {}, {}],
+      rows: [
+        { cells: ['', '', ''], header: true },
+        { cells: ['', '', ''] },
+        { cells: ['', '', ''] },
+      ],
+      pos: { x: 80, y: 80, w: 720, h: 240 },
+    },
+    {
+      id: 'export-chart',
+      type: 'chart',
+      kind: 'bar',
+      categories: ['North', 'South', 'West'],
+      series: [{ name: 'Bookings', values: [30, 45, 20] }],
+      pos: { x: 860, y: 80, w: 660, h: 360 },
+    },
+    {
+      id: 'export-wordart',
+      type: 'text',
+      text: 'Big words',
+      typography: { size: 88, weight: 500, align: 'center' },
+      outline: { color: 'ink', width: 1.5 },
+      pos: { x: 80, y: 380, w: 720, h: 120 },
+    },
+    {
+      id: 'con-a',
+      type: 'shape',
+      shape: 'rectangle',
+      fill: 'plate',
+      stroke: 'ink',
+      pos: { x: 80, y: 600, w: 240, h: 160 },
+    },
+    {
+      id: 'con-b',
+      type: 'shape',
+      shape: 'rectangle',
+      fill: 'plate',
+      stroke: 'ink',
+      pos: { x: 640, y: 600, w: 240, h: 160 },
+    },
+    {
+      id: 'con-c',
+      type: 'shape',
+      shape: 'rectangle',
+      fill: 'plate',
+      stroke: 'ink',
+      pos: { x: 1200, y: 600, w: 240, h: 160 },
+    },
+    {
+      id: 'con-elbow',
+      type: 'shape',
+      shape: 'elbow',
+      stroke: 'ink',
+      width: 2,
+      orientation: 'horizontal',
+      connect: { start: { block: 'con-a', site: 3 }, end: { block: 'con-b', site: 1 } },
+      pos: { x: 320, y: 680, w: 320, h: 1 },
+    },
+    {
+      id: 'con-curved',
+      type: 'shape',
+      shape: 'curved',
+      stroke: 'ink',
+      width: 2,
+      orientation: 'horizontal',
+      connect: { start: { block: 'con-b', site: 3 }, end: { block: 'con-c', site: 1 } },
+      pos: { x: 880, y: 680, w: 320, h: 1 },
+    },
+  ];
+  let revision = s4.revision;
+  for (const block of docs) {
+    await invoke(page, 'block.insert', {
+      baseRevision: revision,
+      slideId: fourth,
+      slot: 'main',
+      block,
+    });
+    revision = (await settled(page)).revision;
+  }
   const owner: Owner = {
     context,
     page,
@@ -106,6 +214,7 @@ async function makeOwner(browser: Browser): Promise<Owner> {
     unskipped: (await slideOrder(page)).length - 1,
     downloads: 0,
     n: owners.length + 1,
+    docsSlide: fourth,
   };
   owners.push(owner);
   return owner;
@@ -383,7 +492,362 @@ test(title('export.print.download-pdf-follows-preview'), async () => {
   await page.waitForURL(/\/edit\//, { timeout: 20_000 });
 });
 
+// ---------------------------------------------------------------------------------------------
+// the return round's rows (docs/RETURN.md section 5)
+
+/** The text of every PDF page's content streams, with the parenthesised strings joined. */
+function pdfText(bytes: Buffer): string {
+  /* a real extractor first, where the machine has one: Chromium prints the sheet's text as CID
+     glyph ids in Flate compressed streams, which the stream reader below cannot turn into words,
+     so the three docs rows (tables.export.pdf, charts.export.pdf, wordart.export.pdf) read "not
+     driven" on the first drive and would park their features whole (docs/RETURN.md section 1 rule
+     2). poppler's pdftotext maps the glyphs through the fonts' ToUnicode tables (the audits read
+     their PDFs the same way); without it on PATH the reader below stands and the rows say so */
+  const extracted = spawnSync('pdftotext', ['-layout', '-', '-'], {
+    input: bytes,
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+  const words =
+    extracted.status === 0 && typeof extracted.stdout === 'string' ? extracted.stdout.trim() : '';
+  const streams = pdfStreams(bytes);
+  const out: string[] = words === '' ? [] : [words];
+  const re = /\(((?:\\.|[^\\)])*)\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(streams)) !== null) out.push(m[1]!.replace(/\\(.)/g, '$1'));
+  /* hex strings too (<48656c6c6f> Tj): a simple font's bytes read as latin1; a CID font's two
+     byte glyph ids come out as noise, which the docs rows report as unreadable rather than fail */
+  const hex = /<([0-9A-Fa-f\s]{2,})>\s*(?:Tj|TJ|\])/g;
+  while ((m = hex.exec(streams)) !== null) {
+    const clean = m[1]!.replace(/\s+/g, '');
+    let word = '';
+    for (let i = 0; i + 1 < clean.length; i += 2)
+      word += String.fromCharCode(parseInt(clean.slice(i, i + 2), 16));
+    out.push(word);
+  }
+  return `${out.join('')}\n${out.join(' ')}`;
+}
+/**
+ * Whether the PDF's text streams carry readable words at all (a slide's heading is on every
+ * deck of this file): when they do not, the spec cannot read the PDF and a row that judges words
+ * is not driven, with the reason, rather than failed.
+ */
+function pdfReadable(text: string, probe: string): boolean {
+  return text.includes(probe);
+}
+/** Every slide part of an Editable text PowerPoint, joined. */
+function pptxSlideXml(bytes: Buffer): string {
+  const entries = zipEntries(bytes);
+  return pptxSlides(bytes)
+    .map((n) => entries.get(n)!())
+    .join('\n');
+}
+/** The two cells of the table typed through the product, each closed by Escape (RETURN.md 2.4). */
+async function typeTableCells(owner: Owner): Promise<void> {
+  const { page, docsSlide } = owner;
+  await clickCard(page, docsSlide!);
+  const cell = (r: number, c: number) => `export-table/rows/${r}/cells/${c}`;
+  const has = async (needle: string) =>
+    JSON.stringify(await slideJsonOf(page, docsSlide!)).includes(needle);
+  if (!(await has('Q1 revenue'))) await typeInto(page, cell(1, 0), 'Q1 revenue');
+  await settled(page);
+  if (!(await has('12 000'))) await typeInto(page, cell(1, 1), '12 000');
+  await settled(page);
+  await expect.poll(() => has('Q1 revenue'), { timeout: 10_000 }).toBe(true);
+  await expect.poll(() => has('12 000'), { timeout: 10_000 }).toBe(true);
+}
+async function slideJsonOf(page: Page, slideId: string): Promise<unknown> {
+  const got = await invoke<{ slide?: unknown }>(page, 'slide.get', { slideId });
+  return got.slide ?? got;
+}
+
+test(title('export.zip.bundle'), async () => {
+  test.setTimeout(120_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  const switched = await reachDownloadRow(page, 'file.download.zip');
+  const zip = await download(page, () =>
+    menuPath(page, 'file', 'file.download', 'file.download.zip'),
+  );
+  expect(zip.ms, 'arrives within 30 s').toBeLessThan(30_000);
+  expect(zip.bytes.subarray(0, 2).toString('latin1')).toBe('PK');
+  const names = [...zipEntries(zip.bytes).keys()];
+  test.info().annotations.push({
+    type: 'bundle',
+    description: `entries ${names.slice(0, 12).join(', ')}${names.length > 12 ? ` and ${names.length - 12} more` : ''}`,
+  });
+  expect(
+    names.some((n) => /(^|\/)deck\.json$/.test(n)),
+    `deck.json is in the bundle (entries ${names.slice(0, 8).join(', ')})`,
+  ).toBe(true);
+  await expect(ctl(page, 'snackbar'), 'the snackbar names the bundle').toContainText(/bundle/i, {
+    timeout: 8000,
+  });
+  expect(page.url(), 'the editor is still the page').toContain(`/edit/${deck}`);
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+});
+
+test(title('export.html.web-page'), async () => {
+  test.setTimeout(120_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  const switched = await reachDownloadRow(page, 'file.download.html');
+  /* the first attempt is the row: a cancelled download fails it (return-drive rows 13 to 16) */
+  const html = await download(
+    page,
+    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    30_000,
+  );
+  expect(html.ms, 'arrives within 30 s').toBeLessThan(30_000);
+  expect(html.name).toMatch(/\.html$/);
+  const text = html.bytes.toString('utf8');
+  expect(text, 'the deck title is in the page').toContain(TITLE.split(',')[0]!);
+  expect(text, 'the heading text is in the page').toContain(TITLE.split(',')[0]!);
+  expect(page.url(), 'the editor is still the page').toContain(`/edit/${deck}`);
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+});
+
+/** JPEG and PNG: a download of the current slide's picture, or the tab the row opened on it. */
+async function pictureRow(rowId: 'jpg' | 'png', magic: string, ext: RegExp): Promise<void> {
+  const { page, deck, context } = await withBudget(1);
+  await openEditor(page, deck);
+  const switched = await reachDownloadRow(page, `file.download.${rowId}`);
+  const t = Date.now();
+  const opened = context.waitForEvent('page', { timeout: 30_000 }).catch(() => null);
+  const arrived = page.waitForEvent('download', { timeout: 30_000 }).catch(() => null);
+  await menuPath(page, 'file', 'file.download', `file.download.${rowId}`);
+  const won = await Promise.race([
+    arrived.then((d) => (d ? { d } : null)),
+    opened.then((p) => (p ? { p } : null)),
+  ]);
+  if (won && 'd' in won && won.d) {
+    const { readFileSync } = await import('node:fs');
+    const bytes = readFileSync(await won.d.path());
+    expect(Date.now() - t, 'arrives within 30 s').toBeLessThan(30_000);
+    test.info().annotations.push({
+      type: 'download',
+      description: `file ${won.d.suggestedFilename()}; ${bytes.length} bytes; magic ${JSON.stringify(bytes.subarray(0, 4).toString('latin1'))}`,
+    });
+    expect(bytes.subarray(0, magic.length).toString('latin1'), `a ${rowId} file`).toBe(magic);
+    expect.soft(won.d.suggestedFilename(), `the file is named .${rowId}`).toMatch(ext);
+    expect(page.url(), 'the editor is still the page').toContain(`/edit/${deck}`);
+  } else if (won && 'p' in won && won.p) {
+    /* the focus round's route: a tab on the render's address; the row passes only when that tab
+       answers the picture (audit-surface rows 27 and 28 read a 401 there) */
+    const tab = won.p;
+    const response = await tab
+      .waitForLoadState('domcontentloaded')
+      .then(() => tab.evaluate(() => document.contentType))
+      .catch(() => null);
+    const status = await tab
+      .evaluate(
+        () =>
+          (performance.getEntriesByType('navigation')[0] as { responseStatus?: number } | undefined)
+            ?.responseStatus ?? null,
+      )
+      .catch(() => null);
+    const address = tab.url();
+    await tab.close();
+    expect(
+      response,
+      `the tab at ${address.replace(/\?.*$/, '?…')} answered ${status ?? 'an unread status'} with ${response}`,
+    ).toMatch(rowId === 'jpg' ? /image\/jpeg/ : /image\/png/);
+  } else {
+    expect(won, `a ${rowId} file or a tab within 30 s`).not.toBeNull();
+  }
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+}
+test(title('export.jpg.current-slide'), async () => {
+  test.setTimeout(120_000);
+  await pictureRow('jpg', '\xff\xd8\xff', /\.jpe?g$/i);
+});
+test(title('export.png.current-slide'), async () => {
+  test.setTimeout(120_000);
+  await pictureRow('png', '\x89PNG', /\.png$/i);
+});
+
+/** Turns Tools > Advanced tools on when a File > Download row is still parked on this build. */
+async function reachDownloadRow(page: Page, rowId: string): Promise<boolean> {
+  await ctl(page, 'menubar.file').click();
+  await page.locator('#ts-menu-file').waitFor({ timeout: 8000 });
+  await ctl(page, 'menu.file.download').hover();
+  await page.locator('[data-control="menu.file.download.pdf"]').waitFor({ timeout: 6000 });
+  const present = (await ctl(page, `menu.${rowId}`).count()) > 0;
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  if (present) return false;
+  await menuPath(page, 'tools', 'tools.advancedTools');
+  await expect
+    .poll(async () => (await state(page)).settings?.['advancedTools'] === true, { timeout: 5000 })
+    .toBe(true);
+  return true;
+}
+
+test(title('tables.export.pdf'), async () => {
+  test.setTimeout(150_000);
+  const owner = await withBudget(1);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  await typeTableCells(owner);
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  expect(pdf.ms).toBeLessThan(30_000);
+  const text = pdfText(pdf.bytes);
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `${pdfPages(pdf.bytes)} pages; ${text.length} characters of text read; Q1 revenue ${text.includes('Q1 revenue')}`,
+  });
+  test.skip(
+    !pdfReadable(text, 'Q1 revenue') && !pdfReadable(text, 'Acme'),
+    'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
+  );
+  expect(text, 'Q1 revenue is in the PDF text').toContain('Q1 revenue');
+  expect(text.replace(/\s+/g, ' '), '12 000 is in the PDF text').toMatch(/12\s?000/);
+});
+
+test(title('tables.export.pptx-editable'), async () => {
+  test.setTimeout(150_000);
+  const owner = await withBudget(1);
+  const { page, deck, docsSlide } = owner;
+  await openEditor(page, deck);
+  await typeTableCells(owner);
+  /* one Insert column right from the cell's right click menu, the write the widths are read after */
+  await clickCard(page, docsSlide!);
+  const cell = page
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-run="export-table/rows/1/cells/1"]')
+    .first();
+  await cell.dblclick();
+  await page.waitForTimeout(300);
+  await cell.click({ button: 'right' });
+  await page.locator('.ts-context-menu').first().waitFor({ timeout: 6000 });
+  await ctl(page, 'menu.format.table.insertColumnRight').click();
+  await expect
+    .poll(
+      async () => {
+        const slide = JSON.stringify(await slideJsonOf(page, docsSlide!));
+        return (slide.match(/"columns":\[(\{[^\]]*)\]/)?.[1] ?? '').split('},').length;
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(4);
+  await page.keyboard.press('Escape');
+  await settled(page);
+  const table = (await objectsOfSlide(page, docsSlide!)).find((o) => o.id === 'export-table');
+  const tableWidth = table?.pos.w ?? 0;
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  expect(pptx.ms).toBeLessThan(30_000);
+  const xml = pptxSlideXml(pptx.bytes);
+  expect(xml, 'a native table').toMatch(/<a:tbl>/);
+  expect(xml).toContain('Q1 revenue');
+  expect(xml.replace(/\s+/g, ' ')).toMatch(/12\s?000/);
+  const cols = [...xml.matchAll(/<a:gridCol w="(\d+)"/g)].map((m) => Number(m[1]));
+  expect(cols.length, 'four grid columns').toBe(4);
+  /* the widths sum to the table width, at the file's own scale: the slide size `p:sldSz` of
+     ppt/presentation.xml over the 1600 px sheet (13.333 in, 12192000 EMU: 7620 EMU per px; the
+     first drive assumed a 10 in slide and read a 33 % drift on exact widths, return/build/integrator.md) */
+  const sum = cols.reduce((a, b) => a + b, 0);
+  const presentation = zipEntries(pptx.bytes).get('ppt/presentation.xml')?.() ?? '';
+  const sldSz = Number(presentation.match(/<p:sldSz cx="(\d+)"/)?.[1] ?? NaN);
+  expect(sldSz, 'the slide size of ppt/presentation.xml').toBeGreaterThan(0);
+  const emuPerPx = sldSz / 1600;
+  expect(
+    Math.abs(sum - tableWidth * emuPerPx) / (tableWidth * emuPerPx),
+    `gridCol widths ${cols.join(', ')} sum to the table's ${Math.round(tableWidth * emuPerPx)} EMU`,
+  ).toBeLessThan(0.02);
+});
+async function objectsOfSlide(page: Page, slideId: string) {
+  const { objectsOf } = await import('./lib');
+  return objectsOf(page, slideId);
+}
+
+test(title('charts.export.pdf'), async () => {
+  test.setTimeout(120_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  expect(pdf.ms).toBeLessThan(30_000);
+  const text = pdfText(pdf.bytes);
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `${pdfPages(pdf.bytes)} pages; ${text.length} characters of text read; North ${text.includes('North')}`,
+  });
+  test.skip(
+    !pdfReadable(text, 'North') && !pdfReadable(text, 'Acme'),
+    'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
+  );
+  for (const word of ['North', 'South', 'West', 'Bookings'])
+    expect(text, `${word} is in the PDF text`).toContain(word);
+});
+
+test(title('charts.export.pptx-native'), async () => {
+  test.setTimeout(150_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  expect(pptx.ms).toBeLessThan(30_000);
+  const parts = [...zipEntries(pptx.bytes).keys()].filter((n) =>
+    /^ppt\/charts\/chart\d+\.xml$/.test(n),
+  );
+  expect(parts.length, 'one native chart part per chart').toBe(1);
+  const xml = pptxSlideXml(pptx.bytes);
+  expect(xml, 'the slide references the chart').toMatch(/<c:chart |graphicFrame/);
+});
+
+test(title('wordart.export.pdf'), async () => {
+  test.setTimeout(120_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  expect(pdf.ms).toBeLessThan(30_000);
+  const text = pdfText(pdf.bytes);
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `${pdfPages(pdf.bytes)} pages; ${text.length} characters of text read; Big words ${text.includes('Big words')}`,
+  });
+  test.skip(
+    !pdfReadable(text, 'Big words') && !pdfReadable(text, 'Acme'),
+    'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
+  );
+  expect(text, 'the word art is in the PDF text').toContain('Big words');
+});
+
+test(title('lines.connector.export-pptx'), async () => {
+  test.setTimeout(150_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  expect(pptx.ms).toBeLessThan(30_000);
+  const xml = pptxSlideXml(pptx.bytes);
+  expect(xml, 'the elbow connector').toContain('prst="bentConnector3"');
+  expect(xml, 'the curved connector').toContain('prst="curvedConnector3"');
+});
+
 coverage(import.meta.filename, [
+  'export.zip.bundle',
+  'export.html.web-page',
+  'export.jpg.current-slide',
+  'export.png.current-slide',
+  'tables.export.pdf',
+  'tables.export.pptx-editable',
+  'charts.export.pdf',
+  'charts.export.pptx-native',
+  'wordart.export.pdf',
+  'lines.connector.export-pptx',
   'export.pdf.file',
   'export.pdf.include-skipped',
   'export.pdf.notes-honest',

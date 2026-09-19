@@ -31,7 +31,10 @@ const SPLIT_RULES = `
 `;
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 const notes = {};
 try {
@@ -46,7 +49,12 @@ try {
       const b = el.getBoundingClientRect();
       return { x: b.x, y: b.y, w: b.width, h: b.height };
     });
-    return { x: Math.max(0, Math.floor(r.x - 8)), y: 0, width: Math.min(1440 - Math.floor(r.x - 8), Math.ceil(r.w + 24)), height: 44 };
+    return {
+      x: Math.max(0, Math.floor(r.x - 8)),
+      y: 0,
+      width: Math.min(1440 - Math.floor(r.x - 8), Math.ceil(r.w + 24)),
+      height: 44,
+    };
   };
   for (const appearance of ['dark', 'light']) {
     await page.evaluate((a) => document.documentElement.setAttribute('data-theme', a), appearance);
@@ -61,13 +69,20 @@ try {
       });
       await sleep(250);
       const name = `q4-${appearance}-hair-${alpha.replace('0.', '')}.png`;
-      await page.screenshot({ path: path.join(OUT, name), clip: { x: 0, y: 0, width: 720, height: 140 } });
-      notes[name] = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--pt-hair').trim());
+      await page.screenshot({
+        path: path.join(OUT, name),
+        clip: { x: 0, y: 0, width: 720, height: 140 },
+      });
+      notes[name] = await page.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue('--pt-hair').trim(),
+      );
       await tag.evaluate((el) => el.remove());
     }
     /* question 1: the split button as one control, Share at 8 px and at 6 px */
     for (const radius of ['8px', '6px']) {
-      const tag = await page.addStyleTag({ content: `${SPLIT_RULES}\n.ts-title-share { border-radius: ${radius}; }` });
+      const tag = await page.addStyleTag({
+        content: `${SPLIT_RULES}\n.ts-title-share { border-radius: ${radius}; }`,
+      });
       await sleep(300);
       const clip = await cluster();
       const name = `q1-${appearance}-share-${radius}.png`;
@@ -75,8 +90,10 @@ try {
       notes[name] = await page.evaluate(() => ({
         share: getComputedStyle(document.querySelector('.ts-title-share')).borderRadius,
         split: getComputedStyle(document.querySelector('.ts-title-slideshow')).borderRadius,
-        inboxSlot: document.querySelector('.ts-title-inbox-slot')?.getBoundingClientRect().width ?? null,
-        more: getComputedStyle(document.querySelector('.ts-presence-more') ?? document.body).opacity,
+        inboxSlot:
+          document.querySelector('.ts-title-inbox-slot')?.getBoundingClientRect().width ?? null,
+        more: getComputedStyle(document.querySelector('.ts-presence-more') ?? document.body)
+          .opacity,
       }));
       await tag.evaluate((el) => el.remove());
     }

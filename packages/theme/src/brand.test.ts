@@ -371,13 +371,35 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       expect(light[`pt-${name}`]).toBe(TOKENS.light[name]);
       expect(dark[`pt-${name}`]).toBe(TOKENS.dark[name]);
     }
-    /* the two additions are the whole difference from the round three sheet: the dark remap
-       gains exactly the same two names and nothing else that is not a colour of tokens.ts */
+    /* the dark remap gains exactly the names below and nothing else that is not a colour of
+       tokens.ts: the two of round four (the selection colour and the guide), and the three of the
+       return round (docs/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over the
+       solid ink of the Slideshow split button, each a paper tint over ink with no colour */
     expect(
       Object.keys(dark).filter((name) => !TOKENS.dark[name.slice(3) as keyof typeof TOKENS.dark]),
-    ).toEqual(['pt-select', 'pt-guide']);
-    expect(Object.keys(light)).toContain('pt-select');
-    expect(Object.keys(light)).toContain('pt-guide');
+    ).toEqual([
+      'pt-hair-on-ink',
+      'pt-plate-on-ink',
+      'pt-plate-on-ink-open',
+      'pt-select',
+      'pt-guide',
+    ]);
+    for (const name of [
+      'pt-hair-on-ink',
+      'pt-plate-on-ink',
+      'pt-plate-on-ink-open',
+      'pt-select',
+      'pt-guide',
+    ])
+      expect(Object.keys(light), name).toContain(name);
+    /* the paper tints over ink (RETURN.md 1 rule 6): white over the light ink, the dark paper over
+       the dark ink, at the alphas the token file's comment measures */
+    expect(light['pt-hair-on-ink']).toBe('rgba(255, 255, 255, 0.26)');
+    expect(dark['pt-hair-on-ink']).toBe('rgba(7, 7, 7, 0.26)');
+    expect(light['pt-plate-on-ink']).toBe('rgba(255, 255, 255, 0.16)');
+    expect(dark['pt-plate-on-ink']).toBe('rgba(7, 7, 7, 0.16)');
+    expect(light['pt-plate-on-ink-open']).toBe('rgba(255, 255, 255, 0.24)');
+    expect(dark['pt-plate-on-ink-open']).toBe('rgba(7, 7, 7, 0.24)');
   });
 });
 

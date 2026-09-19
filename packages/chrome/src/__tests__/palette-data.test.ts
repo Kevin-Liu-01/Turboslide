@@ -214,13 +214,27 @@ describe('presentPaletteEntries', () => {
       expect(entry.group, entry.id).toBe('insert');
     }
     /* the default view's Insert group: the entries whose menu row is core (docs/FOCUS.md 2.3,
-       2.4), then the 21 New slide rows; the five shape and line entries of 2.6 left with their
-       rows in cycle 2 (section 4 under ruling (1), build/b3.md R14) and stand behind the switch */
+       2.4), the five shape and line entries, the table, the chart and the diagram that returned
+       with their rows in the return round (docs/RETURN.md 2.2 to 2.6), then the 21 New slide
+       rows; the Box, Rule, Icon and Material entries and the grammar blocks stand behind the switch */
     const insert = off.filter((entry) => entry.group === 'insert');
-    expect(insert.filter((entry) => entry.insert !== 'slide').map((entry) => entry.id)).toEqual([
-      'insert:block:text',
-      'insert:block:image',
-    ]);
+    expect(insert.filter((entry) => entry.insert === 'primitive').map((entry) => entry.id)).toEqual(
+      [
+        'insert:block:shape:rectangle',
+        'insert:block:shape:rounded',
+        'insert:block:shape:ellipse',
+        'insert:block:shape:line',
+        'insert:block:shape:arrow',
+        'insert:block:text',
+        'insert:block:image',
+      ],
+    );
+    expect(
+      insert
+        .filter((entry) => entry.insert === 'block')
+        .map((entry) => entry.id)
+        .sort(),
+    ).toEqual(['insert:block:chart', 'insert:block:dia', 'insert:block:table']);
     expect(insert.filter((entry) => entry.insert === 'slide')).toHaveLength(LAYOUTS.length);
     for (const entry of insert) expect(entry.row, entry.id).toBeDefined();
     for (const [id, row] of [
@@ -232,16 +246,19 @@ describe('presentPaletteEntries', () => {
     ]) {
       const entry = on.find((each) => each.id === id);
       expect(entry?.row, id).toBe(row);
-      expect(entry?.advanced, id).toBe(true);
+      expect(entry?.advanced, id).toBeUndefined();
     }
-    /* the parked entries name the row they leave with, or none for a grammar block */
+    /* every entry names the row it follows, or none for a grammar block; the parked ones carry the flag */
     const byId = new Map(on.map((entry) => [entry.id, entry]));
     expect(byId.get('insert:block:chart')?.row).toBe('insert.chart');
     expect(byId.get('insert:block:table')?.row).toBe('insert.table');
     expect(byId.get('insert:block:dia')?.row).toBe('insert.diagram');
     expect(byId.get('insert:block:icon')?.row).toBe('insert.icon');
+    expect(byId.get('insert:block:icon')?.advanced).toBe(true);
     expect(byId.get('insert:block:material')?.row).toBe('insert.material');
+    expect(byId.get('insert:block:material')?.advanced).toBe(true);
     expect(byId.get('insert:block:rule')?.row).toBe('insert.line.rule');
+    expect(byId.get('insert:block:rule')?.advanced).toBe(true);
     expect(byId.get('insert:block:plain')?.row).toBeUndefined();
     expect(byId.get('insert:block:plain')?.advanced).toBe(true);
   });

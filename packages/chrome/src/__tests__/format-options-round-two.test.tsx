@@ -341,15 +341,18 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(control('formatOptions.picture.reset').getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('draws no parked section with the switch off: Drop shadow, Shape, Alt text, Dither, Table and Chart data leave (docs/FOCUS.md 3.2)', () => {
+  it('draws no parked section with the switch off: Drop shadow, Alt text and Dither leave; Shape returned with the shapes (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15)', () => {
     panel('s');
     const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
       el.getAttribute('data-section'),
     );
-    for (const parked of ['shadow', 'shape', 'altText', 'dither', 'table', 'chart'])
+    for (const parked of ['shadow', 'altText', 'dither'])
       expect(sections, parked).not.toContain(parked);
     expect(sections).toContain('size');
     expect(sections).toContain('position');
+    /* the Shape section returned with Insert > Shape (RETURN.md 2.2); Table and Chart data return
+       with their blocks (2.4, 2.5) and are drawn for a table and a chart alone */
+    expect(sections).toContain('shape');
     expect(document.querySelector('[data-control="formatOptions.shadow.enable"]')).toBeNull();
   });
 

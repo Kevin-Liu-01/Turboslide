@@ -1,0 +1,124 @@
+{
+  "base": "http://localhost:4403",
+  "deck": "untitled-20260919-s26p",
+  "at": "2026-09-19T01:09:46.640Z",
+  "rows": [
+    {
+      "name": "guides.setup",
+      "ok": true,
+      "observed": "showGuides -> true; shown guide.x.400,guide.x.800,guide.y.450; deck.info guides {\"x\":[400,800],\"y\":[450]}",
+      "ms": 4012
+    },
+    {
+      "name": "guides.drag.fast",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 4526
+    },
+    {
+      "name": "guides.drag.fast.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 1
+    },
+    {
+      "name": "guides.drag.slow",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 5618
+    },
+    {
+      "name": "guides.drag.slow.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 2
+    },
+    {
+      "name": "guides.drag.fast.2",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 4527
+    },
+    {
+      "name": "guides.drag.fast.2.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 3
+    },
+    {
+      "name": "guides.cleanup",
+      "ok": true,
+      "observed": "showGuides -> false",
+      "ms": 4132
+    },
+    {
+      "name": "grid.effect",
+      "ok": true,
+      "observed": "snapGuides -> false; snapGrid -> true; grid on: 200 -> 240 (aimed 236); snapGrid -> false; grid off: 200 -> 236 (aimed 236)",
+      "ms": 14289
+    },
+    {
+      "name": "tab.from-slideshow",
+      "ok": false,
+      "observed": "with \"Title\" selected: focus button[present.open] -> button[present.open], chip -> \"Subtitle\", Tab defaultPrevented no key seen; nothing selected: focus -> button[present.open]",
+      "ms": 4706
+    },
+    {
+      "name": "connector.setup",
+      "ok": true,
+      "observed": "A box-a B box-b C box-c; advancedTools -> true",
+      "ms": 7592
+    },
+    {
+      "name": "connector.elbow.draw",
+      "ok": true,
+      "observed": "elbow shape {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} connect {\"start\":{\"block\":\"box-a\",\"site\":3},\"end\":{\"block\":\"box-b\",\"site\":1}}; site rings during 8",
+      "ms": 3298
+    },
+    {
+      "name": "connector.follows-moved-shape",
+      "ok": true,
+      "observed": "B y 300 -> 450; connector {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} -> {\"x\":440,\"y\":380,\"w\":460,\"h\":150,\"z\":4}",
+      "ms": 1972
+    },
+    {
+      "name": "connector.re-end",
+      "ok": true,
+      "observed": "site rings during 8; connect after {\"start\":{\"block\":\"box-a\",\"site\":3},\"end\":{\"block\":\"box-c\",\"site\":1}}; pos {\"x\":440,\"y\":380.5,\"w\":460,\"h\":319.5,\"z\":4} -> {\"x\":440,\"y\":380,\"w\":580,\"h\":320,\"z\":4} after C moved 120",
+      "ms": 3440
+    },
+    {
+      "name": "shape.draw.readout",
+      "ok": false,
+      "observed": "readout during \"null\" (marquee true); after null; drawn shape {\"x\":300,\"y\":300,\"w\":320,\"h\":200,\"z\":1}",
+      "ms": 4336
+    },
+    {
+      "name": "shape.look.both-appearances",
+      "ok": true,
+      "observed": "dark: fill rgba(242, 242, 240, 0.05) stroke rgb(242, 242, 240) 1px on rgb(7, 7, 7): fill seen true, stroke seen true | light: fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px on rgb(255, 255, 255): fill seen true, stroke seen true",
+      "ms": 4593
+    },
+    {
+      "name": "shape.label.enter",
+      "ok": true,
+      "observed": "session by Enter true; block.text \"Label\"",
+      "ms": 1478
+    },
+    {
+      "name": "shape.label.double-click",
+      "ok": true,
+      "observed": "session by double click true; caret 5/5 collapsed true; block.text \"Label2\"",
+      "ms": 984
+    }
+  ],
+  "consoleErrors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 239223",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7ov4qd-40c352 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7ov4qd-40c352 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7ov4qd-40c352 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7ov4qd-40c352 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 1",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

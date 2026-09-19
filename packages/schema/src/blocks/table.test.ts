@@ -15,6 +15,9 @@ import {
   applyTableCommand,
   emptyTable,
   tableSizeProblem,
+  columnShares,
+  columnsAfterSeamDrag,
+  TABLE_MIN_COLUMN_PX,
 } from './table.ts';
 import type { TableBlock, TableCommand } from './table.ts';
 
@@ -178,5 +181,119 @@ describe('the table block', () => {
     expect(table.rows[1]?.header).toBeUndefined();
     expect(table.rows.every((row) => row.cells.every((cell) => cell === ''))).toBe(true);
     expect(emptyTable('t', 2, 2, { header: false }).rows[0]?.header).toBeUndefined();
+  });
+});
+
+describe('column widths through the column commands (docs/RETURN.md 2.4 fix 4)', () => {
+  const sized = (): ReturnType<typeof emptyTable> => {
+    const table = emptyTable('t', 3, 2);
+    table.columns = [{ width: 240 }, { width: 480 }, { width: 240 }];
+    return table;
+  };
+  const widths = (columns: { width?: number }[]) => columns.map((column) => column.width);
+  const sum = (columns: { width?: number }[]) =>
+    columns.reduce((acc, column) => acc + (column.width ?? 0), 0);
+
+  it('gives an inserted column a width and keeps the total when the grid is sized', () => {
+    const edit = applyTableCommand(sized(), { kind: 'insertColumnRight', column: 0 });
+    if ('deleted' in edit) throw new Error('deleted');
+    expect(edit.columns).toHaveLength(4);
+    expect(edit.columns.every((column) => column.width !== undefined)).toBe(true);
+    expect(sum(edit.columns)).toBeCloseTo(960, 0);
+    // the new column takes an equal share, the others scale down by 3/4
+    expect(widths(edit.columns)).toEqual([180, 240, 360, 180]);
+  });
+
+  it('leaves an unsized grid unsized after an insert, as before', () => {
+    const edit = applyTableCommand(emptyTable('t', 3, 2), { kind: 'insertColumnLeft', column: 1 });
+    if ('deleted' in edit) throw new Error('deleted');
+    expect(edit.columns).toHaveLength(4);
+    expect(edit.columns.every((column) => column.width === undefined)).toBe(true);
+  });
+
+  it('counts an unsized column of a mixed grid at the mean and sizes every column after the insert', () => {
+    const table = emptyTable('t', 3, 2);
+    table.columns = [{ width: 200 }, {}, { width: 400 }];
+    const edit = applyTableCommand(table, { kind: 'insertColumnRight', column: 2 });
+    if ('deleted' in edit) throw new Error('deleted');
+    // the declared total is 200 + 300 (the mean) + 400 = 900; four columns of it
+    expect(sum(edit.columns)).toBeCloseTo(900, 0);
+    expect(edit.columns[3]?.width).toBe(225);
+    expect(edit.columns.every((column) => column.width !== undefined)).toBe(true);
+  });
+
+  it('gives the deleted column’s room to the columns left', () => {
+    const edit = applyTableCommand(sized(), { kind: 'deleteColumn', column: 1 });
+    if ('deleted' in edit) throw new Error('deleted');
+    expect(widths(edit.columns)).toEqual([480, 480]);
+  });
+
+  it('keeps the total through a counted insert and a ranged delete', () => {
+    const inserted = applyTableCommand(sized(), {
+      kind: 'insertColumns',
+      at: 1,
+      count: 2,
+      where: 'left',
+    });
+    if ('deleted' in inserted) throw new Error('deleted');
+    expect(inserted.columns).toHaveLength(5);
+    expect(sum(inserted.columns)).toBeCloseTo(960, 0);
+    const removed = applyTableCommand(
+      { ...sized(), columns: inserted.columns, rows: inserted.rows },
+      { kind: 'deleteColumns', from: 1, to: 2 },
+    );
+    if ('deleted' in removed) throw new Error('deleted');
+    expect(removed.columns).toHaveLength(3);
+    expect(sum(removed.columns)).toBeCloseTo(960, 0);
+  });
+});
+
+describe('columnShares, the grid template’s rule as numbers', () => {
+  it('shares a total equally when no column carries a width', () => {
+    expect(columnShares([{}, {}, {}], 960)).toEqual([320, 320, 320]);
+  });
+  it('scales a fully sized grid to the total', () => {
+    expect(columnShares([{ width: 100 }, { width: 300 }], 800)).toEqual([200, 600]);
+  });
+  it('keeps a set width in px and shares the rest among the unset columns', () => {
+    expect(columnShares([{ width: 160 }, {}, {}], 960)).toEqual([160, 400, 400]);
+    expect(columnShares([{ width: 1000 }, {}], 960)).toEqual([1000, 0]);
+  });
+  it('answers zeros for a total of 0 and nothing for no columns', () => {
+    expect(columnShares([{}, {}], 0)).toEqual([0, 0]);
+    expect(columnShares([], 960)).toEqual([]);
+  });
+});
+
+describe('columnsAfterSeamDrag, the column seam handle (docs/RETURN.md 2.4 fix 5)', () => {
+  it('widens the left column by the drag and narrows its neighbour, sizing every column', () => {
+    const out = columnsAfterSeamDrag([{}, {}, {}], 960, 0, 80);
+    expect(out).not.toBeNull();
+    expect(out?.left).toBe(400);
+    expect(out?.right).toBe(240);
+    expect(out?.columns.map((column) => column.width)).toEqual([400, 240, 320]);
+  });
+  it('drags backwards and keeps the other columns at their drawn widths', () => {
+    const out = columnsAfterSeamDrag(
+      [{ width: 240 }, { width: 480 }, { width: 240 }],
+      960,
+      1,
+      -100,
+    );
+    expect(out?.columns.map((column) => column.width)).toEqual([240, 380, 340]);
+  });
+  it('stops at the smallest column on either side', () => {
+    const out = columnsAfterSeamDrag([{}, {}], 960, 0, 10_000);
+    expect(out?.right).toBe(TABLE_MIN_COLUMN_PX);
+    expect(out?.left).toBe(960 - TABLE_MIN_COLUMN_PX);
+    const back = columnsAfterSeamDrag([{}, {}], 960, 0, -10_000);
+    expect(back?.left).toBe(TABLE_MIN_COLUMN_PX);
+  });
+  it('answers null for a click, a seam off the grid and a pair too narrow to move', () => {
+    expect(columnsAfterSeamDrag([{}, {}], 960, 0, 0)).toBeNull();
+    expect(columnsAfterSeamDrag([{}, {}], 960, 0, 0.3)).toBeNull();
+    expect(columnsAfterSeamDrag([{}, {}], 960, 1, 40)).toBeNull();
+    expect(columnsAfterSeamDrag([{}, {}], 960, -1, 40)).toBeNull();
+    expect(columnsAfterSeamDrag([{}, {}], 60, 0, 40)).toBeNull();
   });
 });

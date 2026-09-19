@@ -4,7 +4,9 @@
 // paragraph appears only while every row of that feature passes; the count of rows that hold a
 // feature back is computed, never typed. Every paragraph below is the text of FOCUS.md section 7
 // verbatim (`what-works.test.mjs` asserts it), so the specification and the README cannot drift.
-// Node only; no dependency.
+// The return round (docs/RETURN.md section 7) added the paragraphs of the features that return:
+// tables, charts, diagrams, word art, formatting, the chrome, the View menu and the notifications;
+// each is shown only while every row of its feature passes. Node only; no dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the
@@ -187,6 +189,62 @@ export const FEATURES = [
     heading: 'Help',
     paragraph:
       '**Help.** Search the menus (Option+/) finds any menu row by name; Help > Keyboard shortcuts lists the chords; Help > Help lists the ten most common tasks with a link to the guides.',
+    shots: [],
+  },
+  {
+    key: 'tables',
+    heading: 'Tables',
+    paragraph:
+      "**Tables.** Insert > Table places a table from a grid of columns and rows. Double click a cell to type, Tab to move to the next cell, Tab on the last cell to add a row. Rows and columns are added and deleted from the cell's right click menu and from Format > Table. Align a cell from the toolbar or the Format menu. Drag a column edge to resize it. The table draws in the show, the PDF and the PowerPoint file.",
+    shots: [],
+  },
+  {
+    key: 'charts',
+    heading: 'Charts',
+    paragraph:
+      '**Charts.** Insert > Chart adds a bar, column, line or pie chart with sample data. The numbers are edited in the Format options panel, in the deck; there is no spreadsheet to open. Change the chart type, add a series or a category, resize the chart by its handles. The chart draws in the show and in the PDF, and the PowerPoint file carries it as a native chart.',
+    shots: [],
+  },
+  {
+    key: 'diagrams',
+    heading: 'Diagrams',
+    paragraph:
+      '**Diagrams.** Insert > Diagram opens a panel of six diagram types with a step count and three styles; the diagram lands as one group and moves as one; double click a box to edit its label.',
+    shots: [],
+  },
+  {
+    key: 'wordart',
+    heading: 'Word art',
+    paragraph:
+      '**Word art.** Insert > Word art places a large outlined text, edited in place by a double click.',
+    shots: [],
+  },
+  {
+    key: 'formatting',
+    heading: 'Formatting',
+    paragraph:
+      '**Formatting.** Superscript, subscript and capitalization from the Format menu, the right click menu and the keyboard; justified alignment; space before and after a paragraph and custom spacing; highlight colour; Paint format copies a look, including the size, from one object to another. Distribute, rotate, flip, group and ungroup are in the Arrange menu. Slide > Change theme switches the deck between the light and dark appearance.',
+    shots: [],
+  },
+  {
+    key: 'chrome',
+    heading: "The editor's chrome",
+    paragraph:
+      "**The editor's chrome.** The Slideshow button and its options menu are one control; Enter, Space and ArrowDown work on it. Every row of the editor draws one hairline at its boundary, and the title row's controls share one height and one corner.",
+    shots: [],
+  },
+  {
+    key: 'view',
+    heading: 'The View menu',
+    paragraph:
+      '**The View menu.** View > Appearance sets the chrome to light or dark; Show filmstrip, Full screen and the editing modes are in the View menu, with the rulers, the guides and the snaps for arranging objects.',
+    shots: [],
+  },
+  {
+    key: 'inbox',
+    heading: 'Notifications',
+    paragraph:
+      '**Notifications.** The bell in the title row lists the replies and mentions on a shared deck, and Tools > Notification settings keeps the level a seller picks.',
     shots: [],
   },
   {

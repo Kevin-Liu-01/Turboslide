@@ -8,6 +8,7 @@ import { presenterActionIds, registerStudioAutomation } from '@turboslide/agent/
 import { detectPlatform } from '@turboslide/chrome/menus/platform';
 import { Toast, useToast } from '@turboslide/chrome/Toast';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
 import { slideTitle } from '@turboslide/schema/deck';
@@ -81,6 +82,8 @@ export function presenterSlides(
         kind: slide.kind,
         sectionId: section.id,
         html: rendered.html,
+        /* the presenter's frames follow Insert > Slide numbers like the show's (render/deck.ts slideCounter) */
+        counter: slideCounter(deck, slide, 1, 1) !== '',
         ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
       });
     }

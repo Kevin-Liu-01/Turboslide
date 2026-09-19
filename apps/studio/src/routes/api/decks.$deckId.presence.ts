@@ -10,6 +10,7 @@ import {
   PRESENCE_EXPIRY_MS,
   clientBoundTo,
   decideFor,
+  leavePresence,
   presenceBudget,
   readJsonBody,
   refuseCrossSite,
@@ -27,7 +28,10 @@ import type { RequestIdentity } from '../../server/room';
  * what the client owns (`clientId`, `clock`, `slideId`, `selection`, `pointer`, `follow`,
  * `pointerOn`, `presenting`); an identity field in the body is `unknown_field` (report 10 F31)
  * and the server writes the identity from the session into the roster. `?leave=1` removes the
- * entry (a closing tab's beacon). The client binding is refreshed on every state.
+ * entry (a closing tab's beacon) and hands the beacon's clock to the roster, so a state of the
+ * same tab whose handler runs after the leave (the roster read below takes a head and a get on
+ * the blob tier) never brings the row back (room.ts `leavePresence`; b4.md C3T-R2). The client
+ * binding is refreshed on every state.
  */
 
 export const Route = createFileRoute('/api/decks/$deckId/presence')({
@@ -103,7 +107,7 @@ async function serveState(
   if (!decision.ok) return jsonResponse(denialBody(decision, 'presence'), decision.status);
   const url = new URL(request.url);
   if (url.searchParams.get('leave') === '1') {
-    await room.channel.presence.leave(deckId, state.clientId);
+    await leavePresence(room, state.clientId, state.clock);
     return jsonResponse({ ok: true, left: true });
   }
   if (!(await presenceBudget(room, state.clientId))) {

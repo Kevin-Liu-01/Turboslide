@@ -171,7 +171,10 @@ const RESIZE_NAMES: Record<string, string> = {
 export function handleDoc(handle: Handle): string {
   switch (handle.kind) {
     case 'col-seam':
-      return 'Drag to set the column ratio: snaps to 4/8, 5/7 and 1/1, then 10 px steps. Left and Right step it.';
+      /* the layout's column seam, or a table's (docs/RETURN.md 2.4 fix 5; table-seam.ts carries the block) */
+      return handle.blockId !== undefined
+        ? 'Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px.'
+        : 'Drag to set the column ratio: snaps to 4/8, 5/7 and 1/1, then 10 px steps. Left and Right step it.';
     case 'plate-width':
       return 'Drag the plate edge: snaps to the plate widths. Left and Right step it.';
     case 'plate-side':
@@ -436,7 +439,9 @@ export function Overlay({ view }: OverlayProps) {
       ? CANVAS.rotation(Math.round(view.rotation))
       : view.sizeReadout !== null
         ? CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))
-        : null;
+        : view.widthReadout !== null
+          ? CANVAS.width(Math.round(view.widthReadout))
+          : null;
   return (
     <>
       {view.rulers ? (

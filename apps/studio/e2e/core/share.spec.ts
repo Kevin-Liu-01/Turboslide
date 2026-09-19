@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { BrowserContext, Locator, Page } from '@playwright/test';
 
 import {
   Scratch,
@@ -37,7 +37,9 @@ import {
 // between two browsers within 5 s three times of three, the presence chips, a rename reaching the
 // second browser, the view and present links leaving skipped slides and notes out, a comment
 // reaching the second browser, and a restore on a deck two browsers wrote into. The owner is one
-// context; every other person is a fresh context with no cookie of the owner's.
+// context; every other person is a fresh context with no cookie of the owner's. The return round
+// (docs/RETURN.md section 5) adds the roster's Go to slide, the second browser's live pointer and
+// the notification that arrives from a second browser's mention.
 //
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/share.spec.ts
 
@@ -84,6 +86,78 @@ async function closeShare(p: Page = page): Promise<void> {
   else await ctl(p, 'dialog.share.close').click();
   await expect(ctl(p, 'dialog.share')).toHaveCount(0, { timeout: 5000 });
 }
+
+// ---------------------------------------------------------------------------------------------
+// the second person's tab: its client id, its roster and the way it leaves
+
+const CLIENT_ID = /^[0-9a-f]{32}$/;
+/** The tab's own client id once the stream's hello has minted it (32 hex characters, report 10 F26). */
+async function ownClientId(p: Page): Promise<string> {
+  await expect
+    .poll(async () => (await state(p)).presence?.clientId ?? '', { timeout: 15_000 })
+    .toMatch(CLIENT_ID);
+  return (await state(p)).presence.clientId ?? '';
+}
+/** The client ids the tab's roster lists beside its own (`describe().state.presence.others`). */
+async function othersOf(p: Page): Promise<string[]> {
+  return ((await state(p)).presence?.others ?? []).map((row) => row.clientId);
+}
+/** One client's chip in the title row's four slots (PresenceSlot.tsx `presence.chip.<id>`). */
+const chipOf = (p: Page, clientId: string): Locator =>
+  p.locator(`[data-control="presence.chip.${clientId}"]`);
+/** When each second tab navigated away, by its client id, for the roster readings of the rows after it. */
+const leftAt = new Map<string, number>();
+
+/**
+ * Closes a second person's context the way their tab closes: a navigation to `about:blank`
+ * first, which fires `pagehide` and lets the room client post its leave with keepalive (b7's
+ * SF-R1; t2.md section 1 proved the client's half), then the context. A context closed under
+ * the beacon cancels it, and a row whose leave never landed stays in every roster for the
+ * record's 30 s life on the blob tier (VERIFICATION.md C3T-F1: `collab.presence-chips` read its
+ * `before` count while two such rows of the collaboration rows' closed contexts were alive). The
+ * leave warning of EditorRoot.tsx fires only with a pending write, so a page with a client id
+ * waits for its pending count to read zero first (up to 5 s, through `describe()` alone: lib's
+ * `settled` reads the `deck.saveState` control, which a viewer's page does not carry, and its
+ * locator read has no action timeout, so it held the two cannot edit rows to the test timeout
+ * on the first run of this round) and a dialog is accepted either way. When the page held a
+ * client id, the owner's roster is given up to 3 s to drop it before the context closes, so no
+ * POST is cut in flight; a roster that keeps the row is not this helper's claim
+ * (`collab.presence-chips` judges the leave) and the context closes all the same, the
+ * navigation's time kept in `leftAt`.
+ */
+async function closeSecond(other: BrowserContext, p: Page): Promise<void> {
+  try {
+    if (p.isClosed() || !/^https?:/.test(p.url())) return;
+    const joined = await state(p)
+      .then((s) => s.presence?.clientId ?? null)
+      .catch(() => null);
+    if (joined !== null)
+      await expect
+        .poll(
+          () =>
+            state(p)
+              .then((s) => s.sync?.pending ?? 0)
+              .catch(() => 0),
+          { timeout: 5000 },
+        )
+        .toBe(0)
+        .catch(() => undefined);
+    p.once('dialog', (dialog) => void dialog.accept().catch(() => undefined));
+    const t = Date.now();
+    await p.goto('about:blank', { timeout: 10_000 }).catch(() => undefined);
+    if (joined !== null) {
+      leftAt.set(joined, t);
+      if (!page.isClosed())
+        await expect
+          .poll(() => othersOf(page).catch(() => [joined]), { timeout: 3000 })
+          .not.toContain(joined)
+          .catch(() => undefined);
+    }
+  } finally {
+    await other.close();
+  }
+}
+
 /* since the focus round the rows hand out no plain address: Copy link mints a share link with the
    row's role (viewer, viewer opening as a show, editor) and copies `<origin>/s/<token>`, the Present
    row's with `?present=1`, and a second Copy link on the same browser sends the same address
@@ -191,7 +265,7 @@ async function landingOf(browser: import('@playwright/test').Browser, url: strin
     const landed = new URL(visitor.url());
     return { path: landed.pathname, search: landed.search };
   } finally {
-    await other.close();
+    await closeSecond(other, visitor);
   }
 }
 
@@ -278,7 +352,7 @@ test(title('share.view-link-lands-viewer'), async ({ browser }) => {
     await expect(ctl(viewer, 'menubar'), 'no editor chrome').toHaveCount(0);
     await expect(ctl(viewer, 'toolbar'), 'no toolbar').toHaveCount(0);
   } finally {
-    await other.close();
+    await closeSecond(other, viewer);
   }
 });
 
@@ -297,7 +371,7 @@ test(title('share.edit-link-lands-editor'), async ({ browser }) => {
       'editing',
     );
   } finally {
-    await other.close();
+    await closeSecond(other, editor);
   }
 });
 
@@ -375,7 +449,7 @@ test(title('share.view-link-cannot-edit'), async ({ browser }) => {
     expect(after.includes('intruder'), "the viewer's typing never reaches the owner").toBe(false);
     void before;
   } finally {
-    await other.close();
+    await closeSecond(other, viewer);
   }
 });
 
@@ -394,7 +468,7 @@ test(title('share.stranger-cannot-edit'), async ({ browser }) => {
     const verdict = await cannotEdit(stranger, deck);
     expect(verdict.ok, verdict.why).toBe(true);
   } finally {
-    await other.close();
+    await closeSecond(other, stranger);
   }
 });
 
@@ -469,7 +543,7 @@ test(title('collab.edit-from-second-browser'), async ({ browser }) => {
       `three of three within 5 s (${times.join(', ')} ms)`,
     ).toBe(true);
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
@@ -503,7 +577,7 @@ test(title('collab.edit-from-owner'), async ({ browser }) => {
       `three of three within 5 s (${times.join(', ')} ms)`,
     ).toBe(true);
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
@@ -531,19 +605,66 @@ test(title('collab.slide-added-appears'), async ({ browser }) => {
       `three of three within 5 s (${times.join(', ')} ms)`,
     ).toBe(true);
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
 test(title('collab.presence-chips'), async ({ browser }) => {
   test.setTimeout(180_000);
   await openEditor(page, deck);
+  const owner = await ownClientId(page);
+  /* the row reads the second tab by its client id, never by a count: VERIFICATION.md C3T-F1 read
+     the row's `before` count while rows of the earlier rows' closed second contexts were alive on
+     the shared record (12 to 30 s after their close on the blob tier) and its navigation while
+     the second tab's first presence post was still in flight, so the owner's count never fell
+     below `before` and the row failed on rows that were not its tab's. Here the owner's roster
+     must show the second tab's own chip first (the matrix's 10 s), which proves its presence has
+     landed on the owner's view before the tab leaves, and the leave is judged on that chip alone.
+     The four slots fill in join order (presence-model.ts slotChips), so a chip is in the +N count
+     while four other rows are alive: the row waits for a free slot, bounded by the record's 30 s
+     life plus the poll, and records the rows that stayed with the time since their tab left
+     (`leftAt`, kept by closeSecond) for the verifier; a row that outlives its tab is the
+     product's half of C3T-F1 (b4.md, the request to b7) and is not this row's claim */
+  const t0 = Date.now();
+  const stale = await othersOf(page);
+  await expect
+    .poll(async () => (await othersOf(page)).length, {
+      timeout: 35_000,
+      message: "a free chip slot on the owner's tab (fewer than four other rows)",
+    })
+    .toBeLessThan(4);
+  const staleNow = await othersOf(page);
+  const ages = stale.map((id) => {
+    const at = leftAt.get(id);
+    return at === undefined
+      ? `${id.slice(0, 8)} unknown`
+      : `${id.slice(0, 8)} left ${t0 - at} ms ago`;
+  });
+  test.info().annotations.push({
+    type: 'presence roster before',
+    description:
+      `${stale.length} row(s) of closed tabs in the owner's roster at the row's start` +
+      (ages.length > 0 ? ` (${ages.join(', ')})` : '') +
+      `; ${staleNow.length} after ${Date.now() - t0} ms`,
+  });
   const { context: other, page: second } = await secondEditor(browser);
-  const chips = (p: Page) => p.locator('[data-control^="presence.chip."]').count();
   try {
-    await expect.poll(() => chips(page), { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
-    await expect.poll(() => chips(second), { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
-    const before = await chips(page);
+    const guest = await ownClientId(second);
+    /* both tabs show the other person within 10 s */
+    const shown = Date.now();
+    await expect(
+      chipOf(page, guest),
+      "the owner's tab shows the second tab's chip within 10 s",
+    ).toHaveCount(1, { timeout: 10_000 });
+    const ownerSaw = Date.now() - shown;
+    await expect(
+      chipOf(second, owner),
+      "the second tab shows the owner's chip within 10 s",
+    ).toHaveCount(1, { timeout: 10_000 });
+    test.info().annotations.push({
+      type: 'presence join',
+      description: `the owner's tab showed the second tab's chip ${ownerSaw} ms after its hello; both tabs show the other within ${Date.now() - shown} ms`,
+    });
     /* the second tab closes the way a person's does: a navigation away fires `pagehide`, the
        controller stops and the room client posts `POST /presence?leave=1` with keepalive, which the
        browser carries across the navigation (EditorRoot.tsx onPageHide, room-client.ts stop).
@@ -551,7 +672,7 @@ test(title('collab.presence-chips'), async ({ browser }) => {
        C3S-F3 shows no leave, pass 1's one at status -1), so the chip lived the roster record's
        30 s life and the row's 30 s bound sat inside it (b7's SF-R1). The bound stays the matrix's
        30 s: with the leave delivered the chip goes within the leave's push and the poll (5 s and
-       2 s on the blob tier, at once on the memory channel), and without it the row fails as
+       5 s on the blob tier, at once on the memory channel), and without it the row fails as
        before. The context closes only after the owner's tab has read the leave, so no beacon is
        cut under it; the leave warning of EditorRoot.tsx fires only with a pending write, which
        `settled` rules out, and a dialog is accepted so the navigation goes through either way.
@@ -563,13 +684,19 @@ test(title('collab.presence-chips'), async ({ browser }) => {
     second.once('dialog', (dialog) => void dialog.accept().catch(() => undefined));
     const t = Date.now();
     await second.goto('about:blank');
-    await expect.poll(() => chips(page), { timeout: 30_000 }).toBeLessThan(before);
+    leftAt.set(guest, t);
+    await expect(
+      chipOf(page, guest),
+      "the second tab's chip leaves the owner's tab within 30 s of its tab closing",
+    ).toHaveCount(0, { timeout: 30_000 });
+    const gone = Date.now() - t;
+    const listed = (await othersOf(page)).includes(guest);
     test.info().annotations.push({
       type: 'presence leave',
-      description: `the owner's chip left ${Date.now() - t} ms after the second tab navigated away`,
+      description: `the second tab's chip left the owner's tab ${gone} ms after it navigated away${listed ? ' (its roster row is still listed)' : ''}`,
     });
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
@@ -590,7 +717,7 @@ test(title('collab.rename-reaches-second-browser'), async ({ browser }) => {
     });
     await expect.poll(() => second.title(), { timeout: 5000 }).toContain(name);
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
@@ -629,7 +756,7 @@ test(title('share.view-link-excludes-skipped-and-notes'), async ({ browser }) =>
       'the skipped slide is out',
     ).toBe(false);
   } finally {
-    await other.close();
+    await closeSecond(other, viewer);
   }
 });
 
@@ -652,7 +779,7 @@ test(title('share.present-link-excludes-skipped'), async ({ browser }) => {
       { timeout: 30_000 },
     );
   } finally {
-    await other.close();
+    await closeSecond(other, viewer);
   }
 });
 
@@ -672,9 +799,20 @@ test(title('comments.reaches-second-browser'), async ({ browser }) => {
     await page.keyboard.type('Please check the totals.', { delay: 40 });
     await ctl(page, 'comment.card.new.submit').click();
     const t = Date.now();
+    /* on the blob tier the thread reaches the second browser's instance through the deck pulse
+       and the comments index watcher (comments-store.ts `watchSidecarIndex`; VERIFICATION.md
+       C2-F28, C3T-F3: the watcher took an index its mirror had pulled for the owner's read back
+       as its own push and announced nothing). A failure names what the second tab knew when the
+       wait ended, so a stream that was down reads apart from an announcement that never came */
     await expect
       .poll(async () => ((await state(second)).comments?.threads ?? []).length, { timeout: 10_000 })
-      .toBe(before + 1);
+      .toBe(before + 1)
+      .catch(async (error: unknown) => {
+        const after = await state(second).catch(() => null);
+        throw new Error(
+          `the second browser lists ${after?.comments?.threads.length ?? 'no'} thread(s) ${Date.now() - t} ms after the owner's submit, ${before + 1} expected (its stream connected ${String(after?.sync.connected)}, pending ${String(after?.sync.pending)}, comments loaded ${String(after?.comments?.loaded)}): ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
     expect(Date.now() - t).toBeLessThan(10_000);
     /* the Comments panel of the second browser lists it */
     const slot = second.locator('[data-control="title.comments.slot"] button').first();
@@ -685,7 +823,7 @@ test(title('comments.reaches-second-browser'), async ({ browser }) => {
       });
     }
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
 });
 
@@ -711,7 +849,7 @@ test(title('versions.restore'), async ({ browser }) => {
       .poll(async () => JSON.stringify(await slideJson(page, first)), { timeout: 10_000 })
       .toContain('written by the second browser');
   } finally {
-    await other.close();
+    await closeSecond(other, second);
   }
   /* the owner names the current version, changes the deck, then restores */
   await clickCard(page, first);
@@ -754,18 +892,358 @@ test(title('versions.restore'), async ({ browser }) => {
   expect(noticeText ?? '', `the panel's notice (${noticeText ?? 'none'})`).not.toMatch(
     /refused|stale|failed|cannot/i,
   );
-  await expect
-    .poll(async () => JSON.stringify(await slideJson(page, first)), {
-      timeout: 5000,
-      message: `the restore lands within 5 s (panel notice ${noticeText ?? 'none'})`,
-    })
-    .toContain('written by the second browser');
-  expect(Date.now() - t).toBeLessThan(5000);
+  /* the row's bound is the matrix's 5 s; the document is read past it, to 20 s, so a miss names
+     the time the restore took rather than "not within 5 s" alone (VERIFICATION.md R2-F3: one red
+     of three on the preview under a machine load of 50 to 133, passed on every quiet run) */
+  let landedMs: number | null = null;
+  for (;;) {
+    if (JSON.stringify(await slideJson(page, first)).includes('written by the second browser')) {
+      landedMs = Date.now() - t;
+      break;
+    }
+    if (Date.now() - t > 20_000) break;
+    await page.waitForTimeout(200);
+  }
+  test.info().annotations.push({
+    type: 'restore',
+    description: `the restored document carried the second browser's text after ${landedMs ?? 'more than 20000'} ms (panel notice ${noticeText ?? 'none'})`,
+  });
+  expect(
+    landedMs,
+    `the restore lands within 5 s: the text ${landedMs === null ? 'did not land within 20 s' : `landed after ${landedMs} ms`} (panel notice ${noticeText ?? 'none'})`,
+  ).not.toBeNull();
+  expect(landedMs!, `the restore lands within 5 s (it took ${landedMs} ms)`).toBeLessThan(5000);
   const snack = await ctl(page, 'snackbar')
     .textContent()
     .catch(() => '');
   expect(snack ?? '', 'no refusal').not.toMatch(/version log breaks|changed outside the store/);
 });
+
+// ---------------------------------------------------------------------------------------------
+// the return round's rows (docs/RETURN.md 2.16, 2.17, section 5)
+
+/** Turns Tools > Advanced tools on in a page when a menubar row is absent; answers whether it did. */
+async function reachMenuRow(p: Page, menuId: string, ...rowIds: string[]): Promise<boolean> {
+  const present = async () => {
+    await ctl(p, `menubar.${menuId}`).click();
+    await p.locator(`#ts-menu-${menuId}`).waitFor({ timeout: 8000 });
+    for (let i = 0; i < rowIds.length - 1; i += 1) {
+      const row = ctl(p, `menu.${rowIds[i]}`);
+      if ((await row.count()) === 0) break;
+      await row.hover();
+      await p.waitForTimeout(350);
+    }
+    const drawn = (await ctl(p, `menu.${rowIds[rowIds.length - 1]}`).count()) > 0;
+    await p.keyboard.press('Escape');
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+    return drawn;
+  };
+  if (await present()) return false;
+  await menuPath(p, 'tools', 'tools.advancedTools');
+  await expect
+    .poll(async () => (await state(p)).settings?.['advancedTools'] === true, { timeout: 5000 })
+    .toBe(true);
+  return true;
+}
+async function switchOff(p: Page): Promise<void> {
+  if ((await state(p)).settings?.['advancedTools'] === true)
+    await menuPath(p, 'tools', 'tools.advancedTools');
+}
+
+test(title('collab.roster.go-to-slide'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const order = await slideOrder(page);
+  await clickCard(page, order[0]!);
+  const { context: other, page: second } = await secondEditor(browser);
+  let switched = false;
+  try {
+    const guest = await ownClientId(second);
+    await ownClientId(page);
+    /* the second browser moves to the last slide; the owner's chip row follows */
+    const last = order[order.length - 1]!;
+    await clickCard(second, last);
+    await expect(chipOf(page, guest), "the second tab's chip on the owner's tab").toHaveCount(1, {
+      timeout: 10_000,
+    });
+    /* the roster's own record of the guest's slide, as the owner's tab holds it
+       (`describe().state.presence.others[].slideId`, the row `goToClient` reads: controller.tsx
+       `latest().roster.find(...)`, then `shell.select(target.slideId)`). It is read to the last
+       slide before the click, within the matrix's 10 s for a presence change to reach the other
+       tab, so the row names its half on a miss: a record that still carries the guest's first
+       slide is the store's (VERIFICATION.md R2-F1: three preview runs read the owner landing on
+       `title`, the guest's first slide, after the click), and a click that does not jump with the
+       record right is the chip's */
+    const guestSlide = async (): Promise<string | null> => {
+      const rows = ((await state(page)).presence?.others ?? []) as {
+        clientId: string;
+        slideId?: string;
+      }[];
+      return rows.find((row) => row.clientId === guest)?.slideId ?? null;
+    };
+    const t0 = Date.now();
+    let rosterMs: number | null = null;
+    for (;;) {
+      if ((await guestSlide()) === last) {
+        rosterMs = Date.now() - t0;
+        break;
+      }
+      if (Date.now() - t0 > 10_000) break;
+      await page.waitForTimeout(250);
+    }
+    const rosterSlide = await guestSlide();
+    test.info().annotations.push({
+      type: 'roster',
+      description: `the owner's record of the guest's slide read ${rosterSlide ?? 'none'} (expected ${last}) after ${rosterMs ?? 'more than 10000'} ms`,
+    });
+    expect(
+      rosterSlide,
+      `the owner's roster carries the guest's slide within 10 s (read ${rosterSlide ?? 'none'}, expected ${last}: the record's half, not the chip's)`,
+    ).toBe(last);
+    /* Go to slide: the chip itself is the row (PresenceSlot.tsx, data-menu-item
+       title.presence.goTo); a click jumps to the person's slide */
+    const chipItem = await chipOf(page, guest).getAttribute('data-menu-item');
+    await chipOf(page, guest).click({ timeout: 5000 });
+    await expect
+      .poll(async () => (await state(page)).slideId, {
+        timeout: 8000,
+        message: `Go to slide jumps (the owner's record read ${last} after ${rosterMs} ms, so a miss is the chip's click)`,
+      })
+      .toBe(last);
+    /* the roster: RosterMenu opens from the +N button alone (PresenceSlot.tsx presence.more);
+       with the chips fitting, B1's 4.3 draws that button at opacity 0 with pointer-events none
+       (is-empty at more === 0), so the roster has no opener a person can reach. The row measures
+       that as it stands: the button's state is read, the roster opened when it takes a pointer */
+    const more = ctl(page, 'presence.more');
+    const moreTakesPointer = await more
+      .evaluate(
+        (el) =>
+          !el.classList.contains('is-empty') &&
+          getComputedStyle(el).pointerEvents !== 'none' &&
+          getComputedStyle(el).opacity !== '0',
+      )
+      .catch(() => false);
+    let rowText = '';
+    let ownDrawn = false;
+    if (moreTakesPointer) {
+      await more.click({ timeout: 5000 });
+      const row = page.locator(`[data-control="presence.roster.${guest}"]`).first();
+      await row.waitFor({ timeout: 8000 });
+      rowText = (await row.textContent()) ?? '';
+      expect(rowText, 'the row names the slide and the role').toMatch(/slide \d+/i);
+      expect(rowText).toMatch(/viewer|editor|owner/i);
+      await page.keyboard.press('Escape');
+      /* the own row opens the account menu (its plate is parked: drawn with the switch on) */
+      switched = await reachMenuRow(page, 'tools', 'tools.advancedTools').catch(() => false);
+      if ((await state(page)).settings?.['advancedTools'] !== true)
+        await menuPath(page, 'tools', 'tools.advancedTools');
+      await more.click({ timeout: 5000 });
+      const own = page
+        .locator('[data-control^="presence.roster."][data-menu-item="title.presence.me"]')
+        .first();
+      ownDrawn = (await own.count()) > 0;
+      if (ownDrawn) {
+        await own.click({ timeout: 5000 });
+        await expect(
+          page.locator('[data-control^="account."]').first(),
+          'the own row opens the account menu',
+        ).toBeVisible({ timeout: 5000 });
+        await page.keyboard.press('Escape');
+      }
+    }
+    test.info().annotations.push({
+      type: 'roster',
+      description: `chip item ${chipItem}; +N takes a pointer ${moreTakesPointer}; row "${rowText.trim()}"; own row drawn with the switch on ${ownDrawn}`,
+    });
+    expect(
+      moreTakesPointer,
+      'the roster has an opener with one collaborator present (the +N button is drawn at opacity 0 with pointer-events none while the chips fit, PresenceSlot.tsx is-empty at more === 0)',
+    ).toBe(true);
+    expect(ownDrawn, 'the own row is listed with the switch on').toBe(true);
+  } finally {
+    if (switched) await switchOff(page).catch(() => undefined);
+    await closeSecond(other, second);
+  }
+});
+
+test(title('view.live-pointers.second-browser'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const switched = await reachMenuRow(
+    page,
+    'view',
+    'view.livePointers',
+    'view.livePointers.collaborators',
+  );
+  const pointersOn = async (p: Page) => (await state(p)).settings?.['pointerOthers'] === true;
+  if (!(await pointersOn(page)))
+    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+  await expect.poll(() => pointersOn(page), { timeout: 5000 }).toBe(true);
+  const { context: other, page: second } = await secondEditor(browser);
+  try {
+    await clickCard(second, first);
+    const guest = await ownClientId(second);
+    await expect(chipOf(page, guest)).toHaveCount(1, { timeout: 10_000 });
+    /* the second browser shows its own pointer (View > Live pointers > Show my pointer, the sender's half) */
+    const mineOn = async () => (await state(second)).settings?.['pointerMine'] === true;
+    const secondSwitched = await reachMenuRow(
+      second,
+      'view',
+      'view.livePointers',
+      'view.livePointers.mine',
+    );
+    if (!(await mineOn()))
+      await menuPath(second, 'view', 'view.livePointers', 'view.livePointers.mine');
+    await expect.poll(mineOn, { timeout: 5000 }).toBe(true);
+    const sheet = (await second
+      .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)')
+      .first()
+      .boundingBox())!;
+    const pointers = () => page.locator('.ts-remote-pointer-group').count();
+    const sweep = async () => {
+      for (let i = 0; i < 6; i += 1) {
+        await second.mouse.move(
+          sheet.x + sheet.width * (0.3 + i * 0.05),
+          sheet.y + sheet.height * (0.4 + i * 0.03),
+        );
+        await second.waitForTimeout(150);
+      }
+    };
+    const t = Date.now();
+    await sweep();
+    /* polled for 10 s so a late pointer is on record; the row's 2 s bound is judged below */
+    let drawnAfter: number | null = null;
+    await expect
+      .poll(
+        async () => {
+          if ((await pointers()) > 0) {
+            drawnAfter ??= Date.now() - t;
+            return true;
+          }
+          await sweep();
+          return false;
+        },
+        {
+          timeout: 10_000,
+          message: "the second browser's pointer is drawn on the first within 10 s",
+        },
+      )
+      .toBe(true);
+    expect(
+      drawnAfter,
+      `the second browser's pointer is drawn on the first within 2 s (drawn after ${drawnAfter} ms)`,
+    ).toBeLessThanOrEqual(2000 + 900);
+    /* with the row off it is not */
+    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+    await expect.poll(() => pointersOn(page), { timeout: 5000 }).toBe(false);
+    await sweep();
+    await page.waitForTimeout(1500);
+    const off = await pointers();
+    test.info().annotations.push({
+      type: 'pointer',
+      description: `drawn ${drawnAfter} ms after the sweep began; with the row off ${off}`,
+    });
+    expect(off, 'no pointer with Show collaborator pointers off').toBe(0);
+    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+    if (secondSwitched) await switchOff(second);
+  } finally {
+    await closeSecond(other, second);
+    if (switched) await switchOff(page).catch(() => undefined);
+  }
+});
+
+test(title('inbox.notification-arrives'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  /* the inbox plate is parked: the bell is drawn with the switch on */
+  const switched = await reachMenuRow(page, 'tools', 'tools.notificationSettings');
+  if ((await state(page)).settings?.['advancedTools'] !== true)
+    await menuPath(page, 'tools', 'tools.advancedTools');
+  await expect(ctl(page, 'title.inbox'), 'the bell is drawn').toBeVisible({ timeout: 8000 });
+  const unread = async () =>
+    Number((await ctl(page, 'title.inbox').getAttribute('data-unread')) ?? '0');
+  const before = await unread();
+  /* the first browser's principal, read from its own state, is what the second browser mentions */
+  const me = await page.evaluate(() => {
+    const s = window.turboslide!.studio.describe().state as unknown as {
+      author?: { principalId?: string; id?: string; name?: string };
+      account?: { principalId?: string };
+      presence?: { me?: { principalId?: string } };
+    };
+    return (
+      s.author?.principalId ??
+      s.account?.principalId ??
+      s.presence?.me?.principalId ??
+      s.author?.id ??
+      null
+    );
+  });
+  const { context: other, page: second } = await secondEditor(browser);
+  try {
+    await clickCard(second, first);
+    const heads = await runsOfBlock(second, 'collab-box');
+    const blockId = heads.length > 0 ? 'collab-box' : null;
+    /* the comment with a mention through the second browser's window API (comment.add; the
+       comment card's mention picker is not this row's question) */
+    const s2 = await state(second);
+    const r = await invokeOn(second, 'comment.add', {
+      anchor: blockId
+        ? { kind: 'block', slideId: first, blockId }
+        : { kind: 'slide', slideId: first },
+      body: {
+        text: 'Please look at this {@0}',
+        mentions: me ? [{ kind: 'principal', principalId: me }] : [],
+      },
+      baseRevision: s2.comments?.threads ? undefined : undefined,
+    });
+    expect(r, 'the second browser added the comment').toBeTruthy();
+    const t = Date.now();
+    await expect
+      .poll(unread, {
+        timeout: 10_000,
+        message: "the first browser's bell shows a count of 1 within 10 s",
+      })
+      .toBe(before + 1);
+    const arrived = Date.now() - t;
+    await ctl(page, 'title.inbox').click();
+    await ctl(page, 'panel.inbox').waitFor({ timeout: 8000 });
+    /* the panel lists the comment as a sentence from its kind, actor and slide (inbox-model.ts
+       inboxSentence: "<name> mentioned you on slide N"), not as the comment's words */
+    const mentionItem = page
+      .locator('[data-control^="panel.inbox.item."][data-kind="mention"]')
+      .first();
+    await expect(mentionItem, 'the panel lists the comment as a mention').toBeVisible({
+      timeout: 8000,
+    });
+    const sentence = (await mentionItem.textContent()) ?? '';
+    expect(sentence, 'the row names the mention').toMatch(/mention/i);
+    await ctl(page, 'panel.inbox.markAllRead').click();
+    await expect.poll(unread, { timeout: 8000, message: 'Mark all read clears the count' }).toBe(0);
+    test.info().annotations.push({
+      type: 'notification',
+      description: `mentioned ${me ?? 'nobody (no principal id read)'}; the count reached ${before + 1} after ${arrived} ms; the row read "${sentence.trim().slice(0, 80)}"`,
+    });
+    if (
+      await ctl(page, 'panel.inbox.close')
+        .isVisible()
+        .catch(() => false)
+    )
+      await ctl(page, 'panel.inbox.close').click();
+  } finally {
+    await closeSecond(other, second);
+    if (switched) await switchOff(page).catch(() => undefined);
+  }
+});
+/** A window API call on another page (lib's invoke is bound to a page; this names the page). */
+async function invokeOn(p: Page, action: string, input: unknown): Promise<unknown> {
+  const { invoke } = await import('./lib');
+  return invoke(p, action, input);
+}
 
 coverage(import.meta.filename, [
   'share.dialog.open',
@@ -787,5 +1265,8 @@ coverage(import.meta.filename, [
   'share.copy-present-link',
   'comments.reaches-second-browser',
   'versions.restore',
+  'collab.roster.go-to-slide',
+  'view.live-pointers.second-browser',
+  'inbox.notification-arrives',
 ]);
 void statusOf;

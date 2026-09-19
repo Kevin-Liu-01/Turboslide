@@ -1,0 +1,812 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/share.spec.ts",
+      "--reporter=list,json",
+      "--output",
+      "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [["list"], ["json"]],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/share.spec.ts",
+      "file": "core/share.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "share.dialog.open: Share in the title row opens the dialog with the View, Present and Edit links",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 20512,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:09:00.646Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-92ccb82ce6b9235bb30e",
+          "file": "core/share.spec.ts",
+          "line": 256,
+          "column": 1
+        },
+        {
+          "title": "share.copy-view-link: Copy link on the View link row copies a link that opens /deck/<id> as a viewer (the copied address is <origin>/s/<token>)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17003,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:09:33.789Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-ae168d6173dd32152263",
+          "file": "core/share.spec.ts",
+          "line": 271,
+          "column": 1
+        },
+        {
+          "title": "share.copy-present-link: Copy link on the Present link row copies a link that opens /deck/<id>?present=1 as a viewer (the copied address is <origin>/s/<token>?present=1)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17292,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:09:50.802Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-2b19c0d7dabd956e7441",
+          "file": "core/share.spec.ts",
+          "line": 285,
+          "column": 1
+        },
+        {
+          "title": "share.copy-edit-link: Copy link on the Edit link row copies a link that opens /edit/<id> as an editor (the copied address is <origin>/s/<token>)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17013,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:08.106Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-3614392a7215dcce65eb",
+          "file": "core/share.spec.ts",
+          "line": 299,
+          "column": 1
+        },
+        {
+          "title": "share.escape: Escape closes the dialog",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 492,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:25.132Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-b9589f50cc59652cb0e6",
+          "file": "core/share.spec.ts",
+          "line": 311,
+          "column": 1
+        },
+        {
+          "title": "share.file-menu-copy-link: File > Share > Copy link copies the view address",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1514,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:25.631Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-64ec64c53b22114aeeb2",
+          "file": "core/share.spec.ts",
+          "line": 317,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-lands-viewer: A second browser on the View link lands on the read only viewer with no editor chrome",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1736,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:27.153Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-6af0c71dd1269a206432",
+          "file": "core/share.spec.ts",
+          "line": 325,
+          "column": 1
+        },
+        {
+          "title": "share.edit-link-lands-editor: A third browser on the Edit link lands in the editor",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2170,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:28.897Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-03bed674cc82a53a0fbf",
+          "file": "core/share.spec.ts",
+          "line": 343,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-cannot-edit: A browser that arrived by the View link and changes /deck/ to /edit/ cannot edit the deck",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 120001,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                        "column": 5,
+                        "line": 141
+                      },
+                      "message": "Error: browserContext.close: Test ended.\nBrowser logs:\n\n[pid=62587][err] [0918/161026.460783:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HeEcqY6YJpOKdfQ71QNLAQ==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161026.831107:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HeEcqY6YJpOKdfQ71QNLAQ==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.385162:INFO:CONSOLE:12] \"TypeError: Failed to fetch\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/index-CkzHlEnU.js (12)\n[pid=62587][err] [0918/161027.386654:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161027.471747:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161027.562131:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161027.603330:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.604510:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.604577:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.709741:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.710037:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.710179:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.731173:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.776787:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.810699:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161027.838247:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-MHALRJtuLWHjGCNP5Ubg8w==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161028.380113:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/deck/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161028.665836:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-si0fAQs/ZUMqdDPVouxd9g==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161028.734704:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/deck/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161028.829427:WARNING:net/spdy/spdy_session.cc:3187] Received HEADERS for invalid stream 77\n[pid=62587][err] [0918/161029.167956:INFO:CONSOLE:12] \"TypeError: Failed to fetch\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/index-CkzHlEnU.js (12)\n[pid=62587][err] [0918/161029.172063:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161029.227046:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161029.330059:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161029.370609:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.371524:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.371681:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.405739:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.406099:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.406180:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.487625:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.514008:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.540056:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161029.691782:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161030.025016:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-HPAp8aJFVHhn+CVRkmDWgw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161030.286071:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161030.849876:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-7jyU3LgaKjRC4D5oq4gHng==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161030.966184:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161031.362574:INFO:CONSOLE:12] \"TypeError: Failed to fetch\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/index-CkzHlEnU.js (12)\n[pid=62587][err] [0918/161031.364469:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161031.412105:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161031.532670:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161031.565999:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.567305:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.567367:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.643043:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.643230:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.643305:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.703150:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.788115:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.791215:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161031.890476:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161032.460256:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/deck/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161032.868600:WARNING:net/spdy/spdy_session.cc:3187] Received HEADERS for invalid stream 57\n[pid=62587][err] [0918/161032.869415:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161032.996077:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161033.103663:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161033.146703:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.147986:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.186917:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.187930:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.188752:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.271681:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161033.365283:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161035.245022:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-tMe1sV0mYfIp68OWQDu+kw==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161035.340891:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161035.350696:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-LfH0ay4wAHiAACbjVfDTlg==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161231.841744:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161231.964462:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161232.047698:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/edit/untitled-20260918-4500 (0)\n[pid=62587][err] [0918/161232.085370:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.086309:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.086501:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.162068:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.356641:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.357104:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.491695:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.492012:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.492134:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.543645:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161232.878124:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161235.552569:INFO:CONSOLE:2] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-SPNDw6hvPgcG0q2wAkkY1A==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (2)\n[pid=62587][err] [0918/161237.645648:INFO:CONSOLE:12] \"TypeError: Failed to fetch\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/index-CkzHlEnU.js (12)\n[pid=62587][err] [0918/161237.649117:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/decks (0)\n[pid=62587][err] [0918/161237.809858:INFO:CONSOLE:1] \"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src 'self' 'nonce-g9jttlgrGc/99gQRarncJA==' 'strict-dynamic'\".\n[pid=62587][err]  The policy is report-only, so the violation has been logged but no further action has been taken.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/assets/Frame-CmwVbLnA.js (1)\n[pid=62587][err] [0918/161247.036750:INFO:CONSOLE:0] \"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\", source: https://turboslide-iv0fskc4w-kl01s-projects.vercel.app/decks/trash (0)\n[pid=62587] <gracefully close start>\n\n  139 |     }\n  140 |   } finally {\n> 141 |     await other.close();\n      |     ^\n  142 |   }\n  143 | }\n  144 |\n    at closeSecond (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:141:5)\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:436:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:10:31.075Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-share-view-link-13ed7-o-edit-cannot-edit-the-deck/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-share-view-link-13ed7-o-edit-cannot-edit-the-deck/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-share-view-link-13ed7-o-edit-cannot-edit-the-deck/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-d380c8a41df2c41c68a0",
+          "file": "core/share.spec.ts",
+          "line": 408,
+          "column": 1
+        },
+        {
+          "title": "share.stranger-cannot-edit: A browser with no link that opens /edit/<id> of a deck never shared cannot edit it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5706,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:12:50.601Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-d50cd4f03d49fcb76982",
+          "file": "core/share.spec.ts",
+          "line": 440,
+          "column": 1
+        },
+        {
+          "title": "collab.edit-from-second-browser: Text typed in a second browser reaches the owner within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14387,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:13:05.184Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-886ac6a6d7041e965d0f",
+          "file": "core/share.spec.ts",
+          "line": 501,
+          "column": 1
+        },
+        {
+          "title": "collab.edit-from-owner: Text typed by the owner reaches the second browser within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13222,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:13:19.582Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-1ddef6f8f0f1d292bf4e",
+          "file": "core/share.spec.ts",
+          "line": 534,
+          "column": 1
+        },
+        {
+          "title": "collab.slide-added-appears: A slide added in the second browser appears in the owner's filmstrip within 5 s, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9802,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:13:32.815Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-52d476dfb85b59c07882",
+          "file": "core/share.spec.ts",
+          "line": 568,
+          "column": 1
+        },
+        {
+          "title": "collab.presence-chips: Presence chips show the other person in both tabs within 10 s, and a chip leaves within 30 s of its tab closing",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "presence roster before",
+                  "description": "3 row(s) of closed tabs in the owner's roster at the row's start (053b9abb left 4345 ms ago, 945e0b5f left 27453 ms ago, deb44e4a left 14158 ms ago); 3 after 13 ms"
+                },
+                {
+                  "type": "presence join",
+                  "description": "the owner's tab showed the second tab's chip 4 ms after its hello; both tabs show the other within 4302 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 37544,
+                  "error": {
+                    "message": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\u001b[22m\n\u001b[2m    63 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n",
+                    "stack": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\u001b[22m\n\u001b[2m    63 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:675:7",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                      "column": 7,
+                      "line": 675
+                    },
+                    "snippet": "  673 |       chipOf(page, guest),\n  674 |       \"the second tab's chip leaves the owner's tab within 30 s of its tab closing\",\n> 675 |     ).toHaveCount(0, { timeout: 30_000 });\n      |       ^\n  676 |     const gone = Date.now() - t;\n  677 |     const listed = (await othersOf(page)).includes(guest);\n  678 |     test.info().annotations.push({"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                        "column": 7,
+                        "line": 675
+                      },
+                      "message": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing\n\n\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  30000ms\n\nCall log:\n\u001b[2m  - the second tab's chip leaves the owner's tab within 30 s of its tab closing with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-control=\"presence.chip.92983f7398e854fd4be0c5fc15efddd8\"]')\u001b[22m\n\u001b[2m    63 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n\n  673 |       chipOf(page, guest),\n  674 |       \"the second tab's chip leaves the owner's tab within 30 s of its tab closing\",\n> 675 |     ).toHaveCount(0, { timeout: 30_000 });\n      |       ^\n  676 |     const gone = Date.now() - t;\n  677 |     const listed = (await othersOf(page)).includes(guest);\n  678 |     test.info().annotations.push({\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts:675:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:13:42.625Z",
+                  "annotations": [
+                    {
+                      "type": "presence roster before",
+                      "description": "3 row(s) of closed tabs in the owner's roster at the row's start (053b9abb left 4345 ms ago, 945e0b5f left 27453 ms ago, deb44e4a left 14158 ms ago); 3 after 13 ms"
+                    },
+                    {
+                      "type": "presence join",
+                      "description": "the owner's tab showed the second tab's chip 4 ms after its hello; both tabs show the other within 4302 ms"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run1/playwright/core-share-collab-presence-31a2e-hin-30-s-of-its-tab-closing/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/share.spec.ts",
+                    "column": 7,
+                    "line": 675
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-91c03b7a5eb3dd6dc6a4",
+          "file": "core/share.spec.ts",
+          "line": 596,
+          "column": 1
+        },
+        {
+          "title": "collab.rename-reaches-second-browser: A rename reaches the second browser's name field within 5 s and its tab title reads the new name without a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12871,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:14:36.139Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-33eb492a7426c022989a",
+          "file": "core/share.spec.ts",
+          "line": 687,
+          "column": 1
+        },
+        {
+          "title": "share.view-link-excludes-skipped-and-notes: A second browser on the View link sees no skipped slide and no note text, in the page and in the payload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5414,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:14:57.982Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-0b62b386f09ce9d20619",
+          "file": "core/share.spec.ts",
+          "line": 708,
+          "column": 1
+        },
+        {
+          "title": "share.present-link-excludes-skipped: A second browser on the Present link shows the unskipped slides only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1829,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:15:03.415Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-31328e2d9693825dfce4",
+          "file": "core/share.spec.ts",
+          "line": 747,
+          "column": 1
+        },
+        {
+          "title": "comments.reaches-second-browser: A comment added in one browser is listed in a second browser's Comments panel within 10 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11253,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:15:05.255Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-8b694651f67f61a407dc",
+          "file": "core/share.spec.ts",
+          "line": 770,
+          "column": 1
+        },
+        {
+          "title": "versions.restore: Restore this version returns the deck to that version within 5 s, on a deck a second browser has also written into",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17048,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-18T23:15:16.518Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0842e0966df1e1d9d887-2bfc1bc1bd664c9670d9",
+          "file": "core/share.spec.ts",
+          "line": 803,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-18T23:09:00.183Z",
+    "duration": 408756.26900000003,
+    "expected": 17,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

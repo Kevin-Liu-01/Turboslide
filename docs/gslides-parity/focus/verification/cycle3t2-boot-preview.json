@@ -1,0 +1,78 @@
+{
+  "base": "https://turboslide-hkne1i4o2-kl01s-projects.vercel.app",
+  "deckId": "untitled-20260919-n5u5",
+  "rows": [
+    {
+      "name": "new draft",
+      "url": "/new",
+      "domMs": 384,
+      "studioMs": 215,
+      "settledMs": 30,
+      "setting": false,
+      "total": 635
+    },
+    {
+      "name": "fresh deck, switch off, navigation",
+      "url": "/edit/untitled-20260919-n5u5",
+      "domMs": 251,
+      "studioMs": 167,
+      "settledMs": 24,
+      "setting": false,
+      "total": 444
+    },
+    {
+      "name": "fresh deck, switch on, navigation",
+      "url": "/edit/untitled-20260919-n5u5",
+      "domMs": 242,
+      "studioMs": 116,
+      "settledMs": 40,
+      "setting": true,
+      "total": 408
+    },
+    {
+      "name": "fresh deck, switch on, reload",
+      "domMs": 394,
+      "studioMs": 109,
+      "settledMs": 37,
+      "setting": true
+    },
+    {
+      "name": "fresh deck, switch on, navigation 2",
+      "url": "/edit/untitled-20260919-n5u5",
+      "domMs": 281,
+      "studioMs": 112,
+      "settledMs": 32,
+      "setting": true,
+      "total": 430
+    },
+    {
+      "name": "gt-brand, switch on, navigation",
+      "url": "/edit/gt-brand",
+      "domMs": 406,
+      "studioMs": 178,
+      "settledMs": 57,
+      "setting": true,
+      "total": 642
+    },
+    {
+      "name": "fresh deck, switch off, navigation 2",
+      "url": "/edit/untitled-20260919-n5u5",
+      "domMs": 337,
+      "studioMs": 98,
+      "settledMs": 25,
+      "setting": false,
+      "total": 461
+    },
+    {
+      "name": "gt-brand, switch off, navigation",
+      "url": "/edit/gt-brand",
+      "domMs": 753,
+      "studioMs": 179,
+      "settledMs": 56,
+      "setting": false,
+      "total": 989
+    }
+  ],
+  "cleanup": "/edit/untitled-20260919-n5u5 answers 404",
+  "at": "2026-09-19T00:51:16.085Z"
+}

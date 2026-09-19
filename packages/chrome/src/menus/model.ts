@@ -49,6 +49,28 @@ import { STUB_PREFIX, stubClause } from './strings.ts';
  * section 8 item 3), and Edit > Paste stays enabled whatever this page copied, as Google's does
  * (`canPaste`; VERIFICATION.md F-slides-paste).
  *
+ * The return round (docs/RETURN.md sections 2 and 3) takes the flag off every row the return
+ * audits measured working or nearly working, so it is in the default view again and its matrix
+ * rows measure it there: the shapes with their three named rows, the lines with the two
+ * connectors, the tables, the charts, the diagrams, the word art, superscript, subscript,
+ * capitalization, Justified, the paragraph spacing rows, Borders & lines, Edit data and Chart
+ * type, Distribute, Rotate, Group, Ungroup and Regroup, Change theme, the View rows (the rulers,
+ * the guides, the snapping, the comment display, the live pointers, the filmstrip toggle, the
+ * modes, Full screen, the appearance), the File rows (the template gallery, Open, Import slides,
+ * the JPEG, PNG and bundle downloads, Show changes, Details), Select none, Check slides, Help
+ * Turboslide improve, Go to slide, Slide numbers, and on the toolbar Paint format, Insert shape,
+ * Insert line, Theme and Hide the menus. What stays flagged is RETURN.md 2.9, 2.10, 2.15, 2.16,
+ * 2.17, 3.4 and section 8: the shape galleries, Change shape, Mask image, Icons and Materials,
+ * Image by URL and From this presentation, Dither, List options, Special characters, Rule, Curve,
+ * Polyline and Scribble, the web page and text downloads, Publish to web, Make a copy of selected
+ * slides, the inbox and Notification settings, the account rows and Follow, Grid view, Show
+ * sections, Underline errors, the Activity dashboard, the Tools > Advanced submenu, Agent access
+ * and Embed in a site, Edit HTML, and Alt text and Drop shadow until Kevin answers questions 6
+ * and 7 of RETURN.md section 9. A row whose return is conditional on a not driven matrix row
+ * (Snap to grid, Show changes, the Hide the menus chevron, Slide numbers, the pictures) is
+ * unflagged here and re-parked by the merge owner from the run through its row's `parks`
+ * (RETURN.md section 1 rule 2).
+ *
  * Nothing in a label, tooltip or stub clause names an internal thing (SPEC 12); the default view
  * words test greps this file. Relative imports carry the `.ts` extension so the parity audit
  * script can load the model under Node; the icon import is a type and is erased.
@@ -723,6 +745,9 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
       }),
       now('title.presence.goTo', 'Go to slide', client('goToClient'), {
         turboslide: true,
+        /* re-parked at the return round's ship: the matrix row collab.roster.go-to-slide carries
+           `parks` naming this id and read red in both preview runs of the ship's tree (docs/RETURN.md
+           section 1 rule 2; VERIFICATION.md R2-F1); the chips stay drawn and a click still jumps */
         advanced: true,
         doc: 'A one time jump to the slide that person has open',
       }),
@@ -841,17 +866,14 @@ const FILE: Menu = {
       }),
       now('file.new.templateGallery', 'From template gallery', route('/decks#templates', true), {
         google: 'From Template Gallery',
-        advanced: true,
       }),
     ]),
     now('file.open', 'Open…', dialog('Open'), {
       key: shortcut('Cmd+O'),
       icon: 'document',
-      advanced: true,
     }),
     now('file.importSlides', 'Import slides', dialog('Import slides'), {
       when: 'write',
-      advanced: true,
     }),
     sub(
       'file.makeCopy',
@@ -899,8 +921,13 @@ const FILE: Menu = {
         now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
           doc: 'One slide per page',
         }),
-        /* docs/FOCUS.md 3.2: the text, picture, web page and bundle downloads are parked; the
-           JPEG and PNG rows open a tab that answers 401 on production (audit-export rows 22, 23) */
+        /* docs/FOCUS.md 3.2 parked the text, picture, web page and bundle downloads. The return
+           round returns the pictures (with the signed render url of docs/RETURN.md 2.19, since the
+           tab answered 401 on production, audit-export rows 22, 23) and the bundle (2.17); the
+           fix round returns the web page once its cancelled downloads had a named mechanism (the
+           built file stored on the blob backend, server/download.ts builtFileLink; 2.17), with the
+           page fetching every one of these four addresses itself (packages/chrome/src/download.ts);
+           the text download stays parked (section 8) */
         now('file.download.txt', 'Plain Text (.txt)', action('export.text'), {
           doc: 'Every slide’s text in order',
           advanced: true,
@@ -909,13 +936,11 @@ const FILE: Menu = {
           'file.download.jpg',
           'JPEG image (.jpg, current slide)',
           action('render.slide', { format: 'jpg' }),
-          { advanced: true },
         ),
         now(
           'file.download.png',
           'PNG image (.png, current slide)',
           action('render.slide', { format: 'png' }),
-          { advanced: true },
         ),
         later(
           'file.download.svg',
@@ -924,12 +949,10 @@ const FILE: Menu = {
         ),
         now('file.download.html', 'Web page (.html)', action('build.run'), {
           turboslide: true,
-          advanced: true,
           doc: 'One file that opens in any browser',
         }),
         now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
           turboslide: true,
-          advanced: true,
           doc: 'The file Open and Import slides read',
         }),
       ],
@@ -958,6 +981,10 @@ const FILE: Menu = {
         }),
         /* SPEC-3 5.7, 13.2: the panel's checkbox at its bottom, Google's position; 0.45, 13.3: the
            two delete rows of a version's More menu, present and disabled with their clause */
+        /* re-parked from the return round's runs (docs/RETURN.md section 1 rule 2; the row
+           versions.show-changes-marks carries this id in `parks` and read 0 change marks for a
+           heading edit and an added box on the memory tier and on the enforce preview;
+           return/build/integrator.md section 6) */
         now('file.versionHistory.showChanges', 'Show changes', toggle('showChanges'), {
           contextOnly: true,
           advanced: true,
@@ -983,7 +1010,7 @@ const FILE: Menu = {
       'Make available offline',
       'Present mode keeps working after load without the network (R07 rule 29)',
     ),
-    now('file.details', 'Details', dialog('Details'), { icon: 'document', advanced: true }),
+    now('file.details', 'Details', dialog('Details'), { icon: 'document' }),
     omit(
       'file.language',
       'Language',
@@ -1043,7 +1070,6 @@ const EDIT: Menu = {
     }),
     /* SPEC-2 0.61: Google's two key sequence stays unbound; the shortcuts dialog lists it greyed */
     now('edit.selectNone', 'Select none', client('selectNone'), {
-      advanced: true,
       enabled: 'hasSelection',
       doc: 'Clears the selection on the slide and in the filmstrip; Esc does the same',
     }),
@@ -1075,10 +1101,10 @@ const VIEW: Menu = {
       'Theme builder',
       'The GT theme is edited in the repository; Slide > Edit theme is the Later stub',
     ),
-    /* docs/FOCUS.md 3.2: the View menu keeps Slideshow, Zoom and Show speaker notes in the
-       default view; the grid, the rulers, the guides, the snapping, the comment display, the live
-       pointers, the filmstrip toggle, the modes, Full screen, the sections and the appearance are
-       parked */
+    /* docs/FOCUS.md 3.2 kept Slideshow, Zoom and Show speaker notes in the default view and
+       parked the rest; the return round (docs/RETURN.md 2.16, 2.17) returns the rulers, the
+       guides, the snapping, the comment display, the live pointers, the filmstrip toggle, the
+       modes, Full screen and the appearance, and the grid and the sections stay parked (section 8) */
     now('view.gridView', 'Grid view', toggle('gridView'), {
       icon: 'grid',
       advanced: true,
@@ -1116,75 +1142,74 @@ const VIEW: Menu = {
        the deck's guides; Google relabels Show ruler rather than checking it */
     now('view.showRuler', 'Show ruler', toggle('showRuler'), {
       plain: true,
-      advanced: true,
       altLabel: { when: 'rulerShown', label: 'Hide ruler' },
       doc: 'Rulers in inches along the top and left of the slide; drag out of one to add a guide',
     }),
-    parked(
-      sub('view.guides', 'Guides', [
-        now('view.guides.show', 'Show guides', toggle('showGuides'), {
-          doc: 'The guides on every slide; they never show when presenting',
-        }),
-        now(
-          'view.guides.addVertical',
-          'Add vertical guide',
-          action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
-          { doc: 'A guide at the centre of the slide; drag it into place' },
-        ),
-        now(
-          'view.guides.addHorizontal',
-          'Add horizontal guide',
-          action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
-          { doc: 'A guide at the centre of the slide; drag it into place' },
-        ),
-        later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
-        now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
-          enabled: 'hasGuides',
-          disabledReason: 'Add a guide first',
-          doc: 'Removes every guide from the presentation',
-        }),
-        /* 4.3: the right-click menu of a guide line; the shell names the guide under the pointer */
-        now('view.guides.delete', 'Delete guide', action('deck.guides'), {
-          enabled: 'hasGuides',
-          contextOnly: true,
-          doc: 'Removes this guide from every slide',
-        }),
-      ]),
-    ),
-    parked(
-      sub('view.snapTo', 'Snap to', [
-        now('view.snapTo.guides', 'Guides', toggle('snapGuides'), {
-          doc: 'Edges and centres of the other objects, the slide and the guides while you drag',
-        }),
-        now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
-      ]),
-    ),
+    sub('view.guides', 'Guides', [
+      now('view.guides.show', 'Show guides', toggle('showGuides'), {
+        doc: 'The guides on every slide; they never show when presenting',
+      }),
+      now(
+        'view.guides.addVertical',
+        'Add vertical guide',
+        action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
+        { doc: 'A guide at the centre of the slide; drag it into place' },
+      ),
+      now(
+        'view.guides.addHorizontal',
+        'Add horizontal guide',
+        action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
+        { doc: 'A guide at the centre of the slide; drag it into place' },
+      ),
+      later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
+      now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
+        enabled: 'hasGuides',
+        disabledReason: 'Add a guide first',
+        doc: 'Removes every guide from the presentation',
+      }),
+      /* 4.3: the right-click menu of a guide line; the shell names the guide under the pointer */
+      now('view.guides.delete', 'Delete guide', action('deck.guides'), {
+        enabled: 'hasGuides',
+        contextOnly: true,
+        doc: 'Removes this guide from every slide',
+      }),
+    ]),
+    sub('view.snapTo', 'Snap to', [
+      now('view.snapTo.guides', 'Guides', toggle('snapGuides'), {
+        doc: 'Edges and centres of the other objects, the slide and the guides while you drag',
+      }),
+      now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
+    ]),
     /* SPEC-3 5.3, 13.1: the four display modes as radio rows over one setting, in Google's order
        (01 3, the 2024 rollout); the chord hides */
-    parked(
-      sub(
-        'view.comments',
-        'Comments',
-        [
-          now('view.comments.showAll', 'Show all comments', toggle('comments', 'all'), {
-            doc: 'The Comments panel and every marker on the slides',
-          }),
-          now('view.comments.expand', 'Expand comments', toggle('comments', 'expanded'), {
-            doc: 'Every card open beside the slide',
-          }),
-          now('view.comments.minimize', 'Minimize comments', toggle('comments', 'minimized'), {
-            doc: 'Markers only; a click opens the card',
-          }),
-          now('view.comments.hide', 'Hide comments', toggle('comments', 'hidden'), {
-            key: shortcut('Cmd+Option+Shift+J'),
-            doc: 'No markers and no cards; the panel still lists them',
-          }),
-        ],
-        { icon: 'chat', dividerBefore: true, when: 'readComments' },
-      ),
+    sub(
+      'view.comments',
+      'Comments',
+      [
+        now('view.comments.showAll', 'Show all comments', toggle('comments', 'all'), {
+          doc: 'The Comments panel and every marker on the slides',
+        }),
+        now('view.comments.expand', 'Expand comments', toggle('comments', 'expanded'), {
+          doc: 'Every card open beside the slide',
+        }),
+        now('view.comments.minimize', 'Minimize comments', toggle('comments', 'minimized'), {
+          doc: 'Markers only; a click opens the card',
+        }),
+        now('view.comments.hide', 'Hide comments', toggle('comments', 'hidden'), {
+          key: shortcut('Cmd+Option+Shift+J'),
+          doc: 'No markers and no cards; the panel still lists them',
+        }),
+      ],
+      { icon: 'chat', dividerBefore: true, when: 'readComments' },
     ),
     /* SPEC-3 4.4, 4.6, 13.1: Google's two rows; the own pointer is off by default and needs the
-       editor role, the collaborators' pointers are on by default for everyone */
+       editor role, the collaborators' pointers are on by default for everyone. Parked again by
+       the return round's integration (docs/RETURN.md section 1 rule 2): the matrix row
+       view.live-pointers.second-browser, which carries `parks` naming these two rows, was red on
+       the memory tier and on the enforce preview on 2026-09-19 (the editor reports the slide,
+       the selection and the caret to the room and never the pointer, so the second browser's
+       pointer is not drawn on the first; build/integrator.md). The rows flip and hold
+       (view.live-pointers.toggles) and return when the second browser row passes. */
     parked(
       sub('view.livePointers', 'Live pointers', [
         now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
@@ -1205,34 +1230,30 @@ const VIEW: Menu = {
     }),
     now('view.showFilmstrip', 'Show filmstrip', toggle('filmstrip'), {
       icon: 'sidebar',
-      advanced: true,
     }),
     /* SPEC-3 5.3, 6.3, 13.1: three radios for an editor, Commenting and Viewing for a commenter,
        no Mode menu for a viewer */
-    parked(
-      sub(
-        'view.mode',
-        'Mode',
-        [
-          now('view.mode.editing', 'Editing', toggle('mode', 'editing'), {
-            when: 'write',
-            doc: 'Handles, the notes pane and Format options',
-          }),
-          now('view.mode.commenting', 'Commenting', toggle('mode', 'commenting'), {
-            when: 'comment',
-            doc: 'Comments without moving anything: no handles, no Format options',
-          }),
-          now('view.mode.viewing', 'Viewing', toggle('mode', 'viewing'), {
-            doc: 'Read only: no handles, no Format options, no comment controls',
-          }),
-        ],
-        { dividerBefore: true, when: 'comment' },
-      ),
+    sub(
+      'view.mode',
+      'Mode',
+      [
+        now('view.mode.editing', 'Editing', toggle('mode', 'editing'), {
+          when: 'write',
+          doc: 'Handles, the notes pane and Format options',
+        }),
+        now('view.mode.commenting', 'Commenting', toggle('mode', 'commenting'), {
+          when: 'comment',
+          doc: 'Comments without moving anything: no handles, no Format options',
+        }),
+        now('view.mode.viewing', 'Viewing', toggle('mode', 'viewing'), {
+          doc: 'Read only: no handles, no Format options, no comment controls',
+        }),
+      ],
+      { dividerBefore: true, when: 'comment' },
     ),
     now('view.fullScreen', 'Full screen', toggle('compact'), {
       key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
       icon: 'fullscreen',
-      advanced: true,
       doc: 'Hides the menus and the toolbar; Esc restores them',
     }),
     now('view.showSections', 'Show sections', toggle('sections'), {
@@ -1241,17 +1262,15 @@ const VIEW: Menu = {
       dividerBefore: true,
       doc: 'Section names between the slides in the filmstrip',
     }),
-    parked(
-      sub(
-        'view.appearance',
-        'Appearance',
-        [
-          now('view.appearance.light', 'Light', toggle('appearance', 'light')),
-          now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
-          now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
-        ],
-        { turboslide: true, icon: 'swatch' },
-      ),
+    sub(
+      'view.appearance',
+      'Appearance',
+      [
+        now('view.appearance.light', 'Light', toggle('appearance', 'light')),
+        now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
+        now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
+      ],
+      { turboslide: true, icon: 'swatch' },
     ),
   ],
 };
@@ -1305,54 +1324,54 @@ const INSERT: Menu = {
        `shapes.*` row passes on the enforce preview and on production; VERIFICATION.md
        F-shapes-export and section 8 item 3; build/b3.md R14): the whole of Insert > Shape leaves
        the default view for this ship. The rows stay, flagged, and return whole under FOCUS.md
-       section 8 once the rows pass; nothing here is deleted. */
-    parked(
-      sub(
-        'insert.shape',
-        'Shape',
-        [
-          sub('insert.shape.shapes', 'Shapes', [
-            now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
-              turboslide: true,
-              doc: 'Click to place a 240 by 160 rectangle, or drag to draw one',
-            }),
-            now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
-              turboslide: true,
-              doc: 'Click to place a rounded rectangle, or drag to draw one',
-            }),
-            now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
-              turboslide: true,
-              doc: 'Click to place an ellipse, or drag to draw one',
-            }),
-          ]),
-          now('insert.shape.gallery', 'All shapes', shapeGrid('shapes'), {
+       section 8 once the rows pass; nothing here is deleted. The return round (docs/RETURN.md
+       2.2) returns Insert > Shape with its three named rows; All shapes, Arrows, Callouts and
+       Equation stay parked until the geometry interpreter draws their presets (2.9). */
+    sub(
+      'insert.shape',
+      'Shape',
+      [
+        sub('insert.shape.shapes', 'Shapes', [
+          now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
             turboslide: true,
-            advanced: true,
-            doc: 'The gallery of shape presets; every tile places a shape or draws one by a drag',
+            doc: 'Click to place a 240 by 160 rectangle, or drag to draw one',
           }),
-          parked(
-            sub(
-              'insert.shape.arrows',
-              'Arrows',
-              [
-                now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
-                  turboslide: true,
-                }),
-              ],
-              { effect: shapeGrid('arrows') },
-            ),
+          now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
+            turboslide: true,
+            doc: 'Click to place a rounded rectangle, or drag to draw one',
+          }),
+          now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
+            turboslide: true,
+            doc: 'Click to place an ellipse, or drag to draw one',
+          }),
+        ]),
+        now('insert.shape.gallery', 'All shapes', shapeGrid('shapes'), {
+          turboslide: true,
+          advanced: true,
+          doc: 'The gallery of shape presets; every tile places a shape or draws one by a drag',
+        }),
+        parked(
+          sub(
+            'insert.shape.arrows',
+            'Arrows',
+            [
+              now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
+                turboslide: true,
+              }),
+            ],
+            { effect: shapeGrid('arrows') },
           ),
-          now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
-            advanced: true,
-            doc: 'A shape with a pointer you can drag',
-          }),
-          now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
-            advanced: true,
-            doc: 'Plus, minus, multiply, divide, equal and not equal',
-          }),
-        ],
-        { icon: 'box' },
-      ),
+        ),
+        now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
+          advanced: true,
+          doc: 'A shape with a pointer you can drag',
+        }),
+        now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
+          advanced: true,
+          doc: 'Plus, minus, multiply, divide, equal and not equal',
+        }),
+      ],
+      { icon: 'box' },
     ),
     now(
       'insert.table',
@@ -1360,42 +1379,38 @@ const INSERT: Menu = {
       { kind: 'submenu', dynamic: 'tableGrid', action: 'block.insert' },
       {
         icon: 'table',
-        advanced: true,
         enabled: 'hasSlide',
         doc: 'Point at the size you want, up to 20 columns by 20 rows',
       },
     ),
-    /* docs/FOCUS.md 2.2, 3.2: tables and charts are parked until their own audit runs */
-    parked(
-      sub(
-        'insert.chart',
-        'Chart',
-        [
-          now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
-            enabled: 'hasSlide',
-          }),
-          now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
-            enabled: 'hasSlide',
-          }),
-          now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
-            enabled: 'hasSlide',
-          }),
-          now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
-            enabled: 'hasSlide',
-          }),
-          omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
-        ],
-        { icon: 'chart-bar', doc: 'A chart with sample numbers you edit in Format options' },
-      ),
+    /* docs/FOCUS.md 2.2, 3.2 parked tables and charts until their own audit; audit-objects of
+       the return round measured both and they return (docs/RETURN.md 2.4, 2.5) */
+    sub(
+      'insert.chart',
+      'Chart',
+      [
+        now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
+          enabled: 'hasSlide',
+        }),
+        omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
+      ],
+      { icon: 'chart-bar', doc: 'A chart with sample numbers you edit in Format options' },
     ),
     now('insert.diagram', 'Diagram', panel('Diagram'), {
       icon: 'rectangle-group',
-      advanced: true,
       enabled: 'hasSlide',
       doc: 'Grid, Hierarchy, Timeline, Process, Relationship or Cycle',
     }),
     now('insert.wordArt', 'Word art', client('wordArt'), {
-      advanced: true,
       enabled: 'hasSlide',
       doc: 'Type your text and press Enter',
     }),
@@ -1403,49 +1418,47 @@ const INSERT: Menu = {
        curve, the polyline and the scribble are parked. Cycle 2, under ruling (1) and section 4's
        last rule (a `lines.*` row not passing on the enforce preview parks Line and Arrow with the
        shapes; VERIFICATION.md section 8 item 3, build/b3.md R14): the whole of Insert > Line leaves
-       the default view for this ship and returns whole under section 8 once its rows pass. */
-    parked(
-      sub(
-        'insert.line',
-        'Line',
-        [
-          now('insert.line.line', 'Line', action('block.insert')),
-          now('insert.line.arrow', 'Arrow', action('block.insert')),
-          now('insert.line.rule', 'Rule', action('block.insert'), {
-            turboslide: true,
-            advanced: true,
-            doc: 'A hairline across the slot',
-          }),
-          now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
-            google: 'Elbow Connector',
-            advanced: true,
-            enabled: 'hasSlide',
-            doc: 'Turns a corner between two shapes and follows them when they move',
-          }),
-          now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
-            google: 'Curved Connector',
-            advanced: true,
-            enabled: 'hasSlide',
-            doc: 'Bends between two shapes and follows them when they move',
-          }),
-          now('insert.line.curve', 'Curve', action('block.insert'), {
-            advanced: true,
-            enabled: 'hasSlide',
-            doc: 'Click each point; double click to finish',
-          }),
-          now('insert.line.polyline', 'Polyline', action('block.insert'), {
-            advanced: true,
-            enabled: 'hasSlide',
-            doc: 'Click each corner; double click to finish',
-          }),
-          now('insert.line.scribble', 'Scribble', action('block.insert'), {
-            advanced: true,
-            enabled: 'hasSlide',
-            doc: 'Draw freehand',
-          }),
-        ],
-        { icon: 'minus' },
-      ),
+       the default view for this ship and returns whole under section 8 once its rows pass. The
+       return round (docs/RETURN.md 2.3) returns Line, Arrow and the two connectors; Rule, Curve,
+       Polyline and Scribble stay parked as chosen departures (RETURN.md section 8). */
+    sub(
+      'insert.line',
+      'Line',
+      [
+        now('insert.line.line', 'Line', action('block.insert')),
+        now('insert.line.arrow', 'Arrow', action('block.insert')),
+        now('insert.line.rule', 'Rule', action('block.insert'), {
+          turboslide: true,
+          advanced: true,
+          doc: 'A hairline across the slot',
+        }),
+        now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
+          google: 'Elbow Connector',
+          enabled: 'hasSlide',
+          doc: 'Turns a corner between two shapes and follows them when they move',
+        }),
+        now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
+          google: 'Curved Connector',
+          enabled: 'hasSlide',
+          doc: 'Bends between two shapes and follows them when they move',
+        }),
+        now('insert.line.curve', 'Curve', action('block.insert'), {
+          advanced: true,
+          enabled: 'hasSlide',
+          doc: 'Click each point; double click to finish',
+        }),
+        now('insert.line.polyline', 'Polyline', action('block.insert'), {
+          advanced: true,
+          enabled: 'hasSlide',
+          doc: 'Click each corner; double click to finish',
+        }),
+        now('insert.line.scribble', 'Scribble', action('block.insert'), {
+          advanced: true,
+          enabled: 'hasSlide',
+          doc: 'Draw freehand',
+        }),
+      ],
+      { icon: 'minus' },
     ),
     now('insert.specialCharacters', 'Special characters', dialog('Insert special characters'), {
       advanced: true,
@@ -1476,7 +1489,7 @@ const INSERT: Menu = {
       dividerBefore: true,
       doc: 'After the current slide, with the same layout',
     }),
-    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers'), { advanced: true }),
+    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers')),
     omit('insert.placeholder', 'Placeholder', 'Theme builder only'),
     later('insert.templates', 'Templates', START_FROM_GT),
     later('insert.buildingBlocks', 'Building blocks', START_FROM_GT),
@@ -1527,15 +1540,14 @@ const FORMAT: Menu = {
           icon: 'strikethrough',
           doc: 'Strikes through the selected text, or a whole list item',
         }),
-        /* docs/FOCUS.md 3.2: superscript, subscript and capitalization are parked */
+        /* docs/FOCUS.md 3.2 parked superscript, subscript and capitalization; the return round
+           returns them (docs/RETURN.md 2.11) */
         now('format.text.superscript', 'Superscript', action('text.style', { mark: 'sup' }), {
           key: shortcut('Cmd+.'),
-          advanced: true,
           enabled: 'textBlockSelected',
         }),
         now('format.text.subscript', 'Subscript', action('text.style', { mark: 'sub' }), {
           key: shortcut('Cmd+,'),
-          advanced: true,
           enabled: 'textBlockSelected',
           doc: 'Your browser may take this key; the Format menu has the item',
         }),
@@ -1554,32 +1566,30 @@ const FORMAT: Menu = {
           ],
           { dividerBefore: true },
         ),
-        parked(
-          sub(
-            'format.text.capitalization',
-            'Capitalization',
-            [
-              now(
-                'format.text.capitalization.lower',
-                'lowercase',
-                action('text.case', { mode: 'lower' }),
-                { enabled: 'textBlockSelected' },
-              ),
-              now(
-                'format.text.capitalization.upper',
-                'UPPERCASE',
-                action('text.case', { mode: 'upper' }),
-                { enabled: 'textBlockSelected' },
-              ),
-              now(
-                'format.text.capitalization.title',
-                'Title Case',
-                action('text.case', { mode: 'title' }),
-                { enabled: 'textBlockSelected' },
-              ),
-            ],
-            { enabled: 'textBlockSelected', doc: 'Rewrites the selected text' },
-          ),
+        sub(
+          'format.text.capitalization',
+          'Capitalization',
+          [
+            now(
+              'format.text.capitalization.lower',
+              'lowercase',
+              action('text.case', { mode: 'lower' }),
+              { enabled: 'textBlockSelected' },
+            ),
+            now(
+              'format.text.capitalization.upper',
+              'UPPERCASE',
+              action('text.case', { mode: 'upper' }),
+              { enabled: 'textBlockSelected' },
+            ),
+            now(
+              'format.text.capitalization.title',
+              'Title Case',
+              action('text.case', { mode: 'title' }),
+              { enabled: 'textBlockSelected' },
+            ),
+          ],
+          { enabled: 'textBlockSelected', doc: 'Rewrites the selected text' },
         ),
       ],
       { icon: 'text' },
@@ -1599,7 +1609,6 @@ const FORMAT: Menu = {
       }),
       now('format.alignIndent.justified', 'Justified', action('block.set'), {
         key: shortcut('Cmd+Shift+J'),
-        advanced: true,
         enabled: 'textBlockSelected',
       }),
       now(
@@ -1645,7 +1654,6 @@ const FORMAT: Menu = {
         'Add space before paragraph',
         action('text.spacing', { before: 8 }),
         {
-          advanced: true,
           enabled: 'textBlockSelected',
           altLabel: { when: 'spaceBeforeSet', label: 'Remove space before paragraph' },
           dividerBefore: true,
@@ -1656,13 +1664,11 @@ const FORMAT: Menu = {
         'Add space after paragraph',
         action('text.spacing', { after: 8 }),
         {
-          advanced: true,
           enabled: 'textBlockSelected',
           altLabel: { when: 'spaceAfterSet', label: 'Remove space after paragraph' },
         },
       ),
       now('format.spacing.custom', 'Custom spacing', dialog('Custom spacing'), {
-        advanced: true,
         enabled: 'textBlockSelected',
         dividerBefore: true,
         doc: 'Line spacing, and the space before and after each paragraph',
@@ -1717,53 +1723,58 @@ const FORMAT: Menu = {
         ),
       ),
     ]),
-    /* docs/FOCUS.md 2.2, 3.2: the table rows are parked; a table a core layout places is text */
-    parked(
-      sub(
-        'format.table',
-        'Table',
-        [
-          now('format.table.insertRowAbove', 'Insert row above', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.insertRowBelow', 'Insert row below', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.insertColumnLeft', 'Insert column left', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.insertColumnRight', 'Insert column right', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.deleteRow', 'Delete row', action('block.set'), {
-            enabled: 'tableCellSelected',
-            dividerBefore: true,
-          }),
-          now('format.table.deleteColumn', 'Delete column', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.deleteTable', 'Delete table', action('block.remove'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.distributeRows', 'Distribute rows', action('block.set'), {
-            enabled: 'tableCellSelected',
-            dividerBefore: true,
-          }),
-          now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
-            enabled: 'tableCellSelected',
-          }),
-          now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
-            enabled: 'cellRangeSelected',
-            disabledReason: 'Select two or more cells first',
-            dividerBefore: true,
-          }),
-          now('format.table.unmergeCells', 'Unmerge cells', action('table.unmerge'), {
-            enabled: 'mergedCellSelected',
-            disabledReason: 'Select a merged cell first',
-          }),
-        ],
-        { icon: 'table', dividerBefore: true },
-      ),
+    /* the Table rows: parked by docs/FOCUS.md 2.2, 3.2, returned with the tables by
+       docs/RETURN.md 2.4 (enabled with a cell session or a selected table, fix 2 there) */
+    sub(
+      'format.table',
+      'Table',
+      [
+        now('format.table.insertRowAbove', 'Insert row above', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.insertRowBelow', 'Insert row below', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.insertColumnLeft', 'Insert column left', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.insertColumnRight', 'Insert column right', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.deleteRow', 'Delete row', action('block.set'), {
+          enabled: 'tableCellSelected',
+          dividerBefore: true,
+        }),
+        now('format.table.deleteColumn', 'Delete column', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.deleteTable', 'Delete table', action('block.remove'), {
+          enabled: 'tableCellSelected',
+        }),
+        now('format.table.distributeRows', 'Distribute rows', action('block.set'), {
+          enabled: 'tableCellSelected',
+          dividerBefore: true,
+        }),
+        now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
+          enabled: 'tableCellSelected',
+        }),
+        /* returned in the return round's fix round: the Editor's cell range (a Shift click on a
+           second cell or a drag across cells, packages/viewer/src/table-range.ts; return/build/b5.md
+           "Return round fix round") gives Merge cells its range, the mechanism the integration's
+           re-park named (return/build/integrator.md section 6). The rows tables.cells.merge-unmerge
+           and tables.tail.merge-unmerge-buttons keep these ids in `parks`, so a red run re-parks
+           the two rows alone (docs/RETURN.md 2.4, section 1 rule 2) */
+        now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
+          enabled: 'cellRangeSelected',
+          disabledReason: 'Select two or more cells first',
+          dividerBefore: true,
+        }),
+        now('format.table.unmergeCells', 'Unmerge cells', action('table.unmerge'), {
+          enabled: 'mergedCellSelected',
+          disabledReason: 'Select a merged cell first',
+        }),
+      ],
+      { icon: 'table', dividerBefore: true },
     ),
     sub(
       'format.image',
@@ -1808,37 +1819,36 @@ const FORMAT: Menu = {
     /* SPEC-2 0.27, 0.62: Border color and Border weight open the toolbar's pickers anchored to
        the row and write the block's border, or a word art block's outline. Cycle 2: the submenu
        is the shapes and lines feature's (docs/FOCUS.md 2.6) and leaves the default view with it
-       under ruling (1) (build/b3.md R14); it returns with the two features under section 8. */
-    parked(
-      sub('format.bordersLines', 'Borders & lines', [
-        now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
-          enabled: 'hasBorderField',
-          disabledReason: SELECT_BORDERED,
-        }),
-        now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
-          enabled: 'hasBorderField',
-          disabledReason: SELECT_BORDERED,
-        }),
-        sub(
-          'format.bordersLines.borderDash',
-          'Border dash',
-          dashItems('format.bordersLines.borderDash', 'blockSelected'),
-          { enabled: 'blockSelected' },
-        ),
-        sub(
-          'format.bordersLines.lineStart',
-          'Line start',
-          lineEndItems('format.bordersLines.lineStart', 'start'),
-          { enabled: 'lineSelected', dividerBefore: true },
-        ),
-        sub(
-          'format.bordersLines.lineEnd',
-          'Line end',
-          lineEndItems('format.bordersLines.lineEnd', 'end'),
-          { enabled: 'lineSelected' },
-        ),
-      ]),
-    ),
+       under ruling (1) (build/b3.md R14); it returned with the two features in the return round
+       (docs/RETURN.md 2.2, 2.3, 3.3). */
+    sub('format.bordersLines', 'Borders & lines', [
+      now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
+        enabled: 'hasBorderField',
+        disabledReason: SELECT_BORDERED,
+      }),
+      now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
+        enabled: 'hasBorderField',
+        disabledReason: SELECT_BORDERED,
+      }),
+      sub(
+        'format.bordersLines.borderDash',
+        'Border dash',
+        dashItems('format.bordersLines.borderDash', 'blockSelected'),
+        { enabled: 'blockSelected' },
+      ),
+      sub(
+        'format.bordersLines.lineStart',
+        'Line start',
+        lineEndItems('format.bordersLines.lineStart', 'start'),
+        { enabled: 'lineSelected', dividerBefore: true },
+      ),
+      sub(
+        'format.bordersLines.lineEnd',
+        'Line end',
+        lineEndItems('format.bordersLines.lineEnd', 'end'),
+        { enabled: 'lineSelected' },
+      ),
+    ]),
     now('format.formatOptions', 'Format options', panel('Format options'), {
       icon: 'adjustments',
       dividerBefore: true,
@@ -1849,8 +1859,11 @@ const FORMAT: Menu = {
       doc: 'Removes the size, weight, colour and border overrides',
     }),
     /* 4.3: on the right-click menus and in Search the menus; Format options carries the sections */
-    /* docs/FOCUS.md 3.2, 3.4: Alt text, Drop shadow, Change shape, Edit data, Edit HTML and Chart
-       type are parked; Text fitting stays */
+    /* docs/FOCUS.md 3.2, 3.4 parked Alt text, Drop shadow, Change shape, Edit data, Edit HTML and
+       Chart type. Edit data and Chart type returned with the charts (docs/RETURN.md 2.5); Alt text
+       and Drop shadow wait for Kevin's answers to questions 6 and 7 of RETURN.md section 9;
+       Change shape stays with the galleries (2.9) and Edit HTML with the html block; Text fitting
+       stays in the default view */
     now('format.altText', 'Alt text', panel('Format options'), {
       key: shortcut('Cmd+Option+Y'),
       advanced: true,
@@ -1881,7 +1894,6 @@ const FORMAT: Menu = {
       { advanced: true, enabled: 'shapeSelected', contextOnly: true, turboslide: true },
     ),
     now('format.editData', 'Edit data', panel('Format options'), {
-      advanced: true,
       enabled: 'chartSelected',
       contextOnly: true,
       turboslide: true,
@@ -1895,31 +1907,29 @@ const FORMAT: Menu = {
       turboslide: true,
       doc: 'The markup and styles of the embedded block',
     }),
-    parked(
-      sub(
-        'format.chartType',
-        'Chart type',
-        [
-          now('format.chartType.bar', 'Bar', action('chart.setKind', { kind: 'bar' }), {
-            enabled: 'chartSelected',
-            turboslide: true,
-          }),
-          now('format.chartType.column', 'Column', action('chart.setKind', { kind: 'column' }), {
-            enabled: 'chartSelected',
-            turboslide: true,
-          }),
-          now('format.chartType.line', 'Line', action('chart.setKind', { kind: 'line' }), {
-            enabled: 'chartSelected',
-            turboslide: true,
-          }),
-          now('format.chartType.pie', 'Pie', action('chart.setKind', { kind: 'pie' }), {
-            enabled: 'chartSelected',
-            turboslide: true,
-            doc: 'Keeps the first series',
-          }),
-        ],
-        { enabled: 'chartSelected', contextOnly: true, turboslide: true },
-      ),
+    sub(
+      'format.chartType',
+      'Chart type',
+      [
+        now('format.chartType.bar', 'Bar', action('chart.setKind', { kind: 'bar' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.column', 'Column', action('chart.setKind', { kind: 'column' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.line', 'Line', action('chart.setKind', { kind: 'line' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.pie', 'Pie', action('chart.setKind', { kind: 'pie' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+          doc: 'Keeps the first series',
+        }),
+      ],
+      { enabled: 'chartSelected', contextOnly: true, turboslide: true },
     ),
   ],
 };
@@ -1999,8 +2009,9 @@ const SLIDE: Menu = {
       'The footer mark, the slide counter and the rails belong to the GT theme',
       { dividerBefore: true },
     ),
-    /* docs/FOCUS.md 3.2: the GT theme is the one theme, so Change theme is parked */
-    now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch', advanced: true }),
+    /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
+       light and dark appearances (docs/RETURN.md 2.13) */
+    now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch' }),
   ],
 };
 
@@ -2081,26 +2092,24 @@ const ARRANGE: Menu = {
     ),
     /* docs/FOCUS.md 3.2: Distribute, Rotate, Group, Ungroup and Regroup are parked (they passed
        their audit rows and are the least work to bring back, section 8) */
-    parked(
-      sub(
-        'arrange.distribute',
-        'Distribute',
-        [
-          now(
-            'arrange.distribute.horizontally',
-            'Horizontally',
-            action('block.distribute', { axis: 'x' }),
-            { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
-          ),
-          now(
-            'arrange.distribute.vertically',
-            'Vertically',
-            action('block.distribute', { axis: 'y' }),
-            { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
-          ),
-        ],
-        { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
-      ),
+    sub(
+      'arrange.distribute',
+      'Distribute',
+      [
+        now(
+          'arrange.distribute.horizontally',
+          'Horizontally',
+          action('block.distribute', { axis: 'x' }),
+          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+        ),
+        now(
+          'arrange.distribute.vertically',
+          'Vertically',
+          action('block.distribute', { axis: 'y' }),
+          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
+        ),
+      ],
+      { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
     ),
     /* SPEC-2 0.80: Center on page is block.align against the sheet, on every slide kind */
     sub(
@@ -2123,49 +2132,46 @@ const ARRANGE: Menu = {
       { enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
     ),
     /* SPEC-2 0.2, 0.3, 4.1: rotation, flip and groups on every object of every slide kind */
-    parked(
-      sub(
-        'arrange.rotate',
-        'Rotate',
-        [
-          now(
-            'arrange.rotate.clockwise',
-            'Rotate clockwise 90°',
-            action('block.rotate', { by: 90 }),
-            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-          ),
-          now(
-            'arrange.rotate.counterClockwise',
-            'Rotate counter-clockwise 90°',
-            action('block.rotate', { by: -90 }),
-            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-          ),
-          now(
-            'arrange.rotate.flipHorizontally',
-            'Flip horizontally',
-            action('block.flip', { axis: 'h' }),
-            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-          ),
-          now(
-            'arrange.rotate.flipVertically',
-            'Flip vertically',
-            action('block.flip', { axis: 'v' }),
-            { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
-          ),
-        ],
-        {
-          icon: 'arrow-path',
-          enabled: 'rotatable',
-          disabledReason: SELECT_OBJECT,
-          dividerBefore: true,
-          doc: 'Option and the Left or Right arrow turn the selection by 15 degrees; with Shift, by 1',
-        },
-      ),
+    sub(
+      'arrange.rotate',
+      'Rotate',
+      [
+        now(
+          'arrange.rotate.clockwise',
+          'Rotate clockwise 90°',
+          action('block.rotate', { by: 90 }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.counterClockwise',
+          'Rotate counter-clockwise 90°',
+          action('block.rotate', { by: -90 }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.flipHorizontally',
+          'Flip horizontally',
+          action('block.flip', { axis: 'h' }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.flipVertically',
+          'Flip vertically',
+          action('block.flip', { axis: 'v' }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+      ],
+      {
+        icon: 'arrow-path',
+        enabled: 'rotatable',
+        disabledReason: SELECT_OBJECT,
+        dividerBefore: true,
+        doc: 'Option and the Left or Right arrow turn the selection by 15 degrees; with Shift, by 1',
+      },
     ),
     now('arrange.group', 'Group', action('block.group'), {
       key: shortcut('Cmd+Option+G'),
       icon: 'rectangle-group',
-      advanced: true,
       enabled: 'canGroup',
       disabledReason: SELECT_OBJECTS,
       dividerBefore: true,
@@ -2173,12 +2179,10 @@ const ARRANGE: Menu = {
     }),
     now('arrange.ungroup', 'Ungroup', action('block.ungroup'), {
       key: shortcut('Cmd+Option+Shift+G'),
-      advanced: true,
       enabled: 'groupSelected',
       disabledReason: 'Select a group first',
     }),
     now('arrange.regroup', 'Regroup', action('block.regroup'), {
-      advanced: true,
       enabled: 'canRegroup',
       disabledReason: 'Available after Ungroup, while the objects are still on the slide',
     }),
@@ -2268,7 +2272,6 @@ const TOOLS: Menu = {
     }),
     now('tools.checkSlides', 'Check slides', panel('Suggestions for this slide'), {
       turboslide: true,
-      advanced: true,
       icon: 'check-badge',
       dividerBefore: true,
       when: 'write',
@@ -2401,7 +2404,6 @@ const HELP: Menu = {
       route('https://github.com/Kevin-Liu-01/Turboslide/issues/new', true),
       {
         google: 'Help Slides improve',
-        advanced: true,
         doc: 'Report a problem or ask for something, in a new tab',
       },
     ),
@@ -2530,14 +2532,14 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'file.print',
   },
-  /* docs/FOCUS.md 3.3: Paint format is parked (not weekly, and it "copies too little") */
+  /* Paint format: parked by docs/FOCUS.md 3.3, returned by docs/RETURN.md 2.11 and 3.2 (it
+     copies the weight, the colour and the size, audit-formatting row 61) */
   {
     control: 'toolbar.paintFormat',
     label: 'Paint format',
     icon: 'paint-brush',
     key: shortcut('Cmd+Option+C or Cmd+Option+V'),
     status: 'now',
-    advanced: true,
     enabled: 'blockSelected',
     doc: 'Click once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms',
   },
@@ -2576,8 +2578,9 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'insert.image',
     arrow: 'insert.image',
   },
-  /* cycle 2: the two buttons leave the default view with Insert > Shape and Insert > Line under
-     ruling (1) (docs/FOCUS.md section 4, build/b3.md R14); they return with their rows */
+  /* cycle 2: the two buttons left the default view with Insert > Shape and Insert > Line under
+     ruling (1) (docs/FOCUS.md section 4, build/b3.md R14); they returned with their rows in the
+     return round (docs/RETURN.md 2.2, 2.3, 3.2) */
   {
     control: 'toolbar.insertShape',
     label: 'Insert shape',
@@ -2585,7 +2588,6 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.shape',
     arrow: 'insert.shape',
-    advanced: true,
   },
   {
     control: 'toolbar.insertLine',
@@ -2594,7 +2596,6 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.line',
     arrow: 'insert.line',
-    advanced: true,
   },
   {
     control: 'toolbar.insertComment',
@@ -2626,13 +2627,15 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'slide.applyLayout',
     arrow: 'slide.applyLayout',
   },
-  /* docs/FOCUS.md 3.3: Theme, Transition (Later) and Hide the menus are parked */
+  /* docs/FOCUS.md 3.3 parked Theme, Transition (Later) and Hide the menus; Theme returned with
+     Change theme (docs/RETURN.md 2.13) and the Hide the menus chevron returns if its row
+     view.hide-menus-chevron passes (RETURN.md 3.2; a red row parks the chevron alone through the
+     row's parks); Transition stays a Later stub */
   {
     control: 'toolbar.theme',
     label: 'Theme',
     text: true,
     status: 'now',
-    advanced: true,
     item: 'slide.changeTheme',
   },
   {
@@ -2649,7 +2652,6 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     icon: 'chevron-up',
     key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
     status: 'now',
-    advanced: true,
     item: 'view.fullScreen',
   },
 ];

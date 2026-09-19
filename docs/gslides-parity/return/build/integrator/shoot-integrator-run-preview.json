@@ -1,0 +1,912 @@
+{
+  "base": "turboslide-b2icvh7xp-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-19T09:51:53.255Z",
+  "endedAt": "2026-09-19T09:52:20.174Z",
+  "deckId": "untitled-20260919-8n55",
+  "rows": [
+    {
+      "n": 1,
+      "area": "Scratch deck",
+      "interaction": "Double click the title on /new, type, Escape",
+      "result": "works",
+      "evidence": "/edit/untitled-20260919-8n55; revision 1"
+    },
+    {
+      "n": 2,
+      "area": "Appearance",
+      "interaction": "The appearance the fresh browser boots into",
+      "result": "works",
+      "evidence": "data-theme dark"
+    },
+    {
+      "n": 3,
+      "area": "Appearance",
+      "interaction": "View > Appearance > dark",
+      "result": "works",
+      "evidence": "already dark"
+    },
+    {
+      "n": 4,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (dark-1440)",
+      "result": "works",
+      "evidence": "9 seams; title -> menu bar: #3a3a3ax1; menu bar -> toolbar: none; toolbar -> sheet: #3a3a3ax1; toolbar -> filmstrip: #3a3a3ax1; stage -> notes pane: #3a3a3ax1; notes pane -> bottom bar: #3a3a3ax1; filmstrip -> bottom bar: #3a3a3ax1; filmstrip -> sheet (vertical): #3a3a3ax1; filmstrip -> sheet, upper (vertical): #3a3a3ax1"
+    },
+    {
+      "n": 5,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (dark-1440)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(242, 242, 240); label half 102.9 by 30 radius 0px; arrow 28 by 30 border-left 1px solid rgba(7, 7, 7, 0.26); divider at mid #f2f2f0x6 #b5b5b4x1 #f2f2f0x6 contrast 1.83; 1 px under the top #f2f2f0x6 #b5b5b4x1 #f2f2f0x6; 2 px under #f2f2f0x6 #b5b5b4x1 #f2f2f0x6"
+    },
+    {
+      "n": 6,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (dark-1440)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 7,
+      "area": "Appearance",
+      "interaction": "View > Appearance > light",
+      "result": "works",
+      "evidence": "data-theme light"
+    },
+    {
+      "n": 8,
+      "area": "Separators",
+      "interaction": "The seams from the pixels (light-1440)",
+      "result": "works",
+      "evidence": "9 seams; title -> menu bar: #d2d2d2x1; menu bar -> toolbar: none; toolbar -> sheet: #d2d2d2x1; toolbar -> filmstrip: #d2d2d2x1; stage -> notes pane: #d2d2d2x1; notes pane -> bottom bar: #d2d2d2x1; filmstrip -> bottom bar: #d2d2d2x1; filmstrip -> sheet (vertical): #d2d2d2x1; filmstrip -> sheet, upper (vertical): #d2d2d2x1"
+    },
+    {
+      "n": 9,
+      "area": "Split button",
+      "interaction": "The wrapper, the halves and the divider from the pixels (light-1440)",
+      "result": "works",
+      "evidence": "wrapper 132.9 by 32 radius 8px border 1px solid rgb(7, 7, 7); label half 102.9 by 30 radius 0px; arrow 28 by 30 border-left 1px solid rgba(255, 255, 255, 0.26); divider at mid #070707x6 #474747x1 #070707x6 contrast 2.17; 1 px under the top #070707x6 #474747x1 #070707x6; 2 px under #070707x6 #474747x1 #070707x6"
+    },
+    {
+      "n": 10,
+      "area": "Right cluster",
+      "interaction": "Gaps, heights, corners and the hidden slots (light-1440)",
+      "result": "works",
+      "evidence": "{\"kids\":[{\"control\":\"title.presence\",\"x\":977.5,\"w\":184,\"h\":32},{\"control\":\"title.comments.slot\",\"x\":1169.5,\"w\":32,\"h\":32},{\"control\":\"present.split\",\"x\":1209.5,\"w\":132.9,\"h\":32},{\"control\":\"share.slot\",\"x\":1350.4,\"w\":77.6,\"h\":32}],\"hidden\":[\"title.inbox.slot\"],\"gaps\":[{\"between\":\"title.presence -> title.comments.slot\",\"gap\":8},{\"between\":\"title.comments.slot -> present.split\",\"gap\":8},{\"between\":\"present.split -> share.slot\",\"gap\":8}],\"rightInset\":12}; share 77.6 by 32 radius 8px; +N chip opacity 0 w 32; inbox slot display none"
+    },
+    {
+      "n": 11,
+      "area": "Scratch deck",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks"
+    },
+    {
+      "n": 12,
+      "area": "Scratch deck",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260919-8n55"
+    },
+    {
+      "n": 13,
+      "area": "Scratch deck",
+      "interaction": "GET /edit/<id> after the delete",
+      "result": "works",
+      "evidence": "status 404"
+    }
+  ],
+  "notes": {
+    "dark-1440-points": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "title": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 44
+      },
+      "menubar": {
+        "x": 0,
+        "y": 44,
+        "w": 1440,
+        "h": 28
+      },
+      "toolbar": {
+        "x": 0,
+        "y": 72,
+        "w": 1440,
+        "h": 40
+      },
+      "sb": {
+        "x": 0,
+        "y": 112,
+        "w": 256,
+        "h": 756
+      },
+      "sbHead": null,
+      "notesSlot": {
+        "x": 256,
+        "y": 804,
+        "w": 1184,
+        "h": 64
+      },
+      "notes": {
+        "x": 256,
+        "y": 804,
+        "w": 1184,
+        "h": 64
+      },
+      "bottom": {
+        "x": 0,
+        "y": 868,
+        "w": 1440,
+        "h": 32
+      },
+      "rpanel": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0
+      },
+      "main": {
+        "x": 256,
+        "y": 112,
+        "w": 1184,
+        "h": 756
+      },
+      "titleMenubar": {
+        "y": 44,
+        "x": 300
+      },
+      "menubarToolbar": {
+        "y": 72,
+        "x": 340
+      },
+      "toolbarSheet": {
+        "y": 112,
+        "x": 300
+      },
+      "toolbarFilmstrip": {
+        "y": 112,
+        "x": 128
+      },
+      "filmstripHead": null,
+      "notesDivider": {
+        "y": 804,
+        "x": 552
+      },
+      "notesBottom": {
+        "y": 868,
+        "x": 336
+      },
+      "filmstripBottom": {
+        "y": 868,
+        "x": 4
+      },
+      "filmstripEdge": {
+        "x": 256,
+        "y": 490
+      },
+      "filmstripEdgeUpper": {
+        "x": 256,
+        "y": 142
+      },
+      "rpanelEdge": null
+    },
+    "dark-1440": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "grid"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "border": "1px solid rgba(242, 242, 240, 0.55)",
+          "left": "1px solid rgba(242, 242, 240, 0.55)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "0",
+          "display": "flex"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "border": "0px none rgb(242, 242, 240)",
+          "left": "0px none rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "border": "1px solid rgb(242, 242, 240)",
+          "left": "1px solid rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "1px solid rgba(7, 7, 7, 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "border": "1px solid rgba(242, 242, 240, 0.22)",
+          "left": "1px solid rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#3a3a3ax1",
+          "ok": true
+        }
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top4": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "divider": {
+          "x": 1313,
+          "thickness": 1,
+          "color": "#b5b5b4",
+          "contrastToPrevious": 1.83
+        },
+        "dividerContrast": 1.83
+      }
+    },
+    "light-1440-points": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "title": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 44
+      },
+      "menubar": {
+        "x": 0,
+        "y": 44,
+        "w": 1440,
+        "h": 28
+      },
+      "toolbar": {
+        "x": 0,
+        "y": 72,
+        "w": 1440,
+        "h": 40
+      },
+      "sb": {
+        "x": 0,
+        "y": 112,
+        "w": 256,
+        "h": 756
+      },
+      "sbHead": null,
+      "notesSlot": {
+        "x": 256,
+        "y": 804,
+        "w": 1184,
+        "h": 64
+      },
+      "notes": {
+        "x": 256,
+        "y": 804,
+        "w": 1184,
+        "h": 64
+      },
+      "bottom": {
+        "x": 0,
+        "y": 868,
+        "w": 1440,
+        "h": 32
+      },
+      "rpanel": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0
+      },
+      "main": {
+        "x": 256,
+        "y": 112,
+        "w": 1184,
+        "h": 756
+      },
+      "titleMenubar": {
+        "y": 44,
+        "x": 300
+      },
+      "menubarToolbar": {
+        "y": 72,
+        "x": 340
+      },
+      "toolbarSheet": {
+        "y": 112,
+        "x": 300
+      },
+      "toolbarFilmstrip": {
+        "y": 112,
+        "x": 128
+      },
+      "filmstripHead": null,
+      "notesDivider": {
+        "y": 804,
+        "x": 552
+      },
+      "notesBottom": {
+        "y": 868,
+        "x": 336
+      },
+      "filmstripBottom": {
+        "y": 868,
+        "x": 4
+      },
+      "filmstripEdge": {
+        "x": 256,
+        "y": 490
+      },
+      "filmstripEdgeUpper": {
+        "x": 256,
+        "y": 142
+      },
+      "rpanelEdge": null
+    },
+    "light-1440": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "cluster": {
+        ".ts-title-r": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 450.53125,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-presence": {
+          "rect": {
+            "x": 977.46875,
+            "y": 5.5,
+            "w": 184,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "grid"
+        },
+        ".ts-presence-more": {
+          "rect": {
+            "x": 1089.46875,
+            "y": 9.5,
+            "w": 32,
+            "h": 24
+          },
+          "radius": "0px",
+          "border": "1px solid rgba(7, 7, 7, 0.62)",
+          "left": "1px solid rgba(7, 7, 7, 0.62)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "0",
+          "display": "flex"
+        },
+        ".ts-title-comments-slot": {
+          "rect": {
+            "x": 1169.46875,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-inbox-slot": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          "radius": "0px",
+          "border": "0px none rgb(7, 7, 7)",
+          "left": "0px none rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "none"
+        },
+        ".ts-title-slideshow": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px",
+          "border": "1px solid rgb(7, 7, 7)",
+          "left": "1px solid rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px",
+          "border": "0px none rgb(255, 255, 255)",
+          "left": "0px none rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-present-arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px",
+          "border": "0px none rgb(255, 255, 255)",
+          "left": "1px solid rgba(255, 255, 255, 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        },
+        ".ts-title-share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px",
+          "border": "1px solid rgba(7, 7, 7, 0.18)",
+          "left": "1px solid rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "opacity": "1",
+          "display": "flex"
+        }
+      },
+      "gaps": {
+        "kids": [
+          {
+            "control": "title.presence",
+            "x": 977.5,
+            "w": 184,
+            "h": 32
+          },
+          {
+            "control": "title.comments.slot",
+            "x": 1169.5,
+            "w": 32,
+            "h": 32
+          },
+          {
+            "control": "present.split",
+            "x": 1209.5,
+            "w": 132.9,
+            "h": 32
+          },
+          {
+            "control": "share.slot",
+            "x": 1350.4,
+            "w": 77.6,
+            "h": 32
+          }
+        ],
+        "hidden": [
+          "title.inbox.slot"
+        ],
+        "gaps": [
+          {
+            "between": "title.presence -> title.comments.slot",
+            "gap": 8
+          },
+          {
+            "between": "title.comments.slot -> present.split",
+            "gap": 8
+          },
+          {
+            "between": "present.split -> share.slot",
+            "gap": 8
+          }
+        ],
+        "rightInset": 12
+      },
+      "seams": {
+        "title -> menu bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "menu bar -> toolbar": {
+          "thin": "none",
+          "ok": true
+        },
+        "toolbar -> sheet": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "toolbar -> filmstrip": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "stage -> notes pane": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "notes pane -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> bottom bar": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        },
+        "filmstrip -> sheet, upper (vertical)": {
+          "thin": "#d2d2d2x1",
+          "ok": true
+        }
+      },
+      "splitSeam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top4": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "divider": {
+          "x": 1313,
+          "thickness": 1,
+          "color": "#474747",
+          "contrastToPrevious": 2.17
+        },
+        "dividerContrast": 2.17
+      }
+    }
+  },
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

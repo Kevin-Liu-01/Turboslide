@@ -28,3 +28,22 @@ packages/fonts/export/fonts.json
 # output, committed as a build product whose bytes packages/native/BUILD-RECORD.json pins, so the
 # formatter never touches it (check step 29 compares the sha256, step 19 would otherwise reflow the glue)
 packages/native/wasm/
+
+# The focus round (docs/FOCUS.md 6; the integrator's fixer, cycle 3 stream fix round two, VERIFICATION C2-F15):
+# the core gate, the probes, the layout shift audit and the lanes' audit scripts write their evidence under these
+# folders as they produce it, and a regenerated file must not fail check step 19 (the rule the two folders above
+# already carry). The hand written notes beside them (VERIFICATION.md, the audit-*.md reports, build/*.md) stay
+# under the formatter.
+docs/gslides-parity/focus/verification/**/*.json
+docs/gslides-parity/focus/verification/*-layout-shift-*.md
+docs/gslides-parity/focus/audit-*/**/*.json
+docs/gslides-parity/return/audit-*/**/*.json
+# The return round's lanes write their run JSON under their evidence folders (build/b1/, build/b3/,
+# build/b2-evidence/, build/integrator/); the notes beside them stay under the formatter (b1.md R8)
+docs/gslides-parity/return/build/*/**/*.json
+# The synthesizer's drive evidence of the return round (RETURN.md: return-drive.md cites them): the run
+# JSON and the deck's built page, written by return-drive.mjs and question-pictures.mjs
+docs/gslides-parity/return/return-drive/*.json
+docs/gslides-parity/return/return-drive/*.html
+docs/gslides-parity/build-4/hotfix-4/*.json
+docs/gslides-parity/verification-4/production-ship/*.json

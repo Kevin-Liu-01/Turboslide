@@ -20698,6 +20698,25 @@
                 "type": "boolean",
                 "const": true
               },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
+              },
               "template": {
                 "title": "Layout",
                 "x-inspector": {
@@ -21174,6 +21193,25 @@
                 "type": "boolean",
                 "const": true
               },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
+              },
               "template": {
                 "title": "Layout",
                 "x-inspector": {
@@ -21643,6 +21681,25 @@
                 "type": "boolean",
                 "const": true
               },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
+              },
               "template": {
                 "title": "Layout",
                 "x-inspector": {
@@ -22100,6 +22157,25 @@
                 "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
                 "type": "boolean",
                 "const": true
+              },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
               },
               "template": {
                 "title": "Layout",
@@ -22588,6 +22664,25 @@
                 "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
                 "type": "boolean",
                 "const": true
+              },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
               },
               "template": {
                 "title": "Layout",
@@ -23089,6 +23184,25 @@
                 "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
                 "type": "boolean",
                 "const": true
+              },
+              "counter": {
+                "title": "Slide number",
+                "x-inspector": {
+                  "label": "Slide number",
+                  "control": "select",
+                  "snap": [
+                    "on",
+                    "off"
+                  ],
+                  "group": "Slide",
+                  "help": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4)."
+                },
+                "description": "Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected; gslides-parity SPEC 7.2.4).",
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off"
+                ]
               },
               "template": {
                 "title": "Layout",

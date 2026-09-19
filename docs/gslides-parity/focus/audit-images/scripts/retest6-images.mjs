@@ -24,11 +24,15 @@ const WORK = arg('work', path.dirname(new URL(import.meta.url).pathname));
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 mkdirSync(WORK, { recursive: true });
 
-const URL_EXTERNAL = 'https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png';
+const URL_EXTERNAL =
+  'https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png';
 const URL_GT = 'https://generaltranslation.com/api/og-home';
-const URL_A = 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
-const URL_B = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/500px-Python-logo-notext.svg.png';
-const URL_BG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/960px-Fronalpstock_big.jpg';
+const URL_A =
+  'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
+const URL_B =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/500px-Python-logo-notext.svg.png';
+const URL_BG =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/960px-Fronalpstock_big.jpg';
 
 // ---------------------------------------------------------------------------------------------
 // the table
@@ -68,7 +72,10 @@ const attempt = async (feature, interaction, fn, { reset, tries = 3 } = {}) => {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      };
     }
     log.push(`try ${i}: ${r.evidence}`);
     if (r.ok) {
@@ -283,7 +290,12 @@ const hoverRow = async (page, rowId, waitFor) => {
   const row = ctl(page, `menu.${rowId}`);
   const r = await row.boundingBox();
   if (!r) throw new Error(`no menu row ${rowId}`);
-  await moveHuman(page, { x: r.x - 20, y: r.y + r.height / 2 }, { x: r.x + r.width / 2, y: r.y + r.height / 2 }, 6);
+  await moveHuman(
+    page,
+    { x: r.x - 20, y: r.y + r.height / 2 },
+    { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+    6,
+  );
   await sleep(rand(250, 400));
   if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
 };
@@ -299,7 +311,12 @@ const clickControl = async (page, control) => {
   if (!r) throw new Error(`no control ${control}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
 };
-const has = (page, selector) => page.locator(selector).first().isVisible().catch(() => false);
+const has = (page, selector) =>
+  page
+    .locator(selector)
+    .first()
+    .isVisible()
+    .catch(() => false);
 const rowState = (page, rowId) =>
   page.evaluate((id) => {
     const el = document.querySelector(`[data-control="menu.${id}"]`);
@@ -332,7 +349,11 @@ try {
 const page = await context.newPage();
 /** The network facts a row may cite: failed requests and non 2xx responses, with the body head. */
 const net = [];
-page.on('requestfailed', (req) => net.push(`failed ${req.method()} ${req.url().slice(0, 140)} :: ${req.failure()?.errorText ?? '?'}`));
+page.on('requestfailed', (req) =>
+  net.push(
+    `failed ${req.method()} ${req.url().slice(0, 140)} :: ${req.failure()?.errorText ?? '?'}`,
+  ),
+);
 page.on('response', async (res) => {
   const url = res.url();
   const status = res.status();
@@ -403,7 +424,12 @@ try {
   });
   const info = await invoke(page, 'deck.info');
   deckId = info.id;
-  record('setup', 'open /new', /^untitled-/.test(deckId) ? 'works' : 'broken', `deck ${deckId}; state keys ${build.keys.join(',')}`);
+  record(
+    'setup',
+    'open /new',
+    /^untitled-/.test(deckId) ? 'works' : 'broken',
+    `deck ${deckId}; state keys ${build.keys.join(',')}`,
+  );
 
   // ---- 1b. a second slide, the click repeated until the slide list grows
   const firstOrder = await slideOrder(page);
@@ -411,14 +437,31 @@ try {
   for (let i = 0; i < 3 && order.length <= firstOrder.length; i += 1) {
     await clearAll(page);
     await clickControl(page, 'toolbar.newSlide');
-    order = await pollUntil(() => slideOrder(page), (o) => o.length > firstOrder.length, 15_000);
+    order = await pollUntil(
+      () => slideOrder(page),
+      (o) => o.length > firstOrder.length,
+      15_000,
+    );
   }
   SLIDE = order.find((id) => !firstOrder.includes(id)) ?? order[order.length - 1];
-  await pollUntil(() => state(page), (s) => s.slideId === SLIDE, 8000);
+  await pollUntil(
+    () => state(page),
+    (s) => s.slideId === SLIDE,
+    8000,
+  );
   await settled(page);
-  const connected = await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+  const connected = await pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    30_000,
+  );
   await sleep(500);
-  record('setup', 'New slide from the toolbar, then the room connected', SLIDE && SLIDE !== firstOrder[0] && connected.sync?.connected === true ? 'works' : 'broken', `slides ${order.length}; working slide ${SLIDE}; active ${(await state(page)).slideId}; sync ${JSON.stringify(connected.sync ?? null)}`);
+  record(
+    'setup',
+    'New slide from the toolbar, then the room connected',
+    SLIDE && SLIDE !== firstOrder[0] && connected.sync?.connected === true ? 'works' : 'broken',
+    `slides ${order.length}; working slide ${SLIDE}; active ${(await state(page)).slideId}; sync ${JSON.stringify(connected.sync ?? null)}`,
+  );
   let k = await kOf(page);
   const sheetPoint = async (sx, sy) => {
     const sheet = await rectOf(page, SHEET);
@@ -467,13 +510,20 @@ try {
     const sel = await selectObject(id);
     if (!sel) return false;
     await press(page, 'Delete');
-    const gone = await pollUntil(() => blockOf(page, SLIDE, id), (b) => b === null, 10_000);
+    const gone = await pollUntil(
+      () => blockOf(page, SLIDE, id),
+      (b) => b === null,
+      10_000,
+    );
     await settled(page);
     return gone === null;
   };
   const waitPos = (id, test, timeout = 12_000) =>
-    pollUntil(() => blockOf(page, SLIDE, id), (b) => b && b.pos && test(b.pos, b), timeout);
-
+    pollUntil(
+      () => blockOf(page, SLIDE, id),
+      (b) => b && b.pos && test(b.pos, b),
+      timeout,
+    );
 
   // the sync facts a row cites: the document revision the page holds, the server revision and the room
   const syncFacts = () =>
@@ -500,7 +550,11 @@ try {
     const t0 = Date.now();
     await clickControl(page, 'dialog.imageByUrl.ok');
     const obj = await newBlockAfter(before, 40_000);
-    const err = await page.evaluate(() => document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ?? null);
+    const err = await page.evaluate(
+      () =>
+        document.querySelector('[data-control="dialog.imageByUrl"] [role="alert"]')?.textContent ??
+        null,
+    );
     const dialogOpen = await has(page, '[data-control="dialog.imageByUrl"]');
     if (dialogOpen) await closeMenus(page);
     await settled(page);
@@ -511,14 +565,24 @@ try {
     };
   };
 
-
   /** The refused write modal ("A change was not applied"): its text, then Dismiss, then the save state. */
   const refusedModal = async () => {
     const facts = await page.evaluate(() => {
-      const heads = [...document.querySelectorAll('h1, h2, h3, [role="heading"], .ts-dialog-title')].map((h) => (h.textContent ?? '').trim());
+      const heads = [
+        ...document.querySelectorAll('h1, h2, h3, [role="heading"], .ts-dialog-title'),
+      ].map((h) => (h.textContent ?? '').trim());
       const modal = heads.find((t) => /change was not applied/i.test(t)) ?? null;
-      const dismiss = [...document.querySelectorAll('button')].find((b) => /^dismiss$/i.test((b.textContent ?? '').trim()));
-      const save = document.querySelector('[data-control="deck.saveState"], .ts-save-state, .ts-title-row [role="status"]')?.textContent ?? [...document.querySelectorAll('.ts-titlerow *, header *')].map((e) => e.textContent ?? '').find((t) => /save|saving|retrying|saved/i.test(t)) ?? null;
+      const dismiss = [...document.querySelectorAll('button')].find((b) =>
+        /^dismiss$/i.test((b.textContent ?? '').trim()),
+      );
+      const save =
+        document.querySelector(
+          '[data-control="deck.saveState"], .ts-save-state, .ts-title-row [role="status"]',
+        )?.textContent ??
+        [...document.querySelectorAll('.ts-titlerow *, header *')]
+          .map((e) => e.textContent ?? '')
+          .find((t) => /save|saving|retrying|saved/i.test(t)) ??
+        null;
       return { modal, dismiss: Boolean(dismiss), save: save ? save.trim().slice(0, 60) : null };
     });
     return facts;
@@ -531,75 +595,153 @@ try {
     if (r) await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
     await sleep(1500);
     const after = await refusedModal();
-    return { ...before, dismissed: !after.modal, saveAfter: after.save, syncAfter: await syncFacts() };
+    return {
+      ...before,
+      dismissed: !after.modal,
+      saveAfter: after.save,
+      syncAfter: await syncFacts(),
+    };
   };
 
-
   // ---- K. the horizontal centre snap with no competing edge: a small picture low on the slide
-  let all = (await blocksOf(page, SLIDE)).filter((b) => (b.type === 'shot' || b.type === 'picture') && b.pos);
+  let all = (await blocksOf(page, SLIDE)).filter(
+    (b) => (b.type === 'shot' || b.type === 'picture') && b.pos,
+  );
   if (all.length === 0) {
     const before = await ids();
     try {
       const dataUrl = `data:image/png;base64,${readFileSync(PNG_A).toString('base64')}`;
       const s0 = await state(page);
-      const asset = await invoke(page, 'asset.add', { url: dataUrl, role: 'capture', alt: 'audit picture', baseRevision: s0.revision });
+      const asset = await invoke(page, 'asset.add', {
+        url: dataUrl,
+        role: 'capture',
+        alt: 'audit picture',
+        baseRevision: s0.revision,
+      });
       const s2 = await state(page);
-      await invoke(page, 'block.insert', { slideId: SLIDE, slot: 'main', block: { id: 'shot-audit', type: 'shot', asset: asset.id, pos: { x: 200, y: 700, w: 200, h: 125 } }, baseRevision: Math.max(s2.revision, asset.revision ?? 0) });
+      await invoke(page, 'block.insert', {
+        slideId: SLIDE,
+        slot: 'main',
+        block: {
+          id: 'shot-audit',
+          type: 'shot',
+          asset: asset.id,
+          pos: { x: 200, y: 700, w: 200, h: 125 },
+        },
+        baseRevision: Math.max(s2.revision, asset.revision ?? 0),
+      });
     } catch (e) {
-      record('setup', 'a small picture through the window API', 'broken', e instanceof Error ? e.message.slice(0, 200) : String(e));
+      record(
+        'setup',
+        'a small picture through the window API',
+        'broken',
+        e instanceof Error ? e.message.slice(0, 200) : String(e),
+      );
     }
     await newBlockAfter(before, 30_000);
     await settled(page);
-    all = (await blocksOf(page, SLIDE)).filter((b) => (b.type === 'shot' || b.type === 'picture') && b.pos);
+    all = (await blocksOf(page, SLIDE)).filter(
+      (b) => (b.type === 'shot' || b.type === 'picture') && b.pos,
+    );
   }
   const ID = all[0]?.id;
   if (!ID) throw new Error('no picture to drive');
   const place = async (x, y) => {
     await clearAll(page);
     const s0 = await state(page);
-    await invoke(page, 'block.set', { slideId: SLIDE, blockId: ID, path: '/pos', value: { x, y, w: 200, h: 125 }, baseRevision: s0.revision }).catch(() => undefined);
+    await invoke(page, 'block.set', {
+      slideId: SLIDE,
+      blockId: ID,
+      path: '/pos',
+      value: { x, y, w: 200, h: 125 },
+      baseRevision: s0.revision,
+    }).catch(() => undefined);
     await waitPos(ID, (p) => p.x === x && p.y === y);
     await settled(page);
     await sleep(1200);
   };
   await place(200, 700);
   k = await kOf(page);
-  await attempt('Alignment guides', 'drag a 200 px wide picture low on the slide so its centre comes within 3 px of the slide centre, no other edge near: a guide shows and the centre snaps to 800', async () => {
-    await place(200, 700);
-    const sel = await selectObject(ID);
-    if (!sel) return { ok: false, evidence: `could not select ${ID}` };
-    const before = await blockOf(page, SLIDE, ID);
-    const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
-    if (!edge) return { ok: false, evidence: 'no frame edge' };
-    const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
-    const cx = before.pos.x + before.pos.w / 2;
-    const to = { x: from.x + (800 + 3 - cx) * k, y: from.y };
-    const mid = await drag(page, from, to, { steps: 24, during: async () => ({ guides: await guidesCount(page), axes: await page.evaluate(() => [...document.querySelectorAll('.ts-guide')].map((g) => `${g.getAttribute('data-axis')}@${Math.round(g.getBoundingClientRect().x)},${Math.round(g.getBoundingClientRect().y)}`).join(',')) }) });
-    const after = await waitPos(ID, (p) => p.x !== before.pos.x);
-    await settled(page);
-    const centreAfter = after.pos.x + after.pos.w / 2;
-    const sheet = await rectOf(page, SHEET);
-    return { ok: mid.guides > 0 && near(centreAfter, 800, 0.5), evidence: `guides during ${mid.guides} (${mid.axes}; sheet centre at css x ${fmt(sheet.x + sheet.w / 2)}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 803); pos ${posStr(before.pos)} -> ${posStr(after.pos)}` };
-  }, { reset: () => place(200, 700) });
+  await attempt(
+    'Alignment guides',
+    'drag a 200 px wide picture low on the slide so its centre comes within 3 px of the slide centre, no other edge near: a guide shows and the centre snaps to 800',
+    async () => {
+      await place(200, 700);
+      const sel = await selectObject(ID);
+      if (!sel) return { ok: false, evidence: `could not select ${ID}` };
+      const before = await blockOf(page, SLIDE, ID);
+      const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
+      if (!edge) return { ok: false, evidence: 'no frame edge' };
+      const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
+      const cx = before.pos.x + before.pos.w / 2;
+      const to = { x: from.x + (800 + 3 - cx) * k, y: from.y };
+      const mid = await drag(page, from, to, {
+        steps: 24,
+        during: async () => ({
+          guides: await guidesCount(page),
+          axes: await page.evaluate(() =>
+            [...document.querySelectorAll('.ts-guide')]
+              .map(
+                (g) =>
+                  `${g.getAttribute('data-axis')}@${Math.round(g.getBoundingClientRect().x)},${Math.round(g.getBoundingClientRect().y)}`,
+              )
+              .join(','),
+          ),
+        }),
+      });
+      const after = await waitPos(ID, (p) => p.x !== before.pos.x);
+      await settled(page);
+      const centreAfter = after.pos.x + after.pos.w / 2;
+      const sheet = await rectOf(page, SHEET);
+      return {
+        ok: mid.guides > 0 && near(centreAfter, 800, 0.5),
+        evidence: `guides during ${mid.guides} (${mid.axes}; sheet centre at css x ${fmt(sheet.x + sheet.w / 2)}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 803); pos ${posStr(before.pos)} -> ${posStr(after.pos)}`,
+      };
+    },
+    { reset: () => place(200, 700) },
+  );
   await shot('snap-centre-x');
-  await attempt('Alignment guides', 'the same drag aimed 1 px right of the slide centre', async () => {
-    await place(200, 700);
-    const sel = await selectObject(ID);
-    if (!sel) return { ok: false, evidence: `could not select ${ID}` };
-    const before = await blockOf(page, SLIDE, ID);
-    const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
-    const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
-    const cx = before.pos.x + before.pos.w / 2;
-    const to = { x: from.x + (800 + 1 - cx) * k, y: from.y };
-    const mid = await drag(page, from, to, { steps: 24, during: async () => ({ guides: await guidesCount(page), axes: await page.evaluate(() => [...document.querySelectorAll('.ts-guide')].map((g) => g.getAttribute('data-axis')).join(',')) }) });
-    const after = await waitPos(ID, (p) => p.x !== before.pos.x);
-    await settled(page);
-    const centreAfter = after.pos.x + after.pos.w / 2;
-    return { ok: mid.guides > 0 && near(centreAfter, 800, 0.5), evidence: `guides during ${mid.guides} (${mid.axes}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 801); pos ${posStr(after.pos)}` };
-  }, { reset: () => place(200, 700) });
+  await attempt(
+    'Alignment guides',
+    'the same drag aimed 1 px right of the slide centre',
+    async () => {
+      await place(200, 700);
+      const sel = await selectObject(ID);
+      if (!sel) return { ok: false, evidence: `could not select ${ID}` };
+      const before = await blockOf(page, SLIDE, ID);
+      const edge = await rectOf(page, '.ts-overlay .ts-frame-edge[data-side="n"]');
+      const from = { x: edge.x + edge.w * 0.3, y: edge.y + edge.h / 2 };
+      const cx = before.pos.x + before.pos.w / 2;
+      const to = { x: from.x + (800 + 1 - cx) * k, y: from.y };
+      const mid = await drag(page, from, to, {
+        steps: 24,
+        during: async () => ({
+          guides: await guidesCount(page),
+          axes: await page.evaluate(() =>
+            [...document.querySelectorAll('.ts-guide')]
+              .map((g) => g.getAttribute('data-axis'))
+              .join(','),
+          ),
+        }),
+      });
+      const after = await waitPos(ID, (p) => p.x !== before.pos.x);
+      await settled(page);
+      const centreAfter = after.pos.x + after.pos.w / 2;
+      return {
+        ok: mid.guides > 0 && near(centreAfter, 800, 0.5),
+        evidence: `guides during ${mid.guides} (${mid.axes}); centre ${fmt(cx)} -> ${fmt(centreAfter)} (aimed at 801); pos ${posStr(after.pos)}`,
+      };
+    },
+    { reset: () => place(200, 700) },
+  );
   await shot('end');
 } catch (error) {
-  record('the audit ran to completion', 'no exception outside a step', 'broken', error instanceof Error ? (error.stack ?? error.message) : String(error));
+  record(
+    'the audit ran to completion',
+    'no exception outside a step',
+    'broken',
+    error instanceof Error ? (error.stack ?? error.message) : String(error),
+  );
 } finally {
   // ---- File > Move to trash, Delete forever, and a 404 for the deck
   if (deckId) {
@@ -607,7 +749,11 @@ try {
     try {
       await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
       await editorReady(page);
-      await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+      await pollUntil(
+        () => state(page),
+        (s) => s.sync?.connected === true,
+        30_000,
+      );
       await settled(page);
       await clickControl(page, 'menubar.file');
       await page.locator('[data-control="menu.file.moveToTrash"]').waitFor({ timeout: 8000 });
@@ -630,17 +776,30 @@ try {
       record('cleanup', 'Delete forever on /decks/trash', 'works', deckId);
       trashed = true;
     } catch (error) {
-      record('cleanup', 'File > Move to trash then Delete forever', 'broken', `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`);
+      record(
+        'cleanup',
+        'File > Move to trash then Delete forever',
+        'broken',
+        `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`,
+      );
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -658,9 +817,19 @@ try {
         if (status === 404 || Date.now() > until) break;
         await sleep(2000);
       }
-      record('cleanup', `GET /edit/${deckId} and /deck/${deckId} answer 404`, status === 404 ? 'works' : 'broken', `/edit ${status}, /deck ${status2}`);
+      record(
+        'cleanup',
+        `GET /edit/${deckId} and /deck/${deckId} answer 404`,
+        status === 404 ? 'works' : 'broken',
+        `/edit ${status}, /deck ${status2}`,
+      );
     } catch (error) {
-      record('cleanup', 'the scratch deck answers 404', 'broken', `probe failed: ${error instanceof Error ? error.message : String(error)}`);
+      record(
+        'cleanup',
+        'the scratch deck answers 404',
+        'broken',
+        `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
   await browser.close().catch(() => undefined);
@@ -684,5 +853,7 @@ try {
     mkdirSync(path.dirname(JSON_OUT), { recursive: true });
     writeFileSync(JSON_OUT, JSON.stringify(summary, null, 2));
   }
-  console.log(`\naudit-images: ${rows.length} rows, ${summary.works} works, ${summary.flaky} flaky, ${summary.broken} broken, ${summary.notDriven} not driven, ${consoleErrors.length} console errors, ${Math.round(summary.ms / 1000)} s against ${BASE}; deck ${deckId}`);
+  console.log(
+    `\naudit-images: ${rows.length} rows, ${summary.works} works, ${summary.flaky} flaky, ${summary.broken} broken, ${summary.notDriven} not driven, ${consoleErrors.length} console errors, ${Math.round(summary.ms / 1000)} s against ${BASE}; deck ${deckId}`,
+  );
 }

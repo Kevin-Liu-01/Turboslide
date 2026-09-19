@@ -9,7 +9,12 @@
 // Every helper that drives the product is the probe's own, bound to the one page of the walk so
 // an area module reads `t.press('Escape')` instead of `press(page, 'Escape')`. The extra helpers
 // at the end (the context menu, the snackbar, the sheet points, the insert tools, the object
-// selection, the window API setup writes) are shared by the area modules under ./areas/.
+// selection, the window API setup writes) are shared by the area modules under ./areas/. The
+// return round (docs/RETURN.md 4.4, section 5) added the pixel reader of audit-chrome.mjs (the PNG
+// decoder, the runs along a column or a row, the eleven seams and the split button's seam), the
+// Advanced tools switch helpers (a parked row is reached with the switch on and the switch is put
+// back), the appearance reads and the screenshot as bytes.
+import { inflateSync } from 'node:zlib';
 
 /** Thrown by `setup()` on a failed setup step; `section()` turns it into the not driven cascade. */
 export class SetupFailed extends Error {
@@ -1433,6 +1438,528 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       },
       [selector, props],
     );
+  /** The bounding box of the first element matching a selector, as `{ x, y, w, h }`, or null. */
+  t.boxRect = t.rectOf;
+
+  // ---------------------------------------------------------------------------------------------
+  // the Advanced tools switch (docs/FOCUS.md 3.1; docs/RETURN.md section 5): a returning row is
+  // driven with the switch off once its flag is gone and with the switch on while it is parked
+
+  /** Whether Tools > Advanced tools is on, read from the shell's settings. */
+  t.advancedOn = async () => (await t.state()).settings?.advancedTools === true;
+  /** Flips Tools > Advanced tools to `on` through the product; answers whether it reads so after. */
+  t.setAdvanced = async (on) => {
+    if ((await t.advancedOn()) === on) return true;
+    await t.surfaceClear();
+    await t.menuPath('tools', 'tools.advancedTools');
+    const got = await t.pollUntil(t.advancedOn, (x) => x === on, 8000).catch(() => null);
+    if (got === on) return true;
+    /* the window API's settings can lag the row (the first chrome run read the switch on for 5 s
+       after the row turned it off while the title row already drew the default view): the menu
+       row's own aria-checked settles it */
+    await t.surfaceClear();
+    try {
+      await t.openMenu('tools');
+      const checked = await t.attr('[data-control="menu.tools.advancedTools"]', 'aria-checked');
+      if (checked === 'true' || checked === 'false') return (checked === 'true') === on;
+    } catch {
+      /* the menu did not open; the state read stands */
+    } finally {
+      await t.closeMenus().catch(() => undefined);
+    }
+    return (await t.advancedOn()) === on;
+  };
+  /** Whether a menubar row is drawn (its parents hovered), the menu closed after. */
+  t.menuRowPresent = async (menuId, ...rowIds) => {
+    await t.surfaceClear();
+    try {
+      await t.openMenu(menuId);
+      for (let i = 0; i < rowIds.length - 1; i += 1) {
+        const child = `[data-control="menu.${rowIds[i + 1]}"], [data-control="${rowIds[i + 1]}"]`;
+        if (!(await t.has(`[data-control="menu.${rowIds[i]}"]`))) return false;
+        await t.hoverRow(rowIds[i], child).catch(() => undefined);
+      }
+      const last = rowIds[rowIds.length - 1];
+      return (
+        (await t.has(`[data-control="menu.${last}"]`)) || (await t.has(`[data-control="${last}"]`))
+      );
+    } catch {
+      return false;
+    } finally {
+      await t.closeMenus().catch(() => undefined);
+    }
+  };
+  /**
+   * Reaches a menubar row for a returning feature (docs/RETURN.md section 5): the row is looked
+   * for in the default view first; when it is absent the switch is turned on (the row is still
+   * parked on this build) and looked for again. Answers `{ present, switched }`; `t.deck.advanced`
+   * remembers that the walk turned the switch on so an area's end can turn it off again.
+   */
+  t.reachRow = async (menuId, ...rowIds) => {
+    if (await t.menuRowPresent(menuId, ...rowIds)) return { present: true, switched: false };
+    const on = await t.setAdvanced(true);
+    if (on) t.deck.advanced = true;
+    const present = await t.menuRowPresent(menuId, ...rowIds);
+    return { present, switched: on };
+  };
+  /** A setup step that reaches a row (`reachRow`) and records the route; a row still absent fails the setup. */
+  t.reachSetup = (label, menuId, ...rowIds) =>
+    t.setup(
+      `${label} in the menu, or the switch on for the parked rows`,
+      `${rowIds[rowIds.length - 1]} is reachable`,
+      async () => {
+        const r = await t.reachRow(menuId, ...rowIds);
+        return {
+          ok: r.present,
+          observed: r.switched
+            ? `${rowIds[rowIds.length - 1]} is parked on this build; Tools > Advanced tools turned on; the row drawn ${r.present}`
+            : `${rowIds[rowIds.length - 1]} is in the default view (${r.present})`,
+        };
+      },
+    );
+  /** Turns the switch off again when this walk turned it on, as an untagged setup observation. */
+  t.advancedBack = async (why) => {
+    if (!t.deck.advanced) return;
+    await t.step(
+      null,
+      `setup: Tools > Advanced tools off again after ${why}`,
+      'the default view is back',
+      async () => {
+        const off = await t.setAdvanced(false);
+        if (off) t.deck.advanced = false;
+        return { ok: off, observed: `advanced tools off ${off}` };
+      },
+    );
+  };
+
+  // ---------------------------------------------------------------------------------------------
+  // the appearance (docs/RETURN.md 2.13, the light appearance rows of section 5)
+
+  /** The chrome's theme (`data-theme` on the root) and the deck's appearance from deck.info. */
+  t.appearance = async () => {
+    const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    const s = await t.state().catch(() => null);
+    const info = await t.invoke('deck.info').catch(() => null);
+    return {
+      theme,
+      deck: info?.defaults?.appearance ?? info?.appearance ?? s?.theme ?? null,
+      state: s?.theme ?? null,
+    };
+  };
+  /** The painted ground under the sheet: the first non transparent background from the sheet up. */
+  t.sheetGround = () =>
+    page.evaluate(() => {
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+      for (let node = sheet; node; node = node.parentElement) {
+        const bg = getComputedStyle(node).backgroundColor;
+        if (bg && bg !== 'transparent' && !/^rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\)$/.test(bg))
+          return bg;
+      }
+      return null;
+    });
+  /** The WCAG contrast of two css colours (rgb or rgba strings); null when one cannot be read. */
+  t.contrastOf = (a, b) => {
+    const parse = (c) => {
+      const m = /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)/.exec(c ?? '');
+      return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+    };
+    const pa = parse(a);
+    const pb = parse(b);
+    return pa && pb ? Number(contrast(pa, pb).toFixed(2)) : null;
+  };
+  /**
+   * Slide > Change theme through the product: the Themes panel's GT tile for the appearance
+   * (`themes.gt.light`, `themes.gt.dark`; ThemesPanel.tsx), the row reached with the switch when
+   * parked. Answers the appearance read after the pick.
+   */
+  t.pickAppearance = async (appearance) => {
+    await t.surfaceClear({ dialogs: true });
+    if (!(await t.visible('panel.themes'))) {
+      const r = await t.reachRow('slide', 'slide.changeTheme');
+      if (!r.present) throw new Error('Slide > Change theme is not reachable');
+      await t.menuPath('slide', 'slide.changeTheme');
+      await t.waitControl('panel.themes', 8000);
+    }
+    /* the editor's own view: the state's theme or the chrome's data-theme; deck.info can hold
+       the written appearance while the sheet still draws the other (the gate run read deck
+       light, state dark, ground dark on the table slide) */
+    const took = (a) => a.state === appearance || a.theme === appearance;
+    let got = null;
+    let tries = 0;
+    /* two tries: the second documents run saw the tile's click leave the deck as it was on the
+       chart and diagram slides while the table slide's took at once */
+    for (; tries < 2 && !(got && took(got)); tries += 1) {
+      await t.clickControl(`themes.gt.${appearance}`);
+      await t.settled();
+      got = await t.pollUntil(t.appearance, took, tries === 0 ? 4000 : 8000).catch(t.appearance);
+    }
+    got = { ...got, tries };
+    /* the sheet's own paint follows the state a moment later (the charts area read a dark ground
+       right after the light tile on the first run); the ground is polled to the appearance */
+    const lumOf = (c) => {
+      const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c ?? '');
+      return m ? (Number(m[1]) + Number(m[2]) + Number(m[3])) / 3 : null;
+    };
+    await t
+      .pollUntil(
+        t.sheetGround,
+        (g) => {
+          const l = lumOf(g);
+          return l !== null && (appearance === 'light' ? l > 180 : l < 80);
+        },
+        6000,
+      )
+      .catch(() => undefined);
+    return got;
+  };
+  /** Closes the Themes panel when it is open. */
+  t.closeThemes = async () => {
+    if (await t.visible('panel.themes.close')) await t.clickControl('panel.themes.close');
+    else if (await t.visible('panel.themes')) await t.press('Escape');
+    await sleep(200);
+  };
+
+  // ---------------------------------------------------------------------------------------------
+  // the pixel reading (docs/RETURN.md 4.4): a screenshot's bytes and the seams read from them
+
+  /** A 1x screenshot of the page as a PNG buffer, decoded (`{ width, height, pixel(x, y) }`). */
+  t.shotPixels = async (clip) => {
+    const buf = await page.screenshot({ ...(clip ? { clip } : {}), scale: 'css' });
+    return decodePng(buf);
+  };
+  /** The boundary points of the eleven seams (audit-chrome.mjs `boundaryPoints`). */
+  t.boundaryPoints = () => boundaryPoints(page);
+  t.seamsFromShot = seamsFromShot;
+  t.splitSeamFromShot = splitSeamFromShot;
+  t.runsAlongRow = runsAlongRow;
+  t.runsAlongColumn = runsAlongColumn;
+  t.contrastRgb = contrast;
+  t.hexOf = hex;
 
   return t;
 }
+
+// -----------------------------------------------------------------------------------------------
+// the pixel reader, ported from docs/gslides-parity/return/audit-chrome/audit-chrome.mjs (the
+// return round, docs/RETURN.md 4.4): `chrome.split.one-box` and `chrome.separators.once` pass
+// only when read from pixels, because audit-chrome row 9 found the computed style asking for one
+// token while the pixels showed ink on ink.
+
+/** Decodes an 8 bit non interlaced PNG (zlib alone) into `{ width, height, pixel(x, y) }`. */
+export function decodePng(buf) {
+  const sig = [137, 80, 78, 71, 13, 10, 26, 10];
+  for (let i = 0; i < 8; i += 1) if (buf[i] !== sig[i]) throw new Error('not a PNG');
+  let off = 8;
+  let width = 0;
+  let height = 0;
+  let colorType = 0;
+  let bitDepth = 0;
+  const idat = [];
+  while (off < buf.length) {
+    const len = buf.readUInt32BE(off);
+    const type = buf.toString('ascii', off + 4, off + 8);
+    const data = buf.subarray(off + 8, off + 8 + len);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      if (data[12] !== 0) throw new Error('interlaced PNG');
+    } else if (type === 'IDAT') idat.push(data);
+    else if (type === 'IEND') break;
+    off += 12 + len;
+  }
+  if (bitDepth !== 8) throw new Error(`bit depth ${bitDepth}`);
+  const channels = { 2: 3, 6: 4, 0: 1, 4: 2 }[colorType];
+  if (!channels) throw new Error(`color type ${colorType}`);
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  const out = Buffer.alloc(height * stride);
+  let p = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[p];
+    p += 1;
+    const line = raw.subarray(p, p + stride);
+    p += stride;
+    const prev = y > 0 ? out.subarray((y - 1) * stride, y * stride) : null;
+    const cur = out.subarray(y * stride, (y + 1) * stride);
+    for (let i = 0; i < stride; i += 1) {
+      const a = i >= channels ? cur[i - channels] : 0;
+      const b = prev ? prev[i] : 0;
+      const c = prev && i >= channels ? prev[i - channels] : 0;
+      let v = line[i];
+      switch (filter) {
+        case 0:
+          break;
+        case 1:
+          v += a;
+          break;
+        case 2:
+          v += b;
+          break;
+        case 3:
+          v += (a + b) >> 1;
+          break;
+        case 4: {
+          const pp = a + b - c;
+          const pa = Math.abs(pp - a);
+          const pb = Math.abs(pp - b);
+          const pc = Math.abs(pp - c);
+          v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+          break;
+        }
+        default:
+          throw new Error(`filter ${filter}`);
+      }
+      cur[i] = v & 255;
+    }
+  }
+  const pixel = (x, y) => {
+    const i = y * stride + x * channels;
+    return channels >= 3 ? [out[i], out[i + 1], out[i + 2]] : [out[i], out[i], out[i]];
+  };
+  return { width, height, pixel };
+}
+export const hex = (rgb) => `#${rgb.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+const lum = ([r, g, b]) => {
+  const f = (v) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+/** The WCAG contrast of two rgb triples. */
+export const contrast = (a, b) => {
+  const la = lum(a);
+  const lb = lum(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+};
+const differs = (a, b, tol = 8) => a.some((v, i) => Math.abs(v - b[i]) > tol);
+/**
+ * The colour segments along a list of pixels: each segment is a run of pixels within tolerance of
+ * its first pixel, with its start, its thickness in pixels, its colour and its contrast against the
+ * segment before it. A 1 px hairline between two grounds reads as a segment of thickness 1; two
+ * hairlines drawn by two rows read as thickness 2 (or two adjacent thin segments); a missing line
+ * reads as one long segment.
+ */
+export function segmentsAlong(img, points, key) {
+  const out = [];
+  if (points.length === 0) return out;
+  const inside = ([x, y]) => x >= 0 && y >= 0 && x < img.width && y < img.height;
+  const pts = points.filter(inside);
+  if (pts.length === 0) return out;
+  let start = 0;
+  let color = img.pixel(...pts[0]);
+  for (let i = 1; i <= pts.length; i += 1) {
+    const c = i < pts.length ? img.pixel(...pts[i]) : null;
+    if (c === null || differs(c, color)) {
+      const prev = out.at(-1);
+      const seg = {
+        [key]: pts[start][key === 'y' ? 1 : 0],
+        thickness: i - start,
+        color: hex(color),
+      };
+      if (prev) seg.contrastToPrevious = Number(contrast(color, prev.rgb).toFixed(2));
+      seg.rgb = color;
+      out.push(seg);
+      if (c) {
+        start = i;
+        color = c;
+      }
+    }
+  }
+  return out.map(({ rgb, ...s }) => s);
+}
+export function runsAlongColumn(img, x, y0, y1) {
+  const pts = [];
+  for (let y = Math.max(0, y0); y <= y1; y += 1) pts.push([x, y]);
+  return segmentsAlong(img, pts, 'y');
+}
+export function runsAlongRow(img, y, x0, x1) {
+  const pts = [];
+  for (let x = Math.max(0, x0); x <= x1; x += 1) pts.push([x, y]);
+  return segmentsAlong(img, pts, 'x');
+}
+/**
+ * The thin runs of a seam scan: the segments of 1 to 4 px thickness between two grounds, which
+ * are the drawn lines (a ground reads as a long segment). A seam that holds one thin run of
+ * thickness 1 is drawn once; two thin runs or one of thickness 2 is a doubled line; none is a
+ * missing line.
+ */
+export function thinRuns(runs, max = 4) {
+  return runs.filter((r) => r.thickness >= 1 && r.thickness <= max);
+}
+
+/** The boundary points: an x on each horizontal seam where nothing but the rows sits (audit-chrome.mjs). */
+export const boundaryPoints = (page) =>
+  page.evaluate(() => {
+    const q = (s) => document.querySelector(s);
+    const rect = (s) => q(s)?.getBoundingClientRect() ?? null;
+    const title = rect('.ts-title-row');
+    const menubar = rect('.ts-menubar');
+    const toolbar = rect('.ts-toolbar');
+    const sb = rect('.pt-viewer.is-editor > .pt-sb');
+    const sbHead = rect('.pt-viewer.is-editor > .pt-sb > .pt-sb-head');
+    const notesSlot = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot');
+    const notes = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes');
+    const bottom = rect('.ts-bottombar');
+    const rpanel = rect('.pt-viewer.is-editor > .ts-rpanel');
+    const main = rect('.pt-viewer.is-editor > .pt-main');
+    /* an x where the point above and below the seam is the row itself (no control) */
+    const clearX = (y, candidates, accept) => {
+      for (const x of candidates) {
+        const a = document.elementFromPoint(x, y - 3);
+        const b = document.elementFromPoint(x, y + 3);
+        if (a && b && accept(a) && accept(b)) return x;
+      }
+      return candidates[0];
+    };
+    const isRowish = (el) =>
+      /ts-title-row|ts-title-l|ts-title-r|ts-menubar|ts-toolbar|ts-tb-tail|ts-tb-spring|ts-tb-head|pt-stagewrap|ts-stage|pt-stage|ts-notes|ts-bottombar|pt-sb|ts-film|pt-viewer|pt-main|ts-notes-slot/.test(
+        typeof el.className === 'string' ? el.className : '',
+      );
+    const xs = [];
+    for (let x = 300; x < Math.min(1400, window.innerWidth - 40); x += 20) xs.push(x);
+    const box = (r) => (r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null);
+    return {
+      viewport: { w: window.innerWidth, h: window.innerHeight },
+      title: box(title),
+      menubar: box(menubar),
+      toolbar: box(toolbar),
+      sb: box(sb),
+      sbHead: box(sbHead),
+      notesSlot: box(notesSlot),
+      notes: box(notes),
+      bottom: box(bottom),
+      rpanel: box(rpanel),
+      main: box(main),
+      titleMenubar: title
+        ? { y: Math.round(title.bottom), x: clearX(Math.round(title.bottom), xs, isRowish) }
+        : null,
+      menubarToolbar: menubar
+        ? { y: Math.round(menubar.bottom), x: clearX(Math.round(menubar.bottom), xs, isRowish) }
+        : null,
+      toolbarSheet: toolbar
+        ? {
+            y: Math.round(toolbar.bottom),
+            x: clearX(
+              Math.round(toolbar.bottom),
+              xs.filter((x) => (sb ? x > sb.right + 10 : true)),
+              isRowish,
+            ),
+          }
+        : null,
+      toolbarFilmstrip:
+        toolbar && sb
+          ? { y: Math.round(toolbar.bottom), x: Math.round(sb.x + sb.width / 2) }
+          : null,
+      filmstripHead: sbHead
+        ? { y: Math.round(sbHead.bottom), x: Math.round(sbHead.x + sbHead.width / 2) }
+        : null,
+      notesDivider: notesSlot
+        ? { y: Math.round(notesSlot.top), x: Math.round(notesSlot.x + notesSlot.width * 0.25) }
+        : null,
+      notesBottom: bottom
+        ? { y: Math.round(bottom.top), x: Math.round((main?.x ?? 300) + 80) }
+        : null,
+      /* an x inside the filmstrip's gutter first: at 900 px the cards fill the column and the
+         centre point crossed a card's number (the first chrome run read a jumble of six colours) */
+      filmstripBottom:
+        bottom && sb
+          ? {
+              y: Math.round(bottom.top),
+              x: clearX(
+                Math.round(bottom.top),
+                [
+                  Math.round(sb.x + 4),
+                  Math.round(sb.x + 10),
+                  Math.round(sb.x + sb.width / 2),
+                  Math.round(sb.right - 6),
+                ],
+                isRowish,
+              ),
+            }
+          : null,
+      filmstripEdge: sb ? { x: Math.round(sb.right), y: Math.round(sb.y + sb.height / 2) } : null,
+      filmstripEdgeUpper: sb ? { x: Math.round(sb.right), y: Math.round(sb.y + 30) } : null,
+      rpanelEdge:
+        rpanel && rpanel.width > 0
+          ? { x: Math.round(rpanel.x), y: Math.round(rpanel.y + rpanel.height / 2) }
+          : null,
+    };
+  });
+
+/** The eleven seams of docs/RETURN.md 4.4 in the order the row reads them. */
+export const SEAM_NAMES = Object.freeze([
+  'title -> menu bar',
+  'menu bar -> toolbar',
+  'toolbar -> sheet',
+  'toolbar -> filmstrip',
+  'filmstrip head -> cards',
+  'stage -> notes pane',
+  'notes pane -> bottom bar',
+  'filmstrip -> bottom bar',
+  'filmstrip -> sheet (vertical)',
+  'filmstrip -> sheet, upper (vertical)',
+  'sheet -> right panel (vertical)',
+]);
+
+/** Reads the lines at every seam from the whole editor screenshot (1x). */
+export const seamsFromShot = (img, pts, scale = 1) => {
+  const out = {};
+  const col = (name, p, span = 6) => {
+    if (!p) return;
+    out[name] = {
+      at: p,
+      runs: runsAlongColumn(
+        img,
+        Math.round(p.x * scale),
+        Math.round((p.y - span) * scale),
+        Math.round((p.y + span) * scale),
+      ).map((r) => ({ ...r, y: r.y / scale, thickness: r.thickness / scale })),
+    };
+  };
+  const rowScan = (name, p, span = 6) => {
+    if (!p) return;
+    out[name] = {
+      at: p,
+      runs: runsAlongRow(
+        img,
+        Math.round(p.y * scale),
+        Math.round((p.x - span) * scale),
+        Math.round((p.x + span) * scale),
+      ).map((r) => ({ ...r, x: r.x / scale, thickness: r.thickness / scale })),
+    };
+  };
+  col('title -> menu bar', pts.titleMenubar);
+  col('menu bar -> toolbar', pts.menubarToolbar);
+  col('toolbar -> sheet', pts.toolbarSheet);
+  col('toolbar -> filmstrip', pts.toolbarFilmstrip);
+  col('filmstrip head -> cards', pts.filmstripHead);
+  col('stage -> notes pane', pts.notesDivider);
+  col('notes pane -> bottom bar', pts.notesBottom);
+  col('filmstrip -> bottom bar', pts.filmstripBottom);
+  rowScan('filmstrip -> sheet (vertical)', pts.filmstripEdge);
+  rowScan('filmstrip -> sheet, upper (vertical)', pts.filmstripEdgeUpper);
+  rowScan('sheet -> right panel (vertical)', pts.rpanelEdge);
+  return out;
+};
+
+/**
+ * The split button's own seam, read from a 1x screenshot: the divider between the halves at mid
+ * height, and the pixels 1, 2 and 4 px under the top edge, where an 8 px corner on each half
+ * leaves a notch of paper (audit-chrome row 9). `presentRect` and `arrowRect` are the halves'
+ * viewport boxes, `cropOrigin` the screenshot's origin in viewport px (`{ x: 0, y: 0 }` for the
+ * whole page).
+ */
+export const splitSeamFromShot = (img, presentRect, arrowRect, cropOrigin = { x: 0, y: 0 }) => {
+  const x0 = Math.round(presentRect.x + presentRect.w - 6 - cropOrigin.x);
+  const x1 = Math.round(arrowRect.x + 6 - cropOrigin.x);
+  const at = (dy) => Math.round(presentRect.y + dy - cropOrigin.y);
+  return {
+    mid: runsAlongRow(img, at(presentRect.h / 2), x0, x1),
+    top1: runsAlongRow(img, at(1), x0, x1),
+    top2: runsAlongRow(img, at(2), x0, x1),
+    top4: runsAlongRow(img, at(4), x0, x1),
+  };
+};

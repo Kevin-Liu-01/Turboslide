@@ -15,7 +15,7 @@ import { MOOD_EARTH, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtu
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 
-import { memoryBlobClient } from './blob-fake.ts';
+import { memoryBlobClient, versionOf } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import {
   BLOB_DOCUMENT_WRITE_TIMEOUT_MS,
@@ -1310,6 +1310,150 @@ describe('hosted stores', () => {
       expect(() => collection('blob', join(root, 'overlay-3'), null)).toThrow(
         /needs a Blob client/,
       );
+    });
+
+    it('lists from one head per deck once a card is proven, reads a body for a deck whose etag moved alone, and lists on through one deck the store refuses (the return round, R1-F3, R1-F4)', async () => {
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-list-a'), fake);
+      await first.ready();
+      clock = '2026-09-19T11:00:00.000Z';
+      await first.create({ name: 'Alpha deck', from: 'blank' });
+      clock = '2026-09-19T11:01:00.000Z';
+      await first.create({ name: 'Beta deck', from: 'blank' });
+      // another instance that never opened a deck: its first listing proves every card from a
+      // body (the origin body, whose md5 is the head's etag on the fake), its second from the
+      // heads alone
+      const second = collection('blob', join(root, 'overlay-list-b'), fake);
+      await second.ready();
+      const ops = (since: number): Record<string, number> => {
+        const out: Record<string, number> = {};
+        for (const call of fake.calls.slice(since)) {
+          if (!call.pathname.endsWith('deck.json') && !call.pathname.includes('/snapshots/'))
+            continue;
+          out[call.op] = (out[call.op] ?? 0) + 1;
+        }
+        return out;
+      };
+      let mark = fake.calls.length;
+      expect((await second.list()).map((head) => head.id)).toEqual([
+        'beta-deck',
+        'alpha-deck',
+        'gt-brand',
+      ]);
+      expect(ops(mark)).toEqual({ head: 3, get: 3 });
+      mark = fake.calls.length;
+      expect((await second.list()).map((head) => head.id)).toEqual([
+        'beta-deck',
+        'alpha-deck',
+        'gt-brand',
+      ]);
+      expect(ops(mark)).toEqual({ head: 3 });
+      // a rename on the first instance moves one etag: the next listing on the second reads that
+      // deck's body and the two others' heads alone, and shows the new title
+      const alpha = await first.open('alpha-deck');
+      const renamed = await alpha.write({
+        baseRevision: 0,
+        author: kevin,
+        mutations: [{ op: 'deck.set', path: '/title', value: 'Alpha deck, renamed' }],
+      });
+      expect(renamed.ok).toBe(true);
+      mark = fake.calls.length;
+      const after = await second.list();
+      expect(after.find((head) => head.id === 'alpha-deck')?.title).toBe('Alpha deck, renamed');
+      expect(ops(mark)).toEqual({ head: 3, get: 1 });
+      // the store refuses one deck's head: the card proven last is listed and the listing answers;
+      // a deck it never proved is left out of that one listing and returns with the store
+      let refuse: string | null = null;
+      const busy = {
+        ...fake,
+        head: (pathname: string, callOptions?: { signal?: AbortSignal }) =>
+          refuse !== null && pathname === `decks/${refuse}/deck.json`
+            ? Promise.reject(
+                new Error(
+                  'Vercel Blob: The blob service is currently not available. Please try again.',
+                ),
+              )
+            : fake.head(pathname, callOptions),
+      } as FakeBlobClient;
+      const lines: string[] = [];
+      const third = openHostedDecks({
+        selection: selectStore({ TURBOSLIDE_STORE: 'blob', BLOB_READ_WRITE_TOKEN: 'test' }),
+        workspaceDecksDir: null,
+        overlayRoot: join(root, 'overlay-list-c'),
+        seed: directorySeed(seedRoot),
+        blob: busy,
+        now,
+        log: (line) => lines.push(line),
+      });
+      await third.ready();
+      refuse = 'beta-deck';
+      expect((await third.list()).map((head) => head.id)).toEqual(['alpha-deck', 'gt-brand']);
+      expect(lines.some((line) => /listing's read of beta-deck .* left out/.test(line))).toBe(true);
+      refuse = null;
+      expect((await third.list()).map((head) => head.id)).toEqual([
+        'beta-deck',
+        'alpha-deck',
+        'gt-brand',
+      ]);
+      refuse = 'beta-deck';
+      expect((await third.list()).map((head) => head.id)).toEqual([
+        'beta-deck',
+        'alpha-deck',
+        'gt-brand',
+      ]);
+      expect(lines.some((line) => /listing's read of beta-deck .* proven last/.test(line))).toBe(
+        true,
+      );
+      refuse = null;
+    });
+
+    it('removes the presence record, its copies and the pulse with the deck although the listing lags, and heads a folder without a manifest once in five minutes (R1-F3)', async () => {
+      const fake = memoryBlobClient();
+      const decks = collection('blob', join(root, 'overlay-sweep'), fake);
+      await decks.ready();
+      clock = '2026-09-19T12:00:00.000Z';
+      await decks.create({ name: 'Gone deck', from: 'blank' });
+      // the presence state: an older copy the listing shows, then the record, its current copy
+      // (named by the record's md5) and the pulse, written a moment ago and not in the store's
+      // listing yet (Vercel Blob's listing lags an upload by up to a minute)
+      const json = (text: string): Uint8Array => new TextEncoder().encode(text);
+      const put = (pathname: string, bytes: Uint8Array): Promise<unknown> =>
+        fake.put(pathname, bytes, { overwrite: true, contentType: 'application/json' });
+      const recordBytes = json('{"v":1,"rows":[],"left":[]}');
+      const hex = versionOf(recordBytes).replace(/"/g, '');
+      const older = 'decks/gone-deck/.turboslide/presence/0123456789abcdef0123456789abcdef.json';
+      await put(older, json('{}'));
+      const late = [
+        'decks/gone-deck/.turboslide/presence.json',
+        `decks/gone-deck/.turboslide/presence/${hex}.json`,
+        'decks/gone-deck/.turboslide/pulse.json',
+      ];
+      fake.holdList();
+      await put(late[0]!, recordBytes);
+      await put(late[1]!, recordBytes);
+      await put(late[2]!, json('{}'));
+      await decks.remove('gone-deck');
+      fake.releaseList();
+      for (const pathname of [older, ...late]) expect(fake.blobs.has(pathname)).toBe(false);
+      expect((await fake.list('decks/gone-deck/')).map((entry) => entry.pathname)).toEqual([]);
+      // a leftover folder of an earlier removal: one head on the first listing, none within
+      // the memory, one again after it; a deck made under that id here lists at once
+      await fake.put('decks/ghost-deck/.turboslide/pulse.json', new TextEncoder().encode('{}'), {
+        overwrite: true,
+        contentType: 'application/json',
+      });
+      const ghostHeads = (): number =>
+        fake.calls.filter(
+          (call) => call.op === 'head' && call.pathname === 'decks/ghost-deck/deck.json',
+        ).length;
+      expect((await decks.list()).map((head) => head.id)).toEqual(['gt-brand']);
+      expect(ghostHeads()).toBe(1);
+      await decks.list();
+      await decks.list();
+      expect(ghostHeads()).toBe(1);
+      clock = '2026-09-19T12:01:00.000Z';
+      await decks.create({ name: 'Ghost deck', from: 'blank' });
+      expect((await decks.list()).map((head) => head.id)).toEqual(['ghost-deck', 'gt-brand']);
     });
 
     it('serves a picture added on one instance from the next (SPEC-3 0.39, report 10 F49)', async () => {

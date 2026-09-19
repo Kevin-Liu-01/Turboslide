@@ -14,7 +14,7 @@ import type { RenderJobResult } from './jobs/render.ts';
 import { cacheFiles } from './jobs/render.ts';
 import { cacheDir, defaultPaths, deckDirOf, readDeckHead } from './paths.ts';
 import type { WorkerPaths } from './paths.ts';
-import { createQueue } from './queue.ts';
+import { EXPORT_AHEAD_OF, createQueue, queuePosition } from './queue.ts';
 import type { JobContext } from './queue.ts';
 import { createWorkerServer } from './server.ts';
 import type { Runners } from './server.ts';
@@ -135,6 +135,75 @@ describe('queue', () => {
     expect(queue.list('export')).toHaveLength(1);
     expect(queue.get('nope')).toBeUndefined();
     await expect(queue.wait('nope')).rejects.toThrow(RangeError);
+    queue.close();
+  });
+
+  it('queues an export ahead of the pending renders and behind everything else (VERIFICATION C3T-F6)', () => {
+    expect([...EXPORT_AHEAD_OF]).toEqual(['render']);
+    // nothing pending: last, which is first
+    expect(queuePosition('export', [])).toBe(0);
+    // before the first pending render, behind an earlier export and a pending sheet
+    expect(queuePosition('export', ['render', 'render'])).toBe(0);
+    expect(queuePosition('export', ['export', 'render'])).toBe(1);
+    expect(queuePosition('export', ['sheet', 'render', 'render'])).toBe(1);
+    expect(queuePosition('export', ['measure', 'verify'])).toBe(2);
+    // every other kind keeps submission order, renders included
+    expect(queuePosition('render', ['export', 'render'])).toBe(2);
+    expect(queuePosition('sheet', ['render'])).toBe(1);
+    expect(queuePosition('measure', ['render', 'export'])).toBe(2);
+    expect(queuePosition('verify', [])).toBe(0);
+  });
+
+  it('runs a download ahead of the thumbnail renders queued before it, never ahead of the running job or another export', async () => {
+    const queue = createQueue({ dir: join(tmp, 'q-export-first') });
+    const order: string[] = [];
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    // the running job: a render the queue never interrupts (the pump is a microtask, so the
+    // submits below wait a tick the way the studio's awaited submits do)
+    const a = queue.submit('render', { n: 1 }, async () => {
+      await gate;
+      order.push('render a');
+      return 'A';
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(queue.get(a.id)?.status).toBe('running');
+    const b = queue.submit('render', { n: 2 }, async () => {
+      order.push('render b');
+      return 'B';
+    });
+    const c = queue.submit('sheet', { n: 3 }, async () => {
+      order.push('sheet c');
+      return 'C';
+    });
+    const d = queue.submit('render', { n: 4 }, async () => {
+      order.push('render d');
+      return 'D';
+    });
+    const e = queue.submit('export', { n: 5 }, async () => {
+      order.push('export e');
+      return 'E';
+    });
+    const f = queue.submit('export', { n: 6 }, async () => {
+      order.push('export f');
+      return 'F';
+    });
+    // the pending list before anything past `a` runs: e and f before b (the first render),
+    // in their own order; c stays where it was submitted, behind b
+    await new Promise((r) => setTimeout(r, 10));
+    expect(queue.get(a.id)?.status).toBe('running');
+    expect(
+      queue
+        .list()
+        .filter((r) => r.status === 'queued')
+        .map((r) => r.id)
+        .sort(),
+    ).toEqual([b.id, c.id, d.id, e.id, f.id].sort());
+    release();
+    await Promise.all([a, b, c, d, e, f].map((job) => queue.wait(job.id)));
+    expect(order).toEqual(['render a', 'export e', 'export f', 'render b', 'sheet c', 'render d']);
     queue.close();
   });
 });

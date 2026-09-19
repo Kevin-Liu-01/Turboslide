@@ -26,6 +26,16 @@ function implementedFrom(ids: ReadonlyArray<ActionId>): (id: ActionId) => boolea
   return (id) => set.has(id);
 }
 
+/**
+ * Every tool of the action table, built once for the file: `deriveTools(() => true)` turns the
+ * whole table's Zod definitions into JSON Schema, about half a second of CPU on a quiet machine,
+ * and under the root `pnpm test` beside every package's workers and the check chain's browsers
+ * the same work passed vitest's 5 s test budget twice (the focus round, VERIFICATION F-check5 and
+ * C3T.5). Built at module load, outside any test's budget, so the two tests that read the full
+ * list assert the same list and neither depends on the machine's load.
+ */
+const EVERY_TOOL = deriveTools(() => true);
+
 describe('deriveTools', () => {
   it('offers only implemented actions whose transports include mcp', () => {
     const tools = deriveTools(
@@ -37,7 +47,7 @@ describe('deriveTools', () => {
 
   it('returns no tool when nothing is implemented and every tool when everything is', () => {
     expect(deriveTools(() => false)).toEqual([]);
-    const all = deriveTools(() => true);
+    const all = EVERY_TOOL;
     const expected = new Set(actionsOn('mcp').map((spec) => spec.mcp));
     expect(new Set(all.map((entry) => entry.name))).toEqual(expected);
     // one tool per name; every action on mcp is reached through exactly one tool
@@ -174,7 +184,7 @@ describe('the served tool list stays under the stdio read buffer', () => {
   });
 
   it('serialises every tool under 4 MB in total and every outputSchema under 32 KB', () => {
-    const tools = deriveTools(() => true);
+    const tools = EVERY_TOOL;
     expect(tools.length).toBeGreaterThan(80);
     const total = tools.reduce((sum, entry) => sum + byteSize(entry.tool), 0);
     expect(total).toBeLessThan(4 * 1024 * 1024);

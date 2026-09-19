@@ -83,13 +83,21 @@ describe('the primitives in the Insert group', () => {
     expect(insertLabel('shot')).toBe('Image');
   });
 
-  it('keeps the entries whose menu row is core in the default view and parks the rest (docs/FOCUS.md 3.1)', () => {
+  it('keeps the entries whose menu row is core in the default view and parks the rest (docs/FOCUS.md 3.1; docs/RETURN.md 2)', () => {
     const plain = buildPaletteEntries({ ...context('content-rule'), advancedTools: false }).filter(
       (entry) => entry.group === 'insert',
     );
-    /* cycle 2 (docs/FOCUS.md section 4 under ruling (1), build/b3.md R14): the five shape and line
-       entries leave the default view with their rows and stand behind the switch */
-    expect(plain.filter((entry) => entry.insert !== 'slide').map((entry) => entry.title)).toEqual([
+    /* the return round (docs/RETURN.md 2.2 to 2.6) brought the shapes, the lines, the table, the
+       chart and the diagram back with their rows; the Box (no row, question 5 of RETURN.md
+       section 9), Rule, Icon and Material stay behind the switch */
+    expect(
+      plain.filter((entry) => entry.insert === 'primitive').map((entry) => entry.title),
+    ).toEqual([
+      'Rectangle shape',
+      'Rounded rectangle shape',
+      'Ellipse shape',
+      'Line shape',
+      'Arrow shape',
       'Text box',
       'Image',
     ]);
@@ -101,20 +109,32 @@ describe('the primitives in the Insert group', () => {
       'insert:block:shape:arrow',
     ]) {
       const entry = inserts.find((each) => each.id === id);
-      expect(entry?.advanced, id).toBe(true);
+      expect(entry?.advanced, id).toBeUndefined();
       expect(entry?.row, id).toMatch(/^insert\.(shape\.shapes|line)\./);
     }
+    const plainIds = plain.map((entry) => entry.id);
+    for (const id of ['insert:block:table', 'insert:block:chart', 'insert:block:dia'])
+      expect(plainIds, id).toContain(id);
+    for (const id of [
+      'insert:block:box',
+      'insert:block:rule',
+      'insert:block:icon',
+      'insert:block:material',
+    ])
+      expect(plainIds, id).not.toContain(id);
     expect(plain.map((entry) => entry.row)).toContain('insert.textBox');
     expect(plain.map((entry) => entry.row)).toContain('insert.image.upload');
     expect(plain.some((entry) => entry.insert === 'slide')).toBe(true);
     expect(plain.every((entry) => entry.advanced !== true)).toBe(true);
-    /* the parked entries name their rows and keep their runs */
+    /* the entries name their rows and keep their runs; a parked one carries the flag */
     const chart = inserts.find((entry) => entry.id === 'insert:block:chart');
     expect(chart?.row).toBe('insert.chart');
-    expect(chart?.advanced).toBe(true);
+    expect(chart?.advanced).toBeUndefined();
     expect(chart?.run.kind).toBe('dispatch');
     expect(inserts.find((entry) => entry.id === 'insert:block:box')?.advanced).toBe(true);
-    expect(inserts.find((entry) => entry.id === 'insert:block:icon')?.row).toBe('insert.icon');
+    const icon = inserts.find((entry) => entry.id === 'insert:block:icon');
+    expect(icon?.row).toBe('insert.icon');
+    expect(icon?.advanced).toBe(true);
   });
 
   it('inserts a shape variant as one block.insert with the shape set', () => {

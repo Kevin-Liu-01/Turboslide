@@ -29,8 +29,9 @@ import './TitleRow.css';
  * through the identity the route resolved, with a 6 px dot when a record landed since this tab
  * loaded. Right, in fixed slots that exist from the first paint (0.43): the presence slot (184 px:
  * four chips, the `+N` chip drawn empty, a hair rule, the own chip), the Show all comments glyph
- * (live), the inbox plate (a glyph and a two digit count, present at zero), the Slideshow split
- * button (the one solid button of the row), Share with a 6 px dot when an access request is
+ * (a toggle), the inbox plate (a glyph and a two digit count, present at zero; its slot collapses
+ * while the plate is parked, docs/RETURN.md 4.3), the Slideshow split button as one control (the
+ * one solid button of the row, RETURN.md 4.1), Share with a 6 px dot when an access request is
  * pending. No star, folder, Meet, Record or Gemini (SPEC 2.0). In compact mode a Show the menus
  * chevron sits at the far right. The row's width never changes when a person joins or a count
  * moves (05 rule 4). New in Turboslide (no Prototemplate source).
@@ -286,26 +287,58 @@ function LastEdit() {
   );
 }
 
+/** The id of the Presentation options menu; the chevron names it in `aria-controls` while it is mounted. */
+export const SLIDESHOW_MENU_ID = 'ts-menu-slideshow';
+
+/**
+ * The Slideshow split button as one control (docs/RETURN.md 4.1; return/audit-chrome.md 5a): a
+ * `group` labelled Slideshow around two buttons. The label half presents from the current slide
+ * and ArrowDown on it opens the options menu with the first row focused, as on the chevron; the
+ * chevron half is the menu button of the ARIA pattern (`aria-haspopup`, `aria-expanded`, and
+ * `aria-controls` only while the menu is mounted, because a closed chevron would otherwise name
+ * an id that is not in the document). The menu hangs under the whole control, its right edge on
+ * the control's right edge (Google drops it under the control's right edge; `align="end"`), and
+ * Escape or Tab returns focus to the half that opened it. Enter and Space on each half do what
+ * the click does: the shell's `key.commit` binding swallows a bare Enter only while a crop is
+ * open (EditorShell.tsx), so the browser's activation reaches the focused button.
+ */
 function Slideshow() {
   const shell = useEditorShell();
   const item = itemById('title.slideshow');
-  const [open, setOpen] = useState(false);
+  const [openedBy, setOpenedBy] = useState<'label' | 'arrow' | null>(null);
+  const box = useRef<HTMLSpanElement>(null);
+  const label = useRef<HTMLButtonElement>(null);
   const arrow = useRef<HTMLButtonElement>(null);
   const key = tooltipKey(item.key, shell.platform);
   const children: ReadonlyArray<MenuItem> = item.items ?? [];
+  const open = openedBy !== null;
+  const labelTip = tipProps({
+    name: TITLE_ROW.slideshow,
+    doc: 'Presents from the current slide; the Down arrow opens the options',
+    ...(key === undefined ? {} : { key }),
+  });
   return (
-    <span className="ts-title-slideshow" data-control="present.split">
+    <span
+      ref={box}
+      className="ts-title-slideshow"
+      role="group"
+      aria-label={TITLE_ROW.slideshow}
+      data-control="present.split"
+    >
       <button
+        ref={label}
         type="button"
         className="pt-ib is-solid ts-title-present"
         data-control="present.open"
         data-menu-item={item.id}
         onClick={() => shell.runItem(item)}
-        {...tipProps({
-          name: TITLE_ROW.slideshow,
-          doc: 'Presents from the current slide',
-          ...(key === undefined ? {} : { key }),
-        })}
+        {...labelTip}
+        onKeyDown={(event) => {
+          labelTip.onKeyDown(event);
+          if (event.key !== 'ArrowDown' || event.altKey || event.metaKey || event.ctrlKey) return;
+          event.preventDefault();
+          setOpenedBy('label');
+        }}
       >
         <Icon name="play" />
         <span className="pt-lb">{TITLE_ROW.slideshow}</span>
@@ -317,8 +350,9 @@ function Slideshow() {
         aria-label="Presentation options"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls={open ? SLIDESHOW_MENU_ID : undefined}
         data-control="present.arrow"
-        onClick={() => setOpen((on) => !on)}
+        onClick={() => setOpenedBy((on) => (on === null ? 'arrow' : null))}
         {...tipProps({
           name: 'Presentation options',
           doc: 'Presenter view and Start from beginning',
@@ -326,17 +360,18 @@ function Slideshow() {
       >
         <Icon name="chevron-down" />
       </button>
-      {open && arrow.current ? (
+      {open && box.current ? (
         <Menu
           items={children}
           context={shell.menuContext}
           label="Presentation options"
-          anchor={{ kind: 'element', element: arrow.current }}
+          anchor={{ kind: 'element', element: box.current }}
           placement="below"
-          returnFocusTo={arrow.current}
+          align="end"
+          returnFocusTo={openedBy === 'label' ? label.current : arrow.current}
           onSelect={(chosen) => shell.runItem(chosen)}
-          onClose={() => setOpen(false)}
-          id="ts-menu-slideshow"
+          onClose={() => setOpenedBy(null)}
+          id={SLIDESHOW_MENU_ID}
         />
       ) : null}
     </span>
@@ -449,6 +484,8 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
         <PresenceSlot />
         <span className="ts-title-slot ts-title-comments-slot" data-control="title.comments.slot">
+          {/* the glyph is a toggle (docs/RETURN.md 4.3; audit-chrome row 24): the first click opens
+              the Comments panel with aria-pressed true, the second closes it, as Google's icon does */}
           {commentsPresent ? (
             <ToolButton
               icon="chat"
@@ -459,13 +496,16 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
               className="ts-title-comments"
               control="title.comments"
               menuItem={comments.id}
-              onClick={() => shell.runItem(comments)}
+              onClick={() =>
+                shell.panel === 'comments' ? shell.closePanel() : shell.runItem(comments)
+              }
             />
           ) : null}
         </span>
         {/* docs/FOCUS.md 3.2 parks title.inbox: the plate is drawn only while Tools > Advanced tools
-            is on; the 60 px slot stays so the row's five slots keep their geometry at first paint
-            (SPEC-3 4.2, 9.2) */}
+            is on. The slot carries `is-empty` while the plate is absent and TitleRow.css collapses
+            it (docs/RETURN.md 4.3, 2.16), so the parked plate leaves no 60 px hole; the slot keeps
+            its width whenever the plate is present (SPEC-3 4.2, 9.2) */}
         <span
           className={cn(
             'ts-title-slot ts-title-inbox-slot',

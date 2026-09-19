@@ -1,0 +1,215 @@
+{
+  "base": "https://turboslide-iv0fskc4w-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-18T23:16:38.831Z",
+  "ms": 264925,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 264922,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4c3t/gate-preview-run2/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "rows": 19,
+  "passed": 18,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "noStep": [],
+  "commit": "1d3ba31",
+  "origin": "https://turboslide-iv0fskc4w-kl01s-projects.vercel.app",
+  "date": "2026-09-18",
+  "results": {
+    "share.dialog.open": "passed",
+    "share.copy-view-link": "passed",
+    "share.copy-present-link": "passed",
+    "share.copy-edit-link": "passed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "passed",
+    "share.edit-link-lands-editor": "passed",
+    "share.view-link-cannot-edit": "passed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "passed",
+    "collab.presence-chips": "failed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "comments.reaches-second-browser": "passed",
+    "versions.restore": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "collab.presence-chips",
+        "feature": "share",
+        "result": "failed"
+      }
+    ]
+  },
+  "wouldPark": ["share"],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the second tab's chip leaves the owner's tab within 30 s of its tab closing"
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

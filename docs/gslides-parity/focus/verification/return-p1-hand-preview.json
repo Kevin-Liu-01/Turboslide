@@ -1,0 +1,271 @@
+{
+  "base": "turboslide-7errarh2r-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-19T12:58:15.388Z",
+  "endedAt": "2026-09-19T13:00:52.273Z",
+  "deckId": "untitled-20260919-l8yq",
+  "rows": [
+    {
+      "n": 1,
+      "id": "setup.deck",
+      "step": "Double click the title on /new, type, Escape",
+      "expected": "a deck at /edit/<id>",
+      "observed": "/edit/untitled-20260919-l8yq; revision 1",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "id": "setup.switch-off",
+      "step": "Tools > Advanced tools reads off",
+      "expected": "the default view",
+      "observed": "settings.advancedTools false; data-advanced-tools false",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "id": "tables.insert.grid",
+      "step": "Insert > Table, point at 4 by 3, click",
+      "expected": "the size words read 4 x 3; a 960 by 320 table with a header row lands",
+      "observed": "size words \"4 x 3\"; table table 960x320; columns 4, rows 3, header true",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "id": "tables.cell.double-click-type",
+      "step": "double click cell 1,1, type Q1 revenue, Escape",
+      "expected": "the cell holds the text; chip Table",
+      "observed": "session true; cell 1,1 \"Q1 revenue\"; chip \"Table\"",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "id": "tables.cell.tab-from-written",
+      "step": "double click cell 2,0, type North, Tab, type South, Escape",
+      "expected": "the session moves to cell 2,1 with its text selected and the typing lands there",
+      "observed": "session true; after Tab editing true in 2,1; cells 2,0 \"North\" 2,1 \"South\"; cell 0,0 \"\"",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "id": "tables.cell.align-menu",
+      "step": "with a cell session open in column 2, Format > Align & indent > Center",
+      "expected": "column 2 alone reads center; Cmd+Z",
+      "observed": "session true; column aligns -,center,-,-; cell 1,1 text-align center; after Cmd+Z -,-,-,-",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "id": "tables.menu.format-table-selected",
+      "step": "one click on the table; Format > Table rows enabled; Insert column right",
+      "expected": "the rows are enabled with the table selected; a column is added at an equal share with no overlap; Cmd+Z",
+      "observed": "selected true chip Table; Insert column right present true disabled false; columns 4 -> 5; drawn widths 135,135,135,135,135 | 135,135,135,135,135 | 135,135,135,135,135 (share 135); equal true overlap false; typed text kept true; after Cmd+Z 4",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "id": "tables.column.resize-seam",
+      "step": "select the table, drag the seam between columns 1 and 2 by 80 px",
+      "expected": "the left column widens by 80, the right narrows, the readout shows the width; Undo",
+      "observed": "seam handle.table.column.0; widths 240,240,240,240 -> 320,160,240,240; readout during \"320 px\"; undo restored true",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "id": "tables.present",
+      "step": "Slideshow on the table slide; Escape",
+      "expected": "the show draws the table with its cells and typed text and no editable field",
+      "observed": "show true (present sheet true); cells 12; typed text drawn true; editable fields 0",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "id": "shapes.insert.rectangle-click",
+      "step": "Insert > Shape > Shapes > Rectangle, one click on the sheet",
+      "expected": "a 240 by 160 rectangle drawn as an svg rect",
+      "observed": "shape shape 240x160 at 300,260; svg rect fill rgba(242, 242, 240, 0.05) stroke rgb(242, 242, 240) 1px",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "id": "shapes.fill.colour",
+      "step": "one click selects; toolbar Fill color, the blue swatch; Cmd+Z",
+      "expected": "the chip and eight handles; the fill writes; Cmd+Z takes it back",
+      "observed": "chip Shape; handles 10; fill rgba(242, 242, 240, 0.05) -> rgb(47, 92, 224); after Cmd+Z rgba(242, 242, 240, 0.05)",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "id": "shapes.border.colour-weight-dash",
+      "step": "toolbar Border color Red, Border weight 2, Border dash Dot",
+      "expected": "the stroke changes each time",
+      "observed": "stroke rgb(242, 242, 240) -> rgb(229, 72, 77); width 1px -> 2px (menu.toolbar.borderWeight.weight-2); dash none -> 2px, 4px (toolbar.borderDash.pick.dot)",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "id": "shapes.text.enter-opens-label",
+      "step": "select the rectangle, Enter, type Label, Escape",
+      "expected": "block.text is stored and drawn (A1 rule 4)",
+      "observed": "session on Enter true; block.text \"Label\"; drawn true",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "id": "shapes.text.colour-toolbar",
+      "step": "select the rectangle, toolbar Text color, the red swatch; Cmd+Z",
+      "expected": "block.color is written and the label draws in it (the fix of RETURN.md 2.2)",
+      "observed": "picked toolbar.textColor.red; block.color \"red\"; label rgb(242, 242, 240) -> rgb(229, 72, 77); restored true",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "id": "shapes.borders-lines.menu",
+      "step": "Format > Borders & lines > Border color > a swatch on the rectangle; Cmd+Z",
+      "expected": "the stroke writes from the menu",
+      "observed": "swatch format.bordersLines.borderColor.blue; stroke rgb(229, 72, 77) -> rgb(47, 92, 224); after Cmd+Z rgb(229, 72, 77)",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "id": "text.textbox.insert-click-type",
+      "step": "toolbar Text box, click on the sheet, type Alpha beta gamma delta, Escape",
+      "expected": "a text box with the text",
+      "observed": "text text; text \"Alpha beta gamma delta\"; run text/text",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "id": "formatting.italic.menu-word",
+      "step": "double click beta, Format > Text > Italic",
+      "expected": "the word alone is marked; Cmd+Z takes it back",
+      "observed": "selected \"beta\"; marks [{\"tag\":\"i\",\"mark\":null,\"text\":\"beta\",\"style\":\"\"}]; text \"Alpha beta gamma delta\"; after Cmd+Z 0 marks",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "id": "formatting.superscript.menu-word",
+      "step": "double click beta, Format > Text > Superscript",
+      "expected": "the word alone is marked; Cmd+Z takes it back",
+      "observed": "selected \"beta\"; marks [{\"tag\":\"sup\",\"mark\":null,\"text\":\"beta\",\"style\":\"\"}]; text \"Alpha beta gamma delta\"; after Cmd+Z 0 marks",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "id": "formatting.context.selection-rows",
+      "step": "double click gamma, right click it, read the rows",
+      "expected": "Superscript, Subscript and Capitalization are listed",
+      "observed": "12 rows: edit.cut, edit.copy, edit.paste, edit.pasteWithoutFormatting, format.text.italic, format.text.underline, format.text.strikethrough, format.text.superscript, format.text.subscript, format.text.capitalization, insert.link, format.formatOptions; missing none",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "id": "formatting.capitalization.upper",
+      "step": "select the box, Format > Text > Capitalization > UPPERCASE; Cmd+Z",
+      "expected": "the box reads in capitals; Cmd+Z restores",
+      "observed": "error: locator.waitFor: Timeout 4000ms exceeded.",
+      "ok": false
+    },
+    {
+      "n": 21,
+      "id": "formatting.highlight.word",
+      "step": "double click beta, toolbar Highlight color, a swatch; Cmd+Z",
+      "expected": "the word alone is marked",
+      "observed": "picked toolbar.highlightColor.ink; marks [{\"tag\":\"mark\",\"mark\":null,\"text\":\"beta\",\"style\":\"background:var(--ink)\"}]",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "id": "arrange.group.menu-regroup",
+      "step": "shift click the two objects, Arrange > Group; Arrange > Ungroup",
+      "expected": "chip Group after Group; two objects after Ungroup",
+      "observed": "chip with two 2 objects; Group row present true enabled true; after Group chip Group; Ungroup row present true enabled true; after Ungroup chip 2 objects",
+      "ok": true
+    },
+    {
+      "n": 23,
+      "id": "charts.insert.bar",
+      "step": "Insert > Chart > Bar",
+      "expected": "a 960 by 540 chart with three categories and one series",
+      "observed": "chart chart 960x540 kind bar; categories 3, series 1; svg rects 4 texts 8",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "id": "charts.select.tail",
+      "step": "one click on the chart",
+      "expected": "the chip and eight handles; the tail reads Chart type, Legend, Number format, Edit data, Format options",
+      "observed": "chip Chart; handles 10; tail toolbar.chartType, toolbar.legend, toolbar.numberFormat, toolbar.editData, toolbar.formatOptions, toolbar.end, toolbar.pointer, toolbar.hideMenus; missing none",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "id": "charts.type.panel-legible",
+      "step": "Format options > Chart type: every segment label fits; Column writes the kind",
+      "expected": "no clipped segment; kind column",
+      "observed": "segments Bar 19/36, Column 44/61, Line 24/41, Pie 18/34; kind after Column column; the panel's first section chart",
+      "ok": true
+    },
+    {
+      "n": 26,
+      "id": "formatting.theme.toolbar-button",
+      "step": "the toolbar Theme button, twice",
+      "expected": "the Themes panel opens with no Import theme control, then closes",
+      "observed": "open true; Import theme text false; controls panel.themes.close, themes.gt.light, themes.gt.dark, themes.inThis.light, themes.inThis.dark; closed true",
+      "ok": true
+    },
+    {
+      "n": 27,
+      "id": "formatting.theme.panel-appearance",
+      "step": "Slide > Change theme: the light tile, then the dark tile",
+      "expected": "the sheet turns light then dark and deck.info carries the appearance",
+      "observed": "tiles panel.themes.close, themes.gt.light, themes.gt.dark, themes.inThis.light, themes.inThis.dark; light ground rgb(255, 255, 255) (deck.info appearance gt-ink-paper); dark ground rgb(7, 7, 7) (gt-ink-paper)",
+      "ok": true
+    },
+    {
+      "n": 28,
+      "id": "view.appearance.rows",
+      "step": "View > Appearance > Light, then Dark, then Match the presentation",
+      "expected": "each sets data-theme",
+      "observed": "light -> light; dark -> dark; match -> dark",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "id": "setup.switch-off-end",
+      "step": "Tools > Advanced tools still reads off at the end",
+      "expected": "the default view throughout",
+      "observed": "settings.advancedTools false",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "id": "cleanup.trash",
+      "step": "File > Move to trash",
+      "expected": "/decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "id": "cleanup.delete-forever",
+      "step": "Delete forever on /decks/trash",
+      "expected": "the card leaves",
+      "observed": "untitled-20260919-l8yq",
+      "ok": true
+    },
+    {
+      "n": 32,
+      "id": "cleanup.404",
+      "step": "GET /edit/<id> after the delete",
+      "expected": "404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

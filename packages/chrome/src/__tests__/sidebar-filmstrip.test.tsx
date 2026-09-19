@@ -327,11 +327,12 @@ describe('the filmstrip', () => {
       'Skip slide',
       'Change background',
       'Apply layout',
+      'Change theme',
       'Move slide',
       'Comment',
     ]);
-    /* Change theme is parked with the Later row (docs/FOCUS.md 3.2, 3.4) */
-    expect(document.querySelector('[data-menu-item="slide.changeTheme"]')).toBeNull();
+    /* Change theme returned in the return round (docs/RETURN.md 2.13); the Later row stays out */
+    expect(document.querySelector('[data-menu-item="slide.changeTheme"]')).not.toBeNull();
     expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
     fireEvent.keyDown(menu!, { key: 'Escape' });
   });

@@ -9,7 +9,6 @@ import { LiveClone } from '@turboslide/viewer/LiveClone';
 import type { SlideRenderer } from './LayoutGrid';
 import { cn } from './lib/cn';
 import { PANELS } from './menus/strings';
-import { stubClause } from './menus/strings';
 import { Panel } from './Panel';
 import { tipProps } from './Tooltip';
 
@@ -20,8 +19,10 @@ import './ThemesPanel.css';
  * "GT" as two thumbnails of slide 1, "Light" and "Dark", the current one ringed; a click writes
  * `deck.set /defaults/appearance` as one commit, and the stage, the thumbnails, present mode, the
  * view route and the Download dialog's default follow it (SPEC 1.4). "In this presentation" lists
- * the same two. "Import theme" sits at the bottom right, disabled, with the stub sentence. The
- * renderer arrives as a prop (the chrome package does not depend on @turboslide/render).
+ * the same two. The "Import theme" stub of the parity rounds is not drawn while the GT theme is
+ * the one theme (docs/RETURN.md 2.13; the matrix row formatting.theme.import-hidden): a disabled
+ * row gives a seller nothing, and the words stay in strings.ts for the round that adds themes.
+ * The renderer arrives as a prop (the chrome package does not depend on @turboslide/render).
  */
 export type ThemesPanelProps = {
   document: DeckDocument;
@@ -133,21 +134,6 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
           {tile('dark', 'themes.inThis')}
         </div>
       </section>
-      <div className="ts-themes-foot">
-        <button
-          type="button"
-          className="pt-ib is-text is-disabled ts-themes-import"
-          aria-disabled="true"
-          data-control="themes.import"
-          data-status="later"
-          {...tipProps({
-            name: PANELS.themes.importTheme,
-            doc: stubClause(PANELS.themes.importStub),
-          })}
-        >
-          <span className="pt-lb">{PANELS.themes.importTheme}</span>
-        </button>
-      </div>
     </Panel>
   );
 }

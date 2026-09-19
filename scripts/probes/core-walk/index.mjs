@@ -31,29 +31,50 @@ import {
 } from '../core-matrix.mjs';
 import { createToolkit } from './toolkit.mjs';
 import * as arrange from './areas/arrange.mjs';
+import * as charts from './areas/charts.mjs';
+import * as chrome from './areas/chrome.mjs';
 import * as decks from './areas/decks.mjs';
+import * as diagrams from './areas/diagrams.mjs';
 import * as exportArea from './areas/export.mjs';
+import * as formatting from './areas/formatting.mjs';
 import * as help from './areas/help.mjs';
 import * as images from './areas/images.mjs';
+import * as inbox from './areas/inbox.mjs';
 import * as lines from './areas/lines.mjs';
 import * as shapes from './areas/shapes.mjs';
 import * as share from './areas/share.mjs';
 import * as slides from './areas/slides.mjs';
 import * as surface from './areas/surface.mjs';
+import * as tables from './areas/tables.mjs';
 import * as text from './areas/text.mjs';
+import * as view from './areas/view.mjs';
+import * as wordart from './areas/wordart.mjs';
 
-/** The areas in the order the walk runs them; each declares the rows it drives. */
+/**
+ * The areas in the order the walk runs them; each declares the rows it drives. The return round
+ * (docs/RETURN.md section 5) added the documents (tables, charts, diagrams, word art), the
+ * formatting rows, the chrome, the View rows and the inbox; the chrome area runs last among the
+ * editor areas because its 900 px reads resize the viewport and put it back.
+ */
 export const AREAS = [
   decks,
   slides,
   text,
+  formatting,
   images,
   arrange,
   shapes,
   lines,
+  tables,
+  charts,
+  diagrams,
+  wordart,
   share,
   exportArea,
   help,
+  view,
+  inbox,
+  chrome,
   surface,
 ];
 
@@ -93,7 +114,9 @@ export async function runCoreWalk({
   const startedAt = Date.now();
   const rowsOfProbe = probeRows();
   const probeIds = new Set(rowsOfProbe.map((row) => row.id));
-  const parked = PARKED ? readParkedList(PARKED) : { commit: null, parkedFeatures: [] };
+  const parked = PARKED
+    ? readParkedList(PARKED)
+    : { commit: null, parkedFeatures: [], parkedRows: [] };
   const only = ONLY ? new Set(ONLY.split(',').map((s) => s.trim())) : null;
   if (only)
     for (const name of only)
@@ -262,7 +285,7 @@ export async function runCoreWalk({
       });
     }
     const noStep = table.filter((r) => r.result === 'no step').map((r) => r.id);
-    const verdict = shipVerdict(results, parked.parkedFeatures, rowsOfProbe);
+    const verdict = shipVerdict(results, parked, rowsOfProbe);
     const tallyOf = (word) => table.filter((r) => r.result === word).length;
     const untaggedFailures = report.rows.filter(
       (r) => r.ok === false && r.id === undefined && !r.step.startsWith('setup:'),

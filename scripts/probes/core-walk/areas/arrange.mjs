@@ -63,6 +63,26 @@ export const IDS = [
   'arrange.escape.text-then-selection',
   'arrange.zoom.menu-presets',
   'arrange.toolbar.select',
+  'arrange.distribute.horizontal',
+  'arrange.distribute.vertical',
+  'arrange.distribute.needs-three',
+  'arrange.rotate.quarter-turns',
+  'arrange.rotate.flips-menu',
+  'arrange.group.chords',
+  'arrange.group.menu-regroup',
+  'arrange.group.context-rows',
+  'arrange.context.rotate-distribute',
+  'arrange.ruler.show-hide',
+  'arrange.guides.from-ruler',
+  'arrange.guides.show-toggle',
+  'arrange.guides.add-vertical-horizontal',
+  'arrange.guides.drag',
+  'arrange.snap.guides-on-off',
+  'arrange.snap.grid-toggle',
+  'arrange.snap.grid-effect',
+  'arrange.guides.context',
+  'arrange.guides.clear',
+  'arrange.select-none.menu',
 ];
 
 const HOMES = {
@@ -470,11 +490,16 @@ export async function run(t) {
   );
 
   // ---- align and centre
+  /** The three boxes, a1 by a click and a2, a3 by Shift clicks (Cmd+A takes every object the
+   * earlier rows left on the slide; the first follow-up run's Distribute spread five). */
   const selectAll = async () => {
     await t.clearAll();
-    const p = await t.emptySheetPoint();
-    await t.clickAt(p.x, p.y);
-    await t.press('Meta+a');
+    await t.selectObject('a1');
+    for (const id of ['a2', 'a3']) {
+      const b = await t.boxOf(id);
+      await t.shiftClickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
+      await t.sleep(150);
+    }
     await t.sleep(300);
   };
   const edges = async () => {
@@ -1397,6 +1422,816 @@ export async function run(t) {
       return {
         ok: Boolean(ctrls) && after === before && (tool === null || /select|pointer/.test(tool)),
         observed: `tool armed ${armed}; after Select ${tool}; a click selected a2 ${Boolean(ctrls)}; objects ${before} -> ${after}`,
+      };
+    },
+  );
+  await t.clearAll();
+
+  // ---- the return round's rows (docs/RETURN.md 2.12, 2.17, section 5): distribute, rotate,
+  // flip, group by chord, menu and right click, the right click Rotate and Distribute, the
+  // rulers, the guides, the snaps and Edit > Select none. Every row is reached in the default
+  // view or with the switch on while it is parked (toolkit reachRow).
+  const groupOf = async (id) => (await pos(id))?.group;
+  const rotateOf = async (id) => (await pos(id))?.rotate ?? 0;
+  const flipOf = async (id) => (await pos(id))?.flip ?? null;
+  const gapsOf = (e, axis) => {
+    const sorted = Object.values(e).sort((p, q) => (axis === 'x' ? p.l - q.l : p.t - q.t));
+    return axis === 'x'
+      ? [sorted[1].l - sorted[0].r, sorted[2].l - sorted[1].r]
+      : [sorted[1].t - sorted[0].b, sorted[2].t - sorted[1].b];
+  };
+  const selectTwo = async () => {
+    await t.clearAll();
+    await t.selectObject('a1');
+    const b = await t.boxOf('a2');
+    await t.shiftClickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
+    await t.sleep(200);
+    return t.chip();
+  };
+  const distributeRow = async (rowId, row, axis) => {
+    await t.step(
+      rowId,
+      `three objects selected, Arrange > Distribute > ${row}; Cmd+Z`,
+      'even gaps; Cmd+Z restores',
+      async () => {
+        await rehome();
+        /* the homes are not evenly spaced on the axis, so the row has something to do */
+        await t.setBlock(
+          A,
+          'a2',
+          '/pos',
+          axis === 'x' ? { ...HOMES.a2, x: 420 } : { ...HOMES.a2, y: 330 },
+        );
+        await selectAll();
+        /* the row is asked of the menu with the three selected: Distribute is disabled below
+           three and a disabled row's submenu does not open (the first gate run asked first) */
+        const r = await t.reachRow(
+          'arrange',
+          'arrange.distribute',
+          `arrange.distribute.${row.toLowerCase()}`,
+        );
+        if (!r.present) return { ok: false, observed: 'Arrange > Distribute is not reachable' };
+        if ((await t.chip()) !== '3 objects') await selectAll();
+        const before = await edges();
+        await t.menuPath(
+          'arrange',
+          'arrange.distribute',
+          `arrange.distribute.${row.toLowerCase()}`,
+        );
+        const after = await t.pollUntil(edges, (e) => !same(e, before), 8000).catch(edges);
+        await t.settled();
+        const gaps = gapsOf(after, axis).map(Math.round);
+        const even = Math.abs(gaps[0] - gaps[1]) <= 1;
+        await t.clearAll();
+        await undo();
+        const back = same(await edges(), before);
+        await rehome();
+        return {
+          ok: even && back,
+          observed: `${r.switched ? 'with the switch on; ' : ''}gaps before ${gapsOf(before, axis).map(Math.round).join(', ')} -> after ${gaps.join(', ')} (even ${even}); Cmd+Z restored ${back}`,
+        };
+      },
+    );
+  };
+  await distributeRow('arrange.distribute.horizontal', 'Horizontally', 'x');
+  await distributeRow('arrange.distribute.vertical', 'Vertically', 'y');
+  await t.step(
+    'arrange.distribute.needs-three',
+    'two objects selected, open Arrange',
+    'the Distribute row is disabled',
+    async () => {
+      const chip = await selectTwo();
+      await t.openMenu('arrange');
+      const row = (await t.menuRows('arrange')).find((x) => x.id === 'arrange.distribute');
+      await t.closeMenus();
+      return {
+        ok: chip === '2 objects' && row !== undefined && row.disabled,
+        observed: `chip "${chip}"; Distribute ${row ? (row.disabled ? 'disabled' : 'enabled') : 'absent'}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.rotate.quarter-turns',
+    'select a1: Rotate clockwise 90, Cmd+Z; Rotate counter clockwise 90, Cmd+Z',
+    'the rotation writes and each Cmd+Z takes it back',
+    async () => {
+      const r = await t.reachRow('arrange', 'arrange.rotate', 'arrange.rotate.clockwise');
+      if (!r.present) return { ok: false, observed: 'Arrange > Rotate is not reachable' };
+      await rehome();
+      await t.selectObject('a1');
+      await t.menuPath('arrange', 'arrange.rotate', 'arrange.rotate.clockwise');
+      const cw = await t
+        .pollUntil(
+          () => rotateOf('a1'),
+          (x) => x === 90,
+          8000,
+        )
+        .catch(() => rotateOf('a1'));
+      await t.clearAll();
+      await undo();
+      const back1 = await rotateOf('a1');
+      await t.selectObject('a1');
+      await t.menuPath('arrange', 'arrange.rotate', 'arrange.rotate.counterClockwise');
+      const ccw = await t
+        .pollUntil(
+          () => rotateOf('a1'),
+          (x) => x === 270,
+          8000,
+        )
+        .catch(() => rotateOf('a1'));
+      await t.clearAll();
+      await undo();
+      const back2 = await rotateOf('a1');
+      return {
+        ok: cw === 90 && back1 === 0 && ccw === 270 && back2 === 0,
+        observed: `clockwise ${cw} -> Cmd+Z ${back1}; counter clockwise ${ccw} -> Cmd+Z ${back2}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.rotate.flips-menu',
+    'select a1: Flip horizontally, Cmd+Z; Flip vertically, Cmd+Z',
+    'each flip writes and Cmd+Z takes it back',
+    async () => {
+      await rehome();
+      await t.selectObject('a1');
+      await t.menuPath('arrange', 'arrange.rotate', 'arrange.rotate.flipHorizontally');
+      const h = await t
+        .pollUntil(
+          () => flipOf('a1'),
+          (x) => x !== null,
+          8000,
+        )
+        .catch(() => flipOf('a1'));
+      await t.clearAll();
+      await undo();
+      const back1 = await flipOf('a1');
+      await t.selectObject('a1');
+      await t.menuPath('arrange', 'arrange.rotate', 'arrange.rotate.flipVertically');
+      const v = await t
+        .pollUntil(
+          () => flipOf('a1'),
+          (x) => x !== null,
+          8000,
+        )
+        .catch(() => flipOf('a1'));
+      await t.clearAll();
+      await undo();
+      const back2 = await flipOf('a1');
+      return {
+        ok: h === 'h' && back1 === null && v === 'v' && back2 === null,
+        observed: `flip ${h} -> Cmd+Z ${back1}; flip ${v} -> Cmd+Z ${back2}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.group.chords',
+    'a1 and a2 selected, Cmd+Option+G, ArrowRight twice, Cmd+Option+Shift+G; three Cmd+Z',
+    'chip Group, both move, the group leaves; the undos return the start',
+    async () => {
+      await rehome();
+      const before = { a1: await pos('a1'), a2: await pos('a2') };
+      const chip = await selectTwo();
+      await t.press('Meta+Alt+g');
+      const grouped = await t
+        .pollUntil(
+          () => groupOf('a1'),
+          (g) => g !== undefined,
+          8000,
+        )
+        .catch(() => groupOf('a1'));
+      const chipGroup = await t.chip();
+      await t.press('ArrowRight');
+      await t.sleep(200);
+      await t.press('ArrowRight');
+      await t.settled();
+      const moved = { a1: await pos('a1'), a2: await pos('a2') };
+      await t.press('Meta+Alt+Shift+g');
+      const ungrouped = await t
+        .pollUntil(
+          () => groupOf('a1'),
+          (g) => g === undefined,
+          8000,
+        )
+        .catch(() => groupOf('a1'));
+      await t.clearAll();
+      /* the undos return the start: the group, the two nudges (one history entry each, as in
+         Google Slides) and the ungroup are four entries, so Cmd+Z is pressed until the start is
+         back, at most six times, and the count is recorded (the first drive pressed three and read
+         the group still applied; return/build/integrator.md) */
+      const atStart = async () => {
+        const after = { a1: await pos('a1'), a2: await pos('a2') };
+        return same(
+          {
+            a1: { x: after.a1.x, y: after.a1.y, g: after.a1.group },
+            a2: { x: after.a2.x, y: after.a2.y, g: after.a2.group },
+          },
+          {
+            a1: { x: before.a1.x, y: before.a1.y, g: before.a1.group },
+            a2: { x: before.a2.x, y: before.a2.y, g: before.a2.group },
+          },
+        );
+      };
+      let undos = 0;
+      let start = false;
+      while (undos < 6 && !start) {
+        await undo();
+        undos += 1;
+        start = await atStart();
+      }
+      return {
+        ok:
+          chip === '2 objects' &&
+          grouped !== undefined &&
+          chipGroup === 'Group' &&
+          moved.a1.x === before.a1.x + 2 &&
+          moved.a2.x === before.a2.x + 2 &&
+          ungrouped === undefined &&
+          start,
+        observed: `chip "${chip}" -> "${chipGroup}" (group ${grouped}); x ${before.a1.x},${before.a2.x} -> ${moved.a1.x},${moved.a2.x}; after ungroup ${ungrouped}; ${undos} Cmd+Z returned the start ${start}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.group.menu-regroup',
+    'Arrange > Group, Ungroup, Regroup; read the enabled states; Cmd+Z',
+    'each row acts with its enabled state and Cmd+Z takes the last back',
+    async () => {
+      const r = await t.reachRow('arrange', 'arrange.group');
+      if (!r.present) return { ok: false, observed: 'Arrange > Group is not reachable' };
+      await rehome();
+      const states = async () => {
+        await t.openMenu('arrange');
+        /* the rows are read once the three are drawn: a read right after the plate mounted found no
+           Group row and answered false for every state (the first drive's "enabled before" read
+           every row false while the row's click grouped; return/build/integrator.md) */
+        const wanted = ['arrange.group', 'arrange.ungroup', 'arrange.regroup'];
+        const rows = await t
+          .pollUntil(
+            () => t.menuRows('arrange'),
+            (list) => wanted.every((id) => list.some((x) => x.id === id)),
+            4000,
+          )
+          .catch(() => t.menuRows('arrange'));
+        await t.closeMenus();
+        return Object.fromEntries(
+          ['arrange.group', 'arrange.ungroup', 'arrange.regroup'].map((id) => [
+            id.replace('arrange.', ''),
+            rows.find((x) => x.id === id)?.disabled === false,
+          ]),
+        );
+      };
+      await selectTwo();
+      const s0 = await states();
+      await t.menuPath('arrange', 'arrange.group');
+      const grouped = await t
+        .pollUntil(
+          () => groupOf('a1'),
+          (g) => g !== undefined,
+          8000,
+        )
+        .catch(() => groupOf('a1'));
+      await t.clearAll();
+      await t.selectObject('a1');
+      const s1 = await states();
+      await t.menuPath('arrange', 'arrange.ungroup');
+      const ungrouped = await t
+        .pollUntil(
+          () => groupOf('a1'),
+          (g) => g === undefined,
+          8000,
+        )
+        .catch(() => groupOf('a1'));
+      await t.clearAll();
+      await t.selectObject('a1');
+      const s2 = await states();
+      await t.menuPath('arrange', 'arrange.regroup');
+      const regrouped = await t
+        .pollUntil(
+          () => groupOf('a1'),
+          (g) => g !== undefined,
+          8000,
+        )
+        .catch(() => groupOf('a1'));
+      await t.clearAll();
+      await undo();
+      const back = await groupOf('a1');
+      await undo();
+      await undo();
+      return {
+        ok:
+          s0.group &&
+          !s0.ungroup &&
+          grouped !== undefined &&
+          s1.ungroup &&
+          ungrouped === undefined &&
+          s2.regroup &&
+          regrouped !== undefined &&
+          back === undefined,
+        observed: `${r.switched ? 'with the switch on; ' : ''}enabled before ${JSON.stringify(s0)}; Group -> ${grouped}; enabled then ${JSON.stringify(s1)}; Ungroup -> ${ungrouped}; enabled then ${JSON.stringify(s2)}; Regroup -> ${regrouped}; Cmd+Z -> ${back}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.group.context-rows',
+    'right click on two selected boxes: Group; right click the group: read Ungroup',
+    'Group is listed and groups; Ungroup is listed on the group',
+    async () => {
+      await rehome();
+      await selectTwo();
+      const b = await t.boxOf('a1');
+      await t.rightClickAt(b.free.x + 8, b.free.y + 8);
+      const rows1 = (await t.contextRows()).map((x) => x.id);
+      let grouped;
+      if (rows1.includes('arrange.group')) {
+        await t.clickContextRow('arrange.group');
+        grouped = await t
+          .pollUntil(
+            () => groupOf('a1'),
+            (g) => g !== undefined,
+            8000,
+          )
+          .catch(() => groupOf('a1'));
+      } else await t.press('Escape');
+      await t.settled();
+      await t.clearAll();
+      await t.selectObject('a1');
+      const b2 = await t.boxOf('a1');
+      await t.rightClickAt(b2.free.x + 8, b2.free.y + 8);
+      const rows2 = (await t.contextRows()).map((x) => x.id);
+      await t.press('Escape');
+      await t.clearAll();
+      if (grouped !== undefined) await undo();
+      return {
+        ok:
+          rows1.includes('arrange.group') &&
+          grouped !== undefined &&
+          rows2.includes('arrange.ungroup'),
+        observed: `two selected: rows ${rows1.join(', ')}; grouped ${grouped}; on the group: rows ${rows2.join(', ')}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.context.rotate-distribute',
+    'right click a shape, a text block and a line: Rotate > Rotate clockwise 90 on each (Cmd+Z each); three selected, right click one, Distribute > Horizontally',
+    'the rotation writes on each and the distribute spreads the three',
+    async () => {
+      await rehome();
+      const shape = await t.placeBlock(A, {
+        id: 'ar-shape',
+        type: 'shape',
+        shape: 'rectangle',
+        fill: 'plate',
+        stroke: 'ink',
+        pos: { x: 152, y: 720, w: 200, h: 120 },
+      });
+      const line = await t.placeBlock(A, {
+        id: 'ar-line',
+        type: 'shape',
+        shape: 'line',
+        stroke: 'ink',
+        width: 2,
+        orientation: 'horizontal',
+        pos: { x: 600, y: 780, w: 300, h: 1 },
+      });
+      if (!shape || !line)
+        return { ok: false, observed: `setup: shape ${Boolean(shape)}, line ${Boolean(line)}` };
+      const facts = [];
+      let ok = true;
+      for (const id of ['ar-shape', 'a1', 'ar-line']) {
+        await t.clearAll();
+        await t.selectObject(id);
+        const b = await t.boxOf(id);
+        const c =
+          id === 'ar-line'
+            ? { x: b.free.x + b.free.w / 2, y: b.free.y + Math.max(1, b.free.h / 2) }
+            : { x: b.free.x + 8, y: b.free.y + 8 };
+        await t.rightClickAt(c.x, c.y);
+        const rows = (await t.contextRows()).map((x) => x.id);
+        let rot = null;
+        if (rows.includes('arrange.rotate')) {
+          await t.hoverContextRow(
+            'arrange.rotate',
+            '[data-control="menu.arrange.rotate.clockwise"]',
+          );
+          await t.clickRow('arrange.rotate.clockwise');
+          rot = await t
+            .pollUntil(
+              () => rotateOf(id),
+              (x) => x === 90,
+              8000,
+            )
+            .catch(() => rotateOf(id));
+        } else await t.press('Escape');
+        await t.clearAll();
+        if (rot === 90) await undo();
+        const back = await rotateOf(id);
+        ok = ok && rot === 90 && back === 0;
+        facts.push(
+          `${id}: Rotate listed ${rows.includes('arrange.rotate')}, rotate ${rot} -> Cmd+Z ${back}`,
+        );
+      }
+      await selectAll();
+      const b = await t.boxOf('a1');
+      await t.rightClickAt(b.free.x + 8, b.free.y + 8);
+      const rows = (await t.contextRows()).map((x) => x.id);
+      const before = await edges();
+      let spread = false;
+      if (rows.includes('arrange.distribute')) {
+        await t.hoverContextRow(
+          'arrange.distribute',
+          '[data-control="menu.arrange.distribute.horizontally"]',
+        );
+        await t.clickRow('arrange.distribute.horizontally');
+        const after = await t.pollUntil(edges, (e) => !same(e, before), 8000).catch(edges);
+        const gaps = gapsOf(after, 'x').map(Math.round);
+        spread = Math.abs(gaps[0] - gaps[1]) <= 1;
+        facts.push(`Distribute listed; gaps ${gaps.join(', ')}`);
+        await t.clearAll();
+        await undo();
+      } else {
+        await t.press('Escape');
+        facts.push(`Distribute absent from ${rows.join(', ')}`);
+      }
+      for (const id of ['ar-shape', 'ar-line']) {
+        const s = await t.state();
+        await t
+          .invoke('block.remove', { baseRevision: s.revision, slideId: A, blockId: id })
+          .catch(() => undefined);
+        await t.settled();
+      }
+      await rehome();
+      return { ok: ok && spread, observed: facts.join('; ') };
+    },
+  );
+  const guides = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('[data-control^="guide."]')]
+        .filter((e) => e.getClientRects().length > 0)
+        .map((e) => e.getAttribute('data-control')),
+    );
+  const storedGuides = async () => {
+    const info = await t.invoke('deck.info');
+    return info.guides ?? info.defaults?.guides ?? { count: info.counts?.guides ?? null };
+  };
+  const storedCount = (g) => (g?.x?.length ?? 0) + (g?.y?.length ?? 0) + (g?.count ?? 0);
+  const storedHas = (g, axis, at) => (g?.[axis] ?? []).some((v) => Math.abs(v - at) <= 2);
+  /**
+   * The guides drawn: the sheet draws them only while View > Guides > Show guides is on, and a
+   * guide added from the ruler or the menu does not turn it on (the first gate run stored every
+   * guide and drew none), so a row that presses on a guide turns it on first and says so.
+   */
+  const ensureGuidesShown = async () => {
+    const drawn = await guides();
+    if (drawn.length > 0) return { shown: false, drawn };
+    if (storedCount(await storedGuides()) === 0) return { shown: false, drawn };
+    await t.menuPath('view', 'view.guides', 'view.guides.show');
+    const after = await t.pollUntil(guides, (g) => g.length > 0, 5000).catch(guides);
+    return { shown: true, drawn: after };
+  };
+  const rulerLabel = async () => {
+    await t.openMenu('view');
+    const row = (await t.menuRows('view')).find((r) => r.id === 'view.showRuler');
+    await t.closeMenus();
+    return row?.label ?? null;
+  };
+  await t.step(
+    'arrange.ruler.show-hide',
+    'View > Show ruler; read the row; View > Hide ruler',
+    'both rulers draw and the row reads Hide ruler; Hide ruler removes them',
+    async () => {
+      const r = await t.reachRow('view', 'view.showRuler');
+      if (!r.present) return { ok: false, observed: 'View > Show ruler is not reachable' };
+      if (await t.has('[data-control="ruler.x"]')) await t.menuPath('view', 'view.showRuler');
+      await t.menuPath('view', 'view.showRuler');
+      const shown = await t
+        .pollUntil(
+          async () =>
+            (await t.has('[data-control="ruler.x"]')) && (await t.has('[data-control="ruler.y"]')),
+          (x) => x,
+          5000,
+        )
+        .catch(() => false);
+      const label = await rulerLabel();
+      await t.menuPath('view', 'view.showRuler');
+      const hidden = await t
+        .pollUntil(
+          () => t.has('[data-control="ruler.x"]'),
+          (x) => !x,
+          5000,
+        )
+        .catch(() => t.has('[data-control="ruler.x"]'));
+      return {
+        ok: shown && label === 'Hide ruler' && hidden === false,
+        observed: `${r.switched ? 'with the switch on; ' : ''}rulers drawn ${shown}; the row read "${label}"; after Hide ruler drawn ${hidden}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.from-ruler',
+    'Show ruler; press on the top ruler at sheet x 400 and drag into the slide',
+    'the readout reads inches and a vertical guide is stored',
+    async () => {
+      if (!(await t.has('[data-control="ruler.x"]'))) await t.menuPath('view', 'view.showRuler');
+      await t
+        .pollUntil(
+          () => t.has('[data-control="ruler.x"]'),
+          (x) => x,
+          5000,
+        )
+        .catch(() => undefined);
+      const ruler = await t.rectOf('[data-control="ruler.x"]');
+      const p400 = await t.sheetPoint(400, 300);
+      const before = await guides();
+      const during = await t.drag(
+        { x: p400.x, y: ruler.y + ruler.h / 2 },
+        { x: p400.x, y: p400.y },
+        {
+          steps: 16,
+          during: async () => ({
+            readout:
+              (await t.readout()) ??
+              (await page.evaluate(
+                () =>
+                  [...document.querySelectorAll('.ts-overlay *, .ts-stagewrap *')]
+                    .map((e) => (e.children.length === 0 ? (e.textContent ?? '').trim() : ''))
+                    .find((x) => /^-?\d+(\.\d+)?\s*in$/.test(x)) ?? null,
+              )),
+          }),
+        },
+      );
+      await t.settled();
+      const stored = await t
+        .pollUntil(storedGuides, (g) => storedHas(g, 'x', 400), 8000)
+        .catch(storedGuides);
+      const after = await guides();
+      return {
+        ok: storedHas(stored, 'x', 400) && /in\b/.test(during?.readout ?? ''),
+        observed: `stored ${JSON.stringify(stored)}; drawn guides ${before.join(',') || 'none'} -> ${after.join(',') || 'none'}${after.length === 0 ? ' (drawn only once View > Guides > Show guides is on)' : ''}; readout during "${during?.readout ?? 'none'}"`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.show-toggle',
+    'View > Guides > Show guides, twice',
+    'the guides hide, then show',
+    async () => {
+      const r = await t.reachRow('view', 'view.guides', 'view.guides.show');
+      if (!r.present) return { ok: false, observed: 'View > Guides is not reachable' };
+      const stored = storedCount(await storedGuides());
+      const before = await guides();
+      await t.menuPath('view', 'view.guides', 'view.guides.show');
+      const flipped = await t
+        .pollUntil(guides, (g) => g.length !== before.length, 5000)
+        .catch(guides);
+      await t.menuPath('view', 'view.guides', 'view.guides.show');
+      const back = await t.pollUntil(guides, (g) => g.length === before.length, 5000).catch(guides);
+      /* from either state: shown then hidden, or hidden then shown (a guide added from the ruler
+         does not turn the row on, so the first press shows) */
+      return {
+        ok: stored > 0 && flipped.length !== before.length && back.length === before.length,
+        observed: `${stored} stored; drawn ${before.length} -> ${flipped.length} -> ${back.length} (${before.length === 0 ? 'hidden at the start: the first press showed them' : 'shown at the start: the first press hid them'})`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.add-vertical-horizontal',
+    'View > Guides > Add vertical guide, Add horizontal guide',
+    'guides at the slide centre, stored on the deck',
+    async () => {
+      await t.menuPath('view', 'view.guides', 'view.guides.addVertical');
+      await t.settled();
+      await t.menuPath('view', 'view.guides', 'view.guides.addHorizontal');
+      await t.settled();
+      const stored = await t
+        .pollUntil(storedGuides, (g) => storedHas(g, 'x', 800) && storedHas(g, 'y', 450), 8000)
+        .catch(storedGuides);
+      const list = await guides();
+      return {
+        ok: storedHas(stored, 'x', 800) && storedHas(stored, 'y', 450),
+        observed: `stored ${JSON.stringify(stored)}; drawn ${list.join(', ') || 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.drag',
+    'press on the vertical guide at 800 and move at once by 200 px',
+    'the guide lands at 1000 and the deck stores it',
+    async () => {
+      const shown = await ensureGuidesShown();
+      const g = await t.rectOf('[data-control="guide.x.800"]');
+      if (!g)
+        return {
+          ok: false,
+          observed: `no guide at 800 (guides ${(await guides()).join(', ')}; stored ${JSON.stringify(await storedGuides())})`,
+        };
+      const k = await t.kOf();
+      const sheet = await t.sheetRect();
+      /* the press at the guide's centre, where the horizontal guide at 450 crosses it: the
+         audit's flaky drag was a press at that crossing taking the horizontal guide drawn on top
+         (return/build/b3.md 1.1); a press away from the crossing passed before the fix */
+      const from = { x: g.x + g.w / 2, y: sheet.y + sheet.h * 0.5 };
+      await t.drag(from, { x: from.x + 200 * k, y: from.y }, { steps: 14 });
+      await t.settled();
+      const nearX = (l, at, tol) =>
+        l.find((g) => {
+          const m = /^guide\.x\.(-?\d+)$/.exec(g);
+          return m && Math.abs(Number(m[1]) - at) <= tol;
+        });
+      /* within 2 px: the drag is 200 sheet px scaled to the stage and rounded back */
+      const list = await t.pollUntil(guides, (l) => Boolean(nearX(l, 1000, 2)), 8000).catch(guides);
+      const stored = await storedGuides();
+      const landed = nearX(list, 1000, 2);
+      t.deck.guideX = landed ? Number(/(\d+)$/.exec(landed)[1]) : null;
+      return {
+        ok: Boolean(landed) && !list.includes('guide.x.800'),
+        observed: `${shown.shown ? 'View > Guides > Show guides turned on first; ' : ''}guides ${list.join(', ')}; stored ${JSON.stringify(stored)}`,
+      };
+    },
+  );
+  /** Drags a1 so its left edge aims at a sheet x; answers the stored x after. */
+  const dropLeftAt = async (targetX) => {
+    await rehome();
+    await t.clearAll();
+    await t.selectObject('a1');
+    const p = await pos('a1');
+    const r = await t.dragInside(A, 'a1', targetX - p.x, 0);
+    await t.settled();
+    return (await pos('a1')).x;
+  };
+  const snapSetting = async (key) => (await t.state()).settings?.[key];
+  const setSnap = async (row, key, on) => {
+    if ((await snapSetting(key)) === on) return;
+    await t.menuPath('view', 'view.snapTo', `view.snapTo.${row}`);
+    await t
+      .pollUntil(
+        () => snapSetting(key),
+        (x) => x === on,
+        5000,
+      )
+      .catch(() => undefined);
+  };
+  await t.step(
+    'arrange.snap.guides-on-off',
+    'drop a1 4 px short of the guide at 1000 with Snap to > Guides on, then off',
+    'it lands on the guide with the row on and where it is dropped with it off',
+    async () => {
+      const r = await t.reachRow('view', 'view.snapTo', 'view.snapTo.guides');
+      if (!r.present) return { ok: false, observed: 'View > Snap to is not reachable' };
+      await setSnap('guides', 'snapGuides', true);
+      await setSnap('grid', 'snapGrid', false);
+      /* the guide where the drag row left it (1000 within 2 px), shown so the snap has it */
+      const guideX = t.deck.guideX ?? 1000;
+      await ensureGuidesShown();
+      const aimed = guideX - 4;
+      const on = await dropLeftAt(aimed);
+      await setSnap('guides', 'snapGuides', false);
+      const off = await dropLeftAt(aimed);
+      await setSnap('guides', 'snapGuides', true);
+      await rehome();
+      return {
+        ok: on === guideX && t.near(off, aimed, 1),
+        observed: `guide at ${guideX}; aimed ${aimed}: with Snap to guides on landed ${on}; off landed ${off}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.snap.grid-toggle',
+    'View > Snap to > Grid, twice',
+    'the check flips both ways and the browser keeps it',
+    async () => {
+      const a = await snapSetting('snapGrid');
+      await t.menuPath('view', 'view.snapTo', 'view.snapTo.grid');
+      const b = await t
+        .pollUntil(
+          () => snapSetting('snapGrid'),
+          (x) => x !== a,
+          5000,
+        )
+        .catch(() => snapSetting('snapGrid'));
+      const kept = await page.evaluate(() => localStorage.getItem('ts-editor-settings'));
+      await t.menuPath('view', 'view.snapTo', 'view.snapTo.grid');
+      const c = await t
+        .pollUntil(
+          () => snapSetting('snapGrid'),
+          (x) => x === a,
+          5000,
+        )
+        .catch(() => snapSetting('snapGrid'));
+      return {
+        ok: b !== a && c === a && /snapGrid/.test(kept ?? ''),
+        observed: `snapGrid ${a} -> ${b} -> ${c}; stored ${/snapGrid/.test(kept ?? '')}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.snap.grid-effect',
+    'Grid on and Guides off: drop a1 with its left edge at 300 (4 px off the 8 px grid); then Grid off',
+    'it lands on the grid line with Grid on and at 300 with it off',
+    async () => {
+      await setSnap('guides', 'snapGuides', false);
+      await setSnap('grid', 'snapGrid', true);
+      const on = await dropLeftAt(300);
+      await setSnap('grid', 'snapGrid', false);
+      const off = await dropLeftAt(300);
+      await setSnap('guides', 'snapGuides', true);
+      await rehome();
+      return {
+        ok: on % 8 === 0 && on !== 300 && t.near(off, 300, 1),
+        observed: `aimed 300: Grid on landed ${on} (on the grid ${on % 8 === 0}); Grid off landed ${off}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.context',
+    'right click the empty sheet, read Guides; right click a guide, Delete guide',
+    'the Guides submenu is listed; Delete guide removes the guide',
+    async () => {
+      await t.clearAll();
+      const p = await t.emptySheetPoint();
+      await t.rightClickAt(p.x, p.y);
+      const rows = (await t.contextRows()).map((x) => x.id);
+      let sub = [];
+      if (rows.includes('view.guides')) {
+        await t.hoverContextRow('view.guides', '[data-control="menu.view.guides.show"]');
+        sub = (await t.contextRows()).map((x) => x.id).filter((x) => x.startsWith('view.guides.'));
+      }
+      await t.press('Escape');
+      await t.press('Escape');
+      const shown = await ensureGuidesShown();
+      const g = await t.rectOf('[data-control="guide.y.450"]');
+      if (!g)
+        return {
+          ok: false,
+          observed: `Guides listed ${rows.includes('view.guides')} (${sub.join(', ')}); no horizontal guide to right click (drawn ${shown.drawn.join(', ') || 'none'}; stored ${JSON.stringify(await storedGuides())})`,
+        };
+      const sheet = await t.sheetRect();
+      await t.rightClickAt(sheet.x + sheet.w * 0.3, g.y + g.h / 2);
+      const guideRows = (await t.contextRows()).map((x) => x.id);
+      let deleted = false;
+      if (guideRows.includes('view.guides.delete')) {
+        await t.clickContextRow('view.guides.delete');
+        deleted = await t
+          .pollUntil(guides, (l) => !l.includes('guide.y.450'), 8000)
+          .then((l) => !l.includes('guide.y.450'))
+          .catch(() => false);
+      } else await t.press('Escape');
+      return {
+        ok:
+          rows.includes('view.guides') &&
+          sub.length >= 4 &&
+          guideRows.includes('view.guides.delete') &&
+          deleted,
+        observed: `${shown.shown ? 'View > Guides > Show guides turned on first; ' : ''}empty sheet rows ${rows.join(', ')}; Guides submenu ${sub.join(', ')}; guide rows ${guideRows.join(', ')}; deleted ${deleted}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.guides.clear',
+    'View > Guides > Clear guides',
+    'every guide leaves and the deck stores none',
+    async () => {
+      const storedBefore = await storedGuides();
+      const before = await guides();
+      await t.menuPath('view', 'view.guides', 'view.guides.clear');
+      const stored = await t
+        .pollUntil(storedGuides, (g) => storedCount(g) === 0, 8000)
+        .catch(storedGuides);
+      const after = await guides();
+      await t.settled();
+      if (await t.has('[data-control="ruler.x"]')) await t.menuPath('view', 'view.showRuler');
+      return {
+        ok: storedCount(storedBefore) > 0 && storedCount(stored) === 0 && after.length === 0,
+        observed: `stored ${JSON.stringify(storedBefore)} -> ${JSON.stringify(stored)}; drawn ${before.length} -> ${after.length}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.select-none.menu',
+    'select a1, Edit > Select none; select two cards, Edit > Select none',
+    'the object selection clears; the filmstrip selection falls to the active card',
+    async () => {
+      const r = await t.reachRow('edit', 'edit.selectNone');
+      if (!r.present) return { ok: false, observed: 'Edit > Select none is not reachable' };
+      await rehome();
+      await t.selectObject('a1');
+      const chipBefore = await t.chip();
+      await t.menuPath('edit', 'edit.selectNone');
+      await t.sleep(300);
+      const handles = (await t.handleControls()).length;
+      const order = await t.slideOrder();
+      const other = order.find((id) => id !== A) ?? order[0];
+      await t.clickCard(A);
+      const c = await t.cardCenter(other);
+      await t.shiftClickAt(c.x, c.y);
+      const selected = (await t.cards()).filter((x) => x.selected).length;
+      await t.menuPath('edit', 'edit.selectNone');
+      await t.sleep(300);
+      const after = (await t.cards()).filter((x) => x.selected);
+      await t.clickCard(A);
+      return {
+        ok: chipBefore !== null && handles === 0 && selected >= 2 && after.length === 1,
+        observed: `chip "${chipBefore}" -> handles ${handles}; cards selected ${selected} -> ${after.length} (${after.map((x) => x.id).join(',')})`,
       };
     },
   );

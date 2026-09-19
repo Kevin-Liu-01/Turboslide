@@ -1,0 +1,188 @@
+{
+  "renderedAt": "2026-09-19T10:00:25.050Z",
+  "runs": {
+    "local-1": {
+      "base": "http://localhost:4408",
+      "startedAt": "2026-09-19T06:29:39.766Z",
+      "commit": "7d19326",
+      "rows": 565,
+      "passed": 547,
+      "failed": 14,
+      "notDriven": 4,
+      "parkedFeatures": [
+        "lines",
+        "tables",
+        "charts",
+        "wordart",
+        "formatting",
+        "inbox"
+      ],
+      "parkedRows": [
+        {
+          "id": "tables.cells.merge-unmerge",
+          "parks": [
+            "format.table.mergeCells",
+            "format.table.unmergeCells"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "tables.tail.merge-unmerge-buttons",
+          "parks": [
+            "toolbar.mergeCells",
+            "toolbar.unmergeCells"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "view.live-pointers.second-browser",
+          "parks": [
+            "view.livePointers.mine",
+            "view.livePointers.collaborators"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "decks.file.open-upload-bundle",
+          "parks": [
+            "file.open"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "slides.numbers.apply",
+          "parks": [
+            "insert.slideNumbers"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "versions.show-changes-marks",
+          "parks": [
+            "file.versionHistory.showChanges"
+          ],
+          "result": "failed"
+        }
+      ],
+      "blocking": [
+        {
+          "id": "text.fontsize.type-one-undo",
+          "feature": "text",
+          "result": "failed"
+        },
+        {
+          "id": "arrange.group.chords",
+          "feature": "arrange",
+          "result": "failed"
+        },
+        {
+          "id": "arrange.group.menu-regroup",
+          "feature": "arrange",
+          "result": "failed"
+        },
+        {
+          "id": "arrange.context.rotate-distribute",
+          "feature": "arrange",
+          "result": "failed"
+        }
+      ]
+    },
+    "preview-1": {
+      "base": "https://turboslide-b2icvh7xp-kl01s-projects.vercel.app",
+      "startedAt": "2026-09-19T08:31:08.868Z",
+      "commit": "7d19326",
+      "rows": 565,
+      "passed": 549,
+      "failed": 15,
+      "notDriven": 1,
+      "parkedFeatures": [
+        "inbox"
+      ],
+      "parkedRows": [
+        {
+          "id": "tables.cells.merge-unmerge",
+          "parks": [
+            "format.table.mergeCells",
+            "format.table.unmergeCells"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "tables.tail.merge-unmerge-buttons",
+          "parks": [
+            "toolbar.mergeCells",
+            "toolbar.unmergeCells"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "view.live-pointers.second-browser",
+          "parks": [
+            "view.livePointers.mine",
+            "view.livePointers.collaborators"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "decks.file.open-list-search",
+          "parks": [
+            "file.open"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "versions.show-changes-marks",
+          "parks": [
+            "file.versionHistory.showChanges"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "export.zip.bundle",
+          "parks": [
+            "file.download.zip"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "export.html.web-page",
+          "parks": [
+            "file.download.html"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "export.jpg.current-slide",
+          "parks": [
+            "file.download.jpg"
+          ],
+          "result": "failed"
+        },
+        {
+          "id": "export.png.current-slide",
+          "parks": [
+            "file.download.png"
+          ],
+          "result": "failed"
+        }
+      ],
+      "blocking": [
+        {
+          "id": "decks.trash.delete-forever-button",
+          "feature": "decks",
+          "result": "failed"
+        },
+        {
+          "id": "collab.presence-chips",
+          "feature": "share",
+          "result": "failed"
+        },
+        {
+          "id": "chrome.separators.toolbar-dividers",
+          "feature": "chrome",
+          "result": "failed"
+        }
+      ]
+    }
+  }
+}

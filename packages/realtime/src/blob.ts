@@ -553,7 +553,8 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
             set: (deckId, clientId, state, ttlMs) =>
               deps.shared!.presence.set(deckId, clientId, state, ttlMs),
             roster: (deckId) => deps.shared!.presence.roster(deckId),
-            leave: (deckId, clientId) => deps.shared!.presence.leave(deckId, clientId),
+            leave: (deckId, clientId, clock) =>
+              deps.shared!.presence.leave(deckId, clientId, clock),
             // the client bindings stay per instance: the id's own MAC decides on another one
             // (apps/studio/src/server/room.ts clientBoundTo)
             bind: local.presence.bind,

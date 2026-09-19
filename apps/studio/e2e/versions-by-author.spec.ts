@@ -4,12 +4,22 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
+import { setAdvancedTools } from './advanced-tools';
+
 // Version history by author (gslides-parity SPEC-3 0.44, 0.45, 5.7, 16.3
 // `versions-by-author.spec.ts`; research 08 section 6): two browser contexts with two labels edit
 // different slides; the panel shows one 15 minute window with two marks; Show changes hatches each
 // slide's blocks with its author's chip and underlines the inserted run; Only named hides both;
 // Make a copy at the earlier record opens a deck at that document; the two delete rows are present
 // and disabled with their clause.
+//
+// The focus round (docs/FOCUS.md 3.1, 3.2): Show changes is a parked row (`advanced: true`) and the
+// two delete rows are Later stubs, so the panel draws them only while Tools > Advanced tools is
+// on; the owner's page turns the switch on before the panel opens and the rest of the row reads as
+// before. The two checkboxes are driven through their label rows, the click a person makes: the
+// input is visually hidden (VersionsPanel.css, 1 by 1 px under the drawn box), so a click aimed at
+// the input meets the box and never lands (check step 26, `locator.check: Test ended`, every
+// cycle of the round).
 //
 // PLAYWRIGHT_BASE_URL=http://localhost:4335 node_modules/.bin/playwright test apps/studio/e2e/versions-by-author.spec.ts
 
@@ -153,6 +163,9 @@ test('two labels editing two slides make one window with two marks; Show changes
     'two browsers are two principals (SPEC-3 0.17): the route derives the author from the cookie (B2 day 4, B3 day 1)',
   ).toBe(2);
 
+  /* the parked rows of the panel (Show changes, the delete rows) need the switch */
+  await setAdvancedTools(pageA, true);
+
   /* the panel: one window with two marks */
   await pageA.locator('[data-control="menubar.file"]').click();
   await pageA.locator('[data-menu-item="file.versionHistory"]').hover();
@@ -169,7 +182,9 @@ test('two labels editing two slides make one window with two marks; Show changes
   expect(new Set(marks).size).toBe(2);
 
   /* Show changes on B's record hatches the title slide's heading with B's chip and underlines the inserted run */
-  await panel.locator('[data-control="versionHistory.showChanges"]').check();
+  const showChanges = panel.locator('[data-control="versionHistory.showChanges"]');
+  await panel.locator('[data-control="versionHistory.showChanges.row"]').click();
+  await expect(showChanges).toBeChecked();
   const newest = log[log.length - 1]!;
   await panel.locator(`[data-control="versionHistory.${newest.n}.pick"]`).click();
   await goTo(pageA, SLIDE_B);
@@ -180,10 +195,14 @@ test('two labels editing two slides make one window with two marks; Show changes
   await expect(pageA.locator('[data-control="versions.changeRun"]').first()).toBeVisible();
 
   /* Only named hides both unnamed windows */
-  await panel.locator('[data-control="versionHistory.namedOnly"]').check();
+  const namedOnly = panel.locator('[data-control="versionHistory.namedOnly"]');
+  const namedOnlyRow = panel.locator('.ts-versions-named', { has: namedOnly });
+  await namedOnlyRow.click();
+  await expect(namedOnly).toBeChecked();
   await expect(panel.locator('[data-control^="versionHistory.window."]')).toHaveCount(0);
   await expect(panel.locator('.ts-version')).toHaveCount(0);
-  await panel.locator('[data-control="versionHistory.namedOnly"]').uncheck();
+  await namedOnlyRow.click();
+  await expect(namedOnly).not.toBeChecked();
 
   /* the delete rows are present and disabled with their clause */
   const earlier = log[before]!;

@@ -13,6 +13,12 @@ export const SLIDE_TEXT_FIELDS: ReadonlySet<string> = new Set(['/heading', '/lea
  * step (build-4/hotfix-4.md cause W10: Cmd Z after " undo" removed "do" and left " un").
  */
 export function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
+  /* the auto-title's rename rides the burst that changed the heading (auto-title.ts, docs/RETURN.md
+     2.18: the name follows the heading burst by burst), so the bursts of one word still fold into
+     one Cmd Z; the rename is read past, never as the burst's own key */
+  const last = mutations[mutations.length - 1];
+  if (mutations.length > 1 && last?.op === 'deck.set' && last.path === '/title')
+    return typingKeyOf(mutations.slice(0, -1));
   const first = mutations[0];
   if (first === undefined) return null;
   if (mutations.length === 2) {

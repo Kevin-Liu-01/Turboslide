@@ -118,11 +118,14 @@ export type EditorKeyContext = {
   /** the selection is a group: Cmd+Option+Shift+G ungroups it */
   grouped?: boolean;
   /**
-   * Tools > Advanced tools (docs/FOCUS.md section 3): false while the switch is off, when the
-   * chords of the parked rows the stage also binds (Group and Ungroup, Paint format's copy and
-   * paste) match nothing, prevent nothing and run nothing, as the chrome's key table already does
-   * for every parked row (useEditorKeys isPresent; the matrix row surface.parked-shortcut-unbound).
-   * Absent or true, the chords stand: a stage outside the shell has no switch.
+   * Tools > Advanced tools (docs/FOCUS.md section 3): false while the switch is off. In the focus
+   * round the chords of the parked rows the stage also binds (Group and Ungroup, Paint format's
+   * copy and paste) matched nothing while it was off; the return round put those rows back in the
+   * default view (docs/RETURN.md 2.11, 2.12: `toolbar.paintFormat`, `arrange.group`,
+   * `arrange.ungroup` lost their flag), so no stage chord reads the switch today
+   * (`formatting.paint-format.chords`, `arrange.group.chords`; return/build/b4.md request 4). The
+   * field stays for the next parked chord; the chrome's key table still drops every parked row
+   * (useEditorKeys isPresent; the matrix row surface.parked-shortcut-unbound).
    */
   advanced?: boolean;
 };
@@ -186,14 +189,13 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
   const key = e.key;
   if (meta && alt && !otherMod) {
     const low = key.toLowerCase();
-    /* the parked rows' chords (toolbar.paintFormat, arrange.group, arrange.ungroup) match nothing
-       while Tools > Advanced tools is off; the rotate aliases below belong to no menu row */
-    const parked = ctx.advanced === false;
-    if (low === 'c') return ctx.selected && !parked ? { type: 'paintCopy' } : null;
-    if (low === 'v') return ctx.selected && !parked ? { type: 'paintPaste' } : null;
+    /* Paint format's copy and paste (toolbar.paintFormat) and Group and Ungroup are default view
+       rows since the return round (docs/RETURN.md 2.11, 2.12), so their chords stand whatever the
+       switch says; the rotate aliases below belong to no menu row */
+    if (low === 'c') return ctx.selected ? { type: 'paintCopy' } : null;
+    if (low === 'v') return ctx.selected ? { type: 'paintPaste' } : null;
     /* Group Cmd+Option+G, Ungroup Cmd+Option+Shift+G (R04 B7, SPEC-2 section 9) */
-    if (low === 'g' && ctx.selected && !parked)
-      return shift ? { type: 'ungroup' } : { type: 'group' };
+    if (low === 'g' && ctx.selected) return shift ? { type: 'ungroup' } : { type: 'group' };
     if (low === 'g') return null;
     /* Cmd+Option+Left and Right: the 15 degree aliases when the browser lets them through (0.78) */
     if (key === 'ArrowLeft' && ctx.selected) return { type: 'rotate', by: -ROTATE_KEY_DEG };

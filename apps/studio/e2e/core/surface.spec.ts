@@ -16,7 +16,6 @@ import {
   pdfPages,
   placeBlock,
   rightClickBlock,
-  runsOfBlock,
   selectBlock,
   settled,
   state,
@@ -41,20 +40,21 @@ let page: Page;
 let deck = '';
 
 /** Parked rows named by section 3.2 to 3.4, one per surface the row leaves. */
+/* the rows that keep the switch after the return round (docs/RETURN.md section 8 and its
+   section 2 questions 6 and 7): Insert > Table, Chart, Diagram and Word art, Arrange > Group and
+   Distribute, File > Details, Superscript, Paint format, Theme and Rotate returned to the default
+   view (RETURN.md sections 2 and 3), so the lists name what is still parked */
 const PARKED_MENU_ROWS = [
-  'insert.table',
-  'insert.chart',
-  'insert.diagram',
-  'insert.wordArt',
-  'arrange.group',
-  'arrange.distribute',
   'view.gridView',
-  'file.details',
-  'format.text.superscript',
+  'view.showSections',
+  'insert.specialCharacters',
+  'tools.spelling',
+  'tools.activityDashboard',
   'tools.advanced',
 ];
-const PARKED_TOOLBAR = ['toolbar.paintFormat', 'toolbar.theme'];
-const PARKED_CONTEXT_ROWS = ['arrange.group', 'arrange.rotate', 'format.dropShadow'];
+/* no toolbar button keeps the switch after the return round (RETURN.md 3.2) */
+const PARKED_TOOLBAR: string[] = [];
+const PARKED_CONTEXT_ROWS = ['format.dropShadow', 'format.altText'];
 
 test.beforeAll(async ({ browser }) => {
   ({ context, page } = await ownerContext(browser));
@@ -156,7 +156,7 @@ test(title('surface.advanced.off-by-default'), async () => {
       present.push(`toolbar ${control}`);
   const ctx = await contextRows(page, 'plain-box');
   for (const row of PARKED_CONTEXT_ROWS) if (ctx.includes(row)) present.push(`right click ${row}`);
-  if (await paletteHas(page, 'insert.table')) present.push('palette insert.table');
+  if (await paletteHas(page, 'view.gridView')) present.push('palette view.gridView');
   if (
     await ctl(page, 'menubar.extensions')
       .isVisible()
@@ -373,43 +373,36 @@ test(title('surface.parked-shortcut-unbound'), async () => {
     }
     await expect(chip).toHaveText('2 objects');
   };
-  const grouped = async () =>
-    (await objectsOf(page, slideId)).some(
-      (o) => o.id === 'g1' && (o.pos as { group?: string }).group !== undefined,
-    );
+  /* the pair is kept as the test's objects; the chord under test is a still parked row's: Alt
+     text (Cmd+Option+Y, format.altText, RETURN.md question 6), which opens Format options on a
+     selected block. Group (Cmd+Option+G) and Justify (Cmd+Shift+J) returned to the default view
+     this round (RETURN.md sections 2 and 3), so they are core rows and no longer this row's chord */
+  const panelOpen = async () => (await ctl(page, 'panel.formatOptions').count()) > 0;
+  const closePanel = async () => {
+    for (let i = 0; i < 3 && (await panelOpen()); i += 1) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(200);
+    }
+  };
+  await closePanel();
   /* off: the chord matches nothing */
-  await selectPair();
-  await page.keyboard.press('Meta+Alt+g');
+  await selectBlock(page, 'g1');
+  await page.keyboard.press('Meta+Alt+y');
   await page.waitForTimeout(1500);
-  expect(await grouped(), 'Cmd+Option+G groups nothing with the switch off').toBe(false);
-  const run = (await runsOfBlock(page, 'g1'))[0]!;
-  await page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="${run}"]`).dblclick();
-  await page.keyboard.press('Meta+Shift+j');
-  await page.waitForTimeout(800);
-  await page.keyboard.press('Escape');
-  await settled(page);
-  const alignOff = JSON.stringify(
-    (await objectsOf(page, slideId)).find((o) => o.id === 'g1')?.block,
-  );
-  expect(/justif/.test(alignOff), 'Cmd+Shift+J justifies nothing with the switch off').toBe(false);
+  expect(await panelOpen(), 'Cmd+Option+Y opens nothing with the switch off').toBe(false);
   /* on: the chord runs the row */
   await setAdvanced(page, true);
-  await selectPair();
-  await page.keyboard.press('Meta+Alt+g');
-  await expect.poll(grouped, { timeout: 8000 }).toBe(true);
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Meta+z');
-  await settled(page);
-  await page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="${run}"]`).dblclick();
-  await page.keyboard.press('Meta+Shift+j');
-  await page.waitForTimeout(800);
-  await page.keyboard.press('Escape');
-  await settled(page);
-  const alignOn = JSON.stringify(
-    (await objectsOf(page, slideId)).find((o) => o.id === 'g1')?.block,
-  );
-  expect(/justif/.test(alignOn), 'Cmd+Shift+J justifies with the switch on').toBe(true);
+  await selectBlock(page, 'g1');
+  await page.keyboard.press('Meta+Alt+y');
+  await expect
+    .poll(panelOpen, {
+      timeout: 8000,
+      message: 'Cmd+Option+Y opens Format options with the switch on',
+    })
+    .toBe(true);
+  await closePanel();
   await setAdvanced(page, false);
+  void selectPair;
 });
 
 test(title('surface.parked-block-core-rows'), async () => {

@@ -4,7 +4,9 @@ import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { createEditHistory } from '@turboslide/agent/window/history';
 import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history';
 import { autoTitleMutations } from './auto-title';
+import type { AutoTitleMemory } from './auto-title';
 import { awaitAcknowledged } from './ack-wait';
+import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
 import { resyncBroughtUnseen } from './resync-history';
@@ -68,6 +70,7 @@ import {
   textReplaceAll,
   textSpacing,
   textStyle,
+  withCanvas,
 } from '@turboslide/cli/store-actions';
 import type {
   BlockAdjustInput,
@@ -125,6 +128,7 @@ import type {
   TextStyleInput,
 } from '@turboslide/cli/store-actions';
 import type { ExportMenuInput, ExportProgress } from '@turboslide/chrome/ExportMenu';
+import { downloadFromPage } from '@turboslide/chrome/download';
 import type {
   CommentAnchorView,
   CommentThreadView,
@@ -161,6 +165,7 @@ import type {
 import { parseSseBlock, roomEventOf } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
+import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
@@ -917,15 +922,16 @@ export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** A browser download of a same-origin URL the server signed (tokens.ts): an anchor click. */
-export function triggerDownload(url: string): void {
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = '';
-  anchor.rel = 'noopener';
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
+/**
+ * A browser download of a URL the server signed (tokens.ts). An address of ours is fetched by
+ * the page and saved from its bytes, so the download carries the page's headers and cookies, a
+ * refusal (a spent token, a quota, a missing bearer) rejects with the server's sentence instead
+ * of a cancelled download the page never hears of, and a redirect never navigates the tab; an
+ * address on another origin (the public Blob host's stored copies) is the anchor click
+ * (@turboslide/chrome/download; the return round fix round, VERIFICATION.md R1-F5).
+ */
+export async function triggerDownload(url: string): Promise<void> {
+  await downloadFromPage(url);
 }
 
 /** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */
@@ -2012,10 +2018,46 @@ export function createEditorController(init: {
     publish({ namePrompt: true });
   };
 
-  /* the auto-title (gslides-parity SPEC 6.3): the first committed heading of an Untitled
-     presentation renames the deck in the same write, so one undo removes both */
-  const commit = (mutations: Mutation[], label: string): Promise<Committed> =>
-    commitAs([...mutations, ...autoTitleMutations(snapshot.document, mutations)], label, 'edit');
+  /* the auto-title (gslides-parity SPEC 6.3; docs/RETURN.md 2.18): a write that changes the title
+     slide's heading renames the deck in the same write while the name still follows the heading
+     (Untitled, or the name this rule gave it), so one undo removes both and a slow typist's deck
+     reads its whole title (decks.name.follows-heading) */
+  const autoTitle: AutoTitleMemory = { lastAuto: null };
+  const withAutoTitle = (mutations: Mutation[]): Mutation[] => {
+    const rename = autoTitleMutations(snapshot.document, mutations, autoTitle);
+    const first = rename[0];
+    if (first?.op === 'deck.set' && typeof first.value === 'string')
+      autoTitle.lastAuto = first.value;
+    return rename.length === 0 ? mutations : [...mutations, ...rename];
+  };
+  /* the first format write on a fixed kind's field (the cover title's heading: Bold, Center, the
+     size, a mark, a colour, Clear formatting) converts the slide to a canvas in the same write,
+     the way the Align rows do through the store's withCanvas (docs/RETURN.md 2.14 item 1; SPEC-2
+     1.6): the measured slide.replace travels in front of the write's mutations, so one revision
+     and one undo step hold both. Every other write keeps its synchronous local apply. */
+  const convertThenCommit = async (
+    slideId: string,
+    mutations: Mutation[],
+    label: string,
+  ): Promise<Committed> => {
+    const current = snapshot.document;
+    const slide = current.slides[slideId];
+    if (slide === undefined) return commitAs(withAutoTitle(mutations), label, 'edit');
+    const canvas = await withCanvas(storeDeps('slide.toCanvas'), current, slide);
+    /* the document moved while the sheet was measured (a collaborator's write, a burst): the
+       conversion is measured again on the document as it stands now */
+    if (snapshot.document !== current) {
+      const again = slideToConvertFor(snapshot.document, mutations);
+      if (again !== null) return convertThenCommit(again, mutations, label);
+      return commitAs(withAutoTitle(mutations), label, 'edit');
+    }
+    return commitAs(withAutoTitle([...canvas.prefix, ...mutations]), label, 'edit');
+  };
+  const commit = (mutations: Mutation[], label: string): Promise<Committed> => {
+    const convert = slideToConvertFor(snapshot.document, mutations);
+    if (convert !== null) return convertThenCommit(convert, mutations, label);
+    return commitAs(withAutoTitle(mutations), label, 'edit');
+  };
 
   /**
    * An undo or redo step moved past what landed since it was recorded (SPEC-3 3.5, 3.6); a typing
@@ -2581,13 +2623,13 @@ export function createEditorController(init: {
           };
           publish({ artifact: { progress: null, run } });
           const first = run.downloads[0];
-          if (first?.url !== undefined) triggerDownload(downloadUrlOf(first.url));
+          if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
           return run.report;
         }
         const run = await runSyncExport(deckId, input);
         publish({ artifact: { progress: null, run } });
         const first = run.downloads[0];
-        if (first?.url !== undefined) triggerDownload(downloadUrlOf(first.url));
+        if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
         return run.report;
       }
       const started = await startExport({ deckId, input });
@@ -2605,7 +2647,7 @@ export function createEditorController(init: {
           publish({ artifact: { progress: null, run } });
           // the first file downloads at once; the card offers every file again
           const first = poll.downloads?.[0];
-          if (first) triggerDownload(first.url);
+          if (first) await triggerDownload(first.url);
           return poll.report;
         }
         if (poll.status === 'failed') throw new Error(poll.error ?? 'the export failed');
@@ -2640,13 +2682,15 @@ export function createEditorController(init: {
         path: built.path,
         bytes: built.bytes,
         assertions: built.assertions,
+        /* the card offers the file again from the same link: the stored copy on the blob
+           backend, this instance's token elsewhere (server/download.ts builtFileLink) */
         downloads: built.download
-          ? [{ name: built.download.name, bytes: built.download.bytes }]
+          ? [{ name: built.download.name, bytes: built.download.bytes, url: built.download.url }]
           : [],
         ms: built.ms,
       };
       publish({ artifact: { progress: null, run } });
-      if (built.download) triggerDownload(built.download.url);
+      if (built.download) await triggerDownload(downloadUrlOf(built.download.url));
       return { path: built.path, bytes: built.bytes, assertions: built.assertions };
     } catch (error) {
       publish({
@@ -3084,13 +3128,18 @@ export function createEditorController(init: {
     const remaining = allFindings().filter((finding) => ids.includes(finding.slideId));
     return { applied, remaining, revision: committed.revision };
   });
-  on<{ slideIds: 'all' | string[]; themes?: Theme[]; scale?: 1 | 2 }>('render.slide', (input) =>
-    renderSlideImages({
-      deckId,
-      slideIds: input.slideIds,
-      ...(input.themes !== undefined ? { themes: input.themes } : {}),
-      ...(input.scale !== undefined ? { scale: input.scale } : {}),
-    }),
+  on<{ slideIds: 'all' | string[]; themes?: Theme[]; scale?: 1 | 2; format?: 'png' | 'jpg' }>(
+    'render.slide',
+    (input) =>
+      renderSlideImages({
+        deckId,
+        slideIds: input.slideIds,
+        ...(input.themes !== undefined ? { themes: input.themes } : {}),
+        ...(input.scale !== undefined ? { scale: input.scale } : {}),
+        /* File > Download > JPEG image asks for `jpg` (editor-shell.ts file.download.jpg); the
+           handler dropped it and the row delivered a PNG (return/build/b7.md B7-R1) */
+        ...(input.format !== undefined ? { format: input.format } : {}),
+      }),
   );
   on<{ slideId: string }>('view.goto', (input) => {
     requireSlide(input.slideId);
@@ -3637,7 +3686,7 @@ export function createEditorController(init: {
             };
             throw new Error(body.error?.message ?? 'the file is not on this instance');
           }
-          triggerDownload(downloadUrlOf(file.url));
+          await triggerDownload(downloadUrlOf(file.url));
           return;
         }
         const { url } = await signDownload(
@@ -3645,7 +3694,7 @@ export function createEditorController(init: {
             ? { kind: 'job', jobId: run.jobId, name: file.name }
             : { kind: 'build', deckId, name: file.name },
         );
-        triggerDownload(url);
+        await triggerDownload(url);
       } catch (error) {
         say(`Download: ${errorMessage(error)}`);
       }
@@ -3737,6 +3786,9 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
         // the parity facts (gslides-parity SPEC 7.2.1, 7.2.2): the show and the grid read skip, the grid the layout
         ...(slide.skip === true ? { skip: true } : {}),
         ...(slide.template !== undefined ? { template: slide.template } : {}),
+        // the show's frame follows Insert > Slide numbers as the editor stage does (render/deck.ts
+        // slideCounter; docs/RETURN.md section 5 slides.numbers.apply, "in the show too")
+        counter: slideCounter(deck, slide, 1, 1) !== '',
       });
     }
   }

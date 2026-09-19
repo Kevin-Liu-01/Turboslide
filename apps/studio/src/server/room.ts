@@ -54,6 +54,7 @@ import { boundedBlobClient } from '@turboslide/store/blob-store';
 import type { BlobClient } from '@turboslide/store/blob-store';
 import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
 import { sharedPresence } from '@turboslide/store/presence-store';
+import type { SharedPresence } from '@turboslide/store/presence-store';
 import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
@@ -103,6 +104,8 @@ type Shared = typeof globalThis & {
     streams: StreamCounters;
     /** the raw Redis commands on the redis tier (the inbox, the session directory), null elsewhere */
     redis: RedisCommands | null;
+    /** the blob tier's shared roster (store/presence-store.ts), for the leave that carries the beacon's clock (`leavePresence`); absent elsewhere */
+    presence?: SharedPresence<RosterEntry>;
   };
 };
 
@@ -115,6 +118,7 @@ function log(line: string): void {
 function buildChannel(selection: RealtimeSelection): {
   channel: RealtimeChannel;
   redis: RedisCommands | null;
+  presence?: SharedPresence<RosterEntry>;
 } {
   switch (selection.tier) {
     case 'memory':
@@ -206,7 +210,7 @@ function buildChannel(selection: RealtimeSelection): {
         },
         onError,
       });
-      return { channel, redis: null };
+      return { channel, redis: null, presence };
     }
   }
 }
@@ -214,7 +218,7 @@ function buildChannel(selection: RealtimeSelection): {
 function state(): NonNullable<Shared['__turboslideRoom']> {
   if (shared.__turboslideRoom === undefined) {
     const selection = selectRealtime(process.env);
-    const { channel, redis } = buildChannel(selection);
+    const { channel, redis, presence } = buildChannel(selection);
     const principals = selectPrincipalStore({ stateDir: stateDir() }).store;
     log(`realtime tier ${selection.tier} (${selection.reason})`);
     shared.__turboslideRoom = {
@@ -224,9 +228,35 @@ function state(): NonNullable<Shared['__turboslideRoom']> {
       principals,
       streams: createStreamCounters(),
       redis,
+      ...(presence === undefined ? {} : { presence }),
     };
   }
   return shared.__turboslideRoom;
+}
+
+/** The blob tier's shared roster, undefined on the memory and redis tiers. */
+export function sharedRoster(): SharedPresence<RosterEntry> | undefined {
+  return state().presence;
+}
+
+/**
+ * A client's leave with the clock its beacon carried (room-client.ts `stop`: `presenceClock + 1`,
+ * above every set of that tab). On the blob tier the shared roster keeps the clock in the
+ * tombstone, so a set of the same tab that reaches this or another instance after the leave (the
+ * presence route awaits the roster read before its set; b4.md C3T-R2) never lands; the channel's
+ * own `leave` (the memory and redis tiers, and the clockless leaves of the stream's close and
+ * `retireClients`) is the path otherwise. `shared` is the roster to write; the tests pass one.
+ */
+export async function leavePresence(
+  room: Room,
+  clientId: string,
+  clock?: number,
+  shared: SharedPresence<RosterEntry> | null = sharedRoster() ?? null,
+): Promise<void> {
+  if (shared !== null && clock !== undefined) await shared.leave(room.deckId, clientId, clock);
+  /* the channel carries the clock too since B7-R3 (realtime/channel.ts `leave`; the blob channel
+     hands it to the shared roster, the memory and redis channels ignore it) */
+  else await room.channel.presence.leave(room.deckId, clientId, clock);
 }
 
 /** The raw Redis commands of the redis tier (B3 R6: `get`, `set ... PX`, `del` ride `call`), null on the other tiers. */
@@ -1504,18 +1534,22 @@ export function namesUnknownAsset(rejected: Rejected): boolean {
   return rejected.reason === 'invalid' && /is not in deck\.json/.test(rejected.message ?? '');
 }
 
+/** How many times the blob admission places and appends again after the store moved under its write. */
+export const BLOB_APPEND_RETRIES = 1;
+
 /** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for its test. */
 export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
   let live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
-  const rejected: Rejected[] = [];
-  const candidates: NewEntry[] = [];
   // the entries of a resent POST this instance admitted already, answered as they were made
   const replayed: Entry[] = [];
-  let running = live.document;
-  // the undo of every entry refused so far, which the later entries are transformed past
-  const refusedUndo: Mutation[] = [];
+  const fresh = post.entries.filter((entry) => {
+    const already = blobAdmittedBefore(room.deckId, entry.opId);
+    if (already === undefined) return true;
+    replayed.push(already);
+    return false;
+  });
   /**
    * A candidate that names an asset this instance's document lacks is judged once more on a
    * mirror synced by force (the focus round, cycle 3 stream fix round; VERIFICATION C3S-F6,
@@ -1524,88 +1558,128 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
    * calls). The sync is the store's forced one (`liveAtLeast`'s), once per POST.
    */
   let resynced = false;
-  const freshLive = async (): Promise<boolean> => {
-    if (resynced || candidates.length > 0) return false;
-    resynced = true;
-    const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
-    if (typeof store.sync !== 'function') return false;
-    try {
-      await store.sync(true);
-    } catch (error) {
-      if (!isStoreBusy(error)) throw error;
-      return false;
-    }
-    live = await room.live();
-    running = live.document;
-    return true;
-  };
-  for (const entry of post.entries) {
-    const already = blobAdmittedBefore(room.deckId, entry.opId);
-    if (already !== undefined) {
-      replayed.push(already);
-      continue;
-    }
-    if (entry.kind === 'comment') {
-      if (entry.comment !== undefined)
-        candidates.push({
-          rev: live.document.deck.revision,
-          kind: 'comment',
-          author: input.author,
-          clientId: post.clientId,
-          opId: entry.opId,
-          comment: entry.comment,
-          at: stamp,
-        });
-      continue;
-    }
-    const mutations =
-      refusedUndo.length === 0
-        ? (entry.mutations ?? [])
-        : transformEntry(entry.mutations ?? [], refusedUndo);
-    if (mutations === null) {
-      rejected.push({ opId: entry.opId, reason: 'stale' });
-      continue;
-    }
-    let placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
-    if (!placed.ok && namesUnknownAsset(placed.rejected) && (await freshLive())) {
-      placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
-    }
-    if (!placed.ok) {
-      refusedUndo.push(...undoOfSplices(mutations));
-      const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
-      if (refusal.kind === 'resync') {
-        return {
-          ok: false,
-          status: 409,
-          code: 'resync',
-          message: `The deck is at revision ${live.document.deck.revision} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
-          head: live.document.deck.revision,
-        };
+  type Placement =
+    | { kind: 'resync'; head: number }
+    | { kind: 'placed'; candidates: NewEntry[]; rejected: Rejected[] };
+  /**
+   * Places the POST's entries against the live document as it stands: the reducer and the
+   * validator on each, the later entries transformed past the undo of every entry refused before
+   * them. Run once, and once more against the head when the store moved under the append below.
+   */
+  const place = async (): Promise<Placement> => {
+    const rejected: Rejected[] = [];
+    const candidates: NewEntry[] = [];
+    let running = live.document;
+    // the undo of every entry refused so far, which the later entries are transformed past
+    const refusedUndo: Mutation[] = [];
+    const freshLive = async (): Promise<boolean> => {
+      if (resynced || candidates.length > 0) return false;
+      resynced = true;
+      const store = room.store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+      if (typeof store.sync !== 'function') return false;
+      try {
+        await store.sync(true);
+      } catch (error) {
+        if (!isStoreBusy(error)) throw error;
+        return false;
       }
-      rejected.push(refusal.rejected);
-      continue;
-    }
-    running = placed.document;
-    candidates.push({
-      rev: live.document.deck.revision,
-      kind: 'edit',
-      author: input.author,
-      clientId: post.clientId,
-      opId: entry.opId,
-      mutations: placed.mutations,
-      at: stamp,
-    });
-  }
-  void identity;
-  if (candidates.length === 0)
-    return {
-      ok: true,
-      entries: replayed,
-      rejected,
-      head: live.seq,
-      revision: live.document.deck.revision,
+      live = await room.live();
+      running = live.document;
+      return true;
     };
-  const result = await room.channel.append(room.deckId, live.document.deck.revision, candidates);
+    for (const entry of fresh) {
+      if (entry.kind === 'comment') {
+        if (entry.comment !== undefined)
+          candidates.push({
+            rev: live.document.deck.revision,
+            kind: 'comment',
+            author: input.author,
+            clientId: post.clientId,
+            opId: entry.opId,
+            comment: entry.comment,
+            at: stamp,
+          });
+        continue;
+      }
+      const mutations =
+        refusedUndo.length === 0
+          ? (entry.mutations ?? [])
+          : transformEntry(entry.mutations ?? [], refusedUndo);
+      if (mutations === null) {
+        rejected.push({ opId: entry.opId, reason: 'stale' });
+        continue;
+      }
+      let placed = landCandidate(
+        running,
+        { opId: entry.opId, kind: 'edit', mutations },
+        () => true,
+      );
+      if (!placed.ok && namesUnknownAsset(placed.rejected) && (await freshLive())) {
+        placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
+      }
+      if (!placed.ok) {
+        refusedUndo.push(...undoOfSplices(mutations));
+        const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
+        if (refusal.kind === 'resync') return { kind: 'resync', head: live.document.deck.revision };
+        rejected.push(refusal.rejected);
+        continue;
+      }
+      running = placed.document;
+      candidates.push({
+        rev: live.document.deck.revision,
+        kind: 'edit',
+        author: input.author,
+        clientId: post.clientId,
+        opId: entry.opId,
+        mutations: placed.mutations,
+        at: stamp,
+      });
+    }
+    return { kind: 'placed', candidates, rejected };
+  };
+  void identity;
+  const resyncAt = (head: number): AdmissionResult => ({
+    ok: false,
+    status: 409,
+    code: 'resync',
+    message: `The deck is at revision ${head} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
+    head,
+  });
+  const nothingToAppend = (rejected: Rejected[]): AdmissionResult => ({
+    ok: true,
+    entries: replayed,
+    rejected,
+    head: live.seq,
+    revision: live.document.deck.revision,
+  });
+  let placement = await place();
+  if (placement.kind === 'resync') return resyncAt(placement.head);
+  if (placement.candidates.length === 0) return nothingToAppend(placement.rejected);
+  let result = await room.channel.append(
+    room.deckId,
+    live.document.deck.revision,
+    placement.candidates,
+  );
+  for (let retry = 0; !result.ok && retry < BLOB_APPEND_RETRIES; retry += 1) {
+    if (result.head <= live.document.deck.revision) break;
+    // the store moved under the write: another instance committed between this instance's
+    // placement and its manifest put (on the wire, the second upload's `asset.set` landing under
+    // the first picture's insert; the focus round, cycle 3 stream fix round two, VERIFICATION
+    // C3T-F2). The mirror is synced to the head the store named, the entries are placed against
+    // it and appended once more, in place of the 409 the tab answered with a resync read and a
+    // resend (about a second of the picture's 5 s). A mirror that cannot reach that head keeps
+    // the 409 below.
+    live = await liveAtLeast(room, result.head);
+    if (live.document.deck.revision < result.head) break;
+    placement = await place();
+    if (placement.kind === 'resync') return resyncAt(placement.head);
+    if (placement.candidates.length === 0) return nothingToAppend(placement.rejected);
+    result = await room.channel.append(
+      room.deckId,
+      live.document.deck.revision,
+      placement.candidates,
+    );
+  }
   if (!result.ok) {
     if (result.head === live.document.deck.revision) {
       // the store did not move and the write did not land (a claim in flight on another
@@ -1645,7 +1719,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
   return {
     ok: true,
     entries,
-    rejected,
+    rejected: placement.rejected,
     head: revision,
     revision,
     ...(between === undefined ? {} : { between }),

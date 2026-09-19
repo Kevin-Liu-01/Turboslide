@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { SceneStyle, SceneTable, SceneTableCell, SceneText } from '../scene/types.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
-import { CELL_FIRST_BASELINE_PX, cellMargin, tableCell } from './table.ts';
+import { CELL_FIRST_BASELINE_PX, cellMargin, normalisedColumnWidths, tableCell } from './table.ts';
 import type { TableCellOptions, TableEmitOptions } from './table.ts';
 
 const style: SceneStyle = {
@@ -93,5 +93,58 @@ describe('a table cell', () => {
     expect(cellMargin(cell, text, { ...options, baseline: 'none' })[0]).toBeCloseTo(12 / 120, 6);
     // an empty cell keeps its padding
     expect(cellMargin(cell, undefined, options)[0]).toBeCloseTo(12 / 120, 6);
+  });
+});
+
+describe('normalisedColumnWidths (docs/RETURN.md 2.4 fix 4)', () => {
+  it('writes the measured widths when they fill the box', () => {
+    expect(
+      normalisedColumnWidths({
+        columns: [
+          { x: 0, w: 480 },
+          { x: 480, w: 480 },
+        ],
+        box: [0, 0, 960, 100],
+      }),
+    ).toEqual([480, 480]);
+    expect(
+      normalisedColumnWidths({
+        columns: [
+          { x: 0, w: 480.2 },
+          { x: 480.2, w: 480 },
+        ],
+        box: [0, 0, 960, 100],
+      }),
+    ).toEqual([480.2, 480]);
+  });
+  it('scales widths whose sum drifted from the box, so no gridCol is wider than the frame', () => {
+    const widths = normalisedColumnWidths({
+      columns: [
+        { x: 0, w: 240 },
+        { x: 240, w: 240 },
+        { x: 480, w: 240 },
+        { x: 720, w: 960 },
+      ],
+      box: [0, 0, 960, 100],
+    });
+    expect(widths.reduce((a, b) => a + b, 0)).toBeCloseTo(960, 6);
+    expect(widths.map((w) => Math.round(w))).toEqual([137, 137, 137, 549]);
+    expect(
+      normalisedColumnWidths({
+        columns: [
+          { x: 0, w: 300 },
+          { x: 300, w: 300 },
+        ],
+        box: [0, 0, 960, 100],
+      }),
+    ).toEqual([480, 480]);
+  });
+  it('leaves a zero total or a zero box as measured', () => {
+    expect(normalisedColumnWidths({ columns: [{ x: 0, w: 0 }], box: [0, 0, 960, 100] })).toEqual([
+      0,
+    ]);
+    expect(normalisedColumnWidths({ columns: [{ x: 0, w: 300 }], box: [0, 0, 0, 100] })).toEqual([
+      300,
+    ]);
   });
 });

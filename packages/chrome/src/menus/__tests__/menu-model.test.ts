@@ -42,7 +42,6 @@ import {
   itemById,
   itemPath,
   presentControls,
-  resolveEffect,
   resolveContextEntries,
   resolveLabel,
   shortcut,
@@ -1105,31 +1104,32 @@ describe('the role predicates of SPEC-3 13.4', () => {
     ])
       expect(isPresent(itemById(id), viewer), id).toBe(true);
     /* the parked rows a viewer may use are drawn for them behind Tools > Advanced tools alone
-       (docs/FOCUS.md 3.1, 3.2) */
+       (docs/FOCUS.md 3.1, 3.2); Open, Details and the collaborator pointers returned to the
+       default view in the return round (docs/RETURN.md 2.16, 2.17) */
     const viewerOn = asRole('viewer', {
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
     });
-    for (const id of [
-      'title.inbox',
-      'title.account',
-      'file.open',
-      'file.details',
-      'view.livePointers.collaborators',
-    ]) {
+    for (const id of ['title.inbox', 'title.account', 'view.livePointers.collaborators']) {
       expect(isPresent(itemById(id), viewer), id).toBe(false);
+      expect(isPresent(itemById(id), viewerOn), id).toBe(true);
+    }
+    for (const id of ['file.open', 'file.details']) {
+      expect(isPresent(itemById(id), viewer), id).toBe(true);
       expect(isPresent(itemById(id), viewerOn), id).toBe(true);
     }
     expect(evaluate('viewOnly', viewer)).toBe(true);
     expect(evaluate('follow', viewer)).toBe(false);
     /* a viewer who may read comments under the owner's switch sees the read surfaces alone; the
-       View > Comments submenu is parked, so it needs the switch too */
+       View > Comments submenu returned with the view rows (docs/RETURN.md 2.16), so it follows
+       the capability and not the switch */
     const reading = asRole('viewer', { capabilities: [...CAPABILITIES.viewer, 'readComments'] });
     const readingOn = {
       ...reading,
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
     };
     expect(isPresent(itemById('title.comments'), reading)).toBe(true);
-    expect(isPresent(itemById('view.comments'), reading)).toBe(false);
+    expect(isPresent(itemById('view.comments'), viewer)).toBe(false);
+    expect(isPresent(itemById('view.comments'), reading)).toBe(true);
     expect(isPresent(itemById('view.comments'), readingOn)).toBe(true);
     expect(isPresent(itemById('insert.comment'), reading)).toBe(false);
     expect(isPresent(itemById('view.mode'), reading)).toBe(false);
@@ -1150,17 +1150,20 @@ describe('the role predicates of SPEC-3 13.4', () => {
       'insert.comment',
     ]);
     expect(isEnabled(itemById('insert.comment'), commenter)).toBe(true);
-    /* View > Mode, Notification settings and the Activity dashboard are parked (docs/FOCUS.md
-       3.2): the role rules are asserted with the switch on, their absence with it off */
+    /* View > Mode returned with the view rows (docs/RETURN.md 2.16) and follows the role alone;
+       Notification settings and the Activity dashboard stay parked (docs/FOCUS.md 3.2; RETURN.md
+       2.16, section 8): their role rules are asserted with the switch on, their absence with it off */
     const commenterOn = asRole('commenter', {
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
     });
     const mode = itemById('view.mode');
-    expect(isPresent(mode, commenter)).toBe(false);
+    expect(isPresent(mode, commenter)).toBe(true);
     expect(isPresent(mode, commenterOn)).toBe(true);
-    expect(visibleItems(mode.items ?? [], { context: commenterOn }).map((item) => item.id)).toEqual(
-      ['view.mode.commenting', 'view.mode.viewing'],
-    );
+    expect(visibleItems(mode.items ?? [], { context: commenter }).map((item) => item.id)).toEqual([
+      'view.mode.commenting',
+      'view.mode.viewing',
+    ]);
+    expect(isPresent(mode, asRole('viewer'))).toBe(false);
     expect(isPresent(itemById('view.showSpeakerNotes'), commenter)).toBe(false);
     expect(isPresent(itemById('tools.notificationSettings'), commenter)).toBe(false);
     expect(isPresent(itemById('tools.notificationSettings'), commenterOn)).toBe(true);
@@ -1909,10 +1912,9 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       'Comment',
     ];
     expect(labelsOf(on)).toEqual(order);
-    /* with the switch off the Later row and the parked Change theme leave (docs/FOCUS.md 3.4) */
-    expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(
-      order.filter((label) => label !== 'Transition' && label !== 'Change theme'),
-    );
+    /* with the switch off the Later row leaves (docs/FOCUS.md 3.4); Change theme returned with
+       the return round (docs/RETURN.md 2.13) and stays in the card menu */
+    expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(order.filter((label) => label !== 'Transition'));
   });
 
   it('builds every right-click menu from menu bar items, dividers between the groups of 4.3', () => {
@@ -1922,9 +1924,10 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
         expect(itemById(id).status, `${target}: ${id} is omitted`).not.toBe('omit');
       }
     }
-    /* the parked rows of docs/FOCUS.md 3.4 (Guides, Change theme, Transition, superscript,
-       subscript, capitalization, the table rows) are asserted behind the switch, and the default
-       view's lists without them */
+    /* the parked rows of docs/FOCUS.md 3.4 (Guides, Change theme, superscript, subscript,
+       capitalization, the table rows) returned in the return round (docs/RETURN.md 2.4, 2.11,
+       2.13, 2.17) and are drawn in both contexts; the Later row Transition and the parked Alt
+       text and Drop shadow (RETURN.md section 9, questions 6 and 7) stay behind the switch */
     const on: MenuContext = {
       ...DEFAULT_MENU_CONTEXT,
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
@@ -1934,66 +1937,64 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     expect(empty.filter((entry) => entry === DIVIDER)).toHaveLength(4);
     expect(empty.at(-1)).toBe(itemById('view.guides'));
     const emptyOff = contextMenuItems('emptyCanvas', DEFAULT_MENU_CONTEXT);
-    expect(emptyOff.filter((entry) => entry === DIVIDER)).toHaveLength(3);
-    expect(emptyOff.at(-1)).toBe(itemById('insert.comment'));
-    expect(
-      contextMenuItems('textSelection', DEFAULT_MENU_CONTEXT).map((entry) =>
-        entry === DIVIDER ? '-' : entry.id,
-      ),
-    ).toEqual([
-      'edit.cut',
-      'edit.copy',
-      'edit.paste',
-      'edit.pasteWithoutFormatting',
-      '-',
-      'format.text.italic',
-      'format.text.underline',
-      'format.text.strikethrough',
-      '-',
-      'insert.link',
-      '-',
-      'format.formatOptions',
-    ]);
-    expect(
-      contextMenuItems('textSelection', on).map((entry) => (entry === DIVIDER ? '-' : entry.id)),
-    ).toEqual([
-      'edit.cut',
-      'edit.copy',
-      'edit.paste',
-      'edit.pasteWithoutFormatting',
-      '-',
-      'format.text.italic',
-      'format.text.underline',
-      'format.text.strikethrough',
-      'format.text.superscript',
-      'format.text.subscript',
-      'format.text.capitalization',
-      '-',
-      'insert.link',
-      '-',
-      'format.formatOptions',
-    ]);
-    expect(
-      contextMenuItems('tableCell', on).filter(
-        (entry) => entry !== DIVIDER && entry.id.startsWith('format.table.'),
-      ),
-    ).toHaveLength(11);
-    /* a table cell a core layout places keeps its clipboard, Link and Format options rows (2.2) */
-    expect(
-      contextMenuItems('tableCell', DEFAULT_MENU_CONTEXT).map((entry) =>
-        entry === DIVIDER ? '-' : entry.id,
-      ),
-    ).toEqual(['edit.cut', 'edit.copy', 'edit.paste', 'insert.link', 'format.formatOptions']);
-    expect(
-      contextMenuItems('cellRange', on)
-        .slice(0, 4)
-        .map((entry) => (entry === DIVIDER ? '-' : entry.id)),
-    ).toEqual([
-      'format.table.mergeCells',
-      'format.table.unmergeCells',
-      'format.table.distributeRows',
-      'format.table.distributeColumns',
-    ]);
+    expect(emptyOff.filter((entry) => entry === DIVIDER)).toHaveLength(4);
+    expect(emptyOff.at(-1)).toBe(itemById('view.guides'));
+    expect(emptyOff.some((entry) => entry !== DIVIDER && entry.id === 'slide.transition')).toBe(
+      false,
+    );
+    const textOff = contextMenuItems('textBlock', DEFAULT_MENU_CONTEXT).map((entry) =>
+      entry === DIVIDER ? '-' : entry.id,
+    );
+    expect(textOff).not.toContain('format.altText');
+    expect(textOff).not.toContain('format.dropShadow');
+    expect(textOff).toContain('arrange.rotate');
+    expect(textOff).toContain('arrange.group');
+    for (const ctx of [DEFAULT_MENU_CONTEXT, on])
+      expect(
+        contextMenuItems('textSelection', ctx).map((entry) => (entry === DIVIDER ? '-' : entry.id)),
+      ).toEqual([
+        'edit.cut',
+        'edit.copy',
+        'edit.paste',
+        'edit.pasteWithoutFormatting',
+        '-',
+        'format.text.italic',
+        'format.text.underline',
+        'format.text.strikethrough',
+        'format.text.superscript',
+        'format.text.subscript',
+        'format.text.capitalization',
+        '-',
+        'insert.link',
+        '-',
+        'format.formatOptions',
+      ]);
+    /* the table rows returned with the tables (docs/RETURN.md 2.4): the cell menu lists its 16
+       rows (audit-objects row 60), the two merge rows among them in the default view since the
+       fix round gave the Editor a cell range (return/build/b5.md "Return round fix round"; the
+       integration had re-parked them, return/build/integrator.md section 6) */
+    for (const [ctx, tableRows, all] of [
+      [DEFAULT_MENU_CONTEXT, 11, 16],
+      [on, 11, 16],
+    ] as const) {
+      const cell = contextMenuItems('tableCell', ctx);
+      expect(
+        cell.filter((entry) => entry !== DIVIDER && entry.id.startsWith('format.table.')),
+      ).toHaveLength(tableRows);
+      expect(cell.filter((entry) => entry !== DIVIDER)).toHaveLength(all);
+    }
+    /* the merge rows lead the range menu in both views since the fix round returned them */
+    for (const ctx of [on, DEFAULT_MENU_CONTEXT])
+      expect(
+        contextMenuItems('cellRange', ctx)
+          .slice(0, 4)
+          .map((entry) => (entry === DIVIDER ? '-' : entry.id)),
+      ).toEqual([
+        'format.table.mergeCells',
+        'format.table.unmergeCells',
+        'format.table.distributeRows',
+        'format.table.distributeColumns',
+      ]);
   });
 
   it('draws the object menus of SPEC-2 4.3 with the Arrange rows on every target', () => {
@@ -2023,55 +2024,50 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     expect(plain.some((entry) => entry !== DIVIDER && entry.id === 'slide.changeBackground')).toBe(
       false,
     );
-    /* Guides is parked (docs/FOCUS.md 3.4): the three appended rows behind the switch, the
-       divider and Change background alone with it off */
+    /* Guides returned with the guides (docs/RETURN.md 2.17): the three appended rows are drawn in
+       both contexts */
     const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
-    const covering = contextMenuItems('image', {
-      ...withObjects(1, { block: 'image', coversSheet: true }),
-      settings: on,
-    });
-    const plainOn = contextMenuItems('image', {
-      ...withObjects(1, { block: 'image' }),
-      settings: on,
-    });
-    const tail = covering.slice(-3).map((entry) => (entry === DIVIDER ? '-' : entry.id));
-    expect(tail).toEqual(['-', 'slide.changeBackground', 'view.guides']);
-    expect(covering.length).toBe(plainOn.length + 3);
-    const coveringOff = contextMenuItems(
-      'image',
-      withObjects(1, { block: 'image', coversSheet: true }),
-    );
-    expect(coveringOff.slice(-2).map((entry) => (entry === DIVIDER ? '-' : entry.id))).toEqual([
-      '-',
-      'slide.changeBackground',
-    ]);
-    expect(coveringOff.length).toBe(plain.length + 2);
-    /* Edit guides is Later and Delete guide is parked with Guides: a guide line draws its two
-       rows behind Tools > Advanced tools and no menu with it off (docs/FOCUS.md 3.1, 3.4) */
+    for (const settings of [DEFAULT_MENU_CONTEXT.settings, on]) {
+      const covering = contextMenuItems('image', {
+        ...withObjects(1, { block: 'image', coversSheet: true }),
+        settings,
+      });
+      const plainCtx = contextMenuItems('image', {
+        ...withObjects(1, { block: 'image' }),
+        settings,
+      });
+      const tail = covering.slice(-3).map((entry) => (entry === DIVIDER ? '-' : entry.id));
+      expect(tail).toEqual(['-', 'slide.changeBackground', 'view.guides']);
+      expect(covering.length).toBe(plainCtx.length + 3);
+    }
+    /* Edit guides is Later and hides with the switch off (docs/FOCUS.md 3.1); Delete guide
+       returned with Guides, so a guide line draws that one row with the switch off and both with
+       it on */
     expect(
       contextMenuItems('guide', { ...DEFAULT_MENU_CONTEXT, settings: on }).map((entry) =>
         entry === DIVIDER ? '-' : entry.id,
       ),
     ).toEqual(['view.guides.delete', 'view.guides.edit']);
-    expect(contextMenuItems('guide', DEFAULT_MENU_CONTEXT)).toEqual([]);
+    expect(
+      contextMenuItems('guide', DEFAULT_MENU_CONTEXT).map((entry) =>
+        entry === DIVIDER ? '-' : entry.id,
+      ),
+    ).toEqual(['view.guides.delete']);
     /* the regroup row shows on a group menu only while the editor remembers an ungrouped set;
-       Regroup is parked with the group rows, so the rule is read with the switch on and the row
-       is absent with it off (docs/FOCUS.md 3.2) */
-    expect(
-      contextMenuItems('group', { ...withObjects(2, { group: 'g1' }), settings: on }).some(
-        (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
-      ),
-    ).toBe(false);
-    expect(
-      contextMenuItems('group', { ...withObjects(2, { regroup: true }), settings: on }).some(
-        (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
-      ),
-    ).toBe(true);
-    expect(
-      contextMenuItems('group', withObjects(2, { regroup: true })).some(
-        (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
-      ),
-    ).toBe(false);
+       Regroup returned with the group rows (docs/RETURN.md 2.12), so the rule reads the same in
+       both contexts */
+    for (const settings of [DEFAULT_MENU_CONTEXT.settings, on]) {
+      expect(
+        contextMenuItems('group', { ...withObjects(2, { group: 'g1' }), settings }).some(
+          (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
+        ),
+      ).toBe(false);
+      expect(
+        contextMenuItems('group', { ...withObjects(2, { regroup: true }), settings }).some(
+          (entry) => entry !== DIVIDER && entry.id === 'arrange.regroup',
+        ),
+      ).toBe(true);
+    }
   });
 
   it('reaches the context-only items from a right-click menu or a panel', () => {
@@ -2233,8 +2229,9 @@ describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3
     ]);
     /* the item in the menu bar is untouched by an entry level flag */
     expect(isPresent(itemById('edit.copy'), OFF)).toBe(true);
-    /* the model's own data: the guide target's rows are parked with Guides and its Later row */
-    expect(contextMenuItems('guide', OFF).map(idOf)).toEqual([]);
+    /* the model's own data: the guide target's Later row hides with the switch off and Delete
+       guide, returned with Guides in the return round (docs/RETURN.md 2.17), stays */
+    expect(contextMenuItems('guide', OFF).map(idOf)).toEqual(['view.guides.delete']);
     expect(contextMenuItems('guide', ON).map(idOf)).toEqual([
       'view.guides.delete',
       'view.guides.edit',
@@ -2365,10 +2362,12 @@ describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3
 });
 
 // Cycle 2 of the focus round (docs/gslides-parity/focus/VERIFICATION.md pass 2; build/b1.md
-// "Cycle 2"): Insert > Shape, Insert > Line, Format > Borders & lines and the two toolbar buttons
-// leave the default view under the orchestrator's ruling (1) on FOCUS.md section 9 (b3's R14), and
-// Edit > Paste stays enabled whatever this page copied, as Google's does (F-slides-paste, b4 FR2).
-describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
+// "Cycle 2") parked Insert > Shape, Insert > Line, Format > Borders & lines and the two toolbar
+// buttons under the orchestrator's ruling (1) on FOCUS.md section 9 (b3's R14); the return round
+// (docs/RETURN.md 2.2, 2.3, 3.2; return/build/b1.md) brought them back whole, with the tables,
+// the charts and the formatting rows, and this block asserts the returned state. Edit > Paste
+// stays enabled whatever this page copied, as Google's does (F-slides-paste, b4 FR2).
+describe('cycle 2 and the return round: the shapes and lines, the returned rows and the Paste rule', () => {
   const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
   const ON: MenuContext = { ...OFF, settings: { ...OFF.settings, advancedTools: true } };
   const ids = (items: ReadonlyArray<MenuItem>, ctx: MenuContext): string[] =>
@@ -2395,7 +2394,7 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
     expect(isEnabled(itemById('edit.paste'), { ...OFF, clipboard: 'empty' })).toBe(true);
   });
 
-  it('parks Insert > Shape and Insert > Line whole in the default view and draws them with the switch on (ruling (1), b3 R14)', () => {
+  it('returns Insert > Shape and Insert > Line whole to the default view with the named rows and the two connectors; the galleries and the freehand kinds stay parked (docs/RETURN.md 2.2, 2.3, 2.9, section 8)', () => {
     const insertOff = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
     const insertOn = ids(MENUS.find((m) => m.id === 'insert')!.items, ON);
     for (const id of [
@@ -2407,39 +2406,52 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
       'insert.line',
       'insert.line.line',
       'insert.line.arrow',
+      'insert.line.elbowConnector',
+      'insert.line.curvedConnector',
+      'insert.table',
+      'insert.chart',
+      'insert.chart.bar',
+      'insert.diagram',
+      'insert.wordArt',
+      'insert.slideNumbers',
     ]) {
-      expect(insertOff, `${id} in the default view`).not.toContain(id);
-      expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(false);
-      expect(isPresent(itemById(id), ON), `${id} present on`).toBe(true);
+      expect(insertOff, `${id} in the default view`).toContain(id);
+      expect(insertOn, `${id} with the switch on`).toContain(id);
+      expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(true);
       expect(itemById(id).status, `${id} stays a now row`).toBe('now');
     }
-    expect(insertOn).toContain('insert.shape');
-    expect(insertOn).toContain('insert.line');
-    /* the default view's Insert menu keeps the seller's rows */
+    /* what stays parked under Insert (RETURN.md 2.9, 2.10, 3.4, section 8) */
     for (const id of [
-      'insert.newSlide',
-      'insert.textBox',
-      'insert.image',
-      'insert.link',
-      'insert.comment',
-    ])
-      expect(insertOff, id).toContain(id);
-    /* the Shapes row lists the three named rows in both contexts (docs/FOCUS.md section 4, the
-       matrix row `shapes.insert.named-rows`, driven with the switch on while the feature is
-       parked, VERIFICATION.md C2-F11); the gallery plate still stands behind the switch as its
-       own row, All shapes, and never replaces the rows */
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+      'insert.line.rule',
+      'insert.line.curve',
+      'insert.line.polyline',
+      'insert.line.scribble',
+      'insert.specialCharacters',
+      'insert.icon',
+      'insert.material',
+      'insert.image.byUrl',
+      'insert.image.fromThisPresentation',
+    ]) {
+      expect(insertOff, `${id} parked`).not.toContain(id);
+      expect(insertOn, `${id} behind the switch`).toContain(id);
+      expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(false);
+      expect(isPresent(itemById(id), ON), `${id} present on`).toBe(true);
+    }
+    /* the Shapes row lists the three named rows in both contexts (docs/FOCUS.md section 4); the
+       gallery plate stands behind the switch as its own row, All shapes */
     const shapesRow = itemById('insert.shape.shapes');
     expect(shapesRow.altEffect).toBeUndefined();
     expect(shapesRow.effect?.kind).toBe('submenu');
-    expect(resolveEffect(shapesRow, ON)).toEqual(shapesRow.effect);
-    /* the three rows carry the parked flag with their menu (`parked` flags every row under
-       Insert > Shape), so they are absent with the switch off and listed with it on */
-    expect(visibleItems(shapesRow.items ?? [], { context: OFF })).toEqual([]);
-    expect(visibleItems(shapesRow.items ?? [], { context: ON }).map((item) => item.id)).toEqual([
-      'insert.shape.shapes.rectangle',
-      'insert.shape.shapes.rounded',
-      'insert.shape.shapes.ellipse',
-    ]);
+    for (const ctx of [OFF, ON])
+      expect(visibleItems(shapesRow.items ?? [], { context: ctx }).map((item) => item.id)).toEqual([
+        'insert.shape.shapes.rectangle',
+        'insert.shape.shapes.rounded',
+        'insert.shape.shapes.ellipse',
+      ]);
     const gallery = itemById('insert.shape.gallery');
     expect(gallery.advanced).toBe(true);
     expect(gallery.effect).toEqual({
@@ -2450,7 +2462,7 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
     });
     const shapeRows = (ctx: MenuContext) =>
       visibleItems(itemById('insert.shape').items ?? [], { context: ctx }).map((item) => item.id);
-    expect(shapeRows(OFF)).toEqual([]);
+    expect(shapeRows(OFF)).toEqual(['insert.shape.shapes']);
     expect(shapeRows(ON)).toEqual([
       'insert.shape.shapes',
       'insert.shape.gallery',
@@ -2458,77 +2470,147 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
       'insert.shape.callouts',
       'insert.shape.equation',
     ]);
+    const lineRows = (ctx: MenuContext) =>
+      visibleItems(itemById('insert.line').items ?? [], { context: ctx }).map((item) => item.id);
+    expect(lineRows(OFF)).toEqual([
+      'insert.line.line',
+      'insert.line.arrow',
+      'insert.line.elbowConnector',
+      'insert.line.curvedConnector',
+    ]);
+    expect(lineRows(ON)).toHaveLength(8);
   });
 
-  it('parks Format > Borders & lines with the two features and keeps the Format menu of docs/FOCUS.md 2.3', () => {
+  it('returns Format > Borders & lines, the Table rows, Edit data and Chart type and keeps the Format menu of docs/RETURN.md 3.3', () => {
     const formatOff = ids(MENUS.find((m) => m.id === 'format')!.items, OFF);
-    const formatOn = ids(MENUS.find((m) => m.id === 'format')!.items, ON);
     for (const id of [
+      'format.text',
+      'format.text.superscript',
+      'format.text.subscript',
+      'format.text.capitalization',
+      'format.text.capitalization.upper',
+      'format.alignIndent',
+      'format.alignIndent.justified',
+      'format.spacing',
+      'format.spacing.addBefore',
+      'format.spacing.addAfter',
+      'format.spacing.custom',
+      'format.bulletsNumbering',
+      'format.table',
+      'format.table.insertRowBelow',
+      'format.image',
       'format.bordersLines',
       'format.bordersLines.borderColor',
       'format.bordersLines.borderWeight',
       'format.bordersLines.borderDash',
       'format.bordersLines.lineStart',
       'format.bordersLines.lineEnd',
-    ]) {
-      expect(formatOff, id).not.toContain(id);
-      expect(formatOn, id).toContain(id);
-    }
-    for (const id of [
-      'format.text',
-      'format.alignIndent',
-      'format.spacing',
-      'format.bulletsNumbering',
-      'format.image',
       'format.formatOptions',
       'format.clearFormatting',
       'format.textFitting',
     ])
       expect(formatOff, id).toContain(id);
-    /* the line target's two rows leave with the submenu; the object rows of 3.1 stay */
+    /* the Format rows that stay parked (RETURN.md 2.15, 3.4, section 9 questions 6 and 7); the two
+       merge rows returned in the fix round with the Editor's cell range (return/build/b5.md) */
+    for (const id of [
+      'format.bulletsNumbering.listOptions',
+      'format.image.maskImage',
+      'format.image.dither',
+      'format.altText',
+      'format.dropShadow',
+      'format.changeShape',
+      'format.editHtml',
+    ]) {
+      expect(isPresent(itemById(id), OFF), id).toBe(false);
+      expect(isPresent(itemById(id), ON), id).toBe(true);
+    }
+    /* Edit data and Chart type are context only rows: present, drawn on the chart's menu */
+    for (const id of ['format.editData', 'format.chartType', 'format.chartType.pie'])
+      expect(isPresent(itemById(id), OFF), id).toBe(true);
+    const chartOff = resolveContextEntries(CONTEXT_MENUS.chart, OFF)
+      .filter((entry) => entry !== DIVIDER)
+      .map((entry) => (entry as MenuItem).id);
+    expect(chartOff).toContain('format.editData');
+    expect(chartOff).toContain('format.chartType');
+    expect(chartOff).not.toContain('format.altText');
+    /* the line target's two rows returned with the submenu; the object rows of 3.1 stay */
     const lineOff = resolveContextEntries(CONTEXT_MENUS.line, OFF)
       .filter((entry) => entry !== DIVIDER)
       .map((entry) => (entry as MenuItem).id);
-    expect(lineOff).not.toContain('format.bordersLines.lineStart');
-    expect(lineOff).not.toContain('format.bordersLines.lineEnd');
     for (const id of [
       'edit.cut',
       'edit.copy',
       'edit.paste',
       'arrange.order',
+      'arrange.rotate',
+      'arrange.distribute',
+      'arrange.group',
+      'format.bordersLines.lineStart',
+      'format.bordersLines.lineEnd',
       'format.formatOptions',
       'insert.comment',
     ])
       expect(lineOff, id).toContain(id);
-    const lineOn = resolveContextEntries(CONTEXT_MENUS.line, ON)
-      .filter((entry) => entry !== DIVIDER)
-      .map((entry) => (entry as MenuItem).id);
-    expect(lineOn).toContain('format.bordersLines.lineStart');
+    expect(lineOff).not.toContain('format.dropShadow');
+    expect(lineOff).not.toContain('format.altText');
   });
 
-  it('parks the two toolbar buttons and the shape and line tails whole; a parked tail carries the flag on every control', () => {
+  it('returns the two toolbar buttons and the shape, line, table, chart and group tails; Change shape and the other tail stay parked', () => {
     const tailOff = presentControls(TOOLBAR_TAIL_DEFAULT, OFF).map((control) => control.control);
-    const tailOn = presentControls(TOOLBAR_TAIL_DEFAULT, ON).map((control) => control.control);
-    for (const id of ['toolbar.insertShape', 'toolbar.insertLine']) {
-      expect(tailOff, id).not.toContain(id);
-      expect(tailOn, id).toContain(id);
-    }
     for (const id of [
       'toolbar.select',
       'toolbar.textBox',
       'toolbar.insertImage',
+      'toolbar.insertShape',
+      'toolbar.insertLine',
       'toolbar.insertComment',
+      'toolbar.background',
+      'toolbar.layout',
+      'toolbar.theme',
+      'toolbar.hideMenus',
     ])
       expect(tailOff, id).toContain(id);
-    for (const kind of ['shape', 'line'] as const) {
+    expect(tailOff).not.toContain('toolbar.transition');
+    expect(presentControls(TOOLBAR_HEAD, OFF).map((control) => control.control)).toContain(
+      'toolbar.paintFormat',
+    );
+    for (const kind of ['shape', 'line', 'table', 'chart', 'group'] as const) {
+      const off = presentControls(TOOLBAR_TAILS[kind], OFF).map((control) => control.control);
+      expect(off.length, kind).toBeGreaterThan(0);
       for (const control of TOOLBAR_TAILS[kind])
-        expect(control.advanced, `${kind} ${control.control}`).toBe(true);
-      expect(presentControls(TOOLBAR_TAILS[kind], OFF)).toEqual([]);
-      expect(presentControls(TOOLBAR_TAILS[kind], ON).length).toBe(TOOLBAR_TAILS[kind].length);
+        if (control.control === 'toolbar.changeShape')
+          expect(control.advanced, `${kind} ${control.control}`).toBe(true);
+        else expect(control.advanced, `${kind} ${control.control}`).toBeUndefined();
     }
+    expect(
+      presentControls(TOOLBAR_TAILS.shape, OFF).map((control) => control.control),
+    ).not.toContain('toolbar.changeShape');
+    expect(presentControls(TOOLBAR_TAILS.shape, ON).map((control) => control.control)).toContain(
+      'toolbar.changeShape',
+    );
+    expect(presentControls(TOOLBAR_TAILS.text, OFF).map((control) => control.control)).toContain(
+      'toolbar.highlightColor',
+    );
+    /* the text tail's fill and border controls wait for question 8; the other tail stays parked */
+    for (const id of [
+      'toolbar.fillColor',
+      'toolbar.borderColor',
+      'toolbar.borderWeight',
+      'toolbar.borderDash',
+    ])
+      expect(
+        presentControls(TOOLBAR_TAILS.text, OFF).map((control) => control.control),
+        id,
+      ).not.toContain(id);
+    expect(presentControls(TOOLBAR_TAILS.other, OFF)).toEqual([]);
+    for (const control of TOOLBAR_TAILS.other) expect(control.advanced, control.control).toBe(true);
+    /* the pointer toggle returned with the live pointers (RETURN.md 2.16) */
+    expect(presentControls(TOOLBAR_TAIL_END, OFF).map((control) => control.control)).toContain(
+      'toolbar.pointer',
+    );
   });
 
-  it('lists no shape or line row in Search the menus with the switch off, and every one with it on', () => {
+  it('lists the returned rows in Search the menus with the switch off, and the parked ones with it on alone', () => {
     const off = new Set(finderRows(OFF).map((row) => row.item.id));
     const on = new Set(finderRows(ON).map((row) => row.item.id));
     for (const id of [
@@ -2537,15 +2619,51 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
       'insert.shape.shapes.ellipse',
       'insert.line.line',
       'insert.line.arrow',
+      'insert.line.elbowConnector',
       'format.bordersLines.borderColor',
+      'format.text.superscript',
+      'format.text.capitalization.title',
+      'arrange.group',
+      'arrange.distribute.horizontally',
+      'slide.changeTheme',
+      'view.appearance.dark',
+      'view.showRuler',
+      'view.fullScreen',
+      'file.open',
+      'file.details',
+      'file.download.zip',
+      'file.download.jpg',
+      'file.download.html',
+      'edit.selectNone',
+      'tools.checkSlides',
+      'help.improve',
+      'insert.textBox',
+    ]) {
+      expect(off.has(id), `${id} off`).toBe(true);
+      expect(on.has(id), `${id} on`).toBe(true);
+    }
+    for (const id of [
+      'insert.shape.gallery',
+      'insert.line.rule',
+      'insert.specialCharacters',
+      'insert.icon',
+      'file.download.txt',
+      'file.share.publish',
+      'title.inbox',
+      'title.presence.follow',
+      'tools.notificationSettings',
+      'view.gridView',
+      'view.showSections',
+      'format.altText',
+      'format.dropShadow',
+      'extensions.agentAccess',
     ]) {
       expect(off.has(id), `${id} off`).toBe(false);
       expect(on.has(id), `${id} on`).toBe(true);
     }
-    expect(off.has('insert.textBox')).toBe(true);
   });
 
-  it('binds no parked chord with the switch off: every present binding names a present row (b4 FR5, the chrome half)', () => {
+  it('binds the returned chords with the switch off and no parked chord: every present binding names a present row (b4 FR5, the chrome half)', () => {
     const table = buildKeyTable();
     const present = table.filter((binding) => {
       const item = findItem(binding.id);
@@ -2556,8 +2674,166 @@ describe('cycle 2: the shapes and lines parking and the Paste rule', () => {
       expect(item?.advanced, binding.id).not.toBe(true);
       expect(item?.status, binding.id).not.toBe('later');
     }
-    /* the parked chords the stage's own table used to fire (build/b2.md, the third defect) */
-    for (const id of ['arrange.group', 'arrange.ungroup', 'format.alignIndent.justified'])
+    /* the chords the stage's own table used to fire (build/b2.md, the third defect) are live
+       again with their rows (docs/RETURN.md 2.11, 2.12) */
+    for (const id of [
+      'arrange.group',
+      'arrange.ungroup',
+      'format.alignIndent.justified',
+      'format.text.superscript',
+      'format.text.subscript',
+      'view.fullScreen',
+      'file.open',
+    ])
+      expect(isPresent(itemById(id), OFF), id).toBe(true);
+    /* a parked row's chord stays unbound (Alt text, question 6 of RETURN.md section 9) */
+    expect(isPresent(itemById('format.altText'), OFF)).toBe(false);
+    expect(present.some((binding) => binding.id === 'format.altText')).toBe(false);
+  });
+});
+
+// The return round (docs/RETURN.md sections 2 and 3; build/b1.md "Return round"): the ledger of
+// what left the parked set and what stays, read from the model, so a flag put back by mistake or
+// a parked row unflagged by mistake fails here before the matrix measures it.
+describe('the return round: the flags of the returned and the parked rows (docs/RETURN.md 2, 3)', () => {
+  const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
+
+  it('draws every returned row in the default view', () => {
+    for (const id of [
+      'file.new.templateGallery',
+      'file.open',
+      'file.importSlides',
+      'file.download.jpg',
+      'file.download.png',
+      'file.download.zip',
+      'file.details',
+      'edit.selectNone',
+      'view.showRuler',
+      'view.guides',
+      'view.guides.show',
+      'view.guides.addVertical',
+      'view.guides.clear',
+      'view.guides.delete',
+      'view.snapTo',
+      'view.snapTo.guides',
+      'view.snapTo.grid',
+      'view.comments',
+      'view.comments.showAll',
+      'view.comments.hide',
+      'view.showFilmstrip',
+      'view.mode',
+      'view.mode.editing',
+      'view.mode.viewing',
+      'view.fullScreen',
+      'view.appearance',
+      'view.appearance.light',
+      'view.appearance.match',
+      'insert.shape',
+      'insert.table',
+      'insert.chart',
+      'insert.diagram',
+      'insert.wordArt',
+      'insert.line',
+      'insert.slideNumbers',
+      'format.text.superscript',
+      'format.text.subscript',
+      'format.text.capitalization',
+      'format.alignIndent.justified',
+      'format.spacing.addBefore',
+      'format.spacing.addAfter',
+      'format.spacing.custom',
+      'format.table',
+      'format.bordersLines',
+      'format.editData',
+      'format.chartType',
+      'slide.changeTheme',
+      'arrange.distribute',
+      'arrange.rotate',
+      'arrange.rotate.flipVertically',
+      'arrange.group',
+      'arrange.ungroup',
+      'arrange.regroup',
+      'tools.checkSlides',
+      'help.improve',
+    ]) {
+      const item = itemById(id);
+      expect(item.advanced, `${id} carries the flag`).toBeUndefined();
+      expect(item.status, id).toBe('now');
+      expect(isPresent(item, OFF), `${id} present in the default view`).toBe(true);
+    }
+  });
+
+  it('keeps the flag on every row RETURN.md leaves parked', () => {
+    for (const id of [
+      'file.versionHistory.showChanges',
+      /* re-parked at the return round's ship: collab.roster.go-to-slide carries `parks` naming
+         the row and read red in both preview runs (docs/RETURN.md section 1 rule 2;
+         VERIFICATION.md R2-F1); the chips stay drawn and a click still jumps */
+      'title.presence.goTo',
+      /* the return round's integration parked the Live pointers rows again: the matrix row
+         view.live-pointers.second-browser carries `parks` naming them and was red on both tiers
+         (docs/RETURN.md section 1 rule 2; build/integrator.md) */
+      'view.livePointers',
+      'view.livePointers.mine',
+      'view.livePointers.collaborators',
+      'title.presence.follow',
+      'title.presence.me',
+      'title.account',
+      'title.inbox',
+      'file.makeCopy.selected',
+      'file.share.publish',
+      'file.download.txt',
+      'view.gridView',
+      'view.showSections',
+      'insert.image.byUrl',
+      'insert.image.fromThisPresentation',
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+      'insert.line.rule',
+      'insert.line.curve',
+      'insert.line.polyline',
+      'insert.line.scribble',
+      'insert.specialCharacters',
+      'insert.icon',
+      'insert.material',
+      'format.bulletsNumbering.listOptions',
+      'format.image.maskImage',
+      'format.image.dither',
+      'format.altText',
+      'format.dropShadow',
+      'format.changeShape',
+      'format.editHtml',
+      'tools.notificationSettings',
+      'tools.activityDashboard',
+      'tools.advanced',
+      'extensions.agentAccess',
+      'extensions.embedInSite',
+      'tools.spelling',
+    ]) {
+      const item = itemById(id);
+      expect(item.advanced, `${id} keeps the flag`).toBe(true);
+      expect(isPresent(item, OFF), `${id} absent in the default view`).toBe(false);
+    }
+    /* the replaced picture rows follow the parked Insert rows */
+    for (const id of [
+      'format.image.replaceImage.byUrl',
+      'format.image.replaceImage.fromThisPresentation',
+    ])
       expect(isPresent(itemById(id), OFF), id).toBe(false);
+  });
+
+  it('keeps the Later stubs Later: Transition, Indentation options, Edit guides, Email collaborators', () => {
+    for (const id of [
+      'slide.transition',
+      'format.alignIndent.indentationOptions',
+      'view.guides.edit',
+      'file.email.collaborators',
+      'title.presence.joinChat',
+    ]) {
+      expect(itemById(id).status, id).toBe('later');
+      expect(isPresent(itemById(id), OFF), id).toBe(false);
+    }
   });
 });

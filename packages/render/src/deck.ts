@@ -60,10 +60,14 @@ export type RenderedDeck = {
  * slide, or when the slide is not in the play list (a skipped slide rendered for the editor).
  */
 export function slideCounter(deck: Deck, slide: Slide, n: number, total: number): string {
+  if (n < 1 || total < 1) return '';
+  /* the slide's own word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md
+     section 5 slides.numbers.apply): on numbers it under an off deck, off blanks it under an on one */
+  if (slide.counter === 'off') return '';
+  if (slide.counter === 'on') return counterText(n, total);
   const mode = deckCounter(deck);
   if (mode === 'off') return '';
   if (mode === 'skip-title' && slide.kind === 'title') return '';
-  if (n < 1 || total < 1) return '';
   return counterText(n, total);
 }
 

@@ -177,6 +177,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* with nobody else present the chip keeps its track and draws nothing, like the empty chip slots
+   (docs/RETURN.md 4.3; return/audit-chrome.md row 25 read an empty 32 by 24 box); from the first
+   other person it draws a people glyph and opens the roster, and `+N` once a fifth joins
+   (PresenceSlot.tsx; return/build/b4.md request 6) */
+.ts-presence-more.is-empty {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .ts-presence-more:hover {
   border-color: var(--pt-ink);
 }
@@ -190,6 +199,9 @@
   text-align: left;
 }
 
+/* the rule between the +N chip and the own chip: a vertical divider inside a row (docs/RETURN.md
+   4.2 item 2), --pt-hair, 1 px wide, 24 px tall beside the 24 px chips, in its own 1 px track with
+   the 8 px and 7 px tracks around it as its air */
 .ts-presence-rule {
   width: 1px;
   height: 24px;

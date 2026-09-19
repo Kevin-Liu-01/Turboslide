@@ -13,6 +13,7 @@
     "./shell-data": "./src/shell-data.ts",
     "./shell-context": "./src/shell-context.ts",
     "./dispatch": "./src/dispatch.ts",
+    "./download": "./src/download.ts",
     "./icons": "./src/icons.tsx",
     "./GtMark": "./src/GtMark.tsx",
     "./TurboslideMark": "./src/TurboslideMark.tsx",

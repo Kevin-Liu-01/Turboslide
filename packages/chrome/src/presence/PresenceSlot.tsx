@@ -4,6 +4,7 @@ import { COLLAB_CLASSES } from '@turboslide/render/collab';
 
 import { useEditorShell } from '../editor-shell-context';
 import type { EditorPresence, IdentityView, PresenceParticipant } from '../editor-shell';
+import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { isPresent, itemById } from '../menus/model';
 import { PRESENCE } from '../menus/strings';
@@ -108,10 +109,15 @@ export function PresenceSlot() {
           </button>
         );
       })}
+      {/* the roster's opener: `+N` once a fifth person joins, a people glyph while the chips fit,
+          and nothing drawn while nobody else is present (docs/RETURN.md 4.3: no empty box). The
+          roster (Go to slide with the person's slide and role) needs an opener from the first other
+          person, which the empty box was before the rule hid it (return/build/b4.md request 6,
+          collab.roster.go-to-slide) */}
       <button
         ref={moreRef}
         type="button"
-        className={cn('ts-presence-more', more === 0 && 'is-empty')}
+        className={cn('ts-presence-more', presence.others.length === 0 && 'is-empty')}
         data-control="presence.more"
         aria-haspopup="menu"
         aria-expanded={roster !== null}
@@ -121,7 +127,13 @@ export function PresenceSlot() {
         onClick={() => setRoster((open) => (open === null ? moreRef.current : null))}
         {...tipProps({ name: PRESENCE.collaborators, doc: item.doc ?? '' })}
       >
-        <span className="ts-presence-count">{more > 0 ? PRESENCE.more(more) : ''}</span>
+        {more > 0 ? (
+          <span className="ts-presence-count">{PRESENCE.more(more)}</span>
+        ) : presence.others.length > 0 ? (
+          <Icon name="user-group" size={14} />
+        ) : (
+          <span className="ts-presence-count" />
+        )}
       </button>
       {/* the own chip opens the account menu, parked whole (docs/FOCUS.md 3.2): the chip and its
           rule are drawn only while Tools > Advanced tools is on; the other people's chips stay

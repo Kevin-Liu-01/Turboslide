@@ -40,14 +40,26 @@ for (const j of judgement) {
       feature ??= row.feature;
       interaction ??= row.interaction;
       result ??= row.result;
-      parts.push(`run ${ref.run} (deck ${run.deckId}) row ${ref.n} ${row.result}: ${clip(row.evidence, ref.clip ?? 700)}`);
+      parts.push(
+        `run ${ref.run} (deck ${run.deckId}) row ${ref.n} ${row.result}: ${clip(row.evidence, ref.clip ?? 700)}`,
+      );
     }
     evidence = [evidence, ...parts].filter(Boolean).join(' ');
   }
   if (j.shots) evidence += ` Screenshots: ${j.shots.join(', ')}.`;
-  const out = { feature, interaction, result, evidence, severity: j.severity, need: j.need, why: j.why };
+  const out = {
+    feature,
+    interaction,
+    result,
+    evidence,
+    severity: j.severity,
+    need: j.need,
+    why: j.why,
+  };
   rowsOut.push(out);
-  lines.push(`| ${i} | ${cell(feature)} | ${cell(interaction)} | ${cell(result)} | ${cell(evidence)} | ${j.severity} | ${j.need} | ${cell(j.why)} |`);
+  lines.push(
+    `| ${i} | ${cell(feature)} | ${cell(interaction)} | ${cell(result)} | ${cell(evidence)} | ${j.severity} | ${j.need} | ${cell(j.why)} |`,
+  );
 }
 writeFileSync(new URL('./table.md', import.meta.url), lines.join('\n') + '\n');
 writeFileSync(new URL('./rows.json', import.meta.url), JSON.stringify(rowsOut, null, 2));

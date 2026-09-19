@@ -66,7 +66,10 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
     attempts.push(r);
     if (r.shot) shotPath = r.shot;
@@ -90,15 +93,23 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     evidence:
       attempts.length > 1
         ? attempts.map((a, i) => `attempt ${i + 1}: ${a.evidence}`).join(' | ')
-        : attempts[0]?.evidence ?? '',
+        : (attempts[0]?.evidence ?? ''),
     shot: shotPath,
     consoleErrors: errs,
   };
   rows.push(entry);
   save();
   const tag =
-    result === 'works' ? 'ok  ' : result === 'broken' ? 'FAIL' : result === 'flaky' ? 'FLKY' : 'n/d ';
-  console.log(`${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`);
+    result === 'works'
+      ? 'ok  '
+      : result === 'broken'
+        ? 'FAIL'
+        : result === 'flaky'
+          ? 'FLKY'
+          : 'n/d ';
+  console.log(
+    `${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`,
+  );
   return entry;
 }
 
@@ -168,9 +179,17 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
   }
 };
 const settled = async (page, timeout = 20_000) =>
-  pollUntil(() => state(page), (s) => (s.sync?.pending ?? s.pending ?? 0) === 0, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => (s.sync?.pending ?? s.pending ?? 0) === 0,
+    timeout,
+  );
 const connected = (page) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, 45_000);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    45_000,
+  );
 const activeSlide = async (page) => (await state(page)).slideId;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
@@ -319,7 +338,10 @@ const counter = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('[data-control="view.count"]');
     return el
-      ? { text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), label: el.getAttribute('aria-label') }
+      ? {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          label: el.getAttribute('aria-label'),
+        }
       : null;
   });
 const hashOf = (page) => page.evaluate(() => window.location.hash);
@@ -368,8 +390,12 @@ const gridFacts = (page) =>
     return {
       grid: Boolean(grid),
       tiles: grid ? grid.querySelectorAll('.pt-thumb').length : 0,
-      tileIds: grid ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id')) : [],
-      activeTile: grid ? grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null : null,
+      tileIds: grid
+        ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id'))
+        : [],
+      activeTile: grid
+        ? (grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null)
+        : null,
       selectedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-selected').length : 0,
       skippedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-skipped').length : 0,
       filmHidden: film
@@ -377,7 +403,9 @@ const gridFacts = (page) =>
         : null,
       filmWidth: film ? Math.round(film.getBoundingClientRect().width) : null,
       stageShown: stage ? stage.getBoundingClientRect().width > 0 : false,
-      gridPressed: document.querySelector('[data-control="view.gridView"]')?.getAttribute('aria-pressed'),
+      gridPressed: document
+        .querySelector('[data-control="view.gridView"]')
+        ?.getAttribute('aria-pressed'),
       filmPressed: document
         .querySelector('[data-control="view.filmstripView"]')
         ?.getAttribute('aria-pressed'),
@@ -416,17 +444,23 @@ const focusWorkspace = async (page) => {
   await clearAll(page);
   const wrap = await rectOf(page, '.ts-stagewrap.ts-editor');
   const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-  if (wrap && sheet) await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
+  if (wrap && sheet)
+    await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
   await sleep(200);
 };
 /** Focuses a card by clicking it, the way a person does; answers whether the card took focus. */
 const focusCard = async (page, id) => {
   await clickCard(page, id);
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await sleep(300);
   return page.evaluate((sid) => document.activeElement?.getAttribute('data-id') === sid, id);
 };
-const waitOrder = (page, test, timeout = 20_000) => pollUntil(() => slideOrder(page), test, timeout);
+const waitOrder = (page, test, timeout = 20_000) =>
+  pollUntil(() => slideOrder(page), test, timeout);
 
 // ---------------------------------------------------------------------------------------------
 // the run
@@ -454,7 +488,9 @@ const shot = async (name, clip) => {
 };
 const stageClip = async () => {
   const r = await rectOf(page, '.ts-stagewrap.ts-editor');
-  return r ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 } : undefined;
+  return r
+    ? { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: r.w + 8, height: r.h + 8 }
+    : undefined;
 };
 
 const TITLE = 'title';
@@ -482,7 +518,10 @@ try {
       const nt = await notesFacts(page);
       const s = await state(page);
       const title = await page.evaluate(
-        () => document.querySelector('[data-control="title.name"], .ts-title-name, input[aria-label*="itle"]')?.value ?? document.title,
+        () =>
+          document.querySelector(
+            '[data-control="title.name"], .ts-title-name, input[aria-label*="itle"]',
+          )?.value ?? document.title,
       );
       const sh = await shot('new-landing');
       const ok =
@@ -508,19 +547,29 @@ try {
       const r = await runRect(page, HEAD);
       if (!r) return { ok: false, evidence: 'no heading run' };
       await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-      const editing = await page.evaluate(
-        () => document.querySelector('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]')?.getAttribute('contenteditable'),
+      const editing = await page.evaluate(() =>
+        document
+          .querySelector('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]')
+          ?.getAttribute('contenteditable'),
       );
       await typeHuman(page, 'Q3 pipeline review for Acme');
       await sleep(600);
       await press(page, 'Escape');
-      const s = await pollUntil(() => state(page), (v) => v.revision >= 1, 30_000);
+      const s = await pollUntil(
+        () => state(page),
+        (v) => v.revision >= 1,
+        30_000,
+      );
       await settled(page, 30_000);
       await closeNamePrompt(page);
       const text = await runText(page, HEAD);
       const stored = (await slideJson(page, TITLE)).heading ?? '';
       return {
-        ok: editing === 'true' && text === 'Q3 pipeline review for Acme' && /\/edit\//.test(page.url()) && String(stored).includes('Q3 pipeline review for Acme'),
+        ok:
+          editing === 'true' &&
+          text === 'Q3 pipeline review for Acme' &&
+          /\/edit\//.test(page.url()) &&
+          String(stored).includes('Q3 pipeline review for Acme'),
         evidence: `contenteditable ${editing}; shown "${text}"; stored "${stored}"; revision ${s.revision}; url ${page.url().replace(BASE, '')}; hash "${await hashOf(page)}"`,
       };
     },
@@ -536,7 +585,11 @@ try {
     await clickControl(page, 'toolbar.newSlide');
     const after = await waitOrder(page, (o) => o.length === before.length + 1);
     const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
+    const active = await pollUntil(
+      () => activeSlide(page),
+      (a) => a === added,
+      8000,
+    );
     await sleep(400);
     const st = await stageFacts(page);
     const sj = added ? await slideJson(page, added) : {};
@@ -544,37 +597,63 @@ try {
     if (!contentSlide && added) contentSlide = added;
     const sh = await shot('new-slide-toolbar');
     return {
-      ok: after.length === before.length + 1 && active === added && after.indexOf(added) === before.indexOf(cur) + 1,
+      ok:
+        after.length === before.length + 1 &&
+        active === added &&
+        after.indexOf(added) === before.indexOf(cur) + 1,
       evidence: `current ${cur}; ${before.length} -> ${after.length}; new ${added} at index ${after.indexOf(added)}; active ${active}; layout ${layoutFacts(sj)}; prompts "${st?.prompts.join('" / "')}"; runs ${st?.runs.join(',')}; counter ${JSON.stringify(await counter(page))}`,
       shot: sh,
     };
   });
 
-  await row('New slide', 'Click the arrow beside New slide (New slide with layout) and pick Title and two columns', async () => {
-    const before = await slideOrder(page);
-    await clearAll(page);
-    await clickControl(page, 'toolbar.newSlide.arrow');
-    const plate = '[data-control="layout.new.plate"]';
-    await page.locator(plate).waitFor({ timeout: 8000 }).catch(() => undefined);
-    const shown = await has(page, plate);
-    const tiles = (await plateTiles(page, plate)) ?? [];
-    const sh = await shot('new-slide-arrow-plate');
-    if (!shown) return { ok: false, evidence: 'the New slide with layout plate did not open', shot: sh };
-    await clickIn(page, plate, 'layout.new.cols');
-    const after = await waitOrder(page, (o) => o.length === before.length + 1);
-    const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
-    await sleep(400);
-    const sj = added ? await slideJson(page, added) : {};
-    const st = await stageFacts(page);
-    const gone = !(await has(page, plate));
-    await settled(page);
-    return {
-      ok: shown && tiles.length >= 21 && after.length === before.length + 1 && active === added && /cols/.test(layoutFacts(sj)) && gone,
-      evidence: `plate shown ${shown}, tiles ${tiles.length}, missing ${tiles.filter((t) => t.missing).map((t) => t.id).join(',') || 'none'}; ${before.length} -> ${after.length}; new ${added}; active ${active}; layout ${layoutFacts(sj)}; prompts "${st?.prompts.join('" / "')}"; plate closed after the pick ${gone}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'New slide',
+    'Click the arrow beside New slide (New slide with layout) and pick Title and two columns',
+    async () => {
+      const before = await slideOrder(page);
+      await clearAll(page);
+      await clickControl(page, 'toolbar.newSlide.arrow');
+      const plate = '[data-control="layout.new.plate"]';
+      await page
+        .locator(plate)
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
+      const shown = await has(page, plate);
+      const tiles = (await plateTiles(page, plate)) ?? [];
+      const sh = await shot('new-slide-arrow-plate');
+      if (!shown)
+        return { ok: false, evidence: 'the New slide with layout plate did not open', shot: sh };
+      await clickIn(page, plate, 'layout.new.cols');
+      const after = await waitOrder(page, (o) => o.length === before.length + 1);
+      const added = after.find((id) => !before.includes(id)) ?? '';
+      const active = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === added,
+        8000,
+      );
+      await sleep(400);
+      const sj = added ? await slideJson(page, added) : {};
+      const st = await stageFacts(page);
+      const gone = !(await has(page, plate));
+      await settled(page);
+      return {
+        ok:
+          shown &&
+          tiles.length >= 21 &&
+          after.length === before.length + 1 &&
+          active === added &&
+          /cols/.test(layoutFacts(sj)) &&
+          gone,
+        evidence: `plate shown ${shown}, tiles ${tiles.length}, missing ${
+          tiles
+            .filter((t) => t.missing)
+            .map((t) => t.id)
+            .join(',') || 'none'
+        }; ${before.length} -> ${after.length}; new ${added}; active ${active}; layout ${layoutFacts(sj)}; prompts "${st?.prompts.join('" / "')}"; plate closed after the pick ${gone}`,
+        shot: sh,
+      };
+    },
+  );
 
   await row('New slide', 'Slide menu > New slide', async () => {
     const before = await slideOrder(page);
@@ -584,7 +663,11 @@ try {
     await clickIn(page, menuRoot('slide'), 'menu.slide.newSlide');
     const after = await waitOrder(page, (o) => o.length === before.length + 1);
     const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
+    const active = await pollUntil(
+      () => activeSlide(page),
+      (a) => a === added,
+      8000,
+    );
     const sj = added ? await slideJson(page, added) : {};
     await settled(page);
     return {
@@ -593,19 +676,27 @@ try {
     };
   });
 
-  await row('New slide', 'Press Ctrl+M with a filmstrip card focused (Google prints Ctrl+M on every platform)', async () => {
-    const before = await slideOrder(page);
-    const focused = await focusCard(page, before[before.length - 1]);
-    await press(page, 'Control+m');
-    const after = await waitOrder(page, (o) => o.length === before.length + 1, 15_000);
-    const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
-    await settled(page);
-    return {
-      ok: focused && after.length === before.length + 1 && active === added,
-      evidence: `card focused ${focused}; ${before.length} -> ${after.length}; new ${added}; active ${active}`,
-    };
-  });
+  await row(
+    'New slide',
+    'Press Ctrl+M with a filmstrip card focused (Google prints Ctrl+M on every platform)',
+    async () => {
+      const before = await slideOrder(page);
+      const focused = await focusCard(page, before[before.length - 1]);
+      await press(page, 'Control+m');
+      const after = await waitOrder(page, (o) => o.length === before.length + 1, 15_000);
+      const added = after.find((id) => !before.includes(id)) ?? '';
+      const active = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === added,
+        8000,
+      );
+      await settled(page);
+      return {
+        ok: focused && after.length === before.length + 1 && active === added,
+        evidence: `card focused ${focused}; ${before.length} -> ${after.length}; new ${added}; active ${active}`,
+      };
+    },
+  );
 
   await row('New slide', 'Press Ctrl+M with the canvas focused and nothing selected', async () => {
     const before = await slideOrder(page);
@@ -614,7 +705,11 @@ try {
     await press(page, 'Control+m');
     const after = await waitOrder(page, (o) => o.length === before.length + 1, 15_000);
     const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
+    const active = await pollUntil(
+      () => activeSlide(page),
+      (a) => a === added,
+      8000,
+    );
     await settled(page);
     return {
       ok: after.length === before.length + 1 && active === added,
@@ -644,12 +739,22 @@ try {
     const before = await slideOrder(page);
     await clearAll(page);
     await openCardMenu(page, before[0]);
-    const items = await page.evaluate((c) => [...document.querySelectorAll(`${c} [data-control^="menu."]`)].map((el) => el.getAttribute('data-control').replace(/^menu\./, '')), CTX);
+    const items = await page.evaluate(
+      (c) =>
+        [...document.querySelectorAll(`${c} [data-control^="menu."]`)].map((el) =>
+          el.getAttribute('data-control').replace(/^menu\./, ''),
+        ),
+      CTX,
+    );
     const sh = await shot('filmstrip-context-menu');
     await clickIn(page, CTX, 'menu.slide.newSlide');
     const after = await waitOrder(page, (o) => o.length === before.length + 1);
     const added = after.find((id) => !before.includes(id)) ?? '';
-    const active = await pollUntil(() => activeSlide(page), (a) => a === added, 8000);
+    const active = await pollUntil(
+      () => activeSlide(page),
+      (a) => a === added,
+      8000,
+    );
     await settled(page);
     return {
       ok: after.length === before.length + 1 && after.indexOf(added) === 1 && active === added,
@@ -685,7 +790,10 @@ try {
     const src = await slideJson(page, TITLE);
     await settled(page);
     return {
-      ok: after.length === before.length + 1 && after.indexOf(added) === 1 && copy.heading === src.heading,
+      ok:
+        after.length === before.length + 1 &&
+        after.indexOf(added) === 1 &&
+        copy.heading === src.heading,
       evidence: `${before.length} -> ${after.length}; copy ${added} at index ${after.indexOf(added)}; copy heading "${copy.heading}" vs source "${src.heading}"; active ${await activeSlide(page)}`,
     };
   });
@@ -716,7 +824,10 @@ try {
     const sb = await snackbar(page);
     await settled(page);
     return {
-      ok: focused && after.length === before.length + 1 && after.indexOf(added) === before.indexOf(target) + 1,
+      ok:
+        focused &&
+        after.length === before.length + 1 &&
+        after.indexOf(added) === before.indexOf(target) + 1,
       evidence: `focused ${focused}; ${before.length} -> ${after.length}; copy ${added} at index ${after.indexOf(added)}; snackbar ${JSON.stringify(sb)}`,
     };
   });
@@ -737,27 +848,36 @@ try {
     };
   });
 
-  await row('Duplicate slide', 'Undo a duplicate with Cmd+Z, then Redo with Cmd+Shift+Z', async () => {
-    const before = await slideOrder(page);
-    const focused = await focusCard(page, before[1]);
-    await press(page, 'Meta+d');
-    const mid = await waitOrder(page, (o) => o.length === before.length + 1);
-    await settled(page);
-    await press(page, 'Meta+z');
-    const undone = await waitOrder(page, (o) => o.length === before.length);
-    await settled(page);
-    await press(page, 'Meta+Shift+z');
-    const redone = await waitOrder(page, (o) => o.length === before.length + 1);
-    await settled(page);
-    // leave the deck as it was
-    await press(page, 'Meta+z');
-    const after = await waitOrder(page, (o) => o.length === before.length);
-    await settled(page);
-    return {
-      ok: focused && mid.length === before.length + 1 && undone.join(',') === before.join(',') && redone.length === before.length + 1 && after.join(',') === before.join(','),
-      evidence: `focused ${focused}; ${before.length} -> ${mid.length} -> undo ${undone.length} -> redo ${redone.length} -> undo ${after.length}`,
-    };
-  });
+  await row(
+    'Duplicate slide',
+    'Undo a duplicate with Cmd+Z, then Redo with Cmd+Shift+Z',
+    async () => {
+      const before = await slideOrder(page);
+      const focused = await focusCard(page, before[1]);
+      await press(page, 'Meta+d');
+      const mid = await waitOrder(page, (o) => o.length === before.length + 1);
+      await settled(page);
+      await press(page, 'Meta+z');
+      const undone = await waitOrder(page, (o) => o.length === before.length);
+      await settled(page);
+      await press(page, 'Meta+Shift+z');
+      const redone = await waitOrder(page, (o) => o.length === before.length + 1);
+      await settled(page);
+      // leave the deck as it was
+      await press(page, 'Meta+z');
+      const after = await waitOrder(page, (o) => o.length === before.length);
+      await settled(page);
+      return {
+        ok:
+          focused &&
+          mid.length === before.length + 1 &&
+          undone.join(',') === before.join(',') &&
+          redone.length === before.length + 1 &&
+          after.join(',') === before.join(','),
+        evidence: `focused ${focused}; ${before.length} -> ${mid.length} -> undo ${undone.length} -> redo ${redone.length} -> undo ${after.length}`,
+      };
+    },
+  );
 
   // ---- 3. Delete
   await row('Delete slide', 'Press Delete with a filmstrip card focused', async () => {
@@ -766,11 +886,21 @@ try {
     const focused = await focusCard(page, target);
     await press(page, 'Delete');
     const after = await waitOrder(page, (o) => o.length === before.length - 1);
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 4000);
+    const sb = await pollUntil(
+      () => snackbar(page),
+      (v) => v !== null,
+      4000,
+    );
     const sh = await shot('delete-snackbar');
     await settled(page);
     return {
-      ok: focused && after.length === before.length - 1 && !after.includes(target) && sb !== null && /deleted/i.test(sb.text) && sb.action === 'Undo',
+      ok:
+        focused &&
+        after.length === before.length - 1 &&
+        !after.includes(target) &&
+        sb !== null &&
+        /deleted/i.test(sb.text) &&
+        sb.action === 'Undo',
       evidence: `focused ${focused}; ${before.length} -> ${after.length}; removed ${target} gone ${!after.includes(target)}; snackbar ${JSON.stringify(sb)}; active ${await activeSlide(page)}; focus ${await activeDesc(page)}`,
       shot: sh,
     };
@@ -783,8 +913,16 @@ try {
     await focusCard(page, target);
     await press(page, 'Delete');
     const mid = await waitOrder(page, (o) => o.length === before.length - 1);
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null && v.action !== null, 4000);
-    if (!sb || sb.action === null) return { ok: false, evidence: `no Undo on the snackbar: ${JSON.stringify(sb)}; ${before.length} -> ${mid.length}` };
+    const sb = await pollUntil(
+      () => snackbar(page),
+      (v) => v !== null && v.action !== null,
+      4000,
+    );
+    if (!sb || sb.action === null)
+      return {
+        ok: false,
+        evidence: `no Undo on the snackbar: ${JSON.stringify(sb)}; ${before.length} -> ${mid.length}`,
+      };
     await clickControl(page, 'snackbar.action');
     const after = await waitOrder(page, (o) => o.length === before.length);
     await settled(page);
@@ -803,7 +941,11 @@ try {
     const rs = await rowState(page, CTX, 'menu.edit.delete');
     await clickIn(page, CTX, 'menu.edit.delete');
     const after = await waitOrder(page, (o) => o.length === before.length - 1);
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 4000);
+    const sb = await pollUntil(
+      () => snackbar(page),
+      (v) => v !== null,
+      4000,
+    );
     await settled(page);
     return {
       ok: after.length === before.length - 1 && !after.includes(target),
@@ -828,37 +970,53 @@ try {
     };
   });
 
-  await row('Delete slide', 'Slide menu > Delete slide, then the toolbar Undo, then Redo from the Edit menu', async () => {
-    const before = await slideOrder(page);
-    const target = before[before.length - 1];
-    await clickCard(page, target);
-    await pollUntil(() => activeSlide(page), (a) => a === target, 8000);
-    await clearAll(page);
-    await openMenu(page, 'slide');
-    const rs = await rowState(page, menuRoot('slide'), 'menu.slide.deleteSlide');
-    await clickIn(page, menuRoot('slide'), 'menu.slide.deleteSlide');
-    const mid = await waitOrder(page, (o) => o.length === before.length - 1);
-    await settled(page);
-    await clickControl(page, 'toolbar.undo');
-    const undone = await waitOrder(page, (o) => o.length === before.length);
-    await settled(page);
-    await openMenu(page, 'edit');
-    const redoRow = await rowState(page, menuRoot('edit'), 'menu.edit.redo');
-    await clickIn(page, menuRoot('edit'), 'menu.edit.redo');
-    const redone = await waitOrder(page, (o) => o.length === before.length - 1);
-    await settled(page);
-    return {
-      ok: mid.length === before.length - 1 && !mid.includes(target) && undone.join(',') === before.join(',') && redone.length === before.length - 1,
-      evidence: `row ${JSON.stringify(rs)}; ${before.length} -> ${mid.length} -> undo ${undone.length} (restored ${undone.join(',') === before.join(',')}) -> redo ${JSON.stringify(redoRow)} ${redone.length}`,
-    };
-  });
+  await row(
+    'Delete slide',
+    'Slide menu > Delete slide, then the toolbar Undo, then Redo from the Edit menu',
+    async () => {
+      const before = await slideOrder(page);
+      const target = before[before.length - 1];
+      await clickCard(page, target);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === target,
+        8000,
+      );
+      await clearAll(page);
+      await openMenu(page, 'slide');
+      const rs = await rowState(page, menuRoot('slide'), 'menu.slide.deleteSlide');
+      await clickIn(page, menuRoot('slide'), 'menu.slide.deleteSlide');
+      const mid = await waitOrder(page, (o) => o.length === before.length - 1);
+      await settled(page);
+      await clickControl(page, 'toolbar.undo');
+      const undone = await waitOrder(page, (o) => o.length === before.length);
+      await settled(page);
+      await openMenu(page, 'edit');
+      const redoRow = await rowState(page, menuRoot('edit'), 'menu.edit.redo');
+      await clickIn(page, menuRoot('edit'), 'menu.edit.redo');
+      const redone = await waitOrder(page, (o) => o.length === before.length - 1);
+      await settled(page);
+      return {
+        ok:
+          mid.length === before.length - 1 &&
+          !mid.includes(target) &&
+          undone.join(',') === before.join(',') &&
+          redone.length === before.length - 1,
+        evidence: `row ${JSON.stringify(rs)}; ${before.length} -> ${mid.length} -> undo ${undone.length} (restored ${undone.join(',') === before.join(',')}) -> redo ${JSON.stringify(redoRow)} ${redone.length}`,
+      };
+    },
+  );
 
   // ---- 4. selection
   await row('Filmstrip selection', 'Click the second card', async () => {
     const order = await slideOrder(page);
     await clearAll(page);
     await clickCard(page, order[1]);
-    const active = await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
+    const active = await pollUntil(
+      () => activeSlide(page),
+      (a) => a === order[1],
+      8000,
+    );
     await sleep(500);
     const cs = await cards(page);
     const ct = await counter(page);
@@ -866,78 +1024,131 @@ try {
     const st = await stageFacts(page);
     const sj = await slideJson(page, order[1]);
     return {
-      ok: active === order[1] && cs.filter((c) => c.current).map((c) => c.id).join() === order[1] && cs.filter((c) => c.selected).length === 1 && h === `#s/${encodeURIComponent(order[1])}`,
+      ok:
+        active === order[1] &&
+        cs
+          .filter((c) => c.current)
+          .map((c) => c.id)
+          .join() === order[1] &&
+        cs.filter((c) => c.selected).length === 1 &&
+        h === `#s/${encodeURIComponent(order[1])}`,
       evidence: `active ${active}; cards ${cardsBrief(cs)} (* current, + selected, @ focused); counter ${JSON.stringify(ct)}; hash "${h}"; stage layout ${layoutFacts(sj)} text "${st?.text.slice(0, 60)}"`,
     };
   });
 
-  await row('Filmstrip selection', 'Shift click the fourth card, then Cmd click the first', async () => {
-    const order = await slideOrder(page);
-    if (order.length < 4) return { ok: false, evidence: `only ${order.length} slides` };
-    await clickCard(page, order[1]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
-    await clickCard(page, order[3], { modifiers: ['Shift'] });
-    await sleep(400);
-    const shifted = await cards(page);
-    const sh = await shot('filmstrip-shift-select');
-    await clickCard(page, order[0], { modifiers: ['Meta'] });
-    await sleep(400);
-    const meta = await cards(page);
-    await clickCard(page, order[0]);
-    await sleep(300);
-    const single = await cards(page);
-    const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
-    return {
-      ok: sel(shifted).join() === order.slice(1, 4).join() && sel(meta).join() === order.slice(0, 4).join() && sel(single).join() === order[0],
-      evidence: `after Shift click ${cardsBrief(shifted)}; after Cmd click ${cardsBrief(meta)}; after a plain click ${cardsBrief(single)}; active ${await activeSlide(page)}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Filmstrip selection',
+    'Shift click the fourth card, then Cmd click the first',
+    async () => {
+      const order = await slideOrder(page);
+      if (order.length < 4) return { ok: false, evidence: `only ${order.length} slides` };
+      await clickCard(page, order[1]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        8000,
+      );
+      await clickCard(page, order[3], { modifiers: ['Shift'] });
+      await sleep(400);
+      const shifted = await cards(page);
+      const sh = await shot('filmstrip-shift-select');
+      await clickCard(page, order[0], { modifiers: ['Meta'] });
+      await sleep(400);
+      const meta = await cards(page);
+      await clickCard(page, order[0]);
+      await sleep(300);
+      const single = await cards(page);
+      const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
+      return {
+        ok:
+          sel(shifted).join() === order.slice(1, 4).join() &&
+          sel(meta).join() === order.slice(0, 4).join() &&
+          sel(single).join() === order[0],
+        evidence: `after Shift click ${cardsBrief(shifted)}; after Cmd click ${cardsBrief(meta)}; after a plain click ${cardsBrief(single)}; active ${await activeSlide(page)}`,
+        shot: sh,
+      };
+    },
+  );
 
-  await row('Filmstrip selection', 'Arrow down and arrow up with a card focused, then Shift+Down to extend', async () => {
-    const order = await slideOrder(page);
-    const focused = await focusCard(page, order[0]);
-    await press(page, 'ArrowDown');
-    const down = await pollUntil(() => activeSlide(page), (a) => a === order[1], 6000);
-    const focusDown = await activeDesc(page);
-    await press(page, 'ArrowUp');
-    const up = await pollUntil(() => activeSlide(page), (a) => a === order[0], 6000);
-    await press(page, 'Shift+ArrowDown');
-    await sleep(500);
-    const ext = await cards(page);
-    await press(page, 'Shift+ArrowDown');
-    await sleep(500);
-    const ext2 = await cards(page);
-    const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
-    await clickCard(page, order[0]);
-    return {
-      ok: focused && down === order[1] && up === order[0] && sel(ext).join() === order.slice(0, 2).join() && sel(ext2).join() === order.slice(0, 3).join(),
-      evidence: `focused ${focused}; Down -> ${down} (focus ${focusDown}); Up -> ${up}; Shift+Down ${cardsBrief(ext)}; Shift+Down again ${cardsBrief(ext2)}`,
-    };
-  });
+  await row(
+    'Filmstrip selection',
+    'Arrow down and arrow up with a card focused, then Shift+Down to extend',
+    async () => {
+      const order = await slideOrder(page);
+      const focused = await focusCard(page, order[0]);
+      await press(page, 'ArrowDown');
+      const down = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        6000,
+      );
+      const focusDown = await activeDesc(page);
+      await press(page, 'ArrowUp');
+      const up = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[0],
+        6000,
+      );
+      await press(page, 'Shift+ArrowDown');
+      await sleep(500);
+      const ext = await cards(page);
+      await press(page, 'Shift+ArrowDown');
+      await sleep(500);
+      const ext2 = await cards(page);
+      const sel = (cs) => cs.filter((c) => c.selected).map((c) => c.id);
+      await clickCard(page, order[0]);
+      return {
+        ok:
+          focused &&
+          down === order[1] &&
+          up === order[0] &&
+          sel(ext).join() === order.slice(0, 2).join() &&
+          sel(ext2).join() === order.slice(0, 3).join(),
+        evidence: `focused ${focused}; Down -> ${down} (focus ${focusDown}); Up -> ${up}; Shift+Down ${cardsBrief(ext)}; Shift+Down again ${cardsBrief(ext2)}`,
+      };
+    },
+  );
 
-  await row('Delete slide', 'Select two cards with Shift click, press Delete, then Undo from the snackbar', async () => {
-    const before = await slideOrder(page);
-    if (before.length < 4) return { ok: false, evidence: `only ${before.length} slides` };
-    const a = before[before.length - 2];
-    const b = before[before.length - 1];
-    await clickCard(page, a);
-    await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
-    await clickCard(page, b, { modifiers: ['Shift'] });
-    await sleep(400);
-    const focused = await page.evaluate(() => document.activeElement?.classList.contains('ts-card'));
-    await press(page, 'Delete');
-    const mid = await waitOrder(page, (o) => o.length === before.length - 2);
-    const sb = await pollUntil(() => snackbar(page), (v) => v !== null && v.action !== null, 4000);
-    if (!sb || sb.action === null) return { ok: false, evidence: `${before.length} -> ${mid.length}; snackbar ${JSON.stringify(sb)}` };
-    await clickControl(page, 'snackbar.action');
-    const after = await waitOrder(page, (o) => o.length === before.length);
-    await settled(page);
-    return {
-      ok: mid.length === before.length - 2 && after.join(',') === before.join(','),
-      evidence: `focused card ${focused}; ${before.length} -> ${mid.length} (snackbar "${sb.text}") -> ${after.length}; order restored ${after.join(',') === before.join(',')}`,
-    };
-  });
+  await row(
+    'Delete slide',
+    'Select two cards with Shift click, press Delete, then Undo from the snackbar',
+    async () => {
+      const before = await slideOrder(page);
+      if (before.length < 4) return { ok: false, evidence: `only ${before.length} slides` };
+      const a = before[before.length - 2];
+      const b = before[before.length - 1];
+      await clickCard(page, a);
+      await pollUntil(
+        () => activeSlide(page),
+        (x) => x === a,
+        8000,
+      );
+      await clickCard(page, b, { modifiers: ['Shift'] });
+      await sleep(400);
+      const focused = await page.evaluate(() =>
+        document.activeElement?.classList.contains('ts-card'),
+      );
+      await press(page, 'Delete');
+      const mid = await waitOrder(page, (o) => o.length === before.length - 2);
+      const sb = await pollUntil(
+        () => snackbar(page),
+        (v) => v !== null && v.action !== null,
+        4000,
+      );
+      if (!sb || sb.action === null)
+        return {
+          ok: false,
+          evidence: `${before.length} -> ${mid.length}; snackbar ${JSON.stringify(sb)}`,
+        };
+      await clickControl(page, 'snackbar.action');
+      const after = await waitOrder(page, (o) => o.length === before.length);
+      await settled(page);
+      return {
+        ok: mid.length === before.length - 2 && after.join(',') === before.join(','),
+        evidence: `focused card ${focused}; ${before.length} -> ${mid.length} (snackbar "${sb.text}") -> ${after.length}; order restored ${after.join(',') === before.join(',')}`,
+      };
+    },
+  );
 
   // ---- 5. reorder
   await row('Reorder slides', 'Drag the second filmstrip card above the first', async () => {
@@ -990,26 +1201,39 @@ try {
     };
   });
 
-  await row('Reorder slides', 'Slide menu > Move slide > Move slide to end, then Cmd+Z', async () => {
-    const before = await slideOrder(page);
-    const target = before[1];
-    await clickCard(page, target);
-    await pollUntil(() => activeSlide(page), (a) => a === target, 8000);
-    await clearAll(page);
-    await openMenu(page, 'slide');
-    await hoverIn(page, menuRoot('slide'), 'menu.slide.moveSlide', '[data-control="menu.slide.moveSlide.toEnd"]');
-    const rs = await rowState(page, 'body', 'menu.slide.moveSlide.toEnd');
-    await clickControl(page, 'menu.slide.moveSlide.toEnd');
-    const moved = await waitOrder(page, (o) => o[o.length - 1] === target, 12_000);
-    await settled(page);
-    await press(page, 'Meta+z');
-    const after = await waitOrder(page, (o) => o.join(',') === before.join(','), 12_000);
-    await settled(page);
-    return {
-      ok: moved[moved.length - 1] === target && after.join(',') === before.join(','),
-      evidence: `row ${JSON.stringify(rs)}; ${before.join(',')} -> ${moved.join(',')} -> undo ${after.join(',')}`,
-    };
-  });
+  await row(
+    'Reorder slides',
+    'Slide menu > Move slide > Move slide to end, then Cmd+Z',
+    async () => {
+      const before = await slideOrder(page);
+      const target = before[1];
+      await clickCard(page, target);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === target,
+        8000,
+      );
+      await clearAll(page);
+      await openMenu(page, 'slide');
+      await hoverIn(
+        page,
+        menuRoot('slide'),
+        'menu.slide.moveSlide',
+        '[data-control="menu.slide.moveSlide.toEnd"]',
+      );
+      const rs = await rowState(page, 'body', 'menu.slide.moveSlide.toEnd');
+      await clickControl(page, 'menu.slide.moveSlide.toEnd');
+      const moved = await waitOrder(page, (o) => o[o.length - 1] === target, 12_000);
+      await settled(page);
+      await press(page, 'Meta+z');
+      const after = await waitOrder(page, (o) => o.join(',') === before.join(','), 12_000);
+      await settled(page);
+      return {
+        ok: moved[moved.length - 1] === target && after.join(',') === before.join(','),
+        evidence: `row ${JSON.stringify(rs)}; ${before.join(',')} -> ${moved.join(',')} -> undo ${after.join(',')}`,
+      };
+    },
+  );
 
   await row('Reorder slides', 'Undo a drag reorder with Cmd+Z', async () => {
     const before = await slideOrder(page);
@@ -1034,96 +1258,150 @@ try {
   const openLayoutPlate = async () => {
     await clearAll(page);
     let via = 'toolbar.layout';
-    if (await has(page, '[data-control="toolbar.layout"]')) await clickControl(page, 'toolbar.layout');
+    if (await has(page, '[data-control="toolbar.layout"]'))
+      await clickControl(page, 'toolbar.layout');
     else {
       await clickControl(page, 'toolbar.more');
       await page.locator('#ts-menu-toolbar-more').waitFor({ timeout: 5000 });
       await clickControl(page, 'toolbar.more.toolbar.layout');
       via = 'toolbar.more.toolbar.layout';
     }
-    await page.locator('[data-control="layout.apply.plate"]').waitFor({ timeout: 8000 }).catch(() => undefined);
+    await page
+      .locator('[data-control="layout.apply.plate"]')
+      .waitFor({ timeout: 8000 })
+      .catch(() => undefined);
     return via;
   };
   const APPLY = '[data-control="layout.apply.plate"]';
   if (!contentSlide) contentSlide = (await slideOrder(page)).find((id) => id !== TITLE) ?? TITLE;
 
-  await row('Layout picker', 'Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it', async () => {
-    await clickCard(page, contentSlide);
-    await pollUntil(() => activeSlide(page), (a) => a === contentSlide, 8000);
-    const via = await openLayoutPlate();
-    const shown = await has(page, APPLY);
-    const tiles = (await plateTiles(page, APPLY)) ?? [];
-    const sj = await slideJson(page, contentSlide);
-    const sh = await shot('layout-picker-open');
-    await press(page, 'Escape');
-    await sleep(400);
-    const gone = !(await has(page, APPLY));
-    if (!gone) await closeMenus(page);
-    return {
-      ok: shown && tiles.length === 21 && tiles.filter((t) => t.current).length === 1 && gone,
-      evidence: `via ${via}; shown ${shown}; tiles ${tiles.length} [${tiles.map((t) => t.id).join(',')}]; ringed ${tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none'} (slide ${layoutFacts(sj)}); missing ${tiles.filter((t) => t.missing).map((t) => t.id).join(',') || 'none'}; gone after Escape ${gone}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Layout picker',
+    'Click Layout in the toolbar; the picker opens ringing the current layout; Escape closes it',
+    async () => {
+      await clickCard(page, contentSlide);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === contentSlide,
+        8000,
+      );
+      const via = await openLayoutPlate();
+      const shown = await has(page, APPLY);
+      const tiles = (await plateTiles(page, APPLY)) ?? [];
+      const sj = await slideJson(page, contentSlide);
+      const sh = await shot('layout-picker-open');
+      await press(page, 'Escape');
+      await sleep(400);
+      const gone = !(await has(page, APPLY));
+      if (!gone) await closeMenus(page);
+      return {
+        ok: shown && tiles.length === 21 && tiles.filter((t) => t.current).length === 1 && gone,
+        evidence: `via ${via}; shown ${shown}; tiles ${tiles.length} [${tiles.map((t) => t.id).join(',')}]; ringed ${
+          tiles
+            .filter((t) => t.current)
+            .map((t) => t.id)
+            .join(',') || 'none'
+        } (slide ${layoutFacts(sj)}); missing ${
+          tiles
+            .filter((t) => t.missing)
+            .map((t) => t.id)
+            .join(',') || 'none'
+        }; gone after Escape ${gone}`,
+        shot: sh,
+      };
+    },
+  );
 
   // every layout, applied to the content slide through the toolbar picker
   let previous = null;
-  const firstTiles = (await (async () => {
+  const firstTiles = await (async () => {
     await openLayoutPlate();
     const t = (await plateTiles(page, APPLY)) ?? [];
     await press(page, 'Escape');
     await sleep(300);
     return t;
-  })());
+  })();
   for (const tile of firstTiles) {
-    await row('Apply layout', `Apply the layout "${tile.label}" (${tile.id}) from the toolbar picker to slide ${contentSlide}`, async () => {
-      await clickCard(page, contentSlide);
-      await pollUntil(() => activeSlide(page), (a) => a === contentSlide, 8000);
-      const before = await slideJson(page, contentSlide);
+    await row(
+      'Apply layout',
+      `Apply the layout "${tile.label}" (${tile.id}) from the toolbar picker to slide ${contentSlide}`,
+      async () => {
+        await clickCard(page, contentSlide);
+        await pollUntil(
+          () => activeSlide(page),
+          (a) => a === contentSlide,
+          8000,
+        );
+        const before = await slideJson(page, contentSlide);
+        await openLayoutPlate();
+        const tiles = (await plateTiles(page, APPLY)) ?? [];
+        const ringed =
+          tiles
+            .filter((t) => t.current)
+            .map((t) => t.id)
+            .join(',') || 'none';
+        const ringNote = previous
+          ? `; picker rings ${ringed} after the previous apply of ${previous}`
+          : '';
+        const me = tiles.find((t) => t.id === tile.id);
+        if (!me) {
+          await press(page, 'Escape');
+          return {
+            ok: false,
+            evidence: `no tile ${tile.id} among ${tiles.map((t) => t.id).join(',')}`,
+          };
+        }
+        if (me.missing) {
+          await press(page, 'Escape');
+          await sleep(300);
+          return {
+            ok: false,
+            notDriven: true,
+            evidence: `the tile reads "Add a picture first" (is-missing); a click opens the file picker, so it was not clicked${ringNote}`,
+          };
+        }
+        await clickIn(page, APPLY, `layout.apply.${tile.id}`);
+        const changed = await pollUntil(
+          () => slideJson(page, contentSlide),
+          (s) =>
+            JSON.stringify(s) !== JSON.stringify(before) || layoutFacts(before).includes(tile.id),
+          15_000,
+        );
+        await sleep(600);
+        await settled(page);
+        const st = await stageFacts(page);
+        const sb = await snackbar(page);
+        const gone = !(await has(page, APPLY));
+        const sh = await shot(`layout-${tile.id}`, await stageClip());
+        previous = tile.id;
+        const facts = layoutFacts(changed);
+        const matches = facts.includes(tile.id) || (tile.id === 'blank' && /freeform/.test(facts));
+        return {
+          ok: gone && (matches || JSON.stringify(changed) !== JSON.stringify(before)),
+          evidence: `slide ${layoutFacts(before)} -> ${facts}${matches ? '' : ' (id not in the facts)'}; runs ${st?.runs.join(',') || 'none'}; prompts "${st?.prompts.join('" / "')}"; blocks ${st?.blocks}; snackbar ${JSON.stringify(sb)}; plate closed ${gone}${ringNote}`,
+          shot: sh,
+        };
+      },
+      { tries: 2 },
+    );
+  }
+  await row(
+    'Apply layout',
+    'Reopen the picker after the last apply and read which tile is ringed',
+    async () => {
       await openLayoutPlate();
       const tiles = (await plateTiles(page, APPLY)) ?? [];
-      const ringed = tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none';
-      const ringNote = previous ? `; picker rings ${ringed} after the previous apply of ${previous}` : '';
-      const me = tiles.find((t) => t.id === tile.id);
-      if (!me) {
-        await press(page, 'Escape');
-        return { ok: false, evidence: `no tile ${tile.id} among ${tiles.map((t) => t.id).join(',')}` };
-      }
-      if (me.missing) {
-        await press(page, 'Escape');
-        await sleep(300);
-        return { ok: false, notDriven: true, evidence: `the tile reads "Add a picture first" (is-missing); a click opens the file picker, so it was not clicked${ringNote}` };
-      }
-      await clickIn(page, APPLY, `layout.apply.${tile.id}`);
-      const changed = await pollUntil(
-        () => slideJson(page, contentSlide),
-        (s) => JSON.stringify(s) !== JSON.stringify(before) || layoutFacts(before).includes(tile.id),
-        15_000,
-      );
-      await sleep(600);
-      await settled(page);
-      const st = await stageFacts(page);
-      const sb = await snackbar(page);
-      const gone = !(await has(page, APPLY));
-      const sh = await shot(`layout-${tile.id}`, await stageClip());
-      previous = tile.id;
-      const facts = layoutFacts(changed);
-      const matches = facts.includes(tile.id) || (tile.id === 'blank' && /freeform/.test(facts));
-      return {
-        ok: gone && (matches || JSON.stringify(changed) !== JSON.stringify(before)),
-        evidence: `slide ${layoutFacts(before)} -> ${facts}${matches ? '' : ' (id not in the facts)'}; runs ${st?.runs.join(',') || 'none'}; prompts "${st?.prompts.join('" / "')}"; blocks ${st?.blocks}; snackbar ${JSON.stringify(sb)}; plate closed ${gone}${ringNote}`,
-        shot: sh,
-      };
-    }, { tries: 2 });
-  }
-  await row('Apply layout', 'Reopen the picker after the last apply and read which tile is ringed', async () => {
-    await openLayoutPlate();
-    const tiles = (await plateTiles(page, APPLY)) ?? [];
-    const ringed = tiles.filter((t) => t.current).map((t) => t.id).join(',') || 'none';
-    await press(page, 'Escape');
-    await sleep(300);
-    return { ok: ringed === previous, evidence: `ringed ${ringed}; last applied ${previous}` };
-  }, { tries: 1 });
+      const ringed =
+        tiles
+          .filter((t) => t.current)
+          .map((t) => t.id)
+          .join(',') || 'none';
+      await press(page, 'Escape');
+      await sleep(300);
+      return { ok: ringed === previous, evidence: `ringed ${ringed}; last applied ${previous}` };
+    },
+    { tries: 1 },
+  );
 
   await row('Apply layout', 'Right click a card > Apply layout > Title and body', async () => {
     await clearAll(page);
@@ -1138,9 +1416,17 @@ try {
     else if (asTiles) await clickControl(page, 'layout.apply.split');
     else {
       await closeMenus(page);
-      return { ok: false, evidence: 'the Apply layout submenu showed neither rows nor tiles', shot: sh };
+      return {
+        ok: false,
+        evidence: 'the Apply layout submenu showed neither rows nor tiles',
+        shot: sh,
+      };
     }
-    const after = await pollUntil(() => slideJson(page, contentSlide), (s) => /split/.test(layoutFacts(s)), 15_000);
+    const after = await pollUntil(
+      () => slideJson(page, contentSlide),
+      (s) => /split/.test(layoutFacts(s)),
+      15_000,
+    );
     await settled(page);
     const gone = !(await has(page, CTX));
     return {
@@ -1150,68 +1436,104 @@ try {
     };
   });
 
-  await row('Apply layout', 'Slide menu > Apply layout > Title and two columns, then Cmd+Z', async () => {
-    await clearAll(page);
-    const before = await slideJson(page, contentSlide);
-    await openMenu(page, 'slide');
-    await hoverIn(page, menuRoot('slide'), 'menu.slide.applyLayout');
-    await sleep(400);
-    const asTiles = await has(page, '[data-control="layout.apply.cols"]');
-    const asRows = await has(page, '[data-control="menu.slide.applyLayout.cols"]');
-    const sh = await shot('menu-apply-layout');
-    if (asTiles) await clickControl(page, 'layout.apply.cols');
-    else if (asRows) await clickControl(page, 'menu.slide.applyLayout.cols');
-    else {
-      await closeMenus(page);
-      return { ok: false, evidence: 'the Apply layout submenu showed neither tiles nor rows', shot: sh };
-    }
-    const after = await pollUntil(() => slideJson(page, contentSlide), (s) => /cols/.test(layoutFacts(s)), 15_000);
-    await settled(page);
-    await focusWorkspace(page);
-    await press(page, 'Meta+z');
-    const undone = await pollUntil(() => slideJson(page, contentSlide), (s) => layoutFacts(s) === layoutFacts(before), 15_000);
-    await settled(page);
-    return {
-      ok: /cols/.test(layoutFacts(after)) && layoutFacts(undone) === layoutFacts(before),
-      evidence: `submenu as ${asTiles ? 'tiles' : 'rows'}; ${layoutFacts(before)} -> ${layoutFacts(after)} -> undo ${layoutFacts(undone)}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Apply layout',
+    'Slide menu > Apply layout > Title and two columns, then Cmd+Z',
+    async () => {
+      await clearAll(page);
+      const before = await slideJson(page, contentSlide);
+      await openMenu(page, 'slide');
+      await hoverIn(page, menuRoot('slide'), 'menu.slide.applyLayout');
+      await sleep(400);
+      const asTiles = await has(page, '[data-control="layout.apply.cols"]');
+      const asRows = await has(page, '[data-control="menu.slide.applyLayout.cols"]');
+      const sh = await shot('menu-apply-layout');
+      if (asTiles) await clickControl(page, 'layout.apply.cols');
+      else if (asRows) await clickControl(page, 'menu.slide.applyLayout.cols');
+      else {
+        await closeMenus(page);
+        return {
+          ok: false,
+          evidence: 'the Apply layout submenu showed neither tiles nor rows',
+          shot: sh,
+        };
+      }
+      const after = await pollUntil(
+        () => slideJson(page, contentSlide),
+        (s) => /cols/.test(layoutFacts(s)),
+        15_000,
+      );
+      await settled(page);
+      await focusWorkspace(page);
+      await press(page, 'Meta+z');
+      const undone = await pollUntil(
+        () => slideJson(page, contentSlide),
+        (s) => layoutFacts(s) === layoutFacts(before),
+        15_000,
+      );
+      await settled(page);
+      return {
+        ok: /cols/.test(layoutFacts(after)) && layoutFacts(undone) === layoutFacts(before),
+        evidence: `submenu as ${asTiles ? 'tiles' : 'rows'}; ${layoutFacts(before)} -> ${layoutFacts(after)} -> undo ${layoutFacts(undone)}`,
+        shot: sh,
+      };
+    },
+  );
 
   // ---- 7. skip slide
-  await row('Skip slide', 'Right click a card > Skip slide; the card fades with the eye glyph; the row then reads Unskip slide', async () => {
-    const order = await slideOrder(page);
-    const target = order[order.length - 1];
-    await clearAll(page);
-    await openCardMenu(page, target);
-    const rs = await rowState(page, CTX, 'menu.slide.skipSlide');
-    await clickIn(page, CTX, 'menu.slide.skipSlide');
-    const sj = await pollUntil(() => slideJson(page, target), (s) => s.skip === true, 15_000);
-    await sleep(400);
-    const cs = (await cards(page)).find((c) => c.id === target);
-    const sh = await shot('skip-slide');
-    await openCardMenu(page, target);
-    const rs2 = await rowState(page, CTX, 'menu.slide.skipSlide');
-    await closeMenus(page);
-    await settled(page);
-    return {
-      ok: sj.skip === true && cs?.skipped === true && cs?.glyph === true && /unskip/i.test(rs2.label ?? ''),
-      evidence: `row before "${rs.label}"; slide.skip ${sj.skip}; card ${JSON.stringify(cs)}; row after "${rs2.label}"; counter ${JSON.stringify(await counter(page))}`,
-      shot: sh,
-    };
-  });
+  await row(
+    'Skip slide',
+    'Right click a card > Skip slide; the card fades with the eye glyph; the row then reads Unskip slide',
+    async () => {
+      const order = await slideOrder(page);
+      const target = order[order.length - 1];
+      await clearAll(page);
+      await openCardMenu(page, target);
+      const rs = await rowState(page, CTX, 'menu.slide.skipSlide');
+      await clickIn(page, CTX, 'menu.slide.skipSlide');
+      const sj = await pollUntil(
+        () => slideJson(page, target),
+        (s) => s.skip === true,
+        15_000,
+      );
+      await sleep(400);
+      const cs = (await cards(page)).find((c) => c.id === target);
+      const sh = await shot('skip-slide');
+      await openCardMenu(page, target);
+      const rs2 = await rowState(page, CTX, 'menu.slide.skipSlide');
+      await closeMenus(page);
+      await settled(page);
+      return {
+        ok:
+          sj.skip === true &&
+          cs?.skipped === true &&
+          cs?.glyph === true &&
+          /unskip/i.test(rs2.label ?? ''),
+        evidence: `row before "${rs.label}"; slide.skip ${sj.skip}; card ${JSON.stringify(cs)}; row after "${rs2.label}"; counter ${JSON.stringify(await counter(page))}`,
+        shot: sh,
+      };
+    },
+  );
 
   await row('Skip slide', 'Slide menu > Unskip slide on the skipped slide', async () => {
     const order = await slideOrder(page);
     const target = order[order.length - 1];
     await clickCard(page, target);
-    await pollUntil(() => activeSlide(page), (a) => a === target, 8000);
+    await pollUntil(
+      () => activeSlide(page),
+      (a) => a === target,
+      8000,
+    );
     await clearAll(page);
     const before = await slideJson(page, target);
     await openMenu(page, 'slide');
     const rs = await rowState(page, menuRoot('slide'), 'menu.slide.skipSlide');
     await clickIn(page, menuRoot('slide'), 'menu.slide.skipSlide');
-    const sj = await pollUntil(() => slideJson(page, target), (s) => s.skip !== before.skip, 15_000);
+    const sj = await pollUntil(
+      () => slideJson(page, target),
+      (s) => s.skip !== before.skip,
+      15_000,
+    );
     await sleep(400);
     const cs = (await cards(page)).find((c) => c.id === target);
     await settled(page);
@@ -1222,58 +1544,104 @@ try {
   });
 
   // ---- 8. the grid view
-  await row('Grid view', 'Click Grid view in the bottom bar; every slide is a tile; Filmstrip view brings the canvas back', async () => {
-    const order = await slideOrder(page);
-    await clearAll(page);
-    // skip the last slide so the grid shows the skip glyph too
-    await openCardMenu(page, order[order.length - 1]);
-    await clickIn(page, CTX, 'menu.slide.skipSlide');
-    await pollUntil(() => slideJson(page, order[order.length - 1]), (s) => s.skip === true, 15_000);
-    await settled(page);
-    if (!(await has(page, '[data-control="view.gridView"]'))) return { ok: false, notDriven: true, evidence: 'no Grid view button in the bottom bar' };
-    await clickControl(page, 'view.gridView');
-    const on = await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === order.length, 8000);
-    const sh = await shot('grid-view');
-    await clickControl(page, 'view.filmstripView');
-    const off = await pollUntil(() => gridFacts(page), (g) => !g.grid, 8000);
-    await sleep(400);
-    // unskip again
-    await openCardMenu(page, order[order.length - 1]);
-    await clickIn(page, CTX, 'menu.slide.skipSlide');
-    await pollUntil(() => slideJson(page, order[order.length - 1]), (s) => s.skip !== true, 15_000);
-    await settled(page);
-    return {
-      ok: on.grid && on.tiles === order.length && on.tileIds.join(',') === order.join(',') && on.skippedTiles === 1 && !off.grid && off.stageShown,
-      evidence: `grid on: ${JSON.stringify({ tiles: on.tiles, order: on.tileIds.join(',') === order.join(','), active: on.activeTile, skipped: on.skippedTiles, filmHidden: on.filmHidden, filmWidth: on.filmWidth, gridPressed: on.gridPressed })}; back: ${JSON.stringify({ grid: off.grid, stage: off.stageShown, filmWidth: off.filmWidth, filmPressed: off.filmPressed })}`,
-      shot: sh,
-    };
-  });
-
-  await row('Grid view', 'In the grid, click a tile to select it and double click it to open that slide', async () => {
-    const order = await slideOrder(page);
-    const target = order[Math.min(2, order.length - 1)];
-    await clearAll(page);
-    await clickControl(page, 'view.gridView');
-    await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === order.length, 8000);
-    const tile = `.pt-grid .pt-thumb[data-id="${target}"]`;
-    const r = await rectOf(page, tile);
-    if (!r) {
+  await row(
+    'Grid view',
+    'Click Grid view in the bottom bar; every slide is a tile; Filmstrip view brings the canvas back',
+    async () => {
+      const order = await slideOrder(page);
+      await clearAll(page);
+      // skip the last slide so the grid shows the skip glyph too
+      await openCardMenu(page, order[order.length - 1]);
+      await clickIn(page, CTX, 'menu.slide.skipSlide');
+      await pollUntil(
+        () => slideJson(page, order[order.length - 1]),
+        (s) => s.skip === true,
+        15_000,
+      );
+      await settled(page);
+      if (!(await has(page, '[data-control="view.gridView"]')))
+        return { ok: false, notDriven: true, evidence: 'no Grid view button in the bottom bar' };
+      await clickControl(page, 'view.gridView');
+      const on = await pollUntil(
+        () => gridFacts(page),
+        (g) => g.grid && g.tiles === order.length,
+        8000,
+      );
+      const sh = await shot('grid-view');
       await clickControl(page, 'view.filmstripView');
-      return { ok: false, evidence: `no tile ${target}` };
-    }
-    await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-    await sleep(400);
-    const picked = await gridFacts(page);
-    const activeAfterClick = await activeSlide(page);
-    await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-    const back = await pollUntil(() => gridFacts(page), (g) => !g.grid, 8000);
-    const active = await pollUntil(() => activeSlide(page), (a) => a === target, 8000);
-    await sleep(300);
-    return {
-      ok: (picked.activeTile === target || picked.selectedTiles >= 1) && !back.grid && active === target,
-      evidence: `after click: active tile ${picked.activeTile}, selected ${picked.selectedTiles}, state ${activeAfterClick}; after double click: grid ${back.grid}, active ${active}, counter ${JSON.stringify(await counter(page))}`,
-    };
-  });
+      const off = await pollUntil(
+        () => gridFacts(page),
+        (g) => !g.grid,
+        8000,
+      );
+      await sleep(400);
+      // unskip again
+      await openCardMenu(page, order[order.length - 1]);
+      await clickIn(page, CTX, 'menu.slide.skipSlide');
+      await pollUntil(
+        () => slideJson(page, order[order.length - 1]),
+        (s) => s.skip !== true,
+        15_000,
+      );
+      await settled(page);
+      return {
+        ok:
+          on.grid &&
+          on.tiles === order.length &&
+          on.tileIds.join(',') === order.join(',') &&
+          on.skippedTiles === 1 &&
+          !off.grid &&
+          off.stageShown,
+        evidence: `grid on: ${JSON.stringify({ tiles: on.tiles, order: on.tileIds.join(',') === order.join(','), active: on.activeTile, skipped: on.skippedTiles, filmHidden: on.filmHidden, filmWidth: on.filmWidth, gridPressed: on.gridPressed })}; back: ${JSON.stringify({ grid: off.grid, stage: off.stageShown, filmWidth: off.filmWidth, filmPressed: off.filmPressed })}`,
+        shot: sh,
+      };
+    },
+  );
+
+  await row(
+    'Grid view',
+    'In the grid, click a tile to select it and double click it to open that slide',
+    async () => {
+      const order = await slideOrder(page);
+      const target = order[Math.min(2, order.length - 1)];
+      await clearAll(page);
+      await clickControl(page, 'view.gridView');
+      await pollUntil(
+        () => gridFacts(page),
+        (g) => g.grid && g.tiles === order.length,
+        8000,
+      );
+      const tile = `.pt-grid .pt-thumb[data-id="${target}"]`;
+      const r = await rectOf(page, tile);
+      if (!r) {
+        await clickControl(page, 'view.filmstripView');
+        return { ok: false, evidence: `no tile ${target}` };
+      }
+      await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+      await sleep(400);
+      const picked = await gridFacts(page);
+      const activeAfterClick = await activeSlide(page);
+      await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+      const back = await pollUntil(
+        () => gridFacts(page),
+        (g) => !g.grid,
+        8000,
+      );
+      const active = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === target,
+        8000,
+      );
+      await sleep(300);
+      return {
+        ok:
+          (picked.activeTile === target || picked.selectedTiles >= 1) &&
+          !back.grid &&
+          active === target,
+        evidence: `after click: active tile ${picked.activeTile}, selected ${picked.selectedTiles}, state ${activeAfterClick}; after double click: grid ${back.grid}, active ${active}, counter ${JSON.stringify(await counter(page))}`,
+      };
+    },
+  );
 
   await row('Grid view', 'View menu > Grid view toggles the grid on, and again off', async () => {
     const order = await slideOrder(page);
@@ -1281,39 +1649,67 @@ try {
     await openMenu(page, 'view');
     const rs = await rowState(page, menuRoot('view'), 'menu.view.gridView');
     await clickIn(page, menuRoot('view'), 'menu.view.gridView');
-    const on = await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === order.length, 8000);
+    const on = await pollUntil(
+      () => gridFacts(page),
+      (g) => g.grid && g.tiles === order.length,
+      8000,
+    );
     await openMenu(page, 'view');
-    const checked = await page.evaluate(() => document.querySelector('#ts-menu-view [data-control="menu.view.gridView"]')?.getAttribute('aria-checked'));
+    const checked = await page.evaluate(() =>
+      document
+        .querySelector('#ts-menu-view [data-control="menu.view.gridView"]')
+        ?.getAttribute('aria-checked'),
+    );
     await clickIn(page, menuRoot('view'), 'menu.view.gridView');
-    const off = await pollUntil(() => gridFacts(page), (g) => !g.grid, 8000);
+    const off = await pollUntil(
+      () => gridFacts(page),
+      (g) => !g.grid,
+      8000,
+    );
     return {
       ok: rs.present && on.grid && checked === 'true' && !off.grid,
       evidence: `row ${JSON.stringify(rs)}; on ${on.grid} (${on.tiles} tiles); checked while on ${checked}; off ${!off.grid}`,
     };
   });
 
-  await row('Grid view', 'Double click a filmstrip card opens the grid; the bottom bar Filmstrip view returns', async () => {
-    const order = await slideOrder(page);
-    await clearAll(page);
-    const r = await cardRect(page, order[0]);
-    await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-    const on = await pollUntil(() => gridFacts(page), (g) => g.grid, 6000);
-    await press(page, 'Escape');
-    await sleep(400);
-    const afterEsc = await gridFacts(page);
-    if (afterEsc.grid) await clickControl(page, 'view.filmstripView');
-    const off = await pollUntil(() => gridFacts(page), (g) => !g.grid, 8000);
-    return {
-      ok: on.grid && !off.grid,
-      evidence: `grid after the double click ${on.grid}; after Escape ${afterEsc.grid ? 'still on' : 'closed'}; back ${!off.grid}`,
-    };
-  });
+  await row(
+    'Grid view',
+    'Double click a filmstrip card opens the grid; the bottom bar Filmstrip view returns',
+    async () => {
+      const order = await slideOrder(page);
+      await clearAll(page);
+      const r = await cardRect(page, order[0]);
+      await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+      const on = await pollUntil(
+        () => gridFacts(page),
+        (g) => g.grid,
+        6000,
+      );
+      await press(page, 'Escape');
+      await sleep(400);
+      const afterEsc = await gridFacts(page);
+      if (afterEsc.grid) await clickControl(page, 'view.filmstripView');
+      const off = await pollUntil(
+        () => gridFacts(page),
+        (g) => !g.grid,
+        8000,
+      );
+      return {
+        ok: on.grid && !off.grid,
+        evidence: `grid after the double click ${on.grid}; after Escape ${afterEsc.grid ? 'still on' : 'closed'}; back ${!off.grid}`,
+      };
+    },
+  );
 
   await row('Grid view', 'Drag a grid tile to a new place', async () => {
     const before = await slideOrder(page);
     await clearAll(page);
     await clickControl(page, 'view.gridView');
-    await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === before.length, 8000);
+    await pollUntil(
+      () => gridFacts(page),
+      (g) => g.grid && g.tiles === before.length,
+      8000,
+    );
     const a = await rectOf(page, `.pt-grid .pt-thumb[data-id="${before[1]}"]`);
     const b = await rectOf(page, `.pt-grid .pt-thumb[data-id="${before[0]}"]`);
     if (!a || !b) {
@@ -1325,85 +1721,128 @@ try {
     await settled(page);
     const sh = await shot('grid-drag');
     await clickControl(page, 'view.filmstripView');
-    await pollUntil(() => gridFacts(page), (g) => !g.grid, 8000);
+    await pollUntil(
+      () => gridFacts(page),
+      (g) => !g.grid,
+      8000,
+    );
     if (after[0] === before[1]) {
       await focusWorkspace(page);
       await press(page, 'Meta+z');
       await waitOrder(page, (o) => o.join(',') === before.join(','), 12_000);
       await settled(page);
     }
-    return { ok: after[0] === before[1] && after[1] === before[0], evidence: `${before.join(',')} -> ${after.join(',')}`, shot: sh };
+    return {
+      ok: after[0] === before[1] && after[1] === before[0],
+      evidence: `${before.join(',')} -> ${after.join(',')}`,
+      shot: sh,
+    };
   });
 
   // ---- 9. speaker notes
   const NOTES = 'Open with the Q3 number, then pause for questions.';
-  await row('Speaker notes', 'Click the notes field and type a talk track with spaces; the slide keeps it', async () => {
-    const order = await slideOrder(page);
-    await clickCard(page, order[1]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
-    await clearAll(page);
-    const nf = await notesFacts(page);
-    if (!nf.present) return { ok: false, evidence: 'no notes pane' };
-    if (nf.hidden) return { ok: false, evidence: `notes pane hidden (${nf.height})` };
-    const r = await rectOf(page, '[data-control="notes.text"]');
-    await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-    await typeHuman(page, NOTES);
-    const typed = (await notesFacts(page)).value;
-    await sleep(700);
-    const stored = await pollUntil(() => slideJson(page, order[1]), (s) => (s.notes ?? '') === NOTES, 15_000);
-    await settled(page);
-    const sh = await shot('notes-typed');
-    return {
-      ok: typed === NOTES && (stored.notes ?? '') === NOTES,
-      evidence: `placeholder "${nf.placeholder}"; height ${nf.height}; field after typing "${typed}"; stored notes "${stored.notes ?? ''}"; revision ${(await state(page)).revision}`,
-      shot: sh,
-    };
-  }, { tries: 2 });
+  await row(
+    'Speaker notes',
+    'Click the notes field and type a talk track with spaces; the slide keeps it',
+    async () => {
+      const order = await slideOrder(page);
+      await clickCard(page, order[1]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        8000,
+      );
+      await clearAll(page);
+      const nf = await notesFacts(page);
+      if (!nf.present) return { ok: false, evidence: 'no notes pane' };
+      if (nf.hidden) return { ok: false, evidence: `notes pane hidden (${nf.height})` };
+      const r = await rectOf(page, '[data-control="notes.text"]');
+      await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+      await typeHuman(page, NOTES);
+      const typed = (await notesFacts(page)).value;
+      await sleep(700);
+      const stored = await pollUntil(
+        () => slideJson(page, order[1]),
+        (s) => (s.notes ?? '') === NOTES,
+        15_000,
+      );
+      await settled(page);
+      const sh = await shot('notes-typed');
+      return {
+        ok: typed === NOTES && (stored.notes ?? '') === NOTES,
+        evidence: `placeholder "${nf.placeholder}"; height ${nf.height}; field after typing "${typed}"; stored notes "${stored.notes ?? ''}"; revision ${(await state(page)).revision}`,
+        shot: sh,
+      };
+    },
+    { tries: 2 },
+  );
 
-  await row('Speaker notes', 'Switch to another slide and back; each slide shows its own notes', async () => {
-    const order = await slideOrder(page);
-    await press(page, 'Escape');
-    await clickCard(page, order[0]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[0], 8000);
-    await sleep(500);
-    const other = (await notesFacts(page)).value;
-    await clickCard(page, order[1]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
-    await sleep(500);
-    const back = (await notesFacts(page)).value;
-    return { ok: other === '' && back === NOTES, evidence: `slide 1 field "${other}"; slide 2 field "${back}"` };
-  });
+  await row(
+    'Speaker notes',
+    'Switch to another slide and back; each slide shows its own notes',
+    async () => {
+      const order = await slideOrder(page);
+      await press(page, 'Escape');
+      await clickCard(page, order[0]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[0],
+        8000,
+      );
+      await sleep(500);
+      const other = (await notesFacts(page)).value;
+      await clickCard(page, order[1]);
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        8000,
+      );
+      await sleep(500);
+      const back = (await notesFacts(page)).value;
+      return {
+        ok: other === '' && back === NOTES,
+        evidence: `slide 1 field "${other}"; slide 2 field "${back}"`,
+      };
+    },
+  );
 
-  await row('Speaker notes', 'Drag the notes handle up to make the pane taller, double click it, drag it back', async () => {
-    const before = await notesFacts(page);
-    const h = await rectOf(page, '[data-control="notes.handle"]');
-    if (!h) return { ok: false, evidence: 'no notes handle' };
-    const from = center(h);
-    await moveHuman(page, { x: from.x - 30, y: from.y - 20 }, from, 6);
-    await page.mouse.down();
-    await sleep(100);
-    await moveHuman(page, from, { x: from.x, y: from.y - 120 }, 14);
-    await sleep(150);
-    await page.mouse.up();
-    await sleep(400);
-    const taller = await notesFacts(page);
-    const h2 = await rectOf(page, '[data-control="notes.handle"]');
-    await dblclickAt(page, h2.x + h2.w / 2, h2.y + h2.h / 2);
-    await sleep(400);
-    const toggled = await notesFacts(page);
-    const h3 = await rectOf(page, '[data-control="notes.handle"]');
-    if (toggled.hidden || toggled.box === 0) {
-      await dblclickAt(page, h3.x + h3.w / 2, h3.y + h3.h / 2);
+  await row(
+    'Speaker notes',
+    'Drag the notes handle up to make the pane taller, double click it, drag it back',
+    async () => {
+      const before = await notesFacts(page);
+      const h = await rectOf(page, '[data-control="notes.handle"]');
+      if (!h) return { ok: false, evidence: 'no notes handle' };
+      const from = center(h);
+      await moveHuman(page, { x: from.x - 30, y: from.y - 20 }, from, 6);
+      await page.mouse.down();
+      await sleep(100);
+      await moveHuman(page, from, { x: from.x, y: from.y - 120 }, 14);
+      await sleep(150);
+      await page.mouse.up();
       await sleep(400);
-    }
-    const restored = await notesFacts(page);
-    const sh = await shot('notes-resized');
-    return {
-      ok: parseInt(taller.height, 10) > parseInt(before.height, 10) + 60 && toggled.height !== taller.height && restored.value === NOTES,
-      evidence: `height ${before.height} -> drag ${taller.height} (box ${taller.box}) -> double click ${toggled.height} (hidden ${toggled.hidden}) -> ${restored.height}; value kept "${restored.value}"`,
-      shot: sh,
-    };
-  });
+      const taller = await notesFacts(page);
+      const h2 = await rectOf(page, '[data-control="notes.handle"]');
+      await dblclickAt(page, h2.x + h2.w / 2, h2.y + h2.h / 2);
+      await sleep(400);
+      const toggled = await notesFacts(page);
+      const h3 = await rectOf(page, '[data-control="notes.handle"]');
+      if (toggled.hidden || toggled.box === 0) {
+        await dblclickAt(page, h3.x + h3.w / 2, h3.y + h3.h / 2);
+        await sleep(400);
+      }
+      const restored = await notesFacts(page);
+      const sh = await shot('notes-resized');
+      return {
+        ok:
+          parseInt(taller.height, 10) > parseInt(before.height, 10) + 60 &&
+          toggled.height !== taller.height &&
+          restored.value === NOTES,
+        evidence: `height ${before.height} -> drag ${taller.height} (box ${taller.box}) -> double click ${toggled.height} (hidden ${toggled.hidden}) -> ${restored.height}; value kept "${restored.value}"`,
+        shot: sh,
+      };
+    },
+  );
 
   await row('Speaker notes', 'Reload the deck; the notes are still there', async () => {
     const order = await slideOrder(page);
@@ -1412,7 +1851,11 @@ try {
     await editorReady(page);
     await connected(page);
     await clickCard(page, order[1]);
-    await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
+    await pollUntil(
+      () => activeSlide(page),
+      (a) => a === order[1],
+      8000,
+    );
     await sleep(600);
     const nf = await notesFacts(page);
     const sj = await slideJson(page, order[1]);
@@ -1423,50 +1866,79 @@ try {
   });
 
   // ---- 10. the counter and the address hash
-  await row('Slide counter', 'The counter reads the slide number; clicking it opens a field; a number and Enter go there', async () => {
-    const order = await slideOrder(page);
-    await clickCard(page, order[2] ?? order[order.length - 1]);
-    const at = order[2] ?? order[order.length - 1];
-    await pollUntil(() => activeSlide(page), (a) => a === at, 8000);
-    await sleep(300);
-    const ct = await counter(page);
-    if (!ct) return { ok: false, notDriven: true, evidence: 'no view.count control on the toolbar' };
-    await clickControl(page, 'view.count');
-    const field = await has(page, '[data-control="view.goto"]');
-    await typeHuman(page, '1');
-    await press(page, 'Enter');
-    const active = await pollUntil(() => activeSlide(page), (a) => a === order[0], 8000);
-    await sleep(300);
-    const ct2 = await counter(page);
-    return {
-      ok: /3/.test(ct.text) && field && active === order[0] && /1/.test(ct2?.text ?? ''),
-      evidence: `on slide 3 counter ${JSON.stringify(ct)}; field opened ${field}; after "1" Enter active ${active}, counter ${JSON.stringify(ct2)}`,
-    };
-  });
+  await row(
+    'Slide counter',
+    'The counter reads the slide number; clicking it opens a field; a number and Enter go there',
+    async () => {
+      const order = await slideOrder(page);
+      await clickCard(page, order[2] ?? order[order.length - 1]);
+      const at = order[2] ?? order[order.length - 1];
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === at,
+        8000,
+      );
+      await sleep(300);
+      const ct = await counter(page);
+      if (!ct)
+        return { ok: false, notDriven: true, evidence: 'no view.count control on the toolbar' };
+      await clickControl(page, 'view.count');
+      const field = await has(page, '[data-control="view.goto"]');
+      await typeHuman(page, '1');
+      await press(page, 'Enter');
+      const active = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[0],
+        8000,
+      );
+      await sleep(300);
+      const ct2 = await counter(page);
+      return {
+        ok: /3/.test(ct.text) && field && active === order[0] && /1/.test(ct2?.text ?? ''),
+        evidence: `on slide 3 counter ${JSON.stringify(ct)}; field opened ${field}; after "1" Enter active ${active}, counter ${JSON.stringify(ct2)}`,
+      };
+    },
+  );
 
-  await row('Address hash', 'The address carries the slide; a reload with the hash and the numeric form land on that slide', async () => {
-    const order = await slideOrder(page);
-    await clickCard(page, order[2] ?? order[1]);
-    const at = order[2] ?? order[1];
-    await pollUntil(() => activeSlide(page), (a) => a === at, 8000);
-    await sleep(300);
-    const h = await hashOf(page);
-    const url = page.url();
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await editorReady(page);
-    await connected(page);
-    const landed = await pollUntil(() => activeSlide(page), (a) => a === at, 8000);
-    await page.goto(`${BASE}/edit/${deckId}#2`, { waitUntil: 'domcontentloaded' });
-    await editorReady(page);
-    await connected(page);
-    const numeric = await pollUntil(() => activeSlide(page), (a) => a === order[1], 8000);
-    await sleep(300);
-    const rewritten = await hashOf(page);
-    return {
-      ok: h === `#s/${encodeURIComponent(at)}` && landed === at && numeric === order[1],
-      evidence: `after clicking card 3 hash "${h}" (${url.replace(BASE, '')}); reload lands on ${landed}; /edit/<id>#2 lands on ${numeric} (order[1] ${order[1]}); hash then "${rewritten}"`,
-    };
-  });
+  await row(
+    'Address hash',
+    'The address carries the slide; a reload with the hash and the numeric form land on that slide',
+    async () => {
+      const order = await slideOrder(page);
+      await clickCard(page, order[2] ?? order[1]);
+      const at = order[2] ?? order[1];
+      await pollUntil(
+        () => activeSlide(page),
+        (a) => a === at,
+        8000,
+      );
+      await sleep(300);
+      const h = await hashOf(page);
+      const url = page.url();
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await editorReady(page);
+      await connected(page);
+      const landed = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === at,
+        8000,
+      );
+      await page.goto(`${BASE}/edit/${deckId}#2`, { waitUntil: 'domcontentloaded' });
+      await editorReady(page);
+      await connected(page);
+      const numeric = await pollUntil(
+        () => activeSlide(page),
+        (a) => a === order[1],
+        8000,
+      );
+      await sleep(300);
+      const rewritten = await hashOf(page);
+      return {
+        ok: h === `#s/${encodeURIComponent(at)}` && landed === at && numeric === order[1],
+        evidence: `after clicking card 3 hash "${h}" (${url.replace(BASE, '')}); reload lands on ${landed}; /edit/<id>#2 lands on ${numeric} (order[1] ${order[1]}); hash then "${rewritten}"`,
+      };
+    },
+  );
 
   await row('Slide counter', 'The counter follows New slide and Delete', async () => {
     const before = await slideOrder(page);
@@ -1484,7 +1956,11 @@ try {
     const c2 = await counter(page);
     await settled(page);
     return {
-      ok: c1 !== null && /\b0?(\d+)\b/.test(c1.text) && (c1.label ?? '').includes(`of ${mid.length}`) && (c2?.label ?? '').includes(`of ${before.length}`),
+      ok:
+        c1 !== null &&
+        /\b0?(\d+)\b/.test(c1.text) &&
+        (c1.label ?? '').includes(`of ${mid.length}`) &&
+        (c2?.label ?? '').includes(`of ${before.length}`),
       evidence: `before ${JSON.stringify(c0)}; after New slide ${JSON.stringify(c1)}; after Delete ${JSON.stringify(c2)}`,
     };
   });
@@ -1523,19 +1999,45 @@ try {
       await clickControl(page, 'trash.confirm.ok');
       await card.waitFor({ state: 'detached', timeout: 30_000 });
       trashed = true;
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'works', attempts: 1, evidence: `deck ${deckId} left the trash`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'works',
+        attempts: 1,
+        evidence: `deck ${deckId} left the trash`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'broken', attempts: 1, evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'broken',
+        attempts: 1,
+        evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -1546,18 +2048,42 @@ try {
       let statusEdit = 0;
       const until = Date.now() + 25_000;
       for (;;) {
-        statusDeck = (await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })).status();
-        statusEdit = (await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })).status();
+        statusDeck = (
+          await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        ).status();
+        statusEdit = (
+          await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })
+        ).status();
         if ((statusDeck === 404 && statusEdit === 404) || Date.now() > until) break;
         await sleep(2000);
       }
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> and /edit/<id> after the delete', result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken', attempts: 1, evidence: `/deck ${statusDeck}, /edit ${statusEdit}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> and /edit/<id> after the delete',
+        result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken',
+        attempts: 1,
+        evidence: `/deck ${statusDeck}, /edit ${statusEdit}`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> after the delete', result: 'broken', attempts: 1, evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> after the delete',
+        result: 'broken',
+        attempts: 1,
+        evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
   }
   save();
   await browser.close().catch(() => undefined);
   const counts = rows.reduce((acc, r) => ({ ...acc, [r.result]: (acc[r.result] ?? 0) + 1 }), {});
-  console.log(`\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`);
+  console.log(
+    `\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`,
+  );
 }

@@ -13,13 +13,17 @@
 // of the four words of the audits; `severity` sits on broken and flaky rows alone; `driver` is
 // the probe or one of the seven spec files; `setup` names a window API write that is never a
 // driven step. The two ship helpers at the end compute rule 4 of section 1 and the exit rule of
-// 6.2 from a run's results, so the parked list is computed and never typed.
+// 6.2 from a run's results, so the parked list is computed and never typed. The return round
+// (docs/RETURN.md section 1 rule 2 and section 5) added the features tables, charts, diagrams,
+// wordart, formatting, chrome, view and inbox, the list of unparkable features (a red row of one
+// blocks the ship), the `parks` field (the data-control ids a row alone guards, validated against
+// the menu model's sources) and the `parkedRows` half of the parked list beside `parkedFeatures`.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //
 // Node only, no dependency. Type declarations for the TypeScript callers are in core-matrix.d.mts.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /** The matrix file docs/FOCUS.md is rendered from. */
@@ -27,7 +31,12 @@ export const CORE_MATRIX_PATH = fileURLToPath(
   new URL('../../docs/gslides-parity/focus/core-matrix.json', import.meta.url),
 );
 
-/** The section 2 features in the order of the document, plus the switch (section 3). */
+/**
+ * The section 2 features in the order of the document, plus the switch (section 3), plus the
+ * return round's features (docs/RETURN.md section 5): the documents (tables, charts, diagrams,
+ * word art), the text and paragraph formatting rows, the chrome (the title row's split button,
+ * the separators and the right cluster), the View menu rows and the inbox.
+ */
 export const CORE_FEATURES = Object.freeze([
   'decks',
   'slides',
@@ -36,12 +45,20 @@ export const CORE_FEATURES = Object.freeze([
   'arrange',
   'shapes',
   'lines',
+  'tables',
+  'charts',
+  'diagrams',
+  'wordart',
+  'formatting',
   'present',
   'share',
   'comments',
   'versions',
   'export',
   'help',
+  'chrome',
+  'view',
+  'inbox',
   'surface',
 ]);
 
@@ -66,6 +83,8 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/share.spec.ts',
   'core/export.spec.ts',
   'core/surface.spec.ts',
+  /* the return round (docs/RETURN.md section 5): the clipboard paste into the chart grid */
+  'core/documents.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS]);
@@ -73,8 +92,37 @@ export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS]);
 /** `area.feature.interaction`: two to four parts of lower case letters, digits and hyphens. */
 export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,3}$/;
 
-/** The feature that cannot be parked: a failed or not driven `surface.*` row blocks the ship (rule 4). */
+/**
+ * The features that cannot be parked (docs/RETURN.md section 1 rule 2): a feature already in the
+ * default view with no flag to hide it. A failed or not driven row of one of them blocks the ship
+ * unless the row carries `parks` (below). `surface` (the switch), `chrome` (the title row's split
+ * button, separators and right cluster; nothing hides them) and every core feature of FOCUS.md
+ * section 2. The parkable features are the rest of CORE_FEATURES: every menu row and control of
+ * each carries the `advanced` flag or a stub sentence, so hiding the feature is one flag change.
+ */
+export const UNPARKABLE_FEATURES = Object.freeze([
+  'surface',
+  'chrome',
+  'decks',
+  'slides',
+  'text',
+  'images',
+  'arrange',
+  'present',
+  'share',
+  'comments',
+  'versions',
+  'export',
+  'help',
+]);
+
+/** The focus round's one unparkable feature, kept for the callers that named it. */
 export const UNPARKABLE_FEATURE = 'surface';
+
+/** True for a feature a red row can park (rule 2). */
+export function isParkable(feature) {
+  return CORE_FEATURES.includes(feature) && !UNPARKABLE_FEATURES.includes(feature);
+}
 
 const ROW_KEYS = new Set([
   'id',
@@ -87,7 +135,43 @@ const ROW_KEYS = new Set([
   'note',
   'setup',
   'manual',
+  'parks',
 ]);
+
+/**
+ * The sources the `parks` ids are validated against (docs/RETURN.md section 5: "validated against
+ * model.ts"): the menu model, the toolbar tails and the title row, read as text; an id is known
+ * when it appears as a string literal in one of them. A plain Node module cannot import the
+ * TypeScript model, so the check is the literal's presence, which catches a typo and a row that
+ * names a control the product no longer has.
+ */
+export const CONTROL_SOURCE_PATHS = Object.freeze(
+  [
+    '../../packages/chrome/src/menus/model.ts',
+    '../../packages/chrome/src/menus/toolbar-tails.ts',
+    '../../packages/chrome/src/TitleRow.tsx',
+  ].map((rel) => fileURLToPath(new URL(rel, import.meta.url))),
+);
+
+let controlSourceText = null;
+/** The concatenated text of the control sources, read once; empty when none exists (a copied file alone). */
+function controlSources() {
+  if (controlSourceText === null)
+    controlSourceText = CONTROL_SOURCE_PATHS.filter((p) => existsSync(p))
+      .map((p) => readFileSync(p, 'utf8'))
+      .join('\n');
+  return controlSourceText;
+}
+
+/** A data-control id: dot separated parts of letters and digits. */
+export const CONTROL_ID_PATTERN = /^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+$/;
+
+/** True when the id appears as a string literal in one of the control sources. */
+export function isKnownControl(id) {
+  const text = controlSources();
+  if (text === '') return true;
+  return text.includes(`'${id}'`) || text.includes(`"${id}"`) || text.includes(`\`${id}\``);
+}
 
 /**
  * A manual row (the orchestrator's ruling (3) on docs/FOCUS.md section 9): a row whose only
@@ -150,6 +234,21 @@ export function validateCoreMatrix(rows) {
       problems.push(`${where}: manual is not a sentence naming the obstacle`);
     if (row.setup !== undefined && typeof row.setup !== 'string')
       problems.push(`${where}: setup is not a string`);
+    if (row.parks !== undefined) {
+      if (!Array.isArray(row.parks) || row.parks.length === 0)
+        problems.push(`${where}: parks is not a list of data-control ids`);
+      else
+        for (const control of row.parks) {
+          if (typeof control !== 'string' || !CONTROL_ID_PATTERN.test(control))
+            problems.push(
+              `${where}: parks names ${JSON.stringify(control)}, not a data-control id`,
+            );
+          else if (!isKnownControl(control))
+            problems.push(
+              `${where}: parks names ${control}, which no control source holds (model.ts, toolbar-tails.ts, TitleRow.tsx)`,
+            );
+        }
+    }
   });
   if (problems.length > 0) throw new Error(`core-matrix.json: ${problems.join('; ')}`);
   return rows;
@@ -211,14 +310,20 @@ export function tally(rows = CORE_MATRIX) {
 }
 
 /**
- * Rule 4 of section 1 over a run: `results` maps every core id to `passed`, `failed` or
- * `not driven` (an id the run did not record is `not driven`). Returns the features that would
- * be parked at a ship on this run, the `surface` rows that would block it, and the red rows by
- * feature, so the ship note renders the list instead of typing it. `rows` narrows the reading to
- * one driver's rows (the walk probe judges its own rows, the gate judges the whole matrix).
+ * Rule 4 of section 1, with docs/RETURN.md section 1 rule 2, over a run: `results` maps every core
+ * id to `passed`, `failed` or `not driven` (an id the run did not record is `not driven`). Returns
+ * the features that would be parked at a ship on this run (`parked`), the rows whose own controls
+ * would stay parked (`parkedRows`, each `{ id, parks, result }`: a red row carrying `parks` parks
+ * those ids alone, never its feature), the rows of an unparkable feature that would block the ship
+ * (`blocking`), and the red rows by feature, so the ship note renders the list instead of typing
+ * it. `rows` narrows the reading to one driver's rows (the walk probe judges its own rows, the gate
+ * judges the whole matrix).
  */
 export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
   const red = new Map();
+  const parkedRows = [];
+  const parkingFeatures = new Set();
+  const blocking = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
@@ -228,51 +333,91 @@ export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
     const list = red.get(row.feature) ?? [];
     list.push({ id: row.id, result });
     red.set(row.feature, list);
+    if (row.parks !== undefined) {
+      parkedRows.push({ id: row.id, parks: [...row.parks], result });
+      continue;
+    }
+    if (isParkable(row.feature)) parkingFeatures.add(row.feature);
+    else blocking.push({ id: row.id, feature: row.feature, result });
   }
-  const parked = CORE_FEATURES.filter(
-    (feature) => feature !== UNPARKABLE_FEATURE && red.has(feature),
-  );
-  const blocking = red.get(UNPARKABLE_FEATURE) ?? [];
-  return { parked, blocking, red: Object.fromEntries(red) };
+  const parked = CORE_FEATURES.filter((feature) => parkingFeatures.has(feature));
+  return { parked, parkedRows, blocking, red: Object.fromEntries(red) };
+}
+
+/** The features and rows of a parked list: an array of features (the focus round's form) or the object. */
+function parkedOf(parked) {
+  if (Array.isArray(parked)) return { parkedFeatures: parked, parkedRows: [] };
+  return {
+    parkedFeatures: parked?.parkedFeatures ?? [],
+    parkedRows: parked?.parkedRows ?? [],
+  };
+}
+
+/** Throws on a parked list that names an unparkable feature, an unknown feature or a row without `parks`. */
+function checkParkedList(parkedFeatures, parkedRows, where) {
+  for (const feature of parkedFeatures) {
+    if (UNPARKABLE_FEATURES.includes(feature))
+      throw new RangeError(
+        `${where}${feature} cannot be parked: a failed or not driven ${feature} row blocks the ship`,
+      );
+    if (!CORE_FEATURES.includes(feature))
+      throw new RangeError(`${where}unknown feature ${feature} in the parked list`);
+  }
+  for (const entry of parkedRows) {
+    if (entry === null || typeof entry !== 'object' || typeof entry.id !== 'string')
+      throw new RangeError(`${where}parkedRows holds an entry without an id`);
+    const row = BY_ID.get(entry.id);
+    if (row === undefined)
+      throw new RangeError(`${where}parkedRows names an unknown row ${entry.id}`);
+    if (row.parks === undefined)
+      throw new RangeError(`${where}parkedRows names ${entry.id}, a row that carries no parks`);
+    if (!Array.isArray(entry.parks) || entry.parks.some((id) => !row.parks.includes(id)))
+      throw new RangeError(
+        `${where}parkedRows entry ${entry.id} names controls the row does not guard (${row.parks.join(', ')})`,
+      );
+  }
 }
 
 /**
- * The exit rule of 6.2 over a run and the ship's committed parked list: every core id must be
- * `passed` unless its feature is in `parkedFeatures`; `surface` cannot be listed. Returns `ok`
- * and the ids that fail it with their result. `rows` narrows the rule to one driver's rows.
- */
-
-/**
- * The committed parked list of a ship (6.2): `docs/gslides-parity/focus/ship-<commit>.json`
- * with `{ "commit": "<sha>", "parkedFeatures": [...] }`. Returns the list, checked against the
- * feature names; `surface` is refused here as it is in `shipVerdict`.
+ * The committed parked list of a ship (6.2; docs/RETURN.md section 1 rule 2):
+ * `docs/gslides-parity/focus/ship-<commit>.json` with `{ "commit": "<sha>", "parkedFeatures":
+ * [...], "parkedRows": [{ "id", "parks" }] }` (`parkedRows` optional; rendered from a run, never
+ * typed). Returns the list, checked against the feature names and the matrix; an unparkable
+ * feature is refused here as it is in `shipVerdict`, and a parkedRows entry must name a row that
+ * carries `parks` and only the controls that row guards.
  */
 export function readParkedList(path) {
   const parsed = JSON.parse(readFileSync(path, 'utf8'));
   const list = parsed?.parkedFeatures;
   if (!Array.isArray(list)) throw new Error(`${path}: no parkedFeatures list`);
-  for (const feature of list) {
-    if (feature === UNPARKABLE_FEATURE)
-      throw new RangeError(`${path}: ${UNPARKABLE_FEATURE} cannot be parked`);
-    if (!CORE_FEATURES.includes(feature))
-      throw new RangeError(`${path}: unknown feature ${feature}`);
-  }
-  return { commit: typeof parsed.commit === 'string' ? parsed.commit : null, parkedFeatures: list };
+  const parkedRows = parsed?.parkedRows ?? [];
+  if (!Array.isArray(parkedRows)) throw new Error(`${path}: parkedRows is not a list`);
+  checkParkedList(list, parkedRows, `${path}: `);
+  return {
+    commit: typeof parsed.commit === 'string' ? parsed.commit : null,
+    parkedFeatures: list,
+    parkedRows: parkedRows.map((entry) => ({ id: entry.id, parks: [...entry.parks] })),
+  };
 }
 
-export function shipVerdict(results, parkedFeatures = [], rows = CORE_MATRIX) {
-  if (parkedFeatures.includes(UNPARKABLE_FEATURE))
-    throw new RangeError(
-      `${UNPARKABLE_FEATURE} cannot be parked: a failed or not driven surface row blocks the ship`,
-    );
-  for (const feature of parkedFeatures)
-    if (!CORE_FEATURES.includes(feature))
-      throw new RangeError(`unknown feature ${feature} in the parked list`);
+/**
+ * The exit rule of 6.2 over a run and the ship's committed parked list: every core id must be
+ * `passed` unless its feature is in `parkedFeatures` or the row itself is in `parkedRows` (a row
+ * carrying `parks`, whose own controls stay behind the switch for the ship); an unparkable
+ * feature cannot be listed. `parked` is the array of features (the focus round's form) or the
+ * object `readParkedList` returns. Returns `ok` and the ids that fail it with their result.
+ * `rows` narrows the rule to one driver's rows.
+ */
+export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
+  const { parkedFeatures, parkedRows } = parkedOf(parked);
+  checkParkedList(parkedFeatures, parkedRows, '');
+  const parkedIds = new Set(parkedRows.map((entry) => entry.id));
   const failures = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
-    if (result === 'passed' || parkedFeatures.includes(row.feature)) continue;
+    if (result === 'passed' || parkedFeatures.includes(row.feature) || parkedIds.has(row.id))
+      continue;
     if (result === 'not driven' && isManualRow(row)) continue;
     failures.push({ id: row.id, feature: row.feature, result });
   }
@@ -295,7 +440,11 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
     }
     for (const driver of CORE_DRIVERS)
       console.log(
-        `  ${driver.padEnd(22)} ${String(rowsForDriver(driver).length).padStart(3)} rows`,
+        `  ${driver.padEnd(24)} ${String(rowsForDriver(driver).length).padStart(3)} rows`,
       );
+    const withParks = CORE_MATRIX.filter((row) => row.parks !== undefined);
+    console.log(
+      `  ${withParks.length} rows carry parks; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
+    );
   }
 }

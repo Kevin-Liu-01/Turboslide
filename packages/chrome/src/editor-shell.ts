@@ -13,7 +13,8 @@ import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
-import { CATALOG } from '@turboslide/schema/catalog';
+import { CATALOG, blockTextPaths } from '@turboslide/schema/catalog';
+import type { Color } from '@turboslide/schema/color';
 import type { Deck, DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
 import { deckAppearance, sectionOfSlide, slideBlocks, slideOrder } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
@@ -29,11 +30,13 @@ import {
   BULLET_PRESETS,
   NUMBER_PRESETS,
   marksOfRange,
+  placeRuns,
   plainLength,
+  runFlags,
   splitParagraphs,
 } from '@turboslide/schema/text';
-import type { RunMarks } from '@turboslide/schema/text';
-import { TYPE_LADDER, TYPE_LEADING } from '@turboslide/schema/typography';
+import type { RunFlagKey, RunFlags, RunMarks } from '@turboslide/schema/text';
+import { INDENT_STEP_PX, TYPE_LADDER, TYPE_LEADING } from '@turboslide/schema/typography';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import type { SlideRenderer } from './LayoutGrid';
@@ -142,6 +145,8 @@ export type EditorHandle = {
   regroup?: () => void;
   cropMode?: () => void;
   exitCrop?: () => void;
+  /** whether a crop is open on the stage, so a bare Enter finishes it and is otherwise the focused button's (docs/RETURN.md 4.1; return/build/b1.md R1) */
+  cropOpen?: () => boolean;
   mask?: (shape: string | null) => void;
   /** inserts text at the caret, or into a new text box when nothing is being edited */
   insertText?: (text: string) => void;
@@ -1051,18 +1056,84 @@ export function selectionGroup(
   return tag !== undefined && blocks.every((block) => block.pos?.group === tag) ? tag : undefined;
 }
 
+// ---------------------------------------------------------------------------------------------
+// The kept cell pointer (docs/RETURN.md 2.4 fixes 2 and 3, section 6: B2 writes it, B5 reads it)
+
+/**
+ * The table cell a selection last named, per table, so the Format > Table rows, the Align rows
+ * and the table tail act on the caret's cell after the cell session ended (a menu bar press, a
+ * list plate that took the focus) or on the table selected by one click. Keyed by slide and block;
+ * a new cell session moves the pointer, and a table selected by one click before any session has
+ * none, so the rows fall back to cell 1,1 (B5's plans). Module state on purpose: the shell reads
+ * every selection through `buildMenuContext` and every plan through `factsOf`, so the pointer is
+ * remembered where the selection is read and needs no wiring through the route (RETURN.md 2.4:
+ * Google enables Format > Table "when the cursor is in a table").
+ */
+const keptCells = new Map<string, { row: number; column: number }>();
+
+function cellKey(slideId: string | undefined, blockId: string): string {
+  return `${slideId ?? ''}/${blockId}`;
+}
+
+/** Remembers the cell a selection names; the selection is returned as given. */
+export function rememberCell(
+  slideId: string | undefined,
+  selection: EditorSelection | null | undefined,
+): void {
+  if (selection?.blockId === undefined || selection.cell === undefined) return;
+  keptCells.set(cellKey(slideId, selection.blockId), { ...selection.cell });
+}
+
+/**
+ * The selection with the kept cell filled in when it names a table and no cell: the caret's last
+ * cell in that table. A selection that carries a cell is remembered and returned as it is.
+ */
+export function withKeptCell(
+  slide: Slide | undefined,
+  selection: EditorSelection | null | undefined,
+): EditorSelection | null | undefined {
+  if (selection === null || selection === undefined || selection.blockId === undefined)
+    return selection;
+  if (selection.cell !== undefined) {
+    rememberCell(slide?.id, selection);
+    return selection;
+  }
+  const block = objectOf(slide, selection.blockId);
+  if (block?.type !== 'table') return selection;
+  const kept = keptCells.get(cellKey(slide?.id, selection.blockId));
+  if (kept === undefined) return selection;
+  const rows = (block as TableBlock).rows.length;
+  const columns = (block as TableBlock).columns.length;
+  /* a remembered cell a row or column deletion removed falls back to the last one that exists */
+  const cell = {
+    row: Math.max(0, Math.min(rows - 1, kept.row)),
+    column: Math.max(0, Math.min(columns - 1, kept.column)),
+  };
+  return { ...selection, cell };
+}
+
+/** Forgets every kept cell (the tests). */
+export function forgetKeptCells(): void {
+  keptCells.clear();
+}
+
 /** Which tail the toolbar draws (SPEC 3.2 to 3.8; SPEC-2 4.2 adds the chart and group tails). */
 export function tailKindOf(
   slide: Slide | undefined,
   selection: EditorSelection | null | undefined,
 ): TailKind {
-  const block = selectedBlock(slide, selection);
+  /* a fixed kind's field (the cover title's heading and lead, a statement's big line) is an
+     object to the tail as it is to the menus: one click on the cover title swaps the toolbar to
+     the text tail (docs/RETURN.md 2.14 item 1; audit-formatting row 10 read the default tail) */
+  const block = objectOf(slide, selection?.blockId);
   if (block === undefined) return selection?.text ? 'text' : 'default';
   /* SPEC-2 4.2: a group selection takes the group tail whatever its members are */
   if ((selection?.blockIds?.length ?? 0) > 1 && selectionGroup(slide, selection) !== undefined)
     return 'group';
-  if (block.type === 'table')
-    return selection?.cell !== undefined || selection?.text ? 'table' : 'other';
+  /* a selected table takes the table tail with the caret's cell, the kept cell after the session
+     ended, or cell 1,1 when the table was selected by one click (RETURN.md 2.4 fixes 2 and 3):
+     the tail's Fill, Border and Align controls read the cell the plans read */
+  if (block.type === 'table') return 'table';
   const family = blockFamily(block);
   if (family === 'text') return 'text';
   if (family === 'shape') return 'shape';
@@ -1209,10 +1280,11 @@ export function buildMenuContext(
   const order = slideOrder(input.document.deck);
   const slide = input.document.slides[input.slideId];
   const index = order.indexOf(input.slideId);
-  const block = objectOf(slide, input.selection?.blockId);
-  const ids =
-    input.selection?.blockIds ??
-    (input.selection?.blockId === undefined ? [] : [input.selection.blockId]);
+  /* the caret's cell survives the end of a cell session for the Format > Table and Align rows,
+     and a table selected by one click acts on its kept cell or cell 1,1 (RETURN.md 2.4 fix 2) */
+  const picked = withKeptCell(slide, input.selection);
+  const block = objectOf(slide, picked?.blockId);
+  const ids = picked?.blockIds ?? (picked?.blockId === undefined ? [] : [picked.blockId]);
   const blocks = ids.length;
   const freeform = slide?.kind === 'content' && slide.layout.type === 'freeform';
   const placed = slide === undefined ? [] : slideBlocks(slide);
@@ -1239,11 +1311,11 @@ export function buildMenuContext(
     block !== undefined && 'typography' in block && typeof block.typography === 'object'
       ? (block.typography as Record<string, unknown> | undefined)
       : undefined;
-  const group = selectionGroup(slide, input.selection);
-  const listItem = input.selection?.listItem === true || block?.type === 'plain';
+  const group = selectionGroup(slide, picked);
+  const listItem = picked?.listItem === true || block?.type === 'plain';
   const listLevel =
-    input.selection?.listLevel ??
-    (block?.type === 'plain' ? block.items[input.selection?.cell?.row ?? 0]?.level : undefined);
+    picked?.listLevel ??
+    (block?.type === 'plain' ? block.items[picked?.cell?.row ?? 0]?.level : undefined);
   const selection: MenuContext['selection'] = {
     blocks,
     ...(family === undefined ? {} : { block: family }),
@@ -1255,37 +1327,34 @@ export function buildMenuContext(
     textBlock:
       (block !== undefined && TEXT_TYPES.has(block.type)) ||
       block?.type === 'plain' ||
-      input.selection?.text === true ||
+      picked?.text === true ||
       block?.type === 'table' ||
       (block?.type === 'shape' && !isLineKind(block.shape)),
     listItem,
-    tableCell:
-      block?.type === 'table' &&
-      (input.selection?.cell !== undefined ||
-        input.selection?.cells !== undefined ||
-        input.selection?.text === true),
+    /* every Format > Table row is enabled while a table is selected, by a cell session, by the
+       kept cell after it, or by one click, and acts on the kept cell or cell 1,1 (RETURN.md 2.4
+       fix 2: Google enables the rows "when the cursor is in a table") */
+    tableCell: block?.type === 'table',
     linked: block?.link !== undefined,
     order: { forward, front: forward, backward, back: backward },
     /* round two (SPEC-2 4.1, 1.1): every top level block of every slide kind is an object; the
        route says no for a nested block */
-    object: blocks > 0 && input.selection?.nested !== true,
-    rotatable:
-      input.selection?.positioned ?? (block?.pos !== undefined || (blocks > 0 && !freeform)),
+    object: blocks > 0 && picked?.nested !== true,
+    rotatable: picked?.positioned ?? (block?.pos !== undefined || (blocks > 0 && !freeform)),
     ...(group === undefined ? {} : { group }),
     ...(input.regroup === undefined ? {} : { regroup: input.regroup }),
-    coversSheet: input.selection?.coversSheet ?? coversSheetOf(slide, block),
-    ...(input.selection?.cells === undefined ? {} : { cells: input.selection.cells }),
+    coversSheet: picked?.coversSheet ?? coversSheetOf(slide, block),
+    ...(picked?.cells === undefined ? {} : { cells: picked.cells }),
     ...(block?.type === 'table' &&
-    input.selection?.cell !== undefined &&
+    picked?.cell !== undefined &&
     (block as TableBlock).spans?.some(
-      (span) =>
-        span.row === input.selection?.cell?.row && span.column === input.selection?.cell?.column,
+      (span) => span.row === picked?.cell?.row && span.column === picked?.cell?.column,
     )
       ? { merged: true }
       : {}),
-    ...(input.selection?.range === undefined ? {} : { range: input.selection.range }),
-    imageEdited: input.selection?.imageEdited ?? imageEditedOf(block),
-    outlined: input.selection?.outlined ?? (block?.type === 'text' && block.outline !== undefined),
+    ...(picked?.range === undefined ? {} : { range: picked.range }),
+    imageEdited: picked?.imageEdited ?? imageEditedOf(block),
+    outlined: picked?.outlined ?? (block?.type === 'text' && block.outline !== undefined),
     ...(listLevel === undefined ? {} : { listLevel }),
     spaceBefore: typeof typography?.spaceBefore === 'number' && typography.spaceBefore > 0,
     spaceAfter: typeof typography?.spaceAfter === 'number' && typography.spaceAfter > 0,
@@ -1293,7 +1362,7 @@ export function buildMenuContext(
     ...(block?.type === 'html' ? { html: true } : {}),
   };
   const focus: MenuContext['focus'] =
-    input.focus ?? (input.selection?.text ? 'text' : blocks > 0 ? 'canvas' : 'none');
+    input.focus ?? (picked?.text ? 'text' : blocks > 0 ? 'canvas' : 'none');
   const guides = input.guides ?? input.document.deck.guides;
   /* the slide's place comes from the manifest, so a shell that has the deck but not the slide
      bodies (the bridge of ViewerShell.tsx) still knows there is a slide to act on */
@@ -1407,7 +1476,9 @@ export function factsOf(
     document: input.document,
     slideId: input.slideId,
     selectedSlideIds: input.selectedSlideIds ?? [input.slideId],
-    selection: input.selection,
+    /* the kept cell pointer (RETURN.md 2.4 fix 2): a plan on a table acts on the caret's cell,
+       the cell the ended session left, or cell 1,1 */
+    selection: withKeptCell(input.document.slides[input.slideId], input.selection),
     revision: input.revision,
     lastLayout,
     ...(input.guides === undefined ? {} : { guides: input.guides }),
@@ -1683,14 +1754,19 @@ function typographyOf(target: Block): Record<string, unknown> {
     : {};
 }
 
-/** The block's current size: its typography override, else the ladder step its role implies. */
+/**
+ * The block's current size: its typography override, else the size the theme draws its role at
+ * (packages/theme/src/gt-ink-paper/sheet.css: h1 88, .big 72, h2 and the mood plate's title 44),
+ * so Decrease font size on the cover title steps from the 88 it draws at, not from a step the
+ * shell believed (audit-formatting row 6 read "dom size 88").
+ */
 function currentSize(target: Block): number {
   const typography = typographyOf(target);
   if (typeof typography.size === 'number') return typography.size;
   if (target.type === 'heading') {
-    if (target.level === 'big') return 88;
-    if (target.level === 'h1' || target.level === 'title') return 58;
-    return 34;
+    if (target.level === 'h1') return 88;
+    if (target.level === 'big') return 72;
+    return 44;
   }
   if (target.type === 'paragraph')
     return target.role === 'lead' ? 26 : target.role === 'cap' ? 17 : 20;
@@ -1721,10 +1797,14 @@ export function stepLadder(size: number, direction: 1 | -1): number {
   return next ?? size;
 }
 
-/** Google's spacing names on the theme's leading steps (SPEC 2.5). */
+/**
+ * Google's spacing names on the theme's leading steps (SPEC 2.5). Every row writes the value its
+ * label names: 1.15 writes 1.15, a step of TYPE_LEADING and of LINE_SPACING_PRESETS (docs/RETURN.md
+ * 2.14 item 4; audit-formatting row 48 read 1.2 under the label 1.15).
+ */
 export const SPACING_STEPS: ReadonlyArray<{ label: string; leading: number }> = [
   { label: 'Single', leading: TYPE_LEADING[0] },
-  { label: '1.15', leading: 1.2 },
+  { label: '1.15', leading: 1.15 },
   { label: '1.5', leading: 1.5 },
   { label: 'Double', leading: TYPE_LEADING[TYPE_LEADING.length - 1] ?? 1.7 },
 ];
@@ -1789,9 +1869,9 @@ const ALIGN_OF: Readonly<Record<string, 'left' | 'center' | 'right' | 'justify'>
 };
 
 const SPACING_OF: Readonly<Record<string, number>> = {
-  'format.spacing.single': SPACING_STEPS[0]?.leading ?? 1.02,
-  'format.spacing.1_15': 1.2,
-  'format.spacing.1_5': 1.5,
+  'format.spacing.single': SPACING_STEPS[0]?.leading ?? 1,
+  'format.spacing.1_15': SPACING_STEPS[1]?.leading ?? 1.15,
+  'format.spacing.1_5': SPACING_STEPS[2]?.leading ?? 1.5,
   'format.spacing.double': SPACING_STEPS[3]?.leading ?? 1.7,
 };
 
@@ -1835,6 +1915,77 @@ function rangeOf(target: Block, path: string, facts: ActionFacts): [number, numb
 }
 
 /**
+ * True when the target is a fixed kind's field the menus see as a block (`pseudoBlockOf`: the
+ * cover title's heading and lead, a statement's big line) and not a block of the slide yet. The
+ * first format write on it converts the slide to a canvas the way the Align rows do (docs/RETURN.md
+ * 2.14 item 1, FOCUS.md 2.5): the plan carries the reducer's own mutations in one `slide.update`,
+ * because the store's text actions look the block up before they write and would refuse it, and
+ * the studio's commit puts the measured conversion in front of them (apps/studio/src/editor/
+ * convert-first.ts), so one revision and one undo step hold both.
+ */
+function isPseudoTarget(facts: ActionFacts, target: Block): boolean {
+  const slide = currentSlide(facts);
+  if (slide === undefined) return false;
+  return !slideBlocks(slide).some(({ block }) => block.id === target.id);
+}
+
+/** One `slide.update` carrying the mutations as they are (the reducer's words). */
+function slideUpdatePlan(facts: ActionFacts, mutations: Mutation[], label: string): ActionPlan {
+  return {
+    action: 'slide.update',
+    input: { slideId: facts.slideId, mutations, baseRevision: facts.revision },
+    label,
+  };
+}
+
+/** What text.style's marks say as the reducer's text.mark edit: the flags set and the flags cleared. */
+export function flagEditOf(marks: Record<string, unknown>): {
+  set?: RunFlags;
+  clear?: RunFlagKey[];
+} {
+  const set: RunFlags = {};
+  const clear: RunFlagKey[] = [];
+  for (const flag of ['i', 'u', 's', 'sup', 'sub'] as const) {
+    if (marks[flag] === true) set[flag] = true;
+    else if (marks[flag] === false) clear.push(flag);
+  }
+  if ('color' in marks) {
+    if (marks.color === null) clear.push('color');
+    else if (typeof marks.color === 'string') set.color = marks.color as Color;
+  }
+  if ('highlight' in marks) {
+    if (marks.highlight === null) clear.push('hl');
+    else if (typeof marks.highlight === 'string') set.hl = marks.highlight as Color;
+  }
+  return {
+    ...(Object.keys(set).length > 0 ? { set } : {}),
+    ...(clear.length > 0 ? { clear } : {}),
+  };
+}
+
+/** The run flags Clear formatting removes: every mark, the colours and the bold run; a link stays. */
+export const CLEARED_FLAGS: ReadonlyArray<RunFlagKey> = [
+  'i',
+  'u',
+  's',
+  'sup',
+  'sub',
+  'color',
+  'hl',
+  'b',
+];
+
+/** True when a run inside the range carries one of the flags Clear formatting removes. */
+export function hasClearableMarks(text: string, range: readonly [number, number]): boolean {
+  const [start, end] = range;
+  return placeRuns(text).some((placed) => {
+    if (placed.end <= start || placed.start >= end) return false;
+    const flags = runFlags(placed.run) as Record<string, unknown>;
+    return CLEARED_FLAGS.some((key) => flags[key] !== undefined);
+  });
+}
+
+/**
  * One `text.style` toggling a mark, or setting a colour, over the caret's range or the whole
  * Text (SPEC-2 4.1): the toggle reads the range's current marks (the route's, else the Text's).
  */
@@ -1864,6 +2015,23 @@ export function textStylePlan(
   } else {
     marks = { highlight: edit.highlight };
   }
+  /* the cover title's heading before the slide converts: the reducer's text.mark in one
+     slide.update, so the studio's commit converts the slide in the same write */
+  if (isPseudoTarget(facts, target))
+    return slideUpdatePlan(
+      facts,
+      [
+        {
+          op: 'text.mark',
+          slideId: facts.slideId,
+          blockId: target.id,
+          path,
+          range,
+          edit: { kind: 'marks', ...flagEditOf(marks) },
+        },
+      ],
+      label,
+    );
   return {
     action: 'text.style',
     input: {
@@ -2500,6 +2668,24 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       const path = textPathOf(target, facts.selection);
       if (path === null) return { refused: SELECT_TEXT };
       const mode = effect.kind === 'action' ? effect.input?.mode : undefined;
+      if (
+        isPseudoTarget(facts, target) &&
+        (mode === 'lower' || mode === 'upper' || mode === 'title')
+      )
+        return slideUpdatePlan(
+          facts,
+          [
+            {
+              op: 'text.mark',
+              slideId: facts.slideId,
+              blockId: target.id,
+              path,
+              range: rangeOf(target, path, facts),
+              edit: { kind: 'case', mode },
+            },
+          ],
+          item.label,
+        );
       return {
         action: 'text.case',
         input: {
@@ -2564,6 +2750,21 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.alignIndent.decreaseIndent': {
       if (target === undefined) return { refused: SELECT_TEXT };
       const by = item.id.endsWith('increaseIndent') ? 1 : -1;
+      if (isPseudoTarget(facts, target) && target.type !== 'plain') {
+        const typography = typographyOf(target);
+        const current = typeof typography.indent === 'number' ? typography.indent : 0;
+        const indent = Math.max(0, current + by * INDENT_STEP_PX);
+        const next = { ...typography };
+        if (indent === 0) delete next.indent;
+        else next.indent = indent;
+        return blockSet(
+          facts,
+          target.id,
+          '/typography',
+          Object.keys(next).length === 0 ? undefined : next,
+          item.label,
+        );
+      }
       const items =
         target.type === 'plain'
           ? {
@@ -2602,6 +2803,19 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       const field = item.id.endsWith('addBefore') ? 'before' : 'after';
       const current = typography[field === 'before' ? 'spaceBefore' : 'spaceAfter'];
       const set = typeof current === 'number' && current > 0;
+      if (isPseudoTarget(facts, target)) {
+        const key = field === 'before' ? 'spaceBefore' : 'spaceAfter';
+        const next = { ...typography };
+        if (set) delete next[key];
+        else next[key] = 8;
+        return blockSet(
+          facts,
+          target.id,
+          '/typography',
+          Object.keys(next).length === 0 ? undefined : next,
+          set ? `Remove space ${field} paragraph` : item.label,
+        );
+      }
       return {
         action: 'text.spacing',
         input: { slideId: facts.slideId, blockIds: [target.id], [field]: set ? null : 8, ...rev },
@@ -2684,16 +2898,38 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     }
     case 'format.clearFormatting': {
       if (target === undefined) return { refused: SELECT_BLOCK };
-      const present = FORMAT_OVERRIDE_PATHS.filter(
-        (path) => path.slice(1) in (target as unknown as Record<string, unknown>),
-      );
-      if (present.length === 0) return { refused: 'Nothing to clear' };
-      const mutations: Mutation[] = present.map((path) => ({
-        op: 'block.set',
-        slideId: facts.slideId,
-        blockId: target.id,
-        path,
-      }));
+      /* with a range selected in a session the marks of that range alone go, as Google's Clear
+         formatting acts on the selection; on a selected box every override and every mark of
+         every Text of the block goes (docs/RETURN.md 2.14 item 5: the button left an italic
+         word with the sentence "Nothing to clear", audit-formatting row 60) */
+      const range = facts.selection?.range;
+      const caretPath = range === undefined ? null : textPathOf(target, facts.selection);
+      const mutations: Mutation[] = [];
+      if (range === undefined || caretPath === null) {
+        const present = FORMAT_OVERRIDE_PATHS.filter(
+          (path) => path.slice(1) in (target as unknown as Record<string, unknown>),
+        );
+        for (const path of present)
+          mutations.push({ op: 'block.set', slideId: facts.slideId, blockId: target.id, path });
+      }
+      const paths =
+        caretPath !== null && range !== undefined ? [caretPath] : blockTextPaths(target);
+      for (const path of paths) {
+        const text = textAt(target, path);
+        if (text === undefined) continue;
+        const over: [number, number] =
+          caretPath !== null && range !== undefined ? range : [0, plainLength(text)];
+        if (over[0] >= over[1] || !hasClearableMarks(text, over)) continue;
+        mutations.push({
+          op: 'text.mark',
+          slideId: facts.slideId,
+          blockId: target.id,
+          path,
+          range: over,
+          edit: { kind: 'marks', clear: [...CLEARED_FLAGS] },
+        });
+      }
+      if (mutations.length === 0) return { refused: 'Nothing to clear' };
       return {
         action: 'slide.update',
         input: { slideId: facts.slideId, mutations, ...rev },

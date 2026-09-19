@@ -14,6 +14,7 @@ import { anchorAtSelection, canvasOrder, stepThread } from './comments/comments-
 import { CommentsPanel } from './comments/CommentsPanel';
 import { NamePromptDialog } from './dialogs/NamePrompt';
 import { WordArtBar } from './dialogs/WordArtBar';
+import { downloadFromPage } from './download';
 import {
   APPEARANCE_STORAGE,
   DEFAULT_SETTINGS,
@@ -405,6 +406,21 @@ export function EditorShell({
     if (routeThread !== null) setCommentCard({ threadId: routeThread });
   }, [routeThread]);
 
+  /* the default made explicit: `applyTheme` persists the theme it stamps under gt-theme (the
+     viewer's key), and `readAppearance` reads a stored gt-theme as the reader's explicit choice
+     when no choice of this menu is stored, so a chrome that matched the deck once and reloaded
+     came back pinned to that theme and stopped following the deck (the light appearance rows read
+     the dark selection colour on a light deck after a reload: return/build/b4.md request 4,
+     `arrange.selection-colour.light`). With nothing chosen and no gt-theme set before the mount,
+     the choice is recorded as `match`; a gt-theme a reader or a test stored before the page opened
+     keeps its meaning */
+  useEffect(() => {
+    if (load(APPEARANCE_STORAGE) !== null) return;
+    const stored = load('gt-theme');
+    if (stored === 'light' || stored === 'dark') return;
+    store(APPEARANCE_STORAGE, 'match');
+  }, []);
+
   /* the deck's appearance changed while the chrome matches it */
   const deckAppearance = appearanceOf(input.document.deck);
   useEffect(() => {
@@ -534,27 +550,33 @@ export function EditorShell({
         return;
       }
       const current = inputRef.current;
-      current
-        .dispatch(plan.action, plan.input)
-        .then((result) => {
-          /* Ungroup leaves a set Regroup puts back; Group and Regroup forget it (SPEC-2 4.1) */
-          if (plan.action === 'block.ungroup') {
-            const ids = (plan.input.blockIds as string[] | undefined) ?? [];
-            const group = plan.input.group as string | undefined;
-            const members =
-              ids.length > 0
-                ? ids
-                : selectedBlocks(current.document.slides[current.slideId], current.selection).map(
-                    (b) => b.id,
-                  );
-            const tag = group ?? current.selection?.group ?? `group-${Date.now().toString(36)}`;
-            if (members.length >= 2) setRegroup({ blockIds: members, group: tag });
-          } else if (plan.action === 'block.group' || plan.action === 'block.regroup') {
-            setRegroup(null);
-          }
-          return result;
-        })
-        .catch((error: unknown) => say(errorText(error)));
+      /* Ungroup leaves a set Regroup puts back; Group and Regroup forget it (SPEC-2 4.1). The
+         memory is written when the write is sent, from the selection the plan was built on, not
+         when the room acknowledges it: the Arrange menu opened in that gap read Regroup disabled
+         while the row, picked a moment later, worked (arrange.group.menu-regroup on the return
+         round's gate; return/build/integrator.md). A refused ungroup forgets it again below. */
+      let remembered: { blockIds: string[]; group: string } | null = null;
+      if (plan.action === 'block.ungroup') {
+        const ids = (plan.input.blockIds as string[] | undefined) ?? [];
+        const group = plan.input.group as string | undefined;
+        const members =
+          ids.length > 0
+            ? ids
+            : selectedBlocks(current.document.slides[current.slideId], current.selection).map(
+                (b) => b.id,
+              );
+        const tag = group ?? current.selection?.group ?? `group-${Date.now().toString(36)}`;
+        if (members.length >= 2) {
+          remembered = { blockIds: members, group: tag };
+          setRegroup(remembered);
+        }
+      } else if (plan.action === 'block.group' || plan.action === 'block.regroup') {
+        setRegroup(null);
+      }
+      current.dispatch(plan.action, plan.input).catch((error: unknown) => {
+        if (remembered !== null) setRegroup(null);
+        say(errorText(error));
+      });
     },
     [say],
   );
@@ -615,7 +637,7 @@ export function EditorShell({
         return result;
       };
       dispatchAll()
-        .then((result) => {
+        .then(async (result) => {
           if (plan.action === 'view.zoom') {
             const zoom = (plan.input as { zoom: number | 'fit' }).zoom;
             setSetting('zoom', zoom === 'fit' ? 'fit' : String(Math.round(zoom * 100)));
@@ -646,11 +668,26 @@ export function EditorShell({
             return;
           }
           if (plan.action === 'render.slide') {
+            /* the picture's address carries a ten minute grant the render route takes for the
+               bearer and answers as an attachment (server/tokens.ts signRenderGrant; docs/RETURN.md
+               2.19). A popup opened after a 6 to 27 s render sits outside the click's transient
+               activation and Chromium can block it (return/build/b7.md B7-R2), and an anchor's
+               download request is the browser's, not the page's: it carries none of the page's
+               headers and a redirect to another origin navigates the tab away from the editor
+               (VERIFICATION.md R1-F5). So the page fetches the picture and saves its bytes under
+               the server's file name (download.ts); a refusal is the server's sentence in the
+               snackbar. A picture on another origin keeps the tab. */
             const images = (result as { images?: string[] }).images ?? [];
             const first = images[0];
-            if (first !== undefined && /^(https?:)?\//.test(first))
-              window.open(first, '_blank', 'noopener');
-            else say(`Rendered ${images.length} image${images.length === 1 ? '' : 's'}`);
+            if (first !== undefined && /^(https?:)?\//.test(first)) {
+              const sameOrigin =
+                first.startsWith('/') ||
+                (typeof window !== 'undefined' && first.startsWith(window.location.origin));
+              if (sameOrigin) {
+                const format = (plan.input as { format?: string }).format ?? 'png';
+                await downloadFromPage(first, { name: `${current.deckId}.${format}` });
+              } else window.open(first, '_blank', 'noopener');
+            } else say(`Rendered ${images.length} image${images.length === 1 ? '' : 's'}`);
             return;
           }
           if (plan.action === 'deck.pack') {
@@ -902,6 +939,11 @@ export function EditorShell({
               : 'all';
           setSetting('comments', display);
           current.comments?.onDisplay?.(display);
+          /* View > Comments > Show all comments opens the Comments panel its sentence promises
+             and Hide comments closes it; Expand and Minimize change the markers alone
+             (docs/RETURN.md 2.16; audit-surface row 53; the matrix row view.comments.show-all-panel) */
+          if (display === 'all') openPanel('comments');
+          else if (display === 'hidden' && panel === 'comments') closePanel();
           return;
         }
         case 'pointerMine': {
@@ -946,7 +988,16 @@ export function EditorShell({
         }
       }
     },
-    [compact, effectiveSettings, setAppearance, setCompact, setSetting],
+    [
+      closePanel,
+      compact,
+      effectiveSettings,
+      openPanel,
+      panel,
+      setAppearance,
+      setCompact,
+      setSetting,
+    ],
   );
 
   /* the comment card (SPEC-3 5.3): the overlay draws it; the route learns the open thread */
@@ -1473,12 +1524,26 @@ export function EditorShell({
           return current.selection?.text === true ? false : rotateBy(-1);
         case 'key.rotateRight1':
           return current.selection?.text === true ? false : rotateBy(1);
-        case 'key.commit':
-          if (current.editor?.exitCrop) {
+        case 'key.commit': {
+          /* a bare Enter outside a field finishes an open crop and nothing else. The binding used
+             to answer true whenever the editor exposed `exitCrop`, which the stage's handle always
+             does, so the key table prevented the default of every bare Enter and the focused
+             Slideshow half, the chevron and every other title row button lost their Enter
+             activation (docs/RETURN.md 4.1; return-drive rows 7 to 12 read defaultPrevented true).
+             The stage's handle says whether a crop is open (`cropOpen`, Editor.tsx; return/build/b1.md
+             R1 and R4); a handle without it is read through the overlay's `.ts-crop-frame`, drawn
+             only while a crop is open (Overlay.tsx). With no crop the key is left to the focused
+             element. */
+          const cropOpen =
+            current.editor?.cropOpen !== undefined
+              ? current.editor.cropOpen()
+              : document.querySelector('.ts-crop-frame') !== null;
+          if (current.editor?.exitCrop && cropOpen) {
             current.editor.exitCrop();
             return true;
           }
           return false;
+        }
         /* round three (SPEC-3 0.42, section 14): Shift+Tab reaches the key owner when the open
            menu's list does not hold focus (the title button does); the menu closes and the
            roster takes focus once it is placed, as it would from inside the list */
@@ -1702,6 +1767,7 @@ export function EditorShell({
               identities={input.identities}
               showChanges={effectiveSettings.showChanges === true}
               selected={selectedVersion}
+              menuContext={menuContext}
               onShowChanges={(on) => {
                 setSetting('showChanges', on);
                 if (!on) setDiff(null);
@@ -2043,10 +2109,28 @@ export function EditorShell({
     <EditorShellContext value={state}>
       <TitleRow compact={compact} onShowMenus={() => setCompact(false)} />
       <MenuBar />
-      <div className="ts-toolbar" role="toolbar" aria-label="Toolbar" data-control="toolbar">
-        <ToolbarHead />
-        <ToolbarTail />
-      </div>
+      {/* View > Mode > Viewing draws no toolbar, as Google's does; Commenting and Editing keep it
+          (docs/RETURN.md 2.14 item 6; EditorShell.css zeroes the row from the root's data-edit-mode).
+          A viewer, whose route is always Viewing, keeps the tail's end alone: the View only button
+          of SPEC-3 6.3 is the viewer's way to ask for edit access, and the parity audit's roles
+          check reads it (the return round's integration; build/integrator.md section 2) */}
+      {mode === 'viewing' ? (
+        evaluate('viewOnly', menuContext) ? (
+          <div
+            className="ts-toolbar is-view-only"
+            role="toolbar"
+            aria-label="Toolbar"
+            data-control="toolbar"
+          >
+            <ToolbarTail />
+          </div>
+        ) : null
+      ) : (
+        <div className="ts-toolbar" role="toolbar" aria-label="Toolbar" data-control="toolbar">
+          <ToolbarHead />
+          <ToolbarTail />
+        </div>
+      )}
       {sidebar}
       <section className="pt-main" data-editor-main="">
         <div ref={stageRef} className="pt-stagewrap">

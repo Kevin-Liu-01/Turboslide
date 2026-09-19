@@ -11,6 +11,8 @@ export const IDS = [
   'versions.pick',
   'versions.name-current',
   'versions.undo-restore',
+  'versions.show-changes-toggle',
+  'versions.show-changes-marks',
 ];
 
 export async function run(t) {
@@ -153,9 +155,19 @@ export async function run(t) {
     'Restore an earlier version, then Cmd+Z',
     'the current version comes back',
     async () => {
-      const T = t.deck.titleSlide;
-      const current = JSON.stringify(await t.slideJson(T));
-      const order = await t.slideOrder();
+      /* the whole deck is the read (every slide's JSON in order, and the revision), not the title
+         slide alone: in a walk of a few areas the title slide can stand as the first version
+         saved it, so a restore of that version changed nothing the old read looked at while the
+         panel said "Restored the version of ..." (return/build/integrator.md item 12); the
+         revision moving proves the restore wrote, and the fingerprint says what it changed */
+      const fingerprint = async () => {
+        const ids = await t.slideOrder();
+        const slides = [];
+        for (const id of ids) slides.push(await t.slideJson(id));
+        return JSON.stringify({ ids, slides });
+      };
+      const current = await fingerprint();
+      const revisionBefore = (await t.state()).revision;
       await expandWindows();
       const restores = await page.evaluate(() =>
         [
@@ -188,13 +200,19 @@ export async function run(t) {
       if (!restoreCtl) return { ok: false, observed: 'no Restore control in the panel' };
       await t.clickControl(restoreCtl);
       await t.sleep(800);
-      const restored = await t.pollUntil(
-        async () =>
-          JSON.stringify(await t.slideJson(T)) !== current ||
-          (await t.slideOrder()).length !== order.length,
-        (x) => x,
-        15_000,
-      );
+      /* the restore has landed when the revision moved (the restore's own write); what it changed
+         is read from the fingerprint, which a restore of a version equal to the current deck
+         leaves as it was */
+      /* pollUntil answers the last value read, on the change or at the bound */
+      const wrote =
+        (await t.pollUntil(
+          async () => (await t.state()).revision,
+          (r) => r !== revisionBefore,
+          15_000,
+        )) !== revisionBefore;
+      const afterRestore = await fingerprint();
+      const changed = afterRestore !== current;
+      const revisionAfter = (await t.state()).revision;
       await t.settled();
       const said = await t.snackbar();
       /* the panel's notice ("Restored the version of …" or the refusal's sentence) and the
@@ -209,23 +227,148 @@ export async function run(t) {
           return s && 'error' in s ? JSON.stringify(s.error) : null;
         })
         .catch(() => null);
+      const restored = wrote && (changed || /restored/i.test(notice ?? ''));
       await t.clearAll();
       await t.press('Meta+z');
-      const back = await t.pollUntil(
-        async () =>
-          JSON.stringify(await t.slideJson(T)) === current &&
-          (await t.slideOrder()).length === order.length,
-        (x) => x,
-        15_000,
-      );
+      /* the current version is back when the deck reads as before the restore and the undo wrote
+         (its revision moved past the restore's) */
+      const back = await t
+        .pollUntil(
+          async () =>
+            (await t.state()).revision !== revisionAfter && (await fingerprint()) === current,
+          (x) => x,
+          15_000,
+        )
+        .catch(() => false);
       await t.settled();
       if (await t.visible('panel.versionHistory.close'))
         await t.clickControl('panel.versionHistory.close');
       else await t.press('Escape');
       return {
         ok: restored && back,
-        observed: `restore changed the deck ${restored} (${restoreCtl}; snackbar ${said ?? 'none'}; panel notice ${notice ?? 'none'}; state.error ${stateError ?? 'none'}); Cmd+Z brought the current version back ${back}`,
+        observed: `restore wrote ${wrote} (revision ${revisionBefore} -> ${revisionAfter}) and changed the deck ${changed} (${restoreCtl}; snackbar ${said ?? 'none'}; panel notice ${notice ?? 'none'}; state.error ${stateError ?? 'none'}); Cmd+Z brought the current version back ${back}`,
       };
     },
   );
+
+  // ---- the return round's rows (docs/RETURN.md 2.17, section 5): Show changes and its marks
+  const openHistory = async () => {
+    if (!(await t.visible('panel.versionHistory'))) {
+      await t.menuPath('file', 'file.versionHistory', 'file.versionHistory.see');
+      await t.waitControl('panel.versionHistory', 8000);
+    }
+  };
+  /* the attribute sits on the panel's list (.ts-versions.is-history, VersionsPanel.tsx 406), an
+     empty string while on and absent while off */
+  const showChangesState = () => t.attr('.ts-versions.is-history', 'data-show-changes');
+  await t.step(
+    'versions.show-changes-toggle',
+    'Version history > Show changes, twice',
+    "the panel's data-show-changes flips both ways",
+    async () => {
+      await t.clearAll();
+      await openHistory();
+      let drawn = await t.visible('versionHistory.showChanges');
+      let switched = false;
+      if (!drawn) {
+        switched = await t.setAdvanced(true);
+        if (switched) t.deck.advanced = true;
+        drawn = await t
+          .pollUntil(
+            () => t.visible('versionHistory.showChanges'),
+            (x) => x,
+            4000,
+          )
+          .catch(() => false);
+      }
+      if (!drawn)
+        return {
+          ok: false,
+          observed: `no Show changes control in the panel (switch on ${switched})`,
+        };
+      const before = await showChangesState();
+      await t.clickControl('versionHistory.showChanges');
+      const on = await t
+        .pollUntil(showChangesState, (x) => x !== before, 5000)
+        .catch(showChangesState);
+      await t.clickControl('versionHistory.showChanges');
+      const off = await t
+        .pollUntil(showChangesState, (x) => x === before, 5000)
+        .catch(showChangesState);
+      return {
+        ok: before === null && on !== null && off === null,
+        observed: `${switched ? 'with the switch on; ' : ''}data-show-changes ${before} -> ${on} -> ${off}`,
+      };
+    },
+  );
+  await t.step(
+    'versions.show-changes-marks',
+    'a heading edit and an added box after the named version; pick the older version with Show changes on; then off',
+    'the changed heading and the added box carry change marks (at least two); none with it off',
+    async () => {
+      await t.clearAll();
+      if (await t.visible('panel.versionHistory.close'))
+        await t.clickControl('panel.versionHistory.close');
+      const T = t.deck.titleSlide;
+      await t.clickCard(T);
+      const head = t.deck.head;
+      if (head) {
+        await t.openRun(head);
+        await t.press('End');
+        await t.typeHuman(' changed');
+        await t.press('Escape');
+        await t.settled();
+      }
+      const box = await t.placeBlock(T, {
+        id: 'changed-box',
+        type: 'text',
+        text: 'Added after the version',
+        pos: { x: 200, y: 700, w: 500, h: 100 },
+      });
+      await t.clearAll();
+      await openHistory();
+      if (!(await t.visible('versionHistory.showChanges'))) {
+        await t.setAdvanced(true);
+        t.deck.advanced = true;
+      }
+      if ((await showChangesState()) === null) await t.clickControl('versionHistory.showChanges');
+      await t.pollUntil(showChangesState, (x) => x !== null, 5000).catch(() => undefined);
+      await expandWindows();
+      const picks = await versionRows();
+      const named = await page.evaluate(() => {
+        const rows = [
+          ...document.querySelectorAll('[data-control^="versionHistory."][data-control$=".pick"]'),
+        ];
+        return (
+          rows
+            .find((el) =>
+              /Before the customer copy/.test(
+                el.closest('li, .ts-version, [data-version]')?.textContent ?? el.textContent ?? '',
+              ),
+            )
+            ?.getAttribute('data-control') ?? null
+        );
+      });
+      const target = named ?? picks[1] ?? picks[picks.length - 1];
+      if (!target) return { ok: false, observed: 'no version row to pick' };
+      await t.clickControl(target);
+      const marks = () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll('.ts-change-group, [data-change], .ts-change')]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.getAttribute('data-block') ?? e.className),
+        );
+      const on = await t.pollUntil(marks, (m) => m.length >= 2, 10_000).catch(marks);
+      await t.clickControl('versionHistory.showChanges');
+      const off = await t.pollUntil(marks, (m) => m.length === 0, 5000).catch(marks);
+      if (await t.visible('panel.versionHistory.close'))
+        await t.clickControl('panel.versionHistory.close');
+      else await t.press('Escape');
+      return {
+        ok: Boolean(box) && on.length >= 2 && off.length === 0,
+        observed: `picked ${target} (named row ${named}); marks with Show changes on ${on.length} (${on.join(', ')}); off ${off.length}`,
+      };
+    },
+  );
+  await t.advancedBack('the versions rows');
 }

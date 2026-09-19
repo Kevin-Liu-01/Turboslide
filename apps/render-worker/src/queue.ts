@@ -1,10 +1,15 @@
 // The job queue (MILESTONES M2 item 6): render, sheet, export, verify and measure jobs run one at a time,
 // in submission order, because the machine is shared and one browser page at a time is the rule
-// (AGENTS.md, dev server rules). A job has a directory under <workerDir>/jobs/<id> for its files, a
-// bounded log, and a record the HTTP surface serves; finished records are kept in memory up to
-// `keep` and on disk as job.json. `run` is submit and wait in one call, the shape a serverless
-// invocation needs: the job starts, finishes and is read back before the function answers
-// (docs/hosting-chromium.md); the queue still serializes it behind whatever is running.
+// (AGENTS.md, dev server rules), with one exception: an export job is queued ahead of the pending
+// render jobs (`EXPORT_AHEAD_OF`), because a person waits on a download in the Download dialog
+// while nobody waits on a thumbnail render (the card shows its placeholder until the render lands,
+// server/thumbs.ts). The running job is never interrupted and two exports keep their order. The
+// focus round read a PDF download on a checkout queued 14 s behind the `/decks` cards' renders
+// and past the row's 30 s (VERIFICATION C3T-F6). A job has a directory under <workerDir>/jobs/<id>
+// for its files, a bounded log, and a record the HTTP surface serves; finished records are kept
+// in memory up to `keep` and on disk as job.json. `run` is submit and wait in one call, the shape
+// a serverless invocation needs: the job starts, finishes and is read back before the function
+// answers (docs/hosting-chromium.md); the queue still serializes it behind whatever is running.
 import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -81,6 +86,21 @@ export type QueueOptions = {
 
 export function isJobKind(value: string): value is JobKind {
   return (JOB_KINDS as ReadonlyArray<string>).includes(value);
+}
+
+/** The job kinds a pending export is queued ahead of: the thumbnail renders nobody waits on. */
+export const EXPORT_AHEAD_OF: ReadonlySet<JobKind> = new Set<JobKind>(['render']);
+
+/**
+ * Where a submitted job enters the pending list: an export goes before the first pending job of
+ * a kind in `EXPORT_AHEAD_OF` (so behind every earlier export and every pending sheet, verify or
+ * measure job, and never before the running job, which is not in the list); every other kind goes
+ * last. Pure over the pending kinds, so the rule is pinned by a test without a queue.
+ */
+export function queuePosition(kind: JobKind, pendingKinds: ReadonlyArray<JobKind>): number {
+  if (kind !== 'export') return pendingKinds.length;
+  const first = pendingKinds.findIndex((pending) => EXPORT_AHEAD_OF.has(pending));
+  return first === -1 ? pendingKinds.length : first;
 }
 
 export function newJobId(): string {
@@ -180,7 +200,11 @@ export function createQueue(options: QueueOptions): Queue {
       log: [],
     };
     records.set(id, record);
-    pending.push({
+    const at = queuePosition(
+      kind,
+      pending.map((entry) => entry.record.kind),
+    );
+    pending.splice(at, 0, {
       record,
       run: run as JobRunner<unknown, unknown>,
       controller: new AbortController(),

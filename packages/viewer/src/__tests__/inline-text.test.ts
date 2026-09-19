@@ -14,8 +14,10 @@ import {
   clickEntry,
   entryCaret,
   forgetAbsorbed,
+  handedText,
   listAppendMutation,
   noteAbsorbed,
+  noteHanded,
   runKey,
   listRemoveMutation,
   nextCellPointer,
@@ -460,6 +462,22 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
     expect(out.text).toBe('hello!');
     expect(out.selection).toEqual([6, 6]);
   });
+
+  it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
+    // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
+    const base = 'Every line of copy';
+    const dom = 'Every AAAAline of copy';
+    const remote = 'Every liBBne of copy';
+    expect(absorbedText(base, dom, remote, [10, 10])).toEqual({
+      text: 'Every AAAAliBBne of copy',
+      selection: [10, 10],
+    });
+    // a caret inside the keystrokes follows their landing point; one past the remote insert
+    // moves with it; one before the keystrokes is an offset of the base and stays
+    expect(absorbedText(base, dom, remote, [8, 8]).selection).toEqual([8, 8]);
+    expect(absorbedText(base, dom, remote, [14, 14]).selection).toEqual([16, 16]);
+    expect(absorbedText(base, dom, remote, [3, 3]).selection).toEqual([3, 3]);
+  });
 });
 
 describe('textBurstMutation diffs against the document when a collaborator moved the text (SPEC-3 3.5)', () => {
@@ -555,6 +573,82 @@ describe('the absorbed marker lives as long as its session (VERIFICATION.md C3-F
   });
 });
 
+describe('the handed text is the base of the next absorb (VERIFICATION.md C3S-F12, seam.md SEAM2-F1)', () => {
+  const key = runKey('content-rule', 'p1', 'text');
+  function p1(): { slide: Slide; before: string } {
+    const slide = structuredClone(workedDocument().slides['content-rule']!) as Slide;
+    const block = Object.values(
+      (slide as unknown as { slots: Record<string, { id: string }[]> }).slots,
+    )
+      .flat()
+      .find((b) => b.id === 'p1') as unknown as { text: string };
+    return { slide, before: block.text };
+  }
+
+  it('textBurstMutation notes the text it hands the document, and forgetAbsorbed drops it with the marker', () => {
+    const { slide, before } = p1();
+    forgetAbsorbed(key);
+    expect(handedText(key)).toBeUndefined();
+    expect(textBurstMutation(slide, 'p1', 'text', before, `A${before}`)).toMatchObject({
+      op: 'text.splice',
+      at: 0,
+      remove: 0,
+      insert: 'A',
+    });
+    expect(handedText(key)).toBe(`A${before}`);
+    // a burst with nothing to send leaves the record where the document is
+    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}`)).toBeNull();
+    expect(handedText(key)).toBe(`A${before}`);
+    // the marker names the document's text: a burst equal to it sends nothing and records it
+    noteAbsorbed(key, `A${before}Z`);
+    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}Z`)).toBeNull();
+    expect(handedText(key)).toBe(`A${before}Z`);
+    forgetAbsorbed(key);
+    expect(handedText(key)).toBeUndefined();
+  });
+
+  it('after the Editor re-sent keystrokes past the burst timer, the absorb re-applies only the newer ones and keeps the caret after them', () => {
+    const { slide, before } = p1();
+    forgetAbsorbed(key);
+    // the session's burst: three characters at the start of the paragraph
+    const burst = `AAA${before}`;
+    expect(textBurstMutation(slide, 'p1', 'text', before, burst)).toMatchObject({
+      at: 0,
+      remove: 0,
+      insert: 'AAA',
+    });
+    // the collaborator's two characters at the end, absorbed: the session notes the document's
+    // text and the marker
+    const absorbed = `${burst}BB`;
+    noteHanded(key, absorbed);
+    noteAbsorbed(key, absorbed);
+    // the Editor's re-send (text-fit.ts sessionReconcile 'resend'): five characters the burst
+    // timer had not flushed travel as one splice and the record follows them
+    const resent = `AAAAAAAA${before}BB`;
+    expect(textBurstMutation(slide, 'p1', 'text', absorbed, resent)).toMatchObject({
+      at: 3,
+      remove: 0,
+      insert: 'AAAAA',
+    });
+    expect(handedText(key)).toBe(resent);
+    // four more of the collaborator's land while two newer characters wait in the editable: the
+    // absorb bases on the re-sent text, so the two land after the eight and the caret stays there
+    const dom = `AAAAAAAAAA${before}BB`;
+    const remote = `AAAAAAAA${before}BBBBBB`;
+    expect(absorbedText(handedText(key) ?? '', dom, remote, [10, 10])).toEqual({
+      text: `AAAAAAAAAA${before}BBBBBB`,
+      selection: [10, 10],
+    });
+    // against the session's own last burst the five re-sent characters read as the
+    // collaborator's change: the seven land four places into the paragraph and the caret with
+    // them, the shape of the miss (98 A's, "Ever", 7 A's)
+    const stale = absorbedText(absorbed, dom, remote, [10, 10]);
+    expect(stale.text).toBe(`AAAAAAAA${before.slice(0, 4)}AAAAAAA${before.slice(4)}BBBBBB`);
+    expect(stale.selection).toEqual([19, 19]);
+    forgetAbsorbed(key);
+  });
+});
+
 describe('a blur into the chrome (docs/FOCUS.md section 5 rank 10)', () => {
   it('parks the session for a button of a transient surface and takes the focus back', () => {
     expect(blurVerdict({ field: false, transient: true, button: true })).toBe('park-and-refocus');
@@ -571,20 +665,21 @@ describe('a blur into the chrome (docs/FOCUS.md section 5 rank 10)', () => {
     expect(blurVerdict({ field: false, transient: false, button: false })).toBe('end');
   });
 
-  it('names the toolbar, the plates and the right click menu as the transient surfaces, and leaves the menu bar out', () => {
+  it('names the toolbar, the plates, the right click menu, the menu bar and the menu plates as the transient surfaces', () => {
     for (const part of [
       '[role="toolbar"]',
       '.ts-tb-tail',
       '.ts-plate-anchored',
       '.ts-layout-plate',
       '.ts-context-menu',
+      /* the return round (docs/RETURN.md 2.14 item 2): a Format > Text row on a double clicked
+         word marked the whole box because the menu bar press ended the session; the menu bar and
+         every menu plate park it now, the rule the toolbar had */
+      '.ts-menubar',
+      '.ts-menu',
     ]) {
       expect(CHROME_TRANSIENT_SELECTOR).toContain(part);
     }
-    /* a menu bar click ends the session as the blur did: the menus' rows read the focus as the
-       caret's while a session is parked, and Insert > Text box refused itself under it */
-    expect(CHROME_TRANSIENT_SELECTOR).not.toContain('menubar');
-    expect(CHROME_TRANSIENT_SELECTOR).not.toContain('[role="menu"]');
   });
 });
 

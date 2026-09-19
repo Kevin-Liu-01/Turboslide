@@ -9,8 +9,13 @@
 // computes the `comment.shift` entries a mutation list produces, the room's admission emits them
 // after the text op (the redis tier) and `fileCommentsOnWrite` writes them inside `FileStore.write`
 // under the deck's lock (a checkout, the blob tier), so one test asserts identical thread bytes.
-// Framework free; the CLI's records (apps/cli/src/records/comments.ts, B1) read and write the same
-// files with the same reducer and the same order.
+// Across instances the index another instance pushed reaches a tab through `watchSidecarIndex`,
+// which the blob channel polls when the deck's pulse moved; the versions this instance pushed are
+// kept in a ledger (`SidecarPushLedger`) so the watcher tells its own push, which its append
+// announced, from an index its mirror merely pulled for a `comment.list` (the focus round, cycle
+// 3 stream fix round two; VERIFICATION.md C3T-F3). Framework free; the CLI's records
+// (apps/cli/src/records/comments.ts, B1) read and write the same files with the same reducer and
+// the same order.
 import { createHash } from 'node:crypto';
 import {
   existsSync,
@@ -379,6 +384,60 @@ export async function pullSidecar(
 
 export type PushResult = { pushed: string[]; indexEtag: string };
 
+/** The rows of an index, thread id to the etag of its file (undefined before a push wrote one). */
+export type IndexRows = ReadonlyMap<string, string | undefined>;
+
+/**
+ * The index versions this instance pushed, per deck, with the rows each carried: the watcher's
+ * own push test (VERIFICATION.md C3T-F3). Before the ledger the watcher took a head that equalled
+ * its mirror's index for this instance's push, and a mirror holds the store's index after a pull
+ * too: on the deployment the owner's read back of a new comment (`comment.list`, whose
+ * `storedThreads` pulls the sidecar) landed on the instance holding the second browser's stream
+ * between the push and that instance's next poll, so the poll read the pulled index as its own
+ * and announced nothing, and the second browser never listed the thread. One ledger per process
+ * by default (a function instance is one process); a test that stands two instances in one
+ * process gives each its own.
+ */
+export type SidecarPushLedger = {
+  /** records a push of the deck's index at `version` with the rows it named */
+  record: (deckId: string, version: string, rows: IndexRows) => void;
+  /** the rows of the index this ledger's instance pushed at `version`; undefined for a version it did not push */
+  pushed: (deckId: string, version: string) => IndexRows | undefined;
+};
+
+/** How many pushes of one deck the ledger keeps: the ones a watcher can still meet at its next poll. */
+export const PUSH_LEDGER_KEEP = 16;
+/** How many decks the ledger keeps; the deck pushed longest ago leaves first. */
+export const PUSH_LEDGER_DECKS = 512;
+
+export function sidecarPushLedger(
+  keep = PUSH_LEDGER_KEEP,
+  decksKept = PUSH_LEDGER_DECKS,
+): SidecarPushLedger {
+  const decks = new Map<string, { version: string; rows: IndexRows }[]>();
+  return {
+    record(deckId, version, rows) {
+      const kept = (decks.get(deckId) ?? []).filter((entry) => entry.version !== version);
+      kept.push({ version, rows: new Map(rows) });
+      while (kept.length > keep) kept.shift();
+      // re-inserted, so the map's order is the order of the last push per deck
+      decks.delete(deckId);
+      decks.set(deckId, kept);
+      while (decks.size > decksKept) {
+        const oldest = decks.keys().next().value;
+        if (oldest === undefined) break;
+        decks.delete(oldest);
+      }
+    },
+    pushed(deckId, version) {
+      return decks.get(deckId)?.find((entry) => entry.version === version)?.rows;
+    },
+  };
+}
+
+/** The process's ledger: every push of this instance, whichever path made it (`applyAndPush`, the file store's shift hook). */
+export const processPushLedger: SidecarPushLedger = sidecarPushLedger();
+
 /**
  * Pushes a change to the store: every changed thread, `authors.json` when it changed, then
  * `index.json` conditional on the etag the store held before (`ifMatch`; no record yet means the
@@ -388,7 +447,8 @@ export type PushResult = { pushed: string[]; indexEtag: string };
  * the deck's `.turboslide/copies/` here so the mirror never pulls it), so a pull on another
  * instance whose edge still serves the file from before this push reads the copy under the
  * version `head()` names (the cycle 2 preview: the Insert menu route's thread was not listed for
- * 20 s while the toolbar route's was, C2-F7).
+ * 20 s while the toolbar route's was, C2-F7). The index's version goes into the ledger with the
+ * rows it names, so this instance's watcher passes over it (C3T-F3).
  */
 export async function pushSidecar(
   client: BlobClient,
@@ -396,6 +456,7 @@ export async function pushSidecar(
   deckDir: string,
   change: SidecarChange,
   indexEtag: string | null,
+  ledger: SidecarPushLedger = processPushLedger,
 ): Promise<PushResult> {
   const prefix = `${deckPrefix(deckId)}${COMMENTS_DIR}/`;
   const pushed: string[] = [];
@@ -424,11 +485,19 @@ export async function pushSidecar(
     ...(indexEtag === null ? {} : { ifMatch: indexEtag }),
   });
   pushed.push(INDEX_FILE);
+  ledger.record(
+    deckId,
+    entry.version,
+    new Map(change.index.threads.map((row) => [row.id, row.etag] as const)),
+  );
   // the deck's pulse (pulse.ts): the one head every other instance's poll makes moves with
   // this push, so its watcher reads the index (the focus round, cycle 3 fix round)
   await putPulse(client, deckId, 'comments');
   return { pushed, indexEtag: entry.version };
 }
+
+/** `applyAndPush`'s options: the proven read's, and the ledger the push is recorded in. */
+export type ApplyAndPushOptions = ProvenReadOptions & { ledger?: SidecarPushLedger };
 
 /**
  * Applies ops to the mirror and pushes them, retrying through a pull when another instance moved
@@ -442,22 +511,30 @@ export async function applyAndPush(
   ops: readonly CommentOp[],
   now = new Date().toISOString(),
   attempts = 4,
-  options: ProvenReadOptions = {},
+  options: ApplyAndPushOptions = {},
 ): Promise<SidecarChange & { indexEtag: string }> {
   const prefix = `${deckPrefix(deckId)}${COMMENTS_DIR}/`;
+  const { ledger, ...proven } = options;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const stored = await client.head(`${prefix}${INDEX_FILE}`);
     const local = existsSync(join(commentsDir(deckDir), INDEX_FILE))
       ? quotedMd5(new Uint8Array(readFileSync(join(commentsDir(deckDir), INDEX_FILE))))
       : null;
     if (stored !== null && stored.version !== local)
-      await pullSidecar(client, deckId, deckDir, options);
+      await pullSidecar(client, deckId, deckDir, proven);
     const change = applyCommentOps(deckDir, deckId, ops, now);
     if (change.threads.length === 0 && change.authors === undefined) {
       return { ...change, indexEtag: stored?.version ?? '' };
     }
     try {
-      const result = await pushSidecar(client, deckId, deckDir, change, stored?.version ?? null);
+      const result = await pushSidecar(
+        client,
+        deckId,
+        deckDir,
+        change,
+        stored?.version ?? null,
+        ledger,
+      );
       return { ...change, indexEtag: result.indexEtag };
     } catch (error) {
       if (!isBlobPreconditionError(error) && !isBlobExistsError(error)) throw error;
@@ -493,8 +570,16 @@ export type SidecarWatchOptions = {
    */
   pollMs?: number | null;
   /**
-   * the etag of this instance's own copy of the index; a head that equals it is this instance's
-   * push, which its own append announced already, so it is not announced twice
+   * the ledger of the pushes made from this instance (`processPushLedger` by default): a head
+   * that names a version this instance pushed is its own push, which its append announced
+   * already, so it is not announced twice; every other version is announced, the ones this
+   * instance's mirror pulled for a `comment.list` among them (C3T-F3)
+   */
+  ledger?: SidecarPushLedger;
+  /**
+   * the etag of this instance's own copy of the index; given, an own push is passed over only
+   * while the mirror still holds it. On its own it never decides: a pulled index hashes to the
+   * store's version too (C3T-F3), which is what the ledger tells apart
    */
   localEtag?: () => string | null;
   proven?: ProvenReadOptions;
@@ -518,7 +603,13 @@ export type SidecarWatch = {
  * under the deck's state folder is the read that holds while the url lags) and hands the caller
  * the revision and the changed thread ids; the blob channel turns them into the checkpoint frame
  * with `comments` that the memory tier's checkpointer sends, which every tab answers with a
- * `comment.list`.
+ * `comment.list`. A version this instance pushed (the ledger) is passed over without a read: its
+ * append announced the entry to every stream here. A version the store holds that this instance
+ * did not push is announced whatever the mirror holds: the mirror takes the store's index on a
+ * pull as well (`pullSidecar` under a `comment.list`, the blob store's sync), and the tabs whose
+ * stream is here have not listed it (the stream fix round two, VERIFICATION.md C3T-F3: the
+ * owner's read back pulled the index on the second browser's instance first, the poll took the
+ * pulled index for its own push and the second browser never learned of the thread).
  */
 export function watchSidecarIndex(
   rawClient: BlobClient,
@@ -530,6 +621,7 @@ export function watchSidecarIndex(
   const client = boundedBlobClient(rawClient);
   const path = `${deckPrefix(deckId)}${COMMENTS_DIR}/${INDEX_FILE}`;
   const onError = options.onError ?? (() => {});
+  const ledger = options.ledger ?? processPushLedger;
   let last: string | null | undefined;
   let rows = new Map<string, string | undefined>();
   let running: Promise<void> | null = null;
@@ -547,10 +639,12 @@ export function watchSidecarIndex(
       return;
     }
     if (version === last) return;
-    if (version !== null && options.localEtag?.() === version) {
+    const own = version === null ? undefined : ledger.pushed(deckId, version);
+    if (own !== undefined && (options.localEtag === undefined || options.localEtag() === version)) {
+      // this instance's push, still what its mirror holds: the rows come from the ledger, so
+      // the pass costs the head alone
       last = version;
-      const got = await provenGet(client, path, options.proven);
-      if (got !== null) rows = rowsOf(got.bytes);
+      rows = new Map(own);
       return;
     }
     if (head === null) {

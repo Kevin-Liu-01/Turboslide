@@ -1,0 +1,82 @@
+{
+  "base": "http://localhost:4403",
+  "deck": "untitled-20260919-37vk",
+  "at": "2026-09-19T01:36:09.743Z",
+  "rows": [
+    {
+      "name": "setup",
+      "ok": true,
+      "observed": "objects box-a,box-b,box-c,line-1,note-1; Distribute present with the switch off true; the Arrange rows are in the default view; the switch stays off",
+      "ms": 11055
+    },
+    {
+      "name": "arrange.distribute.horizontal",
+      "ok": true,
+      "observed": "chip \"3 objects\"; x 200,600,1100 -> 200,650,1100; gaps 210,210; undo restored true",
+      "ms": 4107
+    },
+    {
+      "name": "arrange.distribute.vertical",
+      "ok": true,
+      "observed": "y 200,500,300 -> 200,500,350; gaps -10,-10; undo restored true",
+      "ms": 4097
+    },
+    {
+      "name": "arrange.distribute.needs-three",
+      "ok": false,
+      "observed": "two selected (chip \"2 objects\"): Distribute disabled true; three selected (chip \"2 objects\"): disabled true",
+      "ms": 3975
+    },
+    {
+      "name": "arrange.rotate.quarter-turns",
+      "ok": true,
+      "observed": "clockwise -> 90, undo 0; counter -> 270, undo 0",
+      "ms": 6588
+    },
+    {
+      "name": "arrange.rotate.flips-menu",
+      "ok": true,
+      "observed": "flip h -> h, undo undefined; flip v -> v, undo undefined",
+      "ms": 6531
+    },
+    {
+      "name": "arrange.group.chords",
+      "ok": true,
+      "observed": "chip \"2 objects\" -> Cmd+Option+G chip \"Group\" group group; Right twice x 200,600 -> 202,602; Cmd+Option+Shift+G group undefined; undos restored true",
+      "ms": 3574
+    },
+    {
+      "name": "arrange.group.menu-regroup",
+      "ok": false,
+      "observed": "Group enabled true, Regroup before enabled (an earlier ungroup left its memory); Group -> undefined; Ungroup enabled false -> undefined; Regroup enabled after true -> group; 1 undo(s) -> undefined; objects 5 -> 5",
+      "ms": 18604
+    },
+    {
+      "name": "arrange.group.context-rows",
+      "ok": true,
+      "observed": "two selected: Group listed true -> group group, chip \"Group\"; group right click: Ungroup listed true -> undefined",
+      "ms": 4176
+    },
+    {
+      "name": "arrange.context.rotate-distribute",
+      "ok": false,
+      "observed": "threw: TimeoutError: locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('.ts-context-menu').first() to be visible\n",
+      "ms": 11706
+    },
+    {
+      "name": "lines.tail.line-start-end-menu",
+      "ok": true,
+      "observed": "chip \"Shape\"; Line start > Arrow: block fillArrow, svg {\"start\":\"fillArrow\",\"end\":\"none\",\"heads\":1}, undo undefined; Line end > None: block none, svg {\"start\":\"none\",\"end\":\"none\",\"heads\":0}, undo undefined",
+      "ms": 7643
+    },
+    {
+      "name": "arrange.reload-show-pdf",
+      "ok": true,
+      "observed": "after reload: A rotate 90, B flip h, group B group C group; show: A drawn true, transform matrix(0, 1, -1, 0, 0, 0); Escape closed true; PDF 44119 B in 4515 ms, 2 pages for 2 slides",
+      "ms": 16838
+    }
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

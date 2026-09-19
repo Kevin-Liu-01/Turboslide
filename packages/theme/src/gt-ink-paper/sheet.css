@@ -792,12 +792,6 @@
 .ts-sheet .table .td.last {
   padding-right: 0;
 }
-.ts-sheet .table .td.center {
-  text-align: center;
-}
-.ts-sheet .table .td.right {
-  text-align: right;
-}
 .ts-sheet .table.table-18 {
   font-size: 18px;
 }

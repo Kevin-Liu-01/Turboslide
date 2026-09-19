@@ -1,0 +1,125 @@
+{
+  "base": "http://localhost:4403",
+  "deck": "untitled-20260919-5hrb",
+  "at": "2026-09-19T01:14:33.783Z",
+  "rows": [
+    {
+      "name": "guides.setup",
+      "ok": true,
+      "observed": "showGuides -> true; shown guide.x.400,guide.x.800,guide.y.450; deck.info guides {\"x\":[400,800],\"y\":[450]}",
+      "ms": 3991
+    },
+    {
+      "name": "guides.drag.fast",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"5.00 in\"; guides after guide.x.400,guide.x.600,guide.y.450; deck.info {\"x\":[400,600],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 381
+    },
+    {
+      "name": "guides.drag.fast.back",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"6.67 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 399
+    },
+    {
+      "name": "guides.drag.slow",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"5.00 in\"; guides after guide.x.400,guide.x.600,guide.y.450; deck.info {\"x\":[400,600],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 1491
+    },
+    {
+      "name": "guides.drag.slow.back",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"6.67 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 1450
+    },
+    {
+      "name": "guides.drag.fast.2",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"5.00 in\"; guides after guide.x.400,guide.x.600,guide.y.450; deck.info {\"x\":[400,600],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 374
+    },
+    {
+      "name": "guides.drag.fast.2.back",
+      "ok": true,
+      "observed": "under press guide.y.450; readout during \"6.67 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"Saving…\"; status \"\"",
+      "ms": 377
+    },
+    {
+      "name": "guides.cleanup",
+      "ok": true,
+      "observed": "showGuides -> false",
+      "ms": 3958
+    },
+    {
+      "name": "grid.effect",
+      "ok": true,
+      "observed": "snapGuides -> false; snapGrid -> true; grid on: 200 -> 240 (aimed 236); snapGrid -> false; grid off: 200 -> 236 (aimed 236)",
+      "ms": 13597
+    },
+    {
+      "name": "tab.from-slideshow",
+      "ok": true,
+      "observed": "with \"Title\" selected: focus button[present.open] -> button[present.arrow], chip -> \"Title\", Tab defaultPrevented no key seen; nothing selected: focus -> button[present.arrow]",
+      "ms": 4672
+    },
+    {
+      "name": "connector.setup",
+      "ok": true,
+      "observed": "A box-a B box-b C box-c; advancedTools -> true",
+      "ms": 7572
+    },
+    {
+      "name": "connector.elbow.draw",
+      "ok": true,
+      "observed": "elbow shape {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} connect {\"start\":{\"block\":\"box-a\",\"site\":3},\"end\":{\"block\":\"box-b\",\"site\":1}}; site rings during 8",
+      "ms": 3109
+    },
+    {
+      "name": "connector.follows-moved-shape",
+      "ok": true,
+      "observed": "B y 300 -> 450; connector {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} -> {\"x\":440,\"y\":380,\"w\":460,\"h\":150,\"z\":4}",
+      "ms": 1838
+    },
+    {
+      "name": "connector.re-end",
+      "ok": true,
+      "observed": "site rings during 8; connect after {\"start\":{\"block\":\"box-a\",\"site\":3},\"end\":{\"block\":\"box-c\",\"site\":1}}; pos {\"x\":440,\"y\":380.5,\"w\":460,\"h\":319.5,\"z\":4} -> {\"x\":440,\"y\":380,\"w\":580,\"h\":320,\"z\":4} after C moved 120",
+      "ms": 3295
+    },
+    {
+      "name": "shape.draw.readout",
+      "ok": true,
+      "observed": "readout during \"320 × 200\" (marquee true); after null; drawn shape {\"x\":300,\"y\":300,\"w\":320,\"h\":200,\"z\":1}",
+      "ms": 3752
+    },
+    {
+      "name": "shape.look.both-appearances",
+      "ok": true,
+      "observed": "dark: fill rgba(242, 242, 240, 0.05) stroke rgb(242, 242, 240) 1px on rgb(7, 7, 7): fill seen true, stroke seen true | light: fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px on rgb(255, 255, 255): fill seen true, stroke seen true",
+      "ms": 4535
+    },
+    {
+      "name": "shape.label.enter",
+      "ok": true,
+      "observed": "session by Enter true; block.text \"Label\"",
+      "ms": 1443
+    },
+    {
+      "name": "shape.label.double-click",
+      "ok": true,
+      "observed": "session by double click true; caret 5/5 collapsed true; block.text \"Label2\"",
+      "ms": 798
+    }
+  ],
+  "consoleErrors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 239205",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7p1k61-40fcfd rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7p1k61-40fcfd rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7p1k61-40fcfd rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7p1k61-40fcfd rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 1",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 4",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

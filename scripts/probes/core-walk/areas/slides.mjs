@@ -83,6 +83,7 @@ export const IDS = [
   'slides.reorder.cmd-shift-up-down',
   'slides.notes.view-menu-toggle',
   'slides.context.empty-canvas',
+  'slides.numbers.apply',
 ];
 
 const LAYOUTS = [
@@ -1450,6 +1451,170 @@ export async function run(t) {
       return {
         ok: opened && missing.length === 0 && after.length === before.length + 1,
         observed: `menu ${opened}; rows ${rows.join(', ')}; missing ${missing.join(', ') || 'none'}; ${before.length} -> ${after.length}`,
+      };
+    },
+  );
+
+  // ---- the return round's row (docs/RETURN.md 3.4, section 5)
+  await t.step(
+    'slides.numbers.apply',
+    'Insert > Slide numbers, Skip title slides, Apply; read the sheets and the show; Apply to selected; Cmd+Z',
+    'every slide but the title shows its number, in the show too; Apply to selected numbers the selected slide alone; Cmd+Z removes them',
+    async () => {
+      const r = await t.reachRow('insert', 'insert.slideNumbers');
+      if (!r.present) return { ok: false, observed: 'Insert > Slide numbers is not reachable' };
+      /* the criterion is the dialog's and Google's (B5's return note, item 8): a fresh deck's mode
+         is on already, so Apply with Skip title slides keeps the layout slide's words and empties
+         the title slide's, in the editor and in the show; Apply to selected with Off on the layout
+         slide takes that slide's number alone; Cmd+Z after each restores the words read before.
+         The stored mode and the title slide's kind are on record so a red names its half (the
+         write, or the draw of it). An absent counter reads as the empty string. */
+      const counter = () =>
+        page.evaluate(
+          () =>
+            document
+              .querySelector('.ts-stagewrap.ts-editor .counter, .ts-stagewrap .counter')
+              ?.textContent?.trim() ?? '',
+        );
+      const counterOn = async (id) => {
+        await t.clickCard(id);
+        await t.sleep(250);
+        return counter();
+      };
+      const storedMode = async () =>
+        (await t.invoke('deck.info').catch(() => null))?.defaults?.counter ?? 'absent (on)';
+      const storedSlideCounter = async (id) => (await t.slideJson(id)).counter ?? null;
+      const inShow = async () => {
+        await t.clickControl('present.open');
+        await page.locator('[data-control="present.show"]').waitFor({ timeout: 8000 });
+        await t.sleep(700);
+        const words = await page.evaluate(
+          () =>
+            document
+              .querySelector('.pt-viewer.is-present .counter, .ts-stagewrap.is-present .counter')
+              ?.textContent?.trim() ?? '',
+        );
+        await t.press('Escape');
+        await page
+          .locator('[data-control="present.show"]')
+          .waitFor({ state: 'detached', timeout: 8000 })
+          .catch(() => undefined);
+        return words;
+      };
+      const kindT = (await t.slideJson(T)).kind ?? null;
+      const modeBefore = await storedMode();
+      const beforeT = await counterOn(T);
+      const beforeL = await counterOn(L);
+      await t.clearAll();
+      // 1. On, Skip title slides, Apply
+      await t.menuPath('insert', 'insert.slideNumbers');
+      await t.waitControl('dialog.slideNumbers', 8000);
+      const options = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="dialog.slideNumbers."]')].map((e) =>
+          e.getAttribute('data-control').replace('dialog.slideNumbers.', ''),
+        ),
+      );
+      await t.clickControl('dialog.slideNumbers.on');
+      await t.clickControl('dialog.slideNumbers.skip-title');
+      await t.clickControl('dialog.slideNumbers.apply');
+      await t.waitGone('[data-control="dialog.slideNumbers"]', 6000);
+      await t.settled();
+      const modeSkip = await t
+        .pollUntil(storedMode, (m) => m === 'skip-title', 6000)
+        .catch(storedMode);
+      await t.clickCard(T);
+      const onTitle = await t.pollUntil(counter, (c) => c === '', 8000).catch(counter);
+      const onL = await counterOn(L);
+      await t.clearAll();
+      const showL = await inShow();
+      await t.clickCard(T);
+      await t.clearAll();
+      const showTitle = await inShow();
+      // 2. Apply to selected with Off on the layout slide
+      await t.clickCard(L);
+      await t.clearAll();
+      await t.menuPath('insert', 'insert.slideNumbers');
+      await t.waitControl('dialog.slideNumbers', 8000);
+      const selectedOffered = await t.visible('dialog.slideNumbers.selected');
+      let selectedStored = null;
+      let selectedDrawnL = null;
+      let selectedDrawnT = null;
+      let selectedUndo = null;
+      let selectedError = null;
+      if (selectedOffered) {
+        await t.clickControl('dialog.slideNumbers.off');
+        await t.clickControl('dialog.slideNumbers.selected');
+        await t.sleep(400);
+        selectedError = await page.evaluate(
+          () =>
+            document
+              .querySelector('[data-control="dialog.slideNumbers"] .ts-dialog-error')
+              ?.textContent?.trim() ?? null,
+        );
+        if (await t.visible('dialog.slideNumbers')) await t.press('Escape');
+        await t.waitGone('[data-control="dialog.slideNumbers"]', 6000).catch(() => undefined);
+        await t.settled();
+        selectedStored = await t
+          .pollUntil(
+            () => storedSlideCounter(L),
+            (c) => c === 'off',
+            6000,
+          )
+          .catch(() => storedSlideCounter(L));
+        selectedDrawnL = await t.pollUntil(counter, (c) => c === '', 4000).catch(counter);
+        selectedDrawnT = await counterOn(T);
+        /* Cmd+Z only where a write landed, so the undo of step 3 meets the Skip title write */
+        if (selectedStored === 'off') {
+          await t.clickCard(L);
+          await t.clearAll();
+          await t.press('Meta+z');
+          await t.sleep(500);
+          await t.settled();
+          selectedUndo = {
+            stored: await t
+              .pollUntil(
+                () => storedSlideCounter(L),
+                (c) => c === null,
+                6000,
+              )
+              .catch(() => storedSlideCounter(L)),
+            drawn: await t.pollUntil(counter, (c) => c === beforeL, 4000).catch(counter),
+          };
+        }
+      } else {
+        await t.press('Escape');
+        await t.waitGone('[data-control="dialog.slideNumbers"]', 6000).catch(() => undefined);
+      }
+      // 3. Cmd+Z takes Skip title slides back
+      await t.clickCard(T);
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const modeAfter = await t
+        .pollUntil(storedMode, (m) => m === modeBefore, 6000)
+        .catch(storedMode);
+      const afterT = await t.pollUntil(counter, (c) => c === beforeT, 6000).catch(counter);
+      const afterL = await counterOn(L);
+      const skipOk =
+        modeSkip === 'skip-title' && onTitle === '' && onL === beforeL && Boolean(beforeL);
+      const showOk = Boolean(showL) && showTitle === '';
+      const selectedOk =
+        selectedOffered &&
+        selectedError === null &&
+        selectedStored === 'off' &&
+        selectedDrawnL === '' &&
+        selectedDrawnT === '' &&
+        selectedUndo?.stored === null &&
+        selectedUndo?.drawn === beforeL;
+      const undoOk = modeAfter === modeBefore && afterT === beforeT && afterL === beforeL;
+      return {
+        ok: skipOk && showOk && selectedOk && undoOk,
+        observed: `${r.switched ? 'with the switch on; ' : ''}dialog options ${options.join(', ')}; title slide kind ${kindT}; stored mode ${modeBefore} -> ${modeSkip} after On, Skip title slides, Apply; counter on the title "${beforeT}" -> "${onTitle}", on the layout slide "${beforeL}" -> "${onL}"; in the show from the layout slide "${showL}", from the title "${showTitle}"; Apply to selected offered ${selectedOffered}${
+          selectedOffered
+            ? `: Off on the layout slide stored ${JSON.stringify(selectedStored)}, drawn "${selectedDrawnL}" (title "${selectedDrawnT}"), refusal ${selectedError ?? 'none'}; Cmd+Z ${selectedUndo ? `stored ${JSON.stringify(selectedUndo.stored)}, drawn "${selectedUndo.drawn}"` : 'not pressed (no write landed)'}`
+            : ''
+        }; Cmd+Z after Skip title slides: mode ${modeAfter}, title "${afterT}", layout slide "${afterL}"; the PDF not read by this driver (the walk cancels downloads)`,
       };
     },
   );

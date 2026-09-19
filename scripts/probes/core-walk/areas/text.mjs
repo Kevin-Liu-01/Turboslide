@@ -77,6 +77,15 @@ export const IDS = [
   'text.format-menu.spacing-single-1-15',
   'text.format-menu.align-indent-rows',
   'text.textbox.toolbar-button',
+  'text.title.one-click-tail',
+  'text.title.bold-menu',
+  'text.title.bold-cmd-b',
+  'text.title.align-menu',
+  'text.title.size-menu',
+  'text.title.format-options-marks',
+  'text.title.apply-layout-after-format',
+  'text.fontsize.type-one-undo',
+  'text.format-options.field-one-undo',
 ];
 
 const MARK_SEL = 'b, strong, i, em, u, s, [data-mark], a, span[style]';
@@ -2069,6 +2078,277 @@ export async function run(t) {
       return {
         ok: before.a !== 'null' && same('a') && same('b') && same('title'),
         observed: `box A the same ${same('a')}; box B the same ${same('b')}; title slide the same ${same('title')}; after the load: Kickoff ${facts.kickoff}, a list ${facts.list}, the title ${facts.title}, the subtitle ${facts.subtitle}`,
+      };
+    },
+  );
+
+  // ---- the return round's rows (docs/RETURN.md 2.14 items 1 and 3, section 5): the cover title
+  // takes the toolbar's tail and every text control on one click; a typed field is one undo step
+  /** The cover title as drawn: weight, align and size of its run, and the stored typography where a block exists. */
+  const titleFacts = async () => {
+    await onTitleSlide();
+    const drawn = await page.evaluate((r) => {
+      const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { weight: cs.fontWeight, align: cs.textAlign, size: parseFloat(cs.fontSize) };
+    }, HEAD);
+    const slide = await t.slideJson(T);
+    const blockId = (await t.blockOfRun(HEAD)) ?? HEAD_BLOCK;
+    const stored = (await t.blockOf(T, blockId))?.block?.typography ?? slide.typography ?? null;
+    return { drawn, stored, kind: slide.kind ?? slide.template ?? null, blockId };
+  };
+  /** The stored typography weight of the title's facts, a number or null where none is stored. */
+  const storedWeight = (f) =>
+    f?.stored?.weight === undefined || f?.stored?.weight === null ? null : Number(f.stored.weight);
+  /** A format write on the title by one click: the action, the facts read, the snackbar, then Cmd+Z. */
+  const titleRow = async (rowId, name, act, changed) => {
+    await t.step(
+      rowId,
+      name,
+      'the write lands on the title with no refusal; Cmd+Z takes it back',
+      async () => {
+        await t.clearAll();
+        const before = await titleFacts();
+        const { facts } = await clickTitle();
+        const rev0 = await t.stableRevision();
+        await act();
+        await t.settled();
+        const after = await t
+          .pollUntil(titleFacts, (f) => changed(before, f), 8000)
+          .catch(titleFacts);
+        const rev1 = await t.stableRevision();
+        const snack = await t.snackbar();
+        await t.clearAll();
+        await t.press('Meta+z');
+        await t.sleep(500);
+        await t.settled();
+        const back = await titleFacts();
+        const restored =
+          JSON.stringify(back.drawn) === JSON.stringify(before.drawn) &&
+          storedWeight(back) === storedWeight(before);
+        return {
+          ok:
+            selectedNoCaret(facts) &&
+            changed(before, after) &&
+            rev1 > rev0 &&
+            !/No block/.test(snack ?? '') &&
+            restored,
+          observed: `selected ${selectedNoCaret(facts)}; drawn ${JSON.stringify(before.drawn)} -> ${JSON.stringify(after.drawn)} (stored ${JSON.stringify(after.stored)}, slide kind ${before.kind} -> ${after.kind}); revision ${rev0} -> ${rev1}; snackbar ${snack ?? 'none'}; Cmd+Z restored ${restored}`,
+        };
+      },
+    );
+  };
+  await t.step(
+    'text.title.one-click-tail',
+    'one click on the cover title',
+    'the toolbar swaps to the text tail',
+    async () => {
+      await t.clearAll();
+      const { facts } = await clickTitle();
+      const tail = await t.pollUntil(tailVisible, (x) => x, 3000).catch(tailVisible);
+      const controls = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-toolbar [data-control^="toolbar."]')]
+          .filter((e) => e.getClientRects().length > 0)
+          .map((e) => e.getAttribute('data-control'))
+          .filter((c) => /bold|fontSize$|align$|textColor/.test(c)),
+      );
+      return {
+        ok: selectedNoCaret(facts) && tail,
+        observed: `${t.describeSelection(facts)}; text tail ${tail} (${controls.join(', ') || 'none of bold, fontSize, align, textColor'})`,
+      };
+    },
+  );
+  /* the row's words (RETURN.md section 5): "weight 500 is stored and drawn". The theme draws the
+     cover heading at 500 already (sheet.css h1; B2's return note, open item 1), so Bold on it moves
+     no pixel: the write is judged on the stored typography (weight 500 landing where it was not)
+     with the drawn weight at 500 or above, or on a drawn weight above the one before. */
+  const bolder = (a, b) =>
+    Number(b.drawn?.weight) >= 500 &&
+    (Number(b.drawn?.weight) > Number(a.drawn?.weight) ||
+      (storedWeight(b) === 500 && storedWeight(a) !== 500));
+  await titleRow(
+    'text.title.bold-menu',
+    'click the cover title once, Format > Text > Bold',
+    () => t.menuPath('format', 'format.text', 'format.text.bold'),
+    bolder,
+  );
+  await titleRow(
+    'text.title.bold-cmd-b',
+    'click the cover title once, Cmd+B',
+    () => t.press('Meta+b'),
+    bolder,
+  );
+  await titleRow(
+    'text.title.align-menu',
+    'click the cover title once, Format > Align & indent > Center',
+    () => t.menuPath('format', 'format.alignIndent', 'format.alignIndent.center'),
+    (a, b) => b.drawn?.align === 'center' && a.drawn?.align !== 'center',
+  );
+  await titleRow(
+    'text.title.size-menu',
+    'click the cover title once, Format > Text > Size > Decrease font size',
+    () => t.menuPath('format', 'format.text', 'format.text.size', 'format.text.size.decrease'),
+    (a, b) => (b.drawn?.size ?? 0) < (a.drawn?.size ?? 0),
+  );
+  await titleRow(
+    'text.title.format-options-marks',
+    'click the cover title once, Format options, the B toggle',
+    async () => {
+      await t
+        .tailControl('toolbar.formatOptions')
+        .catch(() => t.menuPath('format', 'format.formatOptions'));
+      await t.waitControl('panel.formatOptions', 8000);
+      const bold = await page.evaluate(() => {
+        const marks = document.querySelector('[data-control="formatOptions.text.marks"]');
+        const btn = marks
+          ? [...marks.querySelectorAll('button')].find((b) =>
+              /^B$|bold/i.test((b.getAttribute('aria-label') ?? b.textContent ?? '').trim()),
+            )
+          : null;
+        return (
+          btn?.getAttribute('data-control') ??
+          (btn ? (btn.setAttribute('data-control', 'b4.marks.bold'), 'b4.marks.bold') : null)
+        );
+      });
+      if (!bold) throw new Error('no B toggle in the Format options Text section');
+      await t.clickControl(bold);
+      await t.sleep(300);
+      if (await t.visible('panel.formatOptions.close'))
+        await t.clickControl('panel.formatOptions.close');
+    },
+    bolder,
+  );
+  await t.step(
+    'text.title.apply-layout-after-format',
+    'bold the cover title by one click and Cmd+B, then toolbar Layout > the title layout again; Cmd+Z',
+    "the slide keeps its heading and subtitle text and the placeholders return to the layout's positions; Cmd+Z restores the bold",
+    async () => {
+      await t.clearAll();
+      const headText = await text(HEAD);
+      const bodyText = BODY ? await text(BODY) : null;
+      await clickTitle();
+      await t.press('Meta+b');
+      await t.settled();
+      const bold = await titleFacts();
+      const posBefore = await page.evaluate(
+        (r) =>
+          document
+            .querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`)
+            ?.getBoundingClientRect()
+            .toJSON() ?? null,
+        HEAD,
+      );
+      await t.clearAll();
+      await t.clickControl('toolbar.layout');
+      await t.waitControl('layout.apply.plate', 8000);
+      await t.clickControl('layout.apply.title');
+      await t.settled();
+      await t.sleep(500);
+      const headAfter = await text(HEAD);
+      const bodyAfter = BODY ? await text(BODY) : null;
+      const layout = (await t.slideJson(T)).template ?? (await t.slideJson(T)).layout?.name ?? null;
+      const posAfter = await page.evaluate(
+        (r) =>
+          document
+            .querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`)
+            ?.getBoundingClientRect()
+            .toJSON() ?? null,
+        HEAD,
+      );
+      const snack = await t.snackbar();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const afterUndo = await titleFacts();
+      return {
+        ok:
+          bolder({ drawn: { weight: '400' } }, bold) &&
+          headAfter === headText &&
+          bodyAfter === bodyText &&
+          Number(afterUndo.drawn?.weight) >= 500,
+        observed: `bold weight ${bold.drawn?.weight}; heading "${headText}" -> "${headAfter}"; subtitle "${bodyText}" -> "${bodyAfter}"; layout after ${layout}; title box ${posBefore ? `${Math.round(posBefore.x)},${Math.round(posBefore.y)}` : '?'} -> ${posAfter ? `${Math.round(posAfter.x)},${Math.round(posAfter.y)}` : '?'}; snackbar ${snack ?? 'none'}; after Cmd+Z weight ${afterUndo.drawn?.weight}`,
+      };
+    },
+  );
+  await t.step(
+    'text.fontsize.type-one-undo',
+    'select box A, type 28 in the size field, Enter; one Cmd+Z',
+    'the size applies; one Cmd+Z restores the previous size',
+    async () => {
+      await t.clickCard(X);
+      await t.clearAll();
+      await t.selectObject(boxA.id);
+      const before = (await typo(boxA.id, X)).size;
+      const rev0 = await t.stableRevision();
+      await t.clickControl('toolbar.fontSize.value');
+      await t.press('Meta+a');
+      await t.typeHuman('28');
+      await t.press('Enter');
+      /* the snap sentence is read as it shows: the snackbar holds five seconds and the revision
+         wait below can outlast it (the first drive read "none" after the wait while the sentence
+         had shown; return/build/integrator.md) */
+      const snackEarly = await t.snackbarWithin(3000).catch(() => null);
+      await t.settled();
+      const after = await t
+        .pollUntil(
+          async () => (await typo(boxA.id, X)).size,
+          (s) => s !== before && s !== null,
+          8000,
+        )
+        .catch(async () => (await typo(boxA.id, X)).size);
+      const rev1 = await t.stableRevision();
+      const snack = snackEarly ?? (await t.snackbar());
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const back = (await typo(boxA.id, X)).size;
+      return {
+        ok:
+          after !== before &&
+          (after === 28 || /step|snap/i.test(snack ?? '')) &&
+          rev1 === rev0 + 1 &&
+          back === before,
+        observed: `size ${before} -> ${after} (snackbar ${snack ?? 'none'}); revision ${rev0} -> ${rev1}; one Cmd+Z -> ${back}`,
+      };
+    },
+  );
+  await t.step(
+    'text.format-options.field-one-undo',
+    'select box A, Format options, type 400 in Width, Enter; one Cmd+Z',
+    'the width applies as one history entry; one Cmd+Z restores it',
+    async () => {
+      await t.clickCard(X);
+      await t.clearAll();
+      await t.selectObject(boxA.id);
+      const before = (await t.blockOf(X, boxA.id))?.pos?.w ?? null;
+      const rev0 = await t.stableRevision();
+      await t.tailControl('toolbar.formatOptions');
+      await t.waitControl('formatOptions.size.width', 8000);
+      await t.clickControl('formatOptions.size.width');
+      await t.press('Meta+a');
+      await t.typeHuman('400');
+      await t.press('Enter');
+      await t.settled();
+      const after = await t
+        .pollUntil(
+          async () => (await t.blockOf(X, boxA.id))?.pos?.w ?? null,
+          (w) => w === 400,
+          8000,
+        )
+        .catch(async () => (await t.blockOf(X, boxA.id))?.pos?.w ?? null);
+      const rev1 = await t.stableRevision();
+      if (await t.visible('panel.formatOptions.close'))
+        await t.clickControl('panel.formatOptions.close');
+      await t.clearAll();
+      await t.press('Meta+z');
+      await t.sleep(500);
+      await t.settled();
+      const back = (await t.blockOf(X, boxA.id))?.pos?.w ?? null;
+      return {
+        ok: after === 400 && rev1 === rev0 + 1 && back === before,
+        observed: `width ${before} -> ${after}; revision ${rev0} -> ${rev1}; one Cmd+Z -> ${back}`,
       };
     },
   );

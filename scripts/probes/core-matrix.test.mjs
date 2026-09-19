@@ -14,12 +14,14 @@ import {
   CORE_SPEC_DRIVERS,
   CORE_STATES,
   PROBE_DRIVER,
-  UNPARKABLE_FEATURE,
+  UNPARKABLE_FEATURES,
   areaOf,
   coreRow,
   featureOf,
   isCoreId,
+  isKnownControl,
   isManualRow,
+  isParkable,
   parkedFeaturesOf,
   probeRows,
   readParkedList,
@@ -30,9 +32,10 @@ import {
   validateCoreMatrix,
 } from './core-matrix.mjs';
 
-// The core matrix module (docs/FOCUS.md section 6; the integrator's day 0): the committed file
-// loads and every row keeps the id scheme, the lookups the probe and the core specs use answer
-// from the file, and the two ship helpers compute rule 4 of section 1 and the exit rule of 6.2.
+// The core matrix module (docs/FOCUS.md section 6; the integrator's day 0; docs/RETURN.md section 5
+// for the return round): the committed file loads and every row keeps the id scheme, the lookups the
+// probe and the core specs use answer from the file, and the two ship helpers compute rule 4 of
+// section 1, RETURN.md's rule 2 (the unparkable features, the `parks` rows) and the exit rule of 6.2.
 
 describe('the committed matrix', () => {
   it('loads with every row on the scheme and no duplicate id', () => {
@@ -48,6 +51,8 @@ describe('the committed matrix', () => {
       if (row.today === 'broken' || row.today === 'flaky')
         expect([1, 2, 3], row.id).toContain(row.severity);
       else expect(row.severity, row.id).toBeUndefined();
+      /* every parks id is a control the menu model's sources hold (RETURN.md section 5) */
+      for (const control of row.parks ?? []) expect(isKnownControl(control), control).toBe(true);
     }
     expect(Object.isFrozen(CORE_MATRIX)).toBe(true);
     expect(Object.isFrozen(CORE_MATRIX[0])).toBe(true);
@@ -66,6 +71,22 @@ describe('the committed matrix', () => {
     for (const row of CORE_MATRIX.filter((each) => areaOf(each.id) === 'collab'))
       expect(row.feature, row.id).toBe('share');
     for (const row of rowsForFeature('surface')) expect(areaOf(row.id)).toBe('surface');
+    /* the return round's features and their unparkable half (RETURN.md rule 2) */
+    for (const feature of [
+      'tables',
+      'charts',
+      'diagrams',
+      'wordart',
+      'formatting',
+      'view',
+      'inbox',
+    ])
+      expect(isParkable(feature), feature).toBe(true);
+    for (const feature of UNPARKABLE_FEATURES) expect(isParkable(feature), feature).toBe(false);
+    expect(UNPARKABLE_FEATURES).toContain('chrome');
+    expect([...CORE_FEATURES.filter((f) => !isParkable(f))].sort()).toEqual(
+      [...UNPARKABLE_FEATURES].sort(),
+    );
     const t = tally();
     expect(t.rows).toBe(CORE_MATRIX.length);
     expect(t.works + t.broken + t.flaky + t['not driven']).toBe(t.rows);
@@ -101,8 +122,8 @@ describe('validateCoreMatrix', () => {
     expect(() => validateCoreMatrix([{ ...good, id: 'decks' }])).toThrow(
       /area\.feature\.interaction/,
     );
-    expect(() => validateCoreMatrix([{ ...good, feature: 'tables' }])).toThrow(
-      /unknown feature tables/,
+    expect(() => validateCoreMatrix([{ ...good, feature: 'boxes' }])).toThrow(
+      /unknown feature boxes/,
     );
     expect(() => validateCoreMatrix([{ ...good, id: 'slides.x.y' }])).toThrow(
       /area slides belongs to slides, not decks/,
@@ -121,6 +142,15 @@ describe('validateCoreMatrix', () => {
     );
     expect(() => validateCoreMatrix([{ ...good, extra: 1 }])).toThrow(/unknown key extra/);
     expect(() => validateCoreMatrix([])).toThrow(/no rows/);
+    /* parks: a list of known data-control ids (RETURN.md section 5) */
+    expect(() => validateCoreMatrix([{ ...good, parks: ['file.download.jpg'] }])).not.toThrow();
+    expect(() => validateCoreMatrix([{ ...good, parks: [] }])).toThrow(/parks is not a list/);
+    expect(() => validateCoreMatrix([{ ...good, parks: ['Not an id'] }])).toThrow(
+      /not a data-control id/,
+    );
+    expect(() => validateCoreMatrix([{ ...good, parks: ['file.download.noSuchRow'] }])).toThrow(
+      /no control source holds/,
+    );
   });
 });
 
@@ -132,25 +162,55 @@ describe('the ship helpers of 6.2', () => {
     return { ...out, ...changes };
   };
 
-  it('parks a feature with one failed or not driven row and never parks the switch', () => {
+  it('parks a parkable feature with one red row, blocks the ship on a red row of an unparkable one, and parks the controls of a parks row alone', () => {
     const clean = parkedFeaturesOf(results());
     expect(clean.parked).toEqual([]);
+    expect(clean.parkedRows).toEqual([]);
     expect(clean.blocking).toEqual([]);
-    const text = rowsForFeature('text')[0].id;
-    const images = rowsForFeature('images')[0].id;
+    /* RETURN.md rule 2: text and images are core features and cannot be parked; a red row blocks */
+    const text = rowsForFeature('text').find((row) => row.parks === undefined).id;
+    const images = rowsForFeature('images').find((row) => row.parks === undefined).id;
     const surface = rowsForFeature('surface')[0].id;
+    const tables = rowsForFeature('tables').find((row) => row.parks === undefined).id;
+    const chrome = rowsForFeature('chrome')[0].id;
     const run = parkedFeaturesOf(
-      results({ [text]: 'failed', [images]: 'not driven', [surface]: 'failed' }),
+      results({
+        [text]: 'failed',
+        [images]: 'not driven',
+        [surface]: 'failed',
+        [tables]: 'failed',
+        [chrome]: 'not driven',
+      }),
     );
-    expect(run.parked).toEqual(['text', 'images']);
-    expect(run.blocking).toEqual([{ id: surface, result: 'failed' }]);
+    expect(run.parked).toEqual(['tables']);
+    /* the blocking rows come in the file's order */
+    expect([...run.blocking].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+      [
+        { id: text, feature: 'text', result: 'failed' },
+        { id: images, feature: 'images', result: 'not driven' },
+        { id: chrome, feature: 'chrome', result: 'not driven' },
+        { id: surface, feature: 'surface', result: 'failed' },
+      ].sort((a, b) => a.id.localeCompare(b.id)),
+    );
     expect(run.red.text).toEqual([{ id: text, result: 'failed' }]);
+    /* a red row carrying parks keeps its controls parked and neither parks its feature nor blocks */
+    const jpg = coreRow('export.jpg.current-slide');
+    const merge = coreRow('tables.cells.merge-unmerge');
+    const withParks = parkedFeaturesOf(results({ [jpg.id]: 'failed', [merge.id]: 'not driven' }));
+    expect(withParks.parked).toEqual([]);
+    expect(withParks.blocking).toEqual([]);
+    expect(withParks.parkedRows).toEqual([
+      { id: merge.id, parks: [...merge.parks], result: 'not driven' },
+      { id: jpg.id, parks: [...jpg.parks], result: 'failed' },
+    ]);
     /* an id the run never recorded is not driven, never passed */
     const partial = { [text]: 'passed' };
-    expect(parkedFeaturesOf(partial).parked).toEqual(
-      CORE_FEATURES.filter((f) => f !== UNPARKABLE_FEATURE),
+    expect(parkedFeaturesOf(partial).parked).toEqual(CORE_FEATURES.filter(isParkable));
+    expect(parkedFeaturesOf(partial).blocking.length).toBe(
+      CORE_MATRIX.filter((row) => !isParkable(row.feature) && row.parks === undefined).length -
+        1 -
+        CORE_MATRIX.filter((row) => isManualRow(row) && !isParkable(row.feature)).length,
     );
-    expect(parkedFeaturesOf(partial).blocking.length).toBe(rowsForFeature('surface').length);
     expect(() => parkedFeaturesOf(results({ [text]: 'green' }))).toThrow(/unknown result green/);
   });
 
@@ -164,14 +224,42 @@ describe('the ship helpers of 6.2', () => {
     expect(shipVerdict(red, ['shapes']).failures).toEqual([
       { id: decks, feature: 'decks', result: 'failed' },
     ]);
-    expect(shipVerdict(red, ['shapes', 'decks'])).toEqual({ ok: true, failures: [] });
+    /* RETURN.md rule 2: decks is unparkable, so a list naming it is refused */
+    expect(() => shipVerdict(red, ['shapes', 'decks'])).toThrow(/decks cannot be parked/);
     expect(() => shipVerdict(red, ['surface'])).toThrow(/cannot be parked/);
-    expect(() => shipVerdict(red, ['tables'])).toThrow(/unknown feature tables/);
+    expect(() => shipVerdict(red, ['chrome'])).toThrow(/chrome cannot be parked/);
+    expect(() => shipVerdict(red, ['boxes'])).toThrow(/unknown feature boxes/);
     /* a surface row never passes by omission */
     const surface = rowsForFeature('surface')[0].id;
     expect(shipVerdict(results({ [surface]: 'not driven' })).failures).toEqual([
       { id: surface, feature: 'surface', result: 'not driven' },
     ]);
+    /* the object form: parkedRows keeps a red parks row out of the failures, and only that row */
+    const jpg = coreRow('export.jpg.current-slide');
+    const zip = coreRow('export.zip.bundle');
+    const both = results({ [jpg.id]: 'failed', [zip.id]: 'failed' });
+    const list = { parkedFeatures: [], parkedRows: [{ id: jpg.id, parks: [...jpg.parks] }] };
+    expect(shipVerdict(both, list).failures).toEqual([
+      { id: zip.id, feature: 'export', result: 'failed' },
+    ]);
+    expect(
+      shipVerdict(both, {
+        parkedFeatures: [],
+        parkedRows: [
+          { id: jpg.id, parks: [...jpg.parks] },
+          { id: zip.id, parks: [...zip.parks] },
+        ],
+      }),
+    ).toEqual({ ok: true, failures: [] });
+    expect(() =>
+      shipVerdict(both, { parkedFeatures: [], parkedRows: [{ id: decks, parks: [] }] }),
+    ).toThrow(/carries no parks/);
+    expect(() =>
+      shipVerdict(both, {
+        parkedFeatures: [],
+        parkedRows: [{ id: jpg.id, parks: ['file.download.pdf'] }],
+      }),
+    ).toThrow(/does not guard/);
   });
 
   it("narrows both helpers to one driver's rows, so the walk probe judges its own rows alone", () => {
@@ -184,7 +272,10 @@ describe('the ship helpers of 6.2', () => {
     const red = probe.find((row) => row.feature === 'text').id;
     const narrowed = shipVerdict({ ...own, [red]: 'failed' }, [], probe);
     expect(narrowed.failures).toEqual([{ id: red, feature: 'text', result: 'failed' }]);
-    expect(parkedFeaturesOf({ ...own, [red]: 'failed' }, probe).parked).toEqual(['text']);
+    /* text is unparkable (RETURN.md rule 2): the red row blocks instead of parking */
+    const narrowedParking = parkedFeaturesOf({ ...own, [red]: 'failed' }, probe);
+    expect(narrowedParking.parked).toEqual([]);
+    expect(narrowedParking.blocking).toEqual([{ id: red, feature: 'text', result: 'failed' }]);
     /* the whole matrix still reads the spec rows as not driven */
     expect(shipVerdict(own).ok).toBe(false);
   });
@@ -206,7 +297,11 @@ describe('the ship helpers of 6.2', () => {
     expect(shipVerdict(failed).failures).toEqual([
       { id: paste, feature: 'text', result: 'failed' },
     ]);
-    expect(parkedFeaturesOf(failed).parked).toEqual(['text']);
+    /* text is unparkable (RETURN.md rule 2): the failed manual row blocks the ship */
+    expect(parkedFeaturesOf(failed).parked).toEqual([]);
+    expect(parkedFeaturesOf(failed).blocking).toEqual([
+      { id: paste, feature: 'text', result: 'failed' },
+    ]);
     /* an unrecorded manual row reads as not driven, the same as a recorded one */
     const { [paste]: _omitted, ...unrecorded } = everything;
     expect(shipVerdict(unrecorded).ok).toBe(true);
@@ -216,20 +311,49 @@ describe('the ship helpers of 6.2', () => {
     );
   });
 
-  it('reads a committed parked list and refuses the switch and an unknown feature', () => {
+  it('reads a committed parked list with its parkedRows and refuses an unparkable feature, an unknown feature and a row without parks', () => {
     const dir = mkdtempSync(join(tmpdir(), 'core-matrix-'));
     const good = join(dir, 'ship-abc1234.json');
     writeFileSync(good, JSON.stringify({ commit: 'abc1234', parkedFeatures: ['shapes', 'lines'] }));
     expect(readParkedList(good)).toEqual({
       commit: 'abc1234',
       parkedFeatures: ['shapes', 'lines'],
+      parkedRows: [],
+    });
+    const jpg = coreRow('export.jpg.current-slide');
+    const withRows = join(dir, 'ship-rows.json');
+    writeFileSync(
+      withRows,
+      JSON.stringify({
+        commit: 'abc1234',
+        parkedFeatures: ['inbox'],
+        parkedRows: [{ id: jpg.id, parks: [...jpg.parks] }],
+      }),
+    );
+    expect(readParkedList(withRows)).toEqual({
+      commit: 'abc1234',
+      parkedFeatures: ['inbox'],
+      parkedRows: [{ id: jpg.id, parks: [...jpg.parks] }],
     });
     const surface = join(dir, 'ship-surface.json');
     writeFileSync(surface, JSON.stringify({ commit: 'x', parkedFeatures: ['surface'] }));
     expect(() => readParkedList(surface)).toThrow(/cannot be parked/);
+    const core = join(dir, 'ship-core.json');
+    writeFileSync(core, JSON.stringify({ commit: 'x', parkedFeatures: ['text'] }));
+    expect(() => readParkedList(core)).toThrow(/text cannot be parked/);
     const unknown = join(dir, 'ship-unknown.json');
-    writeFileSync(unknown, JSON.stringify({ commit: 'x', parkedFeatures: ['tables'] }));
-    expect(() => readParkedList(unknown)).toThrow(/unknown feature tables/);
+    writeFileSync(unknown, JSON.stringify({ commit: 'x', parkedFeatures: ['boxes'] }));
+    expect(() => readParkedList(unknown)).toThrow(/unknown feature boxes/);
+    const noParks = join(dir, 'ship-noparks.json');
+    writeFileSync(
+      noParks,
+      JSON.stringify({
+        commit: 'x',
+        parkedFeatures: [],
+        parkedRows: [{ id: 'export.pdf.file', parks: [] }],
+      }),
+    );
+    expect(() => readParkedList(noParks)).toThrow(/carries no parks/);
     const noList = join(dir, 'ship-nolist.json');
     writeFileSync(noList, JSON.stringify({ commit: 'x' }));
     expect(() => readParkedList(noList)).toThrow(/no parkedFeatures list/);

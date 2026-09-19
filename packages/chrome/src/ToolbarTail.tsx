@@ -1,7 +1,7 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import type { Block } from '@turboslide/schema/blocks';
+import type { Block, PlainBlock } from '@turboslide/schema/blocks';
 import { STROKE_WIDTHS } from '@turboslide/schema/blocks';
 import {
   CHART_KINDS,
@@ -22,11 +22,13 @@ import {
   lineEndPlan,
   listPlan,
   memberWritePlan,
+  PLAIN_SIZE_LADDER,
   selectedBlock,
   selectedBlocks,
   shapePickPlan,
   SPACING_STEPS,
   stepLadder,
+  stepPlainSize,
   tailKindOf as tailOfSelection,
   textStylePlan,
 } from './editor-shell';
@@ -127,10 +129,17 @@ export function shownSize(block: Block | undefined): number | null {
   if (block === undefined) return null;
   const size = typography(block).size;
   if (typeof size === 'number') return size;
-  if (block.type === 'heading') return block.level === 'big' ? 88 : block.level === 'h2' ? 34 : 58;
+  /* the theme's sizes (sheet.css: h1 88, .big 72, h2 and the mood plate's title 44), the ones
+     editor-shell's currentSize steps from */
+  if (block.type === 'heading') return block.level === 'h1' ? 88 : block.level === 'big' ? 72 : 44;
   if (block.type === 'paragraph')
     return block.role === 'lead' ? 26 : block.role === 'cap' ? 17 : 20;
   if (block.type === 'table') return (block as TableBlock).size ?? 20;
+  /* a list (a `plain` block) keeps its size at `/size` on the ladder 20, 22, 24 (editor-shell
+     PLAIN_SIZE_LADDER); the field read null for it and a typed size wrote `/typography`, which the
+     schema refused ("Unknown field typography"; the return round's walk, text.fontsize.type-one-undo
+     on a box the list rows had converted) */
+  if (block.type === 'plain') return (block as PlainBlock).size ?? 20;
   if (block.type === 'text' || block.type === 'box' || block.type === 'shape') return 20;
   return null;
 }
@@ -280,6 +289,11 @@ export function ToolbarTail() {
             current: 'tone' in block && block.tone === 'muted' ? 'titanium' : 'ink',
             tones: true,
           };
+        /* a shape's label colour is its `color` field, optional in the schema, so a shape drawn by
+           the tool has none until a swatch writes it: the `in` check below answered null and the
+           Paper swatch wrote nothing on the rectangle (docs/RETURN.md 2.2 the fix; audit-formatting
+           row 77), the gap the focus round closed for text boxes (FOCUS.md rank 12) */
+        if (block.type === 'shape') return { path: '/color', current: colorOf(block.color) };
         return 'color' in block ? { path: '/color', current: colorOf(block.color) } : null;
       case 'highlightColor':
         return { path: 'highlight', current: colorOf(input.selection?.marks?.hl) };
@@ -346,7 +360,11 @@ export function ToolbarTail() {
         }));
       }
       case 'align': {
-        const items = ALIGN_ITEMS.map((id) => itemById(id));
+        /* Justify sits beside Left, Center and Right while its row is present (docs/RETURN.md 3.2,
+           `formatting.align.toolbar-justify`); a parked row leaves the list with the switch off */
+        const items = ALIGN_ITEMS.map((id) => itemById(id)).filter((item) =>
+          isPresent(item, menuContext),
+        );
         const current =
           typography(block).align ??
           (block?.type === 'table'
@@ -1059,10 +1077,37 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
     control.status === 'now' && evaluate(control.enabled, shell.menuContext) && block !== undefined;
   const size = shownSize(block);
   const [typing, setTyping] = useState<string | null>(null);
+  /* the typed value as the handlers read it: Enter commits and blurs in one event, and the blur's
+     commit ran again on the state the render had bound, so one typed size made two writes and two
+     history entries and the first Cmd+Z restored nothing (docs/RETURN.md 2.14 item 3;
+     audit-formatting row 12). The ref is cleared before the write, so the blur finds nothing */
+  const typingRef = useRef<string | null>(null);
   const tip = controlTip(control, shell.platform, enabled);
 
   const apply = (next: number) => {
     if (block === undefined) return;
+    /* a list steps the plain ladder 20, 22, 24 and writes `/size`, as the Format > Text > Size rows
+       do for it (editor-shell `stepPlainSize`); `/typography` is not a field of a plain block */
+    if (block.type === 'plain') {
+      const ladder = [...PLAIN_SIZE_LADDER];
+      const step = ladder.reduce(
+        (best, each) => (Math.abs(each - next) < Math.abs(best - next) ? each : best),
+        ladder[0] ?? 20,
+      );
+      if (step !== next) shell.say(`Font size ${step}: the nearest step of the list's ladder`);
+      shell.input
+        .dispatch('block.set', {
+          slideId: shell.input.slideId,
+          blockId: block.id,
+          path: '/size',
+          value: step,
+          baseRevision: shell.input.revision,
+        })
+        .catch((error: unknown) =>
+          shell.say(error instanceof Error ? error.message : String(error)),
+        );
+      return;
+    }
     const step = nearestStep(next);
     if (step !== next) shell.say(`Font size ${step}: the nearest step of the type ladder`);
     if (block.type === 'table') {
@@ -1091,7 +1136,8 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
   };
 
   const commit = () => {
-    const value = typing;
+    const value = typingRef.current;
+    typingRef.current = null;
     setTyping(null);
     if (value === null) return;
     const n = Number(value.trim());
@@ -1106,6 +1152,7 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
     } else if (event.key === 'Escape') {
       event.preventDefault();
       event.stopPropagation();
+      typingRef.current = null;
       setTyping(null);
       event.currentTarget.blur();
     }
@@ -1122,7 +1169,11 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         aria-label={decrease.label}
         aria-disabled={enabled ? undefined : true}
         data-control="toolbar.fontSize.minus"
-        onClick={() => enabled && size !== null && apply(stepLadder(size, -1))}
+        onClick={() =>
+          enabled &&
+          size !== null &&
+          apply(block?.type === 'plain' ? stepPlainSize(size, -1) : stepLadder(size, -1))
+        }
         {...tipProps({ name: decrease.label, key: 'Cmd Shift <' })}
       >
         <Icon name="minus" />
@@ -1143,14 +1194,17 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
           fieldTip.onFocus(event);
           event.currentTarget.select();
         }}
-        onChange={(event) => setTyping(event.target.value)}
+        onChange={(event) => {
+          typingRef.current = event.target.value;
+          setTyping(event.target.value);
+        }}
         onKeyDown={(event) => {
           fieldTip.onKeyDown(event);
           onKey(event);
         }}
         onBlur={(event) => {
           fieldTip.onBlur(event);
-          if (typing !== null) commit();
+          if (typingRef.current !== null) commit();
         }}
       />
       <button
@@ -1159,7 +1213,11 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         aria-label={increase.label}
         aria-disabled={enabled ? undefined : true}
         data-control="toolbar.fontSize.plus"
-        onClick={() => enabled && size !== null && apply(stepLadder(size, 1))}
+        onClick={() =>
+          enabled &&
+          size !== null &&
+          apply(block?.type === 'plain' ? stepPlainSize(size, 1) : stepLadder(size, 1))
+        }
         {...tipProps({ name: increase.label, key: 'Cmd Shift >' })}
       >
         <Icon name="plus" />

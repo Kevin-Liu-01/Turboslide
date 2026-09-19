@@ -80,8 +80,9 @@ describe('toolFinderEntries', () => {
   it('has the menus, the slides and the 21 layouts as groups, and runs a menu row through the shell', () => {
     let ran: string | null = null;
     let picked: string | null = null;
-    /* File > Details is parked (docs/FOCUS.md 3.2): the run is asserted with the switch on, and
-       the default list is asserted without the row below */
+    /* the run is asserted with the switch on; the default list is asserted without a parked row
+       below (Special characters, a chosen departure of docs/RETURN.md section 8; File > Details
+       returned to the default view, RETURN.md 2.17) */
     const entries = toolFinderEntries(
       document,
       'content-rule',
@@ -120,7 +121,9 @@ describe('toolFinderEntries', () => {
       },
       () => undefined,
     );
-    expect(plain.find((entry) => entry.id === 'menu:file.details')).toBeUndefined();
+    expect(plain.find((entry) => entry.id === 'menu:insert.specialCharacters')).toBeUndefined();
+    expect(entries.find((entry) => entry.id === 'menu:insert.specialCharacters')).toBeDefined();
+    expect(plain.find((entry) => entry.id === 'menu:file.details')).toBeDefined();
     const rename = plain.find((entry) => entry.id === 'menu:file.rename');
     expect(rename?.meta).toBe('File');
     if (rename?.run.kind === 'call') rename.run.call();

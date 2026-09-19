@@ -62,7 +62,7 @@ import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { provenGet } from './access-store.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
-import { HOSTED_POLL_MS, isStoreBusy, putPulse } from './pulse.ts';
+import { HOSTED_POLL_MS, isStoreBusy, pulsePath, putPulse } from './pulse.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
 import type {
   AssetPut,
@@ -590,6 +590,26 @@ function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
  * 90 s.
  */
 export const BLOB_READ_TIMEOUT_MS = 10_000;
+/**
+ * The deadline on one call of the deck listing (`HostedDecks.list` on the blob tier): a manifest
+ * head answers in well under a second, and the listing makes one per deck, four at a time, so a
+ * head the store holds for the full read deadline held a lane of the listing for 10 s and the
+ * Open dialog with it (the return round, VERIFICATION R1-F3: the list arrived after 26 s once
+ * and not within 30 s once on a store of 65 decks). A deck whose call meets this deadline is
+ * served from the listing's cache or left out of this one listing, never the whole listing failed.
+ */
+export const BLOB_LISTING_READ_TIMEOUT_MS = 4_000;
+/**
+ * How long the listing remembers a folder under `decks/` that held no manifest, before it heads
+ * it again (the return round fix round, VERIFICATION R1-F3, R1-F4). The shared store held 489
+ * such folders beside 65 decks on 2026-09-19: the leftovers of removed decks (the presence
+ * record, its copies and the pulse, refreshed every few seconds while a tab is open, which the
+ * removal's prefix listing missed because the listing lags the store by up to a minute), and
+ * every listing headed each of them, 552 heads for 65 cards. A folder a deck is made into again
+ * under the same id lists on this instance at once (`create` and `copy` forget it) and on every
+ * other within this time.
+ */
+export const LISTING_PHANTOM_TTL_MS = 5 * 60_000;
 /** The turn after the deadline in which an answer that arrived during a stall still counts. */
 export const TIMEOUT_GRACE_MS = 250;
 export const BLOB_WRITE_TIMEOUT_MS = 90_000;
@@ -1897,7 +1917,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
    * opened on this instance lists at once (the focus round, cycle 2; VERIFICATION F-share-404:
    * the share link exchange runs over `list()` and did not find a deck made a minute ago, so the
    * link answered 404 to its visitor). A mirror whose manifest the store no longer holds (a deck
-   * deleted forever elsewhere) answers null at `currentManifest` and is left out.
+   * deleted forever elsewhere) answers null at `cardOf` and is left out.
    */
   const deckIds = async (): Promise<string[]> => {
     const folders = await (await client()).folders('decks/');
@@ -1919,23 +1939,26 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   };
 
   /**
-   * A deck's manifest bytes at the store's head, for the listing (docs/FOCUS.md rank 7): the
-   * mirror's copy when this instance's manifest row names the head's etag, else the origin body
-   * when its md5 is that etag, else the snapshot the etag names (every push of `deck.json`
-   * stores one since the focus round), else the body the CDN served, which is the state before
-   * the last push. Null when the store holds no manifest.
+   * A deck's manifest bytes at the head the caller read, for the listing (docs/FOCUS.md rank 7):
+   * the mirror's copy when this instance's manifest row names the head's etag, else the origin
+   * body when its md5 is that etag, else the snapshot the etag names (every push of `deck.json`
+   * stores one since the focus round), each of those `proven`; else the body the CDN served,
+   * which is the state before the last push and is not. Null when the store holds no body.
    */
-  const currentManifest = async (c: BlobClient, deckId: string): Promise<Uint8Array | null> => {
+  const manifestAtHead = async (
+    c: BlobClient,
+    deckId: string,
+    head: BlobEntry,
+  ): Promise<{ bytes: Uint8Array; proven: boolean } | null> => {
     const pathname = `${deckPrefix(deckId)}deck.json`;
-    const head = await c.head(pathname);
-    if (head === null) return null;
     const dir = join(decksDir, deckId);
     const mirrored = join(dir, 'deck.json');
     if (readManifest(dir).files['deck.json'] === head.version && existsSync(mirrored)) {
-      return new Uint8Array(readFileSync(mirrored));
+      return { bytes: new Uint8Array(readFileSync(mirrored)), proven: true };
     }
     const fetched = await c.get(pathname);
-    if (fetched !== null && quotedMd5(fetched.bytes) === head.version) return fetched.bytes;
+    if (fetched !== null && quotedMd5(fetched.bytes) === head.version)
+      return { bytes: fetched.bytes, proven: true };
     const key = etagMd5(head.version);
     const snapshot = key === null ? null : await c.get(`${deckPrefix(deckId)}${snapshotPath(key)}`);
     if (snapshot !== null) {
@@ -1944,12 +1967,68 @@ export function blobDecks(options: HostedOptions): HostedDecks {
           snapshot.bytes,
           `${deckPrefix(deckId)}${snapshotPath(key ?? '')}`,
         );
-        return new TextEncoder().encode(canonicalJson(document.deck));
+        return { bytes: new TextEncoder().encode(canonicalJson(document.deck)), proven: true };
       } catch {
         // a snapshot that does not parse: the body below
       }
     }
-    return fetched === null ? null : fetched.bytes;
+    return fetched === null ? null : { bytes: fetched.bytes, proven: false };
+  };
+
+  /**
+   * The listing's memory of each deck's card by the manifest etag it was proven from (the
+   * return round fix round, VERIFICATION R1-F3, R1-F4): a listing costs one head per deck, and
+   * a body only for a deck whose etag moved since this instance last proved it. Before this
+   * every listing fetched every manifest body again, two or three calls per deck the instance
+   * had never opened (the origin body, then the snapshot when the CDN served it stale), which on
+   * a store of 65 decks took 5 s at best and past the Open dialog's 30 s under load. A card
+   * proven from an unproven body (the CDN's state before the last push) is not kept, so the next
+   * listing tries the proof again, as before. `null` is a manifest that made no card.
+   */
+  const listed = new Map<string, { version: string; head: DeckHead | null }>();
+  /** The folders under `decks/` without a manifest when this instance last headed them, by id and time (LISTING_PHANTOM_TTL_MS). */
+  const phantoms = new Map<string, number>();
+  let listingClientPromise: Promise<BlobClient> | undefined;
+  /** The client the listing calls the store through: the collection's, under the listing's shorter deadline. */
+  const listingClient = (): Promise<BlobClient> => {
+    listingClientPromise ??= (
+      typeof blobOption === 'function' ? blobOption() : Promise.resolve(blobOption)
+    ).then((raw) => boundedBlobClient(raw, { readMs: BLOB_LISTING_READ_TIMEOUT_MS }));
+    return listingClientPromise;
+  };
+
+  /**
+   * One deck's card for the listing: the head, the cache by etag, the proven body when the etag
+   * moved. A store answer of "not now" (a 429, a 5xx, the listing deadline; pulse.ts
+   * `isStoreBusy`) for one deck answers the card this instance proved last, or leaves the deck
+   * out of this listing when it never proved one, and logs one line; before this it failed the
+   * whole listing and the Open dialog listed nothing (R1-F3, run 1: "0 decks listed after
+   * 30028 ms"). Any other error is the caller's.
+   */
+  const cardOf = async (c: BlobClient, deckId: string): Promise<DeckHead | null> => {
+    const pathname = `${deckPrefix(deckId)}deck.json`;
+    const kept = listed.get(deckId);
+    try {
+      const head = await c.head(pathname);
+      if (head === null) {
+        listed.delete(deckId);
+        phantoms.set(deckId, Date.now());
+        return null;
+      }
+      phantoms.delete(deckId);
+      if (kept !== undefined && kept.version === head.version) return kept.head;
+      const manifest = await manifestAtHead(c, deckId, head);
+      const card = manifest === null ? null : deckHeadOf(deckId, manifest.bytes);
+      if (manifest === null || manifest.proven)
+        listed.set(deckId, { version: head.version, head: card });
+      return card;
+    } catch (error) {
+      if (!isStoreBusy(error)) throw error;
+      log(
+        `blob: the listing's read of ${deckId} met ${error instanceof Error ? error.message : String(error)}; ${kept === undefined ? 'the deck is left out of this listing' : 'the card proven last is listed'}`,
+      );
+      return kept?.head ?? null;
+    }
   };
 
   /**
@@ -2023,19 +2102,25 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       // the mirror's copy when this instance holds the head's etag (no body read), else the
       // origin body when its md5 is the etag, else the snapshot the etag names; the CDN kept
       // serving an overwritten manifest for a while, so a rename, a Make a copy and a Restore
-      // listed the state before them and a card sent that revision back as a stale base.
+      // listed the state before them and a card sent that revision back as a stale base. Since
+      // the return round the card is kept by the etag it was proven from (`listed`), so a warm
+      // instance pays one head per deck and no body, each call under the listing's own deadline,
+      // and one deck's refusal never empties the list (`cardOf`).
       const shape = listOptions?.includeTrashed === true ? 'all' : 'live';
       const joined = listingInFlight.get(shape);
       if (joined !== undefined) return [...(await joined)];
       const run = (async (): Promise<DeckHead[]> => {
-        const ids = await deckIds();
-        const c = await client();
+        const t = Date.now();
+        // a folder that held no manifest when this instance last looked is not headed again
+        // within LISTING_PHANTOM_TTL_MS (the leftovers of removed decks; `phantoms` says why)
+        const ids = (await deckIds()).filter(
+          (id) => (phantoms.get(id) ?? 0) + LISTING_PHANTOM_TTL_MS <= t,
+        );
+        const c = await listingClient();
         const heads: DeckHead[] = [];
         // four at a time: the store's 429 names the number of concurrent requests (C3-F2)
         await eachLimit(ids, 4, async (deckId) => {
-          const bytes = await currentManifest(c, deckId);
-          if (bytes === null) return;
-          const head = deckHeadOf(deckId, bytes);
+          const head = await cardOf(c, deckId);
           if (head === null) return;
           if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
           heads.push(head);
@@ -2109,6 +2194,9 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         }
         throw error;
       }
+      // a folder of this id the listing remembered as empty is a deck now
+      phantoms.delete(deckId);
+      listed.delete(deckId);
       listingInFlight.clear();
       await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
       return result;
@@ -2147,6 +2235,9 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         }
         throw error;
       }
+      // a folder of this id the listing remembered as empty is a deck now
+      phantoms.delete(deckId);
+      listed.delete(deckId);
       listingInFlight.clear();
       await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
       return result;
@@ -2175,11 +2266,28 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await store.sync(true);
         checkRevision(decksDir, deckId, baseRevision);
       }
+      // the current presence record's copy is named by the record's version (presence-store.ts
+      // `presenceCopyPath`: the md5 hex the etag quotes), read before the record goes
+      const record = await c.head(`${prefix}${STATE_DIR}/presence.json`).catch(() => null);
       // the manifest goes first, so a reader that lists the prefix never sees a deck without one
       await c.del([`${prefix}deck.json`]);
-      const rest = (await c.list(prefix)).map((entry) => entry.pathname);
-      await c.del(rest);
+      const rest = new Set((await c.list(prefix)).map((entry) => entry.pathname));
+      if (record !== null) {
+        const hex = record.version.replace(/^W\//, '').replace(/"/g, '');
+        rest.add(`${prefix}${STATE_DIR}/presence/${hex}.json`);
+      }
+      // the deck's state files by name as well (the return round fix round, R1-F3): the listing
+      // lags the store by up to a minute (the note on `pull`), and the presence record, its
+      // copies and the pulse (presence-store.ts, pulse.ts) are refreshed every few seconds while
+      // a tab is open, so the listing above missed them and a folder without a manifest stayed
+      // under `decks/` for good, one head per listing on every instance (489 of them on
+      // 2026-09-19); the copies folder is listed on its own since its names are hashes
+      rest.add(`${prefix}${STATE_DIR}/presence.json`);
+      rest.add(pulsePath(deckId));
+      for (const entry of await c.list(`${prefix}${STATE_DIR}/presence/`)) rest.add(entry.pathname);
+      await c.del([...rest]);
       stores.delete(deckId);
+      listed.delete(deckId);
       listingInFlight.clear();
       for (const pathname of [...urls.keys()])
         if (pathname.startsWith(prefix)) urls.delete(pathname);

@@ -8,8 +8,8 @@ import { authorName } from './dispatch';
 import type { IdentityView } from './editor-shell';
 import { cn } from './lib/cn';
 import { Menu } from './Menu';
-import { DEFAULT_MENU_CONTEXT, itemById } from './menus/model';
-import type { MenuItem } from './menus/model';
+import { DEFAULT_MENU_CONTEXT, isPresent, itemById } from './menus/model';
+import type { MenuContext, MenuItem } from './menus/model';
 import { PANELS, stubClause } from './menus/strings';
 import { IdentityChip, nameOf, trustWordOf } from './presence/IdentityChip';
 import { ToolButton } from './ToolButton';
@@ -58,6 +58,14 @@ export type VersionsPanelProps = {
   selected?: Version | null;
   onShowChanges?: (on: boolean) => void;
   onSelect?: (version: Version | null) => void;
+  /**
+   * The shell's menu context (docs/FOCUS.md 3.1, the one presence rule): the Show changes row
+   * (`file.versionHistory.showChanges`, parked with `advanced: true`) and the two Later delete
+   * rows of a version's More menu are drawn only while `isPresent` says so, which is while Tools
+   * > Advanced tools is on. The default context is the switch off, so a panel mounted without one
+   * (the embedded form, a test) draws neither.
+   */
+  menuContext?: MenuContext;
   className?: string;
 };
 
@@ -143,6 +151,7 @@ export function VersionsPanel({
   selected = null,
   onShowChanges,
   onSelect,
+  menuContext = DEFAULT_MENU_CONTEXT,
   className,
 }: VersionsPanelProps) {
   const [note, setNote] = useState('');
@@ -479,7 +488,11 @@ export function VersionsPanel({
         {more !== null ? (
           <Menu
             items={MORE_ITEMS}
-            context={DEFAULT_MENU_CONTEXT}
+            context={menuContext}
+            /* the two delete rows are contextOnly rows of the File menu's model (SPEC-3 0.45, 13.3:
+               present here and disabled with their clause); without this flag the Menu drops
+               them, and with the switch off `isPresent` hides them (docs/FOCUS.md 3.1) */
+            includeContextOnly
             label="More"
             anchor={{ kind: 'element', element: more.anchor }}
             placement="below"
@@ -493,24 +506,26 @@ export function VersionsPanel({
             id="ts-menu-version-more"
           />
         ) : null}
-        <label
-          className={cn('ts-versions-named ts-versions-foot', showChanges && 'is-on')}
-          data-control="versionHistory.showChanges.row"
-          {...tipProps({
-            name: showChangesItem.label,
-            doc: showChangesItem.doc ?? 'Hatches what the selected version changed, by author',
-          })}
-        >
-          <input
-            type="checkbox"
-            checked={showChanges}
-            data-control="versionHistory.showChanges"
-            data-menu-item={showChangesItem.id}
-            onChange={(event) => onShowChanges?.(event.target.checked)}
-          />
-          <span className="ts-versions-named-box" aria-hidden="true" />
-          <span>{showChangesItem.label}</span>
-        </label>
+        {isPresent(showChangesItem, menuContext) ? (
+          <label
+            className={cn('ts-versions-named ts-versions-foot', showChanges && 'is-on')}
+            data-control="versionHistory.showChanges.row"
+            {...tipProps({
+              name: showChangesItem.label,
+              doc: showChangesItem.doc ?? 'Hatches what the selected version changed, by author',
+            })}
+          >
+            <input
+              type="checkbox"
+              checked={showChanges}
+              data-control="versionHistory.showChanges"
+              data-menu-item={showChangesItem.id}
+              onChange={(event) => onShowChanges?.(event.target.checked)}
+            />
+            <span className="ts-versions-named-box" aria-hidden="true" />
+            <span>{showChangesItem.label}</span>
+          </label>
+        ) : null}
       </div>
     );
   }

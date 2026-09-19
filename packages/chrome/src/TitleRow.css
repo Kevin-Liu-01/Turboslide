@@ -1,10 +1,12 @@
 /* TitleRow (TitleRow.tsx): the first of the editor's rows (gslides-parity SPEC 1.1, 1.2), 44 px
-   (--pt-title-h), full width, its bottom edge in --pt-hair (the menu bar under it draws no rule).
-   Left group: the Turboslide mark at --ts-mark in its 32 px link box (SPEC-4 1.10), the title as
-   a 13.5 px display button (a field over the same box while
-   renaming), the save words in titanium with the cloud glyph, the clock. Right group: the
-   disabled comments glyph, the Slideshow split button (the one solid pair of the row), Share
-   ruled in --pt-hair. 8 px gaps; radius 0; colors are tokens only. */
+   (--pt-title-h), full width, its bottom edge in --pt-hair (the menu bar under it draws no rule;
+   docs/RETURN.md 4.2 item 1). Left group: the Turboslide mark at --ts-mark in its 32 px link box
+   (SPEC-4 1.10), the title as a 13.5 px display button (a field over the same box while
+   renaming), the save words in titanium with the cloud glyph, the clock. Right group (RETURN.md
+   4.3): the presence slot, the comments glyph as a toggle, the Slideshow split button as one
+   control (the one solid button of the row, RETURN.md 4.1) and Share ruled in --pt-hair, every
+   control --pt-ctl-h tall, the split button and Share on the one 8 px corner, 8 px gaps and a
+   12 px inset. Every other box is square; colors are tokens only. */
 .ts-title-row {
   grid-column: 1 / -1;
   grid-row: 1;
@@ -159,29 +161,86 @@
   color: var(--pt-titanium);
 }
 
-/* the Slideshow split button: two solid halves; the arrow owns the one divider between them in
-   --pt-edge (the line law's seam role), and the main half draws no right edge so the seam is
-   drawn once */
+/* The Slideshow split button as one control (docs/RETURN.md 4.1; return/audit-chrome.md 5a): the
+   wrapper owns the box: the one outline and the one ink ground, the 8 px corner of the solid call
+   to action (ToolButton.css) on the outer corners only, --pt-ctl-h tall. The two halves are
+   transparent inside it, 30 px in the 32 px box, no corners and no border of their own, the play
+   glyph before the word as Google draws it. The selectors carry `.pt-ib.is-solid` so they outrank
+   ToolButton.css's `.pt-ib.is-solid` rules (0,2,0) without touching that sheet: the audit found
+   those rules winning over the plain class names here, so each half kept four 8 px corners, the
+   row reversed and the divider computed in ink on ink (audit-chrome rows 9 to 11). The chevron
+   half adds its own class to the chain so its border-left outranks the `border: 0` below; that
+   one inner divider is --pt-hair-on-ink, the hairline that reads over ink in both appearances
+   (RETURN.md 4.2 item 3). A hover shades the half under the pointer in --pt-plate-on-ink and
+   inverts nothing; the open chevron reads --pt-plate-on-ink-open; the focus ring sits inside the
+   focused half in paper. */
 .ts-title-slideshow {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: stretch;
+  height: var(--pt-ctl-h, 32px);
+  border: 1px solid var(--pt-ink);
+  border-radius: 8px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  overflow: hidden;
 }
 
-.ts-title-present {
+.ts-title-slideshow > .pt-ib.is-solid {
+  box-sizing: border-box;
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  flex-direction: row;
   gap: 6px;
-  padding: 0 12px 0 10px;
-  border-right-width: 0;
+  transition: background-color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
-.ts-title-present-arrow {
+.ts-title-slideshow > .pt-ib.is-solid.ts-title-present {
+  padding: 0 10px 0 12px;
+}
+
+.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow {
   width: 28px;
   padding: 0;
   justify-content: center;
-  border-left: 1px solid var(--pt-edge);
+  border-left: 1px solid var(--pt-hair-on-ink);
 }
 
+.ts-title-slideshow > .pt-ib.is-solid svg {
+  width: 12px;
+  height: 12px;
+}
+
+.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ts-title-slideshow > .pt-ib.is-solid:hover {
+  background: var(--pt-plate-on-ink);
+  color: inherit;
+}
+
+.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow[aria-expanded='true'] {
+  background: var(--pt-plate-on-ink-open);
+}
+
+.ts-title-slideshow > .pt-ib.is-solid:focus-visible {
+  outline: 1px solid var(--pt-paper);
+  outline-offset: -3px;
+}
+
+/* Share: the outline button beside the split button, on the same height and the same 8 px corner
+   so the two read as one family (docs/RETURN.md 4.3; question 1 of section 9 names 6 px as the
+   alternative) */
 .ts-title-share {
+  box-sizing: border-box;
+  height: var(--pt-ctl-h, 32px);
   border-color: var(--pt-hair);
+  border-radius: 8px;
   gap: 6px;
 }
 
@@ -197,7 +256,8 @@
     display: none;
   }
 
-  .ts-title-present {
+  /* the word leaves and the label half is a 28 px square beside the 28 px chevron: a 58 px control */
+  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present {
     padding: 0 8px;
   }
 
@@ -213,23 +273,32 @@
   }
 }
 
-/* Round three (gslides-parity SPEC-3 4.2, 0.43, 9.3): the five fixed slots of the right group.
-   The presence slot is its own grid (presence/presence.css); the comments and inbox slots are
-   32 px boxes that stay whether their control is present or not; the Last edit clock and the
-   Share button carry a 6 px dot as an absolute badge inside their box, so a request or a change
-   moves nothing. The save words live in one cell wide enough for the five phrases. */
+/* Round three (gslides-parity SPEC-3 4.2, 0.43, 9.3): the fixed slots of the right group. The
+   presence slot is its own grid (presence/presence.css); the comments slot is a 32 px box that
+   stays whether its control is present or not; the inbox slot collapses while its plate is parked
+   (below); the Last edit clock and the Share button carry a 6 px dot as an absolute badge inside
+   their box, so a request or a change moves nothing. The save words live in one cell wide enough
+   for the six phrases. */
 .ts-title-slot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 32px;
   width: 32px;
-  height: 32px;
+  height: var(--pt-ctl-h, 32px);
 }
 
 .ts-title-inbox-slot {
   flex-basis: var(--pt-inbox-w, 60px);
   width: var(--pt-inbox-w, 60px);
+}
+
+/* the inbox slot collapses while the plate is parked (docs/RETURN.md 4.3, 2.16; question 9 of
+   section 9): the first paint rule of SPEC-3 0.43 guards a plate that can appear, and a parked
+   plate cannot, so the comments glyph sits 8 px from the Slideshow button; the 60 px slot returns
+   with the plate when `title.inbox` is present again */
+.ts-title-inbox-slot.is-empty {
+  display: none;
 }
 
 /* the inbox plate: the glyph, a 4 px gap, a 24 px count cell for two tabular digits */

@@ -22,10 +22,12 @@ import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
  *
  * The focus round (docs/FOCUS.md 3.3) parks a control with `advanced: true`: it leaves the tail
  * while Tools > Advanced tools is off (`presentControls` in ToolbarTail.tsx) and draws as before
- * with it on. The text tail keeps its typography controls and loses Highlight color and the fill
- * and border controls; the shape tail loses Change shape; the image tail loses the frame and
- * Dither; the table, chart, group and other tails are parked whole with their features;
- * `toolbar.font` stays visible and disabled as the one exception (3.1).
+ * with it on. The return round (docs/RETURN.md 3.2) brings back Highlight color on the text tail,
+ * the shape, line, table, chart and group tails whole and the pointer toggle of the tail end with
+ * the live pointers; what stays parked is the text tail's fill and border controls (question 8 of
+ * RETURN.md section 9), Change shape on the shape tail (with the galleries, 2.9), the image tail's
+ * frame controls and Dither (3.4), and the other tail (icons and materials, 2.10); `toolbar.font`
+ * stays visible and disabled as the one exception (FOCUS.md 3.1).
  */
 export type TailKind =
   'default' | 'text' | 'shape' | 'image' | 'line' | 'table' | 'chart' | 'group' | 'other';
@@ -132,7 +134,7 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
   return family === 'table' ? [border, weight, dash, fill] : [fill, border, weight, dash];
 }
 
-/** A tail parked whole (docs/FOCUS.md 3.3): every control carries the flag. */
+/** A tail parked whole (docs/FOCUS.md 3.3): every control carries the flag. The other tail alone since the return round. */
 function parkedTail(controls: ReadonlyArray<TailControl>): TailControl[] {
   return controls.map((control) => ({ ...control, advanced: true as const }));
 }
@@ -148,6 +150,9 @@ const MERGE_CONTROLS: TailControl[] = [
     enabled: 'cellRangeSelected',
     disabledReason: SELECT_CELLS_DOC,
     turboslide: true,
+    /* returned with format.table.mergeCells (model.ts) in the return round's fix round, once the
+       Editor's cell range existed (return/build/b5.md "Return round fix round"); the row
+       tables.tail.merge-unmerge-buttons keeps both controls in `parks` */
   },
   {
     control: 'toolbar.unmergeCells',
@@ -214,13 +219,13 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       dropdown: true,
       doc: 'Ink or muted on headings and paragraphs; the theme colours on selected text, text boxes and boxes',
     },
-    /* docs/FOCUS.md 3.3: Highlight color is parked */
+    /* Highlight color: parked by docs/FOCUS.md 3.3, returned by docs/RETURN.md 2.11 (it marks the
+       selected word alone, audit-formatting row 28) */
     {
       control: 'toolbar.highlightColor',
       label: 'Highlight color',
       icon: 'paint-brush',
       status: 'now',
-      advanced: true,
       op: 'highlightColor',
       dropdown: true,
       doc: 'A theme colour behind the selected text, or none',
@@ -332,10 +337,12 @@ const TEXT_TAIL: TailControl[] = [...fillAndBorder('text'), ...textControls(), F
  * 3.3 with SPEC-2 0.11: a shape selected; Change shape opens the picker before Fill color (where
  * Google's picker lives for a mask, the nearest place for a shape) and the text controls apply,
  * because a shape holds text now. Parked whole in cycle 2 of the focus round with Insert > Shape
- * (docs/FOCUS.md section 4 under ruling (1); build/b3.md R14): a shape a deck carries still
- * renders and, with the switch off, takes the default tail (ToolbarTail.tsx's fallback).
+ * (docs/FOCUS.md section 4 under ruling (1); build/b3.md R14) and returned with it in the return
+ * round (docs/RETURN.md 2.2, 3.2): Fill color, Border color, Border weight, Border dash, the text
+ * controls, Format options, in Google's order. Change shape stays parked with the galleries (2.9),
+ * so with the switch off the fill leads the tail and carries the divider.
  */
-const SHAPE_TAIL: TailControl[] = parkedTail([
+const SHAPE_TAIL: TailControl[] = [
   {
     control: 'toolbar.changeShape',
     label: 'Change shape',
@@ -351,13 +358,13 @@ const SHAPE_TAIL: TailControl[] = parkedTail([
   },
   ...fillAndBorder('shape').map((control) => {
     if (control.control !== 'toolbar.fillColor') return control;
-    /* Change shape carries the divider; the fill follows it without one */
+    /* Change shape carries the divider while it is drawn; the fill follows it without one */
     const { dividerBefore: _divider, ...rest } = control;
     return rest;
   }),
   ...textControls(),
   FORMAT_OPTIONS,
-]);
+];
 
 /**
  * 3.4 with SPEC-2 4.2: an image selected; Border weight, Border dash and Reset image apply. The
@@ -448,10 +455,10 @@ const IMAGE_TAIL: TailControl[] = [
 /**
  * 3.5 with SPEC-2 4.2: a line or arrow selected; Line dash applies and the ends list ten
  * decorations. Parked whole in cycle 2 of the focus round with Insert > Line (docs/FOCUS.md
- * section 4 under ruling (1); build/b3.md R14): a line a deck carries still renders and, with the
- * switch off, takes the default tail.
+ * section 4 under ruling (1); build/b3.md R14) and returned with it in the return round
+ * (docs/RETURN.md 2.3, 3.2): Line color, Line weight, Line dash, Line start, Line end, Format options.
  */
-const LINE_TAIL: TailControl[] = parkedTail([
+const LINE_TAIL: TailControl[] = [
   {
     control: 'toolbar.lineColor',
     label: 'Line color',
@@ -498,18 +505,26 @@ const LINE_TAIL: TailControl[] = parkedTail([
     doc: 'None, an arrow, a circle, a square or a diamond, filled or open',
   },
   FORMAT_OPTIONS,
-]);
+];
 
-/** 3.6 with SPEC-2 4.2: a table cell selected; the merge buttons follow Fill color. Parked whole (docs/FOCUS.md 3.3). */
-const TABLE_TAIL: TailControl[] = parkedTail([
+/**
+ * 3.6 with SPEC-2 4.2: a table cell selected; the merge buttons follow Fill color. Parked whole by
+ * docs/FOCUS.md 3.3, returned with the tables by docs/RETURN.md 2.4 and 3.2; the fill and border
+ * controls and the merge buttons carry their own matrix rows with `parks`, so a red one keeps that
+ * control parked alone (RETURN.md 2.4, the ship fallback).
+ */
+const TABLE_TAIL: TailControl[] = [
   ...fillAndBorder('table'),
   ...MERGE_CONTROLS,
   ...textControls({ table: true }),
   FORMAT_OPTIONS,
-]);
+];
 
-/** SPEC-2 4.2: a chart selected; every control is a Turboslide addition (Google edits charts in Sheets). Parked whole (docs/FOCUS.md 3.3). */
-const CHART_TAIL: TailControl[] = parkedTail([
+/**
+ * SPEC-2 4.2: a chart selected; every control is a Turboslide addition (Google edits charts in
+ * Sheets). Parked whole by docs/FOCUS.md 3.3, returned with the charts by docs/RETURN.md 2.5 and 3.2.
+ */
+const CHART_TAIL: TailControl[] = [
   {
     control: 'toolbar.chartType',
     label: 'Chart type',
@@ -552,10 +567,10 @@ const CHART_TAIL: TailControl[] = parkedTail([
     doc: 'The categories and series, in Format options',
   },
   FORMAT_OPTIONS,
-]);
+];
 
-/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole (docs/FOCUS.md 3.3). */
-const GROUP_TAIL: TailControl[] = parkedTail([...fillAndBorder('group'), FORMAT_OPTIONS]);
+/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole by docs/FOCUS.md 3.3, returned with Group and Ungroup by docs/RETURN.md 2.12. */
+const GROUP_TAIL: TailControl[] = [...fillAndBorder('group'), FORMAT_OPTIONS];
 
 /** 3.8: icons, materials and the other blocks. Parked whole (docs/FOCUS.md 3.3). */
 const OTHER_TAIL: TailControl[] = parkedTail([
@@ -598,13 +613,14 @@ export const HIDE_MENUS_CONTROL = 'toolbar.hideMenus';
  * role and absent for the others (`when`), so nothing moves when a role is known.
  */
 export const TOOLBAR_TAIL_END: ReadonlyArray<TailControl> = [
-  /* docs/FOCUS.md 3.3: the pointer toggle is parked with Live pointers; View only is role driven */
+  /* the pointer toggle: parked with Live pointers by docs/FOCUS.md 3.3, returned with them by
+     docs/RETURN.md 2.16 (its row view.live-pointers.toggles parks the two View rows if red); View
+     only is role driven */
   {
     control: 'toolbar.pointer',
     label: 'Show my pointer',
     icon: 'cursor-arrow-rays',
     status: 'now',
-    advanced: true,
     item: 'view.livePointers.mine',
     when: 'write',
     turboslide: true,

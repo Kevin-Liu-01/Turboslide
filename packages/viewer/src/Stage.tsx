@@ -69,7 +69,9 @@ export function Stage({
         onStep={onStep}
         hidden={mode !== 'slide'}
       >
-        <Frame index={index} total={total} />
+        {/* the counter follows Insert > Slide numbers through the slide's `counter` (the viewer
+            deck builder reads render/deck.ts slideCounter), as the editor stage does */}
+        <Frame index={index} total={total} counter={slide?.counter ?? true} />
         {slide ? <SlideView slideId={slide.id} html={slide.html} theme={theme} /> : null}
       </Sheet>
     </div>

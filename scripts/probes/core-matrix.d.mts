@@ -1,6 +1,7 @@
-// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6), for the TypeScript callers:
-// the core specs under apps/studio/e2e/core/ through apps/studio/e2e/core/matrix.ts. The module
-// itself is plain Node; the declarations describe what it exports and nothing more.
+// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5), for
+// the TypeScript callers: the core specs under apps/studio/e2e/core/ through
+// apps/studio/e2e/core/matrix.ts. The module itself is plain Node; the declarations describe what
+// it exports and nothing more.
 
 export type CoreFeature =
   | 'decks'
@@ -10,12 +11,20 @@ export type CoreFeature =
   | 'arrange'
   | 'shapes'
   | 'lines'
+  | 'tables'
+  | 'charts'
+  | 'diagrams'
+  | 'wordart'
+  | 'formatting'
   | 'present'
   | 'share'
   | 'comments'
   | 'versions'
   | 'export'
   | 'help'
+  | 'chrome'
+  | 'view'
+  | 'inbox'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -31,7 +40,8 @@ export type CoreSpecDriver =
   | 'core/present.spec.ts'
   | 'core/share.spec.ts'
   | 'core/export.spec.ts'
-  | 'core/surface.spec.ts';
+  | 'core/surface.spec.ts'
+  | 'core/documents.spec.ts';
 
 export type CoreDriver = 'probe --core' | CoreSpecDriver;
 
@@ -39,12 +49,12 @@ export type CoreDriver = 'probe --core' | CoreSpecDriver;
 export type CoreRow = {
   /** `area.feature.interaction`, stable */
   readonly id: string;
-  /** the section 2 feature the row belongs to; rule 4 of section 1 is computed from it */
+  /** the feature the row belongs to; rule 4 of section 1 and RETURN.md rule 2 are computed from it */
   readonly feature: CoreFeature;
   /** what the row drives and checks, with its time bound where the audits measured one */
   readonly interaction: string;
   readonly driver: CoreDriver;
-  /** what production did on 2026-09-15 */
+  /** what production did on the day the row was written (2026-09-15, or 2026-09-18 for the return round's rows) */
   readonly today: CoreState;
   /** the audit row or the file that saw it */
   readonly evidence: string;
@@ -55,9 +65,25 @@ export type CoreRow = {
   readonly manual?: string;
   /** a window API write made before the driven steps and never counted as one */
   readonly setup?: string;
+  /**
+   * docs/RETURN.md section 1 rule 2: the data-control ids this row alone guards. A red row with
+   * `parks` keeps those ids behind the Advanced tools switch for the ship and neither parks its
+   * feature nor blocks the ship.
+   */
+  readonly parks?: readonly string[];
 };
 
 export type Tally = { rows: number } & Record<CoreState, number>;
+
+/** A row of the parked list whose own controls stay parked (RETURN.md rule 2). */
+export type ParkedRow = { id: string; parks: string[] };
+
+/** The committed parked list of a ship, `ship-<commit>.json`. */
+export type ParkedList = {
+  commit: string | null;
+  parkedFeatures: CoreFeature[];
+  parkedRows: ParkedRow[];
+};
 
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
@@ -68,6 +94,12 @@ export const PROBE_DRIVER: 'probe --core';
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
 export const CORE_DRIVERS: readonly CoreDriver[];
 export const CORE_ID_PATTERN: RegExp;
+export const CONTROL_ID_PATTERN: RegExp;
+/** The sources `parks` ids are validated against (model.ts, toolbar-tails.ts, TitleRow.tsx). */
+export const CONTROL_SOURCE_PATHS: readonly string[];
+/** The features a red row cannot park: a red row of one blocks the ship unless it carries `parks`. */
+export const UNPARKABLE_FEATURES: readonly CoreFeature[];
+/** The focus round's one unparkable feature, kept for the callers that named it. */
 export const UNPARKABLE_FEATURE: 'surface';
 export const CORE_MATRIX: readonly CoreRow[];
 export const CORE_IDS: readonly string[];
@@ -78,6 +110,10 @@ export function loadCoreMatrix(path?: string): readonly CoreRow[];
 export function isCoreId(id: string): boolean;
 /** True for a manual row of ruling (3): not driven parks nothing and fails no ship; failed still does. */
 export function isManualRow(row: CoreRow | undefined): boolean;
+/** True for a feature a red row can park. */
+export function isParkable(feature: string): boolean;
+/** True when the id appears as a string literal in one of the control sources. */
+export function isKnownControl(id: string): boolean;
 /** The row with the id; a RangeError on an unknown id. */
 export function coreRow(id: string): CoreRow;
 export function featureOf(id: string): CoreFeature;
@@ -91,16 +127,14 @@ export function parkedFeaturesOf(
   rows?: readonly CoreRow[],
 ): {
   parked: CoreFeature[];
-  blocking: Array<{ id: string; result: RunResult }>;
+  parkedRows: Array<ParkedRow & { result: RunResult }>;
+  blocking: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
   red: Record<string, Array<{ id: string; result: RunResult }>>;
 };
 export function shipVerdict(
   results: Readonly<Record<string, RunResult>>,
-  parkedFeatures?: readonly CoreFeature[],
+  parked?: readonly CoreFeature[] | Partial<ParkedList>,
   rows?: readonly CoreRow[],
 ): { ok: boolean; failures: Array<{ id: string; feature: CoreFeature; result: RunResult }> };
-/** The committed parked list of a ship, `ship-<commit>.json` (6.2); `surface` is refused. */
-export function readParkedList(path: string): {
-  commit: string | null;
-  parkedFeatures: CoreFeature[];
-};
+/** The committed parked list of a ship, `ship-<commit>.json` (6.2); an unparkable feature is refused. */
+export function readParkedList(path: string): ParkedList;

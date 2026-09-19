@@ -334,7 +334,7 @@ function PrintPage1({
       <div ref={sheet} className="ts-print-sheet" suppressHydrationWarning>
         <div className="ts-sheet sheet" data-theme={theme}>
           <div className="ts-stage stage">
-            <Frame index={index} total={total} />
+            <Frame index={index} total={total} counter={slide.counter ?? true} />
             <div ref={body} className="pt-slide" dangerouslySetInnerHTML={{ __html: slide.html }} />
           </div>
         </div>

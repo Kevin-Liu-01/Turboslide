@@ -384,6 +384,40 @@ describe('placeMenu', () => {
     ).toBe(498);
   });
 
+  it('hangs a plate under the right edge of its anchor with the end alignment, so the Slideshow options meet the control instead of the viewport clamp (docs/RETURN.md 4.1)', () => {
+    /* the split button at 1440: the wrapper 1209 to 1342, the menu 220 wide; the plate's right
+       edge lands on 1342 (left 1122) and its top at the control's bottom plus the 2 px gap */
+    expect(
+      placeMenu({
+        anchor: { left: 1209, top: 6, right: 1342, bottom: 38 },
+        size: { width: 220, height: 96 },
+        viewport,
+        placement: 'below',
+        align: 'end',
+      }),
+    ).toEqual({ left: 1122, top: 40, maxHeight: 884 });
+    /* the start alignment stays the default; anchored to the chevron alone (1312 to 1342) the plate
+       clamps 8 px inside the viewport at 1212, the placement audit-chrome row 12 measured */
+    expect(
+      placeMenu({
+        anchor: { left: 1312, top: 6, right: 1342, bottom: 38 },
+        size: { width: 220, height: 96 },
+        viewport,
+        placement: 'below',
+      }).left,
+    ).toBe(1212);
+    /* the end alignment never leaves the 8 px margin either */
+    expect(
+      placeMenu({
+        anchor: { left: 40, top: 6, right: 100, bottom: 38 },
+        size: { width: 220, height: 96 },
+        viewport,
+        placement: 'below',
+        align: 'end',
+      }).left,
+    ).toBe(8);
+  });
+
   it('opens a submenu to the right of its row, overlapping by 4 px, and to the left at the edge', () => {
     expect(
       placeMenu({

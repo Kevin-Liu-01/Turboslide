@@ -22,6 +22,15 @@
   --pt-titanium: #8a8f98;
   --pt-hair: rgba(7, 7, 7, 0.18);
   --pt-hair-soft: rgba(7, 7, 7, 0.09);
+  /* The return round (docs/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over
+     the solid ink of the Slideshow split button, where --pt-hair (ink at .18) is ink on ink and
+     invisible. Each is a paper tint over ink with no colour (RETURN.md 1 rule 6). Composites over
+     the ink of each appearance: the hairline #474747 on #070707 (2.17:1) light and #b5b5b3 on
+     #f2f2f0 (1.83:1) dark; the hover plate #2f2f2f (1.50:1) and #cccccb (1.43:1); the open plate
+     #434343 (2.04:1) and #babab8 (1.73:1). The paper text keeps at least 9.89:1 on every one. */
+  --pt-hair-on-ink: rgba(255, 255, 255, 0.26);
+  --pt-plate-on-ink: rgba(255, 255, 255, 0.16);
+  --pt-plate-on-ink-open: rgba(255, 255, 255, 0.24);
   --pt-plate: rgba(7, 7, 7, 0.035);
   --pt-cross: rgba(7, 7, 7, 0.38);
   --pt-edge: rgba(7, 7, 7, 0.62);
@@ -39,6 +48,9 @@
   --pt-notes-h: 64px;
   --pt-status-h: 32px;
   --pt-menu-w: 220px;
+  /* the one control height of the title row's right cluster (docs/RETURN.md 4.3): Share, the
+     Slideshow split button and the comments glyph; the presence chips are 24 px centred in it */
+  --pt-ctl-h: 32px;
   /* the sidebar in outline density; ViewerShell.css widens it to 256px for thumbnails, the
      editor's filmstrip width (gslides-parity SPEC 1.2) */
   --pt-sb-w: 208px;
@@ -116,6 +128,10 @@
   --pt-titanium: #8a8f98;
   --pt-hair: rgba(242, 242, 240, 0.22);
   --pt-hair-soft: rgba(242, 242, 240, 0.1);
+  /* the lines and grounds over the dark appearance's ink (#f2f2f0): a paper (#070707) tint */
+  --pt-hair-on-ink: rgba(7, 7, 7, 0.26);
+  --pt-plate-on-ink: rgba(7, 7, 7, 0.16);
+  --pt-plate-on-ink-open: rgba(7, 7, 7, 0.24);
   --pt-plate: rgba(242, 242, 240, 0.05);
   --pt-cross: rgba(255, 255, 255, 0.34);
   --pt-edge: rgba(242, 242, 240, 0.55);

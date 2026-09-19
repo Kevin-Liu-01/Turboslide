@@ -236,12 +236,12 @@ test('two contexts open one deck as two labels and see each other in the roster'
 
 test('two contexts type in one paragraph and converge byte for byte over 200 keystrokes, no character lost', async () => {
   test.setTimeout(180_000);
+  // the row opens both editors on the slide itself (by line it typed on the slide beforeAll left
+  // and read nothing typed) and pins the two stream positions equal before either types (SPEC-3
+  // 3.6; VERIFICATION-3 finding 33: a page whose position lags holds its first write)
+  await openEditor(pageA, DECK);
+  await openEditor(pageB, DECK);
   const before = await runText(pageA, PARA);
-  // both pages have caught the stream up before either types (SPEC-3 3.6; VERIFICATION-3 finding
-  // 33): a page whose stream position lags holds its first write, so the S2 no-character-lost
-  // guarantee does not depend on which page opened first. openEditor already waited for the
-  // connection; this pins the two positions equal so the first burst on each is transformed
-  // against what the other has already landed.
   await expect
     .poll(async () => (await status(pageA)).seq === (await status(pageB)).seq, { timeout: 20_000 })
     .toBe(true);
@@ -762,6 +762,77 @@ test('sync.status reads the same numbers through the window API and describe().s
   }, DECK);
   expect(hello?.seq).toBe(viaAction.seq);
   expect(hello?.revision).toBe(viaAction.revision);
+});
+
+test('a re-send past the burst timer and a second remote insert: the keystrokes land once and the caret stays after them (C3S-F12)', async () => {
+  test.setTimeout(90_000);
+  // The shape of VERIFICATION.md C3S-F12 made deterministic. A types with no pause, so the 100 ms
+  // burst timer never fires while B's first insert lands; the Editor's re-send 150 ms after that
+  // insert (text-fit.ts sessionReconcile 'resend') writes A's unflushed keystrokes past the timer;
+  // B's second insert lands while A still types. The absorb of the second insert bases on the
+  // re-sent text (InlineText handedText). Before the fix it based on the session's last burst,
+  // read the re-sent keystrokes as B's change, landed them a second time and moved the caret by
+  // their count plus B's insert (the run of 2026-09-18 on 4395: 98 A's, "Ever", 7 A's for 100
+  // typed at the start). The row asserts the document alone; the timing line says whether both
+  // inserts landed while A typed, which is the window the mechanism needs.
+  await openEditor(pageA, DECK);
+  await openEditor(pageB, DECK);
+  await expect
+    .poll(async () => (await status(pageA)).seq === (await status(pageB)).seq, { timeout: 20_000 })
+    .toBe(true);
+  const before = await runText(pageA, PARA);
+  await pageA.evaluate(() => {
+    const arrivals: number[] = [];
+    (window as unknown as { tsArrivals: number[] }).tsArrivals = arrivals;
+    window.addEventListener('turboslide:text-changed', () => arrivals.push(performance.now()));
+  });
+  await caretIn(pageA, PARA, 'start');
+  const typed = 'A'.repeat(150);
+  const typing = pageA.keyboard.type(typed, { delay: 15 });
+  const answers: Promise<unknown>[] = [];
+  // B's insert at the end of the paragraph as B's document reads it; the answer of a window API
+  // write waits for the checkpoint 2 s after the last op (the row above :461), the op leaves at once
+  const insertAtEnd = async (text: string) => {
+    const now = await runText(pageB, PARA);
+    const rev = await revision(pageB);
+    answers.push(
+      invoke(pageB, 'slide.update', {
+        slideId: SLIDE,
+        baseRevision: rev,
+        mutations: [
+          {
+            op: 'text.splice',
+            slideId: SLIDE,
+            blockId: PARA,
+            path: '/text',
+            at: now.length,
+            remove: 0,
+            insert: text,
+          },
+        ],
+      }),
+    );
+  };
+  await pageA.waitForTimeout(400);
+  await insertAtEnd('BB');
+  await pageA.waitForTimeout(700);
+  await insertAtEnd('CCCC');
+  await typing;
+  const timing = await pageA.evaluate(() => ({
+    typedUntil: performance.now(),
+    arrivals: (window as unknown as { tsArrivals: number[] }).tsArrivals,
+  }));
+  await endEdit(pageA);
+  await Promise.all(answers);
+  await settled(pageA);
+  await settled(pageB);
+  const expected = `${typed}${before}BBCCCC`;
+  await expect.poll(() => runText(pageA, PARA), { timeout: 30_000 }).toBe(expected);
+  await expect.poll(() => runText(pageB, PARA), { timeout: 30_000 }).toBe(expected);
+  const landed = timing.arrivals.filter((at) => at < timing.typedUntil).length;
+  console.info(
+    `realtime: C3S-F12 row, ${timing.arrivals.length} remote changes reached A's session, ${landed} of them while A typed (${timing.arrivals.map((at) => Math.round(timing.typedUntil - at)).join(', ')} ms before the last keystroke)`,
+  );
 });
 
 async function post(

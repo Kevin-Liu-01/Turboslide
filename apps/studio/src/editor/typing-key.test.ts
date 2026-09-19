@@ -19,6 +19,22 @@ const splice: Mutation = {
 };
 
 describe('typingKeyOf', () => {
+  it('reads past the auto-title rename a burst carries (auto-title.ts; docs/RETURN.md 2.18)', () => {
+    const rename: Mutation = { op: 'deck.set', path: '/title', value: 'Renewal review' };
+    expect(typingKeyOf([splice, rename])).toBe('s1/p1/text');
+    expect(
+      typingKeyOf([
+        { op: 'slide.set', slideId: 'title', path: '/heading', value: 'Renewal' },
+        rename,
+      ]),
+    ).toBe('title/heading');
+    /* a rename alone, or one after a write that is not a burst, is its own step */
+    expect(typingKeyOf([rename])).toBeNull();
+    expect(
+      typingKeyOf([{ op: 'block.set', slideId: 's1', blockId: 'p1', path: '/typography' }, rename]),
+    ).toBeNull();
+  });
+
   it('names the run of a text.splice', () => {
     expect(typingKeyOf([splice])).toBe('s1/p1/text');
     expect(typingKeyOf([{ ...splice, at: 5, insert: 'y' }])).toBe('s1/p1/text');

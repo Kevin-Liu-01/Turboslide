@@ -1,0 +1,11 @@
+guide-probe.mjs against http://localhost:4403 (the tree before the fix), 2026-09-19 01:01Z, under .turboslide/e2e.lock
+showGuides true
+shown [ 'guide.x.400', 'guide.x.800', 'guide.y.450' ]
+(a) API move 800->600: {"guides":{"x":[400,600],"y":[450]},"revision":4} shown [ 'guide.x.400', 'guide.x.600', 'guide.y.450' ]
+(b away from crossing) press at sheet y 200 under guide.x.800; k 0.705; readout during {"text":"5.00 in","left":"429px","top":"6px"}; after guide.x.400,guide.x.600,guide.y.450; deck.info {"x":[400,600],"y":[450]}
+    events: down on guide.x.800 | up on guide.x.800
+(c at crossing) press at sheet y 450 under guide.y.450; k 0.705; readout during {"text":"3.75 in","left":"6px","top":"323px"}; after guide.x.400,guide.x.800,guide.y.450; deck.info {"x":[400,800],"y":[450]}
+    events: down on guide.y.450 | up on guide.y.450
+(d no y guide, centre) press at sheet y 450 under guide.x.800; readout during "5.00 in"; after guide.x.400,guide.x.600; deck.info {"x":[400,600],"y":[]}
+(e one guide, centre) press at sheet y 450 under guide.x.800; readout during "5.00 in"; after guide.x.600; deck.info {"x":[600],"y":[]}
+cleanup: /edit/untitled-20260919-74sq -> 404

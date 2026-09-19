@@ -1,0 +1,123 @@
+{
+  "base": "http://localhost:4403",
+  "deck": "untitled-20260919-bftb",
+  "at": "2026-09-19T00:58:39.271Z",
+  "rows": [
+    {
+      "name": "guides.setup",
+      "ok": true,
+      "observed": "showGuides -> true; shown guide.x.400,guide.x.800,guide.y.450; deck.info guides {\"x\":[400,800],\"y\":[450]}",
+      "ms": 4052
+    },
+    {
+      "name": "guides.drag.fast",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 4501
+    },
+    {
+      "name": "guides.drag.fast.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 1
+    },
+    {
+      "name": "guides.drag.slow",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 5597
+    },
+    {
+      "name": "guides.drag.slow.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 1
+    },
+    {
+      "name": "guides.drag.fast.2",
+      "ok": false,
+      "observed": "under press guide.y.450; readout during \"3.75 in\"; guides after guide.x.400,guide.x.800,guide.y.450; deck.info {\"x\":[400,800],\"y\":[450]}; save \"All changes saved\"; status \"\"",
+      "ms": 4486
+    },
+    {
+      "name": "guides.drag.fast.2.back",
+      "ok": false,
+      "observed": "no guide element guide.x.600",
+      "ms": 1
+    },
+    {
+      "name": "guides.cleanup",
+      "ok": true,
+      "observed": "showGuides -> false",
+      "ms": 4018
+    },
+    {
+      "name": "grid.effect",
+      "ok": true,
+      "observed": "snapGuides -> false; snapGrid -> true; grid on: 200 -> 240 (aimed 236); snapGrid -> false; grid off: 200 -> 236 (aimed 236)",
+      "ms": 13824
+    },
+    {
+      "name": "tab.from-slideshow",
+      "ok": false,
+      "observed": "with \"Title\" selected: focus button[present.open] -> button[present.open], chip -> \"Subtitle\", Tab defaultPrevented no key seen; nothing selected: focus -> button[present.open]",
+      "ms": 4759
+    },
+    {
+      "name": "connector.setup",
+      "ok": false,
+      "observed": "threw: Error: page.evaluate: TypeError: block.insert: invalid input at /block/id: a block id: lower-case letters, digits and hyphens\n    at Object.dispatch (http://localhost:4403/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/dispatch.ts:50:31)\n    at invoke (http://localhost:4403/src/editor/contro",
+      "ms": 6
+    },
+    {
+      "name": "connector.elbow.draw",
+      "ok": false,
+      "observed": "threw: TypeError: Cannot read properties of null (reading 'id')",
+      "ms": 3201
+    },
+    {
+      "name": "connector.follows-moved-shape",
+      "ok": false,
+      "observed": "threw: TypeError: Cannot read properties of null (reading 'id')",
+      "ms": 208
+    },
+    {
+      "name": "connector.re-end",
+      "ok": false,
+      "observed": "threw: TypeError: Cannot read properties of null (reading 'id')",
+      "ms": 1680
+    },
+    {
+      "name": "shape.draw.readout",
+      "ok": false,
+      "observed": "readout during \"null\" (marquee true); after null; drawn shape {\"x\":300,\"y\":300,\"w\":320,\"h\":200,\"z\":1}",
+      "ms": 3705
+    },
+    {
+      "name": "shape.look.both-appearances",
+      "ok": true,
+      "observed": "dark: fill rgba(242, 242, 240, 0.05) stroke rgb(242, 242, 240) 1px on rgb(7, 7, 7): fill seen true, stroke seen true | light: fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px on rgb(255, 255, 255): fill seen true, stroke seen true",
+      "ms": 4523
+    },
+    {
+      "name": "shape.label.enter",
+      "ok": true,
+      "observed": "session by Enter true; block.text \"Label\"",
+      "ms": 1441
+    },
+    {
+      "name": "shape.label.double-click",
+      "ok": true,
+      "observed": "session by double click true; caret 5/5 collapsed true; block.text \"Label2\"",
+      "ms": 774
+    }
+  ],
+  "consoleErrors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 240171",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7oh3tu-479938 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7oh3tu-479938 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7oh3tu-479938 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4403/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker u7oh3tu-479938 rend",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

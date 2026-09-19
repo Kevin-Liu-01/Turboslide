@@ -67,7 +67,10 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     try {
       r = await fn(i);
     } catch (error) {
-      r = { ok: false, evidence: `error: ${error instanceof Error ? error.message : String(error)}` };
+      r = {
+        ok: false,
+        evidence: `error: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
     attempts.push(r);
     if (r.shot) shotPath = r.shot;
@@ -91,15 +94,23 @@ async function row(feature, interaction, fn, { tries = 4 } = {}) {
     evidence:
       attempts.length > 1
         ? attempts.map((a, i) => `attempt ${i + 1}: ${a.evidence}`).join(' | ')
-        : attempts[0]?.evidence ?? '',
+        : (attempts[0]?.evidence ?? ''),
     shot: shotPath,
     consoleErrors: errs,
   };
   rows.push(entry);
   save();
   const tag =
-    result === 'works' ? 'ok  ' : result === 'broken' ? 'FAIL' : result === 'flaky' ? 'FLKY' : 'n/d ';
-  console.log(`${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`);
+    result === 'works'
+      ? 'ok  '
+      : result === 'broken'
+        ? 'FAIL'
+        : result === 'flaky'
+          ? 'FLKY'
+          : 'n/d ';
+  console.log(
+    `${tag} ${String(entry.n).padStart(3)} ${feature} :: ${interaction}\n       ${entry.evidence}`,
+  );
   return entry;
 }
 
@@ -175,9 +186,17 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
   }
 };
 const settled = async (page, timeout = 20_000) =>
-  pollUntil(() => state(page), (s) => (s.sync?.pending ?? s.pending ?? 0) === 0, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => (s.sync?.pending ?? s.pending ?? 0) === 0,
+    timeout,
+  );
 const connected = (page) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, 45_000);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    45_000,
+  );
 const activeSlide = async (page) => (await state(page)).slideId;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
@@ -326,7 +345,10 @@ const counter = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('[data-control="view.count"]');
     return el
-      ? { text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), label: el.getAttribute('aria-label') }
+      ? {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          label: el.getAttribute('aria-label'),
+        }
       : null;
   });
 const hashOf = (page) => page.evaluate(() => window.location.hash);
@@ -375,8 +397,12 @@ const gridFacts = (page) =>
     return {
       grid: Boolean(grid),
       tiles: grid ? grid.querySelectorAll('.pt-thumb').length : 0,
-      tileIds: grid ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id')) : [],
-      activeTile: grid ? grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null : null,
+      tileIds: grid
+        ? [...grid.querySelectorAll('.pt-thumb')].map((t) => t.getAttribute('data-id'))
+        : [],
+      activeTile: grid
+        ? (grid.querySelector('.pt-thumb.is-active')?.getAttribute('data-id') ?? null)
+        : null,
       selectedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-selected').length : 0,
       skippedTiles: grid ? grid.querySelectorAll('.pt-thumb.is-skipped').length : 0,
       filmHidden: film
@@ -384,7 +410,9 @@ const gridFacts = (page) =>
         : null,
       filmWidth: film ? Math.round(film.getBoundingClientRect().width) : null,
       stageShown: stage ? stage.getBoundingClientRect().width > 0 : false,
-      gridPressed: document.querySelector('[data-control="view.gridView"]')?.getAttribute('aria-pressed'),
+      gridPressed: document
+        .querySelector('[data-control="view.gridView"]')
+        ?.getAttribute('aria-pressed'),
       filmPressed: document
         .querySelector('[data-control="view.filmstripView"]')
         ?.getAttribute('aria-pressed'),
@@ -423,27 +451,36 @@ const focusWorkspace = async (page) => {
   await clearAll(page);
   const wrap = await rectOf(page, '.ts-stagewrap.ts-editor');
   const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-  if (wrap && sheet) await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
+  if (wrap && sheet)
+    await clickAt(page, Math.max(wrap.x + 12, sheet.x - 24), sheet.y + sheet.h / 2);
   await sleep(200);
 };
 /** Focuses a card by clicking it, the way a person does; answers whether the card took focus. */
 const focusCard = async (page, id) => {
   await clickCard(page, id);
-  await pollUntil(() => activeSlide(page), (a) => a === id, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (a) => a === id,
+    8000,
+  );
   await sleep(300);
   return page.evaluate((sid) => document.activeElement?.getAttribute('data-id') === sid, id);
 };
-const waitOrder = (page, test, timeout = 20_000) => pollUntil(() => slideOrder(page), test, timeout);
+const waitOrder = (page, test, timeout = 20_000) =>
+  pollUntil(() => slideOrder(page), test, timeout);
 
 /** Any dialog on the page and the title row's save words, for a write the server refused. */
 const refusals = (page) =>
   page.evaluate(() => {
-    const dialogs = [...document.querySelectorAll('[role="dialog"], [role="alertdialog"], .ts-dialog')]
+    const dialogs = [
+      ...document.querySelectorAll('[role="dialog"], [role="alertdialog"], .ts-dialog'),
+    ]
       .map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 200))
       .filter((t) => /not applied|already exists|stale|refused|rebase/i.test(t));
-    const save = [...document.querySelectorAll('.ts-title *, header *')]
-      .map((el) => (el.textContent ?? '').trim())
-      .find((t) => /saved|saving|save|retry/i.test(t) && t.length < 60) ?? null;
+    const save =
+      [...document.querySelectorAll('.ts-title *, header *')]
+        .map((el) => (el.textContent ?? '').trim())
+        .find((t) => /saved|saving|save|retry/i.test(t) && t.length < 60) ?? null;
     return { dialogs, save };
   });
 // ---------------------------------------------------------------------------------------------
@@ -452,7 +489,10 @@ const refusals = (page) =>
 // retrying" after a two tile Delete and Undo in the grid)
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
@@ -469,7 +509,14 @@ const shot = async (name) => {
 const HEAD = 'heading/text';
 const syncFacts = async () => {
   const s = await state(page);
-  return { revision: s.revision, serverRevision: s.serverRevision, pending: s.sync?.pending ?? s.pending ?? null, rejects: s.rejects?.length ?? 0, error: s.error ?? null, connected: s.sync?.connected };
+  return {
+    revision: s.revision,
+    serverRevision: s.serverRevision,
+    pending: s.sync?.pending ?? s.pending ?? null,
+    rejects: s.rejects?.length ?? 0,
+    error: s.error ?? null,
+    connected: s.sync?.connected,
+  };
 };
 /** Reloads the deck and answers the order the server holds. */
 const serverOrder = async () => {
@@ -493,7 +540,11 @@ const topUp = async () => {
 const selectTwoCards = async (a, b) => {
   await clearAll(page);
   await clickCard(page, a);
-  await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
+  await pollUntil(
+    () => activeSlide(page),
+    (x) => x === a,
+    8000,
+  );
   await clickCard(page, b, { modifiers: ['Shift'] });
   await sleep(400);
   return cards(page);
@@ -502,9 +553,16 @@ const selectTwoCards = async (a, b) => {
 const dismissRefusals = async () => {
   const r = await refusals(page);
   if (r.dialogs.length > 0) {
-    const buttons = await page.evaluate(() => [...document.querySelectorAll('[role="dialog"] button, [role="alertdialog"] button')].map((b) => (b.textContent ?? '').trim()));
+    const buttons = await page.evaluate(() =>
+      [...document.querySelectorAll('[role="dialog"] button, [role="alertdialog"] button')].map(
+        (b) => (b.textContent ?? '').trim(),
+      ),
+    );
     for (let i = 0; i < 4; i += 1) {
-      const btn = page.locator('[role="dialog"] button, [role="alertdialog"] button').filter({ hasText: /dismiss|close|ok/i }).first();
+      const btn = page
+        .locator('[role="dialog"] button, [role="alertdialog"] button')
+        .filter({ hasText: /dismiss|close|ok/i })
+        .first();
       if (!(await btn.isVisible().catch(() => false))) break;
       await btn.click().catch(() => undefined);
       await sleep(300);
@@ -524,7 +582,11 @@ try {
   await dblclickAt(page, r0.x + r0.w / 2, r0.y + r0.h / 2);
   await typeHuman(page, 'Q3 pipeline review for Acme');
   await press(page, 'Escape');
-  await pollUntil(() => state(page), (v) => v.revision >= 1, 30_000);
+  await pollUntil(
+    () => state(page),
+    (v) => v.revision >= 1,
+    30_000,
+  );
   await settled(page, 30_000);
   await closeNamePrompt(page);
   await connected(page);
@@ -532,111 +594,175 @@ try {
   console.log(`deck ${deckId} with ${(await slideOrder(page)).length} slides`);
 
   for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Delete slide', `Trial ${trial}: in the grid, with the fifth slide current, Shift click the sixth tile (two selected), press Delete, click Undo; reload and compare the server's order`, async () => {
-      const before = await topUp();
-      const a = before[before.length - 2];
-      const b = before[before.length - 1];
-      await clearAll(page);
-      await clickCard(page, a);
-      await pollUntil(() => activeSlide(page), (x) => x === a, 8000);
-      await clickControl(page, 'view.gridView');
-      await pollUntil(() => gridFacts(page), (g) => g.grid && g.tiles === before.length, 8000);
-      const rb = await rectOf(page, `.pt-grid .pt-thumb[data-id="${b}"]`);
-      if (!rb) { await clickControl(page, 'view.filmstripView'); return { ok: false, evidence: `tile ${b} missing` }; }
-      await clickAt(page, rb.x + rb.w / 2, rb.y + rb.h / 2, { modifiers: ['Shift'] });
-      await sleep(400);
-      const g = await gridFacts(page);
-      const focus = await activeDesc(page);
-      await press(page, 'Delete');
-      const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 3000);
-      const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
-      const syncMid = await syncFacts();
-      const shMid = await shot(`grid-two-deleted-${trial}`);
-      let undoBy = 'none';
-      if (sb?.action) { await clickControl(page, 'snackbar.action'); undoBy = 'snackbar'; }
-      else { await press(page, 'Meta+z'); undoBy = 'Cmd+Z'; }
-      const after = await waitOrder(page, (o) => o.length === before.length, 15_000);
-      await sleep(2500);
-      const syncAfter = await syncFacts();
-      const ref = await refusals(page);
-      const sh = await shot(`grid-two-undo-${trial}`);
-      const dismissed = await dismissRefusals();
-      await settled(page, 15_000);
-      if (await has(page, '[data-control="view.filmstripView"]')) await clickControl(page, 'view.filmstripView').catch(() => undefined);
-      const server = await serverOrder();
-      return {
-        ok: g.grid && g.selectedTiles === 2 && mid.length === before.length - 2 && after.join(',') === before.join(',') && server.join(',') === before.join(',') && ref.dialogs.length === 0,
-        evidence: `grid still open ${g.grid}, selected tiles ${g.selectedTiles}, focus ${focus}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}; sync ${JSON.stringify(syncMid)}) -> Undo by ${undoBy} ${after.length} (restored in the tab ${after.join(',') === before.join(',')}; sync ${JSON.stringify(syncAfter)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}); server after reload ${server.length}: ${server.join(',')} (matches ${server.join(',') === before.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
-        shot: ref.dialogs.length ? sh : shMid,
-      };
-    }, { tries: 1 });
+    await row(
+      'Delete slide',
+      `Trial ${trial}: in the grid, with the fifth slide current, Shift click the sixth tile (two selected), press Delete, click Undo; reload and compare the server's order`,
+      async () => {
+        const before = await topUp();
+        const a = before[before.length - 2];
+        const b = before[before.length - 1];
+        await clearAll(page);
+        await clickCard(page, a);
+        await pollUntil(
+          () => activeSlide(page),
+          (x) => x === a,
+          8000,
+        );
+        await clickControl(page, 'view.gridView');
+        await pollUntil(
+          () => gridFacts(page),
+          (g) => g.grid && g.tiles === before.length,
+          8000,
+        );
+        const rb = await rectOf(page, `.pt-grid .pt-thumb[data-id="${b}"]`);
+        if (!rb) {
+          await clickControl(page, 'view.filmstripView');
+          return { ok: false, evidence: `tile ${b} missing` };
+        }
+        await clickAt(page, rb.x + rb.w / 2, rb.y + rb.h / 2, { modifiers: ['Shift'] });
+        await sleep(400);
+        const g = await gridFacts(page);
+        const focus = await activeDesc(page);
+        await press(page, 'Delete');
+        const sb = await pollUntil(
+          () => snackbar(page),
+          (v) => v !== null,
+          3000,
+        );
+        const mid = await waitOrder(page, (o) => o.length === before.length - 2, 12_000);
+        const syncMid = await syncFacts();
+        const shMid = await shot(`grid-two-deleted-${trial}`);
+        let undoBy = 'none';
+        if (sb?.action) {
+          await clickControl(page, 'snackbar.action');
+          undoBy = 'snackbar';
+        } else {
+          await press(page, 'Meta+z');
+          undoBy = 'Cmd+Z';
+        }
+        const after = await waitOrder(page, (o) => o.length === before.length, 15_000);
+        await sleep(2500);
+        const syncAfter = await syncFacts();
+        const ref = await refusals(page);
+        const sh = await shot(`grid-two-undo-${trial}`);
+        const dismissed = await dismissRefusals();
+        await settled(page, 15_000);
+        if (await has(page, '[data-control="view.filmstripView"]'))
+          await clickControl(page, 'view.filmstripView').catch(() => undefined);
+        const server = await serverOrder();
+        return {
+          ok:
+            g.grid &&
+            g.selectedTiles === 2 &&
+            mid.length === before.length - 2 &&
+            after.join(',') === before.join(',') &&
+            server.join(',') === before.join(',') &&
+            ref.dialogs.length === 0,
+          evidence: `grid still open ${g.grid}, selected tiles ${g.selectedTiles}, focus ${focus}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}; sync ${JSON.stringify(syncMid)}) -> Undo by ${undoBy} ${after.length} (restored in the tab ${after.join(',') === before.join(',')}; sync ${JSON.stringify(syncAfter)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}); server after reload ${server.length}: ${server.join(',')} (matches ${server.join(',') === before.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
+          shot: ref.dialogs.length ? sh : shMid,
+        };
+      },
+      { tries: 1 },
+    );
   }
 
   for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Delete slide', `Trial ${trial}: click the empty canvas of the last slide (nothing selected) and press Delete, then Cmd+Z; reload and compare the server's order`, async () => {
-      const before = await topUp();
-      const last = before[before.length - 1];
-      await clearAll(page);
-      await clickCard(page, last);
-      await pollUntil(() => activeSlide(page), (x) => x === last, 8000);
-      await focusWorkspace(page);
-      const focus = await activeDesc(page);
-      await press(page, 'Delete');
-      const sb = await pollUntil(() => snackbar(page), (v) => v !== null, 3000);
-      const mid = await waitOrder(page, (o) => o.length === before.length - 1, 8000);
-      const syncMid = await syncFacts();
-      let after = mid;
-      let undone = 'not needed';
-      if (mid.length !== before.length) {
+    await row(
+      'Delete slide',
+      `Trial ${trial}: click the empty canvas of the last slide (nothing selected) and press Delete, then Cmd+Z; reload and compare the server's order`,
+      async () => {
+        const before = await topUp();
+        const last = before[before.length - 1];
+        await clearAll(page);
+        await clickCard(page, last);
+        await pollUntil(
+          () => activeSlide(page),
+          (x) => x === last,
+          8000,
+        );
+        await focusWorkspace(page);
+        const focus = await activeDesc(page);
+        await press(page, 'Delete');
+        const sb = await pollUntil(
+          () => snackbar(page),
+          (v) => v !== null,
+          3000,
+        );
+        const mid = await waitOrder(page, (o) => o.length === before.length - 1, 8000);
+        const syncMid = await syncFacts();
+        let after = mid;
+        let undone = 'not needed';
+        if (mid.length !== before.length) {
+          await press(page, 'Meta+z');
+          after = await waitOrder(page, (o) => o.length === before.length, 15_000);
+          undone = after.join(',') === before.join(',') ? 'restored' : `order ${after.join(',')}`;
+        }
+        await sleep(2500);
+        const syncAfter = await syncFacts();
+        const ref = await refusals(page);
+        const sh = ref.dialogs.length ? await shot(`canvas-delete-undo-${trial}`) : null;
+        const dismissed = await dismissRefusals();
+        await settled(page, 15_000);
+        const server = await serverOrder();
+        return {
+          ok: server.join(',') === before.join(',') && ref.dialogs.length === 0,
+          evidence: `focus ${focus}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}; sync ${JSON.stringify(syncMid)}); undo ${undone}; sync ${JSON.stringify(syncAfter)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}; server after reload ${server.length}: ${server.join(',')} (matches ${server.join(',') === before.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
+          shot: sh,
+        };
+      },
+      { tries: 1 },
+    );
+  }
+
+  for (let trial = 1; trial <= 3; trial += 1) {
+    await row(
+      'Delete slide',
+      `Trial ${trial}: delete the last slide with the Delete key on its card, wait for the save, then Cmd+Z, wait, then Cmd+Shift+Z; reload and compare the server's order`,
+      async () => {
+        const before = await topUp();
+        const last = before[before.length - 1];
+        await focusCard(page, last);
+        await press(page, 'Delete');
+        const mid = await waitOrder(page, (o) => o.length === before.length - 1, 8000);
+        await settled(page, 15_000);
         await press(page, 'Meta+z');
-        after = await waitOrder(page, (o) => o.length === before.length, 15_000);
-        undone = after.join(',') === before.join(',') ? 'restored' : `order ${after.join(',')}`;
-      }
-      await sleep(2500);
-      const syncAfter = await syncFacts();
-      const ref = await refusals(page);
-      const sh = ref.dialogs.length ? await shot(`canvas-delete-undo-${trial}`) : null;
-      const dismissed = await dismissRefusals();
-      await settled(page, 15_000);
-      const server = await serverOrder();
-      return {
-        ok: server.join(',') === before.join(',') && ref.dialogs.length === 0,
-        evidence: `focus ${focus}; ${before.length} -> Delete ${mid.length} (snackbar ${JSON.stringify(sb)}; sync ${JSON.stringify(syncMid)}); undo ${undone}; sync ${JSON.stringify(syncAfter)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}; server after reload ${server.length}: ${server.join(',')} (matches ${server.join(',') === before.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
-        shot: sh,
-      };
-    }, { tries: 1 });
-  }
-
-  for (let trial = 1; trial <= 3; trial += 1) {
-    await row('Delete slide', `Trial ${trial}: delete the last slide with the Delete key on its card, wait for the save, then Cmd+Z, wait, then Cmd+Shift+Z; reload and compare the server's order`, async () => {
-      const before = await topUp();
-      const last = before[before.length - 1];
-      await focusCard(page, last);
-      await press(page, 'Delete');
-      const mid = await waitOrder(page, (o) => o.length === before.length - 1, 8000);
-      await settled(page, 15_000);
-      await press(page, 'Meta+z');
-      const undone = await waitOrder(page, (o) => o.length === before.length, 15_000);
-      await settled(page, 15_000);
-      await press(page, 'Meta+Shift+z');
-      const redone = await waitOrder(page, (o) => o.length === before.length - 1, 15_000);
-      await sleep(2500);
-      const sync = await syncFacts();
-      const ref = await refusals(page);
-      const sh = ref.dialogs.length ? await shot(`redo-delete-${trial}`) : null;
-      const dismissed = await dismissRefusals();
-      await settled(page, 15_000);
-      const server = await serverOrder();
-      const want = before.filter((id) => id !== last);
-      return {
-        ok: mid.length === before.length - 1 && undone.join(',') === before.join(',') && redone.length === before.length - 1 && server.join(',') === want.join(',') && ref.dialogs.length === 0,
-        evidence: `${before.length} -> Delete ${mid.length} -> Cmd+Z ${undone.length} (restored ${undone.join(',') === before.join(',')}) -> Cmd+Shift+Z ${redone.length}; sync ${JSON.stringify(sync)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}; server after reload ${server.length}: ${server.join(',')} (the slide gone ${server.join(',') === want.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
-        shot: sh,
-      };
-    }, { tries: 1 });
+        const undone = await waitOrder(page, (o) => o.length === before.length, 15_000);
+        await settled(page, 15_000);
+        await press(page, 'Meta+Shift+z');
+        const redone = await waitOrder(page, (o) => o.length === before.length - 1, 15_000);
+        await sleep(2500);
+        const sync = await syncFacts();
+        const ref = await refusals(page);
+        const sh = ref.dialogs.length ? await shot(`redo-delete-${trial}`) : null;
+        const dismissed = await dismissRefusals();
+        await settled(page, 15_000);
+        const server = await serverOrder();
+        const want = before.filter((id) => id !== last);
+        return {
+          ok:
+            mid.length === before.length - 1 &&
+            undone.join(',') === before.join(',') &&
+            redone.length === before.length - 1 &&
+            server.join(',') === want.join(',') &&
+            ref.dialogs.length === 0,
+          evidence: `${before.length} -> Delete ${mid.length} -> Cmd+Z ${undone.length} (restored ${undone.join(',') === before.join(',')}) -> Cmd+Shift+Z ${redone.length}; sync ${JSON.stringify(sync)}; save "${ref.save}"; dialogs ${ref.dialogs.length ? ref.dialogs.join(' || ') : 'none'}; server after reload ${server.length}: ${server.join(',')} (the slide gone ${server.join(',') === want.join(',')})${dismissed ? `; dismissed ${dismissed}` : ''}`,
+          shot: sh,
+        };
+      },
+      { tries: 1 },
+    );
   }
 } catch (error) {
-  rows.push({ n: rows.length + 1, feature: 'the run', interaction: 'ran to completion', result: 'broken', attempts: 1, evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`, shot: null, consoleErrors: [] });
+  rows.push({
+    n: rows.length + 1,
+    feature: 'the run',
+    interaction: 'ran to completion',
+    result: 'broken',
+    attempts: 1,
+    evidence: `exception outside a row: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+    shot: null,
+    consoleErrors: [],
+  });
   save();
 } finally {
   // ---- cleanup: File > Move to trash, Delete forever, a 404 on the deck
@@ -659,19 +785,45 @@ try {
       await clickControl(page, 'trash.confirm.ok');
       await card.waitFor({ state: 'detached', timeout: 30_000 });
       trashed = true;
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'works', attempts: 1, evidence: `deck ${deckId} left the trash`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'works',
+        attempts: 1,
+        evidence: `deck ${deckId} left the trash`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'File > Move to trash, then Delete forever on /decks/trash', result: 'broken', attempts: 1, evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'File > Move to trash, then Delete forever on /decks/trash',
+        result: 'broken',
+        attempts: 1,
+        evidence: `failed: ${error instanceof Error ? error.message : String(error)}; falling back to the actions API`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
     if (!trashed) {
       try {
-        await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await page
+          .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+          .catch(() => undefined);
         await editorReady(page).catch(() => undefined);
         const info = await invoke(page, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(page, 'deck.info').catch(() => null);
-          await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(page, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
         }
       } catch {
         // the 404 probe below tells the truth
@@ -682,18 +834,42 @@ try {
       let statusEdit = 0;
       const until = Date.now() + 25_000;
       for (;;) {
-        statusDeck = (await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })).status();
-        statusEdit = (await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })).status();
+        statusDeck = (
+          await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        ).status();
+        statusEdit = (
+          await page.request.get(`${BASE}/edit/${deckId}`, { maxRedirects: 0 })
+        ).status();
         if ((statusDeck === 404 && statusEdit === 404) || Date.now() > until) break;
         await sleep(2000);
       }
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> and /edit/<id> after the delete', result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken', attempts: 1, evidence: `/deck ${statusDeck}, /edit ${statusEdit}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> and /edit/<id> after the delete',
+        result: statusDeck === 404 && statusEdit === 404 ? 'works' : 'broken',
+        attempts: 1,
+        evidence: `/deck ${statusDeck}, /edit ${statusEdit}`,
+        shot: null,
+        consoleErrors: [],
+      });
     } catch (error) {
-      rows.push({ n: rows.length + 1, feature: 'cleanup', interaction: 'GET /deck/<id> after the delete', result: 'broken', attempts: 1, evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`, shot: null, consoleErrors: [] });
+      rows.push({
+        n: rows.length + 1,
+        feature: 'cleanup',
+        interaction: 'GET /deck/<id> after the delete',
+        result: 'broken',
+        attempts: 1,
+        evidence: `probe failed: ${error instanceof Error ? error.message : String(error)}`,
+        shot: null,
+        consoleErrors: [],
+      });
     }
   }
   save();
   await browser.close().catch(() => undefined);
   const counts = rows.reduce((acc, r) => ({ ...acc, [r.result]: (acc[r.result] ?? 0) + 1 }), {});
-  console.log(`\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`);
+  console.log(
+    `\naudit-slides: ${rows.length} rows ${JSON.stringify(counts)}, ${consoleErrors.length} console errors, ${Math.round((Date.now() - started) / 1000)} s; deck ${deckId}; table ${OUT}`,
+  );
 }

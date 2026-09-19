@@ -692,7 +692,7 @@ export async function download(
         )
         .catch(() => '');
       const m =
-        /([^.|]*(?:export limit|too many downloads|try again tomorrow|could not be (?:made|exported)|export failed)[^.|]*)/i.exec(
+        /([^.|]*(?:export limit|too many downloads|try again tomorrow|could not be (?:made|exported|downloaded)|export failed)[^.|]*)/i.exec(
           text,
         );
       if (m) return m[1]!.trim();

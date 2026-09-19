@@ -22,6 +22,7 @@ import type { BlobClient } from './blob-store.ts';
 import { deckPrefix } from './blob-store.ts';
 import { memoryBlobClient } from './blob-fake.ts';
 import {
+  PUSH_LEDGER_KEEP,
   applyAndPush,
   applyCommentOps,
   fileCommentsOnWrite,
@@ -31,9 +32,10 @@ import {
   readSidecar,
   readThread,
   shiftOps,
+  sidecarPushLedger,
   watchSidecarIndex,
 } from './comments-store.ts';
-import type { SidecarIndexChange } from './comments-store.ts';
+import type { SidecarIndexChange, SidecarPushLedger } from './comments-store.ts';
 import { openFileStore, slidePath } from './file-store.ts';
 import { pulsePath } from './pulse.ts';
 
@@ -463,117 +465,218 @@ describe('the sidecar index watcher, two instances over one Blob store (cycle 3,
     },
   });
 
+  /**
+   * Two function instances in one process: each has its own mirror and its own push ledger, as
+   * each has its own process on the deployment (`processPushLedger` there). The watchers are
+   * given `localEtag` as `apps/studio/src/server/room.ts` gives it.
+   */
+  type Instance = { dir: string; ledger: SidecarPushLedger };
+  const instance = (name: string): Instance => {
+    const dir = join(root, name, DECK);
+    writeRawDeck(dir);
+    return { dir, ledger: sidecarPushLedger() };
+  };
+  const push = (
+    client: BlobClient,
+    from: Instance,
+    ops: CommentOp[],
+    at: string,
+  ): ReturnType<typeof applyAndPush> =>
+    applyAndPush(client, DECK, from.dir, ops, at, 4, { ...proven, ledger: from.ledger });
+  const watch = (
+    client: BlobClient,
+    on: Instance,
+    seen: SidecarIndexChange[],
+    pollMs: number | null = 60_000,
+  ) =>
+    watchSidecarIndex(client, DECK, (change) => seen.push(change), {
+      pollMs,
+      ledger: on.ledger,
+      localEtag: () => localIndexEtag(on.dir),
+      proven,
+    });
+  const countOf = (client: ReturnType<typeof memoryBlobClient>, op: string): number =>
+    client.calls.filter((call) => call.op === op).length;
+
   it("announces the index another instance pushed with its revision and the changed threads, and never this instance's own push", async () => {
+    const client = memoryBlobClient();
+    const a = instance('a');
+    const b = instance('b');
+    await push(client, a, [add(blockThread(T1))], NOW);
+    const seenB: SidecarIndexChange[] = [];
+    const seenA: SidecarIndexChange[] = [];
+    const watchB = watch(client, b, seenB);
+    const watchA = watch(client, a, seenA);
+    // the position: what the store holds now is not announced
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB).toEqual([]);
+    expect(seenA).toEqual([]);
+    // A adds a thread: B's watcher announces it, A's does not (A's ledger holds the push)
+    await push(client, a, [add(blockThread(T2))], LATER);
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB).toEqual([{ version: localIndexEtag(a.dir), revision: 2, threadIds: [T2] }]);
+    expect(seenA).toEqual([]);
+    // the same head twice announces nothing twice
+    await watchB.poll();
+    expect(seenB).toHaveLength(1);
+    // a reply on T1 names T1 alone; A's watcher takes its own push as its new position
+    await push(client, a, [reply(T1, C2, 'Done', LATER)], LATER);
+    await watchB.poll();
+    await watchA.poll();
+    expect(seenB[1]).toMatchObject({ revision: 3, threadIds: [T1] });
+    expect(seenA).toEqual([]);
+    // B pulls what the announcement named and lists the reply
+    await pullSidecar(client, DECK, b.dir, proven);
+    expect(
+      readSidecar(b.dir, DECK)
+        .threads.get(T1)
+        ?.replies.map((r) => r.body.text),
+    ).toEqual(['Done']);
+    // B's own push is not announced to B
+    await push(client, b, [add(blockThread(T3))], LATER);
+    await watchB.poll();
+    expect(seenB).toHaveLength(2);
+    await watchA.poll();
+    expect(seenA).toEqual([{ version: localIndexEtag(b.dir), revision: 4, threadIds: [T3] }]);
+    watchA.stop();
+    watchB.stop();
+  });
+
+  it("announces the index another instance pushed when this instance's mirror pulled it first, and passes over its own push without a read (C3T-F3)", async () => {
+    // the deployment's shape (VERIFICATION C3T-F3): A writes the comment and pushes; the owner's
+    // read back (`comment.list`) lands on B, whose `storedThreads` pulls the sidecar into B's
+    // mirror; then B's poll meets the moved head. Before the ledger the poll took the head, which
+    // equalled B's mirror, for B's own push and announced nothing, so the second browser's tab
+    // on B never listed the thread
+    const client = memoryBlobClient();
+    const a = instance('a');
+    const b = instance('b');
+    await push(client, a, [add(blockThread(T1))], NOW);
+    const seenB: SidecarIndexChange[] = [];
+    const watchB = watch(client, b, seenB, null);
+    await watchB.poll();
+    await push(client, a, [add(blockThread(T2))], LATER);
+    const stored = await client.head(`${deckPrefix(DECK)}comments/index.json`);
+    await pullSidecar(client, DECK, b.dir, proven);
+    expect(localIndexEtag(b.dir)).toBe(stored?.version);
+    await watchB.poll();
+    expect(seenB).toEqual([{ version: stored?.version, revision: 2, threadIds: [T2] }]);
+    // B's own push: the head alone, no read of the index, and B's rows follow the ledger, so the
+    // next foreign push still names the changed thread alone
+    await push(client, b, [add(blockThread(T3))], LATER);
+    const gets = countOf(client, 'get');
+    const heads = countOf(client, 'head');
+    await watchB.poll();
+    expect(seenB).toHaveLength(1);
+    expect(countOf(client, 'get')).toBe(gets);
+    expect(countOf(client, 'head')).toBe(heads + 1);
+    await push(client, a, [reply(T1, C2, 'Done', LATER)], LATER);
+    await watchB.poll();
+    expect(seenB[1]).toMatchObject({ revision: 4, threadIds: [T1] });
+    watchB.stop();
+  });
+
+  it("passes over the process's push only while the mirror still holds it, when no ledger of its own is given (one process, two mirrors)", async () => {
+    // the shape packages/realtime/src/blob.test.ts stands two channels in: one process, so one
+    // ledger, and `localEtag` tells the two mirrors apart
     const client = memoryBlobClient();
     const dirA = join(root, 'a', DECK);
     const dirB = join(root, 'b', DECK);
     writeRawDeck(dirA);
     writeRawDeck(dirB);
     await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
-    const seenB: SidecarIndexChange[] = [];
     const seenA: SidecarIndexChange[] = [];
-    const watchB = watchSidecarIndex(client, DECK, (change) => seenB.push(change), {
-      pollMs: 60_000,
-      localEtag: () => localIndexEtag(dirB),
-      proven,
-    });
+    const seenB: SidecarIndexChange[] = [];
     const watchA = watchSidecarIndex(client, DECK, (change) => seenA.push(change), {
-      pollMs: 60_000,
+      pollMs: null,
       localEtag: () => localIndexEtag(dirA),
       proven,
     });
-    // the position: what the store holds now is not announced
-    await watchB.poll();
-    await watchA.poll();
-    expect(seenB).toEqual([]);
-    expect(seenA).toEqual([]);
-    // A adds a thread: B's watcher announces it, A's does not (its own copy carries the etag)
-    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
-    await watchB.poll();
-    await watchA.poll();
-    expect(seenB).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
-    expect(seenA).toEqual([]);
-    // the same head twice announces nothing twice
-    await watchB.poll();
-    expect(seenB).toHaveLength(1);
-    // a reply on T1 names T1 alone; A's watcher takes its own push as its new position
-    await applyAndPush(client, DECK, dirA, [reply(T1, C2, 'Done', LATER)], LATER, 4, proven);
-    await watchB.poll();
-    await watchA.poll();
-    expect(seenB[1]).toMatchObject({ revision: 3, threadIds: [T1] });
-    expect(seenA).toEqual([]);
-    // B pulls what the announcement named and lists the reply
-    await pullSidecar(client, DECK, dirB, proven);
-    expect(
-      readSidecar(dirB, DECK)
-        .threads.get(T1)
-        ?.replies.map((r) => r.body.text),
-    ).toEqual(['Done']);
-    // B's own push is not announced to B
-    await applyAndPush(client, DECK, dirB, [add(blockThread(T3))], LATER, 4, proven);
-    await watchB.poll();
-    expect(seenB).toHaveLength(2);
-    await watchA.poll();
-    expect(seenA).toEqual([{ version: localIndexEtag(dirB), revision: 4, threadIds: [T3] }]);
-    watchA.stop();
-    watchB.stop();
-  });
-
-  it('runs no timer of its own with pollMs null (the blob channel drives it on the deck pulse), and a push moves the pulse (the cycle 3 fix round)', async () => {
-    const client = memoryBlobClient();
-    const dirA = join(root, 'e', DECK);
-    const dirB = join(root, 'f', DECK);
-    writeRawDeck(dirA);
-    writeRawDeck(dirB);
-    expect(client.blobs.has(pulsePath(DECK))).toBe(false);
-    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
-    const first = client.blobs.get(pulsePath(DECK))?.version;
-    expect(first).toBeDefined();
-    const seen: SidecarIndexChange[] = [];
-    const watch = watchSidecarIndex(client, DECK, (change) => seen.push(change), {
+    const watchB = watchSidecarIndex(client, DECK, (change) => seenB.push(change), {
       pollMs: null,
       localEtag: () => localIndexEtag(dirB),
       proven,
     });
-    await watch.poll();
-    const heads = (): number => client.calls.filter((call) => call.op === 'head').length;
-    const before = heads();
-    await new Promise((resolve) => setTimeout(resolve, 60));
-    expect(heads()).toBe(before);
+    await watchA.poll();
+    await watchB.poll();
     await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
+    await watchA.poll();
+    await watchB.poll();
+    expect(seenA).toEqual([]);
+    expect(seenB).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
+    watchA.stop();
+    watchB.stop();
+  });
+
+  it('keeps the last pushes per deck and the decks pushed last', () => {
+    const ledger = sidecarPushLedger(2, 2);
+    const rows = new Map([[T1, '"a"']]);
+    ledger.record('one', '"v1"', rows);
+    ledger.record('one', '"v2"', rows);
+    ledger.record('one', '"v3"', rows);
+    expect(ledger.pushed('one', '"v1"')).toBeUndefined();
+    expect(ledger.pushed('one', '"v2"')).toEqual(rows);
+    expect(ledger.pushed('one', '"v3"')).toEqual(rows);
+    // a version recorded again is one entry, at the end
+    ledger.record('one', '"v2"', new Map([[T1, '"b"']]));
+    expect(ledger.pushed('one', '"v3"')).toEqual(rows);
+    expect(ledger.pushed('one', '"v2"')?.get(T1)).toBe('"b"');
+    // the third deck pushes the deck pushed longest ago out
+    ledger.record('two', '"v1"', rows);
+    ledger.record('three', '"v1"', rows);
+    expect(ledger.pushed('one', '"v3"')).toBeUndefined();
+    expect(ledger.pushed('two', '"v1"')).toEqual(rows);
+    expect(ledger.pushed('three', '"v1"')).toEqual(rows);
+    // the recorded rows are a copy
+    rows.set(T2, '"c"');
+    expect(ledger.pushed('three', '"v1"')?.has(T2)).toBe(false);
+    expect(PUSH_LEDGER_KEEP).toBeGreaterThanOrEqual(2);
+  });
+
+  it('runs no timer of its own with pollMs null (the blob channel drives it on the deck pulse), and a push moves the pulse (the cycle 3 fix round)', async () => {
+    const client = memoryBlobClient();
+    const a = instance('e');
+    const b = instance('f');
+    expect(client.blobs.has(pulsePath(DECK))).toBe(false);
+    await push(client, a, [add(blockThread(T1))], NOW);
+    const first = client.blobs.get(pulsePath(DECK))?.version;
+    expect(first).toBeDefined();
+    const seen: SidecarIndexChange[] = [];
+    const watching = watch(client, b, seen, null);
+    await watching.poll();
+    const before = countOf(client, 'head');
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(countOf(client, 'head')).toBe(before);
+    await push(client, a, [add(blockThread(T2))], LATER);
     expect(client.blobs.get(pulsePath(DECK))?.version).not.toBe(first);
     expect(seen).toEqual([]);
-    await watch.poll();
-    expect(seen).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
-    watch.stop();
+    await watching.poll();
+    expect(seen).toEqual([{ version: localIndexEtag(a.dir), revision: 2, threadIds: [T2] }]);
+    watching.stop();
   });
 
   it('reads a moved index through its immutable copy while the plain read and the url read lag', async () => {
     const client = memoryBlobClient();
-    const dirA = join(root, 'c', DECK);
-    const dirB = join(root, 'd', DECK);
-    writeRawDeck(dirA);
-    writeRawDeck(dirB);
-    await applyAndPush(client, DECK, dirA, [add(blockThread(T1))], NOW, 4, proven);
+    const a = instance('c');
+    const b = instance('d');
+    await push(client, a, [add(blockThread(T1))], NOW);
     const seen: SidecarIndexChange[] = [];
-    const watch = watchSidecarIndex(client, DECK, (change) => seen.push(change), {
-      pollMs: 60_000,
-      localEtag: () => localIndexEtag(dirB),
-      proven,
-    });
-    await watch.poll();
+    const watching = watch(client, b, seen);
+    await watching.poll();
     client.holdGet();
     client.holdList();
-    await applyAndPush(client, DECK, dirA, [add(blockThread(T2))], LATER, 4, proven);
+    await push(client, a, [add(blockThread(T2))], LATER);
     const plain = await client.get(`${deckPrefix(DECK)}comments/index.json`);
     expect(
       (JSON.parse(new TextDecoder().decode(plain?.bytes)) as { revision: number }).revision,
     ).toBe(1);
-    await watch.poll();
-    expect(seen).toEqual([{ version: localIndexEtag(dirA), revision: 2, threadIds: [T2] }]);
+    await watching.poll();
+    expect(seen).toEqual([{ version: localIndexEtag(a.dir), revision: 2, threadIds: [T2] }]);
     client.releaseGet();
     client.releaseList();
-    watch.stop();
+    watching.stop();
   });
 
   it('pulls the index and the changed thread alone when the other threads are on disk at the etag the index names', async () => {

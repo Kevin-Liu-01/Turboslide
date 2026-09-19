@@ -96,13 +96,3 @@
 .ts-themes-tile.is-current .ts-themes-name {
   color: var(--pt-ink);
 }
-
-.ts-themes-foot {
-  display: flex;
-  justify-content: flex-end;
-  padding: 12px 16px 16px;
-}
-
-.ts-themes-import {
-  border-color: var(--pt-hair-soft);
-}

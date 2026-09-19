@@ -47,12 +47,10 @@ const CARD_ORDER = [
 ];
 
 /**
- * The same menu with the switch off: the Later row Transition and the parked row Change theme
- * are absent (docs/FOCUS.md 3.1, 3.4).
+ * The same menu with the switch off: the Later row Transition is absent (docs/FOCUS.md 3.1, 3.4);
+ * Change theme returned to the default view in the return round (docs/RETURN.md 2.13).
  */
-const CARD_ORDER_DEFAULT = CARD_ORDER.filter(
-  (label) => label !== 'Transition' && label !== 'Change theme',
-);
+const CARD_ORDER_DEFAULT = CARD_ORDER.filter((label) => label !== 'Transition');
 
 /** The right-clicked card, mounted before the menu so focus can return to it. */
 function mountCard(): HTMLElement {

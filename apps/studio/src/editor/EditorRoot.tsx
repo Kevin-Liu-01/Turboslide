@@ -321,6 +321,9 @@ function toShellSelection(
     ...(facts.group !== undefined ? { group: facts.group } : {}),
     ...(facts.marks !== undefined ? { marks: facts.marks } : {}),
     ...(facts.range !== undefined ? { range: facts.range } : {}),
+    /* the cell range of the selected table (viewer table-range.ts; docs/RETURN.md 2.4): the
+       Merge cells rows and the table plans read it as `cells` */
+    ...(facts.cells !== undefined ? { cells: facts.cells } : {}),
     ...(facts.listLevel !== undefined ? { listLevel: facts.listLevel } : {}),
     imageEdited: facts.imageEdited,
     positioned: facts.positioned,
@@ -1061,8 +1064,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       return Promise.resolve({ asked: true });
     }
     if (action === 'deck.pack') {
-      return bundleDownloadTicket({ deckId }).then(({ url }) => {
-        triggerDownload(url);
+      /* the bundle is saved from the page's own fetch of the ticket url (controller.tsx
+         triggerDownload): a refused ticket rejects with the server's sentence and the shell says
+         it instead of "The bundle is at" */
+      return bundleDownloadTicket({ deckId }).then(async ({ url }) => {
+        await triggerDownload(url);
         return { path: `${deckId}.zip`, url };
       });
     }

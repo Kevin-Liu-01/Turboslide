@@ -64,6 +64,12 @@ export type MenuProps = {
   anchor: MenuAnchor;
   /** below the anchor (the bar), at the point (a context menu); a submenu is always to the right */
   placement?: 'below' | 'point';
+  /**
+   * For `below`: the plate's left edge on the anchor's left (`start`, the bar's titles), or its
+   * right edge on the anchor's right (`end`: the Slideshow split button's options menu hangs
+   * under the control's right edge, docs/RETURN.md 4.1, instead of clamping at the viewport).
+   */
+  align?: MenuAlign;
   /** a row without a submenu was activated; the menu closes after this */
   onSelect: (item: MenuItem) => void;
   /** the whole menu closed; the reason names what closed it */
@@ -103,25 +109,31 @@ export type Size = { width: number; height: number };
 
 export type MenuPosition = { left: number; top: number; maxHeight: number };
 
+/** How a plate below its anchor lines up with it: its left edge on the anchor's left, or its right edge on the anchor's right. */
+export type MenuAlign = 'start' | 'end';
+
 /**
  * Where the plate goes so it stays inside the viewport: below the anchor and left aligned for the
- * bar, moving above when the viewport ends first; to the right of the parent row for a submenu,
- * flipping to its left when the right edge is out; at the pointer for a context menu, flipping
- * left and up when it would overflow. Every result is clamped 8 px inside both edges.
+ * bar (right aligned with `align: 'end'`, so a plate under a control at the row's right edge meets
+ * that edge rather than the viewport clamp, docs/RETURN.md 4.1), moving above when the viewport
+ * ends first; to the right of the parent row for a submenu, flipping to its left when the right
+ * edge is out; at the pointer for a context menu, flipping left and up when it would overflow.
+ * Every result is clamped 8 px inside both edges.
  */
 export function placeMenu(input: {
   anchor: Rect;
   size: Size;
   viewport: Size;
   placement: MenuPlacement;
+  align?: MenuAlign;
 }): MenuPosition {
-  const { anchor, size, viewport, placement } = input;
+  const { anchor, size, viewport, placement, align = 'start' } = input;
   const maxHeight = Math.max(56, viewport.height - VIEWPORT_MARGIN * 2);
   const height = Math.min(size.height, maxHeight);
   let left: number;
   let top: number;
   if (placement === 'below') {
-    left = anchor.left;
+    left = align === 'end' ? anchor.right - size.width : anchor.left;
     top = anchor.bottom + BELOW_GAP;
     if (
       top + height > viewport.height - VIEWPORT_MARGIN &&
@@ -219,6 +231,7 @@ type ListProps = {
   label: string;
   anchor: MenuAnchor;
   placement: MenuPlacement;
+  align?: MenuAlign;
   level: number;
   autoFocus: boolean;
   includeContextOnly: boolean;
@@ -237,6 +250,7 @@ function MenuList({
   label,
   anchor,
   placement,
+  align,
   level,
   autoFocus,
   includeContextOnly,
@@ -278,9 +292,10 @@ function MenuList({
         size: { width: el.offsetWidth || 220, height: el.offsetHeight },
         viewport: { width: window.innerWidth, height: window.innerHeight },
         placement,
+        ...(align === undefined ? {} : { align }),
       }),
     );
-  }, [anchor, placement, visible.length]);
+  }, [anchor, placement, align, visible.length]);
 
   /* the first enabled row takes focus on open when asked; a pointer opened submenu leaves focus
      on its parent row */
@@ -629,6 +644,7 @@ export function Menu({
   label,
   anchor,
   placement = 'below',
+  align,
   onSelect,
   onClose,
   onNavigate,
@@ -694,6 +710,7 @@ export function Menu({
         label={label}
         anchor={anchor}
         placement={placement}
+        {...(align === undefined ? {} : { align })}
         level={0}
         autoFocus={autoFocus}
         includeContextOnly={includeContextOnly}

@@ -238,8 +238,13 @@ export type PresenceChannel = {
   set: (deckId: string, clientId: string, state: RosterEntry, ttlMs: number) => Promise<void>;
   /** the live entries, expired ones dropped */
   roster: (deckId: string) => Promise<RosterEntry[]>;
-  /** removes a client's entry and announces `leave` */
-  leave: (deckId: string, clientId: string) => Promise<void>;
+  /**
+   * removes a client's entry and announces `leave`; `clock` is the leave beacon's clock (room-client
+   * `stop`, above every set of that tab), which the blob tier keeps in the tombstone so a set of
+   * the same tab landing after the leave never brings the row back (return/build/b7.md B7-R3);
+   * the memory and redis tiers ignore it
+   */
+  leave: (deckId: string, clientId: string, clock?: number) => Promise<void>;
   /** binds a server issued client id to the session that opened the stream (report 10 F26) */
   bind: (deckId: string, clientId: string, sessionId: string, ttlMs: number) => Promise<void>;
   /** the session a client id is bound to, or null when unbound or expired */

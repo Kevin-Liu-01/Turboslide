@@ -1,0 +1,115 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260918-fi6d",
+  "startedAt": "2026-09-18T22:38:26.316Z",
+  "ms": 64080,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "cleanup": [
+    "after File > Move to trash: https://turboslide.vercel.app/decks",
+    "Delete forever clicked; trash card gone: true",
+    "GET /deck/untitled-20260918-fi6d -> 404",
+    "GET /edit/untitled-20260918-fi6d -> 404"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Deck (run 4)",
+      "interaction": "Open /new, double click the title, type a name, Escape; Tools > Advanced tools on",
+      "result": "works",
+      "tries": 1,
+      "evidence": "deck untitled-20260918-fi6d; session true; switch true",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 2,
+      "feature": "Table: insert and type one cell (run 4)",
+      "interaction": "Insert > Table 3 by 3; double click cell 1,1, type \"Head\", Escape",
+      "result": "works",
+      "tries": 1,
+      "evidence": "table table; session true; cell 1,1 \"Head\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Table: cell alignment, toolbar (run 4)",
+      "interaction": "Double click cell 2,1, click the tail Align button; read whatever menu opens; pick Right",
+      "result": "broken",
+      "tries": 1,
+      "evidence": "session true; after the click: menus none, rows none, still editing false",
+      "shot": "91-table-align-list-run4.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Chart: insert Bar (run 4)",
+      "interaction": "Insert > Chart > Bar",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chart chart values [30,45,20]",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Chart: edit data (run 4)",
+      "interaction": "Format options > Chart data with the grid scrolled into view: click the first value, Enter, type 42, Enter; then a double click on the second value, type 7, Enter",
+      "result": "works",
+      "tries": 1,
+      "evidence": "values before [30,45,20]; cell at y 496 after scroll; after the click class \"ts-chartgrid-cell is-active\", focus td[formatOptions.chart.cell.1.1]; Enter opened the input true, values [43,45,20]; double click opened the input true, values [43,7,20]; bar widths now [523,85,243,10]; Chart type labels [\"Bar\",\"Column\",\"Line\",\"Pie\"] widths [28,28,28,28] text widths [27,37,27,28] overlap false; shots 92-chart-grid-clicked-run4.png, 93-chart-grid-after-enter-run4.png",
+      "shot": "94-chart-grid-after-dblclick-run4.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Diagram (run 4)",
+      "interaction": "Insert > Diagram; pick Process, one more step, Insert; the objects that land",
+      "result": "works",
+      "tries": 1,
+      "evidence": "controls 16: insert.diagram.type, insert.diagram.type.grid, insert.diagram.type.hierarchy, insert.diagram.type.timeline, insert.diagram.type.process, insert.diagram.type.relationship, insert.diagram.type.cycle, insert.diagram.count.less, insert.diagram.count, insert.diagram.count.more, insert.diagram.style, insert.diagram.style.outline; Process picked; one more step; steps 4 -> 5; inserted 14 objects: shape/roundRect, text, shape/line, shape/roundRect, text, shape/line, shape/roundRect, text, shape/line, shape/roundRect, text, shape/line, shape/roundRect, text; groups [null]; panel stayed open after the insert true; shot 95-diagram-panel-run4.png",
+      "shot": "96-diagram-inserted-run4.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Diagram: select and move (run 4)",
+      "interaction": "One click on a diagram box; the chip; drag from inside by 100,60; Undo",
+      "result": "works",
+      "tries": 1,
+      "evidence": "clicked shape step-1; chip \"Group\"; handle controls 10; objects moved 14 of 14 (a group moves together when the chip says so)",
+      "shot": "97-diagram-moved-run4.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Present: the table (run 4)",
+      "interaction": "Select the table slide, Slideshow; the visible slide, its runs and the typed cell",
+      "result": "works",
+      "tries": 1,
+      "evidence": "counter \"2 of 4\"; show root text \"2 of 4●⋯\"; visible slides 5, large 1: 1440x810 inShow false runs 12 cellRuns 9 editable 0 text \"Head\"",
+      "shot": "98-present-table-run4.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Present: the chart and the diagram (run 4)",
+      "interaction": "ArrowRight to the chart slide, then the diagram slide; Escape closes the show",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chart slide (3 of 4): svg marks 4 text \"0204060Category 1Category 2Category 3Series 1\"; diagram slide (4 of 4): svg marks 9 runs 5; show closed by Escape true",
+      "shot": "99-present-chart-run4.png",
+      "consoleErrors": []
+    }
+  ]
+}

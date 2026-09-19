@@ -1,0 +1,28 @@
+deck untitled-20260919-i2st
+[1] deck.create: works :: /edit/untitled-20260919-i2st; revision 1; appearance dark
+[2] chrome.split.enter-chevron.mechanism: works :: focus button[present.arrow]; Enter defaultPrevented true on target present.arrow; menu opened false; selection null
+[3] chrome.split.enter-label.mechanism: works :: Enter defaultPrevented true on target present.open; show opened false
+[4] chrome.split.space-chevron.control: works :: Space defaultPrevented false; menu opened true
+[5] chrome.split.tab-order.nothing-selected: works :: selection before null; Tab defaultPrevented false; focus after button[present.arrow]
+[6] chrome.split.tab-order.object-selected: broken :: selection before chip "Title" editing false; Tab defaultPrevented undefined; focus after button[present.open]; selection after chip "Subtitle"
+[7] chrome.split.enter-chevron.object-selected: works :: Enter defaultPrevented true on present.arrow; menu opened false; title session opened false; chip "Title"
+[8] surface.advanced.on: works :: settings.advancedTools true
+[9] slides.new.toolbar: works :: revision 2 -> 3; slide kind undefined layout undefined
+[10] boxes.palette.listed: works :: 232 rows before typing, 60 Insert rows: insert:block:box, insert:block:shape:rectangle, insert:block:shape:rounded, insert:block:shape:ellipse, insert:block:shape:line, insert:block:shape:arrow, insert:block:rule, insert:block:text, insert:block:icon, insert:block:image, insert:block:material, insert:block:heading ...; after typing box 2 rows: insert:block:box "Boxinto headLeftA bordered box with an optional text inside: fill, stroke and te" | insert:block:text "Text boxinto headLeftOne Text in the four-rule markup with typography (size, wei"; Box listed true; box-01-palette.png
+[11] boxes.palette.insert: broken :: revision 3 -> 4; new blocks 0: ; box fields null; drawn null; palette still open false; box-02-inserted.png
+[12] boxes.select.tail.context: not driven :: no box landed
+[13] boxes.text.enter-type: not driven :: no box landed
+[14] boxes.format-options.sections: not driven :: no box landed
+[15] boxes.insert-menu.row: works :: 19 rows: insert.image, insert.textBox, insert.audio, insert.video, insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.specialCharacters, insert.link, insert.comment, insert.newSlide, insert.slideNumbers, insert.templates, insert.buildingBlocks, insert.icon, insert.material; a box row true
+[16] slides.new.toolbar-2: works :: revision 4 -> 5
+[17] tables.insert.grid: broken :: size words "3 x 2"; revision 5 -> 6; table null columns undefined rows undefined
+[18] tables.cell.type-escape: not driven :: no table
+[19] tables.export.pdf.cell-text: broken :: 5642 ms; untitled-20260919-i2st-dark.pdf 49828 B; failure null; pages 3; "Q1 revenue" false; "12 000" false; "Box label" false; "Return drive" true
+[20] tables.export.pptx-editable.cell-text: broken :: 4808 ms; untitled-20260919-i2st-dark.pptx 35520 B; failure null; a:tbl 1; gridCol EMU 2438400, 2438400, 2438400 (px 256, 256, 256); "Q1 revenue" false; "12 000" false; "Box label" false
+[21] export.html.web-page.try-1: broken :: 2218 ms; <redacted token> 0 B; url https://turboslide.vercel.app/api/download/<redacted>; failure "canceled"; title null; heading in file false; snackbar "The web page is ready"; network []
+[22] export.html.web-page.try-2: broken :: 1795 ms; <redacted token> 0 B; url https://turboslide.vercel.app/api/download/<redacted>; failure "canceled"; title null; heading in file false; snackbar "The web page is ready"; network []
+[23] deck.trash: works :: /decks
+[24] deck.delete-forever: works :: untitled-20260919-i2st
+[25] deck.404.edit: works :: status 404
+[26] deck.404.deck: works :: status 404
+console errors 4

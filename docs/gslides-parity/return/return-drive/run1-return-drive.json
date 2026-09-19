@@ -1,0 +1,448 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260919-i2st",
+  "at": "2026-09-19T00:11:12.616Z",
+  "rows": [
+    {
+      "n": 1,
+      "id": "deck.create",
+      "interaction": "Double click the title on /new, type a title, Escape",
+      "result": "works",
+      "observed": "/edit/untitled-20260919-i2st; revision 1; appearance dark"
+    },
+    {
+      "n": 2,
+      "id": "chrome.split.enter-chevron.mechanism",
+      "interaction": "Nothing selected; focus the chevron by script; press Enter; read defaultPrevented on the window and whether the menu opened",
+      "result": "works",
+      "observed": "focus button[present.arrow]; Enter defaultPrevented true on target present.arrow; menu opened false; selection null"
+    },
+    {
+      "n": 3,
+      "id": "chrome.split.enter-label.mechanism",
+      "interaction": "Nothing selected; focus the Slideshow half by script; press Enter; read defaultPrevented and whether the show opened",
+      "result": "works",
+      "observed": "Enter defaultPrevented true on target present.open; show opened false"
+    },
+    {
+      "n": 4,
+      "id": "chrome.split.space-chevron.control",
+      "interaction": "The control reading: focus the chevron, press Space; defaultPrevented and the menu",
+      "result": "works",
+      "observed": "Space defaultPrevented false; menu opened true"
+    },
+    {
+      "n": 5,
+      "id": "chrome.split.tab-order.nothing-selected",
+      "interaction": "Nothing selected; focus the Slideshow half; press Tab; read the focused element",
+      "result": "works",
+      "observed": "selection before null; Tab defaultPrevented false; focus after button[present.arrow]"
+    },
+    {
+      "n": 6,
+      "id": "chrome.split.tab-order.object-selected",
+      "interaction": "One click on the title (selected, no session); focus the Slideshow half by script; press Tab; read the focused element and the selection",
+      "result": "broken",
+      "observed": "selection before chip \"Title\" editing false; Tab defaultPrevented undefined; focus after button[present.open]; selection after chip \"Subtitle\""
+    },
+    {
+      "n": 7,
+      "id": "chrome.split.enter-chevron.object-selected",
+      "interaction": "With the title selected by one click, focus the chevron by script, press Enter: defaultPrevented, the menu, and whether a text session opened on the title (A1 rule 4)",
+      "result": "works",
+      "observed": "Enter defaultPrevented true on present.arrow; menu opened false; title session opened false; chip \"Title\""
+    },
+    {
+      "n": 8,
+      "id": "surface.advanced.on",
+      "interaction": "Tools > Advanced tools on",
+      "result": "works",
+      "observed": "settings.advancedTools true"
+    },
+    {
+      "n": 9,
+      "id": "slides.new.toolbar",
+      "interaction": "Toolbar New slide, so the Box lands on a content slide",
+      "result": "works",
+      "observed": "revision 2 -> 3; slide kind undefined layout undefined"
+    },
+    {
+      "n": 10,
+      "id": "boxes.palette.listed",
+      "interaction": "Tools > Advanced > Run an action opens the palette; read the Insert group; type box; read the rows",
+      "result": "works",
+      "observed": "232 rows before typing, 60 Insert rows: insert:block:box, insert:block:shape:rectangle, insert:block:shape:rounded, insert:block:shape:ellipse, insert:block:shape:line, insert:block:shape:arrow, insert:block:rule, insert:block:text, insert:block:icon, insert:block:image, insert:block:material, insert:block:heading ...; after typing box 2 rows: insert:block:box \"Boxinto headLeftA bordered box with an optional text inside: fill, stroke and te\" | insert:block:text \"Text boxinto headLeftOne Text in the four-rule markup with typography (size, wei\"; Box listed true; box-01-palette.png",
+      "inserts": [
+        {
+          "control": "palette.insert:block:box",
+          "text": "Boxinto headLeftA bordered box with an optional text inside: fill, stroke and te"
+        },
+        {
+          "control": "palette.insert:block:shape:rectangle",
+          "text": "Rectangle shapeinto headLeftA rectangle filling its box, hairline stroke, no fil"
+        },
+        {
+          "control": "palette.insert:block:shape:rounded",
+          "text": "Rounded rectangle shapeinto headLeftA rectangle with 8 px corners filling its bo"
+        },
+        {
+          "control": "palette.insert:block:shape:ellipse",
+          "text": "Ellipse shapeinto headLeftAn ellipse filling its box."
+        },
+        {
+          "control": "palette.insert:block:shape:line",
+          "text": "Line shapeinto headLeftA line across its box, horizontal when the box is wider t"
+        },
+        {
+          "control": "palette.insert:block:shape:arrow",
+          "text": "Arrow shapeinto headLeftA line with a filled 8 px head at its end."
+        },
+        {
+          "control": "palette.insert:block:rule",
+          "text": "Ruleinto headLeftA horizontal or vertical hairline in a palette color at 1, 1.5 "
+        },
+        {
+          "control": "palette.insert:block:text",
+          "text": "Text boxinto headLeftOne Text in the four-rule markup with typography (size, wei"
+        },
+        {
+          "control": "palette.insert:block:icon",
+          "text": "Iconinto headLeftOne sprite glyph on its own at 16 to 96 px in a palette color; "
+        },
+        {
+          "control": "palette.insert:block:image",
+          "text": "Imageinto headLeftA picture from the deck’s assets in a bordered frame with a li"
+        },
+        {
+          "control": "palette.insert:block:material",
+          "text": "Materialinto headLeftA shader material as a recipe (catalog id, preset, uniforms"
+        },
+        {
+          "control": "palette.insert:block:heading",
+          "text": "Heading blockinto headLeftA display line at h1 88 px, h2 44 px, big 72 px or the"
+        },
+        {
+          "control": "palette.insert:block:paragraph",
+          "text": "Paragraph blockinto headLeftBody copy at 22 px on 1.5, lead 26 px, cap 15 px tit"
+        },
+        {
+          "control": "palette.insert:block:credit",
+          "text": "Credit blockinto headLeftThe 15 px titanium credit line on a plate; required whe"
+        },
+        {
+          "control": "palette.insert:block:rows",
+          "text": "Ruled rows blockinto headLeftA ruled key and value table at 20 px; the key colum"
+        },
+        {
+          "control": "palette.insert:block:plain",
+          "text": "Ruled statement list blockinto headLeftStatements as ruled rows at 24 px display"
+        },
+        {
+          "control": "palette.insert:block:refs",
+          "text": "References blockinto headLeftA two-column reference list at 20 px with soft rule"
+        },
+        {
+          "control": "palette.insert:block:say",
+          "text": "Two registers blockinto headLeftTwo quoted registers side by side at 34 px displ"
+        },
+        {
+          "control": "palette.insert:block:scales",
+          "text": "Scales blockinto headLeftSlider rows: a 150 px label, a hairline track with an 1"
+        },
+        {
+          "control": "palette.insert:block:spec",
+          "text": "Type specimen blockinto headLeftInter at 58 px in the listed weights with a 90 p"
+        },
+        {
+          "control": "palette.insert:block:lang",
+          "text": "Scripts blockinto headLeftA two-column multilingual grid at 34 px with 14 px scr"
+        },
+        {
+          "control": "palette.insert:block:ladder",
+          "text": "Type ladder blockinto headLeftOne sample line per size with a right-aligned 14 p"
+        },
+        {
+          "control": "palette.insert:block:swatches",
+          "text": "Swatches blockinto headLeftFive color plates at 190 px with a 20 px name and a 1"
+        },
+        {
+          "control": "palette.insert:block:pair",
+          "text": "Pair blockinto headLeftTwo figures side by side with captions; equal gaps are a "
+        },
+        {
+          "control": "palette.insert:block:tiles",
+          "text": "Tile grid blockinto headLeftA grid of 4 to 6 captured tiles at one aspect with 1"
+        },
+        {
+          "control": "palette.insert:block:details",
+          "text": "Detail grid blockinto headLeftThree 425 px columns of 2x crops with 15 px captio"
+        },
+        {
+          "control": "palette.insert:block:board",
+          "text": "Status board blockinto headLeftOne ruled row per surface: a 128 by 72 capture, t"
+        },
+        {
+          "control": "palette.insert:block:composite",
+          "text": "Composite figure blockinto headLeftA declared grid of cells holding blocks; M5 r"
+        },
+        {
+          "control": "palette.insert:block:panel",
+          "text": "Code panel blockinto headLeftCode on the #101010 panel in white monospace at 17 "
+        },
+        {
+          "control": "palette.insert:block:dia",
+          "text": "Diagram blockinto headLeftAn inline SVG with 1 or 1.5 px strokes in ink, mid or "
+        },
+        {
+          "control": "palette.insert:block:dither",
+          "text": "Dither ramp blockinto headLeftThe live 220 px ramp canvas drawn with the 8 by 8 "
+        },
+        {
+          "control": "palette.insert:block:mark",
+          "text": "Mark blockinto headLeftThe standalone GT mark at a stated size; the symbol is 12"
+        },
+        {
+          "control": "palette.insert:block:markSizes",
+          "text": "Mark sizes blockinto headLeftThe compression specimen: the mark at 16, 32, 64, 1"
+        },
+        {
+          "control": "palette.insert:block:matrix",
+          "text": "Matrix blockinto headLeftA ruled table of numerals at 22 px tabular, the 4 by 4 "
+        },
+        {
+          "control": "palette.insert:block:logoPlates",
+          "text": "Logo plates blockinto headLeftFixed-white 150 by 90 plates for external logos wi"
+        },
+        {
+          "control": "palette.insert:block:table",
+          "text": "Table blockinto headLeftA grid of Text cells in the .rows idiom: a hairline abov"
+        },
+        {
+          "control": "palette.insert:block:chart",
+          "text": "Chart blockinto headLeftA bar, column, line or pie chart from categories and ser"
+        },
+        {
+          "control": "palette.insert:block:picture",
+          "text": "Picture blockinto headLeftA photograph as an object on a canvas slide, drawn at "
+        },
+        {
+          "control": "palette.insert:block:html",
+          "text": "HTML escape blockinto headLeftScoped CSS and HTML the grammar cannot express; fl"
+        },
+        {
+          "control": "palette.insert:slide:title",
+          "text": "Title slideafter this slide in DeckThe mark at 132 by 84, the h1 and a muted lea"
+        },
+        {
+          "control": "palette.insert:slide:opener",
+          "text": "Section headerafter this slide in DeckA full-bleed two-tone picture with the pla"
+        },
+        {
+          "control": "palette.insert:slide:split",
+          "text": "Title and bodyafter this slide in DeckA two-column head (the heading at 4, the p"
+        },
+        {
+          "control": "palette.insert:slide:cols",
+          "text": "Title and two columnsafter this slide in DeckTwo equal columns: the heading and "
+        },
+        {
+          "control": "palette.insert:slide:title-only",
+          "text": "Title onlyafter this slide in DeckOne heading in a stack and nothing else, so th"
+        },
+        {
+          "control": "palette.insert:slide:one-column",
+          "text": "One column textafter this slide in DeckA heading over one paragraph at measure 5"
+        },
+        {
+          "control": "palette.insert:slide:statement",
+          "text": "Main pointafter this slide in DeckOne centered big line at 72 px with a 22ch mea"
+        },
+        {
+          "control": "palette.insert:slide:section-description",
+          "text": "Section title and descriptionafter this slide in DeckTwo columns at 5/7: the hea"
+        },
+        {
+          "control": "palette.insert:slide:mood",
+          "text": "Captionafter this slide in DeckA full-bleed dithered photograph with the plate l"
+        },
+        {
+          "control": "palette.insert:slide:big-number",
+          "text": "Big numberafter this slide in DeckOne number as a big heading over a short note,"
+        },
+        {
+          "control": "palette.insert:slide:blank",
+          "text": "Blankafter this slide in DeckThe freeform layout with no blocks; everything plac"
+        },
+        {
+          "control": "palette.insert:slide:rows",
+          "text": "Ruled rowsafter this slide in DeckThe heading and the body on the left, a ruled "
+        },
+        {
+          "control": "palette.insert:slide:plain",
+          "text": "Ruled statement listafter this slide in DeckThe heading and the body on the left"
+        },
+        {
+          "control": "palette.insert:slide:table",
+          "text": "Title and tableafter this slide in DeckA heading over a 3 by 4 table with a head"
+        },
+        {
+          "control": "palette.insert:slide:figure",
+          "text": "Figureafter this slide in DeckThe heading and the body at 4, one bordered captur"
+        },
+        {
+          "control": "palette.insert:slide:pair",
+          "text": "Pair of figuresafter this slide in DeckA single head over two figures side by si"
+        },
+        {
+          "control": "palette.insert:slide:tiles",
+          "text": "Tile gridafter this slide in DeckA two-column head over a grid of four captured "
+        },
+        {
+          "control": "palette.insert:slide:details",
+          "text": "Detail gridafter this slide in DeckA two-column head over three 425 px columns o"
+        },
+        {
+          "control": "palette.insert:slide:board",
+          "text": "Status boardafter this slide in DeckA two-column head over one ruled row per sur"
+        },
+        {
+          "control": "palette.insert:slide:matrix",
+          "text": "Matrixafter this slide in DeckThe heading and the body on the left, a ruled tabl"
+        },
+        {
+          "control": "palette.insert:slide:closing",
+          "text": "Closingafter this slide in DeckA two-tone render behind a plate upper left at 72"
+        }
+      ],
+      "filtered": [
+        {
+          "control": "palette.insert:block:box",
+          "text": "Boxinto headLeftA bordered box with an optional text inside: fill, stroke and te"
+        },
+        {
+          "control": "palette.insert:block:text",
+          "text": "Text boxinto headLeftOne Text in the four-rule markup with typography (size, wei"
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "id": "boxes.palette.insert",
+      "interaction": "Click the Box row; read what lands",
+      "result": "broken",
+      "observed": "revision 3 -> 4; new blocks 0: ; box fields null; drawn null; palette still open false; box-02-inserted.png",
+      "box": null
+    },
+    {
+      "n": 12,
+      "id": "boxes.select.tail.context",
+      "interaction": "One click on the box: the chip, the handles, the toolbar tail; right click: the rows",
+      "result": "not driven",
+      "observed": "no box landed"
+    },
+    {
+      "n": 13,
+      "id": "boxes.text.enter-type",
+      "interaction": "With the box selected press Enter, type a label, Escape; read block.text and the drawn text",
+      "result": "not driven",
+      "observed": "no box landed"
+    },
+    {
+      "n": 14,
+      "id": "boxes.format-options.sections",
+      "interaction": "Format > Format options on the selected box: the sections and the fields for fill, stroke, radius, padding",
+      "result": "not driven",
+      "observed": "no box landed"
+    },
+    {
+      "n": 15,
+      "id": "boxes.insert-menu.row",
+      "interaction": "Insert menu with the switch on: is there a Box row",
+      "result": "works",
+      "observed": "19 rows: insert.image, insert.textBox, insert.audio, insert.video, insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.specialCharacters, insert.link, insert.comment, insert.newSlide, insert.slideNumbers, insert.templates, insert.buildingBlocks, insert.icon, insert.material; a box row true"
+    },
+    {
+      "n": 16,
+      "id": "slides.new.toolbar-2",
+      "interaction": "Toolbar New slide for the table",
+      "result": "works",
+      "observed": "revision 4 -> 5"
+    },
+    {
+      "n": 17,
+      "id": "tables.insert.grid",
+      "interaction": "Insert > Table, 3 by 2 from the grid",
+      "result": "broken",
+      "observed": "size words \"3 x 2\"; revision 5 -> 6; table null columns undefined rows undefined"
+    },
+    {
+      "n": 18,
+      "id": "tables.cell.type-escape",
+      "interaction": "Double click cell 1,1, type Q1 revenue, Escape; double click cell 2,1, type 12 000, Escape; read the cells",
+      "result": "not driven",
+      "observed": "no table"
+    },
+    {
+      "n": 19,
+      "id": "tables.export.pdf.cell-text",
+      "interaction": "File > Download > PDF; pdftotext; the two cell strings",
+      "result": "broken",
+      "observed": "5642 ms; untitled-20260919-i2st-dark.pdf 49828 B; failure null; pages 3; \"Q1 revenue\" false; \"12 000\" false; \"Box label\" false; \"Return drive\" true"
+    },
+    {
+      "n": 20,
+      "id": "tables.export.pptx-editable.cell-text",
+      "interaction": "File > Download > PowerPoint, Editable text; the a:tbl and the two cell strings",
+      "result": "broken",
+      "observed": "4808 ms; untitled-20260919-i2st-dark.pptx 35520 B; failure null; a:tbl 1; gridCol EMU 2438400, 2438400, 2438400 (px 256, 256, 256); \"Q1 revenue\" false; \"12 000\" false; \"Box label\" false"
+    },
+    {
+      "n": 21,
+      "id": "export.html.web-page.try-1",
+      "interaction": "File > Download > Web page; the download event, its url, its failure, the network answers, the snackbar",
+      "result": "broken",
+      "observed": "2218 ms; <redacted token> 0 B; url https://turboslide.vercel.app/api/download/<redacted>; failure \"canceled\"; title null; heading in file false; snackbar \"The web page is ready\"; network []"
+    },
+    {
+      "n": 22,
+      "id": "export.html.web-page.try-2",
+      "interaction": "File > Download > Web page; the download event, its url, its failure, the network answers, the snackbar",
+      "result": "broken",
+      "observed": "1795 ms; <redacted token> 0 B; url https://turboslide.vercel.app/api/download/<redacted>; failure \"canceled\"; title null; heading in file false; snackbar \"The web page is ready\"; network []"
+    },
+    {
+      "n": 23,
+      "id": "deck.trash",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "observed": "/decks"
+    },
+    {
+      "n": 24,
+      "id": "deck.delete-forever",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "observed": "untitled-20260919-i2st"
+    },
+    {
+      "n": 25,
+      "id": "deck.404.edit",
+      "interaction": "GET /edit/untitled-20260919-i2st answers 404",
+      "result": "works",
+      "observed": "status 404"
+    },
+    {
+      "n": 26,
+      "id": "deck.404.deck",
+      "interaction": "GET /deck/untitled-20260919-i2st answers 404",
+      "result": "works",
+      "observed": "status 404"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

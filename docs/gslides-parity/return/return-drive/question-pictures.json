@@ -1,0 +1,30 @@
+{
+  "q4-dark-hair-18.png": "#f2f2f038",
+  "q4-dark-hair-22.png": "#f2f2f038",
+  "q1-dark-share-8px.png": {
+    "share": "8px",
+    "split": "8px",
+    "inboxSlot": 0,
+    "more": "0"
+  },
+  "q1-dark-share-6px.png": {
+    "share": "6px",
+    "split": "8px",
+    "inboxSlot": 0,
+    "more": "0"
+  },
+  "q4-light-hair-18.png": "#0707072e",
+  "q4-light-hair-22.png": "rgba(7, 7, 7, 0.22)",
+  "q1-light-share-8px.png": {
+    "share": "8px",
+    "split": "8px",
+    "inboxSlot": 0,
+    "more": "0"
+  },
+  "q1-light-share-6px.png": {
+    "share": "6px",
+    "split": "8px",
+    "inboxSlot": 0,
+    "more": "0"
+  }
+}

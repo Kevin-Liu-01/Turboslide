@@ -1,0 +1,1524 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260918-vnbg",
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Scratch deck",
+      "interaction": "Create the deck from /new",
+      "result": "works",
+      "evidence": "/edit/untitled-20260918-vnbg"
+    },
+    {
+      "n": 2,
+      "feature": "Pictures",
+      "interaction": "before-dark: the set",
+      "result": "works",
+      "evidence": "8 files; split seam mid [{\"x\":1306,\"thickness\":13,\"color\":\"#f2f2f0\"}]; top1 [{\"x\":1306,\"thickness\":1,\"color\":\"#f2f2f0\"},{\"x\":1307,\"thickness\":1,\"color\":\"#e0e0df\",\"contrastToPrevious\":1.18},{\"x\":1308,\"thickness\":1,\"color\":\"#8f8f8e\",\"contrastToPrevious\":2.45},{\"x\":1309,\"thickness\":6,\"color\":\"#0b0b0b\",\"contrastToPrevious\":6.08},{\"x\":1315,\"thickness\":1,\"color\":\"#5e5e5d\",\"contrastToPrevious\":3.03},{\"x\":1316,\"thickness\":3,\"color\":\"#ededeb\",\"contrastToPrevious\":5.54}]; notes seam [{\"y\":797,\"thickness\":6,\"color\":\"#070707\"},{\"y\":803,\"thickness\":2,\"color\":\"#3a3a3a\",\"contrastToPrevious\":1.77},{\"y\":805,\"thickness\":5,\"color\":\"#070707\",\"contrastToPrevious\":1.77}]; wrapper {\"rect\":{\"x\":1201.46875,\"y\":5.5,\"w\":140.9375,\"h\":32},\"radius\":\"0px 0px 0px 0px\",\"left\":\"0px rgb(242, 242, 240)\",\"background\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(242, 242, 240)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px rgb(242, 242, 240); share radius 0px 0px 0px 0px"
+    },
+    {
+      "n": 3,
+      "feature": "Pictures",
+      "interaction": "after-dark: the set",
+      "result": "works",
+      "evidence": "8 files; split seam mid [{\"x\":1307,\"thickness\":6,\"color\":\"#f2f2f0\"},{\"x\":1313,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrastToPrevious\":1.83},{\"x\":1314,\"thickness\":6,\"color\":\"#f2f2f0\",\"contrastToPrevious\":1.83}]; top1 [{\"x\":1307,\"thickness\":6,\"color\":\"#f2f2f0\"},{\"x\":1313,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrastToPrevious\":1.83},{\"x\":1314,\"thickness\":6,\"color\":\"#f2f2f0\",\"contrastToPrevious\":1.83}]; notes seam [{\"y\":798,\"thickness\":6,\"color\":\"#070707\"},{\"y\":804,\"thickness\":1,\"color\":\"#3a3a3a\",\"contrastToPrevious\":1.77},{\"y\":805,\"thickness\":6,\"color\":\"#070707\",\"contrastToPrevious\":1.77}]; wrapper {\"rect\":{\"x\":1209.46875,\"y\":5.5,\"w\":132.9375,\"h\":32},\"radius\":\"8px 8px 8px 8px\",\"left\":\"1px rgb(242, 242, 240)\",\"background\":\"rgb(242, 242, 240)\",\"color\":\"rgb(7, 7, 7)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px color(srgb 0.027451 0.027451 0.027451 / 0.26); share radius 8px 8px 8px 8px"
+    },
+    {
+      "n": 4,
+      "feature": "Appearance",
+      "interaction": "View > Appearance > light",
+      "result": "works",
+      "evidence": "data-theme light"
+    },
+    {
+      "n": 5,
+      "feature": "Pictures",
+      "interaction": "before-light: the set",
+      "result": "works",
+      "evidence": "8 files; split seam mid [{\"x\":1306,\"thickness\":13,\"color\":\"#070707\"}]; top1 [{\"x\":1306,\"thickness\":1,\"color\":\"#060606\"},{\"x\":1307,\"thickness\":1,\"color\":\"#191919\",\"contrastToPrevious\":1.15},{\"x\":1308,\"thickness\":1,\"color\":\"#6e6e6e\",\"contrastToPrevious\":3.45},{\"x\":1309,\"thickness\":6,\"color\":\"#fafafa\",\"contrastToPrevious\":4.89},{\"x\":1315,\"thickness\":1,\"color\":\"#a2a2a2\",\"contrastToPrevious\":2.45},{\"x\":1316,\"thickness\":3,\"color\":\"#0b0b0b\",\"contrastToPrevious\":7.71}]; notes seam [{\"y\":797,\"thickness\":6,\"color\":\"#ffffff\"},{\"y\":803,\"thickness\":2,\"color\":\"#d2d2d2\",\"contrastToPrevious\":1.51},{\"y\":805,\"thickness\":5,\"color\":\"#ffffff\",\"contrastToPrevious\":1.51}]; wrapper {\"rect\":{\"x\":1201.46875,\"y\":5.5,\"w\":140.9375,\"h\":32},\"radius\":\"0px 0px 0px 0px\",\"left\":\"0px rgb(7, 7, 7)\",\"background\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(7, 7, 7)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px rgb(7, 7, 7); share radius 0px 0px 0px 0px"
+    },
+    {
+      "n": 6,
+      "feature": "Pictures",
+      "interaction": "after-light: the set",
+      "result": "works",
+      "evidence": "8 files; split seam mid [{\"x\":1307,\"thickness\":6,\"color\":\"#070707\"},{\"x\":1313,\"thickness\":1,\"color\":\"#474747\",\"contrastToPrevious\":2.17},{\"x\":1314,\"thickness\":6,\"color\":\"#070707\",\"contrastToPrevious\":2.17}]; top1 [{\"x\":1307,\"thickness\":6,\"color\":\"#070707\"},{\"x\":1313,\"thickness\":1,\"color\":\"#474747\",\"contrastToPrevious\":2.17},{\"x\":1314,\"thickness\":6,\"color\":\"#070707\",\"contrastToPrevious\":2.17}]; notes seam [{\"y\":798,\"thickness\":6,\"color\":\"#ffffff\"},{\"y\":804,\"thickness\":1,\"color\":\"#d2d2d2\",\"contrastToPrevious\":1.51},{\"y\":805,\"thickness\":6,\"color\":\"#ffffff\",\"contrastToPrevious\":1.51}]; wrapper {\"rect\":{\"x\":1209.46875,\"y\":5.5,\"w\":132.9375,\"h\":32},\"radius\":\"8px 8px 8px 8px\",\"left\":\"1px rgb(7, 7, 7)\",\"background\":\"rgb(7, 7, 7)\",\"color\":\"rgb(255, 255, 255)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px color(srgb 1 1 1 / 0.26); share radius 8px 8px 8px 8px"
+    },
+    {
+      "n": 7,
+      "feature": "Pictures",
+      "interaction": "after-light-900: the set",
+      "result": "works",
+      "evidence": "7 files; split seam mid [{\"x\":813,\"thickness\":6,\"color\":\"#070707\"},{\"x\":819,\"thickness\":1,\"color\":\"#474747\",\"contrastToPrevious\":2.17},{\"x\":820,\"thickness\":6,\"color\":\"#070707\",\"contrastToPrevious\":2.17}]; top1 [{\"x\":813,\"thickness\":6,\"color\":\"#070707\"},{\"x\":819,\"thickness\":1,\"color\":\"#474747\",\"contrastToPrevious\":2.17},{\"x\":820,\"thickness\":6,\"color\":\"#070707\",\"contrastToPrevious\":2.17}]; notes seam null; wrapper {\"rect\":{\"x\":790,\"y\":5.5,\"w\":58,\"h\":32},\"radius\":\"8px 8px 8px 8px\",\"left\":\"1px rgb(7, 7, 7)\",\"background\":\"rgb(7, 7, 7)\",\"color\":\"rgb(255, 255, 255)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px color(srgb 1 1 1 / 0.26); share radius 8px 8px 8px 8px"
+    },
+    {
+      "n": 8,
+      "feature": "Pictures",
+      "interaction": "before-light-900: the set",
+      "result": "works",
+      "evidence": "7 files; split seam mid [{\"x\":812,\"thickness\":13,\"color\":\"#070707\"}]; top1 [{\"x\":812,\"thickness\":1,\"color\":\"#060606\"},{\"x\":813,\"thickness\":1,\"color\":\"#191919\",\"contrastToPrevious\":1.15},{\"x\":814,\"thickness\":1,\"color\":\"#6e6e6e\",\"contrastToPrevious\":3.45},{\"x\":815,\"thickness\":6,\"color\":\"#fafafa\",\"contrastToPrevious\":4.89},{\"x\":821,\"thickness\":1,\"color\":\"#a2a2a2\",\"contrastToPrevious\":2.45},{\"x\":822,\"thickness\":3,\"color\":\"#0b0b0b\",\"contrastToPrevious\":7.71}]; notes seam null; wrapper {\"rect\":{\"x\":777,\"y\":5.5,\"w\":71,\"h\":32},\"radius\":\"0px 0px 0px 0px\",\"left\":\"0px rgb(7, 7, 7)\",\"background\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(7, 7, 7)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px rgb(7, 7, 7); share radius 0px 0px 0px 0px"
+    },
+    {
+      "n": 9,
+      "feature": "Appearance",
+      "interaction": "View > Appearance > dark at 900",
+      "result": "works",
+      "evidence": "data-theme dark"
+    },
+    {
+      "n": 10,
+      "feature": "Pictures",
+      "interaction": "before-dark-900: the set",
+      "result": "works",
+      "evidence": "7 files; split seam mid [{\"x\":812,\"thickness\":13,\"color\":\"#f2f2f0\"}]; top1 [{\"x\":812,\"thickness\":1,\"color\":\"#f2f2f0\"},{\"x\":813,\"thickness\":1,\"color\":\"#e0e0df\",\"contrastToPrevious\":1.18},{\"x\":814,\"thickness\":1,\"color\":\"#8f8f8e\",\"contrastToPrevious\":2.45},{\"x\":815,\"thickness\":6,\"color\":\"#0b0b0b\",\"contrastToPrevious\":6.08},{\"x\":821,\"thickness\":1,\"color\":\"#5e5e5d\",\"contrastToPrevious\":3.03},{\"x\":822,\"thickness\":3,\"color\":\"#ededeb\",\"contrastToPrevious\":5.54}]; notes seam null; wrapper {\"rect\":{\"x\":777,\"y\":5.5,\"w\":71,\"h\":32},\"radius\":\"0px 0px 0px 0px\",\"left\":\"0px rgb(242, 242, 240)\",\"background\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(242, 242, 240)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px rgb(242, 242, 240); share radius 0px 0px 0px 0px"
+    },
+    {
+      "n": 11,
+      "feature": "Pictures",
+      "interaction": "after-dark-900: the set",
+      "result": "works",
+      "evidence": "7 files; split seam mid [{\"x\":813,\"thickness\":6,\"color\":\"#f2f2f0\"},{\"x\":819,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrastToPrevious\":1.83},{\"x\":820,\"thickness\":6,\"color\":\"#f2f2f0\",\"contrastToPrevious\":1.83}]; top1 [{\"x\":813,\"thickness\":6,\"color\":\"#f2f2f0\"},{\"x\":819,\"thickness\":1,\"color\":\"#b5b5b4\",\"contrastToPrevious\":1.83},{\"x\":820,\"thickness\":6,\"color\":\"#f2f2f0\",\"contrastToPrevious\":1.83}]; notes seam null; wrapper {\"rect\":{\"x\":790,\"y\":5.5,\"w\":58,\"h\":32},\"radius\":\"8px 8px 8px 8px\",\"left\":\"1px rgb(242, 242, 240)\",\"background\":\"rgb(242, 242, 240)\",\"color\":\"rgb(7, 7, 7)\",\"padding\":\"0px\",\"flexDirection\":\"row\"}; arrow left 1px color(srgb 0.027451 0.027451 0.027451 / 0.26); share radius 8px 8px 8px 8px"
+    },
+    {
+      "n": 12,
+      "feature": "Scratch deck",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks"
+    },
+    {
+      "n": 13,
+      "feature": "Scratch deck",
+      "interaction": "Delete forever on /decks/trash",
+      "result": "works",
+      "evidence": "untitled-20260918-vnbg"
+    },
+    {
+      "n": 14,
+      "feature": "Scratch deck",
+      "interaction": "GET /edit/untitled-20260918-vnbg answers 404",
+      "result": "works",
+      "evidence": "status 404"
+    },
+    {
+      "n": 15,
+      "feature": "Scratch deck",
+      "interaction": "GET /deck/untitled-20260918-vnbg answers 404",
+      "result": "works",
+      "evidence": "status 404"
+    }
+  ],
+  "notes": {
+    "before-dark": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 1201.46875,
+            "y": 5.5,
+            "w": 140.9375,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 1201.46875,
+            "y": 5.5,
+            "w": 110.9375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "arrow": {
+          "rect": {
+            "x": 1312.40625,
+            "y": 5.5,
+            "w": 30,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "padding": "0px 10px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 1306,
+            "thickness": 13,
+            "color": "#f2f2f0"
+          }
+        ],
+        "top1": [
+          {
+            "x": 1306,
+            "thickness": 1,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1307,
+            "thickness": 1,
+            "color": "#e0e0df",
+            "contrastToPrevious": 1.18
+          },
+          {
+            "x": 1308,
+            "thickness": 1,
+            "color": "#8f8f8e",
+            "contrastToPrevious": 2.45
+          },
+          {
+            "x": 1309,
+            "thickness": 6,
+            "color": "#0b0b0b",
+            "contrastToPrevious": 6.08
+          },
+          {
+            "x": 1315,
+            "thickness": 1,
+            "color": "#5e5e5d",
+            "contrastToPrevious": 3.03
+          },
+          {
+            "x": 1316,
+            "thickness": 3,
+            "color": "#ededeb",
+            "contrastToPrevious": 5.54
+          }
+        ],
+        "top2": [
+          {
+            "x": 1306,
+            "thickness": 2,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1308,
+            "thickness": 1,
+            "color": "#e7e7e6",
+            "contrastToPrevious": 1.1
+          },
+          {
+            "x": 1309,
+            "thickness": 1,
+            "color": "#c6c6c5",
+            "contrastToPrevious": 1.38
+          },
+          {
+            "x": 1310,
+            "thickness": 1,
+            "color": "#323232",
+            "contrastToPrevious": 7.5
+          },
+          {
+            "x": 1311,
+            "thickness": 3,
+            "color": "#070707",
+            "contrastToPrevious": 1.57
+          },
+          {
+            "x": 1314,
+            "thickness": 1,
+            "color": "#767675",
+            "contrastToPrevious": 4.43
+          },
+          {
+            "x": 1315,
+            "thickness": 1,
+            "color": "#e2e2e1",
+            "contrastToPrevious": 3.51
+          },
+          {
+            "x": 1316,
+            "thickness": 3,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.16
+          }
+        ]
+      },
+      "notesSeam": [
+        {
+          "y": 797,
+          "thickness": 6,
+          "color": "#070707"
+        },
+        {
+          "y": 803,
+          "thickness": 2,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 805,
+          "thickness": 5,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#070707"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "files": [
+        "chrome/before-dark-title-row.png",
+        "chrome/before-dark-right-cluster.png",
+        "chrome/before-dark-toolbar-sheet-boundary.png",
+        "chrome/before-dark-notes-divider.png",
+        "chrome/before-dark-split-hover-label.png",
+        "chrome/before-dark-split-hover-arrow.png",
+        "chrome/before-dark-split-focus-arrow.png",
+        "chrome/before-dark-split-menu-open.png"
+      ]
+    },
+    "after-dark": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 10px 0px 12px",
+          "flexDirection": "row"
+        },
+        "arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px color(srgb 0.027451 0.027451 0.027451 / 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "padding": "0px 10px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ]
+      },
+      "notesSeam": [
+        {
+          "y": 798,
+          "thickness": 6,
+          "color": "#070707"
+        },
+        {
+          "y": 804,
+          "thickness": 1,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 805,
+          "thickness": 6,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#070707"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "files": [
+        "chrome/after-dark-title-row.png",
+        "chrome/after-dark-right-cluster.png",
+        "chrome/after-dark-toolbar-sheet-boundary.png",
+        "chrome/after-dark-notes-divider.png",
+        "chrome/after-dark-split-hover-label.png",
+        "chrome/after-dark-split-hover-arrow.png",
+        "chrome/after-dark-split-focus-arrow.png",
+        "chrome/after-dark-split-menu-open.png"
+      ]
+    },
+    "before-light": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 1201.46875,
+            "y": 5.5,
+            "w": 140.9375,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 1201.46875,
+            "y": 5.5,
+            "w": 110.9375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "arrow": {
+          "rect": {
+            "x": 1312.40625,
+            "y": 5.5,
+            "w": 30,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "padding": "0px 10px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 1306,
+            "thickness": 13,
+            "color": "#070707"
+          }
+        ],
+        "top1": [
+          {
+            "x": 1306,
+            "thickness": 1,
+            "color": "#060606"
+          },
+          {
+            "x": 1307,
+            "thickness": 1,
+            "color": "#191919",
+            "contrastToPrevious": 1.15
+          },
+          {
+            "x": 1308,
+            "thickness": 1,
+            "color": "#6e6e6e",
+            "contrastToPrevious": 3.45
+          },
+          {
+            "x": 1309,
+            "thickness": 6,
+            "color": "#fafafa",
+            "contrastToPrevious": 4.89
+          },
+          {
+            "x": 1315,
+            "thickness": 1,
+            "color": "#a2a2a2",
+            "contrastToPrevious": 2.45
+          },
+          {
+            "x": 1316,
+            "thickness": 3,
+            "color": "#0b0b0b",
+            "contrastToPrevious": 7.71
+          }
+        ],
+        "top2": [
+          {
+            "x": 1306,
+            "thickness": 2,
+            "color": "#070707"
+          },
+          {
+            "x": 1308,
+            "thickness": 1,
+            "color": "#101010",
+            "contrastToPrevious": 1.06
+          },
+          {
+            "x": 1309,
+            "thickness": 1,
+            "color": "#343434",
+            "contrastToPrevious": 1.53
+          },
+          {
+            "x": 1310,
+            "thickness": 1,
+            "color": "#d1d1d1",
+            "contrastToPrevious": 8.15
+          },
+          {
+            "x": 1311,
+            "thickness": 3,
+            "color": "#ffffff",
+            "contrastToPrevious": 1.53
+          },
+          {
+            "x": 1314,
+            "thickness": 1,
+            "color": "#888888",
+            "contrastToPrevious": 3.54
+          },
+          {
+            "x": 1315,
+            "thickness": 1,
+            "color": "#161616",
+            "contrastToPrevious": 5.1
+          },
+          {
+            "x": 1316,
+            "thickness": 3,
+            "color": "#070707",
+            "contrastToPrevious": 1.11
+          }
+        ]
+      },
+      "notesSeam": [
+        {
+          "y": 797,
+          "thickness": 6,
+          "color": "#ffffff"
+        },
+        {
+          "y": 803,
+          "thickness": 2,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 805,
+          "thickness": 5,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#ffffff"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "files": [
+        "chrome/before-light-title-row.png",
+        "chrome/before-light-right-cluster.png",
+        "chrome/before-light-toolbar-sheet-boundary.png",
+        "chrome/before-light-notes-divider.png",
+        "chrome/before-light-split-hover-label.png",
+        "chrome/before-light-split-hover-arrow.png",
+        "chrome/before-light-split-focus-arrow.png",
+        "chrome/before-light-split-menu-open.png"
+      ]
+    },
+    "after-light": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 1209.46875,
+            "y": 5.5,
+            "w": 132.9375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 1210.46875,
+            "y": 6.5,
+            "w": 102.9375,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 10px 0px 12px",
+          "flexDirection": "row"
+        },
+        "arrow": {
+          "rect": {
+            "x": 1313.40625,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px color(srgb 1 1 1 / 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "share": {
+          "rect": {
+            "x": 1350.40625,
+            "y": 5.5,
+            "w": 77.59375,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "padding": "0px 10px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top1": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "x": 1307,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 1313,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 1314,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ]
+      },
+      "notesSeam": [
+        {
+          "y": 798,
+          "thickness": 6,
+          "color": "#ffffff"
+        },
+        {
+          "y": 804,
+          "thickness": 1,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 805,
+          "thickness": 6,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#ffffff"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "files": [
+        "chrome/after-light-title-row.png",
+        "chrome/after-light-right-cluster.png",
+        "chrome/after-light-toolbar-sheet-boundary.png",
+        "chrome/after-light-notes-divider.png",
+        "chrome/after-light-split-hover-label.png",
+        "chrome/after-light-split-hover-arrow.png",
+        "chrome/after-light-split-focus-arrow.png",
+        "chrome/after-light-split-menu-open.png"
+      ]
+    },
+    "after-light-900": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 790,
+            "y": 5.5,
+            "w": 58,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 791,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 8px",
+          "flexDirection": "row"
+        },
+        "arrow": {
+          "rect": {
+            "x": 819,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px color(srgb 1 1 1 / 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "share": {
+          "rect": {
+            "x": 856,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "padding": "0px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top1": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ],
+        "top2": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#070707"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#474747",
+            "contrastToPrevious": 2.17
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#070707",
+            "contrastToPrevious": 2.17
+          }
+        ]
+      },
+      "notesSeam": null,
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#ffffff"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "files": [
+        "chrome/after-light-900-title-row.png",
+        "chrome/after-light-900-right-cluster.png",
+        "chrome/after-light-900-toolbar-sheet-boundary.png",
+        "chrome/after-light-900-split-hover-label.png",
+        "chrome/after-light-900-split-hover-arrow.png",
+        "chrome/after-light-900-split-focus-arrow.png",
+        "chrome/after-light-900-split-menu-open.png"
+      ]
+    },
+    "before-light-900": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 777,
+            "y": 5.5,
+            "w": 71,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 777,
+            "y": 5.5,
+            "w": 41,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "arrow": {
+          "rect": {
+            "x": 818,
+            "y": 5.5,
+            "w": 30,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(7, 7, 7)",
+          "background": "rgb(7, 7, 7)",
+          "color": "rgb(255, 255, 255)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "share": {
+          "rect": {
+            "x": 856,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px rgba(7, 7, 7, 0.18)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(58, 61, 68)",
+          "padding": "0px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 812,
+            "thickness": 13,
+            "color": "#070707"
+          }
+        ],
+        "top1": [
+          {
+            "x": 812,
+            "thickness": 1,
+            "color": "#060606"
+          },
+          {
+            "x": 813,
+            "thickness": 1,
+            "color": "#191919",
+            "contrastToPrevious": 1.15
+          },
+          {
+            "x": 814,
+            "thickness": 1,
+            "color": "#6e6e6e",
+            "contrastToPrevious": 3.45
+          },
+          {
+            "x": 815,
+            "thickness": 6,
+            "color": "#fafafa",
+            "contrastToPrevious": 4.89
+          },
+          {
+            "x": 821,
+            "thickness": 1,
+            "color": "#a2a2a2",
+            "contrastToPrevious": 2.45
+          },
+          {
+            "x": 822,
+            "thickness": 3,
+            "color": "#0b0b0b",
+            "contrastToPrevious": 7.71
+          }
+        ],
+        "top2": [
+          {
+            "x": 812,
+            "thickness": 2,
+            "color": "#070707"
+          },
+          {
+            "x": 814,
+            "thickness": 1,
+            "color": "#101010",
+            "contrastToPrevious": 1.06
+          },
+          {
+            "x": 815,
+            "thickness": 1,
+            "color": "#343434",
+            "contrastToPrevious": 1.53
+          },
+          {
+            "x": 816,
+            "thickness": 1,
+            "color": "#d1d1d1",
+            "contrastToPrevious": 8.15
+          },
+          {
+            "x": 817,
+            "thickness": 3,
+            "color": "#ffffff",
+            "contrastToPrevious": 1.53
+          },
+          {
+            "x": 820,
+            "thickness": 1,
+            "color": "#888888",
+            "contrastToPrevious": 3.54
+          },
+          {
+            "x": 821,
+            "thickness": 1,
+            "color": "#161616",
+            "contrastToPrevious": 5.1
+          },
+          {
+            "x": 822,
+            "thickness": 3,
+            "color": "#070707",
+            "contrastToPrevious": 1.11
+          }
+        ]
+      },
+      "notesSeam": null,
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#ffffff"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#d2d2d2",
+          "contrastToPrevious": 1.51
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#ffffff",
+          "contrastToPrevious": 1.51
+        }
+      ],
+      "files": [
+        "chrome/before-light-900-title-row.png",
+        "chrome/before-light-900-right-cluster.png",
+        "chrome/before-light-900-toolbar-sheet-boundary.png",
+        "chrome/before-light-900-split-hover-label.png",
+        "chrome/before-light-900-split-hover-arrow.png",
+        "chrome/before-light-900-split-focus-arrow.png",
+        "chrome/before-light-900-split-menu-open.png"
+      ]
+    },
+    "before-dark-900": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 777,
+            "y": 5.5,
+            "w": 71,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(242, 242, 240)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(242, 242, 240)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 777,
+            "y": 5.5,
+            "w": 41,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "arrow": {
+          "rect": {
+            "x": 818,
+            "y": 5.5,
+            "w": 30,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 14px",
+          "flexDirection": "row-reverse"
+        },
+        "share": {
+          "rect": {
+            "x": 856,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "padding": "0px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 812,
+            "thickness": 13,
+            "color": "#f2f2f0"
+          }
+        ],
+        "top1": [
+          {
+            "x": 812,
+            "thickness": 1,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 813,
+            "thickness": 1,
+            "color": "#e0e0df",
+            "contrastToPrevious": 1.18
+          },
+          {
+            "x": 814,
+            "thickness": 1,
+            "color": "#8f8f8e",
+            "contrastToPrevious": 2.45
+          },
+          {
+            "x": 815,
+            "thickness": 6,
+            "color": "#0b0b0b",
+            "contrastToPrevious": 6.08
+          },
+          {
+            "x": 821,
+            "thickness": 1,
+            "color": "#5e5e5d",
+            "contrastToPrevious": 3.03
+          },
+          {
+            "x": 822,
+            "thickness": 3,
+            "color": "#ededeb",
+            "contrastToPrevious": 5.54
+          }
+        ],
+        "top2": [
+          {
+            "x": 812,
+            "thickness": 2,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 814,
+            "thickness": 1,
+            "color": "#e8e8e6",
+            "contrastToPrevious": 1.09
+          },
+          {
+            "x": 815,
+            "thickness": 1,
+            "color": "#c6c6c5",
+            "contrastToPrevious": 1.39
+          },
+          {
+            "x": 816,
+            "thickness": 1,
+            "color": "#323232",
+            "contrastToPrevious": 7.5
+          },
+          {
+            "x": 817,
+            "thickness": 3,
+            "color": "#070707",
+            "contrastToPrevious": 1.57
+          },
+          {
+            "x": 820,
+            "thickness": 1,
+            "color": "#767675",
+            "contrastToPrevious": 4.43
+          },
+          {
+            "x": 821,
+            "thickness": 1,
+            "color": "#e2e2e1",
+            "contrastToPrevious": 3.51
+          },
+          {
+            "x": 822,
+            "thickness": 3,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.16
+          }
+        ]
+      },
+      "notesSeam": null,
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#070707"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "files": [
+        "chrome/before-dark-900-title-row.png",
+        "chrome/before-dark-900-right-cluster.png",
+        "chrome/before-dark-900-toolbar-sheet-boundary.png",
+        "chrome/before-dark-900-split-hover-label.png",
+        "chrome/before-dark-900-split-hover-arrow.png",
+        "chrome/before-dark-900-split-focus-arrow.png",
+        "chrome/before-dark-900-split-menu-open.png"
+      ]
+    },
+    "after-dark-900": {
+      "edges": {
+        "wrapper": {
+          "rect": {
+            "x": 790,
+            "y": 5.5,
+            "w": 58,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgb(242, 242, 240)",
+          "background": "rgb(242, 242, 240)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "present": {
+          "rect": {
+            "x": 791,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "0px rgb(7, 7, 7)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px 8px",
+          "flexDirection": "row"
+        },
+        "arrow": {
+          "rect": {
+            "x": 819,
+            "y": 6.5,
+            "w": 28,
+            "h": 30
+          },
+          "radius": "0px 0px 0px 0px",
+          "left": "1px color(srgb 0.027451 0.027451 0.027451 / 0.26)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(7, 7, 7)",
+          "padding": "0px",
+          "flexDirection": "row"
+        },
+        "share": {
+          "rect": {
+            "x": 856,
+            "y": 5.5,
+            "w": 32,
+            "h": 32
+          },
+          "radius": "8px 8px 8px 8px",
+          "left": "1px rgba(242, 242, 240, 0.22)",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(185, 188, 195)",
+          "padding": "0px",
+          "flexDirection": "row"
+        }
+      },
+      "seam": {
+        "mid": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top1": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ],
+        "top2": [
+          {
+            "x": 813,
+            "thickness": 6,
+            "color": "#f2f2f0"
+          },
+          {
+            "x": 819,
+            "thickness": 1,
+            "color": "#b5b5b4",
+            "contrastToPrevious": 1.83
+          },
+          {
+            "x": 820,
+            "thickness": 6,
+            "color": "#f2f2f0",
+            "contrastToPrevious": 1.83
+          }
+        ]
+      },
+      "notesSeam": null,
+      "toolbarSeam": [
+        {
+          "y": 106,
+          "thickness": 5,
+          "color": "#070707"
+        },
+        {
+          "y": 111,
+          "thickness": 1,
+          "color": "#3a3a3a",
+          "contrastToPrevious": 1.77
+        },
+        {
+          "y": 112,
+          "thickness": 7,
+          "color": "#070707",
+          "contrastToPrevious": 1.77
+        }
+      ],
+      "files": [
+        "chrome/after-dark-900-title-row.png",
+        "chrome/after-dark-900-right-cluster.png",
+        "chrome/after-dark-900-toolbar-sheet-boundary.png",
+        "chrome/after-dark-900-split-hover-label.png",
+        "chrome/after-dark-900-split-hover-arrow.png",
+        "chrome/after-dark-900-split-focus-arrow.png",
+        "chrome/after-dark-900-split-menu-open.png"
+      ]
+    }
+  },
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "proposedCss": "\n/* (a) the Slideshow split button as one control: one outline and one ground on the wrapper, the\n   halves transparent inside it, one inner divider in a hairline read against ink, the corner on\n   the outer corners only */\n.ts-title-slideshow {\n  box-sizing: border-box;\n  display: inline-flex;\n  align-items: stretch;\n  height: 32px;\n  border: 1px solid var(--pt-ink);\n  border-radius: 8px;\n  background: var(--pt-ink);\n  color: var(--pt-paper);\n  overflow: hidden;\n}\n.ts-title-slideshow > .pt-ib.is-solid {\n  box-sizing: border-box;\n  height: 30px;\n  border: 0;\n  border-radius: 0;\n  background: transparent;\n  color: inherit;\n  flex-direction: row;\n  gap: 6px;\n  transition: background-color var(--pt-dur-fast) var(--pt-ease-out);\n}\n.ts-title-slideshow > .pt-ib.is-solid.ts-title-present { padding: 0 10px 0 12px; }\n.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow {\n  width: 28px;\n  padding: 0;\n  justify-content: center;\n  border-left: 1px solid var(--pt-hair-on-ink, color-mix(in srgb, var(--pt-paper) 26%, transparent));\n}\n.ts-title-slideshow > .pt-ib.is-solid svg { width: 12px; height: 12px; }\n.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow svg { width: 14px; height: 14px; }\n.ts-title-slideshow > .pt-ib.is-solid:hover {\n  background: color-mix(in srgb, var(--pt-paper) 16%, transparent);\n  color: inherit;\n}\n.ts-title-slideshow > .pt-ib.is-solid:focus-visible {\n  outline: 1px solid var(--pt-paper);\n  outline-offset: -3px;\n}\n.ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow[aria-expanded='true'] {\n  background: color-mix(in srgb, var(--pt-paper) 24%, transparent);\n}\n@media (max-width: 900px) {\n  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present { padding: 0 8px; }\n}\n/* (c) the rhythm: Share takes the pair's corner so the two controls read as one family */\n.ts-title-share { border-radius: 8px; }\n/* (b) the separators law: the notes pane draws its divider once (the slot drew a second line) */\n.pt-viewer.is-editor > .pt-main > .ts-notes-slot { border-top: 0; }\n"
+}

@@ -1,0 +1,151 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-18T22:45:57.913Z",
+  "ms": 113089,
+  "decks": [
+    "untitled-20260918-y9ef"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "id": "setup.deck",
+      "feature": "Setup",
+      "interaction": "Open /new, double click the title, type a title, Escape",
+      "result": "works",
+      "observed": "try 1: deck untitled-20260918-y9ef; revision 4; title row name after typing \"P\" (heading \"Pipeline review: Acme, Q3 2026\")",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": null,
+      "ms": 9288
+    },
+    {
+      "n": 2,
+      "id": "setup.switch",
+      "feature": "Setup",
+      "interaction": "Tools > Advanced tools; two slides; a blank slide with a text block (window API)",
+      "result": "works",
+      "observed": "try 1: slides title,blank-1,split-1,split-2; block {\"x\":200,\"y\":300,\"w\":300,\"h\":120}; guides guide.x.800,guide.y.450",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": null,
+      "ms": 18149
+    },
+    {
+      "n": 3,
+      "id": "view.guides.drag",
+      "feature": "Drag a guide to a new position",
+      "interaction": "Press on the vertical guide at 800 (hold 300 ms), drag it slowly to sheet x 600, release over the sheet",
+      "result": "works",
+      "observed": "try 1: element under the press guide.x.800; readout during \"5.00 in\"; live style null; guides after guide.x.600,guide.y.450; deck.info guides {\"x\":[600],\"y\":[450]}; save words \"Saving…\"",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/71-guide-drag-3.png",
+      "ms": 3387
+    },
+    {
+      "n": 4,
+      "id": "view.snapTo.guides.off",
+      "feature": "View > Snap to > Guides off",
+      "interaction": "With Snap to guides off, drag the text block so its left edge stops 4 px short of the guide at 800; then on again and the same drag",
+      "result": "works",
+      "observed": "try 1: row checked true -> false; Snap off: left 200 -> 804 (aimed 804); back to 200; row true; Snap on: 200 -> 800 (aimed 804)",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/72-snap-off-then-on.png",
+      "ms": 20154
+    },
+    {
+      "n": 5,
+      "id": "view.guides.contextMenu",
+      "feature": "Right click menus: View > Guides on the empty canvas and Delete guide on a guide",
+      "interaction": "Right click the empty sheet; hover Guides; read the submenu; Escape; right click the horizontal guide; Delete guide",
+      "result": "works",
+      "observed": "try 1: empty canvas rows edit.paste,slide.newSlide,slide.duplicateSlide,slide.deleteSlide,slide.skipSlide,slide.changeBackground,slide.applyLayout,slide.changeTheme,slide.transition,insert.comment,view.guides; Guides submenu view.guides.show,view.guides.addVertical,view.guides.addHorizontal,view.guides.edit (disabled),view.guides.clear,view.guides.delete; guide right click rows view.guides.delete,view.guides.edit; guide.y.450 deleted true",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/73-empty-canvas-context-menu-guides-3.png",
+      "ms": 2509
+    },
+    {
+      "n": 6,
+      "id": "tools.notificationSettings",
+      "feature": "Tools > Notification settings",
+      "interaction": "Open; read the radios; pick None; Save; reopen and read",
+      "result": "broken",
+      "observed": "try 1: radios all=false forYou=true none=false (activityForCommenters=false; markup <input data-control=\"dialog.notificationSettings.level.all\" type=\"radio\" value=\"all\" name=\"Comments\">); after the click all=false forYou=false none=true; Save closed true, error null, snackbar null; reopened all=false forYou=true none=false; after a reload all=false forYou=true none=false",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/74-notification-settings-3.png",
+      "ms": 8967
+    },
+    {
+      "n": 7,
+      "id": "presence.chip",
+      "feature": "Presence chips and the chip click (Follow or Go to slide)",
+      "interaction": "A second browser opens /edit/<id> (it lands as a viewer), moves to slide 3 with the arrow keys; click its chip in the first browser",
+      "result": "broken",
+      "observed": "try 1: colleague {\"url\":\"/edit/untitled-20260918-y9ef\",\"mode\":\"viewing\",\"cards\":0,\"viewOnly\":true,\"title\":\"P, editor, Turboslide\"}, on slide title after two ArrowRight; chips [{\"client\":\"c238a20ec4848f54b1a95d2f7d4a2982\",\"item\":\"title.presence.goTo\",\"label\":null}]; after the chip click the first browser is on title; Following plate false",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/75-presence-chip-click-3.png",
+      "ms": 4132
+    },
+    {
+      "n": 8,
+      "id": "presence.follow",
+      "feature": "Follow (moves with the other person)",
+      "interaction": "The colleague moves again; read whether the first browser follows",
+      "result": "not driven",
+      "observed": "try 1: the chip's row is title.presence.goTo: canFollow needs an account participant (kind account, role editor or owner); the colleague is an anonymous viewer, so the chip does Go to slide and there is nothing to follow; the colleague moved to title, the first browser stayed on title (was title)",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": null,
+      "ms": 1620
+    },
+    {
+      "n": 9,
+      "id": "presence.roster",
+      "feature": "Collaborators roster (Go to slide, the own row)",
+      "interaction": "Open the roster from the count button; read the rows; click the colleague's row; click the own row",
+      "result": "works",
+      "observed": "try 1: rows [{\"control\":\"presence.roster.6dc8048508b6d8c24e848d4d1508dfdd\",\"item\":\"title.presence.me\",\"text\":\"BBrass 641 (you)slide 2\"},{\"control\":\"presence.roster.c238a20ec4848f54b1a95d2f7d4a2982\",\"item\":\"title.presence.goTo\",\"text\":\"GGraphite 645viewer · slide 1Go to slide 1\"}]; the colleague is on title; its row took the first browser to title; own row opened the account menu true",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/76-presence-roster-3.png",
+      "ms": 3047
+    },
+    {
+      "n": 10,
+      "id": "cleanup.untitled-20260918-y9ef",
+      "feature": "Cleanup",
+      "interaction": "Trash and delete forever untitled-20260918-y9ef; GET /edit and /deck",
+      "result": "works",
+      "observed": "File > Move to trash returned to /decks; Delete forever removed the card; /edit 404, /deck 404",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": null,
+      "ms": 0
+    },
+    {
+      "n": 11,
+      "id": "account.forget",
+      "feature": "Forget this browser",
+      "interaction": "On a fresh /new draft: Tools > Advanced tools, own chip > Forget this browser, confirm; read the name before and after, and after a reload",
+      "result": "broken",
+      "observed": "try 1: name before \"studio\"; dialog \"Forget this browserForget this browser? Your name, avatar and unsaved changes here are cleared; earlier edits keep the old nameCancelForget this browser\"; confirm closed false; error No deck untitled-20260918-3jy4 in the Blob store; address after /new; name after \"unreadable: TimeoutError: locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n  - waiting fo\", after a reload \"null\"; localStorage keys turboslide:opened,ts-editor-settings -> turboslide:opened,ts-editor-settings; draft id untitled-20260918-3jy4 (unsaved, no deck stored)",
+      "consoleErrors": [],
+      "badResponses": [],
+      "shot": "audit-surface/77-forget-this-browser-3.png",
+      "ms": 21781
+    }
+  ],
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "badResponses": []
+}

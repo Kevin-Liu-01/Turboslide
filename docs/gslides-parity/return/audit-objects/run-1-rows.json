@@ -1,0 +1,900 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260918-f2ht",
+  "startedAt": "2026-09-18T22:15:42.758Z",
+  "ms": 869057,
+  "slides": {
+    "title": "title",
+    "boxes": "split-1",
+    "gallery-click": "blank-1",
+    "gallery-drag": "blank-2",
+    "table": "blank-3",
+    "chart": "blank-4",
+    "chart-column": "blank-5",
+    "chart-line": "blank-6",
+    "chart-pie": "blank-7",
+    "diagram": "blank-8",
+    "connectors": "blank-9"
+  },
+  "works": 42,
+  "broken": 38,
+  "flaky": 0,
+  "notDriven": 5,
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "cleanup": [
+    "after File > Move to trash: https://turboslide.vercel.app/decks",
+    "Delete forever clicked; trash card gone: true",
+    "GET /deck/untitled-20260918-f2ht -> 404",
+    "GET /edit/untitled-20260918-f2ht -> 404"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "feature": "Deck",
+      "interaction": "Open /new, double click the title, type a name, Escape; the address moves to /edit/<id>",
+      "result": "works",
+      "tries": 1,
+      "evidence": "deck untitled-20260918-f2ht; title run \"heading/text\" session opened true; revision 2",
+      "shot": "01-new-deck.png",
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 2,
+      "feature": "Insert menu (switch off)",
+      "interaction": "Open Insert and read its rows",
+      "result": "works",
+      "tries": 1,
+      "evidence": "5 rows: insert.image, insert.textBox, insert.link, insert.comment, insert.newSlide",
+      "shot": "02-insert-menu-default.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 3,
+      "feature": "Toolbar (switch off)",
+      "interaction": "Read the toolbar head buttons",
+      "result": "works",
+      "tries": 1,
+      "evidence": "toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo, toolbar.print, toolbar.zoom, toolbar.tail, toolbar.select, toolbar.textBox, toolbar.insertImage, toolbar.insertComment, toolbar.background, toolbar.layout",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 4,
+      "feature": "Palette (switch off)",
+      "interaction": "Search the palette for \"box\", \"table\", \"chart\", \"panel\", \"logo\"",
+      "result": "not driven",
+      "tries": 1,
+      "evidence": "no palette button in the toolbar",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 5,
+      "feature": "Tools > Advanced tools",
+      "interaction": "Turn the switch on from the Tools menu",
+      "result": "works",
+      "tries": 1,
+      "evidence": "row \"Advanced tools\"; settings.advancedTools true",
+      "shot": "03-tools-menu.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 6,
+      "feature": "Insert menu (switch on)",
+      "interaction": "Open Insert and read its rows, the Shape and Line submenus",
+      "result": "works",
+      "tries": 1,
+      "evidence": "19 rows: insert.image, insert.textBox, insert.audio (disabled), insert.video (disabled), insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.specialCharacters, insert.link (disabled), insert.comment, insert.newSlide, insert.slideNumbers, insert.templates (disabled), insert.buildingBlocks (disabled), insert.icon, insert.material; Shape: insert.shape.shapes, insert.shape.gallery, insert.shape.arrows, insert.shape.callouts, insert.shape.equation; Shapes: insert.shape.shapes.rectangle, insert.shape.shapes.rounded, insert.shape.shapes.ellipse; Line: insert.line.line, insert.line.arrow, insert.line.rule, insert.line.elbowConnector, insert.line.curvedConnector, insert.line.curve, insert.line.polyline, insert.line.scribble",
+      "shot": "04-insert-menu-advanced.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 7,
+      "feature": "Palette (switch on)",
+      "interaction": "Search the palette for \"box\", \"panel\", \"logo\", \"plate\", \"card\"",
+      "result": "not driven",
+      "tries": 1,
+      "evidence": "no palette button in the toolbar",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 8,
+      "feature": "Text box",
+      "interaction": "Insert > Text box, one click on the sheet, type \"Box text\", Escape",
+      "result": "works",
+      "tries": 1,
+      "evidence": "text text 120,120 480x64; session opened true; text \"Box text\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 9,
+      "feature": "Text box",
+      "interaction": "Insert > Text box drawn by a drag, type \"Drawn box\"",
+      "result": "works",
+      "tries": 1,
+      "evidence": "text text-2 120,300 580x120 (drawn 120,300 580x120); text \"Drawn box\"",
+      "shot": "07-text-boxes.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 10,
+      "feature": "Text box",
+      "interaction": "The toolbar Text box button, then one click on the sheet",
+      "result": "not driven",
+      "tries": 1,
+      "evidence": "no toolbar.textBox button",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 11,
+      "feature": "Shape: Rectangle",
+      "interaction": "Insert > Shape > Shapes > Rectangle, one click at 120,560",
+      "result": "works",
+      "tries": 1,
+      "evidence": "shape shape 120,560 240x160 shape rectangle; svg rect d \"\" boxPath false; fill rgba(242, 242, 240, 0.05); stroke rgb(242, 242, 240) 1px",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 12,
+      "feature": "Shape: Rounded rectangle",
+      "interaction": "Insert > Shape > Shapes > Rounded rectangle, one click at 480,560",
+      "result": "works",
+      "tries": 1,
+      "evidence": "shape shape-2 480,560 240x160 shape rounded; svg rect d \"\" rx 8 curved false",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 13,
+      "feature": "Shape: Ellipse",
+      "interaction": "Insert > Shape > Shapes > Ellipse, one click at 840,560",
+      "result": "works",
+      "tries": 1,
+      "evidence": "shape shape-3 840,560 240x160; svg ellipse d \"\"",
+      "shot": "08-named-shapes.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 14,
+      "feature": "Shape: Rectangle by drag",
+      "interaction": "Insert > Shape > Shapes > Rectangle, drag 1200,520 to 1500,700",
+      "result": "works",
+      "tries": 1,
+      "evidence": "1200,520 300x180 for a 300x180 drag",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 15,
+      "feature": "Shape: select",
+      "interaction": "One click on the rectangle: chip, eight handles, the ring",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chip \"Shape\"; handles nw,n,ne,e,se,s,sw,w; ring true; editing false",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 16,
+      "feature": "Shape: move",
+      "interaction": "Pointer down inside the selected rectangle, drag by 120,80",
+      "result": "works",
+      "tries": 1,
+      "evidence": "moved 120,80; undo restored true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 17,
+      "feature": "Shape: resize",
+      "interaction": "Drag the se handle by 80,40; the readout; Undo",
+      "result": "works",
+      "tries": 1,
+      "evidence": "120,560 240x160 -> 120,560 320x200; readout \"320 × 200\"; svg fills the box true; undo true",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 18,
+      "feature": "Shape: fill",
+      "interaction": "Select the rectangle, toolbar Fill color, a swatch",
+      "result": "works",
+      "tries": 1,
+      "evidence": "swatch toolbar.fillColor.blue; block.fill \"blue\"; svg fill rgb(47, 92, 224)",
+      "shot": "09-shape-fill-plate.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 19,
+      "feature": "Shape: border",
+      "interaction": "Toolbar Border color, Border weight and Border dash",
+      "result": "works",
+      "tries": 1,
+      "evidence": "colour toolbar.borderColor.red; weight menu.toolbar.borderWeight.weight-2; dash toolbar.borderDash.pick.dash; block stroke \"red\" width 2 dash dash; svg stroke rgb(229, 72, 77) 2px dasharray 8px, 6px",
+      "shot": "10-shape-border.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 20,
+      "feature": "Shape: text inside",
+      "interaction": "Select the rectangle, press Enter, type \"Label\", Escape; else double click",
+      "result": "works",
+      "tries": 1,
+      "evidence": "route Enter; session true; block.text \"Label\"; drawn text \"Label\"",
+      "shot": "11-shape-text.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 21,
+      "feature": "Shape: Format options",
+      "interaction": "Format > Format options on the rectangle; type a width of 300",
+      "result": "works",
+      "tries": 1,
+      "evidence": "sections formatOptions.size, formatOptions.position, formatOptions.textFitting, formatOptions.text, formatOptions.colour, formatOptions.shadow, formatOptions.shape, formatOptions.altText, formatOptions.block; width field true; pos after 120,560 300x160",
+      "shot": "12-shape-format-options.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 22,
+      "feature": "Shape: right click",
+      "interaction": "Right click the rectangle and read the menu rows",
+      "result": "works",
+      "tries": 1,
+      "evidence": "19 rows: edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, arrange.distribute, arrange.group, arrange.ungroup, insert.link, format.textFitting, format.dropShadow, format.formatOptions, format.changeShape, format.altText, insert.comment",
+      "shot": "13-shape-context-menu.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 23,
+      "feature": "Shape: duplicate, delete, undo",
+      "interaction": "Cmd+D, Delete, Cmd+Z on the rectangle",
+      "result": "works",
+      "tries": 1,
+      "evidence": "objects 8 -> 9 (Cmd+D) -> 8 (Delete) -> 9 (Cmd+Z)",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 24,
+      "feature": "Shape gallery",
+      "interaction": "Insert > Shape > All shapes: count the tiles and compare their glyphs",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: row insert.shape.gallery \"All shapes\"; 99 tiles; 3 distinct glyph paths; first ids rect, roundRect, snip1Rect, snip2SameRect, snip2DiagRect, snipRoundRect, round1Rect, round2SameRect, round2DiagRect, ellipse, triangle, rtTriangle | try 2: row insert.shape.gallery \"All shapes\"; 99 tiles; 3 distinct glyph paths; first ids rect, roundRect, snip1Rect, snip2SameRect, snip2DiagRect, snipRoundRect, round1Rect, round2SameRect, round2DiagRect, ellipse, triangle, rtTriangle",
+      "shot": "15-gallery-all-shapes.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 25,
+      "feature": "Shape gallery",
+      "interaction": "The Arrows, Callouts and Equation rows with the switch on",
+      "result": "works",
+      "tries": 1,
+      "evidence": "insert.shape.arrows: 26 tiles, named rows none; insert.shape.callouts: 4 tiles, named rows none; insert.shape.equation: 6 tiles, named rows none",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 26,
+      "feature": "Gallery preset triangle",
+      "interaction": "All shapes > triangle, one click at 60,60",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape 60,60 240x160 shape triangle; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-2 80,80 240x160 shape triangle; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-3 100,100 240x160 shape triangle; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 27,
+      "feature": "Gallery preset diamond",
+      "interaction": "All shapes > diamond, one click at 440,60",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-4 440,60 240x160 shape diamond; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-5 460,80 240x160 shape diamond; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-6 480,100 240x160 shape diamond; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 28,
+      "feature": "Gallery preset hexagon",
+      "interaction": "All shapes > hexagon, one click at 820,60",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-7 820,60 240x160 shape hexagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-8 840,80 240x160 shape hexagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-9 860,100 240x160 shape hexagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 29,
+      "feature": "Gallery preset pentagon",
+      "interaction": "All shapes > pentagon, one click at 1200,60",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-10 1200,60 240x160 shape pentagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-11 1220,80 240x160 shape pentagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-12 1240,100 240x160 shape pentagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 30,
+      "feature": "Gallery preset star5",
+      "interaction": "All shapes > star5, one click at 60,330",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-13 60,330 240x160 shape star5; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-14 80,350 240x160 shape star5; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-15 100,370 240x160 shape star5; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 31,
+      "feature": "Gallery preset octagon",
+      "interaction": "All shapes > octagon, one click at 440,330",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-16 440,330 240x160 shape octagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-17 460,350 240x160 shape octagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-18 480,370 240x160 shape octagon; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 32,
+      "feature": "Gallery preset heart",
+      "interaction": "All shapes > heart, one click at 820,330",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-19 820,330 240x160 shape heart; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-20 840,350 240x160 shape heart; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-21 860,370 240x160 shape heart; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 33,
+      "feature": "Gallery preset cloud",
+      "interaction": "All shapes > cloud, one click at 1200,330",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-22 1200,330 240x160 shape cloud; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-23 1220,350 240x160 shape cloud; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-24 1240,370 240x160 shape cloud; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 34,
+      "feature": "Gallery preset parallelogram",
+      "interaction": "All shapes > parallelogram, one click at 60,600",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-25 60,600 240x160 shape parallelogram; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-26 80,620 240x160 shape parallelogram; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-27 100,640 240x160 shape parallelogram; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 35,
+      "feature": "Gallery preset trapezoid",
+      "interaction": "All shapes > trapezoid, one click at 440,600",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-28 440,600 240x160 shape trapezoid; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-29 460,620 240x160 shape trapezoid; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-30 480,640 240x160 shape trapezoid; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 36,
+      "feature": "Gallery preset plus",
+      "interaction": "All shapes > plus, one click at 820,600",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-31 820,600 240x160 shape plus; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-32 840,620 240x160 shape plus; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-33 860,640 240x160 shape plus; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 37,
+      "feature": "Gallery preset can",
+      "interaction": "All shapes > can, one click at 1200,600",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: shape shape-34 1200,600 240x160 shape can; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 2: shape shape-35 1220,620 240x160 shape can; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null | try 3: shape shape-36 1240,640 240x160 shape can; svg path d \"M0,0 H239 V159 H0 Z\" boxPath true data-shape null",
+      "shot": "19-gallery-click-presets.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 38,
+      "feature": "Gallery preset triangle",
+      "interaction": "All shapes > triangle, drag 60,60 to 360,260",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 60,60 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 60,80 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 39,
+      "feature": "Gallery preset diamond",
+      "interaction": "All shapes > diamond, drag 440,60 to 740,260",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 440,60 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 440,80 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 40,
+      "feature": "Gallery preset hexagon",
+      "interaction": "All shapes > hexagon, drag 820,60 to 1120,260",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 820,60 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 820,80 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 41,
+      "feature": "Gallery preset pentagon",
+      "interaction": "All shapes > pentagon, drag 1200,60 to 1500,260",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 1200,60 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 1200,80 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 42,
+      "feature": "Gallery preset star5",
+      "interaction": "All shapes > star5, drag 60,330 to 360,530",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 60,330 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 60,350 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 43,
+      "feature": "Gallery preset octagon",
+      "interaction": "All shapes > octagon, drag 440,330 to 740,530",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 440,330 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 440,350 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 44,
+      "feature": "Gallery preset heart",
+      "interaction": "All shapes > heart, drag 820,330 to 1120,530",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 820,330 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 820,350 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 45,
+      "feature": "Gallery preset cloud",
+      "interaction": "All shapes > cloud, drag 1200,330 to 1500,530",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 1200,330 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 1200,350 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 46,
+      "feature": "Gallery preset parallelogram",
+      "interaction": "All shapes > parallelogram, drag 60,600 to 360,800",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 60,600 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 60,620 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 47,
+      "feature": "Gallery preset trapezoid",
+      "interaction": "All shapes > trapezoid, drag 440,600 to 740,800",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 440,600 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 440,620 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 48,
+      "feature": "Gallery preset plus",
+      "interaction": "All shapes > plus, drag 820,600 to 1120,800",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 820,600 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 820,620 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 49,
+      "feature": "Gallery preset can",
+      "interaction": "All shapes > can, drag 1200,600 to 1500,800",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: 1200,600 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\" | try 2: 1200,620 300x200 (drawn 300x200) box ok true; svg path boxPath true d \"M0,0 H299 V199 H0 Z\"",
+      "shot": "21-gallery-drag-presets.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 50,
+      "feature": "Table: insert",
+      "interaction": "Insert > Table, point at 4 columns by 3 rows in the grid, click",
+      "result": "works",
+      "tries": 1,
+      "evidence": "size words \"4 x 3\"; table table 320,290 960x320; 4 columns by 3 rows; header true",
+      "shot": "23-table-inserted.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 51,
+      "feature": "Table: type in cells",
+      "interaction": "Double click cell 1,1, type \"Q1 revenue\"; Tab; type \"12 000\"; Tab; type \"Up 8 percent\"; Escape",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: session true, still editing after Tab false; cells \"Up 8 percent\" | \"\" | \"\"; chip after Escape \"Table\" | try 2: session true, still editing after Tab false; cells \"Up 8 percent\" | \"\" | \"\"; chip after Escape \"Table\" | try 3: session true, still editing after Tab false; cells \"Up 8 percent\" | \"\" | \"\"; chip after Escape \"Table\"",
+      "shot": "26-table-typed.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 52,
+      "feature": "Table: Tab at the last cell",
+      "interaction": "Double click the last cell, press Tab: a row is added",
+      "result": "works",
+      "tries": 1,
+      "evidence": "session true; rows 3 -> 4; status \"Row addedUndo\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 53,
+      "feature": "Table: add a row",
+      "interaction": "With a cell session open, Format > Table > Insert row below (or the cell right click menu)",
+      "result": "works",
+      "tries": 1,
+      "evidence": "route right click menu; Format menu: row disabled; context row enabled; rows 4 -> 5",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 54,
+      "feature": "Table: add a column",
+      "interaction": "With a cell session open, Format > Table > Insert column right (or the cell right click menu)",
+      "result": "works",
+      "tries": 1,
+      "evidence": "route right click menu; Format menu: row disabled; context row enabled; columns 4 -> 5; cells per row 5,5,5,5,5",
+      "shot": "27-table-row-column-added.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 55,
+      "feature": "Table: delete a row",
+      "interaction": "With a cell session open, Format > Table > Delete row",
+      "result": "works",
+      "tries": 1,
+      "evidence": "route right click menu; Format menu: row disabled; context row enabled; rows 5 -> 4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 56,
+      "feature": "Table: delete a column",
+      "interaction": "With a cell session open, Format > Table > Delete column",
+      "result": "works",
+      "tries": 1,
+      "evidence": "route right click menu; Format menu: row disabled; context row enabled; columns 5 -> 4; first row still \"Up 8 percent\" | \"\" | \"\"",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 57,
+      "feature": "Table: cell alignment",
+      "interaction": "With a cell session open in column 2, Format > Align & indent > Center",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: session true; row disabled false; columns[1].align undefined; DOM text-align start | try 2: session true; row disabled false; columns[1].align undefined; DOM text-align start | try 3: session true; row disabled false; columns[1].align undefined; DOM text-align start",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 58,
+      "feature": "Table: select and resize",
+      "interaction": "One click on the table: chip and handles; drag the se handle by 80,40; Undo",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chip \"Table\"; handles nw,n,ne,e,se,s,sw,w; 320,290 960x320 -> 320,290 1040x360",
+      "shot": "28-table-selected.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 59,
+      "feature": "Table: resize a column",
+      "interaction": "Look for a column seam handle on the selected table, and a column width control in Format options",
+      "result": "broken",
+      "tries": 1,
+      "evidence": "candidates seam undefined width formatOptions.table.distributeColumns (not driven further)",
+      "shot": "29-table-format-options.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 60,
+      "feature": "Table: right click a cell",
+      "interaction": "Right click a cell with its session open and read the rows",
+      "result": "works",
+      "tries": 1,
+      "evidence": "16 rows: format.table.insertRowAbove, format.table.insertRowBelow, format.table.insertColumnLeft, format.table.insertColumnRight, format.table.deleteRow, format.table.deleteColumn, format.table.deleteTable, format.table.distributeRows, format.table.distributeColumns, format.table.mergeCells(disabled), format.table.unmergeCells(disabled), edit.cut, edit.copy, edit.paste, insert.link, format.formatOptions",
+      "shot": "30-table-cell-context.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 61,
+      "feature": "Chart: insert Bar",
+      "interaction": "Insert > Chart > Bar",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chart chart 320,180 960x540 kind bar; categories 3 series 1 (Series 1); svg drawn true with 0 marks",
+      "shot": "31-chart-bar.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 62,
+      "feature": "Chart: select",
+      "interaction": "One click on the chart: chip and handles",
+      "result": "works",
+      "tries": 1,
+      "evidence": "chip \"Chart\"; handles nw,n,ne,e,se,s,sw,w; toolbar toolbar.paintFormat, toolbar.chartType, toolbar.legend, toolbar.numberFormat, toolbar.editData, toolbar.formatOptions",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 63,
+      "feature": "Chart: edit data",
+      "interaction": "Format > Format options, double click the first value cell, type 42, Enter",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: error: locator.waitFor: Timeout 4000ms exceeded. | try 2: error: locator.waitFor: Timeout 4000ms exceeded. | try 3: error: locator.waitFor: Timeout 4000ms exceeded.",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 64,
+      "feature": "Chart: change type",
+      "interaction": "Format options > Chart type > Column, then Pie",
+      "result": "works",
+      "tries": 1,
+      "evidence": "kind bar -> column -> pie; pie svg paths 0",
+      "shot": "32-chart-pie.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 65,
+      "feature": "Chart: add a series and a category",
+      "interaction": "Format options > Add series, Add category",
+      "result": "works",
+      "tries": 1,
+      "evidence": "series 1 -> 2; categories 3 -> 4; values per series 4,4",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 66,
+      "feature": "Chart: resize",
+      "interaction": "Drag the se handle by 100,60; the svg fills the box; Undo",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: 320,180 960x540 -> 320,180 1060x600; svg none vs box 747.3x423 fills null | try 2: 320,180 960x540 -> 320,180 1060x600; svg none vs box 747.3x423 fills null | try 3: 320,180 960x540 -> 320,180 1060x600; svg none vs box 747.3x423 fills null",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 67,
+      "feature": "Chart: insert Column",
+      "interaction": "Insert > Chart > Column",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: chart chart 320,180 960x540 kind column; svg marks 0 | try 2: chart chart-2 320,180 960x540 kind column; svg marks 0 | try 3: chart chart-3 320,180 960x540 kind column; svg marks 0",
+      "shot": "35-chart-column.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 68,
+      "feature": "Chart: insert Line",
+      "interaction": "Insert > Chart > Line",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: chart chart 320,180 960x540 kind line; svg marks 0 | try 2: chart chart-2 320,180 960x540 kind line; svg marks 0 | try 3: chart chart-3 320,180 960x540 kind line; svg marks 0",
+      "shot": "38-chart-line.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 69,
+      "feature": "Chart: insert Pie",
+      "interaction": "Insert > Chart > Pie",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: chart chart 320,180 960x540 kind pie; svg marks 0 | try 2: chart chart-2 320,180 960x540 kind pie; svg marks 0 | try 3: chart chart-3 320,180 960x540 kind pie; svg marks 0",
+      "shot": "41-chart-pie.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 70,
+      "feature": "Diagram",
+      "interaction": "Insert > Diagram: the panel, a type, one more step, Insert",
+      "result": "broken",
+      "tries": 3,
+      "evidence": "try 1: error: locator.boundingBox: Timeout 30000ms exceeded. | try 2: error: locator.boundingBox: Timeout 30000ms exceeded. | try 3: error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 71,
+      "feature": "Word art",
+      "interaction": "Insert > Word art, type \"Big words\", Enter",
+      "result": "works",
+      "tries": 1,
+      "evidence": "placeholder \"Type your text and press Enter\"; text text 400,390 800x120 typography {\"size\":88,\"weight\":500,\"align\":\"center\"} outline {\"color\":\"ink\",\"width\":1.5}; drawn font 88px weight 500 text stroke 1.5px; text \"Big words\"",
+      "shot": "44-word-art-inserted.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 72,
+      "feature": "Icon",
+      "interaction": "Insert > Icon, pick the first symbol",
+      "result": "works",
+      "tries": 1,
+      "evidence": "70 symbols; picked dialog.insertIcon.pick.gt-mark; icon icon 776,426 48x48 name gt-mark; svg drawn true",
+      "shot": "45-icon-dialog.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 73,
+      "feature": "Material",
+      "interaction": "Insert > Material, pick the first entry",
+      "result": "works",
+      "tries": 1,
+      "evidence": "17 entries; picked dialog.insertMaterial.pick.paper:liquid-metal; material material 560,314 480x272 materialId paper:liquid-metal; asset after 2.5 s none; DOM canvas true img false tag figure",
+      "shot": "47-material-inserted.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 74,
+      "feature": "Palette blocks",
+      "interaction": "Search the palette for \"box\", \"code\", \"logo\" on a blank slide and insert what it offers",
+      "result": "not driven",
+      "tries": 1,
+      "evidence": "no palette button",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 75,
+      "feature": "Connectors: two rectangles",
+      "interaction": "Insert two rectangles at 200,300 and 900,300 by the named row",
+      "result": "works",
+      "tries": 1,
+      "evidence": "A 200,300 240x160; B 900,300 240x160",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 76,
+      "feature": "Connector: Elbow connector",
+      "interaction": "Insert > Line > Elbow connector, drag from A's right site to B's left site; then move B and read the connector",
+      "result": "works",
+      "tries": 1,
+      "evidence": "shape shape-3 shape elbow 440,380 460x1; connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}}; B moved 300 -> 450; connector after 440,380 460x150 points null; followed true",
+      "shot": "48-connector-elbowConnector.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 77,
+      "feature": "Connector: Curved connector",
+      "interaction": "Insert > Line > Curved connector, drag from A's right site to B's left site; then move B and read the connector",
+      "result": "works",
+      "tries": 1,
+      "evidence": "shape shape-4 shape curved 320,460 700x1; connect {\"start\":{\"block\":\"shape\",\"site\":2},\"end\":{\"block\":\"shape-2\",\"site\":2}}; B moved 300 -> 450; connector after 320,460 700x150 points null; followed true",
+      "shot": "49-connector-curvedConnector.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 78,
+      "feature": "Lines: Line and Arrow by drag",
+      "interaction": "Insert > Line > Line, drag 200,700 to 700,760; Insert > Line > Arrow, drag 900,700 to 1400,760",
+      "result": "works",
+      "tries": 1,
+      "evidence": "line line 200,700 500x60; arrow arrow 900,700 500x60 end null; arrow svg \"null\"",
+      "shot": "50-lines.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 79,
+      "feature": "Present: the table",
+      "interaction": "Select the table slide, Slideshow; read the shown slide",
+      "result": "broken",
+      "tries": 2,
+      "evidence": "try 1: shown text has \"Q1 revenue\" false; table element false; cell runs 0; editable fields 0 | try 2: shown text has \"Q1 revenue\" false; table element false; cell runs 0; editable fields 0",
+      "shot": "52-present-table.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 80,
+      "feature": "Present: the chart and the shapes",
+      "interaction": "ArrowRight through the chart, diagram and connector slides; Escape",
+      "result": "not driven",
+      "tries": 1,
+      "evidence": "the show is not open",
+      "shot": null,
+      "consoleErrors": []
+    },
+    {
+      "n": 81,
+      "feature": "Reload",
+      "interaction": "Load /edit/<id> again and count the objects of every slide",
+      "result": "works",
+      "tries": 1,
+      "evidence": "11 slides, every object list the same (0, 8, 36, 24, 1, 1, 3, 3, 3, 3, 6 objects)",
+      "shot": null,
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 82,
+      "feature": "Viewer",
+      "interaction": "Open /deck/<id> and read the table slide",
+      "result": "works",
+      "tries": 1,
+      "evidence": "status 200; title shown true; \"Q1 revenue\" on the first shown slide false (the viewer shows one slide at a time)",
+      "shot": "53-viewer.png",
+      "consoleErrors": [
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ]
+    },
+    {
+      "n": 83,
+      "feature": "Export: PDF",
+      "interaction": "File > Download > PDF Document; the pages and the text of the table, the word art and the shape label",
+      "result": "broken",
+      "tries": 1,
+      "evidence": "4349 ms; 186932 B; 11 pages for 12 slides; error null; text: \"Q1 revenue\" false, \"12 000\" false, \"Big words\" true, \"Label\" true, \"Box text\" true, \"Drawn box\" true",
+      "shot": "54-download-pdf.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 84,
+      "feature": "Export: PowerPoint, Perfect",
+      "interaction": "File > Download > Microsoft PowerPoint, Perfect (default)",
+      "result": "broken",
+      "tries": 1,
+      "evidence": "19098 ms; 295443 B; 11 slide parts; 13 media parts; error null",
+      "shot": "55-download-pptx.png",
+      "consoleErrors": []
+    },
+    {
+      "n": 85,
+      "feature": "Export: PowerPoint, Editable text",
+      "interaction": "File > Download > Microsoft PowerPoint, Editable text; the table and chart XML",
+      "result": "broken",
+      "tries": 1,
+      "evidence": "11972 ms; 160428 B; 11 slide parts; a:tbl 1; c:chart refs 10; graphicFrame 11; p:sp 93; p:pic 3; prstGeom kinds rect,bentConnector3,curvedConnector3,line,roundRect,ellipse,octagon,heart,cloud,trapezoid,plus,can,triangle,diamond,hexagon,pentagon,star5,parallelogram; \"Q1 revenue\" false; \"Big words\" true; charts parts 22; error null",
+      "shot": "56-download-pptx-native.png",
+      "consoleErrors": []
+    }
+  ]
+}

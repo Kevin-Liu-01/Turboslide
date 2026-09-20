@@ -1,0 +1,56 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deck": "gt-brand",
+  "startedAt": "2026-09-19T21:14:19.665Z",
+  "shots": [
+    "production-return-default-1440-dark.jpg",
+    "production-return-title-row-1440-dark.jpg",
+    "production-return-advanced-1440-dark.jpg",
+    "production-return-default-1440-light.jpg",
+    "production-return-title-row-1440-light.jpg",
+    "production-return-advanced-1440-light.jpg"
+  ],
+  "steps": [
+    {
+      "name": "boot",
+      "observed": "data-theme dark; the switch off",
+      "at": "2026-09-19T21:14:24.520Z"
+    },
+    {
+      "name": "appearance dark",
+      "observed": "data-theme dark",
+      "at": "2026-09-19T21:14:24.524Z"
+    },
+    {
+      "name": "title row dark",
+      "observed": "clip {\"x\":0,\"y\":0,\"width\":1440,\"height\":52}",
+      "at": "2026-09-19T21:14:25.109Z"
+    },
+    {
+      "name": "views dark",
+      "observed": "default, title row and advanced shot; the switch read on",
+      "at": "2026-09-19T21:14:27.498Z"
+    },
+    {
+      "name": "appearance light",
+      "observed": "data-theme light",
+      "at": "2026-09-19T21:14:31.674Z"
+    },
+    {
+      "name": "title row light",
+      "observed": "clip {\"x\":0,\"y\":0,\"width\":1440,\"height\":52}",
+      "at": "2026-09-19T21:14:32.261Z"
+    },
+    {
+      "name": "views light",
+      "observed": "default, title row and advanced shot; the switch read on",
+      "at": "2026-09-19T21:14:34.686Z"
+    },
+    {
+      "name": "end",
+      "observed": "the switch off; data-theme dark; revision untouched (no write)",
+      "at": "2026-09-19T21:14:38.933Z"
+    }
+  ],
+  "endedAt": "2026-09-19T21:14:38.933Z"
+}

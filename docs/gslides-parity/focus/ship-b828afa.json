@@ -1,0 +1,18 @@
+{
+  "commit": "b828afa",
+  "renderedFrom": [
+    "docs/gslides-parity/focus/verification/return-p2-gate-preview-run1.json",
+    "docs/gslides-parity/focus/verification/return-p2-gate-preview-run2.json",
+    "docs/gslides-parity/focus/verification/gate-preview-return-ship.json"
+  ],
+  "rule": "docs/RETURN.md section 1 rule 2: parkedFeaturesOf over each counted run of the enforce preview https://turboslide-5sw6p6url-kl01s-projects.vercel.app, the same set from the verifier's run 1 and run 2 and from the ship step's run; the rows that differ between the runs are flaky and are not listed (docs/gslides-parity/return/build/ship.md section 5)",
+  "parkedFeatures": ["inbox"],
+  "parkedRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    { "id": "versions.show-changes-marks", "parks": ["file.versionHistory.showChanges"] },
+    { "id": "collab.roster.go-to-slide", "parks": ["title.presence.goTo"] }
+  ]
+}

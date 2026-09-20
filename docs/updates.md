@@ -2,6 +2,23 @@
 
 The release notes of Turboslide, newest first. An entry names the date, what changed in the default view and where the evidence is; the counts a release passed are in the release note it names and in the README section "What works today", which is rendered from the test matrix and never typed here.
 
+## 2026-09-19, the return round
+
+The features the focus round parked come back to the default view where every one of their interactions passed the driven runs: twice on an enforce preview built from the tree and once on production after the release (docs/RETURN.md section 1). What Kevin asked for, in his words: boxes and tables and the rest of the formatting, working better than before, cleaner separator lines between the editor's rows, and the Slideshow button and its menu as one control.
+
+What changed:
+
+- Shapes and lines. Insert > Shape places a rectangle, a rounded rectangle or an ellipse with a fill, a border and a label; Insert > Line draws a line or an arrow, and the elbow and curved connectors attach to shapes and follow them.
+- Tables. Insert > Table places a table from a grid of columns and rows. Double click a cell to type, Tab to move to the next cell, Tab on the last cell to add a row. Rows and columns are added and deleted from the cell's right click menu and from Format > Table; two cells picked with a Shift click merge and unmerge from the cell menu or the toolbar. Drag a column edge to resize it. The table draws in the show, the PDF and the PowerPoint file.
+- Charts, diagrams and word art. Insert > Chart adds a bar, column, line or pie chart whose numbers are edited in the Format options panel; Insert > Diagram lands as one group with editable labels; Insert > Word art places a large outlined text.
+- Formatting. Superscript, subscript and capitalization from the Format menu, the right click menu and the keyboard; justified alignment; paragraph spacing; highlight colour; Paint format. Distribute, rotate, flip, group, ungroup and regroup in the Arrange menu. Slide > Change theme switches the deck between the light and dark appearance, and View > Appearance sets the chrome.
+- The chrome. The Slideshow button and its options menu are one control with one divider; Enter, Space and ArrowDown work on it and Tab reaches the chevron. Every boundary between the editor's rows is one hairline drawn once. The right cluster keeps one height and one gap; the empty notification slot is gone.
+- File and view rows. From template gallery, Open with its list and bundle upload, Import slides from a deck or a bundle, Details, the JPEG, PNG, web page and bundle downloads, Select none, Check slides, Show ruler, the guides, Snap to guides, Show filmstrip, Full screen and the editing modes.
+- Fixes in the core set. The cover title takes formatting on one click, a typed number is one undo step, the deck's name follows the whole heading, and the slide numbers dialog applies.
+- Stays behind Tools > Advanced tools, with the reason in the README section "Advanced tools": the shape galleries until the geometry interpreter, Icons and Materials, Show changes in Version history and Live pointers (their rows did not pass), the roster's Go to slide word (its row did not pass twice), the notifications inbox (no notification was seen to arrive), and the account rows until accounts exist.
+
+The evidence: the audits under `docs/gslides-parity/return/`, the verifier's two passes in `docs/gslides-parity/focus/VERIFICATION.md` ("Return round, pass 1" and "pass 2"), and the ship step's note `docs/gslides-parity/return/build/ship.md` with the production table in VERIFICATION.md ("Return round, the ship"). The production run of the core gate on 2026-09-19 read 565 rows: 556 passed, 8 failed (five of them rows of parked features or controls, and three that one restore's race left behind: Restore this version followed at once by Cmd+Z did not bring the current version back, and the two rows after it read the restored deck), 1 walked by hand. The restore race is the open item of this release (docs/gslides-parity/return/build/ship.md section 9).
+
 ## 2026-09-15, the focus round
 
 The rule this release sets, and every later release keeps: a feature is in the editor's default view only when every one of its interactions works on production and is in the test matrix ([docs/FOCUS.md](FOCUS.md) section 1). The default view is what a seller does weekly: open a deck that exists, duplicate, delete, skip and reorder slides, retype a name and a few numbers, replace a logo or a screenshot, present over a call, and send a PDF or a link.

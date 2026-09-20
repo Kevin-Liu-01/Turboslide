@@ -1,0 +1,480 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-20T01:25:38.362Z",
+  "reads": [
+    {
+      "name": "GET /api/agent (bearer)",
+      "status": 200,
+      "note": "keys 22"
+    },
+    {
+      "name": "GET /api/agent (no bearer)",
+      "status": 401
+    },
+    {
+      "name": "GET /llms.txt (no bearer)",
+      "status": 200,
+      "note": "6417 chars"
+    },
+    {
+      "name": "GET /llms-full.txt (no bearer)",
+      "status": 200,
+      "note": "68519 chars"
+    },
+    {
+      "name": "GET /openapi.json (no bearer)",
+      "status": 200,
+      "note": "2077021 chars"
+    },
+    {
+      "name": "GET /api/actions/text.replaceAll (bearer)",
+      "status": 200
+    },
+    {
+      "name": "POST /mcp (no bearer)",
+      "status": 401
+    }
+  ],
+  "manifest": {
+    "actionCount": 169,
+    "listed": 156,
+    "byTransport": {
+      "cli": 0,
+      "mcp": 0,
+      "http": 0,
+      "window": 0
+    },
+    "mutating": 0,
+    "implemented": 150,
+    "notImplemented": [
+      {
+        "id": "deck.pack",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.unpack",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.push",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.pull",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "view.goto",
+        "milestone": "M3",
+        "transports": [
+          "window",
+          "mcp"
+        ]
+      },
+      {
+        "id": "view.mode",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.theme",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.present",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.zoom",
+        "milestone": "GS1",
+        "transports": [
+          "window",
+          "mcp"
+        ]
+      },
+      {
+        "id": "export.check",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "fonts.build",
+        "milestone": "M2",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "import.run",
+        "milestone": "M1",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "source.read",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "source.apply",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "controls.list",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "control.activate",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "control.set",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "artifact.download",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "deck.follow",
+        "milestone": "GS3",
+        "transports": [
+          "cli"
+        ]
+      }
+    ],
+    "groups": {
+      "deck": 18,
+      "slide": 20,
+      "block": 41,
+      "asset": 5,
+      "render": 2,
+      "lint": 3,
+      "version": 5,
+      "view": 5,
+      "export": 5,
+      "studio": 6,
+      "presence": 4,
+      "sync": 3,
+      "comment": 16,
+      "share": 21,
+      "account": 10,
+      "admin": 5
+    },
+    "rules": [
+      "Every mutating action requires baseRevision and rejects a stale one with 409 and the current document.",
+      "Every write returns the normalized result; re-read from the response, not from memory.",
+      "Unknown fields are rejected with unknown_field and a JSON pointer, except under ext on a slide, a block or an asset.",
+      "An agent write to a slide another author leased is refused with 409 and the holder unless force is set.",
+      "A claim about a deck names the revision; render both themes and lint before claiming a slide is done."
+    ],
+    "transports": {
+      "cli": "turboslide <command> --json --author agent:<runId>",
+      "mcp": "turboslide mcp (stdio) or POST /mcp (streamable HTTP); tools deck_<action>",
+      "http": "POST /api/actions/<id> with the input as JSON",
+      "window": "window.turboslide.studio.invoke(<id>, input) after the turboslide:studio-api-ready event"
+    },
+    "auth": {
+      "required": true,
+      "env": "TURBOSLIDE_TOKEN",
+      "localhostOpen": false
+    },
+    "http": {
+      "implemented": [
+        "deck.info",
+        "deck.create",
+        "deck.rename",
+        "deck.set",
+        "deck.list",
+        "deck.copy",
+        "deck.trash",
+        "deck.restore",
+        "deck.remove",
+        "deck.setBackground",
+        "deck.guides",
+        "slide.list",
+        "slide.get",
+        "slide.insert",
+        "slide.remove",
+        "slide.move",
+        "slide.update",
+        "slide.replace",
+        "slide.setLayout",
+        "slide.new",
+        "slide.duplicate",
+        "slide.skip",
+        "slide.applyLayout",
+        "slide.import",
+        "slide.toCanvas",
+        "slide.setBackground",
+        "text.replaceAll",
+        "block.set",
+        "block.insert",
+        "block.remove",
+        "block.move",
+        "block.align",
+        "block.distribute",
+        "block.order",
+        "block.duplicate",
+        "block.group",
+        "block.ungroup",
+        "block.regroup",
+        "block.rotate",
+        "block.flip",
+        "block.crop",
+        "block.mask",
+        "block.resetImage",
+        "block.adjust",
+        "block.setAlt",
+        "block.shadow",
+        "block.autofit",
+        "text.style",
+        "text.list",
+        "text.spacing",
+        "text.columns",
+        "text.indent",
+        "text.case",
+        "text.insert",
+        "chart.setData",
+        "chart.setKind",
+        "table.merge",
+        "table.unmerge",
+        "table.insertRows",
+        "table.insertColumns",
+        "table.deleteRows",
+        "table.deleteColumns",
+        "table.distribute",
+        "table.cellStyle",
+        "shape.set",
+        "line.set",
+        "diagram.insert",
+        "section.set",
+        "slide.lease",
+        "asset.add",
+        "asset.dither",
+        "asset.capture",
+        "material.capture",
+        "material.list",
+        "render.slide",
+        "render.sheet",
+        "lint.run",
+        "fix.run",
+        "diff.run",
+        "version.save",
+        "version.list",
+        "version.restore",
+        "export.run",
+        "export.text",
+        "build.run",
+        "validate.run",
+        "presence.list",
+        "presence.follow",
+        "presence.unfollow",
+        "presence.pointer",
+        "sync.status",
+        "deck.watch",
+        "comment.add",
+        "comment.reply",
+        "comment.edit",
+        "comment.delete",
+        "comment.resolve",
+        "comment.reopen",
+        "comment.assign",
+        "comment.done",
+        "comment.react",
+        "comment.list",
+        "comment.get",
+        "comment.link",
+        "notification.list",
+        "notification.markRead",
+        "notification.settings",
+        "activity.list",
+        "version.diff",
+        "share.get",
+        "share.setGeneralAccess",
+        "share.createLink",
+        "share.revokeLink",
+        "share.rotateLink",
+        "share.stop",
+        "share.invite",
+        "share.setRole",
+        "share.remove",
+        "share.setExpiry",
+        "share.settings",
+        "share.requestAccess",
+        "share.listRequests",
+        "share.respond",
+        "share.transferOwnership",
+        "share.acceptOwnership",
+        "share.declineOwnership",
+        "share.claim",
+        "share.emailCollaborators",
+        "deck.publish",
+        "deck.unpublish",
+        "account.decks",
+        "account.tokens.create",
+        "account.tokens.list",
+        "account.tokens.revoke",
+        "account.me",
+        "account.setName",
+        "account.setAvatar",
+        "account.sessions",
+        "account.signOut",
+        "admin.bootstrap",
+        "admin.assignOwner",
+        "admin.flag",
+        "admin.migrateStorage",
+        "admin.mail.list",
+        "picture.dither",
+        "picture.materialize",
+        "slide.setBackgroundPicture",
+        "slide.setBackgroundMaterial"
+      ],
+      "pending": []
+    },
+    "skills": [
+      "turboslide-create",
+      "turboslide-api",
+      "turboslide-studio",
+      "turboslide-verify"
+    ],
+    "resources": [
+      {
+        "uri": "deck://manifest",
+        "name": "Manifest",
+        "description": "deck.json: sections, assets, revision",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://grammar",
+        "name": "Grammar",
+        "description": "The rule table as JSON plus the prose grammar",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://catalog/blocks",
+        "name": "Block catalog",
+        "description": "Every block type with its schema and defaults",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://catalog/icons",
+        "name": "Icon catalog",
+        "description": "The 63 Heroicons plus gt-mark",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://catalog/materials",
+        "name": "Material catalog",
+        "description": "The shader materials and their uniforms (M5)",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://theme",
+        "name": "Theme",
+        "description": "The gt-ink-paper tokens and the type ladder",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://slides/{id}",
+        "name": "Slide",
+        "description": "One normalized slide",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://lint",
+        "name": "Lint",
+        "description": "The current findings",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://render/{id}/{theme}",
+        "name": "Render",
+        "description": "The latest render of a slide in a theme",
+        "mimeType": "image/png"
+      },
+      {
+        "uri": "deck://{id}/comments",
+        "name": "Comments",
+        "description": "The comment threads with their anchors resolved; subscribe for updates",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://{id}/presence",
+        "name": "Collaborators",
+        "description": "The roster of the room with the computed marks; subscribe for updates",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "deck://inbox",
+        "name": "Notifications",
+        "description": "The notifications of the caller; subscribe for updates",
+        "mimeType": "application/json"
+      }
+    ],
+    "instance": {
+      "effectsBackend": "typescript",
+      "glibcVersionRuntime": "2.34",
+      "node": "v24.20.0",
+      "platform": "linux"
+    },
+    "version": "0.0.0",
+    "window": [
+      "global",
+      "event",
+      "actions"
+    ],
+    "sessions": []
+  },
+  "words": {
+    "assist": 0,
+    "gemini": 0,
+    "model": 0,
+    "llm": 4,
+    "anthropic": 0,
+    "openai": 0,
+    "prompt": 0,
+    "summar": 0,
+    "translat": 0
+  }
+}

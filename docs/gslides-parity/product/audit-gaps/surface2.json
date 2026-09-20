@@ -1,0 +1,132 @@
+{
+  "name": "surface2",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:32:56.014Z",
+  "seconds": 94,
+  "ok": 10,
+  "failed": 6,
+  "notDriven": 0,
+  "deck": "untitled-20260920-pmvz",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-pmvz; /edit/untitled-20260920-pmvz",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Text box: Insert > Text box, click at 900,500, type a long paragraph",
+      "expected": "the box grows or the text shrinks; the text stays inside the box",
+      "observed": "{\"box\":\"338x45\",\"run\":\"338x140\",\"lines\":6,\"textBottomPastBox\":92,\"pastSheet\":-145,\"overflow\":\"visible\",\"font\":\"22px\"}; autofit \"grow\"; pos {\"x\":900,\"y\":500,\"w\":480,\"h\":198,\"z\":3}; surface2-01-text-box-overflow.png",
+      "ok": false
+    },
+    {
+      "n": 3,
+      "step": "Format > Text fitting on the text box",
+      "expected": "Format options opens at Text fitting with Do not autofit, Shrink on overflow, Resize shape",
+      "observed": "{\"panel\":true,\"sections\":[\"Size & rotation\",\"Position\",\"Text fitting\",\"Text\",\"Colour\",\"Drop shadow\",\"Alt text\"],\"fitting\":\"Do not autofitShrink text on overflowResize shape to fit text\",\"checked\":[]}; surface2-02-text-fitting-panel.png",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Alt text on the text box (Format options > Alt text)",
+      "expected": "a description field; the block carries alt after Tab",
+      "observed": "alt \"undefined\"; surface2-03-alt-text.png",
+      "ok": false
+    },
+    {
+      "n": 5,
+      "step": "Link the text box to slide 2: New slide, back to slide 1, select the box, Insert > Link, pick the slide, Apply",
+      "expected": "the block carries link { slide }",
+      "observed": "dialog false; popover true; options null; link undefined; surface2-04-link-block-dialog.png",
+      "ok": false
+    },
+    {
+      "n": 6,
+      "step": "The linked box in the show: Slideshow, click it",
+      "expected": "the show jumps to slide 2",
+      "observed": "show true; target {\"x\":180.2125015258789,\"y\":79.88531112670898,\"tag\":\"P\",\"href\":null,\"role\":null,\"cursor\":\"text\"}; slide title -> split-1 (linked split-1); surface2-05-link-in-show.png",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "File > Print settings and preview: the layout rows, paper and orientation",
+      "expected": "the handout rows are drawn disabled; no Paper or Orientation control",
+      "observed": "{\"url\":\"/print/untitled-20260920-pmvz\",\"sameTab\":true,\"options\":[\"1 slide without notes\",\"1 slide with notes\",\"Handout (2 slides per page)(disabled)\",\"Handout (3 slides per page)(disabled)\",\"Handout (4 slides per page)(disabled)\",\"Handout (6 slides per page)(disabled)\",\"Handout (9 slides per page)(disabled)\"],\"controls\":[\"print.page\",\"print.bar\",\"print.close\",\"print.layout\",\"print.skipped\",\"print.pdf\",\"print.print\",\"print.pages\"],\"paperWord\":false,\"orientationWord\":false,\"pages\":\"2\"}; surface2-06-print-preview.png",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "File > Open > Upload with a .pptx",
+      "expected": "the file is refused with the PowerPoint sentence",
+      "observed": "tabs Presentations/Upload/Cancel/Open; accept \".zip,application/zip\"; before \"OpenPresentationsUploadA Turboslide bundle (.zip) from Download, or from the command line.CancelOpen\"; after \"OpenPresentationsUploadA Turboslide bundle (.zip) from Download, or from the command line.CancelOpen\"; surface2-07-open-pptx.png",
+      "ok": false
+    },
+    {
+      "n": 9,
+      "step": "File > Import slides > Upload with a .pptx",
+      "expected": "the same refusal",
+      "observed": "dialog \"Import slidesPresentationsUploadPowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the textPowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text\"; surface2-08-import-slides-pptx.png",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "File > Share > Publish to web: Publish, the link, fresh fetches, Embed, Done, reopen",
+      "expected": "a published link; Stop publishing offered on reopen; the player refuses without its token",
+      "observed": "state before \"This presentation is not publishedPublish\"; after \"Anyone with the published link can view the current version; every edit is publishedStop publishing\"; link https://turboslide.vercel.app/deck/untitled-20260920-pmvz?p=aZL0KoPpdtgCTfnPFgZADk&present=1; fresh fetch {\"withToken\":200,\"withoutToken\":500,\"plainDeck\":200,\"embedNoToken\":200}; embed \"<iframe src=\"https://turboslide.vercel.app/embed/untitled-20260920-pmvz?p=aZL0KoPpdtgCTfnPFgZADk\" width=\"960\" height=\"540\" frameborder=\"0\" a\"; reopened \"This presentation is not publishedPublish\"; Stop publishing offered false; surface2-09-publish-dialog.png; surface2-10-publish-embed.png; surface2-11-publish-reopened.png",
+      "ok": false
+    },
+    {
+      "n": 11,
+      "step": "Comment on the text box: Cmd+Option+M, type with an @, the mention list, Comment, the marker, Resolve",
+      "expected": "a composer with a mention picker of people; the thread posts within 20 s; Resolve works",
+      "observed": "mention list [\"CCement 125\"]; markers 1 after 3744 ms; snackbar \"null\"; markers after Resolve 1; surface2-12-comment-mentions.png; surface2-13-comment-posted.png; surface2-14-comment-resolved.png",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "Paste plain text with Cmd+V, then with Cmd+Shift+V",
+      "expected": "both land the clipboard text in the body",
+      "observed": "session true; after Cmd+V \"PASTED\"; after Cmd+Shift+V \"PASTED\"; snackbar \"null\"",
+      "ok": false
+    },
+    {
+      "n": 13,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "3: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-pmvz",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-pmvz and /edit/untitled-20260920-pmvz are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

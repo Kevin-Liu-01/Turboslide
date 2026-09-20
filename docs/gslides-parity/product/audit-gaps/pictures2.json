@@ -1,0 +1,124 @@
+{
+  "name": "pictures2",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:32:54.532Z",
+  "seconds": 82,
+  "ok": 12,
+  "failed": 3,
+  "notDriven": 0,
+  "deck": "untitled-20260920-jjg3",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-jjg3; /edit/untitled-20260920-jjg3",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Insert > Image > Upload from computer with a PNG: the block that lands",
+      "expected": "a shot block with the asset, 480 by 300 at the content origin",
+      "observed": "{\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}} in 3649 ms; objects now shot:shot,mark:mark,heading:heading,paragraph:lead; snackbar \"asset.add: picture-a\"; pictures2-01-uploaded.png",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "Toolbar Replace image > Upload from computer with a second PNG",
+      "expected": "the asset changes and the box keeps its frame",
+      "observed": "rows menu.format.image.replaceImage.upload; asset picture-a -> picture-a in 30499 ms; pos {\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3} -> {\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}; snackbar \"null\"; pictures2-02-replace-menu.png; pictures2-03-replaced.png",
+      "ok": false
+    },
+    {
+      "n": 4,
+      "step": "Crop: double click the picture, drag the east crop edge 100 sheet px in, Enter",
+      "expected": "crop mode, the frame narrows, the trim is written and the box shrinks",
+      "observed": "chip \"Drag the handles to crop. Press Enter to finish\"; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":380,\"h\":300,\"z\":3},\"trim\":{\"left\":0,\"right\":0.2083,\"top\":0,\"bottom\":0}}; pictures2-04-crop-dragged.png",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Undo the crop from the toolbar",
+      "expected": "the trim leaves and the box returns",
+      "observed": "{\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}}",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "Mask image with the switch on: the Crop image arrow, Ellipse",
+      "expected": "the picture takes an ellipse mask and draws inside it",
+      "observed": "cells 136; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3},\"mask\":\"ellipse\"}; drawn {\"clipPath\":\"none\",\"mask\":\"none\",\"freeClip\":\"none\",\"svgClip\":false}; pictures2-05-mask-menu.png; pictures2-06-mask-applied.png",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Image options: the sections; drag Transparency to about 40 percent",
+      "expected": "adjust.transparency about 0.4 and the picture at 0.6 opacity",
+      "observed": "sections Size & rotation, Position, Picture, Adjustments, Dither, Drop shadow, Alt text; track {\"x\":1348,\"y\":1727.171875,\"w\":57.1875,\"h\":30,\"min\":\"\",\"max\":\"\",\"value\":\"0\",\"tag\":\"INPUT\"}; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3},\"mask\":\"ellipse\"}; img {\"w\":241.3900146484375,\"h\":150.49002075195312,\"opacity\":\"1\",\"filter\":\"none\"}; recolor false; pictures2-07-transparency.png",
+      "ok": false
+    },
+    {
+      "n": 8,
+      "step": "Border color from the toolbar with the switch on",
+      "expected": "a frame colour is written and drawn around the picture",
+      "observed": "cells toolbar.borderColor.plate,toolbar.borderColor.none,toolbar.borderColor.ink,toolbar.borderColor.paper,toolbar.borderColor.ink-2,toolbar.borderColor.titanium,toolbar.borderColor.hair,toolbar.borderColor.hair-soft,toolbar.borderColor.plate,toolbar.borderColor.edge,toolbar.borderColor.green,toolbar.borderColor.amber,toolbar.borderColor.red,toolbar.borderColor.blue,toolbar.borderColor.hex; picked toolbar.borderColor.ink; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3},\"mask\":\"ellipse\",\"frame\":{\"color\":\"ink\"}}; drawn {\"free\":\"0px none rgb(242, 242, 240); outline 3px rgb(242, 242, 240); shadow none\",\"img\":\"0px none rgb(242, 242, 240); outline 3px; shadow none\",\"frameEl\":false}; pictures2-08-border-picker.png; pictures2-09-border-applied.png",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "Alt text on the picture (Format options > Alt text)",
+      "expected": "the description writes to the block",
+      "observed": "field before \"picture a\"; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3},\"mask\":\"ellipse\",\"frame\":{\"color\":\"ink\"}}; asset record alt \"undefined\"; pictures2-10-alt-text.png",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "Drop a PNG onto the existing picture",
+      "expected": "the picture is replaced and keeps its box; no new object",
+      "observed": "asset picture-a -> dropped-a; objects 4 -> 4; pos {\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3} -> {\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}; pictures2-11-drop-on-picture.png",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Reload; the pictures survive; the show draws them",
+      "expected": "the shot count holds after the reload and the show draws the picture",
+      "observed": "shots 1 -> 1; show true; visible img elements 1; pictures2-12-show-with-picture.png",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "2: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-jjg3",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-jjg3 and /edit/untitled-20260920-jjg3 are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

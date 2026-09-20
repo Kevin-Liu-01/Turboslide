@@ -1,0 +1,992 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-peg8",
+  "ranAt": "2026-09-20T01:26:32.195Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260920-peg8",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "type the company title into the heading",
+      "expected": "the heading reads Acme Q4 pitch",
+      "observed": "\"Acme Q4 pitch\"; editing true",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "type a lead sentence into the body",
+      "expected": "the body reads the sentence",
+      "observed": "\"Localization for every product surface.\"",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "the frame of a new slide carries the GT wordmark and a counter",
+      "expected": "the wordmark svg and the counter text are read from the sheet",
+      "observed": "{\"wordmark\":false,\"href\":null,\"wmBox\":null,\"counter\":null,\"counterFont\":null,\"color\":null}",
+      "ok": false
+    },
+    {
+      "n": 5,
+      "step": "Slide > Change theme opens the Themes panel",
+      "expected": "the panel lists themes; the controls are read",
+      "observed": "tiles themes.gt.light, themes.gt.dark, themes.inThis.light, themes.inThis.dark; controls panel.themes, panel.themes.close; text \"ThemesGTAcme Q4 pitchLocalization for every product surface.LightAcme Q4 pitchLocalization for every product surface.DarkIn this presentationAcme Q4 pitchLocalization for every product surface.LightAcme Q4 pitchLocalization for every product surface.Dark\"",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "the light tile switches the deck to light; the dark tile back",
+      "expected": "deck defaults.appearance follows the pick and the sheet ground changes",
+      "observed": "ground rgb(7, 7, 7) -> rgb(255, 255, 255) -> rgb(7, 7, 7); defaults.appearance light then dark",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Slide > Edit theme with Advanced tools off",
+      "expected": "the row is hidden or disabled with a reason",
+      "observed": "row absent; rows newSlide, duplicateSlide, deleteSlide, skipSlide, moveSlide, changeBackground, applyLayout, changeTheme",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Tools > Advanced tools on, then Slide > Edit theme",
+      "expected": "the row appears disabled with its reason in the tooltip",
+      "observed": "{\"control\":\"menu.slide.editTheme\",\"text\":\"Edit theme\",\"disabled\":true,\"hidden\":false}; tooltip \"Edit themeNot available in Turboslide yet. The footer mark, the slide counter and the rails belong to the GT theme.\"",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "File > Language and Page setup with Advanced tools on",
+      "expected": "what the File menu shows for language and page size",
+      "observed": "language row absent; page setup {\"control\":\"menu.file.pageSetup\",\"text\":\"Page setup\",\"disabled\":true,\"hidden\":false}; rows new, open, importSlides, makeCopy, share, email, download, rename, moveToTrash, versionHistory, details, pageSetup, printPreview, print",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "Tools > Advanced tools off again",
+      "expected": "the switch is off",
+      "observed": "advancedTools false",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "select the title and read the Font box",
+      "expected": "the Font box is present, disabled, with its sentence",
+      "observed": "{\"text\":\"Font\",\"disabled\":true,\"title\":null,\"label\":null}; tooltip \"FontThe GT theme sets Inter.\"; click opened nothing; heading font-family Inter, \"Helvetica Neue\", Arial, sans-serif",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "Format > Text: the rows offered for a font",
+      "expected": "the submenu rows are read",
+      "observed": "font rows none; 18 rows",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "the text colour plate on the selected title",
+      "expected": "the plate lists the theme colours; the swatches are read",
+      "observed": "error: locator.waitFor: Error: strict mode violation: locator('[data-control=\"toolbar.textColor.plate\"]') resolved to 2 elements:\n    1) <div role=\"dialog\" aria-label=\"Text color\" data-control=\"toolbar.textColor.plate\" class=\"ts-plate-anchored ts-color-plate ts-chrome\">…</div> aka getByRole('dialog', { name: 'Text color' })\n    2) <button type=\"button\" data-tip=\"Plate\" aria-label=\"Plate\" aria-pressed=\"false\" class=\"ts-color-swatch\" data-control=\"toolbar.textColor.plate\"></button> aka getByRole('button', { name: 'Plate' })\n\nCall log:\n  - waiting for locator('[data-control=\"toolbar.textColor.plate\"]') to be visible\n",
+      "ok": false
+    },
+    {
+      "n": 14,
+      "step": "the text colour plate on a selected word of the body",
+      "expected": "the full palette with a hex field",
+      "observed": "error: locator.waitFor: Error: strict mode violation: locator('[data-control=\"toolbar.textColor.plate\"]') resolved to 2 elements:\n    1) <div role=\"dialog\" aria-label=\"Text color\" data-control=\"toolbar.textColor.plate\" class=\"ts-plate-anchored ts-color-plate ts-chrome\">…</div> aka getByRole('dialog', { name: 'Text color' })\n    2) <button type=\"button\" data-tip=\"Plate\" aria-label=\"Plate\" aria-pressed=\"false\" class=\"ts-color-swatch\" data-control=\"toolbar.textColor.plate\"></button> aka getByRole('button', { name: 'Plate' })\n\nCall log:\n  - waiting for locator('[data-control=\"toolbar.textColor.plate\"]') to be visible\n",
+      "ok": false
+    },
+    {
+      "n": 15,
+      "step": "Slide > Change background: a brand hex, then Add to theme",
+      "expected": "the deck default background carries the hex",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"dialog.background.addToTheme\"]').first()\n",
+      "ok": false
+    },
+    {
+      "n": 16,
+      "step": "Insert > Image > Upload from computer with the company logo",
+      "expected": "a picture lands on the title slide",
+      "observed": "mark mark at {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0}",
+      "ok": false
+    },
+    {
+      "n": 17,
+      "step": "drag the logo to the top right corner",
+      "expected": "the picture moves",
+      "observed": "pos {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0} -> {\"x\":1264,\"y\":78,\"w\":132,\"h\":84,\"z\":0}",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "the right click menu on the logo: is there a way to put it on every slide",
+      "expected": "the rows are read",
+      "observed": "16 rows; rows about every slide: none; rows menu.edit.cut Cut⌘X | menu.edit.copy Copy⌘C | menu.edit.paste Paste⌘V | menu.edit.delete Delete⌫ | menu.edit.duplicate Duplicate⌘D | menu.arrange.order Order | menu.arrange.rotate Rotate | menu.arrange.centerOnPage Center on page | menu.arrange.align Align | menu.arrange.distribute Distribute | menu.arrange.group Group⌥⌘G | menu.arrange.ungroup Ungroup⌥⇧⌘G | menu.insert.link Link⌘K | menu.format.textFitting Text fitting | menu.format.formatOptions Format options | menu.insert.comment Comment⌥⌘M",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "New slide: does the logo carry to the new slide",
+      "expected": "the new slide has no picture (there is no theme slot for a logo)",
+      "observed": "slide title-1; pictures 0; frame {\"wordmark\":false,\"counter\":null}",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "step": "Insert > Slide numbers: On, Apply",
+      "expected": "deck defaults.counter written; the counter draws on the sheet",
+      "observed": "controls dialog.slideNumbers, dialog.slideNumbers.close, dialog.slideNumbers.on, dialog.slideNumbers.off, dialog.slideNumbers.skip-title, dialog.slideNumbers.selected, dialog.slideNumbers.apply; text \"Slide numbersOnOffSkip title slidesCancelApply to selectedApply\"; Off -> defaults off, counter \"null\"; On -> defaults on, counter \"null\"",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "a footer line with the company name: what the menus offer",
+      "expected": "the Insert menu rows are read for header, footer or placeholder",
+      "observed": "footer rows none; rows Image | Text box | Shape | Table | Chart | Diagram | Word art | Line | Link⌘K | Comment⌥⌘M | New slide⌃M | Slide numbers",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "step": "the Layout picker",
+      "expected": "the tiles are counted and named",
+      "observed": "21 tiles: Click to add titleClick to add subtitleT, Click to add titleClick to add textMater, Click to add titleClick to add textClick, Click to add titleClick to add textClick, Click to add titleTitle only, Click to add titleClick to add textOne c, Click to add textMain point, Click to add titleClick to add textClick, Click to add titleClick to add textImage, Click to add a numberClick to add textBi, Blank, Click to add titleClick to add textClick, Click to add titleClick to add textClick, Click to add titleClick to add textClick, Click to add titleClick to add textClick, Click to add titleClick to add a picture, Click to add titleClick to add textTile , Click to add titleClick to add textClick, Click to add titleClick to add textLiveL, Click to add titleClick to add text08210, Click to add titleClick to add textMater",
+      "ok": true
+    },
+    {
+      "n": 23,
+      "step": "File menu rows about templates and copies",
+      "expected": "the File menu and its New submenu are read",
+      "observed": "new.templateGallery \"From template gallery\" | makeCopy \"Make a copy\"",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "step": "File > Make a copy > Entire presentation: the dialog (cancelled)",
+      "expected": "the dialog fields are read; no copy is made",
+      "observed": "controls dialog.makeCopy, dialog.makeCopy.close, dialog.makeCopy.name, dialog.makeCopy.removeNotes, dialog.makeCopy.copyComments, dialog.makeCopy.ok; text \"Make a copyNameRemove speaker notesCopy commentsCancelMake a copy\"",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "step": "File > Import slides: pick the GT brand deck, one slide",
+      "expected": "the slide lands in this deck; the dialog controls are read",
+      "observed": "no other deck offered; controls dialog.importSlides, dialog.importSlides.close, dialog.importSlides.tab.presentations, dialog.importSlides.tab.upload",
+      "ok": false
+    },
+    {
+      "n": 26,
+      "step": "translation: the menus, the palette and the actions",
+      "expected": "nothing named translate exists; what exists is read",
+      "observed": "156 actions; matching translate/locale/language: none; Tools rows Accessibility settings | Check slides | Advanced tools",
+      "ok": true
+    },
+    {
+      "n": 27,
+      "step": "File > Download > PDF",
+      "expected": "the PDF downloads within 180 s",
+      "observed": "untitled-20260920-peg8-dark.pdf saved; dialog \"DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload\"; after: \"DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesYour file is ready. DetailsCancelDone\"",
+      "ok": true
+    },
+    {
+      "n": 28,
+      "step": "File > Download > PowerPoint, Flatten mode",
+      "expected": "the PPTX downloads within 240 s",
+      "observed": "untitled-20260920-peg8-dark.pptx saved; dialog \"DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesCancelDownload\"; more \"More optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as pictures\"; after \"DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesYour file is ready. DetailsCancelDone\"",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "File > Download > PowerPoint, Editable text mode",
+      "expected": "the second PPTX downloads within 240 s",
+      "observed": "untitled-20260920-peg8-dark.pptx saved; dialog \"DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesCancelDownload\"; after \"DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesYour file is ready. DetailsCancelDone\"",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "the shared view of the deck carries the wordmark on every slide",
+      "expected": "/deck/<id> shows the wordmark",
+      "observed": "{\"wordmark\":1,\"counter\":\"01 / 02\",\"url\":\"/deck/untitled-20260920-peg8\"}",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "step": "File > Move to trash",
+      "expected": "the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 32,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-peg8",
+      "ok": true
+    },
+    {
+      "n": 33,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-peg8 is 404 within 30 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "facts": {
+    "runs": [
+      "heading/text",
+      "lead/text"
+    ],
+    "address": "/edit/untitled-20260920-peg8",
+    "frame": {
+      "wordmark": false,
+      "href": null,
+      "wmBox": null,
+      "counter": null,
+      "counterFont": null,
+      "color": null
+    },
+    "slideMenu": [
+      {
+        "control": "menu.slide.newSlide",
+        "text": "New slide⌃M",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.duplicateSlide",
+        "text": "Duplicate slide⌘D",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.deleteSlide",
+        "text": "Delete slide",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.skipSlide",
+        "text": "Skip slide",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.moveSlide",
+        "text": "Move slide",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.changeBackground",
+        "text": "Change background",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.applyLayout",
+        "text": "Apply layout",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.slide.changeTheme",
+        "text": "Change theme",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "themesPanel": {
+      "tiles": [
+        "themes.gt.light",
+        "themes.gt.dark",
+        "themes.inThis.light",
+        "themes.inThis.dark"
+      ],
+      "text": "ThemesGTAcme Q4 pitchLocalization for every product surface.LightAcme Q4 pitchLocalization for every product surface.DarkIn this presentationAcme Q4 pitchLocalization for every product surface.LightAcme Q4 pitchLocalization for every product surface.Dark",
+      "controls": [
+        "panel.themes",
+        "panel.themes.close"
+      ]
+    },
+    "editTheme": {
+      "row": {
+        "control": "menu.slide.editTheme",
+        "text": "Edit theme",
+        "disabled": true,
+        "hidden": false
+      },
+      "tooltip": "Edit themeNot available in Turboslide yet. The footer mark, the slide counter and the rails belong to the GT theme."
+    },
+    "fileMenuAdvanced": [
+      {
+        "control": "menu.file.new",
+        "text": "New",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.open",
+        "text": "Open…⌘O",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.importSlides",
+        "text": "Import slides",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.makeCopy",
+        "text": "Make a copy",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.share",
+        "text": "Share",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.email",
+        "text": "Email",
+        "disabled": true,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download",
+        "text": "Download",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.rename",
+        "text": "Rename",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.moveToTrash",
+        "text": "Move to trash",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.versionHistory",
+        "text": "Version history",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.details",
+        "text": "Details",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.pageSetup",
+        "text": "Page setup",
+        "disabled": true,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.printPreview",
+        "text": "Print settings and preview",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.print",
+        "text": "Print⌘P",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "fontBox": {
+      "font": {
+        "text": "Font",
+        "disabled": true,
+        "title": null,
+        "label": null
+      },
+      "tooltip": "FontThe GT theme sets Inter.",
+      "opened": [],
+      "tail": [
+        "toolbar.head",
+        "toolbar.search",
+        "toolbar.newSlide.split",
+        "toolbar.newSlide",
+        "toolbar.newSlide.arrow",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.tail",
+        "toolbar.font",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ]
+    },
+    "headingFont": "Inter, \"Helvetica Neue\", Arial, sans-serif",
+    "formatMenu": [
+      {
+        "control": "menu.format.text",
+        "text": "Text",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.bold",
+        "text": "Bold⌘B",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.italic",
+        "text": "Italic⌘I",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.underline",
+        "text": "Underline⌘U",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.strikethrough",
+        "text": "Strikethrough⇧⌘X",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.superscript",
+        "text": "Superscript⌘.",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.subscript",
+        "text": "Subscript⌘,",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.size",
+        "text": "Size",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.text.capitalization",
+        "text": "Capitalization",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.alignIndent",
+        "text": "Align & indent",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.spacing",
+        "text": "Line & paragraph spacing",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.bulletsNumbering",
+        "text": "Bullets & numbering",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.table",
+        "text": "Table",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.image",
+        "text": "Image",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.bordersLines",
+        "text": "Borders & lines",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.formatOptions",
+        "text": "Format options",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.clearFormatting",
+        "text": "Clear formatting⌘\\",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.format.textFitting",
+        "text": "Text fitting",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "pictureContext": [
+      "menu.edit.cut Cut⌘X",
+      "menu.edit.copy Copy⌘C",
+      "menu.edit.paste Paste⌘V",
+      "menu.edit.delete Delete⌫",
+      "menu.edit.duplicate Duplicate⌘D",
+      "menu.arrange.order Order",
+      "menu.arrange.rotate Rotate",
+      "menu.arrange.centerOnPage Center on page",
+      "menu.arrange.align Align",
+      "menu.arrange.distribute Distribute",
+      "menu.arrange.group Group⌥⌘G",
+      "menu.arrange.ungroup Ungroup⌥⇧⌘G",
+      "menu.insert.link Link⌘K",
+      "menu.format.textFitting Text fitting",
+      "menu.format.formatOptions Format options",
+      "menu.insert.comment Comment⌥⌘M"
+    ],
+    "slideNumbers": {
+      "controls": [
+        "dialog.slideNumbers",
+        "dialog.slideNumbers.close",
+        "dialog.slideNumbers.on",
+        "dialog.slideNumbers.off",
+        "dialog.slideNumbers.skip-title",
+        "dialog.slideNumbers.selected",
+        "dialog.slideNumbers.apply"
+      ],
+      "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+      "off": {
+        "defaults": "off",
+        "counter": null
+      },
+      "on": {
+        "defaults": "on",
+        "counter": null
+      }
+    },
+    "insertMenu": [
+      {
+        "control": "menu.insert.image",
+        "text": "Image",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.textBox",
+        "text": "Text box",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.shape",
+        "text": "Shape",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.table",
+        "text": "Table",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.chart",
+        "text": "Chart",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.diagram",
+        "text": "Diagram",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.wordArt",
+        "text": "Word art",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.line",
+        "text": "Line",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.link",
+        "text": "Link⌘K",
+        "disabled": true,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.comment",
+        "text": "Comment⌥⌘M",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.newSlide",
+        "text": "New slide⌃M",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.insert.slideNumbers",
+        "text": "Slide numbers",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "layouts": [
+      {
+        "id": "title",
+        "label": "Click to add titleClick to add subtitleT"
+      },
+      {
+        "id": "opener",
+        "label": "Click to add titleClick to add textMater"
+      },
+      {
+        "id": "split",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "cols",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "title-only",
+        "label": "Click to add titleTitle only"
+      },
+      {
+        "id": "one-column",
+        "label": "Click to add titleClick to add textOne c"
+      },
+      {
+        "id": "statement",
+        "label": "Click to add textMain point"
+      },
+      {
+        "id": "section-description",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "mood",
+        "label": "Click to add titleClick to add textImage"
+      },
+      {
+        "id": "big-number",
+        "label": "Click to add a numberClick to add textBi"
+      },
+      {
+        "id": "blank",
+        "label": "Blank"
+      },
+      {
+        "id": "rows",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "plain",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "table",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "figure",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "pair",
+        "label": "Click to add titleClick to add a picture"
+      },
+      {
+        "id": "tiles",
+        "label": "Click to add titleClick to add textTile "
+      },
+      {
+        "id": "details",
+        "label": "Click to add titleClick to add textClick"
+      },
+      {
+        "id": "board",
+        "label": "Click to add titleClick to add textLiveL"
+      },
+      {
+        "id": "matrix",
+        "label": "Click to add titleClick to add text08210"
+      },
+      {
+        "id": "closing",
+        "label": "Click to add titleClick to add textMater"
+      }
+    ],
+    "fileMenu": [
+      {
+        "control": "menu.file.new",
+        "text": "New",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.new.presentation",
+        "text": "Presentation",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.new.templateGallery",
+        "text": "From template gallery",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.open",
+        "text": "Open…⌘O",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.importSlides",
+        "text": "Import slides",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.makeCopy",
+        "text": "Make a copy",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.share",
+        "text": "Share",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download",
+        "text": "Download",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.rename",
+        "text": "Rename",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.moveToTrash",
+        "text": "Move to trash",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.versionHistory",
+        "text": "Version history",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.details",
+        "text": "Details",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.printPreview",
+        "text": "Print settings and preview",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.print",
+        "text": "Print⌘P",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "makeCopy": {
+      "controls": [
+        "dialog.makeCopy",
+        "dialog.makeCopy.close",
+        "dialog.makeCopy.name",
+        "dialog.makeCopy.removeNotes",
+        "dialog.makeCopy.copyComments",
+        "dialog.makeCopy.ok"
+      ],
+      "text": "Make a copyNameRemove speaker notesCopy commentsCancelMake a copy"
+    },
+    "translation": {
+      "actionsMatching": [],
+      "actionCount": 156,
+      "toolsRows": [
+        "Accessibility settings",
+        "Check slides",
+        "Advanced tools"
+      ]
+    },
+    "downloadRows": [
+      {
+        "control": "menu.file.download",
+        "text": "Download",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.pptx",
+        "text": "Microsoft PowerPoint (.pptx)",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.pdf",
+        "text": "PDF Document (.pdf)",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.jpg",
+        "text": "JPEG image (.jpg, current slide)",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.png",
+        "text": "PNG image (.png, current slide)",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.html",
+        "text": "Web page (.html)",
+        "disabled": false,
+        "hidden": false
+      },
+      {
+        "control": "menu.file.download.zip",
+        "text": "Turboslide bundle (.zip)",
+        "disabled": false,
+        "hidden": false
+      }
+    ],
+    "pdfDialog": {
+      "controls": [
+        "dialog.download.pdf",
+        "dialog.download.pdf.close",
+        "dialog.download.includeSkipped",
+        "dialog.download.ok"
+      ],
+      "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload",
+      "ready": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesYour file is ready. DetailsCancelDone"
+    },
+    "pptxDialog": {
+      "controls": [
+        "dialog.download.pptx",
+        "dialog.download.pptx.close",
+        "dialog.download.mode.flatten",
+        "dialog.download.mode.native",
+        "dialog.download.includeNotes",
+        "dialog.download.includeSkipped",
+        "dialog.download.more",
+        "dialog.download.theme",
+        "dialog.download.fonts",
+        "dialog.download.embedFonts",
+        "dialog.download.headings",
+        "dialog.download.ok"
+      ],
+      "text": "DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesCancelDownload",
+      "more": "More optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as pictures",
+      "ready": "DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesYour file is ready. DetailsCancelDone"
+    },
+    "pptxNativeDialog": {
+      "text": "DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesCancelDownload",
+      "ready": "DownloadPerfectEvery slide looks exactly like the screen; the text is there but not editableEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesYour file is ready. DetailsCancelDone"
+    },
+    "downloads": [
+      {
+        "name": "untitled-20260920-peg8-dark.pdf",
+        "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pdf",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+      },
+      {
+        "name": "untitled-20260920-peg8-dark.pptx",
+        "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pptx",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+      },
+      {
+        "name": "untitled-20260920-peg8-dark.pptx",
+        "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pptx",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+      }
+    ]
+  },
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "downloads": [
+    {
+      "name": "untitled-20260920-peg8-dark.pdf",
+      "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pdf",
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+    },
+    {
+      "name": "untitled-20260920-peg8-dark.pptx",
+      "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pptx",
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+    },
+    {
+      "name": "untitled-20260920-peg8-dark.pptx",
+      "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/untitled-20260920-peg8-dark.pptx",
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/untitled-2026092"
+    }
+  ]
+}

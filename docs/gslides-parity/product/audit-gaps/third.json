@@ -1,0 +1,149 @@
+{
+  "name": "third",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:39:08.629Z",
+  "seconds": 107,
+  "ok": 13,
+  "failed": 5,
+  "notDriven": 0,
+  "deck": "untitled-20260920-94fu",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-94fu; /edit/untitled-20260920-94fu",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Setup: a note, a second slide, a picture by upload, a text box",
+      "expected": "the objects the rows below need",
+      "observed": "picture {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}}; text box text; slides title,split-1",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "The owner editor at 375 by 812 (the same session)",
+      "expected": "the toolbar folds, no horizontal overflow, the sheet fits the width",
+      "observed": "{\"innerWidth\":375,\"scrollWidth\":375,\"horizontalOverflow\":false,\"mode\":\"editing\",\"menus\":[\"file\",\"edit\",\"view\",\"insert\",\"format\",\"slide\",\"arrange\",\"tools\",\"help\"],\"toolbar\":[\"head\",\"search\",\"newSlide.split\",\"newSlide\",\"newSlide.arrow\",\"undo\",\"redo\",\"print\",\"paintFormat\",\"zoom\",\"tail\",\"more\",\"end\",\"pointer\",\"hideMenus\"],\"filmstrip\":true,\"notes\":false,\"slideshow\":true,\"share\":false,\"sheet\":\"12,125 351x197\"}; a click on the sheet {\"chip\":\"Title\",\"editing\":false,\"handles\":10}; third-01-owner-editor-375.png",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "The owner editor at 1280 by 800 with the title selected",
+      "expected": "the text tail fits or folds into More",
+      "observed": "chip \"null\"; {\"innerWidth\":1280,\"scrollWidth\":1280,\"horizontalOverflow\":false,\"mode\":\"editing\",\"menus\":[\"file\",\"edit\",\"view\",\"insert\",\"format\",\"slide\",\"arrange\",\"tools\",\"help\"],\"toolbar\":[\"head\",\"search\",\"newSlide.split\",\"newSlide\",\"newSlide.arrow\",\"undo\",\"redo\",\"print\",\"paintFormat\",\"zoom\",\"tail\",\"font\",\"fontSize\",\"fontSize.minus\",\"fontSize.value\",\"fontSize.plus\",\"bold\",\"italic\",\"underline\",\"textColor\",\"highlightColor\",\"insertLink\",\"insertComment\",\"align\",\"spacing\",\"bulletedList\",\"bulletedList.arrow\",\"numberedList\",\"numberedList.arrow\",\"decreaseIndent\",\"increaseIndent\",\"clearFormatting\",\"formatOptions\",\"end\",\"pointer\",\"hideMenus\"],\"filmstrip\":true,\"notes\":true,\"slideshow\":true,\"share\":false,\"sheet\":\"292,140 953x536\"}; third-02-owner-editor-1280-text-tail.png",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Image options > Adjustments > Transparency scrolled into view, dragged to about 40 percent",
+      "expected": "adjust.transparency about 0.4; the picture at 0.6 opacity",
+      "observed": "track {\"x\":1348,\"y\":621.171875,\"w\":57.1875,\"h\":30,\"value\":\"0\",\"min\":\"\",\"max\":\"\",\"step\":\"\",\"type\":\"text\"}; {\"id\":\"shot\",\"type\":\"shot\",\"asset\":\"picture-a\",\"pos\":{\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":3}}; img {\"w\":242.39996337890625,\"h\":151.5,\"opacity\":\"1\",\"filter\":\"none\"}; third-03-transparency.png",
+      "ok": false
+    },
+    {
+      "n": 6,
+      "step": "Alt text on the picture",
+      "expected": "the description writes and reads back",
+      "observed": "no Alt text field for picture",
+      "ok": false
+    },
+    {
+      "n": 7,
+      "step": "Alt text on the text box",
+      "expected": "the description writes and reads back",
+      "observed": "no Alt text field for textbox",
+      "ok": false
+    },
+    {
+      "n": 8,
+      "step": "Link on a selected block: the toolbar Insert link button, then the right click menu",
+      "expected": "a Link dialog with \"Slides in this presentation\" is reachable from one of them",
+      "observed": "error: t.clickContextRow is not a function",
+      "ok": false
+    },
+    {
+      "n": 9,
+      "step": "Right click the picture > Replace image > Upload from computer",
+      "expected": "the asset changes within 30 s",
+      "observed": "asset picture-a -> picture-a in 30537 ms; snackbar \"null\"; network/console errors The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.; third-05-replace-context.png",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "File > Open > Upload: choose the .pptx, press Open",
+      "expected": "the refusal sentence, or the file opens",
+      "observed": "Open button disabled false; dialog \"OpenPresentationsUploadA Turboslide bundle (.zip) from Download, or from the command line.PowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the textCancelOpen\"; snackbar \"null\"; url /edit/untitled-20260920-94fu#s/title; third-06-open-pptx-open-pressed.png",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "The view link page: does the note text travel",
+      "expected": "the /deck/<id> HTML carries no speaker note",
+      "observed": "GET /deck 200 125390 chars, note text present false, \"notes\" keys 0; ?present=1 200 note present false",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "Comment on the text box, then Resolve from the card",
+      "expected": "the marker leaves or the panel lists it resolved",
+      "observed": "markers 1; card controls comment.card,comment.card.resolve,comment.card.close,comment.card.first,comment.card.first.react,comment.card.first.more,comment.card.reply; resolve found true; markers after 0; panel \"Comments0AllFor youAllOpenResolvedSlide orderPPewter 295slide 1Check the renewal datenowRe-openNotification settings\"; third-07-comment-resolve.png",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Slideshow from slide 1 with the network off: ArrowRight, ArrowLeft, 2 then Enter",
+      "expected": "the show pages without the network",
+      "observed": "slides title -> split-1 -> title -> split-1; words [\"Reconnecting\"]; third-08-show-offline-from-first.png",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "Show > Options > More: the rows",
+      "expected": "the pen or Auto-play rows, if any",
+      "observed": "present.options.notes: Open speaker notesS | present.options.laser: Turn on the laser pointerL | present.options.fullScreen: Exit full screen⇧⌘F | present.options.more: More | present.options.more.print: Print⌘P | present.options.more.shortcuts: Keyboard shortcuts | present.options.exit: ExitEsc; third-09-show-options-more.png",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "6: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-94fu",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-94fu and /edit/untitled-20260920-94fu are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

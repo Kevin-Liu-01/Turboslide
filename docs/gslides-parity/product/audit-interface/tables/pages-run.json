@@ -1,0 +1,4828 @@
+{
+  "startedAt": "2026-09-20T01:18:08.193Z",
+  "finishedAt": "2026-09-20T01:19:16.850Z",
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "surface": "home",
+      "what": "1440-light load",
+      "observed": {
+        "ms": 953,
+        "theme": "light",
+        "paper": "#fff",
+        "ink": "#070707",
+        "titanium": "#8a8f98"
+      }
+    },
+    {
+      "n": 2,
+      "surface": "home",
+      "what": "1440-light nav lockup",
+      "observed": {
+        "text": "Turboslide",
+        "box": "131x22 at 184,11",
+        "h": "22px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "15px/23.25px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 3,
+      "surface": "home",
+      "what": "1440-light nav link button",
+      "observed": {
+        "text": "Your presentations",
+        "box": "138x32 at 578,6",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Your presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 4,
+      "surface": "home",
+      "what": "1440-light appearance group",
+      "observed": [
+        {
+          "text": "Light",
+          "pressed": "true",
+          "box": "52x32",
+          "border": "#070707",
+          "borderContrast": 20.14,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "tip": "Light"
+        },
+        {
+          "text": "Dark",
+          "pressed": "false",
+          "box": "51x32",
+          "color": "#3a3d44",
+          "textContrast": 10.88,
+          "tip": "Dark"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "surface": "home",
+      "what": "1440-light h1",
+      "observed": {
+        "text": "Turboslide",
+        "box": "674x66 at 217,343",
+        "h": "66px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "66px/66px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 48,
+          "h": 48
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 6,
+      "surface": "home",
+      "what": "1440-light hero cta solid",
+      "observed": {
+        "text": "New Presentation",
+        "box": "151x40 at 217,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#ffffff",
+        "ground": "#070707",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(255, 255, 255) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "New Presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 7,
+      "surface": "home",
+      "what": "1440-light hero cta plain",
+      "observed": {
+        "text": "Open the GT Deck",
+        "box": "156x40 at 376,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Open the GT Deck",
+        "title": null
+      }
+    },
+    {
+      "n": 8,
+      "surface": "home",
+      "what": "1440-light hero facts",
+      "observed": {
+        "text": "No account needed to start. Free under the MIT licence, with the code on GitHub.",
+        "box": "674x39 at 217,560",
+        "h": "39px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 9,
+      "surface": "home",
+      "what": "1440-light source line",
+      "observed": {
+        "text": "packages/schema/src/actions.ts",
+        "box": "146x36 at 201,899",
+        "h": "36px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/18px 400 ui-monospace",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 10,
+      "surface": "home",
+      "what": "1440-light caption",
+      "observed": {
+        "text": "The Blue Marble slide of the GT deck in the slideshow, a two tone dither with it",
+        "box": "581x43 at 185,5256",
+        "h": "42.5px",
+        "pad": "10px 12px 12px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "borderHex": "#0a0a0a",
+        "borderContrast": 1.04,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 11,
+      "surface": "home",
+      "what": "1440-light hover the plain cta",
+      "observed": {
+        "hover": true,
+        "border": "#d2d2d2",
+        "borderContrast": 1.51,
+        "color": "#070707",
+        "ground": null
+      }
+    },
+    {
+      "n": 12,
+      "surface": "home",
+      "what": "1440-light hover the solid cta",
+      "observed": {
+        "hover": true,
+        "border": "#070707",
+        "color": "#070707",
+        "ownBg": null,
+        "textContrast": 20.14
+      }
+    },
+    {
+      "n": 13,
+      "surface": "home",
+      "what": "1440-light tooltip on a nav button (delay)",
+      "observed": {
+        "shown": true,
+        "afterMs": 372,
+        "name": "Your presentations",
+        "key": null,
+        "doc": "Every presentation on this Turboslide.",
+        "font": "12.5px/17.5px 400 Inter",
+        "border": "#d2d2d2",
+        "borderContrast": 1.51,
+        "radius": "0px"
+      }
+    },
+    {
+      "n": 14,
+      "surface": "home",
+      "what": "1440-light keyboard focus ring",
+      "observed": {
+        "on": "home.nav.docs",
+        "focusVisible": true,
+        "outline": "1px solid rgb(7, 7, 7) offset -1px"
+      }
+    },
+    {
+      "n": 15,
+      "surface": "home",
+      "what": "1440-light type ladder and titanium text",
+      "observed": {
+        "h2": {
+          "font": "32px/35.84px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "h3": {
+          "font": "20px/25px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "lead": {
+          "font": "20px/29px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "body": {
+          "font": "15px/23.25px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "small": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "credit": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "figure": {
+          "font": "40px/40px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        }
+      }
+    },
+    {
+      "n": 16,
+      "surface": "home",
+      "what": "1440-light page scroll and band rhythm",
+      "observed": {
+        "scrollHeight": 11409,
+        "bands": [
+          "72px/72px"
+        ],
+        "nav": "44px"
+      }
+    },
+    {
+      "n": 17,
+      "surface": "decks",
+      "what": "1440-light load (the frames while the list streams)",
+      "observed": {
+        "firstPaintMs": 423,
+        "frames": 0,
+        "hydrated": true,
+        "pendingBand": true,
+        "cards": 48,
+        "readyMs": 1307
+      }
+    },
+    {
+      "n": 18,
+      "surface": "decks",
+      "what": "1440-light app bar",
+      "observed": {
+        "text": "Turboslide",
+        "box": "1072x65 at 184,24",
+        "h": "65px",
+        "pad": "8px 0px 16px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 19,
+      "surface": "decks",
+      "what": "1440-light search field",
+      "observed": {
+        "text": "",
+        "box": "720x40 at 437,32",
+        "h": "40px",
+        "pad": "0px 12px 0px 38px",
+        "radius": "6px",
+        "font": "14px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#f6f6f6",
+        "textContrast": 18.69,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Search presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 20,
+      "surface": "decks",
+      "what": "1440-light search placeholder",
+      "observed": null
+    },
+    {
+      "n": 21,
+      "surface": "decks",
+      "what": "1440-light lockup word",
+      "observed": {
+        "text": "Turboslide",
+        "box": "105x24 at 210,40",
+        "h": "24px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/22px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "About Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 22,
+      "surface": "decks",
+      "what": "1440-light strip heading",
+      "observed": {
+        "text": "Start a new presentation",
+        "box": "184x20 at 184,113",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 23,
+      "surface": "decks",
+      "what": "1440-light template gallery link",
+      "observed": {
+        "text": "Template gallery",
+        "box": "102x16 at 1154,116",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Template gallery",
+        "title": null
+      }
+    },
+    {
+      "n": 24,
+      "surface": "decks",
+      "what": "1440-light template plate",
+      "observed": {
+        "text": "",
+        "box": "160x120 at 184,149",
+        "h": "120px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 40,
+          "h": 40
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 25,
+      "surface": "decks",
+      "what": "1440-light template label",
+      "observed": {
+        "text": "Blank presentation",
+        "box": "160x16 at 184,277",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 26,
+      "surface": "decks",
+      "what": "1440-light recent heading",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "298x20 at 184,350",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 27,
+      "surface": "decks",
+      "what": "1440-light recent lead",
+      "observed": {
+        "text": "Every presentation on this Turboslide is listed here",
+        "box": "298x15 at 184,374",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 28,
+      "surface": "decks",
+      "what": "1440-light view seg button",
+      "observed": {
+        "text": "",
+        "box": "30x30 at 1025,343",
+        "h": "30px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Grid view",
+        "title": null
+      }
+    },
+    {
+      "n": 29,
+      "surface": "decks",
+      "what": "1440-light sort select",
+      "observed": {
+        "text": "Last opened by meLast modifiedTitle",
+        "box": "158x32 at 1098,342",
+        "h": "32px",
+        "pad": "0px 28px 0px 10px",
+        "radius": "6px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Sort by",
+        "title": null
+      }
+    },
+    {
+      "n": 30,
+      "surface": "decks",
+      "what": "1440-light card",
+      "observed": {
+        "text": "Untitled presentationEdited Sep 18, 2026⋮",
+        "box": "253x206 at 184,409",
+        "h": "206.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 31,
+      "surface": "decks",
+      "what": "1440-light card title",
+      "observed": {
+        "text": "Untitled presentation",
+        "box": "191x26 at 197,561",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Untitled presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 32,
+      "surface": "decks",
+      "what": "1440-light card when",
+      "observed": {
+        "text": "Edited Sep 18, 2026",
+        "box": "191x15 at 197,589",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 33,
+      "surface": "decks",
+      "what": "1440-light card more button",
+      "observed": {
+        "text": "⋮",
+        "box": "32x32 at 396,567",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "More actions",
+        "title": null
+      }
+    },
+    {
+      "n": 34,
+      "surface": "decks",
+      "what": "1440-light card hover and the more button",
+      "observed": {
+        "cardBorder": "#070707",
+        "cardBorderContrast": 20.14,
+        "moreOpacity": "1",
+        "moreVisible": true,
+        "cursor": "auto"
+      }
+    },
+    {
+      "n": 35,
+      "surface": "decks",
+      "what": "1440-light card menu",
+      "observed": {
+        "menu": {
+          "w": 220,
+          "radius": "0px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "font": "13px/16.9px 400 Inter"
+        },
+        "rows": [
+          {
+            "text": "Open",
+            "h": "28px",
+            "color": "#070707",
+            "contrast": 18.69,
+            "disabled": false
+          },
+          {
+            "text": "Open in new tab",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Present",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Rename",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Make a copy",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Download",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Move to trash",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "n": 36,
+      "surface": "decks",
+      "what": "1440-light search with no match (empty state)",
+      "observed": {
+        "shown": true,
+        "title": "No presentation matches \"zqxjkvw no such deck\"",
+        "titleFont": "20px/25px 500 Inter",
+        "sentence": "Clear the search to see every presentation again.",
+        "sentenceColor": "#3a3d44",
+        "sentenceContrast": 10.88
+      }
+    },
+    {
+      "n": 37,
+      "surface": "decks",
+      "what": "1440-light list view",
+      "observed": {
+        "row": {
+          "h": 31.5,
+          "font": "13px/normal 400 Inter"
+        },
+        "head": {
+          "text": "Title",
+          "font": "12px/normal 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        }
+      }
+    },
+    {
+      "n": 38,
+      "surface": "decks",
+      "what": "1440-light keyboard focus ring on the search",
+      "observed": {
+        "on": "home.open.untitled-20260919-0jar",
+        "focusVisible": true,
+        "outline": "1px solid rgb(7, 7, 7) offset 2px"
+      }
+    },
+    {
+      "n": 39,
+      "surface": "trash",
+      "what": "1440-light load",
+      "observed": {
+        "cards": 16,
+        "empty": false,
+        "headText": "TrashPresentations moved to the trash stay here until they are restored or deleted forever.Recent presentationsEmpty trash"
+      }
+    },
+    {
+      "n": 40,
+      "surface": "trash",
+      "what": "1440-light head",
+      "observed": {
+        "text": "Trash",
+        "box": "497x26 at 184,97",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 41,
+      "surface": "trash",
+      "what": "1440-light lead sentence",
+      "observed": {
+        "text": "Presentations moved to the trash stay here until they are restored or deleted fo",
+        "box": "497x15 at 184,127",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 42,
+      "surface": "trash",
+      "what": "1440-light back button",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "152x32 at 976,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Recent presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 43,
+      "surface": "trash",
+      "what": "1440-light empty trash button",
+      "observed": {
+        "text": "Empty trash",
+        "box": "120x32 at 1136,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Empty trash",
+        "title": null
+      }
+    },
+    {
+      "n": 44,
+      "surface": "trash",
+      "what": "1440-light restore button",
+      "observed": {
+        "text": "Restore",
+        "box": "93x28 at 193,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Restore",
+        "title": null
+      }
+    },
+    {
+      "n": 45,
+      "surface": "trash",
+      "what": "1440-light delete forever button",
+      "observed": {
+        "text": "Delete forever",
+        "box": "109x28 at 294,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Delete forever",
+        "title": null
+      }
+    },
+    {
+      "n": 46,
+      "surface": "trash",
+      "what": "1440-light empty state title",
+      "observed": null
+    },
+    {
+      "n": 47,
+      "surface": "trash",
+      "what": "1440-light the Empty trash confirm dialog",
+      "observed": {
+        "dialog": {
+          "w": 480,
+          "border": "#070707",
+          "radius": "0px"
+        },
+        "title": "Delete 16 presentations forever? This cannot be undone",
+        "titleFont": "17px/25.5px 500 Inter",
+        "body": "Delete 16 presentations forever? This cannot be undoneEvery presentation in the trash, with its slides and versions, is deleted.CancelDelete forever",
+        "ok": {
+          "text": "Delete forever",
+          "solid": true,
+          "radius": "0px",
+          "h": "32px"
+        },
+        "cancel": {
+          "text": "Cancel",
+          "radius": "0px"
+        },
+        "escapeCloses": true
+      }
+    },
+    {
+      "n": 48,
+      "surface": "new",
+      "what": "1440-light the skeleton",
+      "observed": {
+        "skeleton": {
+          "cls": "pt-viewer is-editor ts-skeleton",
+          "rows": 33
+        },
+        "skeletonAtMs": 1057,
+        "editorReadyMs": 1144,
+        "address": "/new"
+      }
+    },
+    {
+      "n": 49,
+      "surface": "new",
+      "what": "1440-light the placeholder prompts and the save words",
+      "observed": {
+        "prompts": [
+          "",
+          ""
+        ],
+        "save": {
+          "text": "Not saved yet",
+          "font": "12.5px/12.5px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "name": {
+          "text": "Untitled presentation",
+          "font": "14px/14px 500 Inter"
+        },
+        "promptColor": {
+          "color": "#8a8f98",
+          "contrast": 3.25,
+          "font": "88px/89.76px 500 Inter"
+        }
+      }
+    },
+    {
+      "n": 50,
+      "surface": "notfound",
+      "what": "1440-light /no-such-page",
+      "observed": {
+        "status": 404,
+        "title": "Not found",
+        "titleFont": "32px/40px 500 Inter",
+        "sentence": "No page at this address. Start a new presentation, open your presentations or re",
+        "sentenceContrast": 10.88,
+        "actions": [
+          {
+            "text": "New Presentation",
+            "solid": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          },
+          {
+            "text": "Your Presentations",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "About Turboslide",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          }
+        ],
+        "fig": "320x180 at 184,56",
+        "bodyBg": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "n": 51,
+      "surface": "access",
+      "what": "1440-light /deck/<missing> (You need access)",
+      "observed": {
+        "status": 404,
+        "title": "You need access",
+        "titleFont": "20px/24px 500 Inter",
+        "sentence": "This presentation is not available to you, or does not exist.",
+        "sentenceContrast": 10.88,
+        "field": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/normal 400 Inter"
+        },
+        "label": {
+          "font": "12px/17.4px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "button": {
+          "text": "Request access",
+          "solid": true,
+          "h": "32px",
+          "radius": "8px"
+        },
+        "signin": "Sign in from your presentations, then open this address again.",
+        "card": {
+          "w": 480,
+          "top": 90,
+          "pad": "24px"
+        },
+        "controls": [
+          "access.sentence",
+          "access.form",
+          "access.role",
+          "access.message",
+          "access.email",
+          "access.request",
+          "access.answer",
+          "access.signIn",
+          "access.signin.line",
+          "access.signin.decks"
+        ]
+      }
+    },
+    {
+      "n": 52,
+      "surface": "access",
+      "what": "1440-light 1280 body scroll",
+      "observed": {
+        "scrollW": 1440,
+        "clientW": 1440
+      }
+    },
+    {
+      "n": 53,
+      "surface": "home",
+      "what": "1440-dark load",
+      "observed": {
+        "ms": 940,
+        "theme": "dark",
+        "paper": "#070707",
+        "ink": "#f2f2f0",
+        "titanium": "#8a8f98"
+      }
+    },
+    {
+      "n": 54,
+      "surface": "home",
+      "what": "1440-dark nav lockup",
+      "observed": {
+        "text": "Turboslide",
+        "box": "131x22 at 184,11",
+        "h": "22px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "15px/23.25px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 55,
+      "surface": "home",
+      "what": "1440-dark nav link button",
+      "observed": {
+        "text": "Your presentations",
+        "box": "138x32 at 578,6",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Your presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 56,
+      "surface": "home",
+      "what": "1440-dark appearance group",
+      "observed": [
+        {
+          "text": "Light",
+          "pressed": "false",
+          "box": "52x32",
+          "color": "#b9bcc3",
+          "textContrast": 10.59,
+          "tip": "Light"
+        },
+        {
+          "text": "Dark",
+          "pressed": "true",
+          "box": "51x32",
+          "border": "#f2f2f0",
+          "borderContrast": 17.97,
+          "color": "#f2f2f0",
+          "textContrast": 17.97,
+          "tip": "Dark"
+        }
+      ]
+    },
+    {
+      "n": 57,
+      "surface": "home",
+      "what": "1440-dark h1",
+      "observed": {
+        "text": "Turboslide",
+        "box": "674x66 at 217,343",
+        "h": "66px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "66px/66px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 48,
+          "h": 48
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 58,
+      "surface": "home",
+      "what": "1440-dark hero cta solid",
+      "observed": {
+        "text": "New Presentation",
+        "box": "151x40 at 217,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#070707",
+        "ground": "#f2f2f0",
+        "textContrast": 17.97,
+        "border": "1px solid rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "New Presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 59,
+      "surface": "home",
+      "what": "1440-dark hero cta plain",
+      "observed": {
+        "text": "Open the GT Deck",
+        "box": "156x40 at 376,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Open the GT Deck",
+        "title": null
+      }
+    },
+    {
+      "n": 60,
+      "surface": "home",
+      "what": "1440-dark hero facts",
+      "observed": {
+        "text": "No account needed to start. Free under the MIT licence, with the code on GitHub.",
+        "box": "674x39 at 217,560",
+        "h": "39px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 61,
+      "surface": "home",
+      "what": "1440-dark source line",
+      "observed": {
+        "text": "packages/schema/src/actions.ts",
+        "box": "146x36 at 201,899",
+        "h": "36px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/18px 400 ui-monospace",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 62,
+      "surface": "home",
+      "what": "1440-dark caption",
+      "observed": {
+        "text": "The Blue Marble slide of the GT deck in the slideshow, a two tone dither with it",
+        "box": "581x43 at 185,5256",
+        "h": "42.5px",
+        "pad": "10px 12px 12px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.55)",
+        "borderHex": "#8c8c8b",
+        "borderContrast": 5.67,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 63,
+      "surface": "home",
+      "what": "1440-dark hover the plain cta",
+      "observed": {
+        "hover": true,
+        "border": "#3b3b3a",
+        "borderContrast": 1.79,
+        "color": "#f2f2f0",
+        "ground": null
+      }
+    },
+    {
+      "n": 64,
+      "surface": "home",
+      "what": "1440-dark hover the solid cta",
+      "observed": {
+        "hover": true,
+        "border": "#f2f2f0",
+        "color": "#f2f2f0",
+        "ownBg": null,
+        "textContrast": 17.97
+      }
+    },
+    {
+      "n": 65,
+      "surface": "home",
+      "what": "1440-dark tooltip on a nav button (delay)",
+      "observed": {
+        "shown": true,
+        "afterMs": 373,
+        "name": "Your presentations",
+        "key": null,
+        "doc": "Every presentation on this Turboslide.",
+        "font": "12.5px/17.5px 400 Inter",
+        "border": "#3b3b3a",
+        "borderContrast": 1.79,
+        "radius": "0px"
+      }
+    },
+    {
+      "n": 66,
+      "surface": "home",
+      "what": "1440-dark keyboard focus ring",
+      "observed": {
+        "on": "home.nav.docs",
+        "focusVisible": true,
+        "outline": "1px solid rgb(242, 242, 240) offset -1px"
+      }
+    },
+    {
+      "n": 67,
+      "surface": "home",
+      "what": "1440-dark type ladder and titanium text",
+      "observed": {
+        "h2": {
+          "font": "32px/35.84px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "h3": {
+          "font": "20px/25px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "lead": {
+          "font": "20px/29px 400 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "body": {
+          "font": "15px/23.25px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "small": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "credit": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "figure": {
+          "font": "40px/40px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        }
+      }
+    },
+    {
+      "n": 68,
+      "surface": "home",
+      "what": "1440-dark page scroll and band rhythm",
+      "observed": {
+        "scrollHeight": 11409,
+        "bands": [
+          "72px/72px"
+        ],
+        "nav": "44px"
+      }
+    },
+    {
+      "n": 69,
+      "surface": "decks",
+      "what": "1440-dark load (the frames while the list streams)",
+      "observed": {
+        "firstPaintMs": 998,
+        "frames": 0,
+        "hydrated": true,
+        "pendingBand": true,
+        "cards": 48,
+        "readyMs": 1878
+      }
+    },
+    {
+      "n": 70,
+      "surface": "decks",
+      "what": "1440-dark app bar",
+      "observed": {
+        "text": "Turboslide",
+        "box": "1072x65 at 184,24",
+        "h": "65px",
+        "pad": "8px 0px 16px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 71,
+      "surface": "decks",
+      "what": "1440-dark search field",
+      "observed": {
+        "text": "",
+        "box": "720x40 at 437,32",
+        "h": "40px",
+        "pad": "0px 12px 0px 38px",
+        "radius": "6px",
+        "font": "14px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#131313",
+        "textContrast": 16.61,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Search presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 72,
+      "surface": "decks",
+      "what": "1440-dark search placeholder",
+      "observed": null
+    },
+    {
+      "n": 73,
+      "surface": "decks",
+      "what": "1440-dark lockup word",
+      "observed": {
+        "text": "Turboslide",
+        "box": "105x24 at 210,40",
+        "h": "24px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/22px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "About Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 74,
+      "surface": "decks",
+      "what": "1440-dark strip heading",
+      "observed": {
+        "text": "Start a new presentation",
+        "box": "184x20 at 184,113",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 75,
+      "surface": "decks",
+      "what": "1440-dark template gallery link",
+      "observed": {
+        "text": "Template gallery",
+        "box": "102x16 at 1154,116",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Template gallery",
+        "title": null
+      }
+    },
+    {
+      "n": 76,
+      "surface": "decks",
+      "what": "1440-dark template plate",
+      "observed": {
+        "text": "",
+        "box": "160x120 at 184,149",
+        "h": "120px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 40,
+          "h": 40
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 77,
+      "surface": "decks",
+      "what": "1440-dark template label",
+      "observed": {
+        "text": "Blank presentation",
+        "box": "160x16 at 184,277",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 78,
+      "surface": "decks",
+      "what": "1440-dark recent heading",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "298x20 at 184,350",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 79,
+      "surface": "decks",
+      "what": "1440-dark recent lead",
+      "observed": {
+        "text": "Every presentation on this Turboslide is listed here",
+        "box": "298x15 at 184,374",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 80,
+      "surface": "decks",
+      "what": "1440-dark view seg button",
+      "observed": {
+        "text": "",
+        "box": "30x30 at 1025,343",
+        "h": "30px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Grid view",
+        "title": null
+      }
+    },
+    {
+      "n": 81,
+      "surface": "decks",
+      "what": "1440-dark sort select",
+      "observed": {
+        "text": "Last opened by meLast modifiedTitle",
+        "box": "158x32 at 1098,342",
+        "h": "32px",
+        "pad": "0px 28px 0px 10px",
+        "radius": "6px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Sort by",
+        "title": null
+      }
+    },
+    {
+      "n": 82,
+      "surface": "decks",
+      "what": "1440-dark card",
+      "observed": {
+        "text": "Untitled presentationEdited Sep 18, 2026⋮",
+        "box": "253x206 at 184,409",
+        "h": "206.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 83,
+      "surface": "decks",
+      "what": "1440-dark card title",
+      "observed": {
+        "text": "Untitled presentation",
+        "box": "191x26 at 197,561",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Untitled presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 84,
+      "surface": "decks",
+      "what": "1440-dark card when",
+      "observed": {
+        "text": "Edited Sep 18, 2026",
+        "box": "191x15 at 197,589",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 85,
+      "surface": "decks",
+      "what": "1440-dark card more button",
+      "observed": {
+        "text": "⋮",
+        "box": "32x32 at 396,567",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "More actions",
+        "title": null
+      }
+    },
+    {
+      "n": 86,
+      "surface": "decks",
+      "what": "1440-dark card hover and the more button",
+      "observed": {
+        "cardBorder": "#f2f2f0",
+        "cardBorderContrast": 17.97,
+        "moreOpacity": "1",
+        "moreVisible": true,
+        "cursor": "auto"
+      }
+    },
+    {
+      "n": 87,
+      "surface": "decks",
+      "what": "1440-dark card menu",
+      "observed": {
+        "menu": {
+          "w": 220,
+          "radius": "0px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "font": "13px/16.9px 400 Inter"
+        },
+        "rows": [
+          {
+            "text": "Open",
+            "h": "28px",
+            "color": "#f2f2f0",
+            "contrast": 16.61,
+            "disabled": false
+          },
+          {
+            "text": "Open in new tab",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Present",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Rename",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Make a copy",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Download",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Move to trash",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "n": 88,
+      "surface": "decks",
+      "what": "1440-dark search with no match (empty state)",
+      "observed": {
+        "shown": true,
+        "title": "No presentation matches \"zqxjkvw no such deck\"",
+        "titleFont": "20px/25px 500 Inter",
+        "sentence": "Clear the search to see every presentation again.",
+        "sentenceColor": "#b9bcc3",
+        "sentenceContrast": 10.59
+      }
+    },
+    {
+      "n": 89,
+      "surface": "decks",
+      "what": "1440-dark list view",
+      "observed": {
+        "row": {
+          "h": 31.5,
+          "font": "13px/normal 400 Inter"
+        },
+        "head": {
+          "text": "Title",
+          "font": "12px/normal 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        }
+      }
+    },
+    {
+      "n": 90,
+      "surface": "decks",
+      "what": "1440-dark keyboard focus ring on the search",
+      "observed": {
+        "on": "home.open.untitled-20260919-0jar",
+        "focusVisible": true,
+        "outline": "1px solid rgb(242, 242, 240) offset 2px"
+      }
+    },
+    {
+      "n": 91,
+      "surface": "trash",
+      "what": "1440-dark load",
+      "observed": {
+        "cards": 16,
+        "empty": false,
+        "headText": "TrashPresentations moved to the trash stay here until they are restored or deleted forever.Recent presentationsEmpty trash"
+      }
+    },
+    {
+      "n": 92,
+      "surface": "trash",
+      "what": "1440-dark head",
+      "observed": {
+        "text": "Trash",
+        "box": "497x26 at 184,97",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 93,
+      "surface": "trash",
+      "what": "1440-dark lead sentence",
+      "observed": {
+        "text": "Presentations moved to the trash stay here until they are restored or deleted fo",
+        "box": "497x15 at 184,127",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 94,
+      "surface": "trash",
+      "what": "1440-dark back button",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "152x32 at 976,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Recent presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 95,
+      "surface": "trash",
+      "what": "1440-dark empty trash button",
+      "observed": {
+        "text": "Empty trash",
+        "box": "120x32 at 1136,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Empty trash",
+        "title": null
+      }
+    },
+    {
+      "n": 96,
+      "surface": "trash",
+      "what": "1440-dark restore button",
+      "observed": {
+        "text": "Restore",
+        "box": "93x28 at 193,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Restore",
+        "title": null
+      }
+    },
+    {
+      "n": 97,
+      "surface": "trash",
+      "what": "1440-dark delete forever button",
+      "observed": {
+        "text": "Delete forever",
+        "box": "109x28 at 294,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Delete forever",
+        "title": null
+      }
+    },
+    {
+      "n": 98,
+      "surface": "trash",
+      "what": "1440-dark empty state title",
+      "observed": null
+    },
+    {
+      "n": 99,
+      "surface": "trash",
+      "what": "1440-dark the Empty trash confirm dialog",
+      "observed": {
+        "dialog": {
+          "w": 480,
+          "border": "#f2f2f0",
+          "radius": "0px"
+        },
+        "title": "Delete 16 presentations forever? This cannot be undone",
+        "titleFont": "17px/25.5px 500 Inter",
+        "body": "Delete 16 presentations forever? This cannot be undoneEvery presentation in the trash, with its slides and versions, is deleted.CancelDelete forever",
+        "ok": {
+          "text": "Delete forever",
+          "solid": true,
+          "radius": "0px",
+          "h": "32px"
+        },
+        "cancel": {
+          "text": "Cancel",
+          "radius": "0px"
+        },
+        "escapeCloses": true
+      }
+    },
+    {
+      "n": 100,
+      "surface": "new",
+      "what": "1440-dark the skeleton",
+      "observed": {
+        "skeleton": {
+          "cls": "pt-viewer is-editor ts-skeleton",
+          "rows": 33
+        },
+        "skeletonAtMs": 435,
+        "editorReadyMs": 612,
+        "address": "/new"
+      }
+    },
+    {
+      "n": 101,
+      "surface": "new",
+      "what": "1440-dark the placeholder prompts and the save words",
+      "observed": {
+        "prompts": [
+          "",
+          ""
+        ],
+        "save": {
+          "text": "Not saved yet",
+          "font": "12.5px/12.5px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 6.2
+        },
+        "name": {
+          "text": "Untitled presentation",
+          "font": "14px/14px 500 Inter"
+        },
+        "promptColor": {
+          "color": "#8a8f98",
+          "contrast": 6.2,
+          "font": "88px/89.76px 500 Inter"
+        }
+      }
+    },
+    {
+      "n": 102,
+      "surface": "notfound",
+      "what": "1440-dark /no-such-page",
+      "observed": {
+        "status": 404,
+        "title": "Not found",
+        "titleFont": "32px/40px 500 Inter",
+        "sentence": "No page at this address. Start a new presentation, open your presentations or re",
+        "sentenceContrast": 10.59,
+        "actions": [
+          {
+            "text": "New Presentation",
+            "solid": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97
+          },
+          {
+            "text": "Your Presentations",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79
+          },
+          {
+            "text": "About Turboslide",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79
+          }
+        ],
+        "fig": "320x180 at 184,56",
+        "bodyBg": "rgb(7, 7, 7)"
+      }
+    },
+    {
+      "n": 103,
+      "surface": "access",
+      "what": "1440-dark /deck/<missing> (You need access)",
+      "observed": {
+        "status": 404,
+        "title": "You need access",
+        "titleFont": "20px/24px 500 Inter",
+        "sentence": "This presentation is not available to you, or does not exist.",
+        "sentenceContrast": 10.59,
+        "field": {
+          "h": "32px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "radius": "0px",
+          "font": "13px/normal 400 Inter"
+        },
+        "label": {
+          "font": "12px/17.4px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "button": {
+          "text": "Request access",
+          "solid": true,
+          "h": "32px",
+          "radius": "8px"
+        },
+        "signin": "Sign in from your presentations, then open this address again.",
+        "card": {
+          "w": 480,
+          "top": 90,
+          "pad": "24px"
+        },
+        "controls": [
+          "access.sentence",
+          "access.form",
+          "access.role",
+          "access.message",
+          "access.email",
+          "access.request",
+          "access.answer",
+          "access.signIn",
+          "access.signin.line",
+          "access.signin.decks"
+        ]
+      }
+    },
+    {
+      "n": 104,
+      "surface": "access",
+      "what": "1440-dark 1280 body scroll",
+      "observed": {
+        "scrollW": 1440,
+        "clientW": 1440
+      }
+    },
+    {
+      "n": 105,
+      "surface": "home",
+      "what": "1280-light load",
+      "observed": {
+        "ms": 937,
+        "theme": "light",
+        "paper": "#fff",
+        "ink": "#070707",
+        "titanium": "#8a8f98"
+      }
+    },
+    {
+      "n": 106,
+      "surface": "home",
+      "what": "1280-light nav lockup",
+      "observed": {
+        "text": "Turboslide",
+        "box": "131x22 at 104,11",
+        "h": "22px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "15px/23.25px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 107,
+      "surface": "home",
+      "what": "1280-light nav link button",
+      "observed": {
+        "text": "Your presentations",
+        "box": "138x32 at 498,6",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Your presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 108,
+      "surface": "home",
+      "what": "1280-light appearance group",
+      "observed": [
+        {
+          "text": "Light",
+          "pressed": "true",
+          "box": "52x32",
+          "border": "#070707",
+          "borderContrast": 20.14,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "tip": "Light"
+        },
+        {
+          "text": "Dark",
+          "pressed": "false",
+          "box": "51x32",
+          "color": "#3a3d44",
+          "textContrast": 10.88,
+          "tip": "Dark"
+        }
+      ]
+    },
+    {
+      "n": 109,
+      "surface": "home",
+      "what": "1280-light h1",
+      "observed": {
+        "text": "Turboslide",
+        "box": "674x66 at 137,343",
+        "h": "66px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "66px/66px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 48,
+          "h": 48
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 110,
+      "surface": "home",
+      "what": "1280-light hero cta solid",
+      "observed": {
+        "text": "New Presentation",
+        "box": "151x40 at 137,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#ffffff",
+        "ground": "#070707",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(255, 255, 255) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "New Presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 111,
+      "surface": "home",
+      "what": "1280-light hero cta plain",
+      "observed": {
+        "text": "Open the GT Deck",
+        "box": "156x40 at 296,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Open the GT Deck",
+        "title": null
+      }
+    },
+    {
+      "n": 112,
+      "surface": "home",
+      "what": "1280-light hero facts",
+      "observed": {
+        "text": "No account needed to start. Free under the MIT licence, with the code on GitHub.",
+        "box": "674x39 at 137,560",
+        "h": "39px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 113,
+      "surface": "home",
+      "what": "1280-light source line",
+      "observed": {
+        "text": "packages/schema/src/actions.ts",
+        "box": "146x36 at 121,899",
+        "h": "36px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/18px 400 ui-monospace",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 114,
+      "surface": "home",
+      "what": "1280-light caption",
+      "observed": {
+        "text": "The Blue Marble slide of the GT deck in the slideshow, a two tone dither with it",
+        "box": "581x43 at 105,5256",
+        "h": "42.5px",
+        "pad": "10px 12px 12px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "borderHex": "#0a0a0a",
+        "borderContrast": 1.04,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 115,
+      "surface": "home",
+      "what": "1280-light hover the plain cta",
+      "observed": {
+        "hover": true,
+        "border": "#d2d2d2",
+        "borderContrast": 1.51,
+        "color": "#070707",
+        "ground": null
+      }
+    },
+    {
+      "n": 116,
+      "surface": "home",
+      "what": "1280-light hover the solid cta",
+      "observed": {
+        "hover": true,
+        "border": "#070707",
+        "color": "#070707",
+        "ownBg": null,
+        "textContrast": 20.14
+      }
+    },
+    {
+      "n": 117,
+      "surface": "home",
+      "what": "1280-light tooltip on a nav button (delay)",
+      "observed": {
+        "shown": true,
+        "afterMs": 372,
+        "name": "Your presentations",
+        "key": null,
+        "doc": "Every presentation on this Turboslide.",
+        "font": "12.5px/17.5px 400 Inter",
+        "border": "#d2d2d2",
+        "borderContrast": 1.51,
+        "radius": "0px"
+      }
+    },
+    {
+      "n": 118,
+      "surface": "home",
+      "what": "1280-light keyboard focus ring",
+      "observed": {
+        "on": "home.nav.docs",
+        "focusVisible": true,
+        "outline": "1px solid rgb(7, 7, 7) offset -1px"
+      }
+    },
+    {
+      "n": 119,
+      "surface": "home",
+      "what": "1280-light type ladder and titanium text",
+      "observed": {
+        "h2": {
+          "font": "32px/35.84px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "h3": {
+          "font": "20px/25px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "lead": {
+          "font": "20px/29px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "body": {
+          "font": "15px/23.25px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "small": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "credit": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "figure": {
+          "font": "40px/40px 500 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        }
+      }
+    },
+    {
+      "n": 120,
+      "surface": "home",
+      "what": "1280-light page scroll and band rhythm",
+      "observed": {
+        "scrollHeight": 11409,
+        "bands": [
+          "72px/72px"
+        ],
+        "nav": "44px"
+      }
+    },
+    {
+      "n": 121,
+      "surface": "decks",
+      "what": "1280-light load (the frames while the list streams)",
+      "observed": {
+        "firstPaintMs": 985,
+        "frames": 0,
+        "hydrated": true,
+        "pendingBand": true,
+        "cards": 48,
+        "readyMs": 1856
+      }
+    },
+    {
+      "n": 122,
+      "surface": "decks",
+      "what": "1280-light app bar",
+      "observed": {
+        "text": "Turboslide",
+        "box": "1072x65 at 104,24",
+        "h": "65px",
+        "pad": "8px 0px 16px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 123,
+      "surface": "decks",
+      "what": "1280-light search field",
+      "observed": {
+        "text": "",
+        "box": "720x40 at 357,32",
+        "h": "40px",
+        "pad": "0px 12px 0px 38px",
+        "radius": "6px",
+        "font": "14px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#f6f6f6",
+        "textContrast": 18.69,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Search presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 124,
+      "surface": "decks",
+      "what": "1280-light search placeholder",
+      "observed": null
+    },
+    {
+      "n": 125,
+      "surface": "decks",
+      "what": "1280-light lockup word",
+      "observed": {
+        "text": "Turboslide",
+        "box": "105x24 at 130,40",
+        "h": "24px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/22px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "About Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 126,
+      "surface": "decks",
+      "what": "1280-light strip heading",
+      "observed": {
+        "text": "Start a new presentation",
+        "box": "184x20 at 104,113",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 127,
+      "surface": "decks",
+      "what": "1280-light template gallery link",
+      "observed": {
+        "text": "Template gallery",
+        "box": "102x16 at 1074,116",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Template gallery",
+        "title": null
+      }
+    },
+    {
+      "n": 128,
+      "surface": "decks",
+      "what": "1280-light template plate",
+      "observed": {
+        "text": "",
+        "box": "160x120 at 104,149",
+        "h": "120px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 40,
+          "h": 40
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 129,
+      "surface": "decks",
+      "what": "1280-light template label",
+      "observed": {
+        "text": "Blank presentation",
+        "box": "160x16 at 104,277",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 130,
+      "surface": "decks",
+      "what": "1280-light recent heading",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "298x20 at 104,350",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 131,
+      "surface": "decks",
+      "what": "1280-light recent lead",
+      "observed": {
+        "text": "Every presentation on this Turboslide is listed here",
+        "box": "298x15 at 104,374",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 132,
+      "surface": "decks",
+      "what": "1280-light view seg button",
+      "observed": {
+        "text": "",
+        "box": "30x30 at 945,343",
+        "h": "30px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Grid view",
+        "title": null
+      }
+    },
+    {
+      "n": 133,
+      "surface": "decks",
+      "what": "1280-light sort select",
+      "observed": {
+        "text": "Last opened by meLast modifiedTitle",
+        "box": "158x32 at 1018,342",
+        "h": "32px",
+        "pad": "0px 28px 0px 10px",
+        "radius": "6px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Sort by",
+        "title": null
+      }
+    },
+    {
+      "n": 134,
+      "surface": "decks",
+      "what": "1280-light card",
+      "observed": {
+        "text": "Untitled presentationEdited Sep 18, 2026⋮",
+        "box": "253x206 at 104,409",
+        "h": "206.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 135,
+      "surface": "decks",
+      "what": "1280-light card title",
+      "observed": {
+        "text": "Untitled presentation",
+        "box": "191x26 at 117,561",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Untitled presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 136,
+      "surface": "decks",
+      "what": "1280-light card when",
+      "observed": {
+        "text": "Edited Sep 18, 2026",
+        "box": "191x15 at 117,589",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 137,
+      "surface": "decks",
+      "what": "1280-light card more button",
+      "observed": {
+        "text": "⋮",
+        "box": "32x32 at 316,567",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "More actions",
+        "title": null
+      }
+    },
+    {
+      "n": 138,
+      "surface": "decks",
+      "what": "1280-light card hover and the more button",
+      "observed": {
+        "cardBorder": "#070707",
+        "cardBorderContrast": 20.14,
+        "moreOpacity": "1",
+        "moreVisible": true,
+        "cursor": "auto"
+      }
+    },
+    {
+      "n": 139,
+      "surface": "decks",
+      "what": "1280-light card menu",
+      "observed": {
+        "menu": {
+          "w": 220,
+          "radius": "0px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "font": "13px/16.9px 400 Inter"
+        },
+        "rows": [
+          {
+            "text": "Open",
+            "h": "28px",
+            "color": "#070707",
+            "contrast": 18.69,
+            "disabled": false
+          },
+          {
+            "text": "Open in new tab",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Present",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Rename",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Make a copy",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Download",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          },
+          {
+            "text": "Move to trash",
+            "h": "28px",
+            "color": "#3a3d44",
+            "contrast": 10.88,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "n": 140,
+      "surface": "decks",
+      "what": "1280-light search with no match (empty state)",
+      "observed": {
+        "shown": true,
+        "title": "No presentation matches \"zqxjkvw no such deck\"",
+        "titleFont": "20px/25px 500 Inter",
+        "sentence": "Clear the search to see every presentation again.",
+        "sentenceColor": "#3a3d44",
+        "sentenceContrast": 10.88
+      }
+    },
+    {
+      "n": 141,
+      "surface": "decks",
+      "what": "1280-light list view",
+      "observed": {
+        "row": {
+          "h": 31.5,
+          "font": "13px/normal 400 Inter"
+        },
+        "head": {
+          "text": "Title",
+          "font": "12px/normal 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        }
+      }
+    },
+    {
+      "n": 142,
+      "surface": "decks",
+      "what": "1280-light keyboard focus ring on the search",
+      "observed": {
+        "on": "home.open.untitled-20260919-0jar",
+        "focusVisible": true,
+        "outline": "1px solid rgb(7, 7, 7) offset 2px"
+      }
+    },
+    {
+      "n": 143,
+      "surface": "trash",
+      "what": "1280-light load",
+      "observed": {
+        "cards": 16,
+        "empty": false,
+        "headText": "TrashPresentations moved to the trash stay here until they are restored or deleted forever.Recent presentationsEmpty trash"
+      }
+    },
+    {
+      "n": 144,
+      "surface": "trash",
+      "what": "1280-light head",
+      "observed": {
+        "text": "Trash",
+        "box": "497x26 at 104,97",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/normal 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 145,
+      "surface": "trash",
+      "what": "1280-light lead sentence",
+      "observed": {
+        "text": "Presentations moved to the trash stay here until they are restored or deleted fo",
+        "box": "497x15 at 104,127",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 146,
+      "surface": "trash",
+      "what": "1280-light back button",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "152x32 at 896,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Recent presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 147,
+      "surface": "trash",
+      "what": "1280-light empty trash button",
+      "observed": {
+        "text": "Empty trash",
+        "box": "120x32 at 1056,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Empty trash",
+        "title": null
+      }
+    },
+    {
+      "n": 148,
+      "surface": "trash",
+      "what": "1280-light restore button",
+      "observed": {
+        "text": "Restore",
+        "box": "93x28 at 113,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Restore",
+        "title": null
+      }
+    },
+    {
+      "n": 149,
+      "surface": "trash",
+      "what": "1280-light delete forever button",
+      "observed": {
+        "text": "Delete forever",
+        "box": "109x28 at 214,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Delete forever",
+        "title": null
+      }
+    },
+    {
+      "n": 150,
+      "surface": "trash",
+      "what": "1280-light empty state title",
+      "observed": null
+    },
+    {
+      "n": 151,
+      "surface": "trash",
+      "what": "1280-light the Empty trash confirm dialog",
+      "observed": {
+        "dialog": {
+          "w": 480,
+          "border": "#070707",
+          "radius": "0px"
+        },
+        "title": "Delete 16 presentations forever? This cannot be undone",
+        "titleFont": "17px/25.5px 500 Inter",
+        "body": "Delete 16 presentations forever? This cannot be undoneEvery presentation in the trash, with its slides and versions, is deleted.CancelDelete forever",
+        "ok": {
+          "text": "Delete forever",
+          "solid": true,
+          "radius": "0px",
+          "h": "32px"
+        },
+        "cancel": {
+          "text": "Cancel",
+          "radius": "0px"
+        },
+        "escapeCloses": true
+      }
+    },
+    {
+      "n": 152,
+      "surface": "new",
+      "what": "1280-light the skeleton",
+      "observed": {
+        "skeleton": {
+          "cls": "pt-viewer is-editor ts-skeleton",
+          "rows": 33
+        },
+        "skeletonAtMs": 279,
+        "editorReadyMs": 382,
+        "address": "/new"
+      }
+    },
+    {
+      "n": 153,
+      "surface": "new",
+      "what": "1280-light the placeholder prompts and the save words",
+      "observed": {
+        "prompts": [
+          "",
+          ""
+        ],
+        "save": {
+          "text": "Not saved yet",
+          "font": "12.5px/12.5px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "name": {
+          "text": "Untitled presentation",
+          "font": "14px/14px 500 Inter"
+        },
+        "promptColor": {
+          "color": "#8a8f98",
+          "contrast": 3.25,
+          "font": "88px/89.76px 500 Inter"
+        }
+      }
+    },
+    {
+      "n": 154,
+      "surface": "notfound",
+      "what": "1280-light /no-such-page",
+      "observed": {
+        "status": 404,
+        "title": "Not found",
+        "titleFont": "32px/40px 500 Inter",
+        "sentence": "No page at this address. Start a new presentation, open your presentations or re",
+        "sentenceContrast": 10.88,
+        "actions": [
+          {
+            "text": "New Presentation",
+            "solid": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          },
+          {
+            "text": "Your Presentations",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "About Turboslide",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          }
+        ],
+        "fig": "320x180 at 104,56",
+        "bodyBg": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "n": 155,
+      "surface": "access",
+      "what": "1280-light /deck/<missing> (You need access)",
+      "observed": {
+        "status": 404,
+        "title": "You need access",
+        "titleFont": "20px/24px 500 Inter",
+        "sentence": "This presentation is not available to you, or does not exist.",
+        "sentenceContrast": 10.88,
+        "field": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/normal 400 Inter"
+        },
+        "label": {
+          "font": "12px/17.4px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "button": {
+          "text": "Request access",
+          "solid": true,
+          "h": "32px",
+          "radius": "8px"
+        },
+        "signin": "Sign in from your presentations, then open this address again.",
+        "card": {
+          "w": 480,
+          "top": 80,
+          "pad": "24px"
+        },
+        "controls": [
+          "access.sentence",
+          "access.form",
+          "access.role",
+          "access.message",
+          "access.email",
+          "access.request",
+          "access.answer",
+          "access.signIn",
+          "access.signin.line",
+          "access.signin.decks"
+        ]
+      }
+    },
+    {
+      "n": 156,
+      "surface": "access",
+      "what": "1280-light 1280 body scroll",
+      "observed": {
+        "scrollW": 1280,
+        "clientW": 1280
+      }
+    },
+    {
+      "n": 157,
+      "surface": "home",
+      "what": "1280-dark load",
+      "observed": {
+        "ms": 1233,
+        "theme": "dark",
+        "paper": "#070707",
+        "ink": "#f2f2f0",
+        "titanium": "#8a8f98"
+      }
+    },
+    {
+      "n": 158,
+      "surface": "home",
+      "what": "1280-dark nav lockup",
+      "observed": {
+        "text": "Turboslide",
+        "box": "131x22 at 104,11",
+        "h": "22px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "15px/23.25px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 159,
+      "surface": "home",
+      "what": "1280-dark nav link button",
+      "observed": {
+        "text": "Your presentations",
+        "box": "138x32 at 498,6",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Your presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 160,
+      "surface": "home",
+      "what": "1280-dark appearance group",
+      "observed": [
+        {
+          "text": "Light",
+          "pressed": "false",
+          "box": "52x32",
+          "color": "#b9bcc3",
+          "textContrast": 10.59,
+          "tip": "Light"
+        },
+        {
+          "text": "Dark",
+          "pressed": "true",
+          "box": "51x32",
+          "border": "#f2f2f0",
+          "borderContrast": 17.97,
+          "color": "#f2f2f0",
+          "textContrast": 17.97,
+          "tip": "Dark"
+        }
+      ]
+    },
+    {
+      "n": 161,
+      "surface": "home",
+      "what": "1280-dark h1",
+      "observed": {
+        "text": "Turboslide",
+        "box": "674x66 at 137,343",
+        "h": "66px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "66px/66px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 48,
+          "h": 48
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 162,
+      "surface": "home",
+      "what": "1280-dark hero cta solid",
+      "observed": {
+        "text": "New Presentation",
+        "box": "151x40 at 137,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#070707",
+        "ground": "#f2f2f0",
+        "textContrast": 17.97,
+        "border": "1px solid rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "New Presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 163,
+      "surface": "home",
+      "what": "1280-dark hero cta plain",
+      "observed": {
+        "text": "Open the GT Deck",
+        "box": "156x40 at 296,520",
+        "h": "40px",
+        "pad": "0px 16px",
+        "radius": "0px",
+        "font": "14px/14px 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Open the GT Deck",
+        "title": null
+      }
+    },
+    {
+      "n": 164,
+      "surface": "home",
+      "what": "1280-dark hero facts",
+      "observed": {
+        "text": "No account needed to start. Free under the MIT licence, with the code on GitHub.",
+        "box": "674x39 at 137,560",
+        "h": "39px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 165,
+      "surface": "home",
+      "what": "1280-dark source line",
+      "observed": {
+        "text": "packages/schema/src/actions.ts",
+        "box": "146x36 at 121,899",
+        "h": "36px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/18px 400 ui-monospace",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 166,
+      "surface": "home",
+      "what": "1280-dark caption",
+      "observed": {
+        "text": "The Blue Marble slide of the GT deck in the slideshow, a two tone dither with it",
+        "box": "581x43 at 105,5256",
+        "h": "42.5px",
+        "pad": "10px 12px 12px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.55)",
+        "borderHex": "#8c8c8b",
+        "borderContrast": 5.67,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 167,
+      "surface": "home",
+      "what": "1280-dark hover the plain cta",
+      "observed": {
+        "hover": true,
+        "border": "#3b3b3a",
+        "borderContrast": 1.79,
+        "color": "#f2f2f0",
+        "ground": null
+      }
+    },
+    {
+      "n": 168,
+      "surface": "home",
+      "what": "1280-dark hover the solid cta",
+      "observed": {
+        "hover": true,
+        "border": "#f2f2f0",
+        "color": "#f2f2f0",
+        "ownBg": null,
+        "textContrast": 17.97
+      }
+    },
+    {
+      "n": 169,
+      "surface": "home",
+      "what": "1280-dark tooltip on a nav button (delay)",
+      "observed": {
+        "shown": true,
+        "afterMs": 375,
+        "name": "Your presentations",
+        "key": null,
+        "doc": "Every presentation on this Turboslide.",
+        "font": "12.5px/17.5px 400 Inter",
+        "border": "#3b3b3a",
+        "borderContrast": 1.79,
+        "radius": "0px"
+      }
+    },
+    {
+      "n": 170,
+      "surface": "home",
+      "what": "1280-dark keyboard focus ring",
+      "observed": {
+        "on": "home.nav.docs",
+        "focusVisible": true,
+        "outline": "1px solid rgb(242, 242, 240) offset -1px"
+      }
+    },
+    {
+      "n": 171,
+      "surface": "home",
+      "what": "1280-dark type ladder and titanium text",
+      "observed": {
+        "h2": {
+          "font": "32px/35.84px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "h3": {
+          "font": "20px/25px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "lead": {
+          "font": "20px/29px 400 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        },
+        "body": {
+          "font": "15px/23.25px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "small": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "credit": {
+          "font": "13px/19.5px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "figure": {
+          "font": "40px/40px 500 Inter",
+          "color": "#f2f2f0",
+          "contrast": 17.97
+        }
+      }
+    },
+    {
+      "n": 172,
+      "surface": "home",
+      "what": "1280-dark page scroll and band rhythm",
+      "observed": {
+        "scrollHeight": 11409,
+        "bands": [
+          "72px/72px"
+        ],
+        "nav": "44px"
+      }
+    },
+    {
+      "n": 173,
+      "surface": "decks",
+      "what": "1280-dark load (the frames while the list streams)",
+      "observed": {
+        "firstPaintMs": 1283,
+        "frames": 0,
+        "hydrated": true,
+        "pendingBand": true,
+        "cards": 48,
+        "readyMs": 2150
+      }
+    },
+    {
+      "n": 174,
+      "surface": "decks",
+      "what": "1280-dark app bar",
+      "observed": {
+        "text": "Turboslide",
+        "box": "1072x65 at 104,24",
+        "h": "65px",
+        "pad": "8px 0px 16px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 175,
+      "surface": "decks",
+      "what": "1280-dark search field",
+      "observed": {
+        "text": "",
+        "box": "720x40 at 357,32",
+        "h": "40px",
+        "pad": "0px 12px 0px 38px",
+        "radius": "6px",
+        "font": "14px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#131313",
+        "textContrast": 16.61,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Search presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 176,
+      "surface": "decks",
+      "what": "1280-dark search placeholder",
+      "observed": null
+    },
+    {
+      "n": 177,
+      "surface": "decks",
+      "what": "1280-dark lockup word",
+      "observed": {
+        "text": "Turboslide",
+        "box": "105x24 at 130,40",
+        "h": "24px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/22px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "About Turboslide",
+        "title": null
+      }
+    },
+    {
+      "n": 178,
+      "surface": "decks",
+      "what": "1280-dark strip heading",
+      "observed": {
+        "text": "Start a new presentation",
+        "box": "184x20 at 104,113",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 179,
+      "surface": "decks",
+      "what": "1280-dark template gallery link",
+      "observed": {
+        "text": "Template gallery",
+        "box": "102x16 at 1074,116",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Template gallery",
+        "title": null
+      }
+    },
+    {
+      "n": 180,
+      "surface": "decks",
+      "what": "1280-dark template plate",
+      "observed": {
+        "text": "",
+        "box": "160x120 at 104,149",
+        "h": "120px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 40,
+          "h": 40
+        },
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 181,
+      "surface": "decks",
+      "what": "1280-dark template label",
+      "observed": {
+        "text": "Blank presentation",
+        "box": "160x16 at 104,277",
+        "h": "16px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 182,
+      "surface": "decks",
+      "what": "1280-dark recent heading",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "298x20 at 104,350",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "16px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 183,
+      "surface": "decks",
+      "what": "1280-dark recent lead",
+      "observed": {
+        "text": "Every presentation on this Turboslide is listed here",
+        "box": "298x15 at 104,374",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 184,
+      "surface": "decks",
+      "what": "1280-dark view seg button",
+      "observed": {
+        "text": "",
+        "box": "30x30 at 945,343",
+        "h": "30px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Grid view",
+        "title": null
+      }
+    },
+    {
+      "n": 185,
+      "surface": "decks",
+      "what": "1280-dark sort select",
+      "observed": {
+        "text": "Last opened by meLast modifiedTitle",
+        "box": "158x32 at 1018,342",
+        "h": "32px",
+        "pad": "0px 28px 0px 10px",
+        "radius": "6px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Sort by",
+        "title": null
+      }
+    },
+    {
+      "n": 186,
+      "surface": "decks",
+      "what": "1280-dark card",
+      "observed": {
+        "text": "Untitled presentationEdited Sep 18, 2026⋮",
+        "box": "253x206 at 104,409",
+        "h": "206.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "border-color 0.12s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 187,
+      "surface": "decks",
+      "what": "1280-dark card title",
+      "observed": {
+        "text": "Untitled presentation",
+        "box": "191x26 at 117,561",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.5px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Untitled presentation",
+        "title": null
+      }
+    },
+    {
+      "n": 188,
+      "surface": "decks",
+      "what": "1280-dark card when",
+      "observed": {
+        "text": "Edited Sep 18, 2026",
+        "box": "191x15 at 117,589",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 189,
+      "surface": "decks",
+      "what": "1280-dark card more button",
+      "observed": {
+        "text": "⋮",
+        "box": "32x32 at 316,567",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "More actions",
+        "title": null
+      }
+    },
+    {
+      "n": 190,
+      "surface": "decks",
+      "what": "1280-dark card hover and the more button",
+      "observed": {
+        "cardBorder": "#f2f2f0",
+        "cardBorderContrast": 17.97,
+        "moreOpacity": "1",
+        "moreVisible": true,
+        "cursor": "auto"
+      }
+    },
+    {
+      "n": 191,
+      "surface": "decks",
+      "what": "1280-dark card menu",
+      "observed": {
+        "menu": {
+          "w": 220,
+          "radius": "0px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "font": "13px/16.9px 400 Inter"
+        },
+        "rows": [
+          {
+            "text": "Open",
+            "h": "28px",
+            "color": "#f2f2f0",
+            "contrast": 16.61,
+            "disabled": false
+          },
+          {
+            "text": "Open in new tab",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Present",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Rename",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Make a copy",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Download",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          },
+          {
+            "text": "Move to trash",
+            "h": "28px",
+            "color": "#b9bcc3",
+            "contrast": 10.59,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "n": 192,
+      "surface": "decks",
+      "what": "1280-dark search with no match (empty state)",
+      "observed": {
+        "shown": true,
+        "title": "No presentation matches \"zqxjkvw no such deck\"",
+        "titleFont": "20px/25px 500 Inter",
+        "sentence": "Clear the search to see every presentation again.",
+        "sentenceColor": "#b9bcc3",
+        "sentenceContrast": 10.59
+      }
+    },
+    {
+      "n": 193,
+      "surface": "decks",
+      "what": "1280-dark list view",
+      "observed": {
+        "row": {
+          "h": 31.5,
+          "font": "13px/normal 400 Inter"
+        },
+        "head": {
+          "text": "Title",
+          "font": "12px/normal 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        }
+      }
+    },
+    {
+      "n": 194,
+      "surface": "decks",
+      "what": "1280-dark keyboard focus ring on the search",
+      "observed": {
+        "on": "home.open.untitled-20260919-0jar",
+        "focusVisible": true,
+        "outline": "1px solid rgb(242, 242, 240) offset 2px"
+      }
+    },
+    {
+      "n": 195,
+      "surface": "trash",
+      "what": "1280-dark load",
+      "observed": {
+        "cards": 16,
+        "empty": false,
+        "headText": "TrashPresentations moved to the trash stay here until they are restored or deleted forever.Recent presentationsEmpty trash"
+      }
+    },
+    {
+      "n": 196,
+      "surface": "trash",
+      "what": "1280-dark head",
+      "observed": {
+        "text": "Trash",
+        "box": "497x26 at 104,97",
+        "h": "26px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "22px/normal 500 Inter",
+        "color": "#f2f2f0",
+        "ground": "#070707",
+        "textContrast": 17.97,
+        "border": "0px none rgb(242, 242, 240)",
+        "borderHex": "#f2f2f0",
+        "borderContrast": 17.97,
+        "outline": "3px none rgb(242, 242, 240) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 197,
+      "surface": "trash",
+      "what": "1280-dark lead sentence",
+      "observed": {
+        "text": "Presentations moved to the trash stay here until they are restored or deleted fo",
+        "box": "497x15 at 104,127",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "12.5px/normal 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "0px none rgb(185, 188, 195)",
+        "borderHex": "#b9bcc3",
+        "borderContrast": 10.59,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "all 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null
+      }
+    },
+    {
+      "n": 198,
+      "surface": "trash",
+      "what": "1280-dark back button",
+      "observed": {
+        "text": "Recent presentations",
+        "box": "152x32 at 896,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Recent presentations",
+        "title": null
+      }
+    },
+    {
+      "n": 199,
+      "surface": "trash",
+      "what": "1280-dark empty trash button",
+      "observed": {
+        "text": "Empty trash",
+        "box": "120x32 at 1056,98",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Empty trash",
+        "title": null
+      }
+    },
+    {
+      "n": 200,
+      "surface": "trash",
+      "what": "1280-dark restore button",
+      "observed": {
+        "text": "Restore",
+        "box": "93x28 at 113,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Restore",
+        "title": null
+      }
+    },
+    {
+      "n": 201,
+      "surface": "trash",
+      "what": "1280-dark delete forever button",
+      "observed": {
+        "text": "Delete forever",
+        "box": "109x28 at 214,383",
+        "h": "28px",
+        "pad": "0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#b9bcc3",
+        "ground": "#070707",
+        "textContrast": 10.59,
+        "border": "1px solid rgba(242, 242, 240, 0.22)",
+        "borderHex": "#3b3b3a",
+        "borderContrast": 1.79,
+        "outline": "3px none rgb(185, 188, 195) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Delete forever",
+        "title": null
+      }
+    },
+    {
+      "n": 202,
+      "surface": "trash",
+      "what": "1280-dark empty state title",
+      "observed": null
+    },
+    {
+      "n": 203,
+      "surface": "trash",
+      "what": "1280-dark the Empty trash confirm dialog",
+      "observed": {
+        "dialog": {
+          "w": 480,
+          "border": "#f2f2f0",
+          "radius": "0px"
+        },
+        "title": "Delete 16 presentations forever? This cannot be undone",
+        "titleFont": "17px/25.5px 500 Inter",
+        "body": "Delete 16 presentations forever? This cannot be undoneEvery presentation in the trash, with its slides and versions, is deleted.CancelDelete forever",
+        "ok": {
+          "text": "Delete forever",
+          "solid": true,
+          "radius": "0px",
+          "h": "32px"
+        },
+        "cancel": {
+          "text": "Cancel",
+          "radius": "0px"
+        },
+        "escapeCloses": true
+      }
+    },
+    {
+      "n": 204,
+      "surface": "new",
+      "what": "1280-dark the skeleton",
+      "observed": {
+        "skeleton": {
+          "cls": "pt-viewer is-editor ts-skeleton",
+          "rows": 33
+        },
+        "skeletonAtMs": 356,
+        "editorReadyMs": 433,
+        "address": "/new"
+      }
+    },
+    {
+      "n": 205,
+      "surface": "new",
+      "what": "1280-dark the placeholder prompts and the save words",
+      "observed": {
+        "prompts": [
+          "",
+          ""
+        ],
+        "save": {
+          "text": "Not saved yet",
+          "font": "12.5px/12.5px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 6.2
+        },
+        "name": {
+          "text": "Untitled presentation",
+          "font": "14px/14px 500 Inter"
+        },
+        "promptColor": {
+          "color": "#8a8f98",
+          "contrast": 6.2,
+          "font": "88px/89.76px 500 Inter"
+        }
+      }
+    },
+    {
+      "n": 206,
+      "surface": "notfound",
+      "what": "1280-dark /no-such-page",
+      "observed": {
+        "status": 404,
+        "title": "Not found",
+        "titleFont": "32px/40px 500 Inter",
+        "sentence": "No page at this address. Start a new presentation, open your presentations or re",
+        "sentenceContrast": 10.59,
+        "actions": [
+          {
+            "text": "New Presentation",
+            "solid": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97
+          },
+          {
+            "text": "Your Presentations",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79
+          },
+          {
+            "text": "About Turboslide",
+            "solid": false,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79
+          }
+        ],
+        "fig": "320x180 at 104,56",
+        "bodyBg": "rgb(7, 7, 7)"
+      }
+    },
+    {
+      "n": 207,
+      "surface": "access",
+      "what": "1280-dark /deck/<missing> (You need access)",
+      "observed": {
+        "status": 404,
+        "title": "You need access",
+        "titleFont": "20px/24px 500 Inter",
+        "sentence": "This presentation is not available to you, or does not exist.",
+        "sentenceContrast": 10.59,
+        "field": {
+          "h": "32px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "radius": "0px",
+          "font": "13px/normal 400 Inter"
+        },
+        "label": {
+          "font": "12px/17.4px 400 Inter",
+          "color": "#b9bcc3",
+          "contrast": 10.59
+        },
+        "button": {
+          "text": "Request access",
+          "solid": true,
+          "h": "32px",
+          "radius": "8px"
+        },
+        "signin": "Sign in from your presentations, then open this address again.",
+        "card": {
+          "w": 480,
+          "top": 80,
+          "pad": "24px"
+        },
+        "controls": [
+          "access.sentence",
+          "access.form",
+          "access.role",
+          "access.message",
+          "access.email",
+          "access.request",
+          "access.answer",
+          "access.signIn",
+          "access.signin.line",
+          "access.signin.decks"
+        ]
+      }
+    },
+    {
+      "n": 208,
+      "surface": "access",
+      "what": "1280-dark 1280 body scroll",
+      "observed": {
+        "scrollW": 1280,
+        "clientW": 1280
+      }
+    }
+  ]
+}

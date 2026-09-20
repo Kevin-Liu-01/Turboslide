@@ -1,0 +1,1063 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-f4aa",
+  "startedAt": "2026-09-20T01:28:28.777Z",
+  "ms": 93090,
+  "steps": 42,
+  "passed": 15,
+  "failed": 4,
+  "notDriven": 23,
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "facts": {
+    "titleRow": [
+      {
+        "id": "title.row",
+        "label": "Acme pricing review, Q3 2026All changes savedSlideshowShare"
+      },
+      {
+        "id": "title.home",
+        "label": "Turboslide home"
+      },
+      {
+        "id": "title.presence",
+        "label": "Collaborators"
+      },
+      {
+        "id": "title.comments.slot",
+        "label": ""
+      },
+      {
+        "id": "title.comments",
+        "label": "Show all comments"
+      }
+    ],
+    "toolbar": [
+      {
+        "id": "toolbar.head",
+        "label": ""
+      },
+      {
+        "id": "toolbar.search",
+        "label": "Search the menus"
+      },
+      {
+        "id": "toolbar.newSlide.split",
+        "label": ""
+      },
+      {
+        "id": "toolbar.newSlide",
+        "label": "New slide"
+      },
+      {
+        "id": "toolbar.newSlide.arrow",
+        "label": "New slide with layout"
+      },
+      {
+        "id": "toolbar.undo",
+        "label": "Undo"
+      },
+      {
+        "id": "toolbar.redo",
+        "label": "Redo"
+      },
+      {
+        "id": "toolbar.print",
+        "label": "Print"
+      },
+      {
+        "id": "toolbar.paintFormat",
+        "label": "Paint format"
+      },
+      {
+        "id": "toolbar.zoom",
+        "label": ""
+      },
+      {
+        "id": "toolbar.tail",
+        "label": "FontFormat options"
+      },
+      {
+        "id": "toolbar.font",
+        "label": "Font"
+      },
+      {
+        "id": "toolbar.fontSize",
+        "label": ""
+      },
+      {
+        "id": "toolbar.fontSize.minus",
+        "label": "Decrease font size"
+      },
+      {
+        "id": "toolbar.fontSize.value",
+        "label": "Font size"
+      },
+      {
+        "id": "toolbar.fontSize.plus",
+        "label": "Increase font size"
+      },
+      {
+        "id": "toolbar.bold",
+        "label": "Bold"
+      },
+      {
+        "id": "toolbar.italic",
+        "label": "Italic"
+      },
+      {
+        "id": "toolbar.underline",
+        "label": "Underline"
+      },
+      {
+        "id": "toolbar.textColor",
+        "label": "Text color"
+      },
+      {
+        "id": "toolbar.highlightColor",
+        "label": "Highlight color"
+      },
+      {
+        "id": "toolbar.insertLink",
+        "label": "Insert link"
+      },
+      {
+        "id": "toolbar.insertComment",
+        "label": "Insert comment"
+      },
+      {
+        "id": "toolbar.align",
+        "label": "Align"
+      },
+      {
+        "id": "toolbar.spacing",
+        "label": "Line & paragraph spacing"
+      },
+      {
+        "id": "toolbar.bulletedList",
+        "label": "Bulleted list"
+      },
+      {
+        "id": "toolbar.bulletedList.arrow",
+        "label": "Bulleted list"
+      },
+      {
+        "id": "toolbar.numberedList",
+        "label": "Numbered list"
+      },
+      {
+        "id": "toolbar.numberedList.arrow",
+        "label": "Numbered list"
+      },
+      {
+        "id": "toolbar.decreaseIndent",
+        "label": "Decrease indent"
+      },
+      {
+        "id": "toolbar.increaseIndent",
+        "label": "Increase indent"
+      },
+      {
+        "id": "toolbar.clearFormatting",
+        "label": "Clear formatting"
+      },
+      {
+        "id": "toolbar.formatOptions",
+        "label": "Format options"
+      },
+      {
+        "id": "toolbar.end",
+        "label": ""
+      },
+      {
+        "id": "toolbar.pointer",
+        "label": "Show my pointer"
+      },
+      {
+        "id": "toolbar.hideMenus",
+        "label": "Hide the menus"
+      }
+    ],
+    "menubar": [
+      "menubar.file",
+      "menubar.edit",
+      "menubar.view",
+      "menubar.insert",
+      "menubar.format",
+      "menubar.slide",
+      "menubar.arrange",
+      "menubar.tools",
+      "menubar.help"
+    ],
+    "secondSlide": {
+      "id": "split-1",
+      "kind": "content",
+      "layout": {
+        "type": "split",
+        "gap": 56,
+        "head": {
+          "cols": "4/8"
+        },
+        "body": {
+          "align": "center"
+        }
+      },
+      "blocks": 429
+    },
+    "search": [
+      {
+        "phrase": "find and replace",
+        "expect": "Find and replace",
+        "rows": 1,
+        "ids": [
+          "palette.menu:edit.findReplace"
+        ],
+        "texts": [
+          "Find and replaceCmd Shift HEdit"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "rename the customer",
+        "expect": "Find and replace",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-assist/03-search-rename-the-customer.png"
+      },
+      {
+        "phrase": "change the customer name",
+        "expect": "Find and replace",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "bigger text",
+        "expect": "Font size or Increase font size",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-assist/03-search-bigger-text.png"
+      },
+      {
+        "phrase": "font size",
+        "expect": "Increase or decrease font size",
+        "rows": 2,
+        "ids": [
+          "palette.menu:format.text.size.increase",
+          "palette.menu:format.text.size.decrease"
+        ],
+        "texts": [
+          "Increase font sizeCmd Shift >Format › Text › Size",
+          "Decrease font sizeCmd Shift <Format › Text › Size"
+        ],
+        "count": {
+          "count": "2 results",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "speaker notes",
+        "expect": "Show speaker notes",
+        "rows": 1,
+        "ids": [
+          "palette.menu:view.showSpeakerNotes"
+        ],
+        "texts": [
+          "Show speaker notesView"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "talk track",
+        "expect": "Show speaker notes",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "logo",
+        "expect": "Replace image",
+        "rows": 1,
+        "ids": [
+          "palette.menu:format.bordersLines.borderDash.longDashDot"
+        ],
+        "texts": [
+          "Long dash dotFormat › Borders & lines › Border dash"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "replace image",
+        "expect": "Replace image",
+        "rows": 1,
+        "ids": [
+          "palette.menu:format.image.replaceImage.upload"
+        ],
+        "texts": [
+          "Upload from computerFormat › Image › Replace image"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "translate",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-assist/03-search-translate.png"
+      },
+      {
+        "phrase": "agenda",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "summarize",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "shorter",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "align",
+        "expect": "Align",
+        "rows": 12,
+        "ids": [
+          "palette.menu:format.alignIndent.left",
+          "palette.menu:format.alignIndent.center",
+          "palette.menu:format.alignIndent.right",
+          "palette.menu:format.alignIndent.justified",
+          "palette.menu:format.alignIndent.increaseIndent",
+          "palette.menu:format.alignIndent.decreaseIndent",
+          "palette.menu:arrange.align.left",
+          "palette.menu:arrange.align.center",
+          "palette.menu:arrange.align.right",
+          "palette.menu:arrange.align.top",
+          "palette.menu:arrange.align.middle",
+          "palette.menu:arrange.align.bottom"
+        ],
+        "texts": [
+          "LeftCmd Shift LFormat › Align & indent",
+          "CenterCmd Shift EFormat › Align & indent",
+          "RightCmd Shift RFormat › Align & indent",
+          "JustifiedCmd Shift JFormat › Align & indent",
+          "Increase indentCmd ]Format › Align & indentMoves the paragraph right, or a list item down a level",
+          "Decrease indentCmd [Format › Align & indentMoves the paragraph left, or a list item up a level",
+          "LeftArrange › AlignSelect an object on the slide first",
+          "CenterArrange › AlignSelect an object on the slide first",
+          "RightArrange › AlignSelect an object on the slide first",
+          "TopArrange › AlignSelect an object on the slide first",
+          "MiddleArrange › AlignSelect an object on the slide first",
+          "BottomArrange › AlignSelect an object on the slide first"
+        ],
+        "count": {
+          "count": "12 results",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "pdf",
+        "expect": "PDF Document",
+        "rows": 3,
+        "ids": [
+          "palette.menu:file.download.pdf",
+          "palette.menu:insert.image.upload",
+          "palette.menu:format.image.replaceImage.upload"
+        ],
+        "texts": [
+          "PDF Document (.pdf)File › DownloadOne slide per page",
+          "Upload from computerInsert › ImagePictures up to 25 MB",
+          "Upload from computerFormat › Image › Replace image"
+        ],
+        "count": {
+          "count": "3 results",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "send a pdf",
+        "expect": "PDF Document",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "duplicate",
+        "expect": "Duplicate slide",
+        "rows": 2,
+        "ids": [
+          "palette.menu:edit.duplicate",
+          "palette.menu:slide.duplicateSlide"
+        ],
+        "texts": [
+          "DuplicateCmd DEditDuplicates the selected slides in the filmstrip or the selected blocks on the canvas",
+          "Duplicate slideCmd DSlide"
+        ],
+        "count": {
+          "count": "2 results",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "hide slide",
+        "expect": "Skip slide",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-assist/03-search-hide-slide.png"
+      },
+      {
+        "phrase": "skip slide",
+        "expect": "Skip slide",
+        "rows": 1,
+        "ids": [
+          "palette.menu:slide.skipSlide"
+        ],
+        "texts": [
+          "Skip slideSlideA skipped slide stays in the filmstrip and leaves the slideshow and the downloads"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "delete slide",
+        "expect": "Delete slide",
+        "rows": 1,
+        "ids": [
+          "palette.menu:slide.deleteSlide"
+        ],
+        "texts": [
+          "Delete slideSlideUndo brings it back"
+        ],
+        "count": {
+          "count": "1 result",
+          "empty": null
+        },
+        "file": null
+      },
+      {
+        "phrase": "assistant",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      },
+      {
+        "phrase": "help me write",
+        "expect": "nothing today",
+        "rows": 0,
+        "ids": [],
+        "texts": [],
+        "count": {
+          "count": "Nothing matches",
+          "empty": "Nothing matches"
+        },
+        "file": null
+      }
+    ],
+    "toolsMenu": [
+      "tools.accessibilitySettings",
+      "tools.checkSlides",
+      "tools.advancedTools"
+    ],
+    "checkSlides": {
+      "head": "Suggestions for this slide2",
+      "suggestions": [
+        {
+          "id": "suggestion.copy/empty-placeholder|split-1|p1|/slots/headRight/0/text|",
+          "text": "Slide 2 has an empty paragraph; type the copy or remove the placeholder (gslides-parity SPEC 5.4).",
+          "fix": false
+        },
+        {
+          "id": "suggestion.copy/empty-placeholder|split-1|p2|/slots/body/0/text|",
+          "text": "Slide 2 has an empty paragraph; type the copy or remove the placeholder (gslides-parity SPEC 5.4).",
+          "fix": false
+        }
+      ],
+      "empty": null
+    },
+    "agentAccess": {
+      "rows": [
+        "Agent access",
+        "Embed in a site"
+      ],
+      "text": "Agent accessAn assistant reads and edits this presentation through these addresses and commands.MCP addresshttps://turboslide.vercel.app/mcp?deck=untitled-20260920-f4aaCopyAPI addresshttps://turboslide.vercel.app/api/actionsCopyPushturboslide deck push untitled-20260920-f4aa --to https://turboslide.vercel.app --token <TURBOSLIDE_TOKEN>CopyPullturboslide deck pull untitled-20260920-f4aa --from https://turboslide.vercel.app --token <TURBOSLIDE_TOKEN>CopyA token is required and is never shown here.Done"
+    },
+    "runAction": {
+      "placeholder": "Search slides, actions, blocks and views",
+      "count0": {
+        "count": "235 results",
+        "empty": null
+      },
+      "count1": {
+        "count": "7 results",
+        "empty": null
+      },
+      "rows": [
+        "Replace slideslide.replaceReplaces a slide with the given document; what the source drawer’s Apply emits.",
+        "Find and replacetext.replaceAllReplaces every occurrence of a string in the visible text of the deck (every Text of ever",
+        "Unpack deck bundledeck.unpackCreates a deck under decks/ from a bundle zip after validating it, under a free id when the",
+        "Push deck to a studiodeck.pushPacks decks/<id> and uploads the bundle to a hosted studio through POST /api/decks/bundle ",
+        "Pull deck from a studiodeck.pullDownloads a deck bundle from a hosted studio through GET /api/decks/<id>/bundle with the",
+        "Add assetasset.addAdds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional t",
+        "Background pictureslide.setBackgroundPictureOne write for a covering picture object at the back of each named slide with"
+      ]
+    },
+    "beforeAgentWrite": {
+      "revision": 6,
+      "text": "Acme pricing review, Q3 2026Click to add subtitle"
+    },
+    "agentWrite": {
+      "first": {
+        "status": 200,
+        "summary": "200 replacements 1, slides [\"title\"], revision 7"
+      }
+    },
+    "afterAgentWrite": {
+      "text": "Globex pricing review, Q3 2026Click to add subtitle",
+      "banner": null,
+      "snackbar": null,
+      "revision": 7
+    },
+    "undoAfterAgentWrite": {
+      "canUndo": null,
+      "text": "Globex pricing review, Q3 2026Click to add subtitle",
+      "snackbar": null,
+      "revision": 8
+    },
+    "versionHistory": {
+      "entries": [],
+      "text": "Version historyOnly show named versionsName current versionTodayC106:28 PM to 06:29 PMCork 184, Agent · assist-probe · 9 changes▸"
+    },
+    "layouts": [
+      {
+        "id": "new.plate",
+        "label": "New slide with layout"
+      },
+      {
+        "id": "new",
+        "label": "Layouts"
+      },
+      {
+        "id": "new.title",
+        "label": "Click to add titleClick to add subtitleTitle slide"
+      },
+      {
+        "id": "new.opener",
+        "label": "Click to add titleClick to add textMaterial: Event Horizon, "
+      },
+      {
+        "id": "new.split",
+        "label": "Click to add titleClick to add textClick to add textTitle an"
+      },
+      {
+        "id": "new.cols",
+        "label": "Click to add titleClick to add textClick to add textTitle an"
+      },
+      {
+        "id": "new.title-only",
+        "label": "Click to add titleTitle only"
+      },
+      {
+        "id": "new.one-column",
+        "label": "Click to add titleClick to add textOne column text"
+      },
+      {
+        "id": "new.statement",
+        "label": "Click to add textMain point"
+      },
+      {
+        "id": "new.section-description",
+        "label": "Click to add titleClick to add textClick to add textSection "
+      },
+      {
+        "id": "new.mood",
+        "label": "Click to add titleClick to add textImage: NASA, Reto Stöckli"
+      },
+      {
+        "id": "new.big-number",
+        "label": "Click to add a numberClick to add textBig number"
+      },
+      {
+        "id": "new.blank",
+        "label": "Blank"
+      },
+      {
+        "id": "new.rows",
+        "label": "Click to add titleClick to add textClick to add textClick to"
+      },
+      {
+        "id": "new.plain",
+        "label": "Click to add titleClick to add textClick to add textClick to"
+      },
+      {
+        "id": "new.table",
+        "label": "Click to add titleClick to add textClick to add textClick to"
+      },
+      {
+        "id": "new.figure",
+        "label": "Click to add titleClick to add textClick to add a pictureAdd"
+      },
+      {
+        "id": "new.pair",
+        "label": "Click to add titleClick to add a pictureAdd a captionClick t"
+      },
+      {
+        "id": "new.tiles",
+        "label": "Click to add titleClick to add textTile grid"
+      },
+      {
+        "id": "new.details",
+        "label": "Click to add titleClick to add textClick to add a pictureAdd"
+      },
+      {
+        "id": "new.board",
+        "label": "Click to add titleClick to add textLiveLiveLiveStatus board"
+      },
+      {
+        "id": "new.matrix",
+        "label": "Click to add titleClick to add text0821012414631119157135Mat"
+      },
+      {
+        "id": "new.closing",
+        "label": "Click to add titleClick to add textMaterial: Singularity, a "
+      }
+    ],
+    "context": {
+      "deckInfoChars": 419,
+      "outline": [
+        {
+          "id": "deck",
+          "name": "Deck",
+          "slides": [
+            {
+              "id": "title",
+              "n": 1,
+              "title": "Globex pricing review, Q3 2026",
+              "kind": "title"
+            },
+            {
+              "id": "split-1",
+              "n": 2,
+              "title": "Support in twelve languages",
+              "kind": "content"
+            }
+          ]
+        }
+      ],
+      "exportText": "Globex pricing review, Q3 2026\n\nSupport in twelve languages",
+      "exportTextBytes": 59,
+      "exportTextSlides": 2,
+      "slideGetChars": 488,
+      "slideListChars": 274,
+      "slideCount": 2
+    }
+  },
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new and type the title",
+      "expected": "the editor is ready; the title is written; the address is /edit/<id>",
+      "observed": "deck untitled-20260920-f4aa, revision 1, /edit/untitled-20260920-f4aa, stage reads \"Acme pricing review, Q3 2026Click to add subtitle\"",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "read the title row and the toolbar for an assistant entry point",
+      "expected": "no control named Ask, Assist, Gemini or AI",
+      "observed": "title row 5 controls (row, home, presence, comments.slot, comments); toolbar 36; menubar file edit view insert format slide arrange tools help; assistant words: menubar.help",
+      "ok": false
+    },
+    {
+      "n": 3,
+      "step": "New slide from the toolbar, three lines typed in the body",
+      "expected": "a second slide whose body holds three paragraphs",
+      "observed": "slide split-1 (content, layout {\"type\":\"split\",\"gap\":56,\"head\":{\"cols\":): 1 of 3 lines found in the document; slides 1 before",
+      "ok": false
+    },
+    {
+      "n": 4,
+      "step": "type a speaker note under the slide",
+      "expected": "slide.notes carries the sentence",
+      "observed": "notes: \"Ask about their renewal date before the pricing slide.\"",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Search the menus: \"find and replace\"",
+      "expected": "rows for Find and replace",
+      "observed": "1 result: Find and replaceCmd Shift HEdit",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 6,
+      "step": "Search the menus: \"rename the customer\"",
+      "expected": "rows for Find and replace",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 7,
+      "step": "Search the menus: \"change the customer name\"",
+      "expected": "rows for Find and replace",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 8,
+      "step": "Search the menus: \"bigger text\"",
+      "expected": "rows for Font size or Increase font size",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 9,
+      "step": "Search the menus: \"font size\"",
+      "expected": "rows for Increase or decrease font size",
+      "observed": "2 results: Increase font sizeCmd Shift >Format › Text › Size || Decrease font sizeCmd Shift <Format › Text › Size",
+      "ok": null,
+      "rows": 2
+    },
+    {
+      "n": 10,
+      "step": "Search the menus: \"speaker notes\"",
+      "expected": "rows for Show speaker notes",
+      "observed": "1 result: Show speaker notesView",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 11,
+      "step": "Search the menus: \"talk track\"",
+      "expected": "rows for Show speaker notes",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 12,
+      "step": "Search the menus: \"logo\"",
+      "expected": "rows for Replace image",
+      "observed": "1 result: Long dash dotFormat › Borders & lines › Border dash",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 13,
+      "step": "Search the menus: \"replace image\"",
+      "expected": "rows for Replace image",
+      "observed": "1 result: Upload from computerFormat › Image › Replace image",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 14,
+      "step": "Search the menus: \"translate\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 15,
+      "step": "Search the menus: \"agenda\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 16,
+      "step": "Search the menus: \"summarize\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 17,
+      "step": "Search the menus: \"shorter\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 18,
+      "step": "Search the menus: \"align\"",
+      "expected": "rows for Align",
+      "observed": "12 results: LeftCmd Shift LFormat › Align & indent || CenterCmd Shift EFormat › Align & indent || RightCmd Shift RFormat › Align & indent || JustifiedCmd Shift JFormat › Align & indent || Increase indentCmd ]Format › Align & indentMoves the paragraph right, or a list item down a level || Decrease indentCmd [Format › Align & indentMoves the paragraph left, or a list item up a level || LeftArrange › AlignSelect",
+      "ok": null,
+      "rows": 12
+    },
+    {
+      "n": 19,
+      "step": "Search the menus: \"pdf\"",
+      "expected": "rows for PDF Document",
+      "observed": "3 results: PDF Document (.pdf)File › DownloadOne slide per page || Upload from computerInsert › ImagePictures up to 25 MB || Upload from computerFormat › Image › Replace image",
+      "ok": null,
+      "rows": 3
+    },
+    {
+      "n": 20,
+      "step": "Search the menus: \"send a pdf\"",
+      "expected": "rows for PDF Document",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 21,
+      "step": "Search the menus: \"duplicate\"",
+      "expected": "rows for Duplicate slide",
+      "observed": "2 results: DuplicateCmd DEditDuplicates the selected slides in the filmstrip or the selected blocks on the canvas || Duplicate slideCmd DSlide",
+      "ok": null,
+      "rows": 2
+    },
+    {
+      "n": 22,
+      "step": "Search the menus: \"hide slide\"",
+      "expected": "rows for Skip slide",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 23,
+      "step": "Search the menus: \"skip slide\"",
+      "expected": "rows for Skip slide",
+      "observed": "1 result: Skip slideSlideA skipped slide stays in the filmstrip and leaves the slideshow and the downloads",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 24,
+      "step": "Search the menus: \"delete slide\"",
+      "expected": "rows for Delete slide",
+      "observed": "1 result: Delete slideSlideUndo brings it back",
+      "ok": null,
+      "rows": 1
+    },
+    {
+      "n": 25,
+      "step": "Search the menus: \"assistant\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 26,
+      "step": "Search the menus: \"help me write\"",
+      "expected": "rows for nothing today",
+      "observed": "Nothing matches: no rows",
+      "ok": null,
+      "rows": 0
+    },
+    {
+      "n": 27,
+      "step": "Tools > Check slides on slide two",
+      "expected": "the panel lists suggestions with Fix where one exists",
+      "observed": "panel \"Suggestions for this slide2\"; 2 suggestions (0 with Fix): Slide 2 has an empty paragraph; type the copy or remove the placeholder (gslides-parity SPEC 5.4). || Slide 2 has an empty paragraph; type the copy or remove the placeholder (gslides-parity SPEC 5.4).",
+      "ok": true
+    },
+    {
+      "n": 28,
+      "step": "Extensions with the switch off, then Tools > Advanced tools on",
+      "expected": "Extensions is not drawn; after the switch it is",
+      "observed": "switch was false; menubar before: file edit view insert format slide arrange tools help; after: file edit view insert format slide arrange tools extensions help",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "Extensions > Agent access",
+      "expected": "the dialog with the MCP and API addresses and the token sentence",
+      "observed": "Extensions rows: Agent access, Embed in a site; dialog: Agent accessAn assistant reads and edits this presentation through these addresses and commands.MCP addresshttps://turboslide.vercel.app/mcp?deck=untitled-20260920-f4aaCopyAPI addresshttps://turboslide.vercel.app/api/actionsCopyPushturboslide deck push untitled-20260920-f4aa --to https://turboslide.vercel.app --token <TURBOSLIDE_TOKEN>CopyPullturboslide deck pull untitled-20260920-f4aa --from https://turboslide.vercel.app --token <TURBOSLIDE_TOKEN>CopyA token is required and is never shown here.",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "Tools > Advanced > Run an action…",
+      "expected": "the full palette with every action by name",
+      "observed": "placeholder \"Search slides, actions, blocks and views\"; open: 235 results; \">replace\": 7 results: Replace slideslide.replaceReplaces a slide with the given document; what the source drawer’s Apply emits. || Find and replacetext.replaceAllReplaces every occurrence of a string in the visible text of the deck (every Text of ever || Unpack deck bundledeck.unpackCreates a deck under decks/ from a bundle zip after validating it, under a free id when the || Push deck to a studiodeck.pushPacks decks/<",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "step": "Tools > Advanced tools off again",
+      "expected": "the switch reads false and Extensions leaves the bar",
+      "observed": "menubar: file edit view insert format slide arrange tools help",
+      "ok": true
+    },
+    {
+      "n": 32,
+      "step": "go back to the title slide and read the revision",
+      "expected": "the title slide is current",
+      "observed": "slide title, revision 6, stage \"Acme pricing review, Q3 2026Click to add subtitle\"",
+      "ok": true
+    },
+    {
+      "n": 33,
+      "step": "POST /api/actions/text.replaceAll as agent:assist-probe (Acme to Globex) while the editor holds the slide",
+      "expected": "a 409 with the lease holder, or the write lands",
+      "observed": "first: 200 replacements 1, slides [\"title\"], revision 7",
+      "ok": true
+    },
+    {
+      "n": 34,
+      "step": "read the editor after the outside write",
+      "expected": "the stage reads Globex within 10 s; the banner or the snackbar names the author",
+      "observed": "stage \"Globex pricing review, Q3 2026Click to add subtitle\"; revision 7; banner: none; snackbar: none",
+      "ok": true
+    },
+    {
+      "n": 35,
+      "step": "Cmd+Z after the outside write",
+      "expected": "whether the seller can undo the assistant write with one undo",
+      "observed": "canUndo before null; after Cmd+Z the stage reads \"Globex pricing review, Q3 2026Click to add subtitle\" (revision 8); snackbar: none",
+      "ok": null
+    },
+    {
+      "n": 36,
+      "step": "File > Version history > See version history",
+      "expected": "the agent write is a row with the Agent mark",
+      "observed": "0 rows; agent rows 0: ; panel: Version historyOnly show named versionsName current versionTodayC106:28 PM to 06:29 PMCork 184, Agent · assist-probe · 9 changes▸",
+      "ok": false
+    },
+    {
+      "n": 37,
+      "step": "the New slide arrow: the layout picker",
+      "expected": "the layouts by name",
+      "observed": "23 layouts: New slide with layout, Layouts, Click to add titleClick to add subtitleTitle slide, Click to add titleClick to add textMaterial: Event Horizon, , Click to add titleClick to add textClick to add textTitle an, Click to add titleClick to add textClick to add textTitle an, Click to add titleTitle only, Click to add titleClick to add textOne column text, Click to add textMain point, Click to add titleClick to add textClick to add textSection , Click to add titleClick to add textImage: NASA, Reto Stöckli, Click to add a numberClick to add textBig number, Blank, Click to add titleClick to add textClick to add textClick to, Click to add titleClick to add textClick to add textClick to, Click to add titleClick to add textClick to add textClick to, Click to add titleClick to add textClick to add a pictureAdd, Click to add titleClick to add a pictureAdd a captionClick t, Click to add titleClick to add textTile grid, Click to add titleClick to add textClick to add a pictureAdd, Click to add titleClick to add textLiveLiveLiveStatus board, Click to add titleClick to add text0821012414631119157135Mat, Click to add titleClick to add textMaterial: Singularity, a ",
+      "ok": true
+    },
+    {
+      "n": 38,
+      "step": "the context reads: deck.info, export.text, slide.get",
+      "expected": "sizes of what a server would send to a model",
+      "observed": "deck.info 419 chars; export.text 59 bytes over 2 slides (notes included: false); slide.get 488 chars; slide.list 274 chars",
+      "ok": false
+    },
+    {
+      "n": 39,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 40,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-f4aa",
+      "ok": true
+    },
+    {
+      "n": 41,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /edit/untitled-20260920-f4aa is 404 within 20 s",
+      "observed": "status 404",
+      "ok": true
+    },
+    {
+      "n": 42,
+      "step": "the scratch deck answers 404 on /deck",
+      "expected": "GET /deck/untitled-20260920-f4aa is 404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ]
+}

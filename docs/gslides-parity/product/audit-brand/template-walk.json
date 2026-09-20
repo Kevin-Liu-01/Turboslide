@@ -1,0 +1,135 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "gt-brand-mu94ymb6",
+  "ranAt": "2026-09-20T01:27:16.767Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "/decks: the start strip",
+      "expected": "the strip cards and the gallery link are read",
+      "observed": "{\"cards\":[{\"control\":\"home.blank\",\"label\":\"Blank presentation\"},{\"control\":\"home.gt-brand\",\"label\":\"GT brand deck\"}],\"gallery\":{\"text\":\"Template gallery\",\"href\":\"#templates\"},\"heading\":\"Start a new presentation\"}",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the Template gallery link",
+      "expected": "where it leads and what it shows",
+      "observed": "tooltip \"Template galleryThe templates a presentation can start from.\"; after the click {\"url\":\"/decks#templates\",\"cards\":2}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the GT brand deck card: hover, then start a deck from it",
+      "expected": "a copy of the 85 slide template opens in the editor",
+      "observed": "tooltip \"GT brand deckMakes a copy of the GT brand template, 85 slides, and opens it.\"; opened /edit/gt-brand-mu94ymb6 in 8190 ms; title \"GT brand deck\"; 85 slides, 8 sections, 115 assets",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "the first slides of the template copy",
+      "expected": "the titles of the first eight slides are read",
+      "observed": "1 opener \"Brand\"; 2 title \"General Translation\"; 3 statement \"Every product in every language\"; 4 content \"Reputation\"; 5 content \"Why the redesign\"; 6 mood \"The Blue Marble\"; 7 content \"Open source and platform\"; 8 content \"Audience\"",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the Open dialog: the decks a marketer can start from or import",
+      "expected": "the list is read",
+      "observed": "0 decks: ; controls dialog.open.close, dialog.open.tab.presentations, dialog.open.tab.upload, dialog.open.search, dialog.open.ok",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "File > Move to trash",
+      "expected": "the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "gt-brand-mu94ymb6",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/gt-brand-mu94ymb6 is 404 within 40 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "facts": {
+    "strip": {
+      "cards": [
+        {
+          "control": "home.blank",
+          "label": "Blank presentation"
+        },
+        {
+          "control": "home.gt-brand",
+          "label": "GT brand deck"
+        }
+      ],
+      "gallery": {
+        "text": "Template gallery",
+        "href": "#templates"
+      },
+      "heading": "Start a new presentation"
+    },
+    "gallery": {
+      "tooltip": "Template galleryThe templates a presentation can start from.",
+      "after": {
+        "url": "/decks#templates",
+        "cards": 2
+      }
+    },
+    "gtBrandCopy": {
+      "tooltip": "GT brand deckMakes a copy of the GT brand template, 85 slides, and opens it.",
+      "ms": 8190,
+      "id": "gt-brand-mu94ymb6",
+      "title": "GT brand deck",
+      "counts": {
+        "slides": 85,
+        "sections": 8,
+        "assets": 115,
+        "htmlBlocks": 0,
+        "skipped": 0,
+        "canvas": 0,
+        "charts": 0,
+        "guides": 0
+      },
+      "sections": [
+        "Brand (15)",
+        "Design system (15)",
+        "Website (11)",
+        "Documentation (5)",
+        "Blog and content (9)",
+        "Developer experience (4)",
+        "Prototemplate and Glyphfield (19)",
+        "Status and plan (7)"
+      ]
+    },
+    "firstSlides": [
+      "1 opener \"Brand\"",
+      "2 title \"General Translation\"",
+      "3 statement \"Every product in every language\"",
+      "4 content \"Reputation\"",
+      "5 content \"Why the redesign\"",
+      "6 mood \"The Blue Marble\"",
+      "7 content \"Open source and platform\"",
+      "8 content \"Audience\""
+    ],
+    "openDialog": {
+      "list": [],
+      "tabs": [
+        "dialog.open.close",
+        "dialog.open.tab.presentations",
+        "dialog.open.tab.upload",
+        "dialog.open.search",
+        "dialog.open.ok"
+      ]
+    }
+  }
+}

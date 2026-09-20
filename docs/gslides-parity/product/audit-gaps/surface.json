@@ -1,0 +1,230 @@
+{
+  "name": "surface",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:25:35.199Z",
+  "seconds": 113,
+  "ok": 20,
+  "failed": 10,
+  "notDriven": 0,
+  "deck": "untitled-20260920-o6w9",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-o6w9; /edit/untitled-20260920-o6w9",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Insert menu, switch off",
+      "expected": "the default rows; no Video or Audio row",
+      "observed": "insert.image, insert.textBox, insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.link(disabled), insert.comment, insert.newSlide, insert.slideNumbers; surface-01-insert-menu-default.png",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "Tools > Advanced tools on",
+      "expected": "the switch reads on",
+      "observed": "advancedTools true",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Insert > Video and Insert > Audio with the switch on",
+      "expected": "both rows are Later stubs: drawn disabled with the clause \"Not available in Turboslide yet\"",
+      "observed": "video {\"id\":\"insert.video\",\"label\":\"Video\",\"disabled\":true,\"checked\":null,\"title\":null}; audio {\"id\":\"insert.audio\",\"label\":\"Audio\",\"disabled\":true,\"checked\":null,\"title\":null}; tooltip \"VideoNot available in Turboslide yet. Link to a recording instead.\"; surface-02-insert-video-later.png",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Font family: select the title, read the toolbar Font control",
+      "expected": "the Font dropdown is drawn disabled with the sentence \"The GT theme sets Inter\"; no other family is offered",
+      "observed": "font {\"disabled\":\"true\",\"text\":\"Font\",\"title\":null,\"desc\":null}; size \"\"; tooltip \"FontThe GT theme sets Inter.\"; click opened 1 popups; chip \"null\"; surface-03-font-control-disabled.png",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "File > Page setup, ODP, SVG, offline, Language with the switch on",
+      "expected": "Page setup, ODP and SVG are Later stubs (disabled); no Make available offline row; File > Language absent",
+      "observed": "pageSetup {\"id\":\"file.pageSetup\",\"label\":\"Page setup\",\"disabled\":true,\"checked\":null,\"title\":null}; tooltip \"Page setupNot available in Turboslide yet. The GT theme is 16:9 at 1600 by 900.\"; offline row false; language row false; download rows file.download.pptx, file.download.odp(disabled), file.download.pdf, file.download.txt, file.download.jpg, file.download.png, file.download.svg(disabled), file.download.html, file.download.zip; surface-04-file-menu-page-setup.png; surface-05-file-download-rows.png",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Slide > Transition with the switch on",
+      "expected": "a Later stub, drawn disabled with its clause",
+      "observed": "transition {\"id\":\"slide.transition\",\"label\":\"Transition\",\"disabled\":true,\"checked\":null,\"title\":null}; tooltip \"TransitionNot available in Turboslide yet. The GT theme presents still slides.\"; toolbar Transition {\"present\":true,\"disabled\":\"true\"}; surface-06-slide-transition-later.png",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Tools > Spelling with the switch on",
+      "expected": "Spell check is a Later stub; Underline errors toggles; no Personal dictionary",
+      "observed": "[{\"id\":\"tools.spelling.spellCheck\",\"disabled\":true,\"checked\":null},{\"id\":\"tools.spelling.underlineErrors\",\"disabled\":false,\"checked\":\"true\"}]; spell check tooltip \"Spell checkNot available in Turboslide yet. Your browser underlines misspellings and offers suggestions on right-click.\"; surface-07-tools-spelling.png",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "Spelling marks: type a misspelt word into the body and read the browser attribute",
+      "expected": "the run carries spellcheck=true and nothing of the product marks the word (the browser draws its own underline, invisible to a script)",
+      "observed": "{\"spellcheck\":\"true\",\"lang\":\"en\",\"marks\":0}; surface-08-spelling-typed.png",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "Edit > Find and replace: Acme to Globex, Replace all",
+      "expected": "the count, the replacement and the title changed",
+      "observed": "hint before \"null\"; buttons /Prev/Next/Replace/Replace all; after \"Replaced 1 occurrence\"; title \"Pipeline review: Globex Q3 2026\"; surface-09-find-replace.png",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Help > Keyboard shortcuts: the dialog, its rows and the Google chords",
+      "expected": "the dialog lists the bound chords; the seller chords are present",
+      "observed": "{\"rows\":132,\"kbd\":143,\"hasComment\":true,\"hasLink\":true,\"hasNewSlide\":true,\"hasNotes\":true,\"hasPresent\":true,\"hasFind\":true,\"hasPasteWithout\":true,\"notAvailable\":1,\"sample\":\"Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterStart from beginningCmd Shift EnterOpen…Cmd OSee version historyCmd Option Shift HPrintCmd PUndoCmd ZRedoCmd YCmd Shift ZCutCmd XCopyCmd CPasteCmd VPaste without formattingCmd Shift VDeleteDeleteDuplicateCmd DSelect allCmd AFind and replaceCmd Shift HLinkCmd KNew slideCtrl MSearch the menusOption /Keyboard shortcutsCmd /R\"}; filtered \"Keyboard shortcutsCommon actionsInsert commentCmd Option MCommentsHide commentsCmd Option Shift JCommentCmd Option MEnter current commentCtrl EnterOpen comment discussion threadCmd Option Shift AMove to next comment in the presentationCtrl Cmd N then CMove to previous comment in the presentationCtrl Cmd P then CWhen focus is on a comment, move to the next commentJWhen focus is on a comment, move to the previous commentKWhen focus is on a comment, reply to itRWhen focus is on a comment, resolve i\"; surface-10-keyboard-shortcuts.png; surface-11-keyboard-shortcuts-search-comment.png",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "Insert > Slide numbers: Apply",
+      "expected": "the dialog offers Apply and Skip title slides; the slide draws a number; no footer text row exists",
+      "observed": "dialog \"Slide numbersOnOffSkip title slidesCancelApply to selectedApply\"; counter on the sheet \"null\"; deck.info keys id,title,theme,revision,sections,counts; footer row in Insert false; surface-12-slide-numbers-dialog.png; surface-13-slide-numbers-applied.png",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Speaker notes: type a note, View > Show speaker notes off and on",
+      "expected": "the pane below the canvas takes the note, the toggle hides and shows it",
+      "observed": "stored \"Open with the renewal date and the two new logos.\"; hidden after the toggle true; shown again true; placeholder \"Click to add speaker notes\"; surface-14-notes-typed.png",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "Text box: type a long paragraph; read the box against its content",
+      "expected": "the box grows or the text shrinks (Google: autofit); the text stays inside the box",
+      "observed": "{\"box\":\"93x59\",\"content\":\"93x59\",\"overflows\":false,\"overflow\":\"visible\",\"font\":\"13px\"}; autofit stored \"undefined\"; pos {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0}; surface-15-text-box-overflow.png",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Format > Text fitting on the text box",
+      "expected": "Format options opens at Text fitting with Do not autofit, Shrink on overflow, Resize shape",
+      "observed": "{\"panel\":false,\"fitting\":null,\"checked\":null}; surface-16-text-fitting-panel.png",
+      "ok": false
+    },
+    {
+      "n": 16,
+      "step": "Alt text on the text box (Format options, Alt text section)",
+      "expected": "a description field; the block carries alt after Tab",
+      "observed": "no Alt text field; panel sections ",
+      "ok": false
+    },
+    {
+      "n": 17,
+      "step": "Link a word: double click a word in the title, Cmd+K, type a URL, Enter",
+      "expected": "the word becomes a link and the URL is not inserted as text",
+      "observed": "selected \"\"; popover true; dialog false; title text \"Pipeline review: Globex Q3 2026\"; stored link true; surface-17-link-word.png",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "Link a block to a slide: New slide, select the text box on slide 1, Insert > Link, pick the slide, Apply",
+      "expected": "the block carries link { slide }; the show jumps on a click",
+      "observed": "no text box or second slide; {\"slide\":{\"schemaVersion\":1,\"id\":\"split-1\",\"template\":\"split\",\"kind\":\"content\",\"layout\":{\"type\":\"split\",\"gap\":56,\"head\":{\"cols\":\"4/8\"},\"body\":{\"align\":\"center\"}},\"slots\":{\"headLeft\":[{\"id\":\"h\",\"type\":",
+      "ok": false
+    },
+    {
+      "n": 19,
+      "step": "The linked block in the show: Slideshow, click the box",
+      "expected": "the show jumps to the linked slide",
+      "observed": "error: no control title.slideshow",
+      "ok": false
+    },
+    {
+      "n": 20,
+      "step": "File > Print settings and preview: the layout dropdown, paper and orientation",
+      "expected": "the handout rows are drawn disabled; no Paper or Orientation control",
+      "observed": "{\"url\":\"/print/untitled-20260920-o6w9\",\"options\":[\"1 slide without notes\",\"1 slide with notes\",\"Handout (2 slides per page)(disabled)\",\"Handout (3 slides per page)(disabled)\",\"Handout (4 slides per page)(disabled)\",\"Handout (6 slides per page)(disabled)\",\"Handout (9 slides per page)(disabled)\"],\"controls\":[\"print.page\",\"print.bar\",\"print.close\",\"print.layout\",\"print.skipped\",\"print.pdf\",\"print.print\",\"print.pages\"],\"paper\":false,\"orientation\":false,\"pages\":\"2\"}; surface-18-print-preview.png",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "File > Open > Upload with a .pptx",
+      "expected": "the file is refused with the PowerPoint sentence",
+      "observed": "error: no control menubar.file",
+      "ok": false
+    },
+    {
+      "n": 22,
+      "step": "File > Import slides > Upload with a .pptx",
+      "expected": "the same refusal",
+      "observed": "error: no control menubar.file",
+      "ok": false
+    },
+    {
+      "n": 23,
+      "step": "File > Share > Publish to web: Publish, the link, a fetch with no cookie, Done, reopen",
+      "expected": "a published link; the player answers 200 without its token or a 4xx with it; Stop publishing offered on reopen",
+      "observed": "error: Cannot find package 'playwright-core' imported from /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/product/gaps/gaps-surface.mjs",
+      "ok": false
+    },
+    {
+      "n": 24,
+      "step": "View > Show sections on a one section deck",
+      "expected": "the row checks; the filmstrip shows a section label only when the deck has more than one section",
+      "observed": "section labels drawn 0; deck sections [{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":1,\"title\":\"Pipeline review: Globex Q3 2026\",\"kind\":\"content\"},{\"id\":\"split-1\",\"n\":2,\"title\":\"Slide 2\",\"kind\":\"content\"}]}]; surface-21-show-sections.png",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "step": "Comment on the text box: Cmd+Option+M, type \"@\" and read the mention list, Comment, Resolve",
+      "expected": "a composer with a mention picker; the thread lists; Resolve works",
+      "observed": "mention list [\"GGravel 701\",\"GGravel 701\"]; markers 0; snackbar \"null\"; markers after Resolve null; surface-22-comment-mentions.png; surface-23-comment-posted.png",
+      "ok": false
+    },
+    {
+      "n": 26,
+      "step": "Cmd+Shift+V pastes plain text",
+      "expected": "the pasted text takes the box style",
+      "observed": "session true; body \"Thsi propsal covers teh renewal\"",
+      "ok": false
+    },
+    {
+      "n": 27,
+      "step": "console errors of the run",
+      "expected": "zero",
+      "observed": "3: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": false
+    },
+    {
+      "n": 28,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-o6w9",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-o6w9 and /edit/untitled-20260920-o6w9 are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

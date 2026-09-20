@@ -1,0 +1,535 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-qlb6",
+  "ranAt": "2026-09-20T01:45:55.458Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260920-qlb6",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "type the title and the lead",
+      "expected": "both runs carry text",
+      "observed": "\"Acme Q4 pitch\" / \"Localization for every product surface.\"; /edit/untitled-20260920-qlb6",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the frame of the sheet: the GT wordmark and the counter",
+      "expected": "both are read from the stage",
+      "observed": "{\"wordmark\":true,\"href\":\"#gt-mark\",\"wmBox\":[335,750,20,13],\"wmColor\":\"rgb(138, 143, 152)\",\"counter\":\"01 / 01\",\"counterBox\":[1328,749,33,11],\"pointerEvents\":\"auto\"}",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "click the GT wordmark in the frame",
+      "expected": "does anything select",
+      "observed": "chip after the click \"null\"; handles 0; wordmark still drawn after Backspace true",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the GT mark on the title slide: select it, read the chip, Delete, undo",
+      "expected": "what a seller can do to the mark",
+      "observed": "chip \"Mark\"; handles 8; after Backspace: mark field gone false, mark still drawn false, slide kind content; after Cmd+Z drawn again true",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "the text colour plate on the selected title",
+      "expected": "the swatches offered on a heading",
+      "observed": "swatches None, Ink, Paper, Ink 2, Titanium, Hairline, Soft hairline, Plate, Edge, Green, Amber, Red, GT blue, Custom; hex field true; heading colour rgb(242, 242, 240) -> rgb(242, 242, 240) after GT blue",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "the text colour plate on a selected word of the lead, then a brand hex",
+      "expected": "the palette, the hex field, the stored value",
+      "observed": "selected \"\"; swatches None, Ink, Paper, Ink 2, Titanium, Hairline, Soft hairline, Plate, Edge, Green, Amber, Red, GT blue, Custom; hex field true; \"#0b3d91\" stored 0 time(s)",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Slide > Change background: a brand hex, then Add to theme",
+      "expected": "the deck default background carries the hex; what the dialog does after the click",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"dialog.background.addToTheme\"]').first()\n",
+      "ok": false
+    },
+    {
+      "n": 9,
+      "step": "Insert > Image > Upload from computer: the logo, timed",
+      "expected": "a picture object lands; the time is read",
+      "observed": "no picture within 120 s after 120049 ms; status words \"\"",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "Format options on the logo: is there a lock or an every slide switch",
+      "expected": "the panel sections are read",
+      "observed": "no logo",
+      "ok": null
+    },
+    {
+      "n": 11,
+      "step": "File > Import slides: the Presentations tab with a 25 s wait",
+      "expected": "the decks offered, then one slide imported",
+      "observed": "55 decks after 1008 ms (untitled-20260920-jjg3, untitled-20260920-c14z, untitled-20260920-rwya, untitled-20260920-l3w8, untitled-20260920-pmvz, untitled-20260920-7x3g, untitled-20260920-jm4d, untitled-20260919-0jar, untitled-20260918-oyqt, untitled-20260918-j502-5, untitled-20260918-9jec, untitled-20260918-fwco, untitled-20260918-l2vc, untitled-20260918-tvpr, untitled-20260917-0tzn, untitled-20260917-ajop, untitled-20260917-6kn6, untitled-20260917-qovo, untitled-20260917-gz3o, untitled-20260917-me47, untitled-20260917-0xza, gt-brand, untitled-20260917-5kh8, untitled-20260914-y0mk, untitled-20260916-hskq, untitled-20260916-kr3t, untitled-20260916-cfz2, 03-pictures-tables, untitled-20260916-yask, untitled-20260915-hodg, gt-brand-mu2ul4sq, untitled-20260915-vgz6, untitled-20260915-tsv1, untitled-20260915-1g7z, untitled-20260915-fatr, untitled-20260915-blw3, untitled-20260915-0o93, untitled-20260915-qfnh, untitled-20260915-15hi, untitled-20260914-qbha, editor-depth-09120307, untitled-20260913-tii2, gt-brand-mu05h5vq, editor-depth-09120413, editor-depth-09120252, editor-depth-09120230, fixture-p8-193001, editor-depth-09120205, fixture-pushed-181201, fixture-p7-190558, editor-depth-09120131, editor-depth-09120057, bundle-round-trip, editor-depth-09120035, fixture-verifier-0912); picked gt-brand; 85 slides offered; Keep original theme false; added opener-brand, title-2, reputation, why, mood-earth, positioning, audience, values, mood-rosetta, character, voice, inspirations, naming, mark, opener-design-system, compression, color, type, multilingual, ladder, lines, doubled-line, mood-calligraphy, diagrams, dither, iso, language-as-material, motion, avoid, opener-website, surfaces, site, dark-mode, pages-a, pages-b, mood-lighthouse, details, details-two, shell-numbers, horizon, opener-documentation, docs, nearest-page-routing, mood-dictionary, docs-for-agents, opener-blog, blog-index, blog-covers, mood-devanagari, gem-smoke, blog-vision, content-rule, two-registers, off-the-site, opener-developer-experience, dx, mood-cable, cli, opener-prototemplate, lab, knowledge-base, skills-marks, viewer-shell, shell-views, line-law, presenter-compare, dossier, directions, mood-wave, archive, engines, build-log, glyphfield, glyphfield-tools, books-and-templates, glyphfield-materials, agent-api, opener-status, state, mood-compass, identity-project, fixed-points, goals, closing kind content; the imported slide's ground rgba(0, 0, 0, 0)",
+      "ok": false
+    },
+    {
+      "n": 12,
+      "step": "File > Open: the Presentations tab with a 25 s wait",
+      "expected": "the decks listed",
+      "observed": "52 decks after 3666 ms: untitled-20260920-c14z, untitled-20260920-qlb6, untitled-20260920-rwya, untitled-20260920-l3w8, untitled-20260919-0jar, untitled-20260918-oyqt, untitled-20260918-j502-5, untitled-20260918-9jec, untitled-20260918-fwco, untitled-20260918-l2vc; text \"OpenPresentationsUploadInterface audit4 slides · Sep 19, 06:34 PMAcme Q4 pitch85 slides · Sep 19, 06:34 PMGT pitch for Acme6 slides · Sep 19, 06:33 PMAcme QBR: pipeline and renewal4 slides · Sep 19, 0\"",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Slideshow: the frame in the show",
+      "expected": "the wordmark and counter are drawn in the show",
+      "observed": "no slideshow control found",
+      "ok": null
+    },
+    {
+      "n": 14,
+      "step": "the print preview",
+      "expected": "the print bar and the pages are read",
+      "observed": "{\"title\":\"Acme Q4 pitch\",\"markInBar\":1,\"pages\":\"85\",\"layout\":[\"slides\",\"notes\",\"handout-2(disabled)\",\"handout-3(disabled)\",\"handout-4(disabled)\",\"handout-6(disabled)\",\"handout-9(disabled)\"],\"wordmarks\":85,\"controls\":[\"print.page\",\"print.bar\",\"print.close\",\"print.layout\",\"print.skipped\",\"print.pdf\",\"print.print\",\"print.pages\"]}",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Download > PowerPoint, Perfect (flatten)",
+      "expected": "the file saves as walk2-flatten-*",
+      "observed": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/walk2-flatten-untitled-20260920-qlb6-dark.pptx; after \"ore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesYour file is ready. DetailsCancelDone\"",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "Download > PowerPoint, Editable text with Embed fonts",
+      "expected": "the file saves as walk2-native-embed-*; the controls of More options are read",
+      "observed": "no file within 240 s; controls dialog.download.pptx, dialog.download.pptx.close, dialog.download.mode.flatten, dialog.download.mode.native, dialog.download.includeNotes, dialog.download.includeSkipped, dialog.download.more, dialog.download.theme, dialog.download.fonts, dialog.download.embedFonts, dialog.download.headings, dialog.download.ok; embed control dialog.download.embedFonts; appearance options Light, Dark, Both",
+      "ok": false
+    },
+    {
+      "n": 17,
+      "step": "Download > PDF in the light appearance",
+      "expected": "the light PDF saves",
+      "observed": "no file within 180 s; controls dialog.download.pdf, dialog.download.pdf.close, dialog.download.includeSkipped, dialog.download.ok",
+      "ok": false
+    },
+    {
+      "n": 18,
+      "step": "File > Move to trash",
+      "expected": "the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-qlb6",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-qlb6 is 404 within 30 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "facts": {
+    "frame": {
+      "wordmark": true,
+      "href": "#gt-mark",
+      "wmBox": [
+        335,
+        750,
+        20,
+        13
+      ],
+      "wmColor": "rgb(138, 143, 152)",
+      "counter": "01 / 01",
+      "counterBox": [
+        1328,
+        749,
+        33,
+        11
+      ],
+      "pointerEvents": "auto"
+    },
+    "titleSlideBefore": {
+      "kind": "title",
+      "mark": {
+        "w": 132,
+        "h": 84
+      },
+      "keys": [
+        "schemaVersion",
+        "id",
+        "template",
+        "kind",
+        "mark",
+        "heading",
+        "lead"
+      ]
+    },
+    "titleMark": {
+      "chip": "Mark",
+      "handles": [
+        "mark: Resize nw",
+        "mark: Resize n",
+        "mark: Resize ne",
+        "mark: Resize e",
+        "mark: Resize se",
+        "mark: Resize s",
+        "mark: Resize sw",
+        "mark: Resize w"
+      ],
+      "gone": false,
+      "stillDrawn": false,
+      "restored": true,
+      "kindAfter": "content",
+      "layoutAfter": {
+        "type": "freeform"
+      }
+    },
+    "headingPlate": {
+      "names": [
+        "None",
+        "Ink",
+        "Paper",
+        "Ink 2",
+        "Titanium",
+        "Hairline",
+        "Soft hairline",
+        "Plate",
+        "Edge",
+        "Green",
+        "Amber",
+        "Red",
+        "GT blue",
+        "Custom"
+      ],
+      "hexField": true,
+      "before": "rgb(242, 242, 240)",
+      "after": "rgb(242, 242, 240)"
+    },
+    "wordPlate": {
+      "selected": "",
+      "names": [
+        "None",
+        "Ink",
+        "Paper",
+        "Ink 2",
+        "Titanium",
+        "Hairline",
+        "Soft hairline",
+        "Plate",
+        "Edge",
+        "Green",
+        "Amber",
+        "Red",
+        "GT blue",
+        "Custom"
+      ],
+      "hexField": true,
+      "stored": 0
+    },
+    "logoUpload": {
+      "ms": 120049,
+      "logo": null,
+      "words": ""
+    },
+    "importSlides": {
+      "decks": [
+        "untitled-20260920-jjg3",
+        "untitled-20260920-c14z",
+        "untitled-20260920-rwya",
+        "untitled-20260920-l3w8",
+        "untitled-20260920-pmvz",
+        "untitled-20260920-7x3g",
+        "untitled-20260920-jm4d",
+        "untitled-20260919-0jar",
+        "untitled-20260918-oyqt",
+        "untitled-20260918-j502-5",
+        "untitled-20260918-9jec",
+        "untitled-20260918-fwco",
+        "untitled-20260918-l2vc",
+        "untitled-20260918-tvpr",
+        "untitled-20260917-0tzn",
+        "untitled-20260917-ajop",
+        "untitled-20260917-6kn6",
+        "untitled-20260917-qovo",
+        "untitled-20260917-gz3o",
+        "untitled-20260917-me47",
+        "untitled-20260917-0xza",
+        "gt-brand",
+        "untitled-20260917-5kh8",
+        "untitled-20260914-y0mk",
+        "untitled-20260916-hskq",
+        "untitled-20260916-kr3t",
+        "untitled-20260916-cfz2",
+        "03-pictures-tables",
+        "untitled-20260916-yask",
+        "untitled-20260915-hodg",
+        "gt-brand-mu2ul4sq",
+        "untitled-20260915-vgz6",
+        "untitled-20260915-tsv1",
+        "untitled-20260915-1g7z",
+        "untitled-20260915-fatr",
+        "untitled-20260915-blw3",
+        "untitled-20260915-0o93",
+        "untitled-20260915-qfnh",
+        "untitled-20260915-15hi",
+        "untitled-20260914-qbha",
+        "editor-depth-09120307",
+        "untitled-20260913-tii2",
+        "gt-brand-mu05h5vq",
+        "editor-depth-09120413",
+        "editor-depth-09120252",
+        "editor-depth-09120230",
+        "fixture-p8-193001",
+        "editor-depth-09120205",
+        "fixture-pushed-181201",
+        "fixture-p7-190558",
+        "editor-depth-09120131",
+        "editor-depth-09120057",
+        "bundle-round-trip",
+        "editor-depth-09120035",
+        "fixture-verifier-0912"
+      ],
+      "waited": 1008,
+      "text": "Import slidesPresentationsUploadAcme renewal: logos and screenshots1 slidesInterface audit1 slidesGT pitch for Acme6 slidesAcme QBR: pipeline and renewal4 slidesPipeline review: Acme Q3 20262 slidesInterface audit1 slidesInterface audit4 slidesUntitled presentation1 slidesUntitled presentation1 slidesPipeline rev3 slidesdsada1 slidesAcme renewal deck v39 slidesBurst 04:06:371 slidesBurst 04:05:281 slidesUntitled presentation1 slidesUntitled presentation1 slidesShared review deck2 slidesCopy paste target2 slidesAcme renewal deck v33 slidesUntitled presentation1 slidesUntitled presentation1 slidesGT brand deck85 slidesW2 slidesUntitled presentation1 slidesAcme pricing review, Q3 20263 slidesUntitled presentation1 slidesUntitled presentation1 slidesImport fixture 03 pictures and tables2 slidesAudit scratch2 slidesPerf bu2 slidesGT brand deck85 slidesTitle one1 slidesTitle one1 slidesTitle one1 slidesTitle one1 slidesTitle one1 slidesTitle one1 slidesNew Slide Template2 slidesNew Slide Template deck1 slidesQ4 review2 slidesEditor depth 0912030785 slidesV13 slidesGT brand deck85 slidesEditor depth 0912041385 slidesEditor depth 0912025285 slidesEditor depth 0912023085 slidesFixture deck2 slidesEditor depth 0912020585 slidesFixture deck2 slidesFixture deck2 slidesEditor depth 0912013185 slidesEditor depth 0912005785 slidesBundle round trip1 slidesEditor depth 0912003585 slidesFixture deck2 slides",
+      "result": {
+        "pick": "dialog.importSlides.deck.gt-brand",
+        "offered": 85,
+        "keepOriginalTheme": false,
+        "added": [
+          "opener-brand",
+          "title-2",
+          "reputation",
+          "why",
+          "mood-earth",
+          "positioning",
+          "audience",
+          "values",
+          "mood-rosetta",
+          "character",
+          "voice",
+          "inspirations",
+          "naming",
+          "mark",
+          "opener-design-system",
+          "compression",
+          "color",
+          "type",
+          "multilingual",
+          "ladder",
+          "lines",
+          "doubled-line",
+          "mood-calligraphy",
+          "diagrams",
+          "dither",
+          "iso",
+          "language-as-material",
+          "motion",
+          "avoid",
+          "opener-website",
+          "surfaces",
+          "site",
+          "dark-mode",
+          "pages-a",
+          "pages-b",
+          "mood-lighthouse",
+          "details",
+          "details-two",
+          "shell-numbers",
+          "horizon",
+          "opener-documentation",
+          "docs",
+          "nearest-page-routing",
+          "mood-dictionary",
+          "docs-for-agents",
+          "opener-blog",
+          "blog-index",
+          "blog-covers",
+          "mood-devanagari",
+          "gem-smoke",
+          "blog-vision",
+          "content-rule",
+          "two-registers",
+          "off-the-site",
+          "opener-developer-experience",
+          "dx",
+          "mood-cable",
+          "cli",
+          "opener-prototemplate",
+          "lab",
+          "knowledge-base",
+          "skills-marks",
+          "viewer-shell",
+          "shell-views",
+          "line-law",
+          "presenter-compare",
+          "dossier",
+          "directions",
+          "mood-wave",
+          "archive",
+          "engines",
+          "build-log",
+          "glyphfield",
+          "glyphfield-tools",
+          "books-and-templates",
+          "glyphfield-materials",
+          "agent-api",
+          "opener-status",
+          "state",
+          "mood-compass",
+          "identity-project",
+          "fixed-points",
+          "goals",
+          "closing"
+        ],
+        "kind": "content",
+        "template": "opener",
+        "ground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    "openDialog": {
+      "decks": [
+        "untitled-20260920-c14z",
+        "untitled-20260920-qlb6",
+        "untitled-20260920-rwya",
+        "untitled-20260920-l3w8",
+        "untitled-20260919-0jar",
+        "untitled-20260918-oyqt",
+        "untitled-20260918-j502-5",
+        "untitled-20260918-9jec",
+        "untitled-20260918-fwco",
+        "untitled-20260918-l2vc",
+        "untitled-20260918-tvpr",
+        "untitled-20260917-0tzn",
+        "untitled-20260917-ajop",
+        "untitled-20260917-6kn6",
+        "untitled-20260917-qovo",
+        "untitled-20260917-gz3o",
+        "untitled-20260917-me47",
+        "untitled-20260917-0xza",
+        "gt-brand",
+        "untitled-20260917-5kh8",
+        "untitled-20260914-y0mk",
+        "untitled-20260916-hskq",
+        "untitled-20260916-kr3t",
+        "untitled-20260916-cfz2",
+        "03-pictures-tables",
+        "untitled-20260916-yask",
+        "untitled-20260915-hodg",
+        "gt-brand-mu2ul4sq",
+        "untitled-20260915-vgz6",
+        "untitled-20260915-tsv1",
+        "untitled-20260915-1g7z",
+        "untitled-20260915-fatr",
+        "untitled-20260915-blw3",
+        "untitled-20260915-0o93",
+        "untitled-20260915-qfnh",
+        "untitled-20260915-15hi",
+        "untitled-20260914-qbha",
+        "editor-depth-09120307",
+        "untitled-20260913-tii2",
+        "gt-brand-mu05h5vq",
+        "editor-depth-09120413",
+        "editor-depth-09120252",
+        "editor-depth-09120230",
+        "fixture-p8-193001",
+        "editor-depth-09120205",
+        "fixture-pushed-181201",
+        "fixture-p7-190558",
+        "editor-depth-09120131",
+        "editor-depth-09120057",
+        "bundle-round-trip",
+        "editor-depth-09120035",
+        "fixture-verifier-0912"
+      ],
+      "waited": 3666,
+      "text": "OpenPresentationsUploadInterface audit4 slides · Sep 19, 06:34 PMAcme Q4 pitch85 slides · Sep 19, 06:34 PMGT pitch for Acme6 slides · Sep 19, 06:33 PMAcme QBR: pipeline and renewal4 slides · Sep 19, 06:33 PMUntitled presentation1 slides · Sep 18, 05:11 PMUntitled presentation1 slides · Sep 18, 04:13 PMPipeline rev3 slides · Sep 18, 03:15 PMdsada1 slides · Sep 18, 02:48 PMAcme renewal deck v39 slides · Sep 18, 10:52 AMBurst 04:06:371 slides · Sep 17, 09:06 PMBurst 04:05:281 slides · Sep 17, 09:05 PMUntitled presentation1 slides · Sep 17, 04:31 PMUntitled presentation1 slides · Sep 17, 04:31 PMShared review deck2 slides · Sep 17, 04:28 PMCopy paste target2 slides · Sep 17, 01:51 PMAcme renewal deck v33 slides · Sep 17, 11:19 AMUntitled presentation1 slides · Sep 16, 08:50 PMUntitled presentation1 slides · Sep 16, 08:49 PMGT brand deck85 slides · Sep 16, 08:45 PMW2 slides · Sep 16, 06:15 PMUntitled presentation1 slides · Sep 16, 04:44 PMAcme pricing review, Q3 20263 slides · Sep 16, 03:24 AMUntitled presentation1 slides · Sep 16, 01:04 AMUntitled presentation1 slides · Sep 15, 11:13 PMImport fixture 03 pictures and tables2 slides · Sep 15, 06:19 PMAudit scratch2 slides · Sep 15, 05:35 PMPerf bu2 slides · Sep 15, 03:21 PMGT brand deck85 slides · Sep 15, 08:49 AMTitle one1 slides · Sep 14, 07:02 PMTitle one1 slides · Sep 14, 06:49 PMTitle one1 slides · Sep 14, 06:42 PMTitle one1 slides · Sep 14, 06:36 PMTitle one1 slides · Sep 14, 06:34 PMTitle one1 slides · Sep 14, 06:24 PMNew Slide Template2 slides · Sep 14, 06:08 PMNew Slide Template deck1 slides · Sep 14, 06:03 PMQ4 review2 slides · Sep 14, 04:26 PMEditor depth 0912030785 slides · Sep 14, 02:41 AMV13 slides · Sep 13, 11:51 AMGT brand deck85 slides · Sep 13, 11:31 AMEditor depth 0912041385 slides · Sep 11, 09:13 PMEditor depth 0912025285 slides · Sep 11, 07:52 PMEditor depth 0912023085 slides · Sep 11, 07:34 PMFixture deck2 slides · Sep 11, 07:34 PMEditor depth 0912020585 slides · Sep 11, 07:05 PMFixture deck2 slides · Sep 11, 07:03 PMFixture deck2 slides · Sep 11, 07:03 PMEditor depth 0912013185 slides · Sep 11, 06:56 PMEditor depth 0912005785 slides · Sep 11, 06:18 PMBundle round trip1 slides · Sep 11, 06:10 PMEditor depth 0912003585 slides · Sep 11, 05:36 PMFixture deck2 slides · Sep 10, 01:00 PMCancelOpen"
+    },
+    "slideshowControls": [],
+    "print": {
+      "title": "Acme Q4 pitch",
+      "markInBar": 1,
+      "pages": "85",
+      "layout": [
+        "slides",
+        "notes",
+        "handout-2(disabled)",
+        "handout-3(disabled)",
+        "handout-4(disabled)",
+        "handout-6(disabled)",
+        "handout-9(disabled)"
+      ],
+      "wordmarks": 85,
+      "controls": [
+        "print.page",
+        "print.bar",
+        "print.close",
+        "print.layout",
+        "print.skipped",
+        "print.pdf",
+        "print.print",
+        "print.pages"
+      ]
+    },
+    "flattenDetails": null,
+    "downloadMore": {
+      "controls": [
+        "dialog.download.pptx",
+        "dialog.download.pptx.close",
+        "dialog.download.mode.flatten",
+        "dialog.download.mode.native",
+        "dialog.download.includeNotes",
+        "dialog.download.includeSkipped",
+        "dialog.download.more",
+        "dialog.download.theme",
+        "dialog.download.fonts",
+        "dialog.download.embedFonts",
+        "dialog.download.headings",
+        "dialog.download.ok"
+      ],
+      "embed": "dialog.download.embedFonts",
+      "themeOptions": [
+        "Light",
+        "Dark",
+        "Both"
+      ]
+    },
+    "pdfControls": [
+      "dialog.download.pdf",
+      "dialog.download.pdf.close",
+      "dialog.download.includeSkipped",
+      "dialog.download.ok"
+    ],
+    "downloads": [
+      {
+        "tag": "flatten",
+        "name": "untitled-20260920-qlb6-dark.pptx",
+        "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/walk2-flatten-untitled-20260920-qlb6-dark.pptx",
+        "at": "2026-09-20T01:38:28.657Z"
+      }
+    ]
+  },
+  "downloads": [
+    {
+      "tag": "flatten",
+      "name": "untitled-20260920-qlb6-dark.pptx",
+      "to": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-brand/walk2-flatten-untitled-20260920-qlb6-dark.pptx",
+      "at": "2026-09-20T01:38:28.657Z"
+    }
+  ]
+}

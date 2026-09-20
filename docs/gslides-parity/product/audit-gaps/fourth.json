@@ -1,0 +1,81 @@
+{
+  "name": "fourth",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:42:16.885Z",
+  "seconds": 77,
+  "ok": 7,
+  "failed": 2,
+  "notDriven": 0,
+  "deck": "untitled-20260920-x8x0",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-x8x0; /edit/untitled-20260920-x8x0",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Setup: a picture by upload and a text box",
+      "expected": "the objects the rows below need",
+      "observed": "picture shot; text box text; slides title,split-1",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "Image options > Adjustments > Transparency: the control, then 40 typed and Enter",
+      "expected": "adjust.transparency 0.4 and the picture at 0.6 opacity",
+      "observed": "control {\"tag\":\"INPUT\",\"type\":\"text\",\"inputmode\":\"decimal\",\"value\":\"0\",\"w\":57,\"h\":30,\"label\":\"Transparency value\",\"siblings\":\"INPUT:text\"}; adjust {\"transparency\":0.4}; img opacity 0.6; fourth-01-transparency-control.png; fourth-02-transparency-40.png",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Alt text on the picture: the field, a description typed, Tab, then a reload",
+      "expected": "the description reads back after the reload",
+      "observed": "error: locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.",
+      "ok": false
+    },
+    {
+      "n": 5,
+      "step": "Link on a selected block: the toolbar Insert link button, then the right click menu",
+      "expected": "a Link dialog with \"Slides in this presentation\" from one of the routes",
+      "observed": "toolbar button {\"popover\":true,\"dialog\":false,\"editing\":true,\"popText\":\"\"}; context rows edit.cut,edit.copy,edit.paste,edit.delete,edit.duplicate,arrange.order,arrange.rotate,arrange.centerOnPage,arrange.align,arrange.distribute,arrange.group,arrange.ungroup,insert.link,format.textFitting,format.formatOptions,insert.comment; link row insert.link -> {\"popover\":true,\"dialog\":false}; Insert > Link {\"popover\":true,\"dialog\":false}; fourth-04-link-context-menu.png",
+      "ok": false
+    },
+    {
+      "n": 6,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "1: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-x8x0",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-x8x0 and /edit/untitled-20260920-x8x0 are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

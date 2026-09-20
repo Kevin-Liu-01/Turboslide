@@ -1,0 +1,4185 @@
+{
+  "startedAt": "2026-09-20T01:40:01.600Z",
+  "finishedAt": "2026-09-20T01:42:34.489Z",
+  "deckId": "untitled-20260920-c14z",
+  "objects": {
+    "text": "text",
+    "shape": "shape",
+    "line": "shape-2",
+    "picture": "shot-audit-mu958p3l",
+    "table": "table",
+    "chart": "chart",
+    "slide2": "split-1",
+    "slide3": "split-2",
+    "slide4": "split-3",
+    "slide1": "title"
+  },
+  "consoleErrors": [
+    "console: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "surface": "editor",
+      "what": "1280-light the editor skeleton on /edit",
+      "observed": {
+        "skeleton": true,
+        "skeletonAtMs": 728,
+        "readyMs": 1017,
+        "theme": "light"
+      }
+    },
+    {
+      "n": 2,
+      "surface": "editor",
+      "what": "1280-light the frame",
+      "observed": {
+        "theme": "light",
+        "appearance": "light",
+        "paper": "#fff",
+        "ink": "#070707",
+        "titanium": "#8a8f98",
+        "hair": "#0707072e",
+        "select": "#1a73e8",
+        "rows": {
+          "title": "1280x44 at 0,0",
+          "menubar": "1280x28 at 0,44",
+          "toolbar": "1280x40 at 0,72",
+          "filmstrip": "256x656 at 0,112",
+          "stage": "1024x592 at 256,112",
+          "notes": "1024x64 at 256,704",
+          "bottom": "1280x32 at 0,768"
+        },
+        "sheet": {
+          "x": 292,
+          "y": 140,
+          "w": 953,
+          "h": 536.0625
+        }
+      }
+    },
+    {
+      "n": 3,
+      "surface": "title",
+      "what": "1280-light row",
+      "observed": {
+        "text": "Interface auditAll changes savedSlideshowShare",
+        "box": "1280x44 at 0,0",
+        "h": "44px",
+        "pad": "0px 12px 0px 10px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 24,
+          "h": 24
+        },
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 4,
+      "surface": "title",
+      "what": "1280-light home mark link",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 10,6",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 24,
+          "h": 24
+        },
+        "tip": "Turboslide home",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 5,
+      "surface": "title",
+      "what": "1280-light deck name",
+      "observed": {
+        "text": "Interface audit",
+        "box": "115x32 at 50,6",
+        "h": "32px",
+        "pad": "0px 8px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Rename",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 6,
+      "surface": "title",
+      "what": "1280-light save words",
+      "observed": {
+        "text": "All changes saved",
+        "box": "317x32 at 173,6",
+        "h": "32px",
+        "pad": "0px 8px",
+        "radius": "0px",
+        "font": "12.5px/12.5px 400 Inter",
+        "color": "#8a8f98",
+        "ground": "#ffffff",
+        "textContrast": 3.25,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(138, 143, 152) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "default",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "All changes saved",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 7,
+      "surface": "title",
+      "what": "1280-light clock",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 498,6",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#8a8f98",
+        "ground": "#ffffff",
+        "textContrast": 3.25,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(138, 143, 152) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Last edit just now by Krypton 557",
+        "title": null,
+        "disabled": false,
+        "pressed": "false"
+      }
+    },
+    {
+      "n": 8,
+      "surface": "title",
+      "what": "1280-light comments toggle",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 1009,6",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#8a8f98",
+        "ground": "#ffffff",
+        "textContrast": 3.25,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(138, 143, 152) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Show all comments",
+        "title": null,
+        "disabled": false,
+        "pressed": "false"
+      }
+    },
+    {
+      "n": 9,
+      "surface": "title",
+      "what": "1280-light slideshow split",
+      "observed": {
+        "text": "Slideshow",
+        "box": "133x32 at 1049,6",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "8px",
+        "font": "13px/13px 400 Inter",
+        "color": "#ffffff",
+        "ground": "#070707",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(255, 255, 255) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 12,
+          "h": 12
+        },
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 10,
+      "surface": "title",
+      "what": "1280-light slideshow label half",
+      "observed": {
+        "text": "Slideshow",
+        "box": "103x30 at 1050,7",
+        "h": "30px",
+        "pad": "0px 10px 0px 12px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#ffffff",
+        "ground": "#070707",
+        "textContrast": 20.14,
+        "border": "0px none rgb(255, 255, 255)",
+        "borderHex": "#ffffff",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(255, 255, 255) offset 0px",
+        "transition": "background-color 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 12,
+          "h": 12
+        },
+        "tip": "Slideshow",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 11,
+      "surface": "title",
+      "what": "1280-light slideshow arrow half",
+      "observed": {
+        "text": "",
+        "box": "28x30 at 1153,7",
+        "h": "30px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#ffffff",
+        "ground": "#070707",
+        "textContrast": 20.14,
+        "border": "0px none rgb(255, 255, 255)",
+        "borderHex": "#ffffff",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(255, 255, 255) offset 0px",
+        "transition": "background-color 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 14,
+          "h": 14
+        },
+        "tip": "Presentation options",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 12,
+      "surface": "title",
+      "what": "1280-light share",
+      "observed": {
+        "text": "Share",
+        "box": "78x32 at 1190,6",
+        "h": "32px",
+        "pad": "0px 10px",
+        "radius": "8px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 14,
+          "h": 14
+        },
+        "tip": "Share",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 13,
+      "surface": "title",
+      "what": "1280-light presence own chip",
+      "observed": {
+        "text": "",
+        "box": "184x32 at 817,6",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 14,
+      "surface": "title",
+      "what": "1280-light the right cluster geometry",
+      "observed": [
+        {
+          "cls": "ts-presence",
+          "ctl": "title.presence",
+          "x": 817,
+          "w": 184,
+          "h": 32,
+          "radius": "0px",
+          "empty": true
+        },
+        {
+          "cls": "ts-title-slot",
+          "ctl": "title.comments.slot",
+          "x": 1009,
+          "w": 32,
+          "h": 32,
+          "radius": "0px",
+          "empty": false
+        },
+        {
+          "cls": "ts-title-slideshow",
+          "ctl": "present.split",
+          "x": 1049,
+          "w": 133,
+          "h": 32,
+          "radius": "8px",
+          "empty": false
+        },
+        {
+          "cls": "ts-title-share-slot",
+          "ctl": "share.slot",
+          "x": 1190,
+          "w": 78,
+          "h": 32,
+          "radius": "0px",
+          "empty": false
+        }
+      ]
+    },
+    {
+      "n": 15,
+      "surface": "title",
+      "what": "1280-light hover states of the right cluster",
+      "observed": {
+        "deck.name": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "ownBg": null,
+          "cursor": "text"
+        },
+        "share.open": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "ownBg": null,
+          "cursor": "pointer"
+        },
+        "present.open": {
+          "hover": true,
+          "border": "#ffffff",
+          "borderContrast": 20.14,
+          "color": "#ffffff",
+          "ownBg": [
+            46.68000000000001,
+            46.68000000000001,
+            46.68000000000001
+          ],
+          "cursor": "pointer"
+        },
+        "present.arrow": {
+          "hover": true,
+          "border": "#ffffff",
+          "borderContrast": 20.14,
+          "color": "#ffffff",
+          "ownBg": [
+            46.68000000000001,
+            46.68000000000001,
+            46.68000000000001
+          ],
+          "cursor": "pointer"
+        }
+      }
+    },
+    {
+      "n": 16,
+      "surface": "title",
+      "what": "1280-light tooltip on Share and the split button",
+      "observed": {
+        "share": {
+          "shown": true,
+          "afterMs": 367,
+          "name": "Share",
+          "key": null,
+          "doc": "Who can open this presentation, and the link to send",
+          "box": {
+            "x": 992,
+            "y": 44,
+            "w": 280,
+            "h": 70.5
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "slideshow": {
+          "shown": true,
+          "afterMs": 360,
+          "name": "Slideshow",
+          "key": "Cmd Enter",
+          "doc": "Presents from the current slide; the Down arrow opens the options",
+          "box": {
+            "x": 962,
+            "y": 43,
+            "w": 280,
+            "h": 71
+          },
+          "keyRadius": "6px",
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "arrow": {
+          "shown": true,
+          "afterMs": 364,
+          "name": "Presentation options",
+          "key": null,
+          "doc": "Presenter view and Start from beginning",
+          "box": {
+            "x": 1016,
+            "y": 43,
+            "w": 256.21875,
+            "h": 53
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "name": {
+          "shown": true,
+          "afterMs": 357,
+          "name": "Rename",
+          "key": null,
+          "doc": "Click the title to rename the presentation; Enter keeps the name and Esc restores it",
+          "box": {
+            "x": 8,
+            "y": 44,
+            "w": 280,
+            "h": 70.5
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "save": {
+          "shown": true,
+          "afterMs": 364,
+          "name": "All changes saved",
+          "key": null,
+          "doc": "All changes saved, Saving, Offline, Not saved yet or Couldn’t save, retrying",
+          "box": {
+            "x": 192,
+            "y": 44,
+            "w": 280,
+            "h": 70.5
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        }
+      }
+    },
+    {
+      "n": 17,
+      "surface": "title",
+      "what": "1280-light keyboard focus through the title row",
+      "observed": [
+        {
+          "on": "deck.name",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px",
+          "inRow": true
+        },
+        {
+          "on": "deck.saveState",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px",
+          "inRow": true
+        },
+        {
+          "on": "deck.lastEdit",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px",
+          "inRow": true
+        },
+        {
+          "on": "presence.more",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset 1px",
+          "inRow": true
+        },
+        {
+          "on": "title.comments",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px",
+          "inRow": true
+        },
+        {
+          "on": "present.open",
+          "fv": true,
+          "outline": "1px solid rgb(255, 255, 255) offset -3px",
+          "inRow": true
+        },
+        {
+          "on": "present.arrow",
+          "fv": true,
+          "outline": "1px solid rgb(255, 255, 255) offset -3px",
+          "inRow": true
+        },
+        {
+          "on": "share.open",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px",
+          "inRow": true
+        }
+      ]
+    },
+    {
+      "n": 18,
+      "surface": "title",
+      "what": "1280-light a long deck name (truncation)",
+      "observed": {
+        "fieldW": 280,
+        "fieldFont": "14px/14px 500 Inter",
+        "nameW": 360,
+        "maxWidth": "360px",
+        "ellipsis": "ellipsis",
+        "clipped": true,
+        "save": "Saving…",
+        "tabTitle": "Q3 enterprise renewal pitch for the EMEA team, revision four with pricing, editor, Turbosl"
+      }
+    },
+    {
+      "n": 19,
+      "surface": "title",
+      "what": "1280-light rename back",
+      "observed": "Interface audit"
+    },
+    {
+      "n": 20,
+      "surface": "menubar",
+      "what": "1280-light row",
+      "observed": {
+        "text": "FileEditViewInsertFormatSlideArrangeToolsHelp",
+        "box": "1280x28 at 0,44",
+        "h": "28px",
+        "pad": "0px 6px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 21,
+      "surface": "menubar",
+      "what": "1280-light title button",
+      "observed": {
+        "text": "File",
+        "box": "46x28 at 6,44",
+        "h": "28px",
+        "pad": "0px 12px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "default",
+        "svg": null,
+        "tip": "File menu",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 22,
+      "surface": "menubar",
+      "what": "1280-light the titles",
+      "observed": [
+        "File",
+        "Edit",
+        "View",
+        "Insert",
+        "Format",
+        "Slide",
+        "Arrange",
+        "Tools",
+        "Help"
+      ]
+    },
+    {
+      "n": 23,
+      "surface": "menubar",
+      "what": "1280-light hover a title",
+      "observed": {
+        "hover": true,
+        "ownBg": [
+          246.32,
+          246.32,
+          246.32
+        ],
+        "groundContrast": 1.08,
+        "color": "#070707",
+        "cursor": "default",
+        "gapsBetweenTitles": [
+          0
+        ]
+      }
+    },
+    {
+      "n": 24,
+      "surface": "menus",
+      "what": "1280-light the file menu",
+      "observed": {
+        "w": 220,
+        "h": 373,
+        "bottom": 447,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 12,
+        "disabled": 0,
+        "withIcon": 5,
+        "withKey": 2,
+        "submenus": 5,
+        "dividers": 3,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "New",
+          "Open…",
+          "Import slides",
+          "Make a copy",
+          "Share",
+          "Download",
+          "Rename",
+          "Move to trash",
+          "Version history",
+          "Details",
+          "Print settings and preview",
+          "Print"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": null,
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 25,
+      "surface": "menus",
+      "what": "1280-light the edit menu",
+      "observed": {
+        "w": 220,
+        "h": 345,
+        "bottom": 419,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 11,
+        "disabled": 1,
+        "withIcon": 1,
+        "withKey": 10,
+        "submenus": 0,
+        "dividers": 3,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Undo",
+          "Redo",
+          "Cut",
+          "Copy",
+          "Paste",
+          "Paste without formatting",
+          "Delete",
+          "Duplicate",
+          "Select all",
+          "Select none",
+          "Find and replace"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "disabledRow": {
+          "text": "Redo",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 26,
+      "surface": "menus",
+      "what": "1280-light the view menu",
+      "observed": {
+        "w": 220,
+        "h": 345,
+        "bottom": 419,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 11,
+        "disabled": 0,
+        "withIcon": 4,
+        "withKey": 2,
+        "submenus": 6,
+        "dividers": 3,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Slideshow",
+          "Zoom",
+          "Show ruler",
+          "Guides",
+          "Snap to",
+          "Comments",
+          "Show speaker notes",
+          "Show filmstrip",
+          "Mode",
+          "Full screen",
+          "Appearance"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": null,
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 27,
+      "surface": "menus",
+      "what": "1280-light the insert menu",
+      "observed": {
+        "w": 220,
+        "h": 364,
+        "bottom": 438,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 12,
+        "disabled": 1,
+        "withIcon": 10,
+        "withKey": 3,
+        "submenus": 5,
+        "dividers": 2,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Image",
+          "Text box",
+          "Shape",
+          "Table",
+          "Chart",
+          "Diagram",
+          "Word art",
+          "Line",
+          "Link",
+          "Comment",
+          "New slide",
+          "Slide numbers"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": {
+          "text": "Link",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 28,
+      "surface": "menus",
+      "what": "1280-light the format menu",
+      "observed": {
+        "w": 220,
+        "h": 308,
+        "bottom": 382,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 10,
+        "disabled": 2,
+        "withIcon": 4,
+        "withKey": 1,
+        "submenus": 7,
+        "dividers": 2,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Text",
+          "Align & indent",
+          "Line & paragraph spacing",
+          "Bullets & numbering",
+          "Table",
+          "Image",
+          "Borders & lines",
+          "Format options",
+          "Clear formatting",
+          "Text fitting"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": {
+          "text": "Clear formatting",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 29,
+      "surface": "menus",
+      "what": "1280-light the slide menu",
+      "observed": {
+        "w": 220,
+        "h": 252,
+        "bottom": 326,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 8,
+        "disabled": 0,
+        "withIcon": 5,
+        "withKey": 2,
+        "submenus": 2,
+        "dividers": 2,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "New slide",
+          "Duplicate slide",
+          "Delete slide",
+          "Skip slide",
+          "Move slide",
+          "Change background",
+          "Apply layout",
+          "Change theme"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": null,
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 30,
+      "surface": "menus",
+      "what": "1280-light the arrange menu",
+      "observed": {
+        "w": 220,
+        "h": 252,
+        "bottom": 326,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 8,
+        "disabled": 8,
+        "withIcon": 4,
+        "withKey": 2,
+        "submenus": 5,
+        "dividers": 2,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Order",
+          "Align",
+          "Distribute",
+          "Center on page",
+          "Rotate",
+          "Group",
+          "Ungroup",
+          "Regroup"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": {
+          "text": "Order",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 31,
+      "surface": "menus",
+      "what": "1280-light the tools menu",
+      "observed": {
+        "w": 220,
+        "h": 103,
+        "bottom": 177,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 3,
+        "disabled": 0,
+        "withIcon": 1,
+        "withKey": 0,
+        "submenus": 1,
+        "dividers": 1,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Accessibility settings",
+          "Check slides",
+          "Advanced tools"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": null,
+        "iconPx": 16,
+        "subChevronPx": 14,
+        "disabledRow": null,
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 32,
+      "surface": "menus",
+      "what": "1280-light the help menu",
+      "observed": {
+        "w": 220,
+        "h": 131,
+        "bottom": 205,
+        "viewportH": 800,
+        "overflowsViewport": false,
+        "scrolls": false,
+        "rows": 4,
+        "disabled": 0,
+        "withIcon": 2,
+        "withKey": 2,
+        "submenus": 0,
+        "dividers": 1,
+        "rowH": [
+          28
+        ],
+        "labels": [
+          "Search the menus",
+          "Help",
+          "Help Turboslide improve",
+          "Keyboard shortcuts"
+        ],
+        "plateFont": "13px/16.9px 400 Inter",
+        "plateBorder": "#d2d2d2",
+        "plateBorderContrast": 1.51,
+        "plateAnimation": "pt-fade-in 0.12s",
+        "key": {
+          "font": "12px/15.6px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "iconPx": 16,
+        "disabledRow": null,
+        "escapeCloses": true,
+        "newConsoleErrors": 0
+      }
+    },
+    {
+      "n": 33,
+      "surface": "menus",
+      "what": "1280-light a row hover and a submenu (Format > Align & indent)",
+      "observed": {
+        "hovered": {
+          "ownBg": [
+            246.32,
+            246.32,
+            246.32
+          ],
+          "groundContrast": 1.08,
+          "color": "#070707"
+        },
+        "alignId": "format.alignIndent",
+        "sub": {
+          "open": true,
+          "x": 427,
+          "y": 103,
+          "w": 220,
+          "overlapWithParent": 5,
+          "rows": 6,
+          "openAfterMs": 578
+        }
+      }
+    },
+    {
+      "n": 34,
+      "surface": "menus",
+      "what": "1280-light the disabled rows of Edit",
+      "observed": {
+        "rows": [
+          {
+            "label": "Undo",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Undo"
+          },
+          {
+            "label": "Redo",
+            "disabled": true,
+            "ariaDisabled": "true",
+            "cursor": "default",
+            "title": null,
+            "tip": "Redo"
+          },
+          {
+            "label": "Cut",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Cut"
+          },
+          {
+            "label": "Copy",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Copy"
+          },
+          {
+            "label": "Paste",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Paste"
+          },
+          {
+            "label": "Paste without formatting",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Paste without formatting"
+          },
+          {
+            "label": "Delete",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Delete"
+          },
+          {
+            "label": "Duplicate",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Duplicate"
+          },
+          {
+            "label": "Select all",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Select all"
+          },
+          {
+            "label": "Select none",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Select none"
+          },
+          {
+            "label": "Find and replace",
+            "disabled": false,
+            "ariaDisabled": null,
+            "cursor": "pointer",
+            "title": null,
+            "tip": "Find and replace"
+          }
+        ],
+        "disabledColor": "#8a8f98",
+        "disabledContrast": 3.25
+      }
+    },
+    {
+      "n": 35,
+      "surface": "menus",
+      "what": "1280-light View > Appearance",
+      "observed": {
+        "rows": [
+          {
+            "id": "menu.view.appearance.light",
+            "checked": "true",
+            "role": "menuitemradio"
+          },
+          {
+            "id": "menu.view.appearance.dark",
+            "checked": "false",
+            "role": "menuitemradio"
+          },
+          {
+            "id": "menu.view.appearance.match",
+            "checked": "false",
+            "role": "menuitemradio"
+          }
+        ],
+        "switchedTo": "dark",
+        "back": "light",
+        "transitionOnRoot": "0s"
+      }
+    },
+    {
+      "n": 36,
+      "surface": "toolbar",
+      "what": "1280-light default tail",
+      "observed": {
+        "bar": {
+          "x": 0,
+          "w": 1280,
+          "h": 40,
+          "right": 1280
+        },
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "overflow": false,
+        "clipped": [],
+        "more": false,
+        "seps": [
+          {
+            "x": 334,
+            "h": 20
+          },
+          {
+            "x": 615,
+            "h": 20
+          }
+        ],
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          17,
+          18,
+          344
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "select:32",
+          "textBox:32",
+          "insertImage:42",
+          "insertShape:42",
+          "insertLine:32",
+          "insertLine.arrow:32",
+          "insertComment:32",
+          "background:92",
+          "layout:75",
+          "theme:61",
+          "pointer:32",
+          "hideMenus:32"
+        ],
+        "count": 21,
+        "ctrls": [
+          {
+            "id": "toolbar.search",
+            "x": 8,
+            "w": 32,
+            "h": 32,
+            "right": 40,
+            "disabled": false,
+            "pressed": "false",
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Search the menus",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.newSlide",
+            "x": 44,
+            "w": 32,
+            "h": 32,
+            "right": 76,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "New slide",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.newSlide.arrow",
+            "x": 72,
+            "w": 32,
+            "h": 32,
+            "right": 104,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "New slide with layout",
+            "title": null,
+            "svg": 12
+          },
+          {
+            "id": "toolbar.undo",
+            "x": 108,
+            "w": 32,
+            "h": 32,
+            "right": 140,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Undo",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.redo",
+            "x": 144,
+            "w": 32,
+            "h": 32,
+            "right": 176,
+            "disabled": true,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(138, 143, 152)",
+            "radius": "0px",
+            "tip": "Redo",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.print",
+            "x": 180,
+            "w": 32,
+            "h": 32,
+            "right": 212,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Print",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.paintFormat",
+            "x": 216,
+            "w": 32,
+            "h": 32,
+            "right": 248,
+            "disabled": true,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(138, 143, 152)",
+            "radius": "0px",
+            "tip": "Paint format",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "view.zoom.value",
+            "x": 253,
+            "w": 52,
+            "h": 30,
+            "right": 305,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "13px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Zoom",
+            "title": null,
+            "svg": null
+          },
+          {
+            "id": "view.zoom.arrow",
+            "x": 305,
+            "w": 20,
+            "h": 30,
+            "right": 325,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "13.3333px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Zoom levels",
+            "title": null,
+            "svg": 12
+          },
+          {
+            "id": "toolbar.select",
+            "x": 343,
+            "w": 32,
+            "h": 32,
+            "right": 375,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Select",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.textBox",
+            "x": 379,
+            "w": 32,
+            "h": 32,
+            "right": 411,
+            "disabled": false,
+            "pressed": null,
+            "text": "T",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Text box",
+            "title": null,
+            "svg": null
+          },
+          {
+            "id": "toolbar.insertImage",
+            "x": 415,
+            "w": 42,
+            "h": 32,
+            "right": 457,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Insert image",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.insertShape",
+            "x": 461,
+            "w": 42,
+            "h": 32,
+            "right": 503,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Insert shape",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.insertLine",
+            "x": 507,
+            "w": 32,
+            "h": 32,
+            "right": 539,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Insert line",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.insertLine.arrow",
+            "x": 539,
+            "w": 32,
+            "h": 32,
+            "right": 571,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Line",
+            "title": null,
+            "svg": 12
+          },
+          {
+            "id": "toolbar.insertComment",
+            "x": 575,
+            "w": 32,
+            "h": 32,
+            "right": 607,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Insert comment",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.background",
+            "x": 624,
+            "w": 92,
+            "h": 32,
+            "right": 716,
+            "disabled": false,
+            "pressed": null,
+            "text": "Background",
+            "font": "13px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Background",
+            "title": null,
+            "svg": null
+          },
+          {
+            "id": "toolbar.layout",
+            "x": 720,
+            "w": 75,
+            "h": 32,
+            "right": 795,
+            "disabled": false,
+            "pressed": "false",
+            "text": "Layout",
+            "font": "13px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Layout",
+            "title": null,
+            "svg": 12
+          },
+          {
+            "id": "toolbar.theme",
+            "x": 799,
+            "w": 61,
+            "h": 32,
+            "right": 860,
+            "disabled": false,
+            "pressed": "false",
+            "text": "Theme",
+            "font": "13px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Theme",
+            "title": null,
+            "svg": null
+          },
+          {
+            "id": "toolbar.pointer",
+            "x": 1204,
+            "w": 32,
+            "h": 32,
+            "right": 1236,
+            "disabled": false,
+            "pressed": "false",
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Show my pointer",
+            "title": null,
+            "svg": 16
+          },
+          {
+            "id": "toolbar.hideMenus",
+            "x": 1240,
+            "w": 32,
+            "h": 32,
+            "right": 1272,
+            "disabled": false,
+            "pressed": null,
+            "text": "",
+            "font": "14px",
+            "color": "rgb(58, 61, 68)",
+            "radius": "0px",
+            "tip": "Hide the menus",
+            "title": null,
+            "svg": 16
+          }
+        ]
+      }
+    },
+    {
+      "n": 37,
+      "surface": "toolbar",
+      "what": "1280-light search pill",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 8,76",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Search the menus",
+        "title": null,
+        "disabled": false,
+        "pressed": "false"
+      }
+    },
+    {
+      "n": 38,
+      "surface": "toolbar",
+      "what": "1280-light new slide button",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 44,76",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "New slide",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 39,
+      "surface": "toolbar",
+      "what": "1280-light undo (disabled at start)",
+      "observed": {
+        "text": "",
+        "box": "32x32 at 108,76",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "14px/14px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": "Undo",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 40,
+      "surface": "toolbar",
+      "what": "1280-light zoom field",
+      "observed": {
+        "text": "",
+        "box": "52x30 at 253,77",
+        "h": "30px",
+        "pad": "0px 6px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Zoom",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 41,
+      "surface": "toolbar",
+      "what": "1280-light zoom box",
+      "observed": {
+        "text": "",
+        "box": "74x32 at 252,76",
+        "h": "32px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 12,
+          "h": 12
+        },
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 42,
+      "surface": "toolbar",
+      "what": "1280-light text button (Background)",
+      "observed": {
+        "text": "Background",
+        "box": "92x32 at 624,76",
+        "h": "32px",
+        "pad": "0px 8px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Background",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 43,
+      "surface": "toolbar",
+      "what": "1280-light layout button",
+      "observed": {
+        "text": "Layout",
+        "box": "75x32 at 720,76",
+        "h": "32px",
+        "pad": "0px 8px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": {
+          "w": 12,
+          "h": 12
+        },
+        "tip": "Layout",
+        "title": null,
+        "disabled": false,
+        "pressed": "false"
+      }
+    },
+    {
+      "n": 44,
+      "surface": "toolbar",
+      "what": "1280-light separator",
+      "observed": {
+        "text": "",
+        "box": "1x20 at 334,82",
+        "h": "20px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/13px 400 Inter",
+        "color": "#070707",
+        "ground": "#d2d2d2",
+        "textContrast": 13.37,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 45,
+      "surface": "toolbar",
+      "what": "1280-light text box glyph",
+      "observed": {
+        "text": "T",
+        "box": "10x15 at 390,84",
+        "h": "15px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "15px/15px 500 Inter",
+        "color": "#3a3d44",
+        "ground": "#ffffff",
+        "textContrast": 10.88,
+        "border": "0px none rgb(58, 61, 68)",
+        "borderHex": "#3a3d44",
+        "borderContrast": 10.88,
+        "outline": "3px none rgb(58, 61, 68) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 46,
+      "surface": "toolbar",
+      "what": "1280-light hover, pressed and disabled states",
+      "observed": {
+        "toolbar.newSlide": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "ownBg": null,
+          "cursor": "pointer",
+          "disabled": false,
+          "pressed": null
+        },
+        "toolbar.undo": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "ownBg": null,
+          "cursor": "pointer",
+          "disabled": false,
+          "pressed": null
+        },
+        "toolbar.select": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "ownBg": null,
+          "cursor": "pointer",
+          "disabled": false,
+          "pressed": null
+        },
+        "toolbar.background": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "ownBg": null,
+          "cursor": "pointer",
+          "disabled": false,
+          "pressed": null
+        },
+        "toolbar.zoom": {
+          "hover": true,
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "color": "#070707",
+          "textContrast": 20.14,
+          "ownBg": null,
+          "cursor": "auto",
+          "disabled": false,
+          "pressed": null
+        }
+      }
+    },
+    {
+      "n": 47,
+      "surface": "toolbar",
+      "what": "1280-light tooltips (New slide, Undo, Zoom, Select, Insert image)",
+      "observed": {
+        "newSlide": {
+          "shown": true,
+          "afterMs": 359,
+          "name": "New slide",
+          "key": "Ctrl M",
+          "doc": "The arrow picks a layout for the new slide.",
+          "box": {
+            "x": 8,
+            "y": 114,
+            "w": 267.8125,
+            "h": 53.5
+          },
+          "keyRadius": "6px",
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "undo": {
+          "shown": true,
+          "afterMs": 366,
+          "name": "Undo",
+          "key": "Cmd Z",
+          "doc": null,
+          "box": {
+            "x": 71,
+            "y": 114,
+            "w": 105.53125,
+            "h": 33
+          },
+          "keyRadius": "6px",
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51
+        },
+        "select": {
+          "shown": true,
+          "afterMs": 369,
+          "name": "Select",
+          "key": null,
+          "doc": "The pointer; a draw tool returns here when it finishes.",
+          "box": {
+            "x": 219,
+            "y": 114,
+            "w": 280,
+            "h": 70.5
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        },
+        "image": {
+          "shown": true,
+          "afterMs": 377,
+          "name": "Insert image",
+          "key": null,
+          "doc": null,
+          "box": {
+            "x": 390,
+            "y": 114,
+            "w": 91.9375,
+            "h": 32.5
+          },
+          "keyRadius": null,
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51
+        },
+        "paint": {
+          "shown": true,
+          "afterMs": 373,
+          "name": "Paint format",
+          "key": "Cmd Option C",
+          "doc": "Click once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms.",
+          "box": {
+            "x": 92,
+            "y": 114,
+            "w": 280,
+            "h": 88.5
+          },
+          "keyRadius": "6px",
+          "gapFromControl": 7,
+          "font": "12.5px/17.5px 400 Inter",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "docColor": "#3a3d44",
+          "docContrast": 10.88
+        }
+      }
+    },
+    {
+      "n": 48,
+      "surface": "toolbar",
+      "what": "1280-light keyboard focus ring on toolbar buttons",
+      "observed": [
+        {
+          "on": "toolbar.newSlide",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        },
+        {
+          "on": "toolbar.newSlide.arrow",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        },
+        {
+          "on": "toolbar.undo",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        },
+        {
+          "on": "toolbar.redo",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        },
+        {
+          "on": "toolbar.print",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        },
+        {
+          "on": "toolbar.paintFormat",
+          "fv": true,
+          "outline": "1px solid rgb(7, 7, 7) offset -1px"
+        }
+      ]
+    },
+    {
+      "n": 49,
+      "surface": "toolbar",
+      "what": "1280-light the zoom dropdown and the New slide arrow",
+      "observed": {
+        "zoomMenu": {
+          "rows": [
+            "Zoom in⌘+",
+            "Zoom out⌘-",
+            "Fit",
+            "50%",
+            "100%⌘0",
+            "200%"
+          ],
+          "w": 220
+        },
+        "layoutMenu": {
+          "plate": 442,
+          "menuRows": null,
+          "tiles": 21
+        }
+      }
+    },
+    {
+      "n": 50,
+      "surface": "filmstrip",
+      "what": "1280-light column",
+      "observed": {
+        "text": "12Pricing note30204060Category 1Category 2Category 3Series 14Interface audit",
+        "box": "256x656 at 0,112",
+        "h": "656px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "opacity 0.22s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 37.68750762939453,
+          "h": 20.100006103515625
+        },
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 51,
+      "surface": "filmstrip",
+      "what": "1280-light card",
+      "observed": {
+        "text": "1",
+        "box": "231x114 at 8,126",
+        "h": "114.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": "Slide 1",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 52,
+      "surface": "filmstrip",
+      "what": "1280-light card frame (current)",
+      "observed": {
+        "text": "",
+        "box": "203x114 at 36,126",
+        "h": "114.188px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "2px solid rgb(7, 7, 7) offset 1px",
+        "transition": "border-color 0.12s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 53,
+      "surface": "filmstrip",
+      "what": "1280-light card number",
+      "observed": {
+        "text": "1",
+        "box": "28x38 at 8,126",
+        "h": "38px",
+        "pad": "2px 0px 0px 2px",
+        "radius": "0px",
+        "font": "12px/16px 500 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "pointer",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 54,
+      "surface": "filmstrip",
+      "what": "1280-light New slide from the toolbar (a second card)",
+      "observed": {
+        "before": null,
+        "slide2": "split-1",
+        "cards": [
+          {
+            "id": "filmstrip.slide.split-2",
+            "current": true,
+            "selected": true,
+            "y": 126,
+            "h": 114,
+            "frame": "203x114",
+            "border": "rgb(7, 7, 7)",
+            "outline": "2px solid offset 1px"
+          },
+          {
+            "id": "filmstrip.slide.split-1",
+            "current": false,
+            "selected": false,
+            "y": 252,
+            "h": 114,
+            "frame": "203x114",
+            "border": "rgba(7, 7, 7, 0.62)",
+            "outline": "3px none offset 0px"
+          },
+          {
+            "id": "filmstrip.slide.split-3",
+            "current": false,
+            "selected": false,
+            "y": 378,
+            "h": 114,
+            "frame": "203x114",
+            "border": "rgba(7, 7, 7, 0.62)",
+            "outline": "3px none offset 0px"
+          },
+          {
+            "id": "filmstrip.slide.title",
+            "current": false,
+            "selected": false,
+            "y": 505,
+            "h": 114,
+            "frame": "203x114",
+            "border": "rgba(7, 7, 7, 0.62)",
+            "outline": "3px none offset 0px"
+          }
+        ],
+        "gapBetweenCards": 12
+      }
+    },
+    {
+      "n": 55,
+      "surface": "filmstrip",
+      "what": "1280-light hover a non current card and its number",
+      "observed": {
+        "border": "#070707",
+        "borderContrast": 20.14,
+        "transition": "border-color 0.12s",
+        "number": {
+          "font": "12px/16px 500 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "cursor": "pointer"
+      }
+    },
+    {
+      "n": 56,
+      "surface": "filmstrip",
+      "what": "1280-light right click a card",
+      "observed": {
+        "w": 220,
+        "h": 382,
+        "x": 137,
+        "y": 309,
+        "fits": true,
+        "rows": 12,
+        "disabled": 0,
+        "withIcon": 6,
+        "labels": [
+          "Cut",
+          "Copy",
+          "Paste",
+          "New slide",
+          "Duplicate slide",
+          "Delete",
+          "Skip slide",
+          "Change background",
+          "Apply layout",
+          "Change theme",
+          "Move slide",
+          "Comment"
+        ]
+      }
+    },
+    {
+      "n": 57,
+      "surface": "filmstrip",
+      "what": "1280-light drag card 2 above card 1 (the drop line)",
+      "observed": {
+        "during": {
+          "drop": "before",
+          "draggingOpacity": "0.4",
+          "ghost": false
+        }
+      }
+    },
+    {
+      "n": 58,
+      "surface": "overlay",
+      "what": "1280-light select the title placeholder (ring, handles, chip)",
+      "observed": {
+        "handles": 10,
+        "ring": {
+          "border": "1px solid rgb(26, 115, 232)",
+          "color": "#1a73e8",
+          "contrast": 4.18
+        },
+        "handle": {
+          "drawn": "11x11",
+          "hit": "11x11",
+          "border": "#1a73e8",
+          "bg": "rgb(255, 255, 255)",
+          "cursor": "nwse-resize",
+          "ariaLabel": "heading: Resize nw"
+        },
+        "rotate": {
+          "drawn": "12x12",
+          "hit": "12x12",
+          "radius": "50%",
+          "ariaLabel": "heading: Rotate"
+        },
+        "chip": {
+          "text": "Title",
+          "h": "18px",
+          "font": "13px/13px 500 Inter",
+          "bg": [
+            26,
+            115,
+            232
+          ],
+          "color": "#ffffff",
+          "contrast": 4.51,
+          "cursor": "move",
+          "radius": "0px"
+        }
+      }
+    },
+    {
+      "n": 59,
+      "surface": "overlay",
+      "what": "1280-light the hover outline over the body placeholder",
+      "observed": {
+        "border": "1px solid rgb(26, 115, 232)",
+        "animation": "pt-fade-in 0.12s",
+        "box": "537x22"
+      }
+    },
+    {
+      "n": 60,
+      "surface": "overlay",
+      "what": "1280-light resize by the se handle: the readout during the drag",
+      "observed": {
+        "during": {
+          "text": "1125 × 23",
+          "h": "18px",
+          "font": "13px/13px 500 Inter",
+          "bg": [
+            7,
+            7,
+            7
+          ],
+          "color": "#ffffff",
+          "contrast": 20.14,
+          "x": 966,
+          "y": 357
+        },
+        "afterRelease": null
+      }
+    },
+    {
+      "n": 61,
+      "surface": "overlay",
+      "what": "1280-light the sheet on the plate ground",
+      "observed": {
+        "stageBg": [
+          246.32,
+          246.32,
+          246.32
+        ],
+        "stageGroundContrast": 1.08,
+        "sheetBg": null,
+        "sheetBorder": "0px none rgb(7, 7, 7)",
+        "sheetShadow": "none",
+        "sheetBox": "953x536",
+        "margins": {
+          "left": 36,
+          "top": 28,
+          "right": 35,
+          "bottom": 28
+        }
+      }
+    },
+    {
+      "n": 62,
+      "surface": "tails",
+      "what": "1280-light the text tail",
+      "observed": {
+        "selected": true,
+        "chip": "Text box",
+        "expected": true,
+        "count": 32,
+        "overflow": true,
+        "clipped": [
+          "toolbar.pointer",
+          "toolbar.hideMenus"
+        ],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          8,
+          17,
+          18
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [
+          "toolbar.font"
+        ],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "font:45",
+          "fontSize.minus:32",
+          "fontSize.value:36",
+          "fontSize.plus:32",
+          "bold:32",
+          "italic:32",
+          "underline:32",
+          "textColor:42",
+          "highlightColor:42",
+          "insertLink:32",
+          "insertComment:32",
+          "align:42",
+          "spacing:42",
+          "bulletedList:32",
+          "bulletedList.arrow:32",
+          "numberedList:32",
+          "numberedList.arrow:32",
+          "decreaseIndent:32",
+          "increaseIndent:32",
+          "clearFormatting:32",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:18"
+        ],
+        "lastRight": 1328,
+        "barRight": 1280,
+        "seps": 5
+      }
+    },
+    {
+      "n": 63,
+      "surface": "tails",
+      "what": "1280-light the shape tail",
+      "observed": {
+        "selected": true,
+        "chip": "Shape",
+        "expected": true,
+        "count": 36,
+        "overflow": true,
+        "clipped": [
+          "toolbar.increaseIndent",
+          "toolbar.clearFormatting",
+          "toolbar.formatOptions",
+          "toolbar.pointer",
+          "toolbar.hideMenus"
+        ],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          8,
+          17,
+          18
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [
+          "toolbar.font"
+        ],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "fillColor:42",
+          "borderColor:42",
+          "borderWeight:42",
+          "borderDash:42",
+          "font:45",
+          "fontSize.minus:32",
+          "fontSize.value:36",
+          "fontSize.plus:32",
+          "bold:32",
+          "italic:32",
+          "underline:32",
+          "textColor:42",
+          "highlightColor:42",
+          "insertLink:32",
+          "insertComment:32",
+          "align:42",
+          "spacing:42",
+          "bulletedList:32",
+          "bulletedList.arrow:32",
+          "numberedList:32",
+          "numberedList.arrow:32",
+          "decreaseIndent:32",
+          "increaseIndent:32",
+          "clearFormatting:32",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:18"
+        ],
+        "lastRight": 1525,
+        "barRight": 1280,
+        "seps": 6
+      }
+    },
+    {
+      "n": 64,
+      "surface": "tails",
+      "what": "1280-light the line tail",
+      "observed": {
+        "selected": true,
+        "chip": "Shape",
+        "expected": true,
+        "count": 17,
+        "overflow": false,
+        "clipped": [],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          17,
+          18,
+          508
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "lineColor:42",
+          "lineWeight:42",
+          "lineDash:42",
+          "lineStart:42",
+          "lineEnd:42",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:32"
+        ],
+        "lastRight": 1272,
+        "barRight": 1280,
+        "seps": 2
+      }
+    },
+    {
+      "n": 65,
+      "surface": "tails",
+      "what": "1280-light the picture tail",
+      "observed": {
+        "selected": true,
+        "chip": "Image",
+        "expected": true,
+        "count": 16,
+        "overflow": false,
+        "clipped": [],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          17,
+          18,
+          511
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [
+          "toolbar.resetImage"
+        ],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "cropImage:32",
+          "replaceImage:42",
+          "imageOptions:105",
+          "resetImage:32",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:32"
+        ],
+        "lastRight": 1272,
+        "barRight": 1280,
+        "seps": 2
+      }
+    },
+    {
+      "n": 66,
+      "surface": "tails",
+      "what": "1280-light the table tail",
+      "observed": {
+        "selected": true,
+        "chip": "Table",
+        "expected": true,
+        "count": 38,
+        "overflow": true,
+        "clipped": [
+          "toolbar.numberedList.arrow",
+          "toolbar.decreaseIndent",
+          "toolbar.increaseIndent",
+          "toolbar.clearFormatting",
+          "toolbar.formatOptions",
+          "toolbar.pointer",
+          "toolbar.hideMenus"
+        ],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          8,
+          17,
+          18
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [
+          "toolbar.mergeCells",
+          "toolbar.unmergeCells",
+          "toolbar.font"
+        ],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "borderColor:42",
+          "borderWeight:42",
+          "borderDash:42",
+          "fillColor:42",
+          "mergeCells:32",
+          "unmergeCells:32",
+          "font:45",
+          "fontSize.minus:32",
+          "fontSize.value:36",
+          "fontSize.plus:32",
+          "bold:32",
+          "italic:32",
+          "underline:32",
+          "textColor:42",
+          "highlightColor:42",
+          "insertLink:32",
+          "insertComment:32",
+          "align:42",
+          "spacing:42",
+          "bulletedList:32",
+          "bulletedList.arrow:32",
+          "numberedList:32",
+          "numberedList.arrow:32",
+          "decreaseIndent:32",
+          "increaseIndent:32",
+          "clearFormatting:32",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:18"
+        ],
+        "lastRight": 1610,
+        "barRight": 1280,
+        "seps": 7
+      }
+    },
+    {
+      "n": 67,
+      "surface": "tails",
+      "what": "1280-light the chart tail",
+      "observed": {
+        "selected": true,
+        "chip": "Chart",
+        "expected": true,
+        "count": 16,
+        "overflow": false,
+        "clipped": [],
+        "more": false,
+        "gaps": [
+          -4,
+          0,
+          4,
+          5,
+          17,
+          18,
+          524
+        ],
+        "heights": [
+          32,
+          30
+        ],
+        "disabled": [],
+        "widths": [
+          "search:32",
+          "newSlide:32",
+          "newSlide.arrow:32",
+          "undo:32",
+          "redo:32",
+          "print:32",
+          "paintFormat:32",
+          "view.zoom.value:52",
+          "view.zoom.arrow:20",
+          "chartType:42",
+          "legend:42",
+          "numberFormat:42",
+          "editData:72",
+          "formatOptions:110",
+          "pointer:32",
+          "hideMenus:32"
+        ],
+        "lastRight": 1272,
+        "barRight": 1280,
+        "seps": 2
+      }
+    },
+    {
+      "n": 68,
+      "surface": "tails",
+      "what": "1280-light the text tail's controls up close",
+      "observed": {
+        "font": {
+          "text": "Font",
+          "w": 45,
+          "disabled": true,
+          "color": "#8a8f98",
+          "contrast": 3.25,
+          "cursor": "default",
+          "tip": {
+            "shown": true,
+            "afterMs": 365,
+            "name": "Font",
+            "key": null,
+            "doc": "The GT theme sets Inter.",
+            "box": {
+              "x": 284,
+              "y": 114,
+              "w": 162.8125,
+              "h": 53
+            },
+            "keyRadius": null,
+            "gapFromControl": 7,
+            "font": "12.5px/17.5px 400 Inter",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "docColor": "#3a3d44",
+            "docContrast": 10.88
+          }
+        },
+        "size": {
+          "w": 36,
+          "h": "30px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "font": "13px/13px 400 Inter"
+        },
+        "sizeStepW": 32,
+        "bold": {
+          "pressed": "false",
+          "color": "#3a3d44"
+        },
+        "boldOn": {
+          "pressed": "false",
+          "color": "#3a3d44",
+          "ownBg": null
+        },
+        "colorSwatch": {
+          "w": 42,
+          "svg": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "align": {
+          "w": 42
+        }
+      }
+    },
+    {
+      "n": 69,
+      "surface": "tails",
+      "what": "1280-light the text colour plate",
+      "observed": {
+        "plate": null,
+        "swatch": null
+      }
+    },
+    {
+      "n": 70,
+      "surface": "panel",
+      "what": "1280-light Format options for the text box",
+      "observed": {
+        "w": 320,
+        "h": 656,
+        "headH": 40,
+        "title": {
+          "text": "Format options",
+          "font": "14px/16.8px 500 Inter"
+        },
+        "count": null,
+        "sections": [
+          {
+            "text": "Size & rotation",
+            "h": 36,
+            "closed": false,
+            "disabled": false
+          },
+          {
+            "text": "Position",
+            "h": 36,
+            "closed": false,
+            "disabled": false
+          },
+          {
+            "text": "Text fitting",
+            "h": 36,
+            "closed": false,
+            "disabled": false
+          },
+          {
+            "text": "Text",
+            "h": 36,
+            "closed": false,
+            "disabled": false
+          },
+          {
+            "text": "Colour",
+            "h": 36,
+            "closed": false,
+            "disabled": false
+          }
+        ],
+        "bodyScrolls": true,
+        "bodyScrollClass": "ts-panel-body pt-scroll",
+        "empty": null,
+        "notice": null,
+        "fields": 30,
+        "rows": 3,
+        "controls": [
+          "panel.formatOptions.close",
+          "formatOptions.size",
+          "formatOptions.size.width",
+          "formatOptions.size.height",
+          "formatOptions.size.lock",
+          "formatOptions.size.lock.lock",
+          "formatOptions.size.flip",
+          "formatOptions.size.flip.h",
+          "formatOptions.size.flip.v",
+          "formatOptions.size.rotate",
+          "formatOptions.size.rotate.dial",
+          "formatOptions.position",
+          "formatOptions.position.from",
+          "formatOptions.position.from.topLeft",
+          "formatOptions.position.from.center",
+          "formatOptions.position.x",
+          "formatOptions.position.y",
+          "formatOptions.textFitting",
+          "formatOptions.textFitting.autofit",
+          "formatOptions.textFitting.autofit.none",
+          "formatOptions.textFitting.autofit.shrink",
+          "formatOptions.textFitting.autofit.grow",
+          "formatOptions.textFitting.indent",
+          "formatOptions.textFitting.padding.top",
+          "formatOptions.textFitting.padding.bottom",
+          "formatOptions.textFitting.padding.left",
+          "formatOptions.textFitting.padding.right",
+          "formatOptions.textFitting.valign",
+          "formatOptions.textFitting.valign.top",
+          "formatOptions.textFitting.valign.middle",
+          "formatOptions.textFitting.valign.bottom",
+          "formatOptions.text",
+          "block.text.text",
+          "block.text.typography",
+          "block.text.typography.size.down",
+          "block.text.typography.size",
+          "block.text.typography.size.up",
+          "block.text.typography.weight.down",
+          "block.text.typography.weight",
+          "block.text.typography.weight.up",
+          "block.text.typography.align",
+          "block.text.typography.align.option.left",
+          "block.text.typography.align.option.center",
+          "block.text.typography.align.option.right",
+          "block.text.typography.align.option.justify",
+          "block.text.typography.tracking.down",
+          "block.text.typography.tracking",
+          "block.text.typography.tracking.up",
+          "block.text.typography.leading.down",
+          "block.text.typography.leading"
+        ],
+        "head": {
+          "h": "40px",
+          "border": "0px none rgb(7, 7, 7)"
+        },
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "ariaLabel": "Close Format options"
+        },
+        "sectionHead": {
+          "text": "Size & rotation",
+          "h": "36px",
+          "font": "13px/13px 500 Inter",
+          "chevron": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "label": {
+          "font": "12px/17.4px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "rowLabel": {
+          "font": "12.5px/16.25px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "input": {
+          "h": "30px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "font": "13px/18.2px 400 Inter"
+        },
+        "panelBorder": "0px 0px 0px 1px",
+        "panelBorderHex": "#070707"
+      }
+    },
+    {
+      "n": 71,
+      "surface": "panel",
+      "what": "1280-light a section closes and the body scrolls",
+      "observed": {
+        "firstClosedAfterClick": true,
+        "body": {
+          "scrollH": 1458,
+          "clientH": 616,
+          "overflowY": "scroll",
+          "scrollClass": "ts-panel-body pt-scroll"
+        },
+        "chevronTransition": null
+      }
+    },
+    {
+      "n": 72,
+      "surface": "panel",
+      "what": "1280-light nothing selected: the panel's empty sentence",
+      "observed": {}
+    },
+    {
+      "n": 73,
+      "surface": "panel",
+      "what": "1280-light close the panel by its X",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "error": true
+    },
+    {
+      "n": 74,
+      "surface": "panel",
+      "what": "1280-light Themes panel",
+      "observed": {
+        "title": "Themes",
+        "tiles": 4,
+        "tile": {
+          "w": 283,
+          "h": 178.78125
+        },
+        "frame": {
+          "size": "283x159",
+          "border": "#656565",
+          "outline": "3px none rgb(58, 61, 68) offset 0px"
+        },
+        "name": {
+          "text": "Light",
+          "font": "12px/15.6px 400 Inter",
+          "color": "#3a3d44",
+          "contrast": 10.88
+        },
+        "groupHead": {
+          "text": "GT",
+          "font": "12px/12px 400 Inter",
+          "contrast": 3.25
+        },
+        "importButton": null,
+        "empty": null
+      }
+    },
+    {
+      "n": 75,
+      "surface": "panel",
+      "what": "1280-light Comments panel (empty)",
+      "observed": {
+        "title": "Comments0",
+        "count": "0",
+        "empty": {
+          "text": "No comments yet",
+          "font": "13px/18.85px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "body": "AllFor youAllOpenResolvedSlide orderNo comments yetNotification settings",
+        "togglePressed": "true",
+        "toggleBorder": "#d2d2d2",
+        "controls": [
+          "panel.comments.close",
+          "panel.comments.tab.all",
+          "panel.comments.tab.forYou",
+          "panel.comments.search",
+          "panel.comments.filter",
+          "panel.comments.slideOrder",
+          "panel.comments.notificationSettings"
+        ],
+        "closedByToggle": true
+      }
+    },
+    {
+      "n": 76,
+      "surface": "panel",
+      "what": "1280-light Version history panel",
+      "observed": {
+        "title": "Version history",
+        "rows": 0,
+        "row": null,
+        "note": {
+          "text": "06:33 PM to 06:41 PM",
+          "font": "12.5px/16.875px 400 Inter",
+          "contrast": 10.88
+        },
+        "meta": {
+          "text": "Krypton 557 · 61 changes",
+          "font": "11.5px/16.675px 400 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "named": "Only show named versions",
+        "field": null,
+        "restore": null,
+        "body": "Only show named versionsName current versionTodayK506:33 PM to 06:41 PMKrypton 557 · 61 changes▸",
+        "empty": null
+      }
+    },
+    {
+      "n": 77,
+      "surface": "plates",
+      "what": "1280-light the Layout picker",
+      "observed": {
+        "tiles": 21,
+        "current": 0,
+        "fits": true,
+        "scrolls": true,
+        "plateBottom": 792,
+        "headText": "Apply layout",
+        "missing": 0,
+        "plate": {
+          "w": 442,
+          "h": 784,
+          "border": "#d2d2d2",
+          "pad": "8px 8px 12px"
+        },
+        "gridW": 424,
+        "tile": "128x92",
+        "frame": {
+          "size": "128x72",
+          "border": "#070707",
+          "borderContrast": 20.14
+        },
+        "name": {
+          "text": "Title slide",
+          "font": "12px/15.6px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "rule": {
+          "text": "GT layouts",
+          "font": "11.5px/14.95px 400 Inter",
+          "contrast": 3.25
+        },
+        "head": {
+          "font": "12px/12px 500 Inter",
+          "contrast": 3.25
+        },
+        "hoveredBorder": "#070707",
+        "closedByEscape": true
+      }
+    },
+    {
+      "n": 78,
+      "surface": "dialogs",
+      "what": "1280-light share",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 765,
+          "top": 17,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "font": "13px/18.85px 400 Inter",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Share Interface auditNo pending requestsViewerCommenterEditorSendNotify peopleKK",
+          "font": "13px/18.85px 400 Inter"
+        },
+        "lead": "Share Interface auditNo pending requestsViewerCommenterEditorSendNotify peopleKK",
+        "x": {
+          "size": "520x765",
+          "tip": null,
+          "title": null,
+          "ariaLabel": null
+        },
+        "actions": [
+          {
+            "text": "Share Interface auditNo pending requestsViewerCommenterEditorSendNotify peopleKK",
+            "solid": false,
+            "textStyle": false,
+            "h": "765.344px",
+            "radius": "0px",
+            "border": "#4b4b4b",
+            "borderContrast": 4.48
+          },
+          {
+            "text": "Copy link",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          }
+        ],
+        "label": {
+          "font": "13px/18.85px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "input": {
+          "h": "765.344px",
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px"
+        },
+        "inputs": 5,
+        "labels": 2,
+        "checks": 1,
+        "controls": [
+          "dialog.share.close",
+          "dialog.share.review",
+          "dialog.share.emails",
+          "dialog.share.inviteRole",
+          "dialog.share.send",
+          "dialog.share.notify",
+          "dialog.share.message",
+          "dialog.share.people",
+          "dialog.share.owner",
+          "dialog.share.rows",
+          "dialog.share.view",
+          "dialog.share.view.copy",
+          "dialog.share.present",
+          "dialog.share.present.copy",
+          "dialog.share.edit",
+          "dialog.share.edit.copy",
+          "dialog.share.general",
+          "dialog.share.mode",
+          "dialog.share.gear",
+          "dialog.share.publish",
+          "dialog.share.footer",
+          "dialog.share.authorize",
+          "dialog.share.error",
+          "dialog.share.copyLink",
+          "dialog.share.done"
+        ],
+        "scrolls": false,
+        "text": "Share Interface auditNo pending requestsViewerCommenterEditorSendNotify peopleKKrypton 557OwnerLinksView link · ViewerCopy linkPresent link · Viewer, opens as a showCopy linkEdit link · EditorCopy linkGeneral accessRestrictedAnyone with the linkOnly people with access can open itPublish to the webSpeaker notes and skipped slides never travel with a view or comment linkSharing is not enforced on th",
+        "focusIn": true,
+        "active": "dialog.share.emails",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 79,
+      "surface": "dialogs",
+      "what": "1280-light download",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 221,
+          "top": 290,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "font": "13px/18.85px 400 Inter",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in t",
+          "font": "13px/18.85px 400 Inter"
+        },
+        "lead": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in t",
+        "x": {
+          "size": "520x221",
+          "tip": null,
+          "title": null,
+          "ariaLabel": null
+        },
+        "actions": [
+          {
+            "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in t",
+            "solid": false,
+            "textStyle": false,
+            "h": "220.688px",
+            "radius": "0px",
+            "border": "#4b4b4b",
+            "borderContrast": 4.48
+          },
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "Download",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          }
+        ],
+        "label": {
+          "font": "13px/18.85px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "input": {
+          "h": "220.688px",
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px"
+        },
+        "inputs": 1,
+        "labels": 0,
+        "checks": 1,
+        "controls": [
+          "dialog.download.pdf.close",
+          "dialog.download.includeSkipped",
+          "dialog.download.ok"
+        ],
+        "scrolls": false,
+        "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload",
+        "focusIn": true,
+        "active": "dialog.download.includeSkipped",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 80,
+      "surface": "dialogs",
+      "what": "1280-light details",
+      "observed": {
+        "dialog": {
+          "w": 420,
+          "h": 259,
+          "top": 270,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "font": "13px/18.85px 400 Inter",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "DetailsTitleInterface auditSlides4Sections1CreatedSep 19, 06:33 PMLast editSep 1",
+          "font": "13px/18.85px 400 Inter"
+        },
+        "lead": "DetailsTitleInterface auditSlides4Sections1CreatedSep 19, 06:33 PMLast editSep 1",
+        "x": {
+          "size": "420x259",
+          "tip": null,
+          "title": null,
+          "ariaLabel": null
+        },
+        "actions": [
+          {
+            "text": "DetailsTitleInterface auditSlides4Sections1CreatedSep 19, 06:33 PMLast editSep 1",
+            "solid": false,
+            "textStyle": false,
+            "h": "259.219px",
+            "radius": "0px",
+            "border": "#4b4b4b",
+            "borderContrast": 4.48
+          },
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          }
+        ],
+        "label": {
+          "font": "13px/18.85px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "input": {
+          "h": "259.219px",
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px"
+        },
+        "inputs": 0,
+        "labels": 0,
+        "checks": 0,
+        "controls": [
+          "dialog.details.close",
+          "dialog.details.title",
+          "dialog.details.slides",
+          "dialog.details.sections",
+          "dialog.details.created",
+          "dialog.details.lastEdit",
+          "dialog.details.done"
+        ],
+        "scrolls": false,
+        "text": "DetailsTitleInterface auditSlides4Sections1CreatedSep 19, 06:33 PMLast editSep 19, 06:41 PM (change 39)Done",
+        "focusIn": true,
+        "active": "dialog.details.done",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 81,
+      "surface": "dialogs",
+      "what": "1280-light slide-numbers",
+      "observed": {
+        "dialog": {
+          "w": 400,
+          "h": 241,
+          "top": 280,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "font": "13px/18.85px 400 Inter",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+          "font": "13px/18.85px 400 Inter"
+        },
+        "lead": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+        "x": {
+          "size": "400x241",
+          "tip": null,
+          "title": null,
+          "ariaLabel": null
+        },
+        "actions": [
+          {
+            "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+            "solid": false,
+            "textStyle": false,
+            "h": "241px",
+            "radius": "0px",
+            "border": "#4b4b4b",
+            "borderContrast": 4.48
+          },
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "Apply to selected",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51
+          },
+          {
+            "text": "Apply",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14
+          }
+        ],
+        "label": {
+          "font": "13px/18.85px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "input": {
+          "h": "241px",
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px"
+        },
+        "inputs": 3,
+        "labels": 0,
+        "checks": 3,
+        "controls": [
+          "dialog.slideNumbers.close",
+          "dialog.slideNumbers.on",
+          "dialog.slideNumbers.off",
+          "dialog.slideNumbers.skip-title",
+          "dialog.slideNumbers.selected",
+          "dialog.slideNumbers.apply"
+        ],
+        "scrolls": false,
+        "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+        "focusIn": true,
+        "active": "dialog.slideNumbers.on",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 82,
+      "surface": "dialogs",
+      "what": "1280-light shortcuts",
+      "observed": {
+        "dialog": {
+          "w": 640,
+          "h": 606,
+          "top": 97,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "font": "13px/18.85px 400 Inter",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterSta",
+          "font": "13px/18.85px 400 Inter"
+        },
+        "lead": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterSta",
+        "x": {
+          "size": "640x606",
+          "tip": null,
+          "title": null,
+          "ariaLabel": null
+        },
+        "actions": [
+          {
+            "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterSta",
+            "solid": false,
+            "textStyle": false,
+            "h": "606px",
+            "radius": "0px",
+            "border": "#4b4b4b",
+            "borderContrast": 4.48
+          }
+        ],
+        "label": {
+          "font": "13px/18.85px 400 Inter",
+          "color": "#070707",
+          "contrast": 20.14
+        },
+        "input": {
+          "h": "606px",
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px"
+        },
+        "inputs": 1,
+        "labels": 0,
+        "checks": 0,
+        "controls": [
+          "dialog.keyboardShortcuts.close",
+          "dialog.keyboardShortcuts.search"
+        ],
+        "scrolls": true,
+        "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterStart from beginningCmd Shift EnterOpen…Cmd OSee version historyCmd Option Shift HPrintCmd PUndoCmd ZRedoCmd YCmd Shift ZCutCmd XCopyCmd CPasteCmd VPaste without formattingCmd Shift VDeleteDeleteDuplicateCmd DSelect allCmd AFind and replaceCmd Shift HLinkCmd KNew slideCtrl MSearch the menusOption /Keyboard shortcutsCmd /R",
+        "focusIn": true,
+        "active": "dialog.keyboardShortcuts.search",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 83,
+      "surface": "dialogs",
+      "what": "1280-light the Share dialog's body up close",
+      "observed": {
+        "controls": [
+          {
+            "id": "close",
+            "h": 32,
+            "w": 32,
+            "tag": "button",
+            "text": ""
+          },
+          {
+            "id": "review",
+            "h": 32,
+            "w": 470,
+            "tag": "div",
+            "text": "No pending requests"
+          },
+          {
+            "id": "emails",
+            "h": 32,
+            "w": 276,
+            "tag": "input",
+            "text": ""
+          },
+          {
+            "id": "inviteRole",
+            "h": 32,
+            "w": 120,
+            "tag": "select",
+            "text": "ViewerCommenterEditor"
+          },
+          {
+            "id": "send",
+            "h": 32,
+            "w": 62,
+            "tag": "button",
+            "text": "Send"
+          },
+          {
+            "id": "notify",
+            "h": 1,
+            "w": 1,
+            "tag": "input",
+            "text": ""
+          },
+          {
+            "id": "message",
+            "h": 32,
+            "w": 351,
+            "tag": "input",
+            "text": ""
+          },
+          {
+            "id": "people",
+            "h": 42,
+            "w": 470,
+            "tag": "ul",
+            "text": "KKrypton 557Owner"
+          },
+          {
+            "id": "owner",
+            "h": 40,
+            "w": 464,
+            "tag": "li",
+            "text": "KKrypton 557Owner"
+          },
+          {
+            "id": "rows",
+            "h": 122,
+            "w": 470,
+            "tag": "ul",
+            "text": "View link · ViewerCopy linkPresent link "
+          },
+          {
+            "id": "view",
+            "h": 40,
+            "w": 468,
+            "tag": "li",
+            "text": "View link · ViewerCopy link"
+          },
+          {
+            "id": "view.copy",
+            "h": 32,
+            "w": 83,
+            "tag": "button",
+            "text": "Copy link"
+          },
+          {
+            "id": "present",
+            "h": 40,
+            "w": 468,
+            "tag": "li",
+            "text": "Present link · Viewer, opens as a showCo"
+          },
+          {
+            "id": "present.copy",
+            "h": 32,
+            "w": 83,
+            "tag": "button",
+            "text": "Copy link"
+          },
+          {
+            "id": "edit",
+            "h": 40,
+            "w": 468,
+            "tag": "li",
+            "text": "Edit link · EditorCopy link"
+          },
+          {
+            "id": "edit.copy",
+            "h": 32,
+            "w": 83,
+            "tag": "button",
+            "text": "Copy link"
+          },
+          {
+            "id": "general",
+            "h": 32,
+            "w": 470,
+            "tag": "div",
+            "text": "RestrictedAnyone with the linkOnly peopl"
+          },
+          {
+            "id": "mode",
+            "h": 32,
+            "w": 166,
+            "tag": "select",
+            "text": "RestrictedAnyone with the link"
+          },
+          {
+            "id": "gear",
+            "h": 32,
+            "w": 32,
+            "tag": "button",
+            "text": ""
+          },
+          {
+            "id": "publish",
+            "h": 32,
+            "w": 139,
+            "tag": "button",
+            "text": "Publish to the web"
+          },
+          {
+            "id": "footer",
+            "h": 17,
+            "w": 422,
+            "tag": "p",
+            "text": "Speaker notes and skipped slides never t"
+          },
+          {
+            "id": "authorize",
+            "h": 52,
+            "w": 469,
+            "tag": "p",
+            "text": "Sharing is not enforced on this deployme"
+          },
+          {
+            "id": "error",
+            "h": 20,
+            "w": 470,
+            "tag": "p",
+            "text": ""
+          },
+          {
+            "id": "copyLink",
+            "h": 32,
+            "w": 83,
+            "tag": "button",
+            "text": "Copy link"
+          },
+          {
+            "id": "done",
+            "h": 32,
+            "w": 62,
+            "tag": "button",
+            "text": "Done"
+          }
+        ],
+        "controlHeights": [
+          32,
+          1
+        ],
+        "text": "Share Interface auditNo pending requestsViewerCommenterEditorSendNotify peopleKKrypton 557OwnerLinksView link · ViewerCopy linkPresent link · Viewer, opens as a showCopy linkEdit link · EditorCopy linkGeneral accessRestrictedAnyone with the linkOnly people with access can open itPublish to the webSpeaker notes and skipped slides never travel with a view or comment linkSharing is not enforced on this deployment: the roles here are shown and logged, anyone with the address can open the presentation, and a change from any browser is accepted.Copy linkDone",
+        "emails": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "placeholder": null
+        },
+        "role": {
+          "h": "32px",
+          "tag": "select"
+        },
+        "send": {
+          "text": "Send",
+          "solid": true,
+          "h": "32px",
+          "disabled": true
+        },
+        "done": {
+          "text": "Done",
+          "solid": true,
+          "h": "32px"
+        },
+        "copy": {
+          "text": "Copy link",
+          "h": "32px"
+        },
+        "footer": {
+          "text": "Speaker notes and skipped slides never travel with a view or comment link",
+          "font": "12px/17.4px 400 Inter",
+          "contrast": 10.88
+        },
+        "general": {
+          "text": "RestrictedAnyone with the linkOnly people with access can open it"
+        }
+      }
+    },
+    {
+      "n": 84,
+      "surface": "notes",
+      "what": "1280-light pane",
+      "observed": {
+        "text": "",
+        "box": "1024x64 at 256,704",
+        "h": "64px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": null,
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 85,
+      "surface": "notes",
+      "what": "1280-light field",
+      "observed": {
+        "text": "",
+        "box": "1024x63 at 256,705",
+        "h": "63px",
+        "pad": "10px 28px",
+        "radius": "0px",
+        "font": "13px/19.5px 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "0px none rgb(7, 7, 7)",
+        "borderHex": "#070707",
+        "borderContrast": 20.14,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "text",
+        "svg": null,
+        "tip": "Speaker notes",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 86,
+      "surface": "notes",
+      "what": "1280-light placeholder",
+      "observed": null
+    },
+    {
+      "n": 87,
+      "surface": "notes",
+      "what": "1280-light handle",
+      "observed": {
+        "text": "",
+        "box": "44x13 at 746,698",
+        "h": "13px",
+        "pad": "0px",
+        "radius": "0px",
+        "font": "13.3333px/normal 400 Arial",
+        "color": "#8a8f98",
+        "ground": "#ffffff",
+        "textContrast": 3.25,
+        "border": "0px none rgb(138, 143, 152)",
+        "borderHex": "#8a8f98",
+        "borderContrast": 3.25,
+        "outline": "3px none rgb(138, 143, 152) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "row-resize",
+        "svg": null,
+        "tip": "Speaker notes",
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 88,
+      "surface": "notes",
+      "what": "1280-light type a note and the handle hover",
+      "observed": {
+        "placeholder": "Click to add speaker notes",
+        "fieldOutlineWhileFocused": "1px solid rgb(7, 7, 7) offset -1px",
+        "fieldFocusVisible": true,
+        "handle": {
+          "size": "44x13",
+          "color": "#070707",
+          "cursor": "row-resize",
+          "tip": "Speaker notes",
+          "title": null,
+          "ariaLabel": "Resize speaker notes"
+        },
+        "paneH": 64
+      }
+    },
+    {
+      "n": 89,
+      "surface": "bottom",
+      "what": "1280-light bar",
+      "observed": {
+        "text": "",
+        "box": "1280x32 at 0,768",
+        "h": "32px",
+        "pad": "0px 8px",
+        "radius": "0px",
+        "font": "13px/normal 400 Inter",
+        "color": "#070707",
+        "ground": "#ffffff",
+        "textContrast": 20.14,
+        "border": "1px solid rgba(7, 7, 7, 0.18)",
+        "borderHex": "#d2d2d2",
+        "borderContrast": 1.51,
+        "outline": "3px none rgb(7, 7, 7) offset 0px",
+        "transition": "all 0s",
+        "animation": "none 0s",
+        "cursor": "auto",
+        "svg": {
+          "w": 16,
+          "h": 16
+        },
+        "tip": null,
+        "title": null,
+        "disabled": false,
+        "pressed": null
+      }
+    },
+    {
+      "n": 90,
+      "surface": "bottom",
+      "what": "1280-light the bottom bar's buttons",
+      "observed": [
+        {
+          "ctl": "panel.toggle",
+          "size": "28x28",
+          "svg": {
+            "w": 16,
+            "h": 16
+          },
+          "tip": "Show side panel",
+          "title": null,
+          "ariaLabel": "Show side panel",
+          "color": "#3a3d44",
+          "contrast": 10.88,
+          "pressed": null,
+          "tooltip": {
+            "shown": true,
+            "afterMs": 357,
+            "name": "Show side panel",
+            "key": null,
+            "doc": "Reopens the last panel: Themes, Format options, Version history or Check slides",
+            "box": {
+              "x": 992,
+              "y": 694,
+              "w": 280,
+              "h": 70.5
+            },
+            "keyRadius": null,
+            "gapFromControl": -104,
+            "font": "12.5px/17.5px 400 Inter",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "docColor": "#3a3d44",
+            "docContrast": 10.88
+          }
+        }
+      ]
+    },
+    {
+      "n": 91,
+      "surface": "context",
+      "what": "1280-light right click the empty sheet",
+      "observed": {
+        "w": 220,
+        "h": 326,
+        "x": 965,
+        "y": 326,
+        "fits": true,
+        "rows": 10,
+        "disabled": 0,
+        "withIcon": 6,
+        "labels": [
+          "Paste",
+          "New slide",
+          "Duplicate slide",
+          "Delete slide",
+          "Skip slide",
+          "Change background",
+          "Apply layout",
+          "Change theme",
+          "Comment",
+          "Guides"
+        ]
+      }
+    },
+    {
+      "n": 92,
+      "surface": "context",
+      "what": "1280-light right click the text box",
+      "observed": {
+        "w": 220,
+        "h": 485,
+        "x": 458,
+        "y": 22,
+        "fits": true,
+        "rows": 16,
+        "disabled": 3,
+        "withIcon": 7,
+        "labels": [
+          "Cut",
+          "Copy",
+          "Paste",
+          "Delete",
+          "Duplicate",
+          "Order",
+          "Rotate",
+          "Center on page",
+          "Align",
+          "Distribute",
+          "Group",
+          "Ungroup",
+          "Link",
+          "Text fitting",
+          "Format options",
+          "Comment"
+        ]
+      }
+    },
+    {
+      "n": 93,
+      "surface": "motion",
+      "what": "1280-light the transitions the chrome declares",
+      "observed": {
+        "button": "color, background-color, border-color 0.12s, 0.12s, 0.12s",
+        "cardFrame": "border-color 0.12s",
+        "filmstrip": "opacity 0.22s",
+        "menubarTitle": "all 0s",
+        "titleName": "all 0s",
+        "stage": "all 0s",
+        "slide": "all 0s",
+        "notesHandle": "all 0s",
+        "reducedMotion": false
+      }
+    }
+  ]
+}

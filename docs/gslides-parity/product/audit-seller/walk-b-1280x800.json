@@ -1,0 +1,1164 @@
+[
+  {
+    "t": 238,
+    "kind": "task",
+    "text": "--- Open Your presentations before any deck exists"
+  },
+  {
+    "t": 3105,
+    "kind": "done",
+    "text": "Open Your presentations before any deck exists: 0 clicks, 0 keys, 0 drags, 2.9 s",
+    "result": {
+      "ms": 2205,
+      "text": "Turboslide\nStart a new presentation\nTemplate gallery\nBlank presentation\nGT brand deck\nRecent presentations\n\nEvery presentation on this Turboslide is listed here\n\nSort by\nLast opened by me\nLast modified\nTitle\nAcme pricing review, Q3 2026\nEdited 6:28 PM\n⋮\nInterface audit\nInterface audit\nEdited 6:28 PM\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 18, 2026\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 18, 2026\n⋮\nPipeline rev\nPipeline rev\nEdited Sep 18, 2026\n⋮\ndsada\ndsada\nEdited Sep 18, 2026\n⋮\nAcme renewal deck v3\nAcme renewal deck v3\nEdited Sep 18, 2026\n⋮\nBurst 04:06:37\nBurst 04:06:37\nEdited Sep 17, 2026\n⋮\nBurst 04:05:28\nBurst 04:05:28\nEdited Sep 17, 2026\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 17, 2026\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 17, 2026\n⋮\nShared review deck\nShared review deck\nEdited Sep 17, 2026\n⋮\nCopy paste target\nCopy paste target\nEdited Sep 17, 2026\n⋮\nAcme renewal deck v3\nAcme renewal deck v3\nEdited Sep 17, 2026\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 16, 2026\n⋮\nUntitled presentation\nUntitled presentation\nEdited Sep 16, 2026\n⋮\nGT brand deck\nEdited Sep 16, 2026\n⋮\nW\nW\nEdited Sep 16, 2026\n⋮\nUntitle",
+      "controls": [
+        "appbar.home \"Turboslide\"",
+        "appbar.about \"Turboslide\"",
+        "home.search \"Search presentations\"",
+        "home.gallery \"Template gallery\"",
+        "home.blank \"Blank presentation\"",
+        "home.gt-brand \"GT brand deck\"",
+        "home.view.grid \"\"",
+        "home.view.list \"\"",
+        "home.sort \"Last opened by meLast modifiedTitle\"",
+        "home.cards \"Acme pricing review, Q3 2026Edited 6:28 \"",
+        "home.card.untitled-20260920-f4aa \"Acme pricing review, Q3 2026Edited 6:28 \"",
+        "home.open.untitled-20260920-f4aa \"\"",
+        "home.title.untitled-20260920-f4aa \"Acme pricing review, Q3 2026\"",
+        "home.more.untitled-20260920-f4aa \"⋮\"",
+        "home.card.untitled-20260920-jm4d \"Interface auditInterface auditEdited 6:2\"",
+        "home.open.untitled-20260920-jm4d \"Interface audit\"",
+        "home.title.untitled-20260920-jm4d \"Interface audit\"",
+        "home.more.untitled-20260920-jm4d \"⋮\"",
+        "home.card.untitled-20260919-0jar \"Untitled presentationUntitled presentati\"",
+        "home.open.untitled-20260919-0jar \"Untitled presentation\"",
+        "home.title.untitled-20260919-0jar \"Untitled presentation\"",
+        "home.more.untitled-20260919-0jar \"⋮\"",
+        "home.card.untitled-20260918-oyqt \"Untitled presentationUntitled presentati\"",
+        "home.open.untitled-20260918-oyqt \"Untitled presentation\"",
+        "home.title.untitled-20260918-oyqt \"Untitled presentation\"",
+        "home.more.untitled-20260918-oyqt \"⋮\"",
+        "home.card.untitled-20260918-j502-5 \"Pipeline revPipeline revEdited Sep 18, 2\"",
+        "home.open.untitled-20260918-j502-5 \"Pipeline rev\"",
+        "home.title.untitled-20260918-j502-5 \"Pipeline rev\"",
+        "home.more.untitled-20260918-j502-5 \"⋮\"",
+        "home.card.untitled-20260918-9jec \"dsadadsadaEdited Sep 18, 2026⋮\"",
+        "home.open.untitled-20260918-9jec \"dsada\"",
+        "home.title.untitled-20260918-9jec \"dsada\"",
+        "home.more.untitled-20260918-9jec \"⋮\"",
+        "home.card.untitled-20260918-fwco \"Acme renewal deck v3Acme renewal deck v3\"",
+        "home.open.untitled-20260918-fwco \"Acme renewal deck v3\"",
+        "home.title.untitled-20260918-fwco \"Acme renewal deck v3\"",
+        "home.more.untitled-20260918-fwco \"⋮\"",
+        "home.card.untitled-20260918-l2vc \"Burst 04:06:37Burst 04:06:37Edited Sep 1\"",
+        "home.open.untitled-20260918-l2vc \"Burst 04:06:37\""
+      ]
+    }
+  },
+  {
+    "t": 3108,
+    "kind": "task",
+    "text": "--- Land on /home and start a presentation"
+  },
+  {
+    "t": 5442,
+    "kind": "done",
+    "text": "Land on /home and start a presentation: 1 clicks, 0 keys, 0 drags, 2.3 s",
+    "result": {
+      "homeMs": 212,
+      "editorMs": 493,
+      "tip": "New PresentationOpens a fresh presentation; no account needed.",
+      "saveState": "Not saved yet",
+      "name": "",
+      "tier": "memory",
+      "transport": "poll",
+      "runs": [
+        "heading/text \"Click to add title\"",
+        "lead/text \"Click to add subtitle\""
+      ]
+    }
+  },
+  {
+    "t": 5444,
+    "kind": "task",
+    "text": "--- Title slide: type the title and the subtitle; the company mark"
+  },
+  {
+    "t": 13395,
+    "kind": "deck",
+    "text": "deck id untitled-20260920-yu8b"
+  },
+  {
+    "t": 14417,
+    "kind": "done",
+    "text": "Title slide: type the title and the subtitle; the company mark: 3 clicks, 73 keys, 0 drags, 9 s",
+    "result": {
+      "titleText": "General Translation for Acme",
+      "leadText": "Localization that ships with every release",
+      "saveStateDuringTyping": "Saving…",
+      "urlAfterFirstWrite": "/edit/untitled-20260920-yu8b",
+      "savedAfterTitleMs": 2,
+      "savedState": "All changes saved",
+      "saved2": {
+        "state": "All changes saved",
+        "ms": 103
+      },
+      "markOnSheet": [
+        {
+          "tag": "svg",
+          "cls": "",
+          "block": null,
+          "label": null
+        },
+        {
+          "tag": "H1",
+          "cls": "",
+          "block": "heading",
+          "label": null
+        },
+        {
+          "tag": "P",
+          "cls": "lead muted max-p",
+          "block": "lead",
+          "label": null
+        }
+      ],
+      "markBox": {
+        "x": 373.6006164550781,
+        "y": 323.32220458984375,
+        "w": 78.62249755859375,
+        "h": 50.032501220703125
+      },
+      "markChip": "Mark",
+      "markHandles": [
+        "handle.mark.move",
+        "handle.mark.resize.nw",
+        "handle.mark.resize.n",
+        "handle.mark.resize.ne",
+        "handle.mark.resize.e",
+        "handle.mark.resize.se",
+        "handle.mark.resize.s",
+        "handle.mark.resize.sw",
+        "handle.mark.resize.w",
+        "handle.mark.rotate"
+      ],
+      "markTail": [
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertLine.arrow",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "tierAfter": {
+        "seq": 2,
+        "revision": 2,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": false,
+        "streamDown": false
+      },
+      "typeToSheetMs": 8963
+    }
+  },
+  {
+    "t": 14417,
+    "kind": "task",
+    "text": "--- Agenda slide: New slide, a title and four lines"
+  },
+  {
+    "t": 15377,
+    "kind": "time",
+    "text": "New slide: 957 ms to the new slide with 3 runs",
+    "runs": [
+      "h/text",
+      "p1/text",
+      "p2/text"
+    ]
+  },
+  {
+    "t": 24648,
+    "kind": "done",
+    "text": "Agenda slide: New slide, a title and four lines: 3 clicks, 103 keys, 0 drags, 10.2 s",
+    "result": {
+      "runsAfterNewSlide": [
+        "h/text \"Click to add title\"",
+        "p1/text \"Click to add text\"",
+        "p2/text \"Click to add text\""
+      ],
+      "bodyRuns": [
+        {
+          "run": "p1/text",
+          "prompt": "Click to add text",
+          "w": 498,
+          "h": 20,
+          "x": 665,
+          "y": 217
+        },
+        {
+          "run": "p2/text",
+          "prompt": "Click to add text",
+          "w": 457,
+          "h": 20,
+          "x": 374,
+          "y": 429
+        }
+      ],
+      "chosenBody": "p1/text",
+      "layoutFixed": null,
+      "titleText": "Agenda",
+      "bodyText": [
+        "p1/text: Where Acme ships todayWhat breaks at scaleHow General Translation worksPricing and next steps",
+        "p2/text: "
+      ],
+      "saved": {
+        "state": "All changes saved",
+        "ms": 515
+      },
+      "filmstrip": [
+        "filmstrip.slide.title \"Slide 1\"",
+        "filmstrip.comments.title \"\"",
+        "filmstrip.slide.split-1 \"Slide 2\"",
+        "filmstrip.comments.split-1 \"\""
+      ]
+    }
+  },
+  {
+    "t": 24649,
+    "kind": "task",
+    "text": "--- Problem slide: three lines as a bulleted list"
+  },
+  {
+    "t": 25625,
+    "kind": "time",
+    "text": "New slide: 973 ms to the new slide with 3 runs",
+    "runs": [
+      "h/text",
+      "p1/text",
+      "p2/text"
+    ]
+  },
+  {
+    "t": 40772,
+    "kind": "done",
+    "text": "Problem slide: three lines as a bulleted list: 4 clicks, 137 keys, 0 drags, 16.1 s",
+    "result": {
+      "tailWhileEditing": [
+        "toolbar.font[dis]",
+        "toolbar.fontSize",
+        "toolbar.fontSize.minus",
+        "toolbar.fontSize.value",
+        "toolbar.fontSize.plus",
+        "toolbar.bold",
+        "toolbar.italic",
+        "toolbar.underline",
+        "toolbar.textColor",
+        "toolbar.highlightColor",
+        "toolbar.insertLink",
+        "toolbar.insertComment",
+        "toolbar.align",
+        "toolbar.spacing",
+        "toolbar.bulletedList",
+        "toolbar.bulletedList.arrow",
+        "toolbar.numberedList",
+        "toolbar.numberedList.arrow",
+        "toolbar.decreaseIndent",
+        "toolbar.increaseIndent",
+        "toolbar.clearFormatting",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "route": {
+        "via": "toolbar.bulletedList",
+        "tip": "Bulleted listCmd Shift 8The first bullet style; the arrow picks another."
+      },
+      "afterKey": {
+        "tag": "P",
+        "html": "<p data-block=\"p1\" data-type=\"paragraph\" data-run=\"p1/text\" contenteditable=\"true\" spellcheck=\"true\" class=\"ts-editing\" style=\"\">Translations lag two releases behind the product<br>Every locale is a spreadsheet and a Slack thread<br>Nobody owns the glossary</p>",
+        "lis": 0,
+        "listStyle": "disc"
+      },
+      "bodyBlock": "{\"id\":\"p1\",\"type\":\"plain\",\"marker\":\"bullet\",\"preset\":\"disc-circle-square\",\"items\":[{\"text\":\"Translations lag two releases behind the product\"},{\"text\":\"Every locale is a spreadsheet and a Slack thread\"},{\"text\":\"Nobody owns the glossary\"}]}",
+      "afterUndo": "{\"id\":\"p1\",\"type\":\"paragraph\",\"text\":\"Translations lag two releases behind the product\\nEvery locale is a spreadsheet and a Slack thread\\nNobody owns the glossary\",\"autofit\":\"shrink\"}",
+      "afterRedo": "{\"id\":\"p1\",\"type\":\"plain\",\"marker\":\"bullet\",\"preset\":\"disc-circle-square\",\"items\":[{\"text\":\"Translations lag two releases behind the product\"},{\"text\":\"Every locale is a spreadsheet and a Slack thread",
+      "saved": {
+        "state": "All changes saved",
+        "ms": 1
+      }
+    }
+  },
+  {
+    "t": 40772,
+    "kind": "task",
+    "text": "--- Product slide: a picture from a file, moved, with a caption"
+  },
+  {
+    "t": 41735,
+    "kind": "time",
+    "text": "New slide: 960 ms to the new slide with 3 runs",
+    "runs": [
+      "h/text",
+      "p1/text",
+      "p2/text"
+    ]
+  },
+  {
+    "t": 58704,
+    "kind": "done",
+    "text": "Product slide: a picture from a file, moved, with a caption: 10 clicks, 67 keys, 1 drags, 17.9 s",
+    "result": {
+      "imageRows": [
+        "menu.insert.image.upload \"Upload from computer\""
+      ],
+      "picMs": 1427,
+      "placeholdersAfter": [
+        {
+          "run": "h/text",
+          "prompt": null,
+          "x": 374,
+          "y": 217,
+          "w": 249,
+          "h": 29
+        },
+        {
+          "run": "p1/text",
+          "prompt": "Click to add text",
+          "x": 665,
+          "y": 217,
+          "w": 498,
+          "h": 20
+        },
+        {
+          "run": "p2/text",
+          "prompt": "Click to add text",
+          "x": 374,
+          "y": 429,
+          "w": 457,
+          "h": 20
+        }
+      ],
+      "pic": {
+        "id": "shot",
+        "type": "shot",
+        "pos": {
+          "x": 136,
+          "y": 128,
+          "w": 480,
+          "h": 335,
+          "z": 3
+        }
+      },
+      "snack": "asset.add: product-shot",
+      "chipAfter": "Image",
+      "handles": [
+        "handle.shot.move",
+        "handle.shot.resize.nw",
+        "handle.shot.resize.n",
+        "handle.shot.resize.ne",
+        "handle.shot.resize.e",
+        "handle.shot.resize.se",
+        "handle.shot.resize.s",
+        "handle.shot.resize.sw",
+        "handle.shot.resize.w",
+        "handle.shot.rotate"
+      ],
+      "tail": [
+        "toolbar.cropImage",
+        "toolbar.replaceImage",
+        "toolbar.imageOptions",
+        "toolbar.resetImage",
+        "toolbar.formatOptions",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "box": {
+        "x": 373.0050048828125,
+        "y": 216.239990234375,
+        "w": 285.9000244140625,
+        "h": 199.53436279296875
+      },
+      "moved": {
+        "x": 592.7906494140625,
+        "y": 256.1468811035156,
+        "w": 285.89996337890625,
+        "h": 199.53436279296875
+      },
+      "readoutDuring": {
+        "readout": null,
+        "chip": "Image"
+      },
+      "foControls": [
+        "toolbar.formatOptions \"Format options\"",
+        "panel.formatOptions \"Format optionsSize & rotationWidthpxHeig\"",
+        "panel.formatOptions.close \"Close Format options\"",
+        "formatOptions.size \"Size & rotation\"",
+        "formatOptions.size.width \"Width\"",
+        "formatOptions.size.height \"Height\"",
+        "formatOptions.size.lock \"Lock aspect ratio\"",
+        "formatOptions.size.lock.lock \"Lock aspect ratio\"",
+        "formatOptions.size.flip \"Flip\"",
+        "formatOptions.size.flip.h \"Flip horizontally\"",
+        "formatOptions.size.flip.v \"Flip vertically\"",
+        "formatOptions.size.rotate \"Rotate\"",
+        "formatOptions.size.rotate.dial \"Rotate dial\"",
+        "formatOptions.position \"Position\"",
+        "formatOptions.position.from \"From\"",
+        "formatOptions.position.from.topLeft \"Top-left\"",
+        "formatOptions.position.from.center \"Center\"",
+        "formatOptions.position.x \"X\"",
+        "formatOptions.position.y \"Y\"",
+        "formatOptions.picture \"Picture\"",
+        "formatOptions.picture.replace \"Replace image\"",
+        "formatOptions.picture.crop \"Crop image\"",
+        "formatOptions.picture.reset \"Reset image\"",
+        "formatOptions.picture.anchor \"Crop anchor\"",
+        "formatOptions.picture.anchor.top \"Top\"",
+        "formatOptions.picture.anchor.center \"Centre\"",
+        "formatOptions.picture.mask \"None\"",
+        "formatOptions.picture.frame.weight \"Frame Weight\"",
+        "formatOptions.picture.frame.dash \"Frame Dash\"",
+        "formatOptions.picture.frame.color \"Frame Color\"",
+        "formatOptions.picture.frame.color.none \"None\"",
+        "formatOptions.picture.frame.color.ink \"Ink\"",
+        "formatOptions.picture.frame.color.paper \"Paper\"",
+        "formatOptions.picture.frame.color.ink-2 \"Ink 2\"",
+        "formatOptions.picture.frame.color.titanium \"Titanium\"",
+        "formatOptions.picture.frame.color.hair \"Hairline\"",
+        "formatOptions.picture.frame.color.hair-soft \"Soft hairline\"",
+        "formatOptions.picture.frame.color.plate \"Plate\"",
+        "formatOptions.picture.frame.color.edge \"Edge\"",
+        "formatOptions.picture.frame.color.green \"Green\"",
+        "formatOptions.picture.frame.color.amber \"Amber\"",
+        "formatOptions.picture.frame.color.red \"Red\"",
+        "formatOptions.picture.frame.color.blue \"GT blue\"",
+        "formatOptions.picture.frame.color.hex \"Frame Color custom\"",
+        "formatOptions.adjustments \"Adjustments\"",
+        "formatOptions.adjustments.transparency.slider \"Transparency\"",
+        "formatOptions.adjustments.transparency \"Transparency value\"",
+        "formatOptions.adjustments.brightness.slider \"Brightness\"",
+        "formatOptions.adjustments.brightness \"Brightness value\"",
+        "formatOptions.adjustments.contrast.slider \"Contrast\"",
+        "formatOptions.adjustments.contrast \"Contrast value\"",
+        "formatOptions.adjustments.reset \"Reset\"",
+        "panel.toggle \"Hide side panel\""
+      ],
+      "foText": "Format options\nSize & rotation\nWidth\npx\nHeight\npx\nRotate\n°\nPosition\nTop-left\nCenter\nX\npx\nY\npx\nPicture\nAsset\nmood-earth\nopener-brand\nopener-closing\nopener-prototemplate\nproduct-shot\nneutral\nAlt\nproduct shot\nRole\ncapture, 832 by 580 at 1x, resample-1280\nFit\nnone\nwidth\nfit\nwidth\nfit\nAspect\nCrop anchor\nnone\ntop\ncenter\ntop\ncenter\nCaption\nCaption size\nnone\n16\n15\n16\n15\nWidth\n−\n+\nBorder\noff\nReplace image\nCrop image\nReset image\nTop\nCentre\nMask\nNone\nFrame\nFrame Weight\nNone\n1 px\n1.5 px\n2 px\nFrame Dash\nSolid\nDot\nDash\nDash dot\nLong dash\nLong dash dot\nFrame Color\nAdjustments\nTransparency\n%\nBrightness\n%\nContrast\n%\nReset",
+      "caption": {
+        "via": "toolbar.textBox click-place under the picture"
+      },
+      "captionOnSheet": [
+        "The GT dashboard, one project per product surface"
+      ],
+      "captionJson": "{\"id\":\"text\",\"pos\":{\"x\":347,\"y\":545,\"w\":480,\"h\":66,\"z\":4},\"type\":\"text\",\"text\":\"The \\\\GT dashboard, one project per product surface\",\"autofit\":\"grow\"}",
+      "saved": {
+        "state": "All changes saved",
+        "ms": 824
+      },
+      "objects": [
+        "shot shot",
+        "heading h",
+        "paragraph p1",
+        "paragraph p2",
+        "text text"
+      ]
+    }
+  },
+  {
+    "t": 58705,
+    "kind": "task",
+    "text": "--- Pricing slide: a 3 by 3 table typed in, and a column chart beside it"
+  },
+  {
+    "t": 59636,
+    "kind": "time",
+    "text": "New slide: 930 ms to the new slide with 3 runs",
+    "runs": [
+      "h/text",
+      "p1/text",
+      "p2/text"
+    ]
+  },
+  {
+    "t": 82721,
+    "kind": "done",
+    "text": "Pricing slide: a 3 by 3 table typed in, and a column chart beside it: 9 clicks, 58 keys, 2 drags, 24 s",
+    "result": {
+      "plateWords": "1 x 1",
+      "plateHover": "3 x 3",
+      "tableMs": 382,
+      "tableSelected": {
+        "chip": "Title",
+        "handles": 0
+      },
+      "table": {
+        "id": "table",
+        "type": "table",
+        "pos": {
+          "x": 320,
+          "y": 290,
+          "w": 960,
+          "h": 320,
+          "z": 3
+        }
+      },
+      "chipT": "Title",
+      "cellsDrawn": 9,
+      "typing": {
+        "via": "single click",
+        "sessionOpened": true,
+        "block": "{\"id\":\"table\",\"pos\":{\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":3},\"type\":\"table\",\"columns\":[{},{},{}],\"rows\":[{\"cells\":[\"Plan\",\"Seats\",\"Price\"],\"header\":true},{\"cells\":[\"Starter\",\"5\",\"$99\"]},{\"cells\":[\"Team\",\"25\",\"$399\"]}]}"
+      },
+      "saved1": {
+        "state": "All changes saved",
+        "ms": 4113
+      },
+      "chartMs": 539,
+      "chartSelected": {
+        "chip": null,
+        "handles": []
+      },
+      "chart": {
+        "id": "chart",
+        "type": "chart",
+        "pos": {
+          "x": 320,
+          "y": 180,
+          "w": 960,
+          "h": 540,
+          "z": 4
+        },
+        "keys": [
+          "id",
+          "pos",
+          "type",
+          "kind",
+          "categories",
+          "series"
+        ]
+      },
+      "chipC": null,
+      "tailC": [
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertLine.arrow",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.end",
+        "toolbar.pointer",
+        "toolbar.hideMenus"
+      ],
+      "snackC": null,
+      "overlap": 108985.05208007991,
+      "chartMoved": {
+        "x": 692.260009765625,
+        "y": 277.58935546875,
+        "w": 571.800048828125,
+        "h": 321.63751220703125
+      },
+      "resized": {
+        "handles": 12,
+        "readoutDuring": "759 × 320",
+        "after": {
+          "x": 482.5999755859375,
+          "y": 312.73126220703125,
+          "w": 452.07940673828125,
+          "h": 190.5999755859375
+        }
+      },
+      "saved": {
+        "state": "All changes saved",
+        "ms": 1498
+      }
+    }
+  },
+  {
+    "t": 82721,
+    "kind": "task",
+    "text": "--- Closing slide: contact details and a link on the company address"
+  },
+  {
+    "t": 83711,
+    "kind": "time",
+    "text": "New slide: 987 ms to the new slide with 3 runs",
+    "runs": [
+      "h/text",
+      "p1/text",
+      "p2/text"
+    ]
+  },
+  {
+    "t": 101836,
+    "kind": "done",
+    "text": "Closing slide: contact details and a link on the company address: 6 clicks, 114 keys, 0 drags, 19.1 s",
+    "result": {
+      "shiftHomeSelected": "Kevin Liu, founder\nkevin@generaltranslation.com\ngeneraltranslation.com",
+      "selected": "generaltranslation",
+      "insertLinkEnabled": true,
+      "dlg": true,
+      "dialogControls": [
+        "toolbar.insertLink \"Insert link\"",
+        "run.link.href \"Link\""
+      ],
+      "dialogText": {
+        "text": "",
+        "placeholder": "https://",
+        "label": "Link",
+        "buttons": []
+      },
+      "applied": {
+        "enterClosed": true
+      },
+      "bodyRun": {
+        "links": [
+          "generaltranslation -> https://generaltranslation.com"
+        ],
+        "html": "<span class=\"para\">Kevin Liu, founder</span><span class=\"para\">kevin@generaltranslation.com</span><span class=\"para\"><a href=\"https://generaltranslation.com\" target=\"_blank\" rel=\"noreferrer\">generaltranslation</a>.com</span>"
+      },
+      "bodyJson": "{\"schemaVersion\":1,\"id\":\"split-5\",\"template\":\"split\",\"kind\":\"content\",\"layout\":{\"type\":\"split\",\"gap\":56,\"head\":{\"cols\":\"4/8\"},\"body\":{\"align\":\"center\"}},\"slots\":{\"headLeft\":[{\"id\":\"h\",\"type\":\"heading\",\"level\":\"h2\",\"text\":\"Thank you\",\"autofit\":\"shrink\"}],\"headRight\":[{\"id\":\"p1\",\"type\":\"paragraph\",\"text\":\"Kevin Liu, founder\\nkevin@generaltranslation.com\\n[generaltranslation](https://generaltranslation.com).com\",\"autofit\":\"shrink\"}],\"body\":[{\"id\":\"p2\",\"type\":\"paragraph\",\"text\":\"\",\"measure\":56,\"autofit\":\"shrink\"}]}}",
+      "saved": {
+        "state": "All changes saved",
+        "ms": 5335
+      }
+    }
+  },
+  {
+    "t": 101836,
+    "kind": "task",
+    "text": "--- Rename the deck from the title row"
+  },
+  {
+    "t": 106400,
+    "kind": "done",
+    "text": "Rename the deck from the title row: 1 clicks, 18 keys, 0 drags, 4.6 s",
+    "result": {
+      "nameBefore": "",
+      "tip": "RenameClick the title to rename the presentation; Enter keeps the name and Esc restores it",
+      "selectedAll": {
+        "tag": "INPUT",
+        "start": 0,
+        "end": 28,
+        "len": 28,
+        "control": "deck.name"
+      },
+      "nameAfter": [
+        "BUTTON::shown"
+      ],
+      "docTitle": "GT pitch for Acme, editor, Turboslide",
+      "saved": {
+        "state": "All changes saved",
+        "ms": 1026
+      }
+    }
+  },
+  {
+    "t": 106400,
+    "kind": "task",
+    "text": "--- Reorder: drag the Pricing slide above the Product slide, then move it back with the keyboard"
+  },
+  {
+    "t": 113242,
+    "kind": "done",
+    "text": "Reorder: drag the Pricing slide above the Product slide, then move it back with the keyboard: 1 clicks, 1 keys, 1 drags, 6.8 s",
+    "result": {
+      "cardTip": "Pricing",
+      "cursor": "pointer",
+      "before": [
+        "title",
+        "split-1",
+        "split-2",
+        "split-3",
+        "split-4",
+        "split-5"
+      ],
+      "mid": {
+        "shot": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-seller/b1280-19-filmstrip-drag-mid.png",
+        "ghost": [
+          "ts-card is-dragging"
+        ]
+      },
+      "after": [
+        "title",
+        "split-1",
+        "split-2",
+        "split-4",
+        "split-3",
+        "split-5"
+      ],
+      "dragWorked": true,
+      "after2": [
+        "title",
+        "split-1",
+        "split-2",
+        "split-3",
+        "split-4",
+        "split-5"
+      ],
+      "keyWorked": true,
+      "snack": null,
+      "saved": {
+        "state": "All changes saved",
+        "ms": 2232
+      }
+    }
+  },
+  {
+    "t": 113242,
+    "kind": "task",
+    "text": "--- Present: the show, the keys, presenter view"
+  },
+  {
+    "t": 128839,
+    "kind": "done",
+    "text": "Present: the show, the keys, presenter view: 4 clicks, 10 keys, 0 drags, 15.6 s",
+    "result": {
+      "tip": "SlideshowCmd EnterPresents from the current slide; the Down arrow opens the options",
+      "openMs": 397,
+      "on": {
+        "on": true,
+        "counter": "5 of 6",
+        "toolbar": true,
+        "fullscreen": true
+      },
+      "controlsInShow": [
+        "present.toolbar \"Slideshow controls\"",
+        "present.previous \"Previous\"",
+        "present.counter \"5 of 6\"",
+        "present.next \"Next\"",
+        "present.laser \"Turn on the laser pointer\"",
+        "present.captions \"Captions\"",
+        "present.fullScreen \"Exit full screen\"",
+        "present.exit \"Exit\"",
+        "present.options \"Options\"",
+        "snackbar \"\""
+      ],
+      "p2": {
+        "on": true,
+        "counter": "6 of 6",
+        "toolbar": true,
+        "fullscreen": true
+      },
+      "p2b": {
+        "on": true,
+        "counter": "5 of 6",
+        "toolbar": true,
+        "fullscreen": true
+      },
+      "p5": {
+        "on": true,
+        "counter": "5 of 6",
+        "toolbar": true,
+        "fullscreen": true
+      },
+      "barControls": [
+        "present.show \"5 of 6●⋯\"",
+        "present.toolbar \"Slideshow controls\"",
+        "present.previous \"Previous\"",
+        "present.counter \"5 of 6\"",
+        "present.next \"Next\"",
+        "present.laser \"Turn on the laser pointer\"",
+        "present.captions \"Captions\"",
+        "present.fullScreen \"Exit full screen\"",
+        "present.exit \"Exit\"",
+        "present.options \"Options\""
+      ],
+      "blank": {
+        "blank": true,
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "notesPopupInfo": {
+        "url": "/present/untitled-20260920-yu8b",
+        "size": {
+          "width": 1180,
+          "height": 760
+        }
+      },
+      "off": {
+        "on": false,
+        "counter": null,
+        "toolbar": false,
+        "fullscreen": false
+      },
+      "slideAfterShow": "split-4",
+      "arrowRows": [
+        "menu.title.slideshow.presenterView \"Presenter view\"",
+        "menu.title.slideshow.startFromBeginning \"Start from beginning⇧⌘↩\""
+      ],
+      "presenterInfo": {
+        "ms": 2740,
+        "url": "/present/untitled-20260920-yu8b",
+        "size": {
+          "width": 1180,
+          "height": 760
+        },
+        "ctrls": [
+          "presenter \"Timer0:02PauseResetGT pitch fo\"",
+          "presenter.timer \"Timer0:02PauseReset\"",
+          "presenter.elapsed \"0:02\"",
+          "presenter.pause \"Pause\"",
+          "presenter.reset \"Reset\"",
+          "presenter.connection \"Slideshow connected\"",
+          "presenter.clock \"Time 06:31 PM\"",
+          "presenter.previous \"Previous\"",
+          "presenter.counter \"5 of 6Pricing▾\"",
+          "presenter.next \"Next\"",
+          "presenter.tab.notes \"Speaker notes\"",
+          "presenter.tab.audience \"Audience tools\"",
+          "presenter.notesSmaller \"Smaller notes text\"",
+          "presenter.notesSize \"16 px\"",
+          "presenter.notesLarger \"Larger notes text\"",
+          "presenter.notesText \"No speaker notes for this slid\""
+        ],
+        "text": "TIMER\n0:02\nPause\nReset\nGT pitch for Acme\nSlideshow connected\nTIME 06:31 PM\nPricing\n\nPlan\nSeats\nPrice\nStarter\n5\n$99\nTeam\n25\n$399\n0\n20\n40\n60\nCategory 1\nCategory 2\nCategory 3\nSeries 1\n5 of 6\nPricing\n▾\nPREVIOUS SLIDE\nThe product\n\nThe GT dashboard, one project per product surface\n\nNEXT SLIDE\nThank you\n\nKevin Liu, founder\nkevin@generaltranslation.com\ngeneraltranslation.com\n\nSpeaker notes\nAudience tools\n16 px\n\nNo speaker notes for this slide",
+        "mainCounterAfterPresenterArrow": {
+          "on": true,
+          "counter": "6 of 6",
+          "toolbar": true,
+          "fullscreen": false
+        }
+      },
+      "mainAfter": {
+        "on": true,
+        "counter": "6 of 6",
+        "toolbar": true,
+        "fullscreen": false
+      }
+    }
+  },
+  {
+    "t": 128839,
+    "kind": "task",
+    "text": "--- Share a view link and open it in a second browser"
+  },
+  {
+    "t": 140949,
+    "kind": "done",
+    "text": "Share a view link and open it in a second browser: 5 clicks, 0 keys, 0 drags, 12.1 s",
+    "result": {
+      "tip": "ShareWho can open this presentation, and the link to send",
+      "openMs": 560,
+      "text": "Share GT pitch for Acme\nNo pending requests\nViewer\nCommenter\nEditor\nSend\nNotify people\nX\nXenon 488\nOwner\nLinks\nView link · Viewer\nCopy link\nPresent link · Viewer, opens as a show\nCopy link\nEdit link · Editor\nCopy link\nGeneral access\nRestricted\nAnyone with the link\nOnly people with access can open it\nPublish to the web\n\nSpeaker notes and skipped slides never travel with a view or comment link\n\nSharing is not enforced on this deployment: the roles here are shown and logged, anyone with the address can open the presentation, and a change from any browser is accepted.\n\nCopy link\nDone",
+      "controls": [
+        "dialog.share.close \"Close\"",
+        "dialog.share.review \"No pending requests\"",
+        "dialog.share.emails \"Add people by email\"",
+        "dialog.share.inviteRole \"Role\"",
+        "dialog.share.send \"Send\" [dis]",
+        "dialog.share.notify \"\"",
+        "dialog.share.message \"Message\"",
+        "dialog.share.people \"People with access\"",
+        "dialog.share.owner \"XXenon 488Owner\"",
+        "dialog.share.rows \"View link · ViewerCopy linkPresent link \"",
+        "dialog.share.view \"View link · ViewerCopy link\"",
+        "dialog.share.view.copy \"Copy link\"",
+        "dialog.share.present \"Present link · Viewer, opens as a showCo\"",
+        "dialog.share.present.copy \"Copy link\"",
+        "dialog.share.edit \"Edit link · EditorCopy link\"",
+        "dialog.share.edit.copy \"Copy link\"",
+        "dialog.share.general \"RestrictedAnyone with the linkOnly peopl\"",
+        "dialog.share.mode \"General access\"",
+        "dialog.share.gear \"Settings\"",
+        "dialog.share.publish \"Publish to the web\"",
+        "dialog.share.footer \"Speaker notes and skipped slides never t\"",
+        "dialog.share.authorize \"Sharing is not enforced on this deployme\"",
+        "dialog.share.error \"\"",
+        "dialog.share.copyLink \"Copy link\"",
+        "dialog.share.done \"Done\""
+      ],
+      "mode": {
+        "before": "restricted",
+        "after": "link"
+      },
+      "textAfter": "Share GT pitch for Acme\nNo pending requests\nViewer\nCommenter\nEditor\nSend\nNotify people\nX\nXenon 488\nOwner\nLinks\nView link · Viewer\nCopy link\nPresent link · Viewer, opens as a show\nCopy link\nEdit link · Editor\nCopy link\nGeneral access\nRestricted\nAnyone with the link\nViewer\nCommenter\nEditor\nAnyone with the link\nViewer\n9/19/2026\nRotate\nRevoke\nStop sharing\nPublish to the web\n\nSpeaker notes and skipped slides never travel with a view or comment link\n\nSharing is not enforced on this deployment: the roles here are shown and logged, anyone with the address can open the presentation, and a change from any browser is accepted.\n\nCopy link\nDone",
+      "linkRows": [
+        {
+          "c": "dialog.share.link.lnk_SMQZOkW-LiuFBiDo",
+          "text": "Anyone with the link\nViewer\n9/19/2026\nRotate\nRevoke",
+          "title": null,
+          "href": null
+        },
+        {
+          "c": "dialog.share.link.lnk_SMQZOkW-LiuFBiDo.rotate",
+          "text": "Rotate",
+          "title": null,
+          "href": null
+        },
+        {
+          "c": "dialog.share.link.lnk_SMQZOkW-LiuFBiDo.revoke",
+          "text": "Revoke",
+          "title": null,
+          "href": null
+        }
+      ],
+      "url": "https://turboslide.vercel.app/s/swiYKZyu0HJAwwBdPpR6fz",
+      "copyTip": "Copy linkA link that opens the presentation as viewer; it can be revoked below",
+      "copySnack": "Link copied",
+      "done": true,
+      "viewer": {
+        "status": 200,
+        "ms": 3724,
+        "info": {
+          "title": "GT pitch for Acme, Turboslide",
+          "url": "/deck/untitled-20260920-yu8b",
+          "controls": [
+            "sidebar.density.thumbs \"Thumbnails\"",
+            "sidebar.density.outline \"Outline\"",
+            "sidebar.filter \"Filter slides\"",
+            "view.sidebar \"Show or hide the list\"",
+            "view.prev \"Previous\"",
+            "view.count \"slide 1 of 6\"",
+            "view.next \"Next\"",
+            "view.mode.slide \"Slide\"",
+            "view.mode.grid \"Grid\"",
+            "view.mode.book \"Book\"",
+            "view.theme \"Switch to light\"",
+            "view.present \"Present\"",
+            "view.fullscreen \"Fullscreen\"",
+            "view.copyLink \"Copy link\"",
+            "view.help \"Help\""
+          ],
+          "slides": 0,
+          "text": "Turboslide\n6 slides\nDeck\n01\nGeneral Translation for Acme\n\nLocalization that ships with every release\n\nGeneral Translation for Acme\n02\nAgenda\n\nWhere Acme ships today\nWhat breaks at scale\nHow General Translation works\nPricing and next steps\n\nAgenda\n03\nThe problem\n●\nTranslations lag two releases behind the product\n●\nEvery locale is a spreadsheet and a Slack thread\n●\nNobody owns the glossary\n\nThe problem\n04\nThe product\n\nThe GT dashboard, one project per product surface\n\nThe product\n05\nPricing\n\nPlan\n"
+        },
+        "afterArrow": "#s/split-1 02 / 06",
+        "bareDeckStatus": 200
+      }
+    }
+  },
+  {
+    "t": 140950,
+    "kind": "task",
+    "text": "--- Download the PDF"
+  },
+  {
+    "t": 148237,
+    "kind": "done",
+    "text": "Download the PDF: 4 clicks, 0 keys, 0 drags, 7.3 s",
+    "result": {
+      "rows": [
+        "menu.file.download.pptx \"Microsoft PowerPoint (.pptx)\"",
+        "menu.file.download.pdf \"PDF Document (.pdf)\"",
+        "menu.file.download.jpg \"JPEG image (.jpg, current slide)\"",
+        "menu.file.download.png \"PNG image (.png, current slide)\"",
+        "menu.file.download.html \"Web page (.html)\"",
+        "menu.file.download.zip \"Turboslide bundle (.zip)\""
+      ],
+      "dialogText": "Download\n\nOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.\n\nInclude skipped slides\nCancel\nDownload",
+      "okLabel": "Download",
+      "progressWords": "Preparing your PDF, about half a minute for 6 slides",
+      "readyMs": 4101,
+      "file": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/product/seller/files-b/untitled-20260920-yu8b-dark.pdf",
+      "ready": "Your file is ready. Details",
+      "snack": null,
+      "done": true,
+      "reportText": null
+    }
+  },
+  {
+    "t": 148237,
+    "kind": "task",
+    "text": "--- Download the PowerPoint"
+  },
+  {
+    "t": 164172,
+    "kind": "done",
+    "text": "Download the PowerPoint: 4 clicks, 0 keys, 0 drags, 15.9 s",
+    "result": {
+      "rows": [
+        "menu.file.download.pptx \"Microsoft PowerPoint (.pptx)\"",
+        "menu.file.download.pdf \"PDF Document (.pdf)\"",
+        "menu.file.download.jpg \"JPEG image (.jpg, current slide)\"",
+        "menu.file.download.png \"PNG image (.png, current slide)\"",
+        "menu.file.download.html \"Web page (.html)\"",
+        "menu.file.download.zip \"Turboslide bundle (.zip)\""
+      ],
+      "dialogText": "Download\nPerfect\nEvery slide looks exactly like the screen; the text is there but not editable\nEditable text\nText boxes you can edit in PowerPoint; layout within a few pixels\nInclude speaker notes\nInclude skipped slides\nMore options\nCancel\nDownload",
+      "okLabel": "Download",
+      "progressWords": "Preparing your PowerPoint file, about half a minute for 6 slides",
+      "readyMs": 12556,
+      "file": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/product/seller/files-b/untitled-20260920-yu8b-dark.pptx",
+      "ready": "Your file is ready. Details",
+      "snack": null,
+      "done": true,
+      "reportText": null
+    }
+  },
+  {
+    "t": 164173,
+    "kind": "task",
+    "text": "--- Come back the next day: reload and read the deck"
+  },
+  {
+    "t": 170950,
+    "kind": "done",
+    "text": "Come back the next day: reload and read the deck: 2 clicks, 1 keys, 0 drags, 6.8 s",
+    "result": {
+      "reloadMs": 624,
+      "orderSame": true,
+      "order": [
+        "title",
+        "split-1",
+        "split-2",
+        "split-3",
+        "split-4",
+        "split-5"
+      ],
+      "summary": [
+        {
+          "id": "title",
+          "objects": [],
+          "texts": []
+        },
+        {
+          "id": "split-1",
+          "objects": [],
+          "texts": [
+            "\"text\":\"Agenda\"",
+            "\"text\":\"\""
+          ]
+        },
+        {
+          "id": "split-2",
+          "objects": [],
+          "texts": [
+            "\"text\":\"The problem\"",
+            "\"text\":\"Translations lag two releases behind the product\"",
+            "\"text\":\"Every locale is a spreadsheet and a Slack thread\"",
+            "\"text\":\"Nobody owns the glossary\"",
+            "\"text\":\"\""
+          ]
+        },
+        {
+          "id": "split-3",
+          "objects": [
+            "shot",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "text"
+          ],
+          "texts": [
+            "\"text\":\"The product\"",
+            "\"text\":\"\"",
+            "\"text\":\"\"",
+            "\"text\":\"The \\\\GT dashboard, one project per product surface\""
+          ]
+        },
+        {
+          "id": "split-4",
+          "objects": [
+            "table",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "chart"
+          ],
+          "texts": [
+            "\"text\":\"Pricing\"",
+            "\"text\":\"\"",
+            "\"text\":\"\""
+          ]
+        },
+        {
+          "id": "split-5",
+          "objects": [],
+          "texts": [
+            "\"text\":\"Thank you\"",
+            "\"text\":\"\""
+          ]
+        }
+      ],
+      "name": "",
+      "save": "All changes saved",
+      "active": "split-5",
+      "cards": [
+        "home.recent \"Opened on this deviceGT pitch for AcmeOp\"",
+        "home.recent.untitled-20260920-yu8b \"GT pitch for AcmeOpened just now\"",
+        "home.recent.open.untitled-20260920-yu8b \"\"",
+        "home.cards \"GT pitch for AcmeOpened just now⋮Acme Q4\"",
+        "home.card.untitled-20260920-yu8b \"GT pitch for AcmeOpened just now⋮\"",
+        "home.open.untitled-20260920-yu8b \"\"",
+        "home.title.untitled-20260920-yu8b \"GT pitch for Acme\"",
+        "home.card.untitled-20260920-qlb6 \"Acme Q4 pitchEdited 6:31 PM⋮\"",
+        "home.open.untitled-20260920-qlb6 \"\"",
+        "home.title.untitled-20260920-qlb6 \"Acme Q4 pitch\"",
+        "home.card.untitled-20260920-jm4d \"Interface auditInterface auditEdited 6:2\"",
+        "home.open.untitled-20260920-jm4d \"Interface audit\"",
+        "home.title.untitled-20260920-jm4d \"Interface audit\"",
+        "home.card.untitled-20260919-0jar \"Untitled presentationUntitled presentati\"",
+        "home.open.untitled-20260919-0jar \"Untitled presentation\"",
+        "home.title.untitled-20260919-0jar \"Untitled presentation\"",
+        "home.card.untitled-20260918-oyqt \"Untitled presentationUntitled presentati\"",
+        "home.open.untitled-20260918-oyqt \"Untitled presentation\"",
+        "home.title.untitled-20260918-oyqt \"Untitled presentation\"",
+        "home.card.untitled-20260918-j502-5 \"Pipeline revPipeline revEdited Sep 18, 2\""
+      ],
+      "cardText": "GT pitch for Acme\nOpened just now\n⋮",
+      "thumb": {
+        "tag": "IMG",
+        "w": 251,
+        "h": 140,
+        "src": "/api/render/title?deck=untitled-20260920-yu8b&theme=dark&w=320&r=45",
+        "complete": true
+      },
+      "moreRows": [
+        "menu.home.card.open \"Open\"",
+        "menu.home.card.openNewTab \"Open in new tab\"",
+        "menu.home.card.present \"Present\"",
+        "menu.home.card.rename \"Rename\"",
+        "menu.home.card.copy \"Make a copy\"",
+        "menu.home.card.download \"Download\"",
+        "menu.home.card.trash \"Move to trash\""
+      ],
+      "reopenMs": 525
+    }
+  },
+  {
+    "t": 170950,
+    "kind": "task",
+    "text": "--- Delete the scratch deck"
+  },
+  {
+    "t": 179019,
+    "kind": "done",
+    "text": "Delete the scratch deck: 5 clicks, 0 keys, 0 drags, 8.1 s",
+    "result": {
+      "tip": "Move to trashThe presentation stays in the trash until someone deletes it forever.",
+      "confirm": false,
+      "confirmText": null,
+      "ms": 2072,
+      "snack": null,
+      "url": "/decks",
+      "cardShown": true,
+      "trashMs": 1424,
+      "trashText": "Turboslide\nTrash\n\nPresentations moved to the trash stay here until they are restored or deleted forever.\n\nRecent presentations\nEmpty trash\nGT pitch for Acme\nTrashed 6:31 PM · 6 slides\nRestore\nDelete forever\nPipeline review: Acme, Q3 2026\nPipeline review: Acme, Q3 2026\nTrashed Sep 17, 2026 · 1 slide\nRestore\nDelete forever\nQ4 review\nQ4 review\nTrashed Sep 17, 2026 · 2 slides\nRestore\nDelete forever\nCopy paste source\nCopy paste source\nTrashed Sep 17, 2026 · 3 slides\nRestore\nDelete forever\nShared review deck\nShared review deck\nTrashed Sep 17, 2026 · 3 slides\nRestore\nDelete forever\nShare\nShare\nTrashed Sep 17, 2026 · 1 slide\nRestore\nDelete forever\nPipeline review: Acme, Q3 2026\nPipeline review: Acme, Q3 2026\nTrashed Sep 17, 2026 · 4 slides\nRestore\nDelete forever\nCopy paste source\nCopy paste source",
+      "confirmWords": "Delete GT pitch for Acme forever? This cannot be undone\n\n6 slides and every version of GT pitch for Acme are deleted.\n\nCancel\nDelete forever",
+      "deletedMs": 536,
+      "status404": true
+    }
+  },
+  {
+    "t": 179019,
+    "kind": "errors",
+    "text": "console errors",
+    "consoleErrors": []
+  }
+]

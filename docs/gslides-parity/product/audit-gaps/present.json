@@ -1,0 +1,129 @@
+{
+  "name": "present",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:32:57.676Z",
+  "seconds": 138,
+  "ok": 14,
+  "failed": 1,
+  "notDriven": 0,
+  "deck": "untitled-20260920-l3w8",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-l3w8; /edit/untitled-20260920-l3w8",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Type a speaker note; New slide from the toolbar and a title on it",
+      "expected": "the note is stored; two slides",
+      "observed": "notes \"Open with the renewal date and the two new logos.\"; slides title,split-1; second split-1",
+      "ok": true,
+      "second": "split-1"
+    },
+    {
+      "n": 3,
+      "step": "Slideshow arrow > Presenter view: the second window",
+      "expected": "a window with the notes, the next slide and a timer; the show in the first window",
+      "observed": "rows title.slideshow.presenterView,title.slideshow.startFromBeginning; presenter {\"url\":\"/present/untitled-20260920-l3w8\",\"counter\":\"1 of 2Acme QBR: pipeline and renewal▾\",\"notes\":\"Open with the renewal date and the two new logos.\",\"elapsed\":\"0:03\",\"connection\":\"Slideshow connected\",\"frames\":4,\"controls\":\"presenter.timer,presenter.elapsed,presenter.pause,presenter.reset,presenter.connection,presenter.clock,presenter.previous,presenter.counter,presenter.next,presenter.tab.notes,presenter.tab.audience,presenter.notesSmaller,presenter.notesSize,presenter.notesLarger,presenter.notesText\"}; audience {\"show\":true,\"url\":\"/edit/untitled-20260920-l3w8\"}; after Next in the console: editor slide split-1; present-01-slideshow-arrow-menu.png; present-02-presenter-console.png; present-03-audience-window.png",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Slideshow: L toggles the laser; the Options menu lists the pen",
+      "expected": "the laser dot draws; the pen row is a stub",
+      "observed": "laser dot true; options [{\"id\":\"present.options.notes\",\"text\":\"Open speaker notesS\",\"disabled\":null},{\"id\":\"present.options.laser\",\"text\":\"Turn on the laser pointerL\",\"disabled\":null},{\"id\":\"present.options.fullScreen\",\"text\":\"Exit full screen⇧⌘F\",\"disabled\":null},{\"id\":\"present.options.more\",\"text\":\"More\",\"disabled\":null},{\"id\":\"present.options.exit\",\"text\":\"ExitEsc\",\"disabled\":null}]; show still open after Escape on the menu true; present-04-show-laser.png; present-05-show-options-menu.png",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Offline in the show: ArrowRight, ArrowLeft, a digit and Enter with the network off",
+      "expected": "the show keeps working after load without the network",
+      "observed": "slide split-1 -> split-1 -> title; snackbar \"null\"; words on the page [\"Reconnecting\"]; present-06-show-offline.png",
+      "ok": false
+    },
+    {
+      "n": 6,
+      "step": "Reload the editor with the network off",
+      "expected": "what the page shows without the network",
+      "observed": "reload Error: page.reload: net::ERR_INTERNET_DISCONNECTED; body \"\"; present-07-editor-reload-offline.png",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "Ctrl+M adds a slide; Cmd+D duplicates the selected card",
+      "expected": "both chords work as Google binds them",
+      "observed": "slides 2 -> 3 after Ctrl+M -> 4 after Cmd+D",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Cmd+Shift+H, Cmd+/, Alt+/, Cmd+Option+Shift+S, Cmd+Option+M",
+      "expected": "Find and replace, the shortcuts dialog, Search the menus, the notes focus, the comment card",
+      "observed": "{\"findReplace\":true,\"shortcuts\":true,\"searchMenus\":\"palette\",\"notesFocus\":\"textarea[notes.text]\",\"commentCard\":true}; present-08-chords.png",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "The viewer and the editor at 375 by 812 (a phone)",
+      "expected": "no horizontal overflow; the viewer pages by a tap; the editor is usable or says it is for larger screens",
+      "observed": "{\"viewer\":{\"path\":\"/deck/untitled-20260920-l3w8\",\"innerWidth\":375,\"scrollWidth\":375,\"horizontalOverflow\":false,\"menubar\":false,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,131 197x111\",\"notes\":false,\"slideshow\":false,\"share\":false,\"more\":false,\"moreCount\":0,\"viewerControls\":\"\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":24},\"viewerAfterTap\":{\"counter\":\"01 / 04\",\"path\":\"/deck/untitled-20260920-l3w8\"},\"editor\":{\"path\":\"/edit/untitled-20260920-l3w8\",\"innerWidth\":375,\"scrollWidth\":375,\"horizontalOverflow\":false,\"menubar\":true,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,243 197x111\",\"notes\":false,\"slideshow\":true,\"share\":false,\"more\":true,\"moreCount\":0,\"viewerControls\":\"present.split,present.open,present.arrow\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":24},\"editorAfterTap\":{\"chip\":null,\"editing\":false,\"handles\":0},\"shot3\":\"present-11-phone-375-editor-tap.png\"}; present-09-phone-375-viewer.png; present-10-phone-375-editor.png",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "The viewer and the editor at 768 by 1024 (a tablet)",
+      "expected": "no horizontal overflow; the editor draws its rows",
+      "observed": "{\"viewer\":{\"path\":\"/deck/untitled-20260920-l3w8\",\"innerWidth\":768,\"scrollWidth\":768,\"horizontalOverflow\":false,\"menubar\":false,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,131 197x111\",\"notes\":false,\"slideshow\":false,\"share\":false,\"more\":false,\"moreCount\":0,\"viewerControls\":\"\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":24},\"viewerAfterTap\":{\"counter\":\"01 / 04\",\"path\":\"/deck/untitled-20260920-l3w8\"},\"editor\":{\"path\":\"/edit/untitled-20260920-l3w8\",\"innerWidth\":768,\"scrollWidth\":768,\"horizontalOverflow\":false,\"menubar\":true,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,243 197x111\",\"notes\":false,\"slideshow\":true,\"share\":false,\"more\":true,\"moreCount\":0,\"viewerControls\":\"present.split,present.open,present.arrow\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":24},\"editorAfterTap\":{\"chip\":null,\"editing\":false,\"handles\":0},\"shot3\":\"present-14-tablet-768-editor-tap.png\"}; present-12-tablet-768-viewer.png; present-13-tablet-768-editor.png",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "The editor at 1280 by 800 (a laptop)",
+      "expected": "the toolbar fits or folds into More; no horizontal overflow",
+      "observed": "{\"viewer\":{\"path\":\"/deck/untitled-20260920-l3w8\",\"innerWidth\":1280,\"scrollWidth\":1280,\"horizontalOverflow\":false,\"menubar\":false,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,131 197x111\",\"notes\":false,\"slideshow\":false,\"share\":false,\"more\":false,\"moreCount\":0,\"viewerControls\":\"\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":24},\"editor\":{\"path\":\"/edit/untitled-20260920-l3w8\",\"innerWidth\":1280,\"scrollWidth\":1280,\"horizontalOverflow\":false,\"menubar\":true,\"toolbar\":null,\"filmstrip\":false,\"sheet\":\"43,243 197x111\",\"notes\":true,\"slideshow\":true,\"share\":false,\"more\":false,\"moreCount\":0,\"viewerControls\":\"present.split,present.open,present.arrow\",\"viewport\":\"width=device-width, initial-scale=1\",\"smallestTap\":13},\"tailAt1280\":{\"visible\":12,\"more\":false,\"chip\":null},\"shot3\":\"present-17-laptop-1280-editor-text-tail.png\"}; present-15-laptop-1280-viewer.png; present-16-laptop-1280-editor.png",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "6: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || Failed to load resource: net::ERR_INTERNET_DISCONNECTED || The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-l3w8",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-l3w8 and /edit/untitled-20260920-l3w8 are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

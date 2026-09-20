@@ -1,0 +1,171 @@
+{
+  "name": "pictures",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T01:25:33.708Z",
+  "seconds": 154,
+  "ok": 9,
+  "failed": 10,
+  "notDriven": 0,
+  "deck": "untitled-20260920-umsg",
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "step": "a scratch deck from /new",
+      "expected": "the address moves to /edit/<id>",
+      "observed": "untitled-20260920-umsg; /edit/untitled-20260920-umsg",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Insert > Image > Upload from computer with a PNG",
+      "expected": "a picture block lands on the slide within 20 s",
+      "observed": "mark mark pos {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0} in 3890 ms; snackbar \"asset.add: picture-a\"; pictures-01-picture-uploaded.png",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "Select the picture: the chip and the toolbar tail (switch off), then with the switch on",
+      "expected": "crop, replace and image options in the default view; the border controls and the mask arrow only with the switch on",
+      "observed": "chip \"Image\"; tail off toolbar.cropImage,toolbar.replaceImage,toolbar.imageOptions,toolbar.resetImage,toolbar.formatOptions; tail on toolbar.borderColor,toolbar.borderWeight,toolbar.borderDash,toolbar.cropImage,toolbar.cropImage.arrow,toolbar.replaceImage,toolbar.imageOptions,toolbar.resetImage,toolbar.dither,toolbar.formatOptions; pictures-02-picture-tail-default.png; pictures-03-picture-tail-advanced.png",
+      "ok": false
+    },
+    {
+      "n": 4,
+      "step": "Toolbar Replace image > Upload from computer with a second PNG",
+      "expected": "the asset changes and the box keeps its frame",
+      "observed": "asset undefined -> undefined; pos {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0} -> {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0}; snackbar \"null\"; pictures-04-picture-replaced.png",
+      "ok": false
+    },
+    {
+      "n": 5,
+      "step": "Crop: double click the picture, drag the east edge 100 sheet px in, Enter",
+      "expected": "crop mode opens, the frame narrows, the trim is written",
+      "observed": "chip \"Drag the handles to crop. Press Enter to finish\"; trim null; pos {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0}; pictures-05-crop-dragged.png",
+      "ok": false
+    },
+    {
+      "n": 6,
+      "step": "Mask image: the Crop image arrow with the switch on",
+      "expected": "the arrow lists the mask shapes; a mask draws",
+      "observed": "rows format.image.maskImage.pick.rect,format.image.maskImage.pick.roundRect,format.image.maskImage.pick.snip1Rect,format.image.maskImage.pick.snip2SameRect,format.image.maskImage.pick.snip2DiagRect,format.image.maskImage.pick.snipRoundRect,format.image.maskImage.pick.round1Rect,format.image.maskImage.pick.round2SameRect,format.image.maskImage.pick.round2DiagRect,format.image.maskImage.pick.ellipse,format.image.maskImage.pick.triangle,format.image.maskImage.pick.rtTriangle,format.image.maskImage.pick.parallelogram,format.image.maskImage.pick.trapezoid,format.image.maskImage.pick.diamond,format.image.maskImage.pick.pentagon,format.image.maskImage.pick.hexagon,format.image.maskImage.pick.heptagon,format.image.maskImage.pick.octagon,format.image.maskImage.pick.decagon,format.image.maskImage.pick.dodecagon,format.image.maskImage.pick.pie,format.image.maskImage.pick.chord,format.image.maskImage.pick.teardrop,format.image.maskImage.pick.frame,format.image.maskImage.pick.halfFrame,format.image.maskImage.pick.corner,format.image.maskImage.pick.diagStripe,format.image.maskImage.pick.plus,format.image.maskImage.pick.plaque; mask null; pictures-06-mask-menu.png; pictures-07-mask-after.png",
+      "ok": false
+    },
+    {
+      "n": 7,
+      "step": "Image options: the Format options sections; drag Transparency to about 40 percent",
+      "expected": "sections Size, Position, Picture, Adjustments; the picture draws at 0.6 opacity",
+      "observed": "sections Size & rotation, Position, Picture, Adjustments, Dither, Drop shadow, Alt text; adjust null; img opacity undefined; recolor control false; pictures-08-transparency.png",
+      "ok": false
+    },
+    {
+      "n": 8,
+      "step": "Border color from the toolbar with the switch on",
+      "expected": "a frame colour is written and drawn",
+      "observed": "cells ; picked undefined; frame null; drawn {\"free\":\"0px none rgb(242, 242, 240) outline 3px\",\"img\":\"0px none rgb(242, 242, 240) outline 3px shadow none\"}; pictures-09-border-color-picker.png; pictures-10-border-applied.png",
+      "ok": false
+    },
+    {
+      "n": 9,
+      "step": "Alt text on the picture (Format options)",
+      "expected": "the description writes to the block",
+      "observed": "alt \"undefined\"; sections Size & rotation, Position, Picture, Adjustments, Dither, Drop shadow, Alt text; pictures-11-picture-alt-text.png",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "Drag a PNG from the desktop and drop it on the empty sheet",
+      "expected": "a new picture lands at the drop point",
+      "observed": "shot shot-2 pos {\"x\":1120,\"y\":640,\"w\":480,\"h\":300,\"z\":4}; dropped at viewport 1076,590; pictures-12-drop-on-sheet.png",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Drop a PNG onto the existing picture",
+      "expected": "the picture is replaced and keeps its box (design rule 13)",
+      "observed": "asset changed false; objects 5 -> 5; pos {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0} -> {\"x\":137,\"y\":262.40625,\"w\":132,\"h\":84,\"z\":0}; snackbar \"null\"; pictures-13-drop-on-picture.png",
+      "ok": false
+    },
+    {
+      "n": 12,
+      "step": "Copy a PNG to the clipboard and press Cmd+V on the sheet",
+      "expected": "a new picture lands",
+      "observed": "clipboard.write ok; shot shot-3 pos {\"x\":136,\"y\":128,\"w\":480,\"h\":300,\"z\":5}; pictures-14-paste-picture.png",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Insert > Image > By URL with a PNG on generaltranslation.com, typed at human speed",
+      "expected": "a preview, then Insert lands the picture; the preview does not fetch every partial address",
+      "observed": "partial address console errors while typing 19; no block within 40 s; dialog still open true \"Image by URLImage addressPictures up to 25 MBslides/title.json /slots/main/0/pos: Block \"shot-mu94z9b1\" needs a position box (pos) under the freeform layout (docs/freeform.md) (this instance's document is at revision 14; the write's base was 14)CancelInsert\"; pictures-15-image-by-url.png; pictures-16-image-by-url-after.png",
+      "ok": false
+    },
+    {
+      "n": 14,
+      "step": "Insert > Video: the row and its sentence",
+      "expected": "a Later stub with its clause; no dialog opens on a click",
+      "observed": "{\"id\":\"insert.video\",\"label\":\"Video\",\"disabled\":true,\"checked\":null,\"title\":null}; tooltip \"VideoNot available in Turboslide yet. Link to a recording instead.\"; dialogs after the click 1",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Reload the editor and count the pictures; open the show",
+      "expected": "every picture survives the reload and draws in the show",
+      "observed": "error: no control title.slideshow",
+      "ok": false
+    },
+    {
+      "n": 16,
+      "step": "console errors of the run",
+      "expected": "recorded",
+      "observed": "21: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. || Failed to load resource: net::ERR_NAME_NOT_RESOLVED || Failed to load resource: net::ERR_NAME_NOT_RESOLVED || Failed to load resource: net::ERR_NAME_NOT_RESOLVED || Failed to load resource: net::ERR_NAME_NOT_RESOLVED || Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-umsg",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "the scratch deck answers 404",
+      "expected": "GET /deck/untitled-20260920-umsg and /edit/untitled-20260920-umsg are 404 within 25 s",
+      "observed": "/deck 404; /edit 404",
+      "ok": true
+    }
+  ]
+}

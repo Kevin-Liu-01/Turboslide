@@ -1,0 +1,205 @@
+{
+  "startedAt": "2026-09-20T01:46:07.760Z",
+  "finishedAt": "2026-09-20T01:47:27.438Z",
+  "deckId": "untitled-20260920-rvhu",
+  "rows": [
+    {
+      "n": 1,
+      "surface": "after",
+      "what": "light decks-search-field",
+      "observed": "before-light-decks-search-field.png, after-light-decks-search-field.png"
+    },
+    {
+      "n": 2,
+      "surface": "after",
+      "what": "light decks-card-menu-tooltip",
+      "observed": "before-light-decks-card-menu-tooltip.png, after-light-decks-card-menu-tooltip.png"
+    },
+    {
+      "n": 3,
+      "surface": "after",
+      "what": "light trash-buttons",
+      "observed": "before-light-trash-buttons.png, after-light-trash-buttons.png"
+    },
+    {
+      "n": 4,
+      "surface": "after",
+      "what": "light trash-confirm",
+      "observed": "before-light-trash-confirm.png, after-light-trash-confirm.png"
+    },
+    {
+      "n": 5,
+      "surface": "after",
+      "what": "light access-form",
+      "observed": "before-light-access-form.png, after-light-access-form.png"
+    },
+    {
+      "n": 6,
+      "surface": "after",
+      "what": "light title-row-titanium",
+      "observed": "before-light-title-row-titanium.png, after-light-title-row-titanium.png"
+    },
+    {
+      "n": 7,
+      "surface": "after",
+      "what": "light title-row-corner",
+      "observed": "before-light-title-row-corner.png, after-light-title-row-corner.png"
+    },
+    {
+      "n": 8,
+      "surface": "after",
+      "what": "light toolbar-hover",
+      "observed": "before-light-toolbar-hover.png, after-light-toolbar-hover.png"
+    },
+    {
+      "n": 9,
+      "surface": "after",
+      "what": "light menubar-hover",
+      "observed": "before-light-menubar-hover.png, after-light-menubar-hover.png"
+    },
+    {
+      "n": 10,
+      "surface": "after",
+      "what": "light file-menu",
+      "observed": "before-light-file-menu.png, after-light-file-menu.png"
+    },
+    {
+      "n": 11,
+      "surface": "after",
+      "what": "light filmstrip-numbers",
+      "observed": "before-light-filmstrip-numbers.png, after-light-filmstrip-numbers.png"
+    },
+    {
+      "n": 12,
+      "surface": "after",
+      "what": "light zoom-and-size-fields",
+      "observed": "before-light-zoom-and-size-fields.png, after-light-zoom-and-size-fields.png"
+    },
+    {
+      "n": 13,
+      "surface": "after",
+      "what": "light share-dialog-fields",
+      "observed": "before-light-share-dialog-fields.png, after-light-share-dialog-fields.png"
+    },
+    {
+      "n": 14,
+      "surface": "after",
+      "what": "light format-options-labels",
+      "observed": "before-light-format-options-labels.png, after-light-format-options-labels.png"
+    },
+    {
+      "n": 15,
+      "surface": "after",
+      "what": "dark decks-search-field",
+      "observed": "before-dark-decks-search-field.png, after-dark-decks-search-field.png"
+    },
+    {
+      "n": 16,
+      "surface": "after",
+      "what": "dark decks-card-menu-tooltip",
+      "observed": "before-dark-decks-card-menu-tooltip.png, after-dark-decks-card-menu-tooltip.png"
+    },
+    {
+      "n": 17,
+      "surface": "after",
+      "what": "dark trash-buttons",
+      "observed": "before-dark-trash-buttons.png, after-dark-trash-buttons.png"
+    },
+    {
+      "n": 18,
+      "surface": "after",
+      "what": "dark trash-confirm",
+      "observed": "before-dark-trash-confirm.png, after-dark-trash-confirm.png"
+    },
+    {
+      "n": 19,
+      "surface": "after",
+      "what": "dark access-form",
+      "observed": "before-dark-access-form.png, after-dark-access-form.png"
+    },
+    {
+      "n": 20,
+      "surface": "after",
+      "what": "dark title-row-titanium",
+      "observed": "before-dark-title-row-titanium.png, after-dark-title-row-titanium.png"
+    },
+    {
+      "n": 21,
+      "surface": "after",
+      "what": "dark title-row-corner",
+      "observed": "before-dark-title-row-corner.png, after-dark-title-row-corner.png"
+    },
+    {
+      "n": 22,
+      "surface": "after",
+      "what": "dark toolbar-hover",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "error": true
+    },
+    {
+      "n": 23,
+      "surface": "after",
+      "what": "dark menubar-hover",
+      "observed": "before-dark-menubar-hover.png, after-dark-menubar-hover.png"
+    },
+    {
+      "n": 24,
+      "surface": "after",
+      "what": "dark file-menu",
+      "observed": "before-dark-file-menu.png, after-dark-file-menu.png"
+    },
+    {
+      "n": 25,
+      "surface": "after",
+      "what": "dark filmstrip-numbers",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "error": true
+    },
+    {
+      "n": 26,
+      "surface": "after",
+      "what": "dark zoom-and-size-fields",
+      "observed": "before-dark-zoom-and-size-fields.png, after-dark-zoom-and-size-fields.png"
+    },
+    {
+      "n": 27,
+      "surface": "after",
+      "what": "dark share-dialog-fields",
+      "observed": "before-dark-share-dialog-fields.png, after-dark-share-dialog-fields.png"
+    },
+    {
+      "n": 28,
+      "surface": "after",
+      "what": "dark format-options-labels",
+      "observed": "error: no menubar button format",
+      "error": true
+    },
+    {
+      "n": 29,
+      "surface": "trash",
+      "what": "trash: untitled-20260920-rvhu moved to the trash",
+      "observed": ""
+    },
+    {
+      "n": 30,
+      "surface": "trash",
+      "what": "trash: untitled-20260920-rvhu deleted forever",
+      "observed": ""
+    },
+    {
+      "n": 31,
+      "surface": "trash",
+      "what": "trash: GET /deck/untitled-20260920-rvhu answers 404",
+      "observed": ""
+    },
+    {
+      "n": 32,
+      "surface": "trash",
+      "what": "the scratch deck",
+      "observed": {
+        "trashed": true,
+        "status": 404
+      }
+    }
+  ]
+}

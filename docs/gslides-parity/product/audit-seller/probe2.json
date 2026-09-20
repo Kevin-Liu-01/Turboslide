@@ -1,0 +1,143 @@
+[
+  {
+    "t": 7065,
+    "kind": "step",
+    "text": "title-typed (2943 ms)",
+    "r": "{\"deckId\":\"untitled-20260920-ku63\"}"
+  },
+  {
+    "t": 28074,
+    "kind": "step",
+    "text": "tooltips (21009 ms)",
+    "r": "{\"deck.saveState\":\"All changes savedAll changes saved, Saving, Offline, Not saved yet or Couldn’t save, retrying\",\"deck.lastEdit\":\"Last edit just now by Lithium 636Who changed the presentation last and when; opens Version history\",\"title.presence\":null,\"title.comments\":\"Show all commentsEvery comment on this presentation, with the ones for you first\",\"present.arrow\":\"Presentation optionsPresenter view and Start from beginning\",\"share.open\":\"ShareWho can open this presentation, and the link to send\",\"toolbar.pointer\":\"Show my pointerOthers see where your pointer is on the slide, with your name.\",\"toolbar.hideMenus\":\"Hide the menusCtrl Shift F\",\"toolbar.select\":\"SelectThe pointer; a draw tool returns here when it finishes.\",\"toolbar.paintFormat\":\"Paint formatCmd Option CClick once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms."
+  },
+  {
+    "t": 28075,
+    "kind": "step",
+    "text": "title-row-icons (1 ms)",
+    "r": "[]"
+  },
+  {
+    "t": 28076,
+    "kind": "step",
+    "text": "title-row-text (1 ms)",
+    "r": "{\"text\":\"Probe deck\\nAll changes saved\\nSlideshow\\nShare\",\"saveIcon\":\"<svg viewBox=\\\"0 0 20 20\\\" width=\\\"16\\\" height=\\\"16\\\" fill=\\\"currentColor\\\" aria-hidden=\\\"true\\\"><path d=\\\"M1 12.5A4.5 4.5 0 0 0 5.5 17H15a4 4 0 0 0 1.866-7.539 3.504 3.504 0 0 0-4.504-4.272A4.5 4.5 0 0 0 4.06 8\"}"
+  },
+  {
+    "t": 28713,
+    "kind": "step",
+    "text": "filmstrip-context (637 ms)",
+    "r": "[\"edit.cut \\\"Cut⌘X\\\"\",\"edit.copy \\\"Copy⌘C\\\"\",\"edit.paste \\\"Paste⌘V\\\"\",\"slide.newSlide \\\"New slide⌃M\\\"\",\"slide.duplicateSlide \\\"Duplicate slide⌘D\\\"\",\"edit.delete \\\"Delete⌫\\\"\",\"slide.skipSlide \\\"Skip slide\\\"\",\"slide.changeBackground \\\"Change background\\\"\",\"slide.applyLayout \\\"Apply layout\\\"\",\"slide.changeTheme \\\"Change theme\\\"\",\"slide.moveSlide \\\"Move slide\\\"\",\"insert.comment \\\"Comment⌥⌘M\\\"\"]"
+  },
+  {
+    "t": 29249,
+    "kind": "step",
+    "text": "canvas-context-empty (535 ms)",
+    "r": "[\"edit.paste \\\"Paste⌘V\\\"\",\"slide.newSlide \\\"New slide⌃M\\\"\",\"slide.duplicateSlide \\\"Duplicate slide⌘D\\\"\",\"slide.deleteSlide \\\"Delete slide\\\"\",\"slide.skipSlide \\\"Skip slide\\\"\",\"slide.changeBackground \\\"Change background\\\"\",\"slide.applyLayout \\\"Apply layout\\\"\",\"slide.changeTheme \\\"Change theme\\\"\",\"insert.comment \\\"Comment⌥⌘M\\\"\",\"view.guides \\\"Guides\\\"\"]"
+  },
+  {
+    "t": 29746,
+    "kind": "step",
+    "text": "canvas-context-title (497 ms)",
+    "r": "[\"edit.cut \\\"Cut⌘X\\\"\",\"edit.copy \\\"Copy⌘C\\\"\",\"edit.paste \\\"Paste⌘V\\\"\",\"edit.delete \\\"Delete⌫\\\"\",\"edit.duplicate \\\"Duplicate⌘D\\\"\",\"arrange.order \\\"Order\\\"\",\"arrange.rotate \\\"Rotate\\\"\",\"arrange.centerOnPage \\\"Center on page\\\"\",\"arrange.align \\\"Align\\\"\",\"arrange.distribute \\\"Distribute\\\" [dis]\",\"arrange.group \\\"Group⌥⌘G\\\" [dis]\",\"arrange.ungroup \\\"Ungroup⌥⇧⌘G\\\" [dis]\",\"insert.link \\\"Link⌘K\\\"\",\"format.textFitting \\\"Text fitting\\\"\",\"format.formatOptions \\\"Format options\\\"\",\"insert.comment \\\"Comment⌥⌘M\\\"\"]"
+  },
+  {
+    "t": 30921,
+    "kind": "step",
+    "text": "new-slide-arrow (1175 ms)",
+    "r": "{\"tiles\":[\"layout.new \\\"Layouts\\\"\",\"layout.new.title \\\"Click to add titleClick to add subtitleT\\\"\",\"layout.new.opener \\\"Click to add titleClick to add textMater\\\"\",\"layout.new.split \\\"Click to add titleClick to add textClick\\\"\",\"layout.new.cols \\\"Click to add titleClick to add textClick\\\"\",\"layout.new.title-only \\\"Click to add titleTitle only\\\"\",\"layout.new.one-column \\\"Click to add titleClick to add textOne c\\\"\",\"layout.new.statement \\\"Click to add textMain point\\\"\",\"layout.new.section-description \\\"Click to add titleClick to add textClick\\\"\",\"layout.new.mood \\\"Click to add titleClick to add textImage\\\"\",\"layout.new.big-number \\\"Click to add a numberClick to add textBi\\\"\",\"layout.new.blank \\\"Blank\\\"\",\"layout.new.rows \\\"Click to add titleClick to add textClick\\\"\",\"layout.new.plain \\\"Click to add titleClick to add textClick\\\"\",\"layout.new.table \\\"Click to add titleClick to add textClick\\\""
+  },
+  {
+    "t": 34315,
+    "kind": "step",
+    "text": "undo-new-slide (3393 ms)",
+    "r": "{\"before\":1,\"undoEnabled\":null,\"afterUndo\":1,\"snack\":null,\"redone\":2}"
+  },
+  {
+    "t": 37569,
+    "kind": "step",
+    "text": "delete-slide-key (3254 ms)",
+    "r": "{\"deleted\":true,\"snack\":\"Slide deletedUndo\",\"undone\":true}"
+  },
+  {
+    "t": 41817,
+    "kind": "step",
+    "text": "theme-panel (4247 ms)",
+    "r": "{\"ms\":4247,\"controls\":[\"toolbar.theme \\\"Theme\\\"\",\"panel.themes \\\"ThemesGTProbe deckClick to add subtitleL\\\"\",\"panel.themes.close \\\"Close Themes\\\"\",\"themes.gt.light \\\"Probe deckClick to add subtitleLight\\\"\",\"themes.gt.dark \\\"Probe deckClick to add subtitleDark\\\"\",\"themes.inThis.light \\\"Probe deckClick to add subtitleLight\\\"\",\"themes.inThis.dark \\\"Probe deckClick to add subtitleDark\\\"\",\"panel.toggle \\\"Hide side panel\\\"\"],\"text\":\"Themes\\nGT\\nProbe deck\\n\\nClick to add subtitle\\n\\nLight\\nProbe deck\\n\\nClick to add subtitle\\n\\nDark\\nIn this presentation\\nProbe deck\\n\\nClick to add subtitle\\n\\nLight\\nProbe deck\\n\\nClick to add subtitle\\n\\nDark ||  || \",\"switched\":{\"ms\":1641,\"theme\":\"light\",\"bg\":\"rgba(0, 0, 0, 0)\"}}"
+  },
+  {
+    "t": 46300,
+    "kind": "step",
+    "text": "font-control (4482 ms)",
+    "r": "{\"font\":{\"text\":\"Font\",\"disabled\":\"true\",\"tag\":\"BUTTON\"},\"tip\":\"FontThe GT theme sets Inter.\",\"textRows\":[\"format.text \\\"Text\\\"\",\"format.text.bold \\\"Bold⌘B\\\"\",\"format.text.italic \\\"Italic⌘I\\\"\",\"format.text.underline \\\"Underline⌘U\\\"\",\"format.text.strikethrough \\\"Strikethrough⇧⌘X\\\"\",\"format.text.superscript \\\"Superscript⌘.\\\"\",\"format.text.subscript \\\"Subscript⌘,\\\"\",\"format.text.size \\\"Size\\\"\",\"format.text.capitalization \\\"Capitalization\\\"\",\"format.alignIndent \\\"Align & indent\\\"\",\"format.spacing \\\"Line & paragraph spacing\\\"\",\"format.bulletsNumbering \\\"Bullets & numbering\\\"\",\"format.table \\\"Table\\\"\",\"format.image \\\"Image\\\"\",\"format.bordersLines \\\"Borders & lines\\\"\",\"format.formatOptions \\\"Format options\\\"\",\"format.clearFormatting \\\"Clear formatting⌘\\\\\\\"\",\"format.textFitting \\\"Text fitting\\\"\"]}"
+  },
+  {
+    "t": 55221,
+    "kind": "step",
+    "text": "speaker-notes (8921 ms)",
+    "r": "{\"stored\":\"Open with the Acme renewal date.\",\"notesInPresenter\":\"Open with the Acme renewal date.\"}"
+  },
+  {
+    "t": 56137,
+    "kind": "step",
+    "text": "shortcuts-dialog (915 ms)",
+    "r": "{\"shown\":true,\"text\":\"Keyboard shortcuts\\nCommon actions\\nLast edit\\tCmd Option Shift H\\nSlideshow\\tCmd Enter\\nStart from beginning\\tCmd Shift Enter\\nOpen…\\tCmd O\\nSee version history\\tCmd Option Shift H\\nPrint\\tCmd P\\nUndo\\tCmd Z\\nRedo\\tCmd YCmd Shift Z\\nCut\\tCmd X\\nCopy\\tCmd C\\nPaste\\tCmd V\\nPaste without formatting\\tCmd Shift V\\nDelete\\tDelete\\nDuplicate\\tCmd D\\nSelect all\\tCmd A\\nFind and replace\\tCmd Shift H\\nLink\\tCmd K\\nNew slide\\tCtrl M\\nSearch the menus\\tOption /\\nKeyboard shortcuts\\tCmd /\\nRedo\\tCmd Y\\nPaint format\\tCmd Option CCmd Option V\\nInsert comment\\tCmd Option M\\nHide the menus\\tCtrl Shift F\\nFind\\tCmd F\\nFind again\\tCmd G\\nFind previous\\tCmd Shift G\\nSave (every change is saved automatically)\\tCmd S\\nOpen link\\tOption Enter\\nCopy formatting of the selected text or shape\\tCmd Option C\\nPaste formatting of the selected text or shape\\tCmd Option V\\nFilm stri\",\"count\":141}"
+  },
+  {
+    "t": 57667,
+    "kind": "step",
+    "text": "search-the-menus (1528 ms)",
+    "r": "[\"palette.menu:insert.table \\\"TableInsertPoint at the size you want, up to 20 co\\\"\",\"palette.menu:format.table.deleteTable \\\"Delete tableFormat › Table\\\"\",\"palette.menu:format.table.insertRowAbove \\\"Insert row aboveFormat › Table\\\"\",\"palette.menu:format.table.insertRowBelow \\\"Insert row belowFormat › Table\\\"\",\"palette.menu:format.table.insertColumnLeft \\\"Insert column leftFormat › Table\\\"\",\"palette.menu:format.table.insertColumnRight \\\"Insert column rightFormat › Table\\\"\",\"palette.menu:format.table.deleteRow \\\"Delete rowFormat › Table\\\"\",\"palette.menu:format.table.deleteColumn \\\"Delete columnFormat › Table\\\"\",\"palette.menu:format.table.distributeRows \\\"Distribute rowsFormat › Table\\\"\",\"palette.menu:format.table.distributeColumns \\\"Distribute columnsFormat › Table\\\"\",\"palette.menu:format.table.mergeCells \\\"Merge cellsFormat › TableSelect two or more cells \\\"\",\"palette.menu:format.table.un"
+  },
+  {
+    "t": 60726,
+    "kind": "step",
+    "text": "menus-dump (3059 ms)",
+    "r": "{\"edit\":[\"edit.undo \\\"Undo⌘Z\\\"\",\"edit.redo \\\"Redo⌘Y\\\" [dis]\",\"edit.cut \\\"Cut⌘X\\\"\",\"edit.copy \\\"Copy⌘C\\\"\",\"edit.paste \\\"Paste⌘V\\\"\",\"edit.pasteWithoutFormatting \\\"Paste without formatting⇧⌘V\\\"\",\"edit.delete \\\"Delete⌫\\\"\",\"edit.duplicate \\\"Duplicate⌘D\\\"\",\"edit.selectAll \\\"Select all⌘A\\\"\",\"edit.selectNone \\\"Select none\\\"\",\"edit.findReplace \\\"Find and replace⇧⌘H\\\"\"],\"view\":[\"view.slideshow \\\"Slideshow⌘↩\\\"\",\"view.zoom \\\"Zoom\\\"\",\"view.showRuler \\\"Show ruler\\\"\",\"view.guides \\\"Guides\\\"\",\"view.snapTo \\\"Snap to\\\"\",\"view.comments \\\"Comments\\\"\",\"view.showSpeakerNotes \\\"Show speaker notes\\\"\",\"view.showFilmstrip \\\"Show filmstrip\\\"\",\"view.mode \\\"Mode\\\"\",\"view.fullScreen \\\"Full screen⌃⇧F\\\"\",\"view.appearance \\\"Appearance\\\"\"],\"arrange\":[\"arrange.order \\\"Order\\\" [dis]\",\"arrange.align \\\"Align\\\" [dis]\",\"arrange.distribute \\\"Distribute\\\" [dis]\",\"arrange.centerOnPage \\\"Center on page\\\" [dis]\",\"arrange.rotate \\\"R"
+  },
+  {
+    "t": 70509,
+    "kind": "step",
+    "text": "picture-context (9782 ms)",
+    "r": "{\"rows\":[\"edit.cut \\\"Cut⌘X\\\"\",\"edit.copy \\\"Copy⌘C\\\"\",\"edit.paste \\\"Paste⌘V\\\"\",\"edit.delete \\\"Delete⌫\\\"\",\"edit.duplicate \\\"Duplicate⌘D\\\"\",\"arrange.order \\\"Order\\\"\",\"arrange.rotate \\\"Rotate\\\"\",\"arrange.group \\\"Group⌥⌘G\\\" [dis]\",\"arrange.centerOnPage \\\"Center on page\\\"\",\"arrange.align \\\"Align\\\"\",\"format.image.replaceImage \\\"Replace image\\\"\",\"format.image.cropImage \\\"Crop image\\\"\",\"format.image.resetImage \\\"Reset image\\\" [dis]\",\"format.image.imageOptions \\\"Image options\\\"\",\"format.formatOptions \\\"Format options\\\"\",\"insert.comment \\\"Comment⌥⌘M\\\"\"],\"tail\":[\"toolbar.cropImage \\\"Crop image\\\"\",\"toolbar.replaceImage \\\"Replace image\\\"\",\"toolbar.imageOptions \\\"Image options\\\"\",\"toolbar.resetImage \\\"Reset image\\\"\",\"toolbar.formatOptions \\\"Format options\\\"\",\"toolbar.end \\\"\\\"\",\"toolbar.pointer \\\"Show my pointer\\\"\",\"toolbar.hideMenus \\\"Hide the menus\\\"\"],\"tipReplace\":\"Replace image\",\"before\":{\"x\":379.88"
+  },
+  {
+    "t": 72161,
+    "kind": "step",
+    "text": "present-link (1652 ms)",
+    "r": "{\"tip\":\"Copy linkA link that opens the presentation as editor; it can be revoked below\",\"viewer\":null}"
+  },
+  {
+    "t": 75329,
+    "kind": "step",
+    "text": "template-gallery (3168 ms)",
+    "r": "{\"dialog\":null,\"controls\":[\"home.gallery \\\"Template gallery\\\"\"],\"url\":\"/decks#templates\"}"
+  },
+  {
+    "t": 81138,
+    "kind": "step",
+    "text": "decks-card-rename (5809 ms)",
+    "r": "{\"more\":true,\"field\":\"home.rename.untitled-20260920-ku63\",\"fieldInfo\":{\"tag\":\"INPUT\",\"control\":\"home.rename.untitled-20260920-ku63\",\"value\":\"Probe deck\",\"selStart\":0,\"selEnd\":10},\"title\":\"Probe deck\"}"
+  },
+  {
+    "t": 87963,
+    "kind": "step",
+    "text": "editor-1280 (6824 ms)",
+    "r": "{\"toolbar\":[\"toolbar.tail\",\"toolbar.select\",\"toolbar.textBox\",\"toolbar.insertImage\",\"toolbar.insertShape\",\"toolbar.insertLine\",\"toolbar.background\",\"toolbar.layout\",\"toolbar.theme\",\"toolbar.end\",\"toolbar.viewOnly\",\"toolbar.hideMenus\"],\"more\":false,\"presentLabel\":\"Slideshow\",\"shareLabel\":\"Share\",\"sheet\":null,\"filmstripW\":0,\"notesH\":64,\"bottomBar\":32,\"scrollW\":1280,\"innerW\":1280,\"tail1280\":null}"
+  },
+  {
+    "t": 92309,
+    "kind": "destroy",
+    "text": "File > Move to trash -> /decks"
+  },
+  {
+    "t": 93845,
+    "kind": "destroy",
+    "text": "Delete forever: the card left the trash"
+  },
+  {
+    "t": 94366,
+    "kind": "destroy",
+    "text": "GET /deck/untitled-20260920-ku63 -> 404"
+  }
+]

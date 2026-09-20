@@ -1,0 +1,1836 @@
+{
+  "startedAt": "2026-09-20T01:41:49.444Z",
+  "finishedAt": "2026-09-20T01:44:20.731Z",
+  "deckId": "untitled-20260920-wf5l",
+  "textId": "text",
+  "rows": [
+    {
+      "n": 1,
+      "surface": "setup",
+      "what": "deck and text box",
+      "observed": {
+        "deckId": "untitled-20260920-wf5l",
+        "textId": "text"
+      }
+    },
+    {
+      "n": 2,
+      "surface": "dialogs",
+      "what": "1440-light share",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 765,
+          "top": 67,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Share Interface audit dialogs",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Copy link",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": "dialog.share.copyLink"
+          },
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.share.done"
+          }
+        ],
+        "label": {
+          "text": "Links",
+          "font": "12px/17.4px 700 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": {
+          "size": "16x16",
+          "border": "#070707",
+          "borderContrast": 20.14
+        },
+        "inputs": 5,
+        "controls": [
+          "dialog.share.close",
+          "dialog.share.review",
+          "dialog.share.emails",
+          "dialog.share.inviteRole",
+          "dialog.share.send",
+          "dialog.share.notify",
+          "dialog.share.message",
+          "dialog.share.people",
+          "dialog.share.owner",
+          "dialog.share.rows",
+          "dialog.share.view",
+          "dialog.share.view.copy",
+          "dialog.share.present",
+          "dialog.share.present.copy",
+          "dialog.share.edit",
+          "dialog.share.edit.copy",
+          "dialog.share.general",
+          "dialog.share.mode",
+          "dialog.share.gear",
+          "dialog.share.publish",
+          "dialog.share.footer",
+          "dialog.share.authorize",
+          "dialog.share.error",
+          "dialog.share.copyLink",
+          "dialog.share.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.share.emails",
+        "tipOnOpen": {
+          "name": "Add people by email",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Share Interface audit dialogsNo pending requestsViewerCommenterEditorSendNotify peopleNNickel 788OwnerLinksView link · ViewerCopy linkPresent link · Viewer, opens as a showCopy linkEdit link · EditorC",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 3,
+      "surface": "dialogs",
+      "what": "1440-light download",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 221,
+          "top": 340,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Download",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Download",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.download.ok"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#656565",
+          "borderContrast": 5.81
+        },
+        "inputs": 1,
+        "controls": [
+          "dialog.download.pdf.close",
+          "dialog.download.includeSkipped",
+          "dialog.download.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.download.includeSkipped",
+        "tipOnOpen": {
+          "name": "Include skipped slides",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 4,
+      "surface": "dialogs",
+      "what": "1440-light details",
+      "observed": {
+        "dialog": {
+          "w": 420,
+          "h": 259,
+          "top": 320,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Details",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.details.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.details.close",
+          "dialog.details.title",
+          "dialog.details.slides",
+          "dialog.details.sections",
+          "dialog.details.created",
+          "dialog.details.lastEdit",
+          "dialog.details.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.details.done",
+        "tipOnOpen": {
+          "name": "Done",
+          "overDialog": false
+        },
+        "fits": true,
+        "text": "DetailsTitleInterface audit dialogsSlides1Sections1CreatedSep 19, 06:41 PMLast editSep 19, 06:41 PM (change 3)Done",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 5,
+      "surface": "dialogs",
+      "what": "1440-light slide-numbers",
+      "observed": {
+        "dialog": {
+          "w": 400,
+          "h": 241,
+          "top": 330,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Slide numbers",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Apply to selected",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": "dialog.slideNumbers.selected"
+          },
+          {
+            "text": "Apply",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.slideNumbers.apply"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#070707",
+          "borderContrast": 20.14
+        },
+        "inputs": 3,
+        "controls": [
+          "dialog.slideNumbers.close",
+          "dialog.slideNumbers.on",
+          "dialog.slideNumbers.off",
+          "dialog.slideNumbers.skip-title",
+          "dialog.slideNumbers.selected",
+          "dialog.slideNumbers.apply"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.slideNumbers.on",
+        "tipOnOpen": {
+          "name": "On",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 6,
+      "surface": "dialogs",
+      "what": "1440-light shortcuts",
+      "observed": {
+        "dialog": {
+          "w": 640,
+          "h": 666,
+          "top": 117,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Keyboard shortcuts",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.keyboardShortcuts.close",
+          "dialog.keyboardShortcuts.search"
+        ],
+        "scrollRegions": [
+          "ts-shortcuts-list 540/4717"
+        ],
+        "focusIn": true,
+        "active": "dialog.keyboardShortcuts.search",
+        "tipOnOpen": {
+          "name": "Search shortcuts",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterStart from beginningCmd Shift EnterOpen…Cmd OSee version historyCmd Option Shift HPrintCmd PUndoCmd ZRedoCmd YCmd Shift ZCu",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 7,
+      "surface": "dialogs",
+      "what": "1440-light help",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 586,
+          "top": 157,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Help",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.help.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.help.close",
+          "dialog.help.docs",
+          "dialog.help.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.help.docs",
+        "tipOnOpen": {
+          "name": "Documentation",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "HelpOpen a presentation. Click its card on the home page, or press Cmd+O and pick it.Make a copy for a prospect. File > Make a copy > Entire presentation, type the name, press Enter.Change a name acro",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 8,
+      "surface": "dialogs",
+      "what": "1440-light image-by-url-or-open",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 249,
+          "top": 326,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Open",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Open",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.open.ok"
+          }
+        ],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.open.close",
+          "dialog.open.tab.presentations",
+          "dialog.open.tab.upload",
+          "dialog.open.search",
+          "dialog.open.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.open.tab.presentations",
+        "tipOnOpen": {
+          "name": "Presentations",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "OpenPresentationsUploadLoading…CancelOpen",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 9,
+      "surface": "keys",
+      "what": "1440-light the ? key and Cmd+/",
+      "observed": {
+        "questionKey": {
+          "dialog": null,
+          "help": false,
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "cmdSlash": {
+          "dialog": "Keyboard shortcuts",
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "snackbarStillOnAfterMs": 2122
+      }
+    },
+    {
+      "n": 10,
+      "surface": "tails",
+      "what": "1440-light Bold pressed state and the colour plate",
+      "observed": {
+        "beforePressed": "false",
+        "afterCmdB": {
+          "pressed": "false",
+          "color": "#3a3d44",
+          "ownBg": null,
+          "strong": true
+        },
+        "afterClick": {
+          "pressed": "true",
+          "strong": true
+        },
+        "plate": null
+      }
+    },
+    {
+      "n": 11,
+      "surface": "dialogs",
+      "what": "1440-dark share",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 765,
+          "top": 67,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Share Interface audit dialogs",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Copy link",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79,
+            "ctl": "dialog.share.copyLink"
+          },
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.share.done"
+          }
+        ],
+        "label": {
+          "text": "Links",
+          "font": "12px/17.4px 700 Inter",
+          "color": "#8a8f98",
+          "contrast": 6.2
+        },
+        "input": {
+          "h": "32px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": {
+          "size": "16x16",
+          "border": "#f2f2f0",
+          "borderContrast": 17.97
+        },
+        "inputs": 5,
+        "controls": [
+          "dialog.share.close",
+          "dialog.share.review",
+          "dialog.share.emails",
+          "dialog.share.inviteRole",
+          "dialog.share.send",
+          "dialog.share.notify",
+          "dialog.share.message",
+          "dialog.share.people",
+          "dialog.share.owner",
+          "dialog.share.rows",
+          "dialog.share.view",
+          "dialog.share.view.copy",
+          "dialog.share.present",
+          "dialog.share.present.copy",
+          "dialog.share.edit",
+          "dialog.share.edit.copy",
+          "dialog.share.general",
+          "dialog.share.mode",
+          "dialog.share.gear",
+          "dialog.share.publish",
+          "dialog.share.footer",
+          "dialog.share.authorize",
+          "dialog.share.error",
+          "dialog.share.copyLink",
+          "dialog.share.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.share.emails",
+        "tipOnOpen": {
+          "name": "Add people by email",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Share Interface audit dialogsNo pending requestsViewerCommenterEditorSendNotify peopleNNickel 788OwnerLinksView link · ViewerCopy linkPresent link · Viewer, opens as a showCopy linkEdit link · EditorC",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 12,
+      "surface": "dialogs",
+      "what": "1440-dark download",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 221,
+          "top": 340,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Download",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79,
+            "ctl": null
+          },
+          {
+            "text": "Download",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.download.ok"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#888887",
+          "borderContrast": 5.7
+        },
+        "inputs": 1,
+        "controls": [
+          "dialog.download.pdf.close",
+          "dialog.download.includeSkipped",
+          "dialog.download.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.download.includeSkipped",
+        "tipOnOpen": {
+          "name": "Include skipped slides",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 13,
+      "surface": "dialogs",
+      "what": "1440-dark details",
+      "observed": {
+        "dialog": {
+          "w": 420,
+          "h": 259,
+          "top": 320,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Details",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.details.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.details.close",
+          "dialog.details.title",
+          "dialog.details.slides",
+          "dialog.details.sections",
+          "dialog.details.created",
+          "dialog.details.lastEdit",
+          "dialog.details.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.details.done",
+        "tipOnOpen": {
+          "name": "Done",
+          "overDialog": false
+        },
+        "fits": true,
+        "text": "DetailsTitleInterface audit dialogsSlides1Sections1CreatedSep 19, 06:41 PMLast editSep 19, 06:42 PM (change 4)Done",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 14,
+      "surface": "dialogs",
+      "what": "1440-dark slide-numbers",
+      "observed": {
+        "dialog": {
+          "w": 400,
+          "h": 241,
+          "top": 330,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Slide numbers",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79,
+            "ctl": null
+          },
+          {
+            "text": "Apply to selected",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79,
+            "ctl": "dialog.slideNumbers.selected"
+          },
+          {
+            "text": "Apply",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.slideNumbers.apply"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#f2f2f0",
+          "borderContrast": 17.97
+        },
+        "inputs": 3,
+        "controls": [
+          "dialog.slideNumbers.close",
+          "dialog.slideNumbers.on",
+          "dialog.slideNumbers.off",
+          "dialog.slideNumbers.skip-title",
+          "dialog.slideNumbers.selected",
+          "dialog.slideNumbers.apply"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.slideNumbers.on",
+        "tipOnOpen": {
+          "name": "On",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 15,
+      "surface": "dialogs",
+      "what": "1440-dark shortcuts",
+      "observed": {
+        "dialog": {
+          "w": 640,
+          "h": 666,
+          "top": 117,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Keyboard shortcuts",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.keyboardShortcuts.close",
+          "dialog.keyboardShortcuts.search"
+        ],
+        "scrollRegions": [
+          "ts-shortcuts-list 540/4717"
+        ],
+        "focusIn": true,
+        "active": "dialog.keyboardShortcuts.search",
+        "tipOnOpen": {
+          "name": "Search shortcuts",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterStart from beginningCmd Shift EnterOpen…Cmd OSee version historyCmd Option Shift HPrintCmd PUndoCmd ZRedoCmd YCmd Shift ZCu",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 16,
+      "surface": "dialogs",
+      "what": "1440-dark help",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 586,
+          "top": 157,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Help",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.help.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.help.close",
+          "dialog.help.docs",
+          "dialog.help.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.help.docs",
+        "tipOnOpen": {
+          "name": "Documentation",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "HelpOpen a presentation. Click its card on the home page, or press Cmd+O and pick it.Make a copy for a prospect. File > Make a copy > Entire presentation, type the name, press Enter.Change a name acro",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 17,
+      "surface": "dialogs",
+      "what": "1440-dark image-by-url-or-open",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 249,
+          "top": 326,
+          "border": "#888887",
+          "borderContrast": 5.7,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Open",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#3b3b3a",
+            "borderContrast": 1.79,
+            "ctl": null
+          },
+          {
+            "text": "Open",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#f2f2f0",
+            "borderContrast": 17.97,
+            "ctl": "dialog.open.ok"
+          }
+        ],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#3b3b3a",
+          "borderContrast": 1.79,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.open.close",
+          "dialog.open.tab.presentations",
+          "dialog.open.tab.upload",
+          "dialog.open.search",
+          "dialog.open.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.open.tab.presentations",
+        "tipOnOpen": {
+          "name": "Presentations",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "OpenPresentationsUploadLoading…CancelOpen",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 18,
+      "surface": "keys",
+      "what": "1440-dark the ? key and Cmd+/",
+      "observed": {
+        "questionKey": {
+          "dialog": null,
+          "help": false,
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "cmdSlash": {
+          "dialog": "Keyboard shortcuts",
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "snackbarStillOnAfterMs": 2121
+      }
+    },
+    {
+      "n": 19,
+      "surface": "tails",
+      "what": "1440-dark Bold pressed state and the colour plate",
+      "observed": {
+        "beforePressed": "true",
+        "afterCmdB": {
+          "pressed": "true",
+          "color": "#f2f2f0",
+          "border": "#f2f2f0",
+          "ownBg": null,
+          "strong": false
+        },
+        "afterClick": {
+          "pressed": "false",
+          "strong": false
+        },
+        "plate": null
+      }
+    },
+    {
+      "n": 20,
+      "surface": "dialogs",
+      "what": "1280-light share",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 765,
+          "top": 17,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Share Interface audit dialogs",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Copy link",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": "dialog.share.copyLink"
+          },
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.share.done"
+          }
+        ],
+        "label": {
+          "text": "Links",
+          "font": "12px/17.4px 700 Inter",
+          "color": "#8a8f98",
+          "contrast": 3.25
+        },
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": {
+          "size": "16x16",
+          "border": "#070707",
+          "borderContrast": 20.14
+        },
+        "inputs": 5,
+        "controls": [
+          "dialog.share.close",
+          "dialog.share.review",
+          "dialog.share.emails",
+          "dialog.share.inviteRole",
+          "dialog.share.send",
+          "dialog.share.notify",
+          "dialog.share.message",
+          "dialog.share.people",
+          "dialog.share.owner",
+          "dialog.share.rows",
+          "dialog.share.view",
+          "dialog.share.view.copy",
+          "dialog.share.present",
+          "dialog.share.present.copy",
+          "dialog.share.edit",
+          "dialog.share.edit.copy",
+          "dialog.share.general",
+          "dialog.share.mode",
+          "dialog.share.gear",
+          "dialog.share.publish",
+          "dialog.share.footer",
+          "dialog.share.authorize",
+          "dialog.share.error",
+          "dialog.share.copyLink",
+          "dialog.share.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.share.emails",
+        "tipOnOpen": {
+          "name": "Add people by email",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Share Interface audit dialogsNo pending requestsViewerCommenterEditorSendNotify peopleNNickel 788OwnerLinksView link · ViewerCopy linkPresent link · Viewer, opens as a showCopy linkEdit link · EditorC",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 21,
+      "surface": "dialogs",
+      "what": "1280-light download",
+      "observed": {
+        "dialog": {
+          "w": 520,
+          "h": 221,
+          "top": 290,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Download",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Download",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.download.ok"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#656565",
+          "borderContrast": 5.81
+        },
+        "inputs": 1,
+        "controls": [
+          "dialog.download.pdf.close",
+          "dialog.download.includeSkipped",
+          "dialog.download.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.download.includeSkipped",
+        "tipOnOpen": {
+          "name": "Include skipped slides",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "DownloadOne slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File > Print preview prints them under each slide.Include skipped slidesCancelDownload",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 22,
+      "surface": "dialogs",
+      "what": "1280-light details",
+      "observed": {
+        "dialog": {
+          "w": 420,
+          "h": 259,
+          "top": 270,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Details",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.details.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.details.close",
+          "dialog.details.title",
+          "dialog.details.slides",
+          "dialog.details.sections",
+          "dialog.details.created",
+          "dialog.details.lastEdit",
+          "dialog.details.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.details.done",
+        "tipOnOpen": {
+          "name": "Done",
+          "overDialog": false
+        },
+        "fits": true,
+        "text": "DetailsTitleInterface audit dialogsSlides1Sections1CreatedSep 19, 06:41 PMLast editSep 19, 06:43 PM (change 7)Done",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 23,
+      "surface": "dialogs",
+      "what": "1280-light slide-numbers",
+      "observed": {
+        "dialog": {
+          "w": 400,
+          "h": 241,
+          "top": 280,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Slide numbers",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Apply to selected",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": "dialog.slideNumbers.selected"
+          },
+          {
+            "text": "Apply",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.slideNumbers.apply"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": {
+          "size": "16x16",
+          "border": "#070707",
+          "borderContrast": 20.14
+        },
+        "inputs": 3,
+        "controls": [
+          "dialog.slideNumbers.close",
+          "dialog.slideNumbers.on",
+          "dialog.slideNumbers.off",
+          "dialog.slideNumbers.skip-title",
+          "dialog.slideNumbers.selected",
+          "dialog.slideNumbers.apply"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.slideNumbers.on",
+        "tipOnOpen": {
+          "name": "On",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Slide numbersOnOffSkip title slidesCancelApply to selectedApply",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 24,
+      "surface": "dialogs",
+      "what": "1280-light shortcuts",
+      "observed": {
+        "dialog": {
+          "w": 640,
+          "h": 606,
+          "top": 97,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Keyboard shortcuts",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.keyboardShortcuts.close",
+          "dialog.keyboardShortcuts.search"
+        ],
+        "scrollRegions": [
+          "ts-shortcuts-list 480/4717"
+        ],
+        "focusIn": true,
+        "active": "dialog.keyboardShortcuts.search",
+        "tipOnOpen": {
+          "name": "Search shortcuts",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "Keyboard shortcutsCommon actionsLast editCmd Option Shift HSlideshowCmd EnterStart from beginningCmd Shift EnterOpen…Cmd OSee version historyCmd Option Shift HPrintCmd PUndoCmd ZRedoCmd YCmd Shift ZCu",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 25,
+      "surface": "dialogs",
+      "what": "1280-light help",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 586,
+          "top": 107,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Help",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Done",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.help.done"
+          }
+        ],
+        "label": null,
+        "input": null,
+        "check": null,
+        "inputs": 0,
+        "controls": [
+          "dialog.help.close",
+          "dialog.help.docs",
+          "dialog.help.done"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.help.docs",
+        "tipOnOpen": {
+          "name": "Documentation",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "HelpOpen a presentation. Click its card on the home page, or press Cmd+O and pick it.Make a copy for a prospect. File > Make a copy > Entire presentation, type the name, press Enter.Change a name acro",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 26,
+      "surface": "dialogs",
+      "what": "1280-light image-by-url-or-open",
+      "observed": {
+        "dialog": {
+          "w": 560,
+          "h": 249,
+          "top": 276,
+          "border": "#4b4b4b",
+          "borderContrast": 4.48,
+          "radius": "0px",
+          "pad": "0px",
+          "animation": "ts-dialog-in 0.2s"
+        },
+        "title": {
+          "text": "Open",
+          "font": "18px/22.5px 500 Inter",
+          "letterSpacing": "-0.18px"
+        },
+        "lead": null,
+        "x": {
+          "size": "32x32",
+          "tip": "Close",
+          "title": null,
+          "ariaLabel": "Close",
+          "icon": {
+            "w": 16,
+            "h": 16
+          }
+        },
+        "actions": [
+          {
+            "text": "Cancel",
+            "solid": false,
+            "textStyle": true,
+            "h": "32px",
+            "radius": "0px",
+            "border": "#d2d2d2",
+            "borderContrast": 1.51,
+            "ctl": null
+          },
+          {
+            "text": "Open",
+            "solid": true,
+            "textStyle": false,
+            "h": "32px",
+            "radius": "8px",
+            "border": "#070707",
+            "borderContrast": 20.14,
+            "ctl": "dialog.open.ok"
+          }
+        ],
+        "label": null,
+        "input": {
+          "h": "32px",
+          "border": "#d2d2d2",
+          "borderContrast": 1.51,
+          "radius": "0px",
+          "font": "13px/18.2px 400 Inter"
+        },
+        "check": null,
+        "inputs": 1,
+        "controls": [
+          "dialog.open.close",
+          "dialog.open.tab.presentations",
+          "dialog.open.tab.upload",
+          "dialog.open.search",
+          "dialog.open.ok"
+        ],
+        "scrollRegions": [],
+        "focusIn": true,
+        "active": "dialog.open.tab.presentations",
+        "tipOnOpen": {
+          "name": "Presentations",
+          "overDialog": true
+        },
+        "fits": true,
+        "text": "OpenPresentationsUploadLoading…CancelOpen",
+        "escapeCloses": true,
+        "outsideCloses": true
+      }
+    },
+    {
+      "n": 27,
+      "surface": "keys",
+      "what": "1280-light the ? key and Cmd+/",
+      "observed": {
+        "questionKey": {
+          "dialog": null,
+          "help": false,
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "cmdSlash": {
+          "dialog": "Keyboard shortcuts",
+          "snackbar": "? now shows the keyboard shortcuts from the Help menu"
+        },
+        "snackbarStillOnAfterMs": 2116
+      }
+    },
+    {
+      "n": 28,
+      "surface": "tails",
+      "what": "1280-light Bold pressed state and the colour plate",
+      "observed": {
+        "beforePressed": "false",
+        "afterCmdB": {
+          "pressed": "false",
+          "color": "#3a3d44",
+          "ownBg": null,
+          "strong": true
+        },
+        "afterClick": {
+          "pressed": "true",
+          "strong": true
+        },
+        "plate": null
+      }
+    },
+    {
+      "n": 29,
+      "surface": "trash",
+      "what": "trash: untitled-20260920-wf5l moved to the trash",
+      "observed": ""
+    },
+    {
+      "n": 30,
+      "surface": "trash",
+      "what": "trash: untitled-20260920-wf5l deleted forever",
+      "observed": ""
+    },
+    {
+      "n": 31,
+      "surface": "trash",
+      "what": "trash: GET /deck/untitled-20260920-wf5l answers 404",
+      "observed": ""
+    },
+    {
+      "n": 32,
+      "surface": "trash",
+      "what": "the scratch deck",
+      "observed": {
+        "trashed": true,
+        "status": 404
+      }
+    }
+  ]
+}

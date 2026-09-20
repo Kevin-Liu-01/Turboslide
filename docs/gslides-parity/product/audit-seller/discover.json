@@ -1,0 +1,779 @@
+[
+  {
+    "t": 1566,
+    "kind": "time",
+    "text": "/home hydrated in 1155 ms"
+  },
+  {
+    "t": 1639,
+    "kind": "home",
+    "text": "controls",
+    "links": [
+      "A \"Turboslide\" /home home.nav.lockup",
+      "A \"Your presentations\" /decks home.nav.decks",
+      "A \"Documentation\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md home.nav.docs",
+      "A \"For agents\" #agents home.nav.agents",
+      "A \"GitHub\" https://github.com/Kevin-Liu-01/Turboslide home.nav.github",
+      "BUTTON \"Light\"  home.theme.light",
+      "BUTTON \"Dark\"  home.theme.dark",
+      "A \"New Presentation\" /new home.nav.new",
+      "A \"New Presentation\" /new home.hero.new",
+      "A \"Open the GT Deck\" /deck/gt-brand home.hero.deck",
+      "A \"GitHub\" https://github.com/Kevin-Liu-01/Turboslide home.hero.github",
+      "A \"New Presentation\" /new home.specimen.new",
+      "A \"Read the file on GitHub\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json home.agents.openapi",
+      "A \"Read the file on GitHub\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md home.agents.skills",
+      "A \"New presentation\" /new home.foot.new",
+      "A \"Your presentations\" /decks home.foot.decks",
+      "A \"The GT deck\" /deck/gt-brand home.foot.deck",
+      "A \"Present the GT deck\" /deck/gt-brand?present=1 home.foot.present",
+      "A \"Trash\" /decks/trash home.foot.trash",
+      "A \"The documentation index\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md home.foot.docs",
+      "A \"The specification\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/spec/SPEC.md home.foot.spec",
+      "A \"Google Slides parity\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/gslides-parity/SPEC.md home.foot.parity",
+      "A \"The slide rules\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/grammar.md home.foot.grammar",
+      "A \"PowerPoint export\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md home.foot.pptx",
+      "A \"Hosting\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/hosting.md home.foot.hosting",
+      "A \"The Rust module\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/native.md home.foot.native",
+      "A \"Rules for the repository\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/AGENTS.md home.foot.rules",
+      "A \"Manifest\" /api/agent home.foot.manifest",
+      "A \"OpenAPI\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json home.foot.openapi",
+      "A \"llms.txt\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/llms.txt home.foot.llms",
+      "A \"MCP\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md home.foot.mcp",
+      "A \"turboslide-api\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md home.foot.skill-api",
+      "A \"turboslide-create\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md home.foot.skill-create",
+      "A \"turboslide-studio\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md home.foot.skill-studio",
+      "A \"turboslide-verify\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md home.foot.skill-verify",
+      "A \"MIT licence, copyright 2026 Kevin Liu\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE home.foot.licence",
+      "A \"Third party notices\" https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md home.foot.notices",
+      "A \"GitHub\" https://github.com/Kevin-Liu-01/Turboslide home.foot.github",
+      "A \"Turboslide\" /home home.foot.lockup"
+    ]
+  },
+  {
+    "t": 1646,
+    "kind": "home",
+    "text": "hero",
+    "hero": "Turboslide\n\nA slides editor with Google Slides' menus, toolbar and shortcuts, a canvas on every slide, and a PowerPoint export that matches the screen pixel for pixel.\n\nNew Presentation\nOpen the GT Deck\nGitHub\n\nNo account needed to start. Free under the MIT licence, with the code on GitHub. Hosted at turboslide.vercel.app."
+  },
+  {
+    "t": 2766,
+    "kind": "home",
+    "text": "hover tip on New Presentation",
+    "tip": "New PresentationOpens a fresh presentation; no account needed."
+  },
+  {
+    "t": 3830,
+    "kind": "time",
+    "text": "/new editor ready in 1062 ms (url change 531 ms)"
+  },
+  {
+    "t": 4678,
+    "kind": "editor",
+    "text": "title row",
+    "controls": [
+      {
+        "c": "title.home",
+        "label": "Turboslide home",
+        "dis": null
+      },
+      {
+        "c": "deck.name",
+        "label": "Presentation title",
+        "dis": null
+      },
+      {
+        "c": "deck.saveState",
+        "label": "Not saved yet",
+        "dis": null
+      },
+      {
+        "c": "deck.lastEdit.slot",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "deck.lastEdit",
+        "label": "Last edit just now",
+        "dis": null
+      },
+      {
+        "c": "title.presence",
+        "label": "Collaborators",
+        "dis": null
+      },
+      {
+        "c": "presence.more",
+        "label": "Collaborators",
+        "dis": null
+      },
+      {
+        "c": "title.comments.slot",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "title.comments",
+        "label": "Show all comments",
+        "dis": null
+      },
+      {
+        "c": "present.split",
+        "label": "Slideshow",
+        "dis": null
+      },
+      {
+        "c": "present.open",
+        "label": "Slideshow",
+        "dis": null
+      },
+      {
+        "c": "present.arrow",
+        "label": "Presentation options",
+        "dis": null
+      },
+      {
+        "c": "share.slot",
+        "label": "Share",
+        "dis": null
+      },
+      {
+        "c": "share.open",
+        "label": "Share",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4687,
+    "kind": "editor",
+    "text": "menubar",
+    "controls": [
+      {
+        "c": "menubar.file",
+        "label": "File",
+        "dis": null
+      },
+      {
+        "c": "menubar.edit",
+        "label": "Edit",
+        "dis": null
+      },
+      {
+        "c": "menubar.view",
+        "label": "View",
+        "dis": null
+      },
+      {
+        "c": "menubar.insert",
+        "label": "Insert",
+        "dis": null
+      },
+      {
+        "c": "menubar.format",
+        "label": "Format",
+        "dis": null
+      },
+      {
+        "c": "menubar.slide",
+        "label": "Slide",
+        "dis": null
+      },
+      {
+        "c": "menubar.arrange",
+        "label": "Arrange",
+        "dis": null
+      },
+      {
+        "c": "menubar.tools",
+        "label": "Tools",
+        "dis": null
+      },
+      {
+        "c": "menubar.help",
+        "label": "Help",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4697,
+    "kind": "editor",
+    "text": "toolbar",
+    "controls": [
+      {
+        "c": "toolbar.head",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "toolbar.search",
+        "label": "Search the menus",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide.split",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide",
+        "label": "New slide",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide.arrow",
+        "label": "New slide with layout",
+        "dis": null
+      },
+      {
+        "c": "toolbar.undo",
+        "label": "Undo",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.redo",
+        "label": "Redo",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.print",
+        "label": "Print",
+        "dis": null
+      },
+      {
+        "c": "toolbar.paintFormat",
+        "label": "Paint format",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.zoom",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "view.zoom.value",
+        "label": "Zoom",
+        "dis": null
+      },
+      {
+        "c": "view.zoom.arrow",
+        "label": "Zoom levels",
+        "dis": null
+      },
+      {
+        "c": "toolbar.tail",
+        "label": "TBackgroundLayoutTheme",
+        "dis": null
+      },
+      {
+        "c": "toolbar.select",
+        "label": "Select",
+        "dis": null
+      },
+      {
+        "c": "toolbar.textBox",
+        "label": "Text box",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertImage",
+        "label": "Insert image",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertShape",
+        "label": "Insert shape",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertLine",
+        "label": "Insert line",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertLine.arrow",
+        "label": "Line",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertComment",
+        "label": "Insert comment",
+        "dis": null
+      },
+      {
+        "c": "toolbar.background",
+        "label": "Background",
+        "dis": null
+      },
+      {
+        "c": "toolbar.layout",
+        "label": "Layout",
+        "dis": null
+      },
+      {
+        "c": "toolbar.theme",
+        "label": "Theme",
+        "dis": null
+      },
+      {
+        "c": "toolbar.end",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "toolbar.pointer",
+        "label": "Show my pointer",
+        "dis": null
+      },
+      {
+        "c": "toolbar.hideMenus",
+        "label": "Hide the menus",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4699,
+    "kind": "editor",
+    "text": "toolbar head",
+    "controls": [
+      {
+        "c": "toolbar.search",
+        "label": "Search the menus",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide.split",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide",
+        "label": "New slide",
+        "dis": null
+      },
+      {
+        "c": "toolbar.newSlide.arrow",
+        "label": "New slide with layout",
+        "dis": null
+      },
+      {
+        "c": "toolbar.undo",
+        "label": "Undo",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.redo",
+        "label": "Redo",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.print",
+        "label": "Print",
+        "dis": null
+      },
+      {
+        "c": "toolbar.paintFormat",
+        "label": "Paint format",
+        "dis": "true"
+      },
+      {
+        "c": "toolbar.zoom",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "view.zoom.value",
+        "label": "Zoom",
+        "dis": null
+      },
+      {
+        "c": "view.zoom.arrow",
+        "label": "Zoom levels",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4704,
+    "kind": "editor",
+    "text": "toolbar tail",
+    "controls": [
+      {
+        "c": "toolbar.select",
+        "label": "Select",
+        "dis": null
+      },
+      {
+        "c": "toolbar.textBox",
+        "label": "Text box",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertImage",
+        "label": "Insert image",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertShape",
+        "label": "Insert shape",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertLine",
+        "label": "Insert line",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertLine.arrow",
+        "label": "Line",
+        "dis": null
+      },
+      {
+        "c": "toolbar.insertComment",
+        "label": "Insert comment",
+        "dis": null
+      },
+      {
+        "c": "toolbar.background",
+        "label": "Background",
+        "dis": null
+      },
+      {
+        "c": "toolbar.layout",
+        "label": "Layout",
+        "dis": null
+      },
+      {
+        "c": "toolbar.theme",
+        "label": "Theme",
+        "dis": null
+      },
+      {
+        "c": "toolbar.end",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "toolbar.pointer",
+        "label": "Show my pointer",
+        "dis": null
+      },
+      {
+        "c": "toolbar.hideMenus",
+        "label": "Hide the menus",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4706,
+    "kind": "editor",
+    "text": "filmstrip",
+    "controls": [
+      {
+        "c": "filmstrip.slide.title",
+        "label": "Slide 1",
+        "dis": null
+      },
+      {
+        "c": "filmstrip.comments.title",
+        "label": "",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4707,
+    "kind": "editor",
+    "text": "bottombar",
+    "controls": [
+      {
+        "c": "panel.toggle",
+        "label": "Show side panel",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 4712,
+    "kind": "editor",
+    "text": "runs",
+    "runs": [
+      {
+        "run": "heading/text",
+        "text": "",
+        "prompt": "Click to add title",
+        "x": 380.5849914550781,
+        "y": 450.34075927734375,
+        "w": 934.8299560546875,
+        "h": 63.27374267578125
+      },
+      {
+        "run": "lead/text",
+        "text": "",
+        "prompt": "Click to add subtitle",
+        "x": 380.5849914550781,
+        "y": 531.9445190429688,
+        "w": 635.5244140625,
+        "h": 26.5697021484375
+      }
+    ]
+  },
+  {
+    "t": 4719,
+    "kind": "editor",
+    "text": "save state",
+    "save": "Not saved yet",
+    "name": ""
+  },
+  {
+    "t": 4722,
+    "kind": "editor",
+    "text": "state keys",
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "settings",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ],
+    "slideId": "title",
+    "revision": 0,
+    "sync": {
+      "seq": 0,
+      "revision": 0,
+      "pending": 0,
+      "retained": 0,
+      "tier": "memory",
+      "transport": "poll",
+      "connected": false,
+      "offline": false,
+      "storeDegraded": false,
+      "streamDown": false
+    }
+  },
+  {
+    "t": 4728,
+    "kind": "editor",
+    "text": "panels",
+    "controls": [
+      {
+        "c": "view.zoom.value",
+        "label": "Zoom",
+        "dis": null
+      },
+      {
+        "c": "view.zoom.arrow",
+        "label": "Zoom levels",
+        "dis": null
+      },
+      {
+        "c": "notes",
+        "label": "",
+        "dis": null
+      },
+      {
+        "c": "notes.handle",
+        "label": "Resize speaker notes",
+        "dis": null
+      },
+      {
+        "c": "notes.text",
+        "label": "Speaker notes",
+        "dis": null
+      },
+      {
+        "c": "panel.toggle",
+        "label": "Show side panel",
+        "dis": null
+      }
+    ]
+  },
+  {
+    "t": 5413,
+    "kind": "menu",
+    "text": "file",
+    "rows": [
+      "file.new \"New\"",
+      "file.open \"Open…⌘O\"",
+      "file.importSlides \"Import slides\"",
+      "file.makeCopy \"Make a copy\"",
+      "file.share \"Share\"",
+      "file.download \"Download\"",
+      "file.rename \"Rename\"",
+      "file.moveToTrash \"Move to trash\"",
+      "file.versionHistory \"Version history\"",
+      "file.details \"Details\"",
+      "file.printPreview \"Print settings and preview\"",
+      "file.print \"Print⌘P\""
+    ]
+  },
+  {
+    "t": 6238,
+    "kind": "menu",
+    "text": "insert",
+    "rows": [
+      "insert.image \"Image\"",
+      "insert.textBox \"Text box\"",
+      "insert.shape \"Shape\"",
+      "insert.table \"Table\"",
+      "insert.chart \"Chart\"",
+      "insert.diagram \"Diagram\"",
+      "insert.wordArt \"Word art\"",
+      "insert.line \"Line\"",
+      "insert.link \"Link⌘K\" [disabled]",
+      "insert.comment \"Comment⌥⌘M\"",
+      "insert.newSlide \"New slide⌃M\"",
+      "insert.slideNumbers \"Slide numbers\""
+    ]
+  },
+  {
+    "t": 6998,
+    "kind": "menu",
+    "text": "slide",
+    "rows": [
+      "slide.newSlide \"New slide⌃M\"",
+      "slide.duplicateSlide \"Duplicate slide⌘D\"",
+      "slide.deleteSlide \"Delete slide\"",
+      "slide.skipSlide \"Skip slide\"",
+      "slide.moveSlide \"Move slide\"",
+      "slide.changeBackground \"Change background\"",
+      "slide.applyLayout \"Apply layout\"",
+      "slide.changeTheme \"Change theme\""
+    ]
+  },
+  {
+    "t": 7724,
+    "kind": "menu",
+    "text": "format",
+    "rows": [
+      "format.text \"Text\"",
+      "format.alignIndent \"Align & indent\"",
+      "format.spacing \"Line & paragraph spacing\"",
+      "format.bulletsNumbering \"Bullets & numbering\"",
+      "format.table \"Table\"",
+      "format.image \"Image\"",
+      "format.bordersLines \"Borders & lines\"",
+      "format.formatOptions \"Format options\"",
+      "format.clearFormatting \"Clear formatting⌘\\\" [disabled]",
+      "format.textFitting \"Text fitting\" [disabled]"
+    ]
+  },
+  {
+    "t": 8588,
+    "kind": "menu",
+    "text": "tools",
+    "rows": [
+      "tools.accessibilitySettings \"Accessibility settings\"",
+      "tools.checkSlides \"Check slides\"",
+      "tools.advancedTools \"Advanced tools\""
+    ]
+  },
+  {
+    "t": 9440,
+    "kind": "menu",
+    "text": "help",
+    "rows": [
+      "help.searchMenus \"Search the menus⌥/\"",
+      "help.help \"Help\"",
+      "help.improve \"Help Turboslide improve\"",
+      "help.keyboardShortcuts \"Keyboard shortcuts⌘/\""
+    ]
+  },
+  {
+    "t": 9589,
+    "kind": "editor",
+    "text": "sheet",
+    "sheet": {
+      "x": 284,
+      "y": 141,
+      "w": 1128,
+      "h": 634.5
+    }
+  },
+  {
+    "t": 20354,
+    "kind": "editor",
+    "text": "toolbar tooltips",
+    "tips": [
+      {
+        "c": "toolbar.head",
+        "tip": "RedoCmd Y"
+      },
+      {
+        "c": "toolbar.search",
+        "tip": "Search the menusOption /"
+      },
+      {
+        "c": "toolbar.newSlide.split",
+        "tip": "New slide with layoutPick a layout for the new slide"
+      },
+      {
+        "c": "toolbar.newSlide",
+        "tip": "New slideCtrl MThe arrow picks a layout for the new slide."
+      },
+      {
+        "c": "toolbar.newSlide.arrow",
+        "tip": "New slide with layoutPick a layout for the new slide"
+      },
+      {
+        "c": "toolbar.undo",
+        "tip": "UndoCmd Z"
+      },
+      {
+        "c": "toolbar.redo",
+        "tip": "RedoCmd Y"
+      },
+      {
+        "c": "toolbar.print",
+        "tip": "PrintCmd P"
+      },
+      {
+        "c": "toolbar.paintFormat",
+        "tip": "Paint formatCmd Option CClick once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms."
+      },
+      {
+        "c": "toolbar.zoom",
+        "tip": "ZoomFit, 50%, 100%, 200%, or type a value from 25 to 1600."
+      },
+      {
+        "c": "view.zoom.value",
+        "tip": "ZoomFit, 50%, 100%, 200%, or type a value from 25 to 1600."
+      },
+      {
+        "c": "view.zoom.arrow",
+        "tip": "Zoom levelsFit, 50%, 100%, 200%, or type 25 to 1600"
+      },
+      {
+        "c": "toolbar.tail",
+        "tip": null
+      },
+      {
+        "c": "toolbar.select",
+        "tip": "SelectThe pointer; a draw tool returns here when it finishes."
+      }
+    ]
+  },
+  {
+    "t": 20411,
+    "kind": "errors",
+    "text": "console errors",
+    "errors": [
+      "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ]
+  }
+]

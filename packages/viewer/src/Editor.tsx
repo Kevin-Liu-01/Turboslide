@@ -178,6 +178,7 @@ import { editorKeyAction, isBareCharacterKey, typingEntry } from './keys';
 import { toggleMark } from './marks';
 import type { ToggleMark } from './marks';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
+import { blockTypeIn, boxContains, ringBoxFor } from './text-ring';
 import { MaterialMount } from './MaterialMount';
 import { isPictureKind } from './model';
 import { flipMutations, ROTATE_READOUT_MS, rotateMutations } from './rotate';
@@ -4497,8 +4498,24 @@ export function Editor({
       armDraw(e.clientX, e.clientY, drawTool, { shift: e.shiftKey, alt: e.altKey });
       return;
     }
-    const id = resolveObject(e.target, el, slideNow);
+    const resolved = resolveObject(e.target, el, slideNow);
     const selected = selectedIds(selectionRef.current, extraRef.current);
+    /* the band between a text object's text and its ring (text-ring.ts) belongs to the object:
+       a press there on the one selected text object is a press on it, so the drag arms from the
+       whole ring, not the text alone */
+    const id = ((): string | null => {
+      if (resolved !== null || selected.length !== 1) return resolved;
+      const only = selected[0];
+      const box = only !== undefined ? boxesRef.current.blocks[only] : undefined;
+      const type =
+        only !== undefined ? (blockById(slideNow, only)?.type ?? blockTypeIn(el, only)) : undefined;
+      if (only === undefined || !box || type === undefined) return null;
+      const ring = ringBoxFor(type, box);
+      if (ring === box) return null;
+      const rect = stageRect();
+      const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : null;
+      return point && boxContains(ring, point.x, point.y) ? only : null;
+    })();
     /* the click model (docs/gslides-parity/focus/AMENDMENTS.md A1 rules 1 and 2, above
        gslides-parity SPEC 10.2's single click caret, which opened the session here until this
        round): Selection.tsx objectPressPlan decides what the press does, so its rules carry unit
@@ -4822,7 +4839,9 @@ export function Editor({
     anchorBlock?.pos ??
     (slide && selectedId !== null ? posFor(slide, selectedId, boxes) : null) ??
     null;
-  const selectionBox =
+  /* a text object's ring stands off its text (text-ring.ts): the caret at the first character
+     no longer sits on the ring's left edge */
+  const measuredSelectionBox =
     selection === null
       ? null
       : selection.kind === 'run'
@@ -4830,9 +4849,17 @@ export function Editor({
           boxes.blocks[selection.blockId] ??
           null)
         : (boxes.blocks[selection.blockId] ?? null);
+  /* a grammar field (the cover title, a subtitle) is no block of the slide, so its type is read
+     from the element the renderer wrote (data-type) when the slide's blocks do not name it */
+  const ringTypeOf = (id: string): string | undefined =>
+    (slide ? blockById(slide, id)?.type : undefined) ?? blockTypeIn(body.current, id);
+  const selectionBox =
+    measuredSelectionBox === null || selectedId === null
+      ? measuredSelectionBox
+      : ringBoxFor(ringTypeOf(selectedId), measuredSelectionBox);
   const extraBoxes = extra.flatMap((id) => {
     const box = boxes.blocks[id];
-    return box ? [box] : [];
+    return box ? [ringBoxFor(ringTypeOf(id), box)] : [];
   });
   /* the cell range's ring (table-range.ts): the union of its measured cells, inside the table's
      own ring; none while a session is open */
@@ -4849,8 +4876,12 @@ export function Editor({
   const group =
     ids.length > 1 && slide ? (selectionUnion(slide, ids, boxes) ?? groupBoxOf(ids, boxes)) : null;
   const groupTag = slide ? sharedGroup(slide, ids) : null;
-  const hoverBox =
+  const measuredHoverBox =
     hover !== null && !ids.includes(hover) && !activeHandle ? (boxes.blocks[hover] ?? null) : null;
+  const hoverBox =
+    measuredHoverBox === null || hover === null
+      ? null
+      : ringBoxFor(ringTypeOf(hover), measuredHoverBox);
   /* a table cell or a cell range is active: the work is inside the table, so its outer transform
      handles (the eight resize squares, the rotation ring) and the column seams are not drawn, as
      Google draws them only for the whole-table selection (docs/RETURN.md 2.4). A single click

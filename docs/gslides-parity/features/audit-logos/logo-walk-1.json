@@ -1,0 +1,50 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-3no9",
+  "ranAt": "2026-09-20T19:02:45.938Z",
+  "rows": [
+    {
+      "step": "the draft opened",
+      "expected": "an untitled draft",
+      "observed": "untitled-20260920-3no9; slide title",
+      "ok": true
+    },
+    {
+      "step": "Insert menu rows",
+      "expected": "a Logo row or a brand route",
+      "observed": "Insert: Image | Text box | Shape | Table | Chart | Diagram | Word art | Line | Link⌘K | Comment⌥⌘M | New slide⌃M | Slide numbers; Image: Upload from computer",
+      "ok": false
+    },
+    {
+      "step": "the walk",
+      "expected": "no exception",
+      "observed": "exception: locator.boundingBox: Timeout 30000ms exceeded. / Call log: /   - waiting for locator('[data-control=\"menu.insert.image.byUrl\"]')",
+      "ok": false
+    },
+    {
+      "step": "the product trash path",
+      "expected": "Move to trash then Delete forever",
+      "observed": "failed: page.waitForFunction: Timeout 90000ms exceeded.; falling back to the actions API",
+      "ok": false
+    },
+    {
+      "step": "the scratch deck answers 404",
+      "expected": "GET /edit/untitled-20260920-3no9 is 404",
+      "observed": "status 404",
+      "ok": true
+    },
+    {
+      "step": "the scratch deck answers 404 on /deck",
+      "expected": "GET /deck/untitled-20260920-3no9 is 404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

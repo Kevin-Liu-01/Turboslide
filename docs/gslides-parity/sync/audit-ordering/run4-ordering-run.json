@@ -1,0 +1,1369 @@
+{
+  "run": "run4",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T19:17:49.510Z",
+  "phases": {
+    "create": {
+      "deckId": "untitled-20260920-spff",
+      "a": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "heading": "Sync audit four"
+    },
+    "slide": {
+      "slide": "split-1",
+      "runs": [
+        "h/text",
+        "p1/text",
+        "p2/text"
+      ],
+      "run": "h/text"
+    },
+    "open": {
+      "rounds": [
+        {
+          "round": 1,
+          "typedAt": 8999,
+          "windowMs": 399,
+          "a": "pb1pa1",
+          "b": "pa1pb1",
+          "equal": false,
+          "aHas": {
+            "own": 0,
+            "other": 0
+          },
+          "bHas": {
+            "own": 0,
+            "other": 0
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 9010,
+              "base": 2,
+              "opIds": [
+                "2"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 0,
+                  "remove": 0,
+                  "insert": "pa1",
+                  "insertLength": 3
+                }
+              ],
+              "status": 200,
+              "ms": 586,
+              "revision": "3",
+              "admitted": [
+                3
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 9119,
+              "base": 2,
+              "opIds": [
+                "1"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 0,
+                  "remove": 0,
+                  "insert": "pb1",
+                  "insertLength": 3
+                }
+              ],
+              "status": 200,
+              "ms": 2062,
+              "revision": "4",
+              "admitted": [
+                4
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 3,
+                  "clientId": "store",
+                  "mutations": [
+                    "splice@0-0+3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "samples": [
+            {
+              "at": 9001,
+              "a": " pa1",
+              "b": " pb1",
+              "ra": 2,
+              "rb": 2,
+              "pa": 1,
+              "pb": 0
+            },
+            {
+              "at": 9760,
+              "a": " pa1",
+              "b": " pb1",
+              "ra": 3,
+              "rb": 2,
+              "pa": 0,
+              "pb": 1
+            },
+            {
+              "at": 11277,
+              "a": "pb1pa1",
+              "b": "pa1pb1",
+              "ra": 4,
+              "rb": 4,
+              "pa": 0,
+              "pb": 0
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          }
+        },
+        {
+          "round": 2,
+          "typedAt": 21450,
+          "windowMs": 317,
+          "a": "pa1pb1 pb2 pa2",
+          "b": "pa1pb1 pb2 pa2",
+          "equal": true,
+          "aHas": {
+            "own": 1,
+            "other": 1
+          },
+          "bHas": {
+            "own": 1,
+            "other": 1
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 21560,
+              "base": 4,
+              "opIds": [
+                "3"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 6,
+                  "remove": 0,
+                  "insert": " pa2",
+                  "insertLength": 4
+                }
+              ],
+              "status": 200,
+              "ms": 557,
+              "revision": "5",
+              "admitted": [
+                5
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 21591,
+              "base": 4,
+              "opIds": [
+                "2"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 1,
+                  "remove": 5,
+                  "insert": "a1pb1 pb2",
+                  "insertLength": 9
+                }
+              ],
+              "status": 200,
+              "ms": 1841,
+              "revision": "6",
+              "admitted": [
+                6
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 5,
+                  "clientId": "store",
+                  "mutations": [
+                    "splice@6-0+4"
+                  ]
+                }
+              ]
+            }
+          ],
+          "samples": [
+            {
+              "at": 21451,
+              "a": "pb1pa1 pa2",
+              "b": "pa1pb1 pb2",
+              "ra": 4,
+              "rb": 4,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 22208,
+              "a": "pb1pa1 pa2",
+              "b": "pa1pb1 pb2",
+              "ra": 5,
+              "rb": 4,
+              "pa": 0,
+              "pb": 1
+            },
+            {
+              "at": 23470,
+              "a": "pb1pa1 pa2",
+              "b": "pa1pb1 pb2 pa2",
+              "ra": 5,
+              "rb": 6,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 24229,
+              "a": "pa1pb1 pb2 pa2",
+              "b": "pa1pb1 pb2 pa2",
+              "ra": 6,
+              "rb": 6,
+              "pa": 0,
+              "pb": 0
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          }
+        }
+      ],
+      "afterEscape": {
+        "a": "pa1pb1 pb2 pa2",
+        "b": "pa1pb1 pb2 pa2",
+        "equal": true,
+        "a2": {
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 6,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false
+        },
+        "b2": {
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 6,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false
+        }
+      }
+    },
+    "closed": {
+      "rounds": [
+        {
+          "round": 1,
+          "convergedMs": 4466,
+          "a": "pa1pb1 pb2 pa2 qa1 qb1",
+          "b": "pa1pb1 pb2 pa2 qa1 qb1",
+          "equal": true,
+          "aHas": {
+            "own": 1,
+            "other": 1
+          },
+          "bHas": {
+            "own": 1,
+            "other": 1
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 38752,
+              "base": 6,
+              "opIds": [
+                "4"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 14,
+                  "remove": 0,
+                  "insert": " qa1",
+                  "insertLength": 4
+                }
+              ],
+              "status": 200,
+              "ms": 2301,
+              "revision": "8",
+              "admitted": [
+                8
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 7,
+                  "clientId": "store",
+                  "mutations": [
+                    "splice@14-0+4"
+                  ]
+                }
+              ]
+            },
+            {
+              "who": "B",
+              "at": 38908,
+              "base": 6,
+              "opIds": [
+                "3"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 14,
+                  "remove": 0,
+                  "insert": " qb1",
+                  "insertLength": 4
+                }
+              ],
+              "status": 200,
+              "ms": 401,
+              "revision": "7",
+              "admitted": [
+                7
+              ],
+              "rejected": [],
+              "between": null
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          },
+          "a2": {
+            "revision": 8,
+            "serverRevision": 8,
+            "seq": 8,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          },
+          "b2": {
+            "revision": 8,
+            "serverRevision": 8,
+            "seq": 8,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          }
+        },
+        {
+          "round": 2,
+          "convergedMs": 2839,
+          "a": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2",
+          "b": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2",
+          "equal": true,
+          "aHas": {
+            "own": 1,
+            "other": 1
+          },
+          "bHas": {
+            "own": 1,
+            "other": 1
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 46817,
+              "base": 8,
+              "opIds": [
+                "5"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 22,
+                  "remove": 0,
+                  "insert": " qa2",
+                  "insertLength": 4
+                }
+              ],
+              "status": 200,
+              "ms": 549,
+              "revision": "9",
+              "admitted": [
+                9
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 46932,
+              "base": 8,
+              "opIds": [
+                "4"
+              ],
+              "mutations": [
+                {
+                  "op": "text.splice",
+                  "path": "/text",
+                  "at": 22,
+                  "remove": 0,
+                  "insert": " qb2",
+                  "insertLength": 4
+                }
+              ],
+              "status": 200,
+              "ms": 1771,
+              "revision": "10",
+              "admitted": [
+                10
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 9,
+                  "clientId": "store",
+                  "mutations": [
+                    "splice@22-0+4"
+                  ]
+                }
+              ]
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          },
+          "a2": {
+            "revision": 10,
+            "serverRevision": 10,
+            "seq": 10,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          },
+          "b2": {
+            "revision": 10,
+            "serverRevision": 10,
+            "seq": 10,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          }
+        }
+      ]
+    },
+    "offline": {
+      "before": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2",
+      "aBeforeOnline": {
+        "revision": 10,
+        "serverRevision": 10,
+        "seq": 10,
+        "pending": 1,
+        "retained": 0,
+        "connected": false,
+        "offline": true,
+        "streamDown": true,
+        "words": "Offline. Changes will save when you reconnect",
+        "heading": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2 oa1"
+      },
+      "bBeforeOnline": {
+        "revision": 13,
+        "serverRevision": 13,
+        "seq": 13,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "heading": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2 ob1 ob2 ob3"
+      },
+      "aSettledMs": 4803,
+      "aSettled": {
+        "revision": 14,
+        "serverRevision": 14,
+        "seq": 14,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "converged": true,
+      "a": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2 ob1 ob2 ob3 oa1",
+      "b": "pa1pb1 pb2 pa2 qa1 qb1 qb2 qa2 ob1 ob2 ob3 oa1",
+      "lostInA": [],
+      "lostInB": [],
+      "wire": [
+        {
+          "who": "B",
+          "at": 53340,
+          "base": 10,
+          "opIds": [
+            "5"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " ob1",
+              "insertLength": 4
+            }
+          ],
+          "status": 200,
+          "ms": 430,
+          "revision": "11",
+          "admitted": [
+            11
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "B",
+          "at": 56093,
+          "base": 11,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 34,
+              "remove": 0,
+              "insert": " ob2",
+              "insertLength": 4
+            }
+          ],
+          "status": 200,
+          "ms": 897,
+          "revision": "12",
+          "admitted": [
+            12
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "A",
+          "at": 56564,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 57066,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 58068,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "B",
+          "at": 58862,
+          "base": 12,
+          "opIds": [
+            "7"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 38,
+              "remove": 0,
+              "insert": " ob3",
+              "insertLength": 4
+            }
+          ],
+          "status": 200,
+          "ms": 448,
+          "revision": "13",
+          "admitted": [
+            13
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "A",
+          "at": 60070,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 64073,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 72073,
+          "base": 10,
+          "opIds": [
+            "6"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 30,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 76607,
+          "base": 13,
+          "opIds": [
+            "7"
+          ],
+          "mutations": [
+            {
+              "op": "text.splice",
+              "path": "/text",
+              "at": 42,
+              "remove": 0,
+              "insert": " oa1",
+              "insertLength": 4
+            }
+          ],
+          "status": 200,
+          "ms": 511,
+          "revision": "14",
+          "admitted": [
+            14
+          ],
+          "rejected": [],
+          "between": null
+        }
+      ],
+      "stale": {
+        "a": null,
+        "b": null
+      },
+      "a2": {
+        "revision": 14,
+        "serverRevision": 14,
+        "seq": 14,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b2": {
+        "revision": 14,
+        "serverRevision": 14,
+        "seq": 14,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      }
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 3438,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "B",
+      "at": 4559,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 4725,
+      "base": 1,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "slide.insert",
+          "path": null
+        }
+      ],
+      "status": 200,
+      "ms": 557,
+      "revision": "2",
+      "admitted": [
+        2
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 9010,
+      "base": 2,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 0,
+          "remove": 0,
+          "insert": "pa1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 586,
+      "revision": "3",
+      "admitted": [
+        3
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 9119,
+      "base": 2,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 0,
+          "remove": 0,
+          "insert": "pb1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 2062,
+      "revision": "4",
+      "admitted": [
+        4
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 3,
+          "clientId": "store",
+          "mutations": [
+            "splice@0-0+3"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 21560,
+      "base": 4,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 6,
+          "remove": 0,
+          "insert": " pa2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 557,
+      "revision": "5",
+      "admitted": [
+        5
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 21591,
+      "base": 4,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 1,
+          "remove": 5,
+          "insert": "a1pb1 pb2",
+          "insertLength": 9
+        }
+      ],
+      "status": 200,
+      "ms": 1841,
+      "revision": "6",
+      "admitted": [
+        6
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 5,
+          "clientId": "store",
+          "mutations": [
+            "splice@6-0+4"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 38752,
+      "base": 6,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 14,
+          "remove": 0,
+          "insert": " qa1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 2301,
+      "revision": "8",
+      "admitted": [
+        8
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 7,
+          "clientId": "store",
+          "mutations": [
+            "splice@14-0+4"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "B",
+      "at": 38908,
+      "base": 6,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 14,
+          "remove": 0,
+          "insert": " qb1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 401,
+      "revision": "7",
+      "admitted": [
+        7
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 46817,
+      "base": 8,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 22,
+          "remove": 0,
+          "insert": " qa2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 549,
+      "revision": "9",
+      "admitted": [
+        9
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 46932,
+      "base": 8,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 22,
+          "remove": 0,
+          "insert": " qb2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1771,
+      "revision": "10",
+      "admitted": [
+        10
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 9,
+          "clientId": "store",
+          "mutations": [
+            "splice@22-0+4"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "B",
+      "at": 53340,
+      "base": 10,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " ob1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 430,
+      "revision": "11",
+      "admitted": [
+        11
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 56093,
+      "base": 11,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 34,
+          "remove": 0,
+          "insert": " ob2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 897,
+      "revision": "12",
+      "admitted": [
+        12
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 56564,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 57066,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 58068,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "B",
+      "at": 58862,
+      "base": 12,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 38,
+          "remove": 0,
+          "insert": " ob3",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 448,
+      "revision": "13",
+      "admitted": [
+        13
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 60070,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 64073,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 72073,
+      "base": 10,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 30,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 76560,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 76607,
+      "base": 13,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "at": 42,
+          "remove": 0,
+          "insert": " oa1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 511,
+      "revision": "14",
+      "admitted": [
+        14
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 78516,
+      "stream": true,
+      "status": 200
+    }
+  ],
+  "anomalies": [
+    {
+      "kind": "open-sessions-diverge",
+      "round": 1,
+      "a": "pb1pa1",
+      "b": "pa1pb1",
+      "posts": 2
+    },
+    {
+      "kind": "open-sessions-lost-other",
+      "round": 1,
+      "aHas": {
+        "own": 0,
+        "other": 0
+      },
+      "bHas": {
+        "own": 0,
+        "other": 0
+      }
+    },
+    {
+      "kind": "open-sessions-lost-after-escape",
+      "token": " pa1",
+      "inA": 0,
+      "inB": 0
+    },
+    {
+      "kind": "open-sessions-lost-after-escape",
+      "token": " pb1",
+      "inA": 0,
+      "inB": 0
+    }
+  ],
+  "console": [],
+  "finishedAt": "2026-09-20T19:19:07.302Z",
+  "seconds": 78,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260920-spff"
+}

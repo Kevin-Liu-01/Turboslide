@@ -1,0 +1,1788 @@
+{
+  "query": {
+    "metric": "vercel.function_invocation.function_duration_gbhr",
+    "aggregation": "sum",
+    "groupBy": [
+      "request_path"
+    ],
+    "filter": "environment eq 'production'",
+    "startTime": "2026-09-13T19:12:48.243Z",
+    "endTime": "2026-09-20T19:12:48.243Z",
+    "granularity": {
+      "days": 1
+    },
+    "orderBy": "count",
+    "orderDirection": "desc"
+  },
+  "summary": [
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 413.127364266667,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 5.220543715555555,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.7392995555555558,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.08466318222222223,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.6351843555555555,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.4264260266666665,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.5676379022222222,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.023104284444444442,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 35.49479708444444,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.03009479111111111,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.05016234666666667,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 8.772488533333334,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.03230151111111111,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.024151608888888895,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01881315555555555,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0025116444444444443,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.05237248,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.008077084444444445,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0005683200000000001,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.20717056,
+      "request_path": "/api/render/title"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.19384206222222222,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0009756444444444446,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.20808305777777775,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.18137543111111115,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00062464,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0031749688888888902,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.17230506666666667,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0006343111111111111,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00040789333333333326,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0000620088888888889,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.003029333333333333,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06036195555555556,
+      "request_path": "/decks"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.016195697777777778,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.000029013333333333332,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.23787121777777778,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.014850844444444445,
+      "request_path": "/new"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0006411377777777779,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00027363555555555554,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0010678044444444445,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    }
+  ],
+  "data": [
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.2050821688888912,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 10.285713635555567,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 96.3313954133336,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 56.854421617777774,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 71.49972536888893,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 57.25384817777776,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 74.4398751288889,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 46.257302755555564,
+      "request_path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 1.3733757155555555,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 2.606998755555556,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 1.2401692444444445,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5769c117c83b2e8aa190e130c9af07b9c0ac937b611be2115ac2e3b34ae4d5cb"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.03891086222222222,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.532705848888889,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.02874538666666667,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0006855111111111111,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01340529777777778,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.009324657777777778,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.11552199111111111,
+      "request_path": "/_serverFn/f1dbc072a6faae7799da60ec0e8e2053ba49c9ccd828e34767655246b3597756"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.000613831111111111,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.024078222222222223,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0002156088888888889,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.021952853333333338,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.037802666666666665,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260914-y0mk/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06551210666666668,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.2509550933333333,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.09153706666666668,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00221184,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01835463111111111,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.13510883555555556,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.07150478222222222,
+      "request_path": "/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.024338204444444445,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.40208782222222206,
+      "request_path": "/api/decks/untitled-20260919-0jar/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00307712,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.05292145777777778,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.13960362666666667,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06415530666666668,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06351928888888889,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06740195555555557,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.1769591466666666,
+      "request_path": "/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.002813724444444445,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.006553599999999999,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0024274488888888887,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.003610168888888889,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.003651697777777778,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.004047644444444444,
+      "request_path": "/api/x/csp/report"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.13876508444444446,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 5.945666559999999,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.16446008888888888,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 7.45420288,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 13.216376604444443,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 5.173057991111111,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 3.4022678755555558,
+      "request_path": "/api/decks/untitled-20260914-y0mk/stream"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.03009479111111111,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.004725191111111112,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.006219093333333333,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01222712888888889,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.002705635555555555,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.000005688888888888889,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01932003555555556,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.004154595555555555,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0008049777777777777,
+      "request_path": "/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 4.151322737777778,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 4.621165795555555,
+      "request_path": "/api/decks/untitled-20260919-0jar/stream"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.004221724444444444,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.005014186666666667,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.013049173333333334,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.002533831111111111,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.000027306666666666667,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00044088888888888894,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.004127288888888889,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.002887111111111111,
+      "request_path": "/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0038764088888888896,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0055552,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.010513066666666668,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00017578666666666668,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.001284551111111111,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0011571200000000002,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0012794311111111111,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00031004444444444445,
+      "request_path": "/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.01881315555555555,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0025116444444444443,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-nb3i/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.05237248,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-lhcu/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0060194133333333335,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0020576711111111113,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260913-tii2/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0005683200000000001,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-wes8/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.05561514666666668,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.04414634666666667,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.011921635555555556,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.003976533333333333,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.06245831111111111,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0073824711111111115,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.021670115555555557,
+      "request_path": "/api/render/title"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.19384206222222222,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260919-2j28/ops"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0009756444444444446,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.20808305777777775,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/ops"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.18137543111111115,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-rpr9/ops"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00062464,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-itw2/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0031749688888888902,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260915-d812/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.1533240888888889,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0060165688888888895,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0022033066666666662,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.005323093333333333,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00003868444444444445,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.002087822222222222,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0033115022222222224,
+      "request_path": "/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-tsb3/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0006343111111111111,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-ry1g/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00040789333333333326,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-r8pd/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0000620088888888889,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-w3oy/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.003029333333333333,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-oopc/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.012348302222222222,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0011946666666666666,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00015303111111111112,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.02660522666666667,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0007998577777777778,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.019260871111111112,
+      "request_path": "/decks"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.016195697777777778,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-f2ht/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.000029013333333333332,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-5kf6/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.23787121777777778,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260918-uf65/ops"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0020212622222222226,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00552391111111111,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0038877866666666675,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00018943999999999998,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00010581333333333333,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0029758577777777777,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00014677333333333335,
+      "request_path": "/new"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0006411377777777779,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-7bfu/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.00027363555555555554,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260916-74xj/presence"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_function_duration_gbhr_sum": 0.0010678044444444445,
+      "request_path": "/api/decks/untitled-20260920-h255/presence"
+    }
+  ],
+  "statistics": {
+    "bytesRead": 5059821583,
+    "rowsRead": 59553172,
+    "dbTimeSeconds": 7.452332019805908
+  },
+  "orderBy": "count",
+  "orderDirection": "desc"
+}

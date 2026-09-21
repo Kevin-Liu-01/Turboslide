@@ -1,0 +1,228 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-axjg",
+  "startedAt": "2026-09-20T19:03:08.307Z",
+  "ms": 276345,
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260920-axjg",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Insert menu with Advanced tools off",
+      "expected": "no Material row",
+      "observed": "rows: insert.image, insert.textBox, insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.link, insert.comment, insert.newSlide, insert.slideNumbers",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "Tools > Advanced tools on, then Insert menu",
+      "expected": "a Material row at the foot of Insert",
+      "observed": "advanced true; row present true; row text \"Material\"; 19 rows",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Insert > Material opens a dialog of names",
+      "expected": "the Insert material dialog: a list of catalog rows with preset counts and no thumbnails",
+      "observed": "title \"Material\"; lead \"A shader picture from the theme; its recipe is edited in Pictures and materials\"; 17 rows; 1 pictures or canvases; 0 search fields; rows: Liquid metal7 presets | Gem smoke5 presets | Smoke ring3 presets | God rays3 presets | Mesh gradient3 presets | Simplex noise3 presets | Swirl3 presets | Spiral3 presets | Grain gradient3 presets | Dithering3 presets | Static radial gradient3 presets | Neuro noise3 presets | Metaballs3 presets | Waves3 presets | Dot grid3 presets | Perlin noise3 presets | Static mesh gradient3 presets",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "pick Liquid metal",
+      "expected": "a material block on the slide, its recipe with the first preset",
+      "observed": "material material pos {\"x\":560,\"y\":314,\"w\":480,\"h\":272,\"z\":3} recipe {\"materialId\":\"paper:liquid-metal\",\"preset\":\"ink-paper\",\"anchor\":5500}; the block in the document after 707 ms, its canvas on the stage after 725 ms; other objects that gained a pos: mark mark, heading heading, lead paragraph",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "material.list on production",
+      "expected": "the catalog entries with availability",
+      "observed": "22 entries; available 17: paper:liquid-metal, paper:gem-smoke, paper:smoke-ring, paper:god-rays, paper:mesh-gradient, paper:simplex-noise, paper:swirl, paper:spiral, paper:grain-gradient, paper:dithering, paper:static-radial-gradient, paper:neuro-noise, paper:metaballs, paper:waves, paper:dot-grid, paper:perlin-noise, paper:static-mesh-gradient; unavailable 5: proto:event-horizon, proto:chroma-flow, proto:glyph-rain, proto:lens-gate, proto:singularity; uniforms per entry {\"paper:liquid-metal\":19,\"paper:gem-smoke\":20,\"paper:smoke-ring\":16,\"paper:god-rays\":18,\"paper:mesh-gradient\":14,\"paper:simplex-noise\":12,\"paper:swirl\":18,\"paper:spiral\":19,\"paper:grain-gradient\":15,\"paper:dithering\":14,\"paper:static-radial-gradient\":21,\"paper:neuro-noise\":14,\"paper:metaballs\":13,\"paper:waves\":17,\"paper:dot-grid\":19,\"paper:perlin-noise\":16,\"paper:static-mesh-gradient\":18}",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "the material block on the sheet",
+      "expected": "the frozen frame; today the plate ground with a titanium label and a live canvas over it",
+      "observed": "label \"paper:liquid-metal · ink-paper · not captured\"; canvas {\"w\":960,\"h\":520}; img false; data-live 1; filmstrip card {\"canvases\":0,\"labels\":[\"paper:liquid-metal · ink-paper · not captured\"]}",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "the live canvas animates in the editor",
+      "expected": "two screenshots of the block 900 ms apart differ",
+      "observed": "frames differ true; block box 338 by 183 css px",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "frame cadence with one shader mounted",
+      "expected": "rAF near 60 per second, few long tasks",
+      "observed": "48 rAF per second over 3 s; long tasks 3 (157 ms); canvases on the page 1: 960x520 stage",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "select the material block and read the toolbar",
+      "expected": "the block selected by one click; the toolbar tail for a material",
+      "observed": "chip \"Picture\"; handles 8: material: Resize nw, material: Resize n; toolbar controls: toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.formatOptions, toolbar.replaceImage, toolbar.end, toolbar.pointer, toolbar.hideMenus",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "drag the material block by 120 by 80 sheet px",
+      "expected": "pos.x and pos.y move by about 120 and 80",
+      "observed": "moved 120 by 79; before {\"x\":560,\"y\":314,\"w\":480,\"h\":272,\"z\":3} after {\"x\":680,\"y\":393,\"w\":480,\"h\":272,\"z\":3}",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "resize the material block by its south east handle",
+      "expected": "the box grows and the canvas follows",
+      "observed": "before 480x272 after 586x332; canvas {\"w\":1172,\"h\":640,\"cssW\":413}",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Format > Format options with the material selected",
+      "expected": "the panel with a Material section: material, preset, the uniform rows, anchor, two-tone, plate, Capture frame",
+      "observed": "20 controls; section null px tall at top null in a panel null px; sliders 0, number fields 0, text fields 0, color inputs 0, selects 0; section headings ST | File | Edit | View | Insert | Format | Slide | Arrange | Tools | Extensions | Help | Size & rotation | Position | Top-leftCenter | Top-left | Center | Alt text | The Liquid metal material | Material; controls: materialId(select=paper:liquid-met), preset(select=ink-paper), uniforms(textarea=), anchor.down(button:button=), anchor(input:number=5500), anchor.up(button:button=), twoTone(input:checkbox=on), plate(select=), plate.option.lower-left(button:button=), plate.option.lower-right(button:button=), plate.option.upper-left(button:button=), asset(select=), asset.browse(button:button=), height.down(button:button=), height(input:number=), height.up(button:button=), caption(textarea=), captionSize(select=), captionSize.option.16(button:button=), captionSize.option.15(button:button=)",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "type a uniform value and read the canvas",
+      "expected": "Repetition 3 to 6 writes /uniforms and the live shader changes",
+      "observed": "not driven: no u_repetition field",
+      "ok": null
+    },
+    {
+      "n": 15,
+      "step": "change the preset from the Preset select",
+      "expected": "Chrome (Paper default) writes /preset and drops nothing else",
+      "observed": "error: locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"block.material.preset\"]').first()\n    - locator resolved to <select data-tip=\"Preset\" class=\"ts-ctl-select\" aria-label=\"material: Preset\" data-control=\"block.material.preset\">…</select>\n  - attempting select option action\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n    - waiting 20ms\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n      - waiting 100ms\n    51 × waiting for element to be visible and enabled\n       - did not find some options\n     - retrying select option action\n       - waiting 500ms\n",
+      "ok": false
+    },
+    {
+      "n": 16,
+      "step": "the Material section at 1280 by 800",
+      "expected": "the section fits the panel without clipping",
+      "observed": "section null px tall, right edge null; 0 fields past the viewport; field widths ",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Capture frame runs the hosted material.capture",
+      "expected": "a frozen frame asset set as the block frame within 90 s",
+      "observed": "not driven: no Capture frame button",
+      "ok": null
+    },
+    {
+      "n": 18,
+      "step": "Slide > Change background, the Material row",
+      "expected": "a Choose list of the catalog and a Place button; Dither toggle beside",
+      "observed": "60 material controls, 0 previews; choose=\"Choose\", dither=\"\", place=\"Place\", paper:liquid-metal.ink-paper=\"Liquid metal · ink-paper\", paper:liquid-metal.paper-ink=\"Liquid metal · paper-ink\", paper:liquid-metal.brand-blue=\"Liquid metal · brand-blue\", paper:liquid-metal.diamond=\"Liquid metal · diamond\", paper:liquid-metal.sphere=\"Liquid metal · sphere\", paper:liquid-metal.chrome=\"Liquid metal · chrome\", paper:liquid-metal.noir=\"Liquid metal · noir\", paper:gem-smoke.brand-blue=\"Gem smoke · brand-blue\", paper:gem-smoke.ink-paper=\"Gem smoke · ink-paper\", paper:gem-smoke.paper-ink=\"Gem smoke · paper-ink\", paper:gem-smoke.fire=\"Gem smoke · fire\", paper:gem-smoke.default=\"Gem smoke · default\", paper:smoke-ring.ink-paper=\"Smoke ring · ink-paper\", paper:smoke-ring.paper-ink=\"Smoke ring · paper-ink\", paper:smoke-ring.brand-blue=\"Smoke ring · brand-blue\", paper:god-rays.ink-paper=\"God rays · ink-paper\", paper:god-rays.paper-ink=\"God rays · paper-ink\", paper:god-rays.brand-blue=\"God rays · brand-blue\", paper:mesh-gradient.ink-paper=\"Mesh gradient · ink-paper\", paper:mesh-gradient.paper-ink=\"Mesh gradient · paper-ink\", paper:mesh-gradient.brand-blue=\"Mesh gradient · brand-blue\", paper:simplex-noise.ink-paper=\"Simplex noise · ink-paper\", paper:simplex-noise.paper-ink=\"Simplex noise · paper-ink\", paper:simplex-noise.brand-blue=\"Simplex noise · brand-blue\", paper:swirl.ink-paper=\"Swirl · ink-paper\", paper:swirl.paper-ink=\"Swirl · paper-ink\", paper:swirl.brand-blue=\"Swirl · brand-blue\", paper:spiral.ink-paper=\"Spiral · ink-paper\", paper:spiral.paper-ink=\"Spiral · paper-ink\", paper:spiral.brand-blue=\"Spiral · brand-blue\", paper:grain-gradient.ink-paper=\"Grain gradient · ink-paper\", paper:grain-gradient.paper-ink=\"Grain gradient · paper-ink\", paper:grain-gradient.brand-blue=\"Grain gradient · brand-blue\", paper:dithering.ink-paper=\"Dithering · ink-paper\", paper:dithering.paper-ink=\"Dithering · paper-ink\", paper:dithering.brand-blue=\"Dithering · brand-blue\", paper:static-radial-gradient.ink-paper=\"Static radial gradient · ink-paper\"",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "Place a gem smoke background",
+      "expected": "slide.setBackgroundMaterial captures a frame server side and places a covering picture at the back",
+      "observed": "93410 ms; placed nothing; alert browserContext.close: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /tmp/chromium-nocore.sh --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ash-no-nudges --disable-domain-reliability --disable-print-preview --disk-cache-size=33554432 --no-default-browser-check --no-pings --single-process --font-render-hinting=none --ignore-gpu-blocklist --in-process-gpu --allow-running-insecure-content --disable-setuid-sandbox --disable-site-isolation-trials --disable-web-security --no-zygote --user-data-dir=/tmp/playwright_chromiumdev_profile-hzseZd --remote-debugging-pipe --no-startup-window\n<launched> pid=22",
+      "ok": false
+    },
+    {
+      "n": 20,
+      "step": "close the dialog and read the stage",
+      "expected": "the background frame under the material block; canvases on the page",
+      "observed": "1 recipe roots: figure material {\"materialId\":\"paper:liquid-metal\",\"preset\":\"ink-paper\",\"anc; canvases 1: 1172x640 stage",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "New slide, then the canvases left behind",
+      "expected": "the shader of the title slide is disposed when the stage shows another slide",
+      "observed": "active title-1; canvases 0: ; 121 rAF per second with no shader in view",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "step": "the slideshow on the title slide",
+      "expected": "the show; whether a shader plays or the frozen frame stands",
+      "observed": "path /edit/untitled-20260920-axjg; present root true; 2 recipe roots; canvases none; labels paper:liquid-metal · ink-paper · not captured | paper:liquid-metal · ink-paper · not captured; frames differ false",
+      "ok": true
+    },
+    {
+      "n": 23,
+      "step": "export.run pdf with a material block and a material background",
+      "expected": "a report; what the material became",
+      "observed": "4124 ms; download 200 43714 bytes saved; {\"deckId\":\"untitled-20260920-axjg\",\"revision\":4,\"format\":\"pdf\",\"mode\":\"flatten\",\"theme\":\"dark\",\"fontSet\":\"exact\",\"fontSetVersion\":\"inter-variable\",\"files\":[{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6tmq4-74793b/export/untitled-20260920-axjg-dark.pdf\",\"bytes\":43714,\"sha256\":\"2c2d7921bad4131e5033b2f3707dc01890ff5a881e5f7e261b82118cc7cbb028\"}],\"fonts\":{\"embedded\":[\"Inter\"],\"requiredOnViewer\":[],\"substitutedIn\":[]},\"slides\":[{\"slideId\":\"title\",\"theme\":\"dark\",\"native\":[],\"raster\":[]},{\"slideId\":\"title-1\",\"theme\":\"dark\",\"native\":[],\"raster\":[]}],\"geometryInBounds\":true,\"perfect\":false,\"pas",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "step": "export.run pptx with a material block and a material background",
+      "expected": "a report; what the material became",
+      "observed": "15783 ms; download 200 52517 bytes saved; {\"deckId\":\"untitled-20260920-axjg\",\"revision\":4,\"format\":\"pptx\",\"mode\":\"flatten\",\"theme\":\"light\",\"fontSet\":\"exact\",\"fontSetVersion\":\"4.001+gt.2\",\"files\":[{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6tq6w-11bf7e/export/untitled-20260920-axjg-light.pptx\",\"bytes\":52517,\"sha256\":\"6234f80b232d952a97cdb179c51c02521253a807ed7f66660f32de72692f2126\"},{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6tq6w-11bf7e/export/untitled-20260920-axjg-dark.pptx\",\"bytes\":52484,\"sha256\":\"e1cb0f58c1e06892bb9493f5ef1c9bd81fa973d99b8b112391a678c936966c75\"},{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mu",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "step": "the editor under prefers-reduced-motion: reduce",
+      "expected": "whether the material canvas still animates",
+      "observed": "not driven: no .material box in the second context",
+      "ok": null
+    },
+    {
+      "n": 26,
+      "step": "the shared viewer /deck/<id>",
+      "expected": "the frozen frames; no live canvas",
+      "observed": "{\"canvases\":0,\"recipes\":2,\"labels\":[\"paper:liquid-metal · ink-paper · not captured\",\"paper:liquid-metal · ink-paper · not captured\"],\"imgs\":[]}",
+      "ok": true
+    },
+    {
+      "n": 27,
+      "step": "console errors during the walk",
+      "expected": "none",
+      "observed": "1: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": null
+    },
+    {
+      "n": 28,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-axjg",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "the scratch deck answers 404 on /deck",
+      "expected": "GET /deck/untitled-20260920-axjg is 404 within 25 s",
+      "observed": "status 404",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "step": "the scratch deck answers 404 on /edit",
+      "expected": "GET /edit/untitled-20260920-axjg is 404 within 25 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

@@ -1,0 +1,2022 @@
+{
+  "run": "run3",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T19:15:21.953Z",
+  "phases": {
+    "create": {
+      "deckId": "untitled-20260920-9dh0",
+      "a": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "heading": "Sync audit three"
+    },
+    "open": {
+      "rounds": [
+        {
+          "round": 1,
+          "typedAt": 6072,
+          "windowMs": 381,
+          "a": "Sync audit three pa1",
+          "b": "Sync audit three pb1",
+          "equal": false,
+          "aHas": {
+            "own": 1,
+            "other": 0
+          },
+          "bHas": {
+            "own": 1,
+            "other": 0
+          },
+          "posts": 7,
+          "wire": [
+            {
+              "who": "A",
+              "at": 5997,
+              "base": 1,
+              "opIds": [
+                "1"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 530,
+              "revision": "2",
+              "admitted": [
+                2
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 6101,
+              "base": 1,
+              "opIds": [
+                "1"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 1738,
+              "revision": "3",
+              "admitted": [
+                3
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 2,
+                  "clientId": "store",
+                  "mutations": [
+                    "slide.set",
+                    "deck.set"
+                  ]
+                }
+              ]
+            },
+            {
+              "who": "A",
+              "at": 8004,
+              "base": 3,
+              "opIds": [
+                "2"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 3599,
+              "revision": "4",
+              "admitted": [
+                4
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 12483,
+              "base": 4,
+              "opIds": [
+                "2"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 474,
+              "revision": "5",
+              "admitted": [
+                5
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "A",
+              "at": 13510,
+              "base": 5,
+              "opIds": [
+                "3"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 975,
+              "revision": "6",
+              "admitted": [
+                6
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 14742,
+              "base": 6,
+              "opIds": [
+                "3"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 957,
+              "revision": "7",
+              "admitted": [
+                7
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "A",
+              "at": 17962,
+              "base": 7,
+              "opIds": [
+                "4"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 3143,
+              "revision": "9",
+              "admitted": [
+                9
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 8,
+                  "clientId": "store",
+                  "mutations": [
+                    "slide.set",
+                    "deck.set"
+                  ]
+                }
+              ]
+            }
+          ],
+          "samples": [
+            {
+              "at": 6075,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 1,
+              "rb": 1,
+              "pa": 1,
+              "pb": 0
+            },
+            {
+              "at": 6580,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 2,
+              "rb": 1,
+              "pa": 0,
+              "pb": 1
+            },
+            {
+              "at": 7845,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 2,
+              "rb": 3,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 8099,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 3,
+              "rb": 3,
+              "pa": 1,
+              "pb": 0
+            },
+            {
+              "at": 11637,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 4,
+              "rb": 3,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 12396,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 4,
+              "rb": 4,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 13153,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 4,
+              "rb": 5,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 13406,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 5,
+              "rb": 5,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 14669,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 6,
+              "rb": 6,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 15932,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 6,
+              "rb": 7,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 17954,
+              "a": "Sync audit three pa1",
+              "b": "Sync audit three pb1",
+              "ra": 7,
+              "rb": 7,
+              "pa": 0,
+              "pb": 0
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          }
+        },
+        {
+          "round": 2,
+          "typedAt": 18519,
+          "windowMs": 312,
+          "a": "Sync audit three pa1 pa2",
+          "b": "Sync audit three pb1 pb2",
+          "equal": false,
+          "aHas": {
+            "own": 1,
+            "other": 0
+          },
+          "bHas": {
+            "own": 1,
+            "other": 0
+          },
+          "posts": 6,
+          "wire": [
+            {
+              "who": "B",
+              "at": 18572,
+              "base": 7,
+              "opIds": [
+                "4"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 800,
+              "revision": "8",
+              "admitted": [
+                8
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "A",
+              "at": 21110,
+              "base": 9,
+              "opIds": [
+                "5"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 874,
+              "revision": "10",
+              "admitted": [
+                10
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 23556,
+              "base": 10,
+              "opIds": [
+                "5"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 753,
+              "revision": "11",
+              "admitted": [
+                11
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "A",
+              "at": 25475,
+              "base": 11,
+              "opIds": [
+                "6"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 629,
+              "revision": "12",
+              "admitted": [
+                12
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 28146,
+              "base": 12,
+              "opIds": [
+                "6"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 763,
+              "revision": "13",
+              "admitted": [
+                13
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "A",
+              "at": 30413,
+              "base": 13,
+              "opIds": [
+                "7"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 796,
+              "revision": "14",
+              "admitted": [
+                14
+              ],
+              "rejected": [],
+              "between": null
+            }
+          ],
+          "samples": [
+            {
+              "at": 18520,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 7,
+              "rb": 7,
+              "pa": 1,
+              "pb": 0
+            },
+            {
+              "at": 19531,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 7,
+              "rb": 8,
+              "pa": 2,
+              "pb": 0
+            },
+            {
+              "at": 20542,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 8,
+              "rb": 8,
+              "pa": 2,
+              "pb": 0
+            },
+            {
+              "at": 21302,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 9,
+              "rb": 8,
+              "pa": 1,
+              "pb": 0
+            },
+            {
+              "at": 22059,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 10,
+              "rb": 8,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 23575,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 10,
+              "rb": 10,
+              "pa": 0,
+              "pb": 1
+            },
+            {
+              "at": 24334,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 10,
+              "rb": 11,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 25345,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 11,
+              "rb": 11,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 26354,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 12,
+              "rb": 11,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 28122,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 12,
+              "rb": 12,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 29132,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 12,
+              "rb": 13,
+              "pa": 0,
+              "pb": 0
+            },
+            {
+              "at": 30395,
+              "a": "Sync audit three pa1 pa2",
+              "b": "Sync audit three pb1 pb2",
+              "ra": 13,
+              "rb": 13,
+              "pa": 0,
+              "pb": 0
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          }
+        }
+      ],
+      "afterEscape": {
+        "a": "Sync audit three pa1 pa2",
+        "b": "Sync audit three pa1 pa2",
+        "equal": true,
+        "a2": {
+          "revision": 14,
+          "serverRevision": 14,
+          "seq": 14,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false
+        },
+        "b2": {
+          "revision": 14,
+          "serverRevision": 14,
+          "seq": 14,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false
+        }
+      }
+    },
+    "closed": {
+      "rounds": [
+        {
+          "round": 1,
+          "convergedMs": 15176,
+          "a": "Sync audit three pa1 pa2 qb1",
+          "b": "Sync audit three pa1 pa2 qb1",
+          "equal": true,
+          "aHas": {
+            "own": 0,
+            "other": 1
+          },
+          "bHas": {
+            "own": 1,
+            "other": 0
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 35682,
+              "base": 14,
+              "opIds": [
+                "8"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 641,
+              "revision": "15",
+              "admitted": [
+                15
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 35847,
+              "base": 14,
+              "opIds": [
+                "7"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 2103,
+              "revision": "16",
+              "admitted": [
+                16
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 15,
+                  "clientId": "store",
+                  "mutations": [
+                    "slide.set",
+                    "deck.set"
+                  ]
+                }
+              ]
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          },
+          "a2": {
+            "revision": 16,
+            "serverRevision": 16,
+            "seq": 16,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          },
+          "b2": {
+            "revision": 16,
+            "serverRevision": 16,
+            "seq": 16,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          }
+        },
+        {
+          "round": 2,
+          "convergedMs": 15168,
+          "a": "Sync audit three pa1 pa2 qb1 qb2",
+          "b": "Sync audit three pa1 pa2 qb1 qb2",
+          "equal": true,
+          "aHas": {
+            "own": 0,
+            "other": 1
+          },
+          "bHas": {
+            "own": 1,
+            "other": 0
+          },
+          "posts": 2,
+          "wire": [
+            {
+              "who": "A",
+              "at": 54455,
+              "base": 16,
+              "opIds": [
+                "9"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 699,
+              "revision": "17",
+              "admitted": [
+                17
+              ],
+              "rejected": [],
+              "between": null
+            },
+            {
+              "who": "B",
+              "at": 54578,
+              "base": 16,
+              "opIds": [
+                "8"
+              ],
+              "mutations": [
+                {
+                  "op": "slide.set",
+                  "path": "/heading"
+                },
+                {
+                  "op": "deck.set",
+                  "path": "/title"
+                }
+              ],
+              "status": 200,
+              "ms": 2329,
+              "revision": "18",
+              "admitted": [
+                18
+              ],
+              "rejected": [],
+              "between": [
+                {
+                  "seq": 17,
+                  "clientId": "store",
+                  "mutations": [
+                    "slide.set",
+                    "deck.set"
+                  ]
+                }
+              ]
+            }
+          ],
+          "stale": {
+            "a": null,
+            "b": null
+          },
+          "a2": {
+            "revision": 18,
+            "serverRevision": 18,
+            "seq": 18,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          },
+          "b2": {
+            "revision": 18,
+            "serverRevision": 18,
+            "seq": 18,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false
+          }
+        }
+      ]
+    },
+    "offline": {
+      "before": "Sync audit three pa1 pa2 qb1 qb2",
+      "aBeforeOnline": {
+        "revision": 18,
+        "serverRevision": 18,
+        "seq": 18,
+        "pending": 1,
+        "retained": 0,
+        "connected": false,
+        "offline": true,
+        "streamDown": true,
+        "words": "Offline. Changes will save when you reconnect",
+        "heading": "Sync audit three pa1 pa2 qb1 qb2 oa1"
+      },
+      "bBeforeOnline": {
+        "revision": 21,
+        "serverRevision": 21,
+        "seq": 21,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "heading": "Sync audit three pa1 pa2 qb1 qb2 ob1 ob2 ob3"
+      },
+      "aSettledMs": 4704,
+      "aSettled": {
+        "revision": 22,
+        "serverRevision": 22,
+        "seq": 22,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "converged": true,
+      "a": "Sync audit three pa1 pa2 qb1 qb2 oa1",
+      "b": "Sync audit three pa1 pa2 qb1 qb2 oa1",
+      "lostInA": [
+        " ob1",
+        " ob2",
+        " ob3"
+      ],
+      "lostInB": [
+        " ob1",
+        " ob2",
+        " ob3"
+      ],
+      "wire": [
+        {
+          "who": "B",
+          "at": 73338,
+          "base": 18,
+          "opIds": [
+            "9"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": 200,
+          "ms": 577,
+          "revision": "19",
+          "admitted": [
+            19
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "B",
+          "at": 76147,
+          "base": 19,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": 200,
+          "ms": 532,
+          "revision": "20",
+          "admitted": [
+            20
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "A",
+          "at": 76491,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 76993,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 77995,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "B",
+          "at": 78918,
+          "base": 20,
+          "opIds": [
+            "11"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": 200,
+          "ms": 569,
+          "revision": "21",
+          "admitted": [
+            21
+          ],
+          "rejected": [],
+          "between": null
+        },
+        {
+          "who": "A",
+          "at": 79997,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 83999,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 92001,
+          "base": 18,
+          "opIds": [
+            "10"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": "no response",
+          "ms": null,
+          "revision": null
+        },
+        {
+          "who": "A",
+          "at": 96741,
+          "base": 21,
+          "opIds": [
+            "11"
+          ],
+          "mutations": [
+            {
+              "op": "slide.set",
+              "path": "/heading"
+            },
+            {
+              "op": "deck.set",
+              "path": "/title"
+            }
+          ],
+          "status": 200,
+          "ms": 690,
+          "revision": "22",
+          "admitted": [
+            22
+          ],
+          "rejected": [],
+          "between": null
+        }
+      ],
+      "stale": {
+        "a": null,
+        "b": null
+      },
+      "a2": {
+        "revision": 22,
+        "serverRevision": 22,
+        "seq": 22,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b2": {
+        "revision": 22,
+        "serverRevision": 22,
+        "seq": 22,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      }
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 3896,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "B",
+      "at": 5030,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 5997,
+      "base": 1,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 530,
+      "revision": "2",
+      "admitted": [
+        2
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 6101,
+      "base": 1,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 1738,
+      "revision": "3",
+      "admitted": [
+        3
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 2,
+          "clientId": "store",
+          "mutations": [
+            "slide.set",
+            "deck.set"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 8004,
+      "base": 3,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 3599,
+      "revision": "4",
+      "admitted": [
+        4
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 12483,
+      "base": 4,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 474,
+      "revision": "5",
+      "admitted": [
+        5
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 13510,
+      "base": 5,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 975,
+      "revision": "6",
+      "admitted": [
+        6
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 14742,
+      "base": 6,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 957,
+      "revision": "7",
+      "admitted": [
+        7
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 17962,
+      "base": 7,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 3143,
+      "revision": "9",
+      "admitted": [
+        9
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 8,
+          "clientId": "store",
+          "mutations": [
+            "slide.set",
+            "deck.set"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "B",
+      "at": 18572,
+      "base": 7,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 800,
+      "revision": "8",
+      "admitted": [
+        8
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 21110,
+      "base": 9,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 874,
+      "revision": "10",
+      "admitted": [
+        10
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 23556,
+      "base": 10,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 753,
+      "revision": "11",
+      "admitted": [
+        11
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 25475,
+      "base": 11,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 629,
+      "revision": "12",
+      "admitted": [
+        12
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 28146,
+      "base": 12,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 763,
+      "revision": "13",
+      "admitted": [
+        13
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 30413,
+      "base": 13,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 796,
+      "revision": "14",
+      "admitted": [
+        14
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 35682,
+      "base": 14,
+      "opIds": [
+        "8"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 641,
+      "revision": "15",
+      "admitted": [
+        15
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 35847,
+      "base": 14,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 2103,
+      "revision": "16",
+      "admitted": [
+        16
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 15,
+          "clientId": "store",
+          "mutations": [
+            "slide.set",
+            "deck.set"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 54455,
+      "base": 16,
+      "opIds": [
+        "9"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 699,
+      "revision": "17",
+      "admitted": [
+        17
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 54578,
+      "base": 16,
+      "opIds": [
+        "8"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 2329,
+      "revision": "18",
+      "admitted": [
+        18
+      ],
+      "rejected": [],
+      "between": [
+        {
+          "seq": 17,
+          "clientId": "store",
+          "mutations": [
+            "slide.set",
+            "deck.set"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "B",
+      "at": 73338,
+      "base": 18,
+      "opIds": [
+        "9"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 577,
+      "revision": "19",
+      "admitted": [
+        19
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 76147,
+      "base": 19,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 532,
+      "revision": "20",
+      "admitted": [
+        20
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 76491,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 76993,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 77995,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "B",
+      "at": 78918,
+      "base": 20,
+      "opIds": [
+        "11"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 569,
+      "revision": "21",
+      "admitted": [
+        21
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 79997,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 83999,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 92001,
+      "base": 18,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 96706,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 96741,
+      "base": 21,
+      "opIds": [
+        "11"
+      ],
+      "mutations": [
+        {
+          "op": "slide.set",
+          "path": "/heading"
+        },
+        {
+          "op": "deck.set",
+          "path": "/title"
+        }
+      ],
+      "status": 200,
+      "ms": 690,
+      "revision": "22",
+      "admitted": [
+        22
+      ],
+      "rejected": [],
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 98407,
+      "stream": true,
+      "status": 200
+    }
+  ],
+  "anomalies": [
+    {
+      "kind": "open-sessions-diverge",
+      "round": 1,
+      "a": "Sync audit three pa1",
+      "b": "Sync audit three pb1",
+      "posts": 7
+    },
+    {
+      "kind": "open-sessions-lost-other",
+      "round": 1,
+      "aHas": {
+        "own": 1,
+        "other": 0
+      },
+      "bHas": {
+        "own": 1,
+        "other": 0
+      }
+    },
+    {
+      "kind": "open-sessions-diverge",
+      "round": 2,
+      "a": "Sync audit three pa1 pa2",
+      "b": "Sync audit three pb1 pb2",
+      "posts": 6
+    },
+    {
+      "kind": "open-sessions-lost-other",
+      "round": 2,
+      "aHas": {
+        "own": 1,
+        "other": 0
+      },
+      "bHas": {
+        "own": 1,
+        "other": 0
+      }
+    },
+    {
+      "kind": "open-sessions-lost-after-escape",
+      "token": " pb1",
+      "inA": 0,
+      "inB": 0
+    },
+    {
+      "kind": "open-sessions-lost-after-escape",
+      "token": " pb2",
+      "inA": 0,
+      "inB": 0
+    },
+    {
+      "kind": "closed-sessions-lost-or-doubled",
+      "round": 1,
+      "aHas": {
+        "own": 0,
+        "other": 1
+      },
+      "bHas": {
+        "own": 1,
+        "other": 0
+      }
+    },
+    {
+      "kind": "closed-sessions-lost-or-doubled",
+      "round": 2,
+      "aHas": {
+        "own": 0,
+        "other": 1
+      },
+      "bHas": {
+        "own": 1,
+        "other": 0
+      }
+    },
+    {
+      "kind": "offline-lost",
+      "lostInA": [
+        " ob1",
+        " ob2",
+        " ob3"
+      ],
+      "lostInB": [
+        " ob1",
+        " ob2",
+        " ob3"
+      ]
+    }
+  ],
+  "console": [],
+  "finishedAt": "2026-09-20T19:16:59.726Z",
+  "seconds": 98,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260920-9dh0"
+}

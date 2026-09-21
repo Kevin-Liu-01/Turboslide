@@ -1,0 +1,204 @@
+{
+  "query": {
+    "metric": "vercel.request.fdt_out_bytes",
+    "aggregation": "sum",
+    "groupBy": [
+      "path_type"
+    ],
+    "filter": "environment eq 'production'",
+    "startTime": "2026-09-13T19:16:50.518Z",
+    "endTime": "2026-09-20T19:16:50.518Z",
+    "granularity": {
+      "days": 1
+    },
+    "orderBy": "count",
+    "orderDirection": "desc"
+  },
+  "summary": [
+    {
+      "vercel_request_fdt_out_bytes_sum": 670422044,
+      "path_type": "streaming_func"
+    },
+    {
+      "vercel_request_fdt_out_bytes_sum": 1929618844,
+      "path_type": "static"
+    },
+    {
+      "vercel_request_fdt_out_bytes_sum": 12650,
+      "path_type": ""
+    },
+    {
+      "vercel_request_fdt_out_bytes_sum": 8864,
+      "path_type": "redirect"
+    }
+  ],
+  "data": [
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 121121605,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 318930809,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 78963507,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 47468480,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 2314019,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 36115507,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 33693611,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 31814506,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 271681352,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 294846470,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 858287559,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 175483496,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 4170584,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 89218539,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 117284327,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 118646517,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 2606,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 1772,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 773,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 897,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 2928,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 2752,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 598,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 324,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 0,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 1211,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 4200,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 899,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 412,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 918,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 641,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_fdt_out_bytes_sum": 583,
+      "path_type": "redirect"
+    }
+  ],
+  "statistics": {
+    "bytesRead": 159877818,
+    "rowsRead": 2815058,
+    "dbTimeSeconds": 4.259823799133301
+  },
+  "orderBy": "count",
+  "orderDirection": "desc"
+}

@@ -1,0 +1,10 @@
+# rsms/inter releases, read from api.github.com on 2026-09-20
+v4.1 2024-11-16T00:27:07Z
+v4.0 2023-11-20T00:11:13Z
+v4.0-beta9h 2023-07-13T14:54:27Z
+
+# URL checks
+200 https://github.com/rsms/inter/releases/tag/v4.1
+200 https://github.com/rsms/inter/blob/v4.1/LICENSE.txt
+404 https://github.com/rsms/inter/releases/tag/v4.001
+404 https://github.com/rsms/inter/blob/v4.001/LICENSE.txt

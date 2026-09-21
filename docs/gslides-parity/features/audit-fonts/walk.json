@@ -1,0 +1,179 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-20T19:05:23.042Z",
+  "deckId": "untitled-20260920-38cc",
+  "readyAt": 606,
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened from /new",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260920-38cc; ready at 606 ms",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the Inter faces the page loaded",
+      "expected": "Inter upright and italic loaded, the Inter Fallback face defined, nothing else",
+      "observed": "{\"faces\":[\"Inter normal 100 900 loaded\",\"Inter italic 100 900 unloaded\",\"Inter Fallback normal normal unloaded\"],\"resources\":[{\"name\":\"InterVariable-DiVDrmQJ.woff2\",\"initiator\":\"link\",\"start\":323,\"end\":407,\"bytes\":352240},{\"name\":\"InterVariable-Italic-d6KXgdvN.woff2\",\"initiator\":\"link\",\"start\":323,\"end\":439,\"bytes\":380904}],\"preloads\":[\"InterVariable-DiVDrmQJ.woff2 font/woff2 anonymous\",\"InterVariable-Italic-d6KXgdvN.woff2 font/woff2 anonymous\"],\"fontResponses\":[{\"url\":\"/assets/InterVariable-DiVDrmQJ.woff2\",\"status\":200,\"at\":424,\"type\":\"font/woff2\"},{\"url\":\"/assets/InterVariable-Italic-d6KXgdvN.woff2\",\"status\":200,\"at\":455,\"type\":\"font/woff2\"}],\"readyAt\":606}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the sheet root type",
+      "expected": "font-family Inter first, font-optical-sizing auto, antialiased",
+      "observed": "{\"fontFamily\":\"Inter, \\\"Helvetica Neue\\\", Arial, sans-serif\",\"fontOpticalSizing\":\"auto\",\"smoothing\":\"antialiased\",\"fontFeatureSettings\":\"normal\",\"textVar\":\"\\\"Inter\\\", \\\"Helvetica Neue\\\", Arial, sans-serif\",\"displayVar\":\"\\\"Inter\\\", \\\"Helvetica Neue\\\", Arial, sans-serif\"}",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "the runs of the title slide",
+      "expected": "a heading run and a body run",
+      "observed": "heading/text, lead/text",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the title typed with cv11 and ss01 letters",
+      "expected": "a single storey a in the heading, the display features on the run",
+      "observed": "{\"run\":\"heading/text\",\"tag\":\"H1\",\"fontFamily\":\"Inter, \\\"Helvetica Neue\\\", Arial, sans-serif\",\"fontWeight\":\"500\",\"fontStyle\":\"normal\",\"fontSize\":\"88px\",\"fontFeatureSettings\":\"\\\"cv11\\\", \\\"ss01\\\"\",\"fontVariationSettings\":\"normal\",\"fontOpticalSizing\":\"auto\",\"letterSpacing\":\"-2.2px\",\"lineHeight\":\"89.76px\",\"fontVariantNumeric\":\"normal\",\"text\":\"Agenda for a quarterly plan 0123456789\"}",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "the true italic by Cmd+I",
+      "expected": "font-style italic on the run text and the italic face used",
+      "observed": "{\"ts\":{\"run\":\"heading/text\",\"tag\":\"I\",\"fontFamily\":\"Inter, \\\"Helvetica Neue\\\", Arial, sans-serif\",\"fontWeight\":\"500\",\"fontStyle\":\"italic\",\"fontSize\":\"88px\",\"fontFeatureSettings\":\"\\\"cv11\\\", \\\"ss01\\\"\",\"fontVariationSettings\":\"normal\",\"fontOpticalSizing\":\"auto\",\"letterSpacing\":\"-2.2px\",\"lineHeight\":\"89.76px\",\"fontVariantNumeric\":\"normal\",\"text\":\"Agenda for a quarterly plan 0123456789\"},\"italicFace\":[\"Inter loaded\"]}",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "digit widths in the sheet face",
+      "expected": "whether 1111 and 0000 measure equal (tabular) at 500 22px Inter and with tnum",
+      "observed": "{\"canvas\":{\"text22\":{\"ones\":34.8121337890625,\"zeros\":56.01397705078125},\"display44\":{\"ones\":65.374267578125,\"zeros\":110.10302734375}},\"dom\":{\"ones\":34.8125,\"zeros\":56.015625},\"tnum\":{\"ones\":56.890625,\"zeros\":56.890625},\"check\":true}",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "the toolbar Font control on a selected text block",
+      "expected": "the control present in the text tail; its state, value and reason read",
+      "observed": "{\"info\":{\"tag\":\"BUTTON\",\"text\":\"Font\",\"disabled\":\"true\",\"title\":null,\"ariaLabel\":null,\"describedBy\":null,\"dataTip\":\"Font\",\"cls\":\"pt-ib ts-tb is-text is-disabled\",\"expanded\":null,\"haspopup\":null,\"visible\":true},\"box\":{\"x\":343,\"y\":75.5,\"width\":44.890625,\"height\":32}}",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "the Font control tooltip on hover",
+      "expected": "the sentence the tooltip shows",
+      "observed": "[\"FontThe GT theme sets Inter.\"]",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "a click on the Font control",
+      "expected": "what opens: a plate, a menu, or nothing",
+      "observed": "[\"DIV.ts-film pt-scroll#filmstrip\"]",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Format > Text menu rows",
+      "expected": "the rows of the Text submenu and whether a Font row exists",
+      "observed": "[]",
+      "ok": false
+    },
+    {
+      "n": 12,
+      "step": "the text tail at 1280 by 800",
+      "expected": "whether the Font control stays visible or folds into More",
+      "observed": "{\"fontVisible\":true,\"moreVisible\":false}",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "the network after the walk",
+      "expected": "every font response of the session",
+      "observed": "{\"fontResponses\":[{\"url\":\"/assets/InterVariable-DiVDrmQJ.woff2\",\"status\":200,\"at\":424,\"type\":\"font/woff2\"},{\"url\":\"/assets/InterVariable-Italic-d6KXgdvN.woff2\",\"status\":200,\"at\":455,\"type\":\"font/woff2\"}],\"consoleErrors\":[\"The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.\"]}",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "File > Move to trash",
+      "expected": "the address moves to /decks and the card is not listed",
+      "observed": "https://turboslide.vercel.app/decks; card listed false",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Delete forever, then GET /edit and /deck",
+      "expected": "the card leaves the trash and both addresses answer 404",
+      "observed": "the trash page; /edit 404, /deck 404",
+      "ok": true
+    }
+  ],
+  "shots": [
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/title-cv11-ss01-zoom.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/editor-title-typed.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/title-italic-zoom.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/toolbar-text-tail-1440.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/toolbar-font-tooltip.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/toolbar-font-clicked.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/format-text-menu.png",
+    "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/features/audit-fonts/toolbar-text-tail-1280.png"
+  ],
+  "fontResponses": [
+    {
+      "url": "/assets/InterVariable-DiVDrmQJ.woff2",
+      "status": 200,
+      "at": 424,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "status": 200,
+      "at": 455,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-DiVDrmQJ.woff2",
+      "status": 200,
+      "at": 13902,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "status": 200,
+      "at": 13902,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-DiVDrmQJ.woff2",
+      "status": 200,
+      "at": 17740,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "status": 200,
+      "at": 17740,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-DiVDrmQJ.woff2",
+      "status": 200,
+      "at": 24520,
+      "type": "font/woff2"
+    },
+    {
+      "url": "/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "status": 200,
+      "at": 24521,
+      "type": "font/woff2"
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

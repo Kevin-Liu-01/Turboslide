@@ -1,0 +1,66 @@
+=== HEAD /assets/InterVariable-DiVDrmQJ.woff2 ===
+HTTP/2 200 
+age: 2165
+cache-control: public, max-age=31536000, immutable
+content-type: font/woff2
+etag: "2bf3d951bf9d6109437ea0874bbf12fb"
+x-vercel-cache: HIT
+content-length: 352240
+=== HEAD /assets/inter-DJL1FIyQ.css ===
+HTTP/2 200 
+age: 2165
+cache-control: public, max-age=31536000, immutable
+content-type: text/css; charset=utf-8
+etag: "3f463713c9c575595fd1ed80554375a6"
+x-vercel-cache: HIT
+content-length: 447
+=== HEAD /brand/figure-dark.png ===
+HTTP/2 200 
+age: 2165
+cache-control: public, max-age=86400, stale-while-revalidate=604800
+content-type: image/png
+etag: "9f91f14a11980436274b3b0bf181511a"
+x-vercel-cache: HIT
+content-length: 13873
+=== HEAD /robots.txt ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain; charset=utf-8
+etag: "b79fa11ad8683aa2602fe32c0563659e"
+x-vercel-cache: MISS
+content-length: 99
+=== HEAD /decks ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+x-vercel-cache: MISS
+=== HEAD /home ===
+HTTP/2 200 
+age: 1614
+cache-control: public, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+etag: "cabff2f83383e35daf74445789116888"
+x-vercel-cache: HIT
+content-length: 98750
+=== HEAD /deck/gt-brand ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+x-vercel-cache: MISS
+=== HEAD /new ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+x-vercel-cache: MISS
+=== HEAD /decks/gt-brand/assets/opener-brand-dark.jpg ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+content-type: image/jpeg
+etag: "6fbb8d7fbfd0e95a5f80af0a3d5e80fd"
+x-vercel-cache: MISS
+content-length: 515192

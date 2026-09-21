@@ -1,0 +1,61 @@
+{
+  "query": {
+    "metric": "vercel.function_invocation.fot_out_bytes",
+    "aggregation": "sum",
+    "groupBy": [],
+    "filter": "environment eq 'production'",
+    "startTime": "2026-09-13T19:16:56.222Z",
+    "endTime": "2026-09-20T19:16:56.222Z",
+    "granularity": {
+      "days": 1
+    },
+    "orderBy": "count",
+    "orderDirection": "desc"
+  },
+  "summary": [
+    {
+      "vercel_function_invocation_fot_out_bytes_sum": 1609891245
+    }
+  ],
+  "data": [
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 198512340
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 1082456801
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 107758860
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 67969314
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 4640835
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 52677458
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 54456197
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_function_invocation_fot_out_bytes_sum": 41419440
+    }
+  ],
+  "statistics": {
+    "bytesRead": 36379231,
+    "rowsRead": 614307,
+    "dbTimeSeconds": 1.140549659729004
+  },
+  "orderBy": "count",
+  "orderDirection": "desc"
+}

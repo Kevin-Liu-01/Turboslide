@@ -1,0 +1,4 @@
+# Copy rule checks on docs/FEATURES.md, 2026-09-20
+em dashes: 0
+headings ending in a period: 0
+mentions of the audit's sellerBrandsMissing list: 0

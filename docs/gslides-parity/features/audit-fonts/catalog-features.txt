@@ -1,0 +1,25 @@
+bebas-neue | Bebas Neue Regular | Version 2.000 | static | pnum tnum
+dm-sans | DM Sans 9pt Regular | Version 4.004;gftools[0.9.30] | opsz9-40,wght100-1000 | calt case ss01 ss02
+eb-garamond | EB Garamond Regular | Version 1.003 | wght400-800 | case dlig lnum onum pnum smcp tnum ss01 ss02
+fira-code | Fira Code Light | Version 5.002 | wght300-700 | calt case onum tnum zero ss01 ss02
+ibm-plex-mono | IBM Plex Mono Light | Version 2.3 | static | zero ss01 ss02
+ibm-plex-sans | IBM Plex Sans Regular | Version 3.201 | wght100-700,wdth75-100 | lnum onum zero ss01 ss02
+jetbrains-mono | JetBrains Mono Regular | Version 2.211 | wght100-800 | calt case zero
+lato | Lato Light | Version 2.015; 2015-08-06; http://www.latofonts.com/ | static | calt case dlig lnum onum pnum tnum ss01 ss02
+libre-baskerville | Libre Baskerville Regular | Version 2.005 | wght400-700 | case dlig
+lora | Lora Regular | Version 3.008 | wght400-700 | calt case pnum tnum
+merriweather | Merriweather Light | Version 2.100 | wght300-900,wdth87-112,opsz18-144 | calt case dlig lnum onum pnum smcp tnum zero ss01 ss02
+montserrat | Montserrat Thin | Version 9.000 | wght100-900 | case dlig lnum onum pnum smcp tnum ss01
+nunito | Nunito ExtraLight | Version 3.602 | wght200-1000 | calt case onum ss01 ss02
+open-sans | Open Sans Regular | Version 3.003 | wght300-800,wdth75-100 | lnum onum pnum tnum zero ss01 ss02
+oswald | Oswald Regular | Version 4.103;gftools[0.9.33.dev8+g029e19f] | wght200-700 | case dlig
+playfair-display | Playfair Display Regular | Version 1.203 | wght400-900 | calt case dlig lnum onum smcp
+poppins | Poppins Light | 4.004 | static | ss01 ss02
+pt-serif | PT Serif | Version 1.000W OFL | static | 
+raleway | Raleway Thin | Version 4.026 | wght100-900 | dlig lnum smcp ss01 ss02
+roboto-mono | Roboto Mono Regular | Version 3.001 | wght100-700 | smcp
+roboto | Roboto Regular | Version 3.015; 2026 | wght100-900,wdth75-100 | dlig lnum onum pnum smcp tnum ss01 ss02
+source-sans-3 | Source Sans 3 | Version 3.052;hotconv 1.1.0;makeotfexe 2.6.0 | wght200-900 | case dlig onum pnum smcp zero cv11 ss01 ss02
+source-serif-4 | Source Serif 4 Regular | Version 4.004;hotconv 1.0.116;makeotfexe 2.5.65601 | wght200-900,opsz8-60 | case lnum onum pnum smcp tnum zero ss01 ss02
+space-grotesk | Space Grotesk Light | Version 2.000 | wght300-700 | case lnum onum pnum tnum zero ss01 ss02
+work-sans | Work Sans Regular | Version 2.012 | wght100-900 | calt case dlig lnum onum pnum smcp tnum zero ss01 ss02

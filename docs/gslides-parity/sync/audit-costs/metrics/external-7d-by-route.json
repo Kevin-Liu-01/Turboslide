@@ -1,0 +1,347 @@
+{
+  "query": {
+    "metric": "vercel.external_api_request.count",
+    "aggregation": "sum",
+    "groupBy": [
+      "origin_route",
+      "request_hostname"
+    ],
+    "filter": "environment eq 'production'",
+    "startTime": "2026-09-13T19:12:08.426Z",
+    "endTime": "2026-09-20T19:12:08.426Z",
+    "granularity": {
+      "days": 1
+    },
+    "orderBy": "count",
+    "orderDirection": "desc"
+  },
+  "summary": [
+    {
+      "vercel_external_api_request_count_sum": 397,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "vercel_external_api_request_count_sum": 95,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "vercel_external_api_request_count_sum": 87,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "vercel_external_api_request_count_sum": 13,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "vercel_external_api_request_count_sum": 7,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "vercel_external_api_request_count_sum": 3,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    }
+  ],
+  "data": [
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 397,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "turboslide.vercel.app"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 74,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 21,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 47,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 40,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/__server",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 12,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 1,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "generaltranslation.com"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 6,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 1,
+      "origin_route": "/_serverFn/[...]",
+      "request_hostname": "upload.wikimedia.org"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 3,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_external_api_request_count_sum": 0,
+      "origin_route": "/api/render/[...]",
+      "request_hostname": "ggmycvj7j6224ay5.public.blob.vercel-storage.com"
+    }
+  ],
+  "statistics": {
+    "bytesRead": 77527032,
+    "rowsRead": 1576541,
+    "dbTimeSeconds": 0.7164061069488525
+  },
+  "orderBy": "count",
+  "orderDirection": "desc"
+}

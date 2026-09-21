@@ -1,0 +1,228 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-5axr",
+  "startedAt": "2026-09-20T18:57:47.612Z",
+  "ms": 191075,
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled draft id",
+      "observed": "untitled-20260920-5axr",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "material.list on production",
+      "expected": "the catalog entries with availability",
+      "observed": "error: page.evaluate: Error: No deck untitled-20260920-5axr in the Blob store\n    at Object.deserialize (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:26069)\n    at Fo (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:19252)\n    at N (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:21110)\n    at _o (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:16604)\n    at bo (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:16952)\n    at xo (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:17055)\n    at N (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:20784)\n    at qo (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:21477)\n    at Jo (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:21556)\n    at Is (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:32024)",
+      "ok": false
+    },
+    {
+      "n": 3,
+      "step": "Insert menu with Advanced tools off",
+      "expected": "no Material row",
+      "observed": "rows: insert.image, insert.textBox, insert.shape, insert.table, insert.chart, insert.diagram, insert.wordArt, insert.line, insert.link, insert.comment, insert.newSlide, insert.slideNumbers",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Tools > Advanced tools on, then Insert menu",
+      "expected": "a Material row at the foot of Insert",
+      "observed": "advanced true; row present true; row text \"Material\"; 19 rows",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "Insert > Material opens a dialog of names",
+      "expected": "the Insert material dialog: a list of catalog rows with preset counts and no thumbnails",
+      "observed": "title \"Material\"; lead \"A shader picture from the theme; its recipe is edited in Pictures and materials\"; 17 rows; 1 pictures or canvases; 0 search fields; rows: Liquid metal7 presets | Gem smoke5 presets | Smoke ring3 presets | God rays3 presets | Mesh gradient3 presets | Simplex noise3 presets | Swirl3 presets | Spiral3 presets | Grain gradient3 presets | Dithering3 presets | Static radial gradient3 presets | Neuro noise3 presets | Metaballs3 presets | Waves3 presets | Dot grid3 presets | Perlin noise3 presets | Static mesh gradient3 presets",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "pick Liquid metal",
+      "expected": "a material block on the slide, its recipe with the first preset",
+      "observed": "mark mark pos {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0} recipe {}",
+      "ok": false
+    },
+    {
+      "n": 7,
+      "step": "the material block on the sheet",
+      "expected": "the frozen frame; today the plate ground with a titanium label and a live canvas over it",
+      "observed": "label \"paper:liquid-metal · ink-paper · not captured\"; canvas {\"w\":960,\"h\":520}; img false; data-live 1",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "the live canvas animates in the editor",
+      "expected": "two screenshots of the block 900 ms apart differ",
+      "observed": "frames differ true; block box 338 by 183 css px",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "frame cadence with one shader mounted",
+      "expected": "rAF near 60 per second, few long tasks",
+      "observed": "44 rAF per second over 3 s; long tasks 4 (820 ms); canvases on the page 1: 960x520 stage",
+      "ok": false
+    },
+    {
+      "n": 10,
+      "step": "select the material block and read the toolbar",
+      "expected": "the block selected by one click; the toolbar tail for a material",
+      "observed": "chip \"Mark\"; handles 8: mark: Resize nw, mark: Resize n; toolbar controls: toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.formatOptions, toolbar.replaceImage, toolbar.end, toolbar.pointer, toolbar.hideMenus",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "drag the material block by 120 by 80 sheet px",
+      "expected": "pos.x and pos.y move by about 120 and 80",
+      "observed": "moved 120 by 80; before {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0} after {\"x\":257,\"y\":387,\"w\":132,\"h\":84,\"z\":0}",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "resize the material block by its south east handle",
+      "expected": "the box grows and the canvas follows",
+      "observed": "before 132x84 after 232x148; canvas {\"w\":960,\"h\":520,\"cssW\":338}",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Format > Format options with the material selected",
+      "expected": "the panel with a Material section: material, preset, the uniform rows, anchor, two-tone, plate, Capture frame",
+      "observed": "6 controls; section null px tall at top null in a panel null px; sliders 0, number fields 0, text fields 0, color inputs 0, selects 0; section headings ST | File | Edit | View | Insert | Format | Slide | Arrange | Tools | Extensions | Help | Size & rotation | Position | Top-leftCenter | Top-left | Center | Alt text | Mark; controls: w.down(button:button=), w(input:number=132), w.up(button:button=), h.down(button:button=), h(input:number=84), h.up(button:button=)",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "type a uniform value and read the canvas",
+      "expected": "Repetition 3 to 6 writes /uniforms and the live shader changes",
+      "observed": "not driven: no u_repetition field",
+      "ok": null
+    },
+    {
+      "n": 15,
+      "step": "change the preset from the Preset select",
+      "expected": "Chrome (Paper default) writes /preset and drops nothing else",
+      "observed": "not driven: no preset select",
+      "ok": null
+    },
+    {
+      "n": 16,
+      "step": "the Material section at 1280 by 800",
+      "expected": "the section fits the panel without clipping",
+      "observed": "section null px tall, right edge null; 0 fields past the viewport; field widths ",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Capture frame runs the hosted material.capture",
+      "expected": "a frozen frame asset set as the block frame within 90 s",
+      "observed": "not driven: no Capture frame button",
+      "ok": null
+    },
+    {
+      "n": 18,
+      "step": "Slide > Change background, the Material row",
+      "expected": "a Choose list of the catalog and a Place button; Dither toggle beside",
+      "observed": "60 material controls, 0 previews; choose=\"Choose\", dither=\"\", place=\"Place\", paper:liquid-metal.ink-paper=\"Liquid metal · ink-paper\", paper:liquid-metal.paper-ink=\"Liquid metal · paper-ink\", paper:liquid-metal.brand-blue=\"Liquid metal · brand-blue\", paper:liquid-metal.diamond=\"Liquid metal · diamond\", paper:liquid-metal.sphere=\"Liquid metal · sphere\", paper:liquid-metal.chrome=\"Liquid metal · chrome\", paper:liquid-metal.noir=\"Liquid metal · noir\", paper:gem-smoke.brand-blue=\"Gem smoke · brand-blue\", paper:gem-smoke.ink-paper=\"Gem smoke · ink-paper\", paper:gem-smoke.paper-ink=\"Gem smoke · paper-ink\", paper:gem-smoke.fire=\"Gem smoke · fire\", paper:gem-smoke.default=\"Gem smoke · default\", paper:smoke-ring.ink-paper=\"Smoke ring · ink-paper\", paper:smoke-ring.paper-ink=\"Smoke ring · paper-ink\", paper:smoke-ring.brand-blue=\"Smoke ring · brand-blue\", paper:god-rays.ink-paper=\"God rays · ink-paper\", paper:god-rays.paper-ink=\"God rays · paper-ink\", paper:god-rays.brand-blue=\"God rays · brand-blue\", paper:mesh-gradient.ink-paper=\"Mesh gradient · ink-paper\", paper:mesh-gradient.paper-ink=\"Mesh gradient · paper-ink\", paper:mesh-gradient.brand-blue=\"Mesh gradient · brand-blue\", paper:simplex-noise.ink-paper=\"Simplex noise · ink-paper\", paper:simplex-noise.paper-ink=\"Simplex noise · paper-ink\", paper:simplex-noise.brand-blue=\"Simplex noise · brand-blue\", paper:swirl.ink-paper=\"Swirl · ink-paper\", paper:swirl.paper-ink=\"Swirl · paper-ink\", paper:swirl.brand-blue=\"Swirl · brand-blue\", paper:spiral.ink-paper=\"Spiral · ink-paper\", paper:spiral.paper-ink=\"Spiral · paper-ink\", paper:spiral.brand-blue=\"Spiral · brand-blue\", paper:grain-gradient.ink-paper=\"Grain gradient · ink-paper\", paper:grain-gradient.paper-ink=\"Grain gradient · paper-ink\", paper:grain-gradient.brand-blue=\"Grain gradient · brand-blue\", paper:dithering.ink-paper=\"Dithering · ink-paper\", paper:dithering.paper-ink=\"Dithering · paper-ink\", paper:dithering.brand-blue=\"Dithering · brand-blue\", paper:static-radial-gradient.ink-paper=\"Static radial gradient · ink-paper\"",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "Place a gem smoke background",
+      "expected": "slide.setBackgroundMaterial captures a frame server side and places a covering picture at the back",
+      "observed": "no Place button after choosing",
+      "ok": false
+    },
+    {
+      "n": 20,
+      "step": "close the dialog and read the stage",
+      "expected": "the background frame under the material block; canvases on the page",
+      "observed": "1 recipe roots: figure material {\"materialId\":\"paper:liquid-metal\",\"preset\":\"ink-paper\",\"anc; canvases 1: 960x520 stage",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "New slide, then the canvases left behind",
+      "expected": "the shader of the title slide is disposed when the stage shows another slide",
+      "observed": "active title-1; canvases 0: ; 121 rAF per second with no shader in view",
+      "ok": true
+    },
+    {
+      "n": 22,
+      "step": "the slideshow on the title slide",
+      "expected": "the show; whether a shader plays or the frozen frame stands",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"title.slideshow\"]').first()\n",
+      "ok": false
+    },
+    {
+      "n": 23,
+      "step": "export.run pdf with a material block and a material background",
+      "expected": "a report; what the material became",
+      "observed": "4803 ms; {\"deckId\":\"untitled-20260920-5axr\",\"revision\":4,\"format\":\"pdf\",\"mode\":\"flatten\",\"theme\":\"dark\",\"fontSet\":\"exact\",\"fontSetVersion\":\"inter-variable\",\"files\":[{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6ld8h-c836ff/export/untitled-20260920-5axr-dark.pdf\",\"bytes\":43711,\"sha256\":\"5d6d6b3342b91eca690b358d7a673025c995351a6a0b910a287d50da8b5bf802\"}],\"fonts\":{\"embedded\":[\"Inter\"],\"requiredOnViewer\":[],\"substitutedIn\":[]},\"slides\":[{\"slideId\":\"title\",\"theme\":\"dark\",\"native\":[],\"raster\":[]},{\"slideId\":\"title-1\",\"theme\":\"dark\",\"native\":[],\"raster\":[]}],\"geometryInBounds\":true,\"perfect\":false,\"passed\":true,\"residual\":[\"renderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Google\",\"pdf: 2 pa",
+      "ok": true
+    },
+    {
+      "n": 24,
+      "step": "export.run pptx with a material block and a material background",
+      "expected": "a report; what the material became",
+      "observed": "11632 ms; {\"deckId\":\"untitled-20260920-5axr\",\"revision\":4,\"format\":\"pptx\",\"mode\":\"flatten\",\"theme\":\"light\",\"fontSet\":\"exact\",\"fontSetVersion\":\"4.001+gt.2\",\"files\":[{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6lgz0-5c411d/export/untitled-20260920-5axr-light.pptx\",\"bytes\":56589,\"sha256\":\"23fddd9c5b58bf79c6a0666f548108c56a9f53018f82dd50d5053ab8409af9f3\"},{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6lgz0-5c411d/export/untitled-20260920-5axr-dark.pptx\",\"bytes\":56614,\"sha256\":\"a2ce8921df8c4882c932bf27d144809e6baadc7e75d7527a934b3fcf92a20e66\"},{\"path\":\"/tmp/turboslide/.turboslide/worker/jobs/mua6lgz0-5c411d/export/untitled-20260920-5axr-both.zip\",\"bytes\":113507,\"sha256\":\"ab9b5ff2dbe6410566d37",
+      "ok": true
+    },
+    {
+      "n": 25,
+      "step": "the editor under prefers-reduced-motion: reduce",
+      "expected": "whether the material canvas still animates",
+      "observed": "not driven: no .material box in the second context",
+      "ok": null
+    },
+    {
+      "n": 26,
+      "step": "the shared viewer /deck/<id>",
+      "expected": "the frozen frames; no live canvas",
+      "observed": "{\"canvases\":0,\"recipes\":2,\"labels\":[\"paper:liquid-metal · ink-paper · not captured\",\"paper:liquid-metal · ink-paper · not captured\"],\"imgs\":[]}",
+      "ok": true
+    },
+    {
+      "n": 27,
+      "step": "console errors during the walk",
+      "expected": "none",
+      "observed": "1: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+      "ok": null
+    },
+    {
+      "n": 28,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "n": 29,
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-5axr",
+      "ok": true
+    },
+    {
+      "n": 30,
+      "step": "the scratch deck answers 404 on /deck",
+      "expected": "GET /deck/untitled-20260920-5axr is 404 within 25 s",
+      "observed": "status 404",
+      "ok": true
+    },
+    {
+      "n": 31,
+      "step": "the scratch deck answers 404 on /edit",
+      "expected": "GET /edit/untitled-20260920-5axr is 404 within 25 s",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

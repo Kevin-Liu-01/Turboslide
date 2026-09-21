@@ -1,0 +1,3729 @@
+[
+  {
+    "id": "paper:liquid-metal",
+    "family": "paper",
+    "label": "Liquid metal",
+    "doc": "Fluid chrome over a shape (circle, daisy, diamond, metaballs) or the whole canvas: animated stripes distorted along the edges, with dispersion and contour controls. The Prototemplate and Glyphfield opener.",
+    "available": true,
+    "credit": "Material: liquid metal, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#aaaaac"
+      },
+      {
+        "name": "u_colorTint",
+        "label": "Tint",
+        "kind": "color",
+        "default": "#ffffff",
+        "help": "Color burn over the metal."
+      },
+      {
+        "name": "u_repetition",
+        "label": "Repetition",
+        "kind": "float",
+        "default": 2,
+        "min": 1,
+        "max": 10,
+        "step": 0.1,
+        "help": "Density of the stripes (1 to 10)."
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "help": "0 a hard edge, 1 a smooth gradient."
+      },
+      {
+        "name": "u_shiftRed",
+        "label": "Shift red",
+        "kind": "float",
+        "default": 0.3,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "help": "Red channel dispersion."
+      },
+      {
+        "name": "u_shiftBlue",
+        "label": "Shift blue",
+        "kind": "float",
+        "default": 0.3,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "help": "Blue channel dispersion."
+      },
+      {
+        "name": "u_distortion",
+        "label": "Distortion",
+        "kind": "float",
+        "default": 0.07,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "help": "Noise over the stripes."
+      },
+      {
+        "name": "u_contour",
+        "label": "Contour",
+        "kind": "float",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "help": "Distortion along the shape edge."
+      },
+      {
+        "name": "u_angle",
+        "label": "Angle",
+        "kind": "float",
+        "default": 70,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Direction of the stripe motion in degrees."
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "enum",
+        "default": "diamond",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "circle",
+            "value": 1
+          },
+          {
+            "name": "daisy",
+            "value": 2
+          },
+          {
+            "name": "diamond",
+            "value": 3
+          },
+          {
+            "name": "metaballs",
+            "value": 4
+          }
+        ],
+        "help": "The form the metal fills when no image is given."
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorTint": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorTint": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorTint": "#ffffff"
+        }
+      },
+      {
+        "name": "diamond",
+        "label": "Diamond",
+        "doc": "The Prototemplate and Glyphfield opener: white chrome on black, the rotated square with two contour bands (OPENERS.md, lm-gem-c5).",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#ffffff",
+          "u_softness": 0.05,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_contour": 0.6,
+          "u_repetition": 3,
+          "u_distortion": 0.07,
+          "u_angle": 70,
+          "u_offsetX": 0,
+          "u_offsetY": 0,
+          "u_scale": 0.5,
+          "u_shape": 3
+        }
+      },
+      {
+        "name": "sphere",
+        "label": "Sphere",
+        "doc": "The same recipe on the circle, the round ten runner-up with a crisp rim.",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#ffffff",
+          "u_softness": 0.05,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_contour": 0.6,
+          "u_repetition": 3,
+          "u_distortion": 0.07,
+          "u_angle": 70,
+          "u_offsetX": 0,
+          "u_offsetY": 0,
+          "u_scale": 0.5,
+          "u_shape": 1
+        }
+      },
+      {
+        "name": "chrome",
+        "label": "Chrome (Paper default)",
+        "doc": "Paper’s Default preset: grey ground, red and blue dispersion, the diamond.",
+        "uniforms": {
+          "u_colorBack": "#aaaaac",
+          "u_colorTint": "#ffffff",
+          "u_distortion": 0.07,
+          "u_repetition": 2,
+          "u_shiftRed": 0.3,
+          "u_shiftBlue": 0.3,
+          "u_contour": 0.4,
+          "u_softness": 0.1,
+          "u_angle": 70,
+          "u_shape": 3,
+          "u_scale": 0.6
+        }
+      },
+      {
+        "name": "noir",
+        "label": "Noir (Paper)",
+        "doc": "Paper’s Noir preset: black ground, grey tint, soft bands, no dispersion.",
+        "uniforms": {
+          "u_colorBack": "#000000",
+          "u_colorTint": "#606060",
+          "u_softness": 0.45,
+          "u_repetition": 1.5,
+          "u_shiftRed": 0,
+          "u_shiftBlue": 0,
+          "u_distortion": 0,
+          "u_contour": 0,
+          "u_angle": 90,
+          "u_shape": 3,
+          "u_scale": 0.6
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:gem-smoke",
+    "family": "paper",
+    "label": "Gem smoke",
+    "doc": "Animated color fields behind a glassy shape: smoke inside and around the form with separate glow and distortion inside and out. The two color openers, Blog and content and Developer experience.",
+    "available": true,
+    "credit": "Material: gem smoke, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#f0efea"
+      },
+      {
+        "name": "u_colors",
+        "label": "Smoke colors",
+        "kind": "colors",
+        "default": "#333333,#e7e6df",
+        "maxCount": 6,
+        "help": "Up to 6 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_colorInner",
+        "label": "Inner fill",
+        "kind": "color",
+        "default": "#fafaf5",
+        "help": "Mixed with the smoke inside the shape; #00000000 is none."
+      },
+      {
+        "name": "u_innerDistortion",
+        "label": "Inner distortion",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_outerDistortion",
+        "label": "Outer distortion",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_outerGlow",
+        "label": "Outer glow",
+        "kind": "float",
+        "default": 0.55,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_innerGlow",
+        "label": "Inner glow",
+        "kind": "float",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offset",
+        "label": "Offset",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "help": "Vertical offset of the smoke inside the shape."
+      },
+      {
+        "name": "u_angle",
+        "label": "Angle",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Smoke direction in degrees."
+      },
+      {
+        "name": "u_size",
+        "label": "Size",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "help": "Size of the smoke relative to the shape box."
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "enum",
+        "default": "diamond",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "circle",
+            "value": 1
+          },
+          {
+            "name": "daisy",
+            "value": 2
+          },
+          {
+            "name": "diamond",
+            "value": 3
+          },
+          {
+            "name": "metaballs",
+            "value": 4
+          }
+        ]
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "The Blog and content opener: white smoke over the accent blue, the Default geometry on the metaballs shape (OPENERS.md).",
+        "uniforms": {
+          "u_outerGlow": 0.55,
+          "u_innerGlow": 1,
+          "u_innerDistortion": 0.8,
+          "u_outerDistortion": 0.6,
+          "u_offset": 0,
+          "u_angle": 0,
+          "u_size": 0.8,
+          "u_shape": 4,
+          "u_scale": 0.6,
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff",
+          "u_colorInner": "#00000000"
+        }
+      },
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98",
+          "u_colorInner": "#00000000"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44",
+          "u_colorInner": "#00000000"
+        }
+      },
+      {
+        "name": "fire",
+        "label": "Fire",
+        "doc": "The Developer experience opener: Paper’s Fire colors on the ink ground, the inner fill transparent (OPENERS.md).",
+        "uniforms": {
+          "u_outerGlow": 1,
+          "u_innerGlow": 0.65,
+          "u_innerDistortion": 0.6,
+          "u_outerDistortion": 0.8,
+          "u_offset": 0,
+          "u_angle": 0,
+          "u_size": 0.8,
+          "u_shape": 4,
+          "u_scale": 0.6,
+          "u_colorBack": "#000000",
+          "u_colors": "#fe5b16,#f7ff61,#ffffff",
+          "u_colorInner": "#00000000"
+        }
+      },
+      {
+        "name": "default",
+        "label": "Default (Paper)",
+        "doc": "Paper’s Default preset: dark smoke over warm paper on the diamond shape.",
+        "uniforms": {
+          "u_outerGlow": 0.55,
+          "u_innerGlow": 1,
+          "u_innerDistortion": 0.8,
+          "u_outerDistortion": 0.6,
+          "u_offset": 0,
+          "u_angle": 0,
+          "u_size": 0.8,
+          "u_shape": 3,
+          "u_scale": 0.6,
+          "u_colorBack": "#f0efea",
+          "u_colorInner": "#fafaf5",
+          "u_colors": "#333333,#e7e6df"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:smoke-ring",
+    "family": "paper",
+    "label": "Smoke ring",
+    "doc": "A radial multi-color gradient shaped with layered noise into a smoky ring.",
+    "available": true,
+    "credit": "Material: smoke ring, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colors",
+        "label": "Ring colors",
+        "kind": "colors",
+        "default": "#ffffff",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_noiseScale",
+        "label": "Noise scale",
+        "kind": "float",
+        "default": 3,
+        "min": 0.01,
+        "max": 5,
+        "step": 0.01
+      },
+      {
+        "name": "u_thickness",
+        "label": "Thickness",
+        "kind": "float",
+        "default": 0.65,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_radius",
+        "label": "Radius",
+        "kind": "float",
+        "default": 0.25,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_innerShape",
+        "label": "Inner shape",
+        "kind": "float",
+        "default": 0.7,
+        "min": 0,
+        "max": 4,
+        "step": 0.01
+      },
+      {
+        "name": "u_noiseIterations",
+        "label": "Noise iterations",
+        "kind": "int",
+        "default": 8,
+        "min": 1,
+        "max": 8,
+        "step": 1,
+        "help": "More layers, more detail (1 to 8)."
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:god-rays",
+    "family": "paper",
+    "label": "God rays",
+    "doc": "A fan of light rays from one point with a bloom, the cleanest hard geometry after the ring (OPENERS.md, rejected at 1.9 percent lit).",
+    "available": true,
+    "credit": "Material: god rays, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colorBloom",
+        "label": "Bloom",
+        "kind": "color",
+        "default": "#0000ff"
+      },
+      {
+        "name": "u_colors",
+        "label": "Ray colors",
+        "kind": "colors",
+        "default": "#a600ff6e,#6200fff0,#ffffff,#33fff5",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_spotty",
+        "label": "Spotty",
+        "kind": "float",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_midSize",
+        "label": "Mid size",
+        "kind": "float",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_midIntensity",
+        "label": "Mid intensity",
+        "kind": "float",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_density",
+        "label": "Density",
+        "kind": "float",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_intensity",
+        "label": "Intensity",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_bloom",
+        "label": "Bloom amount",
+        "kind": "float",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorBloom": "#f2f2f0",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorBloom": "#070707",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorBloom": "#ffffff",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:mesh-gradient",
+    "family": "paper",
+    "label": "Mesh gradient",
+    "doc": "Color spots moving along distinct paths, warped by organic distortion and swirl.",
+    "available": true,
+    "credit": "Material: mesh gradient, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#e0eaff,#241d9a,#f75092,#9f50d3",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_distortion",
+        "label": "Distortion",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_swirl",
+        "label": "Swirl",
+        "kind": "float",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_grainMixer",
+        "label": "Grain mixer",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_grainOverlay",
+        "label": "Grain overlay",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:simplex-noise",
+    "family": "paper",
+    "label": "Simplex noise",
+    "doc": "A multi-color gradient mapped into smooth animated curves, stepped or soft.",
+    "available": true,
+    "credit": "Material: simplex noise, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#4449cf,#ffd1e0,#f94446,#ffd36b,#ffffff",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_stepsPerColor",
+        "label": "Steps per color",
+        "kind": "int",
+        "default": 2,
+        "min": 1,
+        "max": 10,
+        "step": 1
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:swirl",
+    "family": "paper",
+    "label": "Swirl",
+    "doc": "Color bands twisted around a center, with noise over the twist.",
+    "available": true,
+    "credit": "Material: swirl, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#330000"
+      },
+      {
+        "name": "u_colors",
+        "label": "Band colors",
+        "kind": "colors",
+        "default": "#ffd1d1,#ff8a8a,#660000",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_bandCount",
+        "label": "Band count",
+        "kind": "float",
+        "default": 4,
+        "min": 0,
+        "max": 15,
+        "step": 1,
+        "help": "0 gives concentric ripples."
+      },
+      {
+        "name": "u_twist",
+        "label": "Twist",
+        "kind": "float",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_center",
+        "label": "Center",
+        "kind": "float",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_proportion",
+        "label": "Proportion",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_noiseFrequency",
+        "label": "Noise frequency",
+        "kind": "float",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_noise",
+        "label": "Noise",
+        "kind": "float",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:spiral",
+    "family": "paper",
+    "label": "Spiral",
+    "doc": "A single spiral stroke on a ground, with taper, cap and noise; dithers to one clean line (OPENERS.md).",
+    "available": true,
+    "credit": "Material: spiral, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#001429"
+      },
+      {
+        "name": "u_colorFront",
+        "label": "Stroke",
+        "kind": "color",
+        "default": "#79d1ff"
+      },
+      {
+        "name": "u_density",
+        "label": "Density",
+        "kind": "float",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_distortion",
+        "label": "Distortion",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_strokeWidth",
+        "label": "Stroke width",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_strokeTaper",
+        "label": "Stroke taper",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_strokeCap",
+        "label": "Stroke cap",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_noise",
+        "label": "Noise",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_noiseFrequency",
+        "label": "Noise frequency",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFront": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFront": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:grain-gradient",
+    "family": "paper",
+    "label": "Grain gradient",
+    "doc": "A grainy gradient shaped as a wave, dots, truchet tiles, corners, a ripple, a blob or a sphere.",
+    "available": true,
+    "credit": "Material: grain gradient, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#7300ff,#eba8ff,#00bfff,#2a00ff",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_intensity",
+        "label": "Intensity",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_noise",
+        "label": "Noise",
+        "kind": "float",
+        "default": 0.25,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "enum",
+        "default": "corners",
+        "options": [
+          {
+            "name": "wave",
+            "value": 1
+          },
+          {
+            "name": "dots",
+            "value": 2
+          },
+          {
+            "name": "truchet",
+            "value": 3
+          },
+          {
+            "name": "corners",
+            "value": 4
+          },
+          {
+            "name": "ripple",
+            "value": 5
+          },
+          {
+            "name": "blob",
+            "value": 6
+          },
+          {
+            "name": "sphere",
+            "value": 7
+          }
+        ]
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:dithering",
+    "family": "paper",
+    "label": "Dithering",
+    "doc": "Paper’s ordered dither over a shape, at 2 by 2, 4 by 4 or 8 by 8, in two colors; the deck’s own screen is the two-tone treatment, this is the shader.",
+    "available": true,
+    "credit": "Material: dithering, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colorFront",
+        "label": "Front",
+        "kind": "color",
+        "default": "#00b2ff"
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "enum",
+        "default": "sphere",
+        "options": [
+          {
+            "name": "simplex",
+            "value": 1
+          },
+          {
+            "name": "warp",
+            "value": 2
+          },
+          {
+            "name": "dots",
+            "value": 3
+          },
+          {
+            "name": "wave",
+            "value": 4
+          },
+          {
+            "name": "ripple",
+            "value": 5
+          },
+          {
+            "name": "swirl",
+            "value": 6
+          },
+          {
+            "name": "sphere",
+            "value": 7
+          }
+        ]
+      },
+      {
+        "name": "u_type",
+        "label": "Type",
+        "kind": "enum",
+        "default": "4x4",
+        "options": [
+          {
+            "name": "random",
+            "value": 1
+          },
+          {
+            "name": "2x2",
+            "value": 2
+          },
+          {
+            "name": "4x4",
+            "value": 3
+          },
+          {
+            "name": "8x8",
+            "value": 4
+          }
+        ]
+      },
+      {
+        "name": "u_pxSize",
+        "label": "Pixel size",
+        "kind": "float",
+        "default": 2,
+        "min": 1,
+        "max": 20,
+        "step": 1
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFront": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFront": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:static-radial-gradient",
+    "family": "paper",
+    "label": "Static radial gradient",
+    "doc": "A still radial gradient with a movable focal point, falloff, mixing and distortion.",
+    "available": true,
+    "credit": "Material: static radial gradient, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#00bbff,#00ffe1,#ffffff",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_radius",
+        "label": "Radius",
+        "kind": "float",
+        "default": 0.8,
+        "min": 0,
+        "max": 2,
+        "step": 0.01
+      },
+      {
+        "name": "u_focalDistance",
+        "label": "Focal distance",
+        "kind": "float",
+        "default": 0.99,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_focalAngle",
+        "label": "Focal angle",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1
+      },
+      {
+        "name": "u_falloff",
+        "label": "Falloff",
+        "kind": "float",
+        "default": 0.24,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_mixing",
+        "label": "Mixing",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_distortion",
+        "label": "Distortion",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_distortionShift",
+        "label": "Distortion shift",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_distortionFreq",
+        "label": "Distortion frequency",
+        "kind": "float",
+        "default": 12,
+        "min": 0,
+        "max": 20,
+        "step": 0.1
+      },
+      {
+        "name": "u_grainMixer",
+        "label": "Grain mixer",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_grainOverlay",
+        "label": "Grain overlay",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:neuro-noise",
+    "family": "paper",
+    "label": "Neuro noise",
+    "doc": "A glowing web of fluid lines and soft intersections in three colors.",
+    "available": true,
+    "credit": "Material: neuro noise, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorFront",
+        "label": "Front",
+        "kind": "color",
+        "default": "#ffffff"
+      },
+      {
+        "name": "u_colorMid",
+        "label": "Mid",
+        "kind": "color",
+        "default": "#47a6ff"
+      },
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_brightness",
+        "label": "Brightness",
+        "kind": "float",
+        "default": 0.05,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_contrast",
+        "label": "Contrast",
+        "kind": "float",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFront": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFront": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:metaballs",
+    "family": "paper",
+    "label": "Metaballs",
+    "doc": "Up to 20 gooey blobs moving around the center and merging into smooth forms.",
+    "available": true,
+    "credit": "Material: metaballs, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#6e33cc,#ff5500,#ffc105,#ffc800,#f585ff",
+        "maxCount": 8,
+        "help": "Up to 8 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_count",
+        "label": "Count",
+        "kind": "int",
+        "default": 10,
+        "min": 1,
+        "max": 20,
+        "step": 1
+      },
+      {
+        "name": "u_size",
+        "label": "Size",
+        "kind": "float",
+        "default": 0.83,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:waves",
+    "family": "paper",
+    "label": "Waves",
+    "doc": "A still line pattern from sharp zigzags to smooth waves in two colors.",
+    "available": true,
+    "credit": "Material: waves, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorFront",
+        "label": "Front",
+        "kind": "color",
+        "default": "#ffbb00"
+      },
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 3,
+        "step": 0.01,
+        "help": "0 zigzag, 1 sine, 2 to 3 irregular; fractions morph."
+      },
+      {
+        "name": "u_frequency",
+        "label": "Frequency",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 2,
+        "step": 0.01
+      },
+      {
+        "name": "u_amplitude",
+        "label": "Amplitude",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_spacing",
+        "label": "Spacing",
+        "kind": "float",
+        "default": 1.2,
+        "min": 0,
+        "max": 2,
+        "step": 0.01
+      },
+      {
+        "name": "u_proportion",
+        "label": "Proportion",
+        "kind": "float",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFront": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFront": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:dot-grid",
+    "family": "paper",
+    "label": "Dot grid",
+    "doc": "A still grid of circles, diamonds, squares or triangles with fill and stroke.",
+    "available": true,
+    "credit": "Material: dot grid, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#000000"
+      },
+      {
+        "name": "u_colorFill",
+        "label": "Fill",
+        "kind": "color",
+        "default": "#ffffff"
+      },
+      {
+        "name": "u_colorStroke",
+        "label": "Stroke",
+        "kind": "color",
+        "default": "#ffaa00"
+      },
+      {
+        "name": "u_dotSize",
+        "label": "Dot size",
+        "kind": "float",
+        "default": 2,
+        "min": 0,
+        "max": 100,
+        "step": 0.5
+      },
+      {
+        "name": "u_gapX",
+        "label": "Gap X",
+        "kind": "float",
+        "default": 32,
+        "min": 2,
+        "max": 500,
+        "step": 1
+      },
+      {
+        "name": "u_gapY",
+        "label": "Gap Y",
+        "kind": "float",
+        "default": 32,
+        "min": 2,
+        "max": 500,
+        "step": 1
+      },
+      {
+        "name": "u_strokeWidth",
+        "label": "Stroke width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 50,
+        "step": 0.5
+      },
+      {
+        "name": "u_sizeRange",
+        "label": "Size range",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_opacityRange",
+        "label": "Opacity range",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_shape",
+        "label": "Shape",
+        "kind": "enum",
+        "default": "circle",
+        "options": [
+          {
+            "name": "circle",
+            "value": 0
+          },
+          {
+            "name": "diamond",
+            "value": 1
+          },
+          {
+            "name": "square",
+            "value": 2
+          },
+          {
+            "name": "triangle",
+            "value": 3
+          }
+        ]
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFill": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFill": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFill": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:perlin-noise",
+    "family": "paper",
+    "label": "Perlin noise",
+    "doc": "Animated 3D Perlin noise in two colors with octave, persistence and lacunarity controls.",
+    "available": true,
+    "credit": "Material: perlin noise, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colorFront",
+        "label": "Front",
+        "kind": "color",
+        "default": "#fccff7"
+      },
+      {
+        "name": "u_colorBack",
+        "label": "Ground",
+        "kind": "color",
+        "default": "#632ad5"
+      },
+      {
+        "name": "u_proportion",
+        "label": "Proportion",
+        "kind": "float",
+        "default": 0.35,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_softness",
+        "label": "Softness",
+        "kind": "float",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_octaveCount",
+        "label": "Octaves",
+        "kind": "int",
+        "default": 1,
+        "min": 1,
+        "max": 8,
+        "step": 1
+      },
+      {
+        "name": "u_persistence",
+        "label": "Persistence",
+        "kind": "float",
+        "default": 1,
+        "min": 0.3,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_lacunarity",
+        "label": "Lacunarity",
+        "kind": "float",
+        "default": 1.5,
+        "min": 1.5,
+        "max": 10,
+        "step": 0.1
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "none",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colorBack": "#070707",
+          "u_colorFront": "#f2f2f0"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colorBack": "#2f5ce0",
+          "u_colorFront": "#ffffff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "paper:static-mesh-gradient",
+    "family": "paper",
+    "label": "Static mesh gradient",
+    "doc": "A still mesh gradient: color spots placed by a seed and warped by two waves.",
+    "available": true,
+    "credit": "Material: static mesh gradient, Paper Shaders",
+    "license": "Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)",
+    "uniforms": [
+      {
+        "name": "u_colors",
+        "label": "Colors",
+        "kind": "colors",
+        "default": "#ffad0a,#6200ff,#e2a3ff,#ff99fd",
+        "maxCount": 10,
+        "help": "Up to 10 colors as a comma list of hex values."
+      },
+      {
+        "name": "u_positions",
+        "label": "Positions seed",
+        "kind": "float",
+        "default": 2,
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      {
+        "name": "u_waveX",
+        "label": "Wave X",
+        "kind": "float",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_waveXShift",
+        "label": "Wave X shift",
+        "kind": "float",
+        "default": 0.6,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_waveY",
+        "label": "Wave Y",
+        "kind": "float",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_waveYShift",
+        "label": "Wave Y shift",
+        "kind": "float",
+        "default": 0.21,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_mixing",
+        "label": "Mixing",
+        "kind": "float",
+        "default": 0.93,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_grainMixer",
+        "label": "Grain mixer",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_grainOverlay",
+        "label": "Grain overlay",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_fit",
+        "label": "Fit",
+        "kind": "enum",
+        "default": "contain",
+        "options": [
+          {
+            "name": "none",
+            "value": 0
+          },
+          {
+            "name": "contain",
+            "value": 1
+          },
+          {
+            "name": "cover",
+            "value": 2
+          }
+        ],
+        "help": "How the graphic fits the canvas."
+      },
+      {
+        "name": "u_scale",
+        "label": "Scale",
+        "kind": "float",
+        "default": 1,
+        "min": 0.01,
+        "max": 4,
+        "step": 0.01,
+        "help": "Zoom of the graphic (0.01 to 4)."
+      },
+      {
+        "name": "u_rotation",
+        "label": "Rotation",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "help": "Degrees."
+      },
+      {
+        "name": "u_offsetX",
+        "label": "Offset X",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_offsetY",
+        "label": "Offset Y",
+        "kind": "float",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originX",
+        "label": "Origin X",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_originY",
+        "label": "Origin Y",
+        "kind": "float",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      {
+        "name": "u_worldWidth",
+        "label": "World width",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas width."
+      },
+      {
+        "name": "u_worldHeight",
+        "label": "World height",
+        "kind": "float",
+        "default": 0,
+        "min": 0,
+        "max": 8192,
+        "step": 1,
+        "help": "0 takes the canvas height."
+      }
+    ],
+    "presets": [
+      {
+        "name": "ink-paper",
+        "label": "Ink and paper",
+        "doc": "The ink ground with paper figures: the look of the dark twin, the ground the opener plate sits on.",
+        "uniforms": {
+          "u_colors": "#f2f2f0,#8a8f98"
+        }
+      },
+      {
+        "name": "paper-ink",
+        "label": "Paper and ink",
+        "doc": "The paper ground with ink figures: the light twin’s look.",
+        "uniforms": {
+          "u_colors": "#070707,#3a3d44"
+        }
+      },
+      {
+        "name": "brand-blue",
+        "label": "Brand blue",
+        "doc": "White figures over the accent blue (#2f5ce0), the polarity of the GT open-source cover and the Blog opener.",
+        "uniforms": {
+          "u_colors": "#ffffff,#86a8ff"
+        }
+      }
+    ]
+  },
+  {
+    "id": "proto:event-horizon",
+    "family": "proto",
+    "label": "Event Horizon",
+    "doc": "The careers page horizon field shader: a ring with a glow and orbiting locale labels. The Brand opener is its top arc, dithered (OPENERS.md). Not ported: SPEC open question 9 (import Paper Shaders directly and port the Prototemplate direction engines as proto:* materials, or proxy Glyphfield) is Kevin’s decision.",
+    "available": false,
+    "credit": "Material: Event Horizon, a Prototemplate direction",
+    "license": "Kevin Liu’s own code (Prototemplate/src/lib/directions.ts)",
+    "uniforms": [],
+    "presets": []
+  },
+  {
+    "id": "proto:chroma-flow",
+    "family": "proto",
+    "label": "Chroma Flow",
+    "doc": "Doubled flow lines bending toward a central ellipse. The Design system opener, dithered from the light render. Not ported: SPEC open question 9 (import Paper Shaders directly and port the Prototemplate direction engines as proto:* materials, or proxy Glyphfield) is Kevin’s decision.",
+    "available": false,
+    "credit": "Material: Chroma Flow, a Prototemplate direction",
+    "license": "Kevin Liu’s own code (Prototemplate/src/lib/directions.ts)",
+    "uniforms": [],
+    "presets": []
+  },
+  {
+    "id": "proto:glyph-rain",
+    "family": "proto",
+    "label": "Glyph Rain",
+    "doc": "The production homepage hero engine: a falling character field. The Website opener is its right half, dithered. Not ported: SPEC open question 9 (import Paper Shaders directly and port the Prototemplate direction engines as proto:* materials, or proxy Glyphfield) is Kevin’s decision.",
+    "available": false,
+    "credit": "Material: Glyph Rain, a Prototemplate direction",
+    "license": "Kevin Liu’s own code (Prototemplate/src/lib/directions.ts)",
+    "uniforms": [],
+    "presets": []
+  },
+  {
+    "id": "proto:lens-gate",
+    "family": "proto",
+    "label": "Lens Gate",
+    "doc": "A wireframe sphere over horizontal rules. The Documentation opener is the upper half of the sphere, dithered. Not ported: SPEC open question 9 (import Paper Shaders directly and port the Prototemplate direction engines as proto:* materials, or proxy Glyphfield) is Kevin’s decision.",
+    "available": false,
+    "credit": "Material: Lens Gate, a Prototemplate direction",
+    "license": "Kevin Liu’s own code (Prototemplate/src/lib/directions.ts)",
+    "uniforms": [],
+    "presets": []
+  },
+  {
+    "id": "proto:singularity",
+    "family": "proto",
+    "label": "Singularity",
+    "doc": "The horizon ring of the singularity dossier, label free on the 404 route. The Status and plan opener is the ring’s left arc, dithered. Not ported: SPEC open question 9 (import Paper Shaders directly and port the Prototemplate direction engines as proto:* materials, or proxy Glyphfield) is Kevin’s decision.",
+    "available": false,
+    "credit": "Material: Singularity, a Prototemplate direction",
+    "license": "Kevin Liu’s own code (Prototemplate/src/lib/directions.ts)",
+    "uniforms": [],
+    "presets": []
+  }
+]

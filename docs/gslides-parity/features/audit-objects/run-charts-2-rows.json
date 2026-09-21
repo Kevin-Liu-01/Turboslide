@@ -1,0 +1,127 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deck": "untitled-20260920-mrls",
+  "cleanup": "File > Move to trash; Delete forever; /deck/untitled-20260920-mrls 404; /edit 404",
+  "rows": [
+    {
+      "n": 1,
+      "task": "Chart: insert and read the selection two seconds later",
+      "expected": "Google selects the inserted chart",
+      "observed": "chart chart; chip \"null\"; tail toolbar.select,toolbar.textBox,toolbar.insertImage,toolbar.insertShape",
+      "ok": true,
+      "clicks": 2,
+      "keys": 0,
+      "seconds": 3.6
+    },
+    {
+      "n": 2,
+      "task": "Chart: click a grid cell, read the focus, type 42, Enter",
+      "expected": "the section says typing edits the active cell",
+      "observed": "focus after click td[formatOptions.chart.cell.1.1]; active cell formatOptions.chart.cell.1.1; input open after typing false; values 30,45,20",
+      "ok": false,
+      "clicks": 3,
+      "keys": 6,
+      "seconds": 3.5
+    },
+    {
+      "n": 3,
+      "task": "Chart: arrows and Enter in the grid",
+      "expected": "Down moves the active cell, Enter opens it, typing replaces, Enter commits",
+      "observed": "after Down input[formatOptions.chart.edit]; input after Enter false; values 30,45,20",
+      "ok": false,
+      "clicks": 1,
+      "keys": 5,
+      "seconds": 2.1
+    },
+    {
+      "n": 4,
+      "task": "Chart: Escape while the grid has focus",
+      "expected": "Google: Escape leaves the field; here the selection and the panel",
+      "observed": "error: locator.boundingBox: Timeout 15000ms exceeded.",
+      "ok": false,
+      "clicks": 0,
+      "keys": 0,
+      "seconds": 19
+    },
+    {
+      "n": 5,
+      "task": "Chart: the series colour swatch",
+      "expected": "hover the header, click the swatch, pick blue",
+      "observed": "swatch 14x14; swatches 12; picked formatOptions.chart.swatches.blue; series[0].color blue; svg fill #2f5ce0",
+      "ok": true,
+      "clicks": 4,
+      "keys": 3,
+      "seconds": 4.3
+    },
+    {
+      "n": 6,
+      "task": "Chart: remove a category with the row remove button",
+      "expected": "hover the row header, the remove square shows, one click drops the category",
+      "observed": "remove button idle {\"opacity\":\"0\",\"display\":\"flex\",\"w\":18} hovered {\"opacity\":\"1\",\"w\":18}; categories 3 -> 2",
+      "ok": true,
+      "clicks": 1,
+      "keys": 0,
+      "seconds": 1.8
+    },
+    {
+      "n": 7,
+      "task": "Chart: Cmd+Z with the focus in the panel",
+      "expected": "Google undoes from anywhere; the removed category returns",
+      "observed": "focus body; categories 2 -> 3 -> 3 (panel focus)",
+      "ok": true,
+      "clicks": 0,
+      "keys": 1,
+      "seconds": 0.9,
+      "how": "panel focus"
+    },
+    {
+      "n": 8,
+      "task": "Chart: Add series then Pie from the panel",
+      "expected": "the snackbar names the dropped series",
+      "observed": "series 2 -> 1; kind pie; snackbar \"The pie chart keeps its first series; Series 2 was left out\"",
+      "ok": true,
+      "clicks": 4,
+      "keys": 3,
+      "seconds": 4
+    },
+    {
+      "n": 9,
+      "task": "Chart: back to Column from the toolbar, then Pie from the toolbar with two series",
+      "expected": "the toolbar path shows the same notice",
+      "observed": "series before 2; kind pie; series 1; snackbar \"The pie chart keeps its first series; Series 2 was left out\"",
+      "ok": true,
+      "clicks": 2,
+      "keys": 1,
+      "seconds": 3
+    },
+    {
+      "n": 10,
+      "task": "Chart: Legend > None from the toolbar",
+      "expected": "the legend text leaves the svg",
+      "observed": "legend undefined; svg texts Category 1|Category 2|Category 3|Category 1|Category 2|Category 3",
+      "ok": false,
+      "clicks": 2,
+      "keys": 0,
+      "seconds": 2.1
+    },
+    {
+      "n": 11,
+      "task": "Chart: a value typed with a thousands separator",
+      "expected": "\"12,500\" reads as 12500",
+      "observed": "values 12500,45,20; snackbar \"null\"",
+      "ok": true,
+      "clicks": 4,
+      "keys": 11,
+      "seconds": 3.2
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

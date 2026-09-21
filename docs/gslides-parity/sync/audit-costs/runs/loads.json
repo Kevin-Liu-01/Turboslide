@@ -1,0 +1,5718 @@
+{
+  "mode": "loads",
+  "base": "https://turboslide.vercel.app",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "startedAt": "2026-09-20T19:23:18.776Z",
+  "phases": {
+    "setup": {
+      "windowMs": 4748,
+      "minutes": 0.08,
+      "requests": 50,
+      "rows": [
+        {
+          "route": "/assets/* (static)",
+          "requests": 37,
+          "bytes": 1436724,
+          "statuses": {
+            "200": 37
+          },
+          "cache": {
+            "HIT": 37
+          },
+          "methods": {
+            "GET": 37
+          },
+          "types": {
+            "stylesheet": 15,
+            "script": 20,
+            "font": 2
+          },
+          "pending": 0,
+          "perMinute": 467.57
+        },
+        {
+          "route": "/api/x/csp/report",
+          "requests": 3,
+          "bytes": 417,
+          "statuses": {
+            "204": 2,
+            "pending": 1
+          },
+          "cache": {
+            "MISS": 2
+          },
+          "methods": {
+            "POST": 3
+          },
+          "types": {
+            "other": 3
+          },
+          "pending": 1,
+          "perMinute": 37.91
+        },
+        {
+          "route": "/new (document)",
+          "requests": 1,
+          "bytes": 23551,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "brand/* (static)",
+          "requests": 1,
+          "bytes": 13873,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "HIT": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "image": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/8f65781f…",
+          "requests": 1,
+          "bytes": 268,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/3a277a5c…",
+          "requests": 1,
+          "bytes": 344,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/2d9a6ce6…",
+          "requests": 1,
+          "bytes": 1879,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/bf5e8df0…",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "pending": 1
+          },
+          "cache": {},
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/a98ce574…",
+          "requests": 1,
+          "bytes": 2068,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/api/decks/<id>/stream",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "pending": 1
+          },
+          "cache": {},
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/376e57a1…",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "pending": 1
+          },
+          "cache": {},
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 12.64
+        },
+        {
+          "route": "/_serverFn/5f3e5dc3…",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "pending": 1
+          },
+          "cache": {},
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 12.64
+        }
+      ],
+      "note": "from /new to the deck at /edit with its title written"
+    },
+    "load home": {
+      "windowMs": 8230,
+      "minutes": 0.14,
+      "requests": 30,
+      "rows": [
+        {
+          "route": "/assets/* (static)",
+          "requests": 15,
+          "bytes": 763282,
+          "statuses": {
+            "200": 15
+          },
+          "cache": {
+            "HIT": 14,
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 15
+          },
+          "types": {
+            "stylesheet": 8,
+            "script": 5,
+            "font": 2
+          },
+          "pending": 0,
+          "perMinute": 109.36
+        },
+        {
+          "route": "home/* (static)",
+          "requests": 10,
+          "bytes": 268727,
+          "statuses": {
+            "200": 10
+          },
+          "cache": {
+            "MISS": 10
+          },
+          "methods": {
+            "GET": 10
+          },
+          "types": {
+            "image": 10
+          },
+          "pending": 0,
+          "perMinute": 72.9
+        },
+        {
+          "route": "brand/* (static)",
+          "requests": 2,
+          "bytes": 27552,
+          "statuses": {
+            "200": 2
+          },
+          "cache": {
+            "MISS": 1,
+            "HIT": 1
+          },
+          "methods": {
+            "GET": 2
+          },
+          "types": {
+            "image": 2
+          },
+          "pending": 0,
+          "perMinute": 14.58
+        },
+        {
+          "route": "/home (document)",
+          "requests": 1,
+          "bytes": 23587,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "HIT": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 7.29
+        },
+        {
+          "route": "/decks (document)",
+          "requests": 1,
+          "bytes": 17835,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "other": 1
+          },
+          "pending": 0,
+          "perMinute": 7.29
+        },
+        {
+          "route": "/deck/<id> (document)",
+          "requests": 1,
+          "bytes": 33223,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "other": 1
+          },
+          "pending": 0,
+          "perMinute": 7.29
+        }
+      ],
+      "note": "one load of /home, recorded until the network rested plus 6 s"
+    },
+    "load decks": {
+      "windowMs": 12746,
+      "minutes": 0.21,
+      "requests": 56,
+      "rows": [
+        {
+          "route": "/assets/* (static)",
+          "requests": 38,
+          "bytes": 736552,
+          "statuses": {
+            "200": 38
+          },
+          "cache": {
+            "HIT": 38
+          },
+          "methods": {
+            "GET": 38
+          },
+          "types": {
+            "stylesheet": 15,
+            "script": 21,
+            "font": 2
+          },
+          "pending": 0,
+          "perMinute": 178.88
+        },
+        {
+          "route": "/_serverFn/376e57a1…",
+          "requests": 8,
+          "bytes": 158880,
+          "statuses": {
+            "200": 8
+          },
+          "cache": {
+            "MISS": 8
+          },
+          "methods": {
+            "GET": 8
+          },
+          "types": {
+            "fetch": 8
+          },
+          "pending": 0,
+          "perMinute": 37.66
+        },
+        {
+          "route": "/api/render/<slide>",
+          "requests": 5,
+          "bytes": 9169,
+          "statuses": {
+            "200": 2,
+            "302": 3
+          },
+          "cache": {
+            "MISS": 1,
+            "HIT": 4
+          },
+          "methods": {
+            "GET": 5
+          },
+          "types": {
+            "image": 5
+          },
+          "pending": 0,
+          "perMinute": 23.54
+        },
+        {
+          "route": "blob public host",
+          "requests": 3,
+          "bytes": 30730,
+          "statuses": {
+            "200": 3
+          },
+          "cache": {
+            "HIT": 3
+          },
+          "methods": {
+            "GET": 3
+          },
+          "types": {
+            "image": 3
+          },
+          "pending": 0,
+          "perMinute": 14.12
+        },
+        {
+          "route": "/decks (document)",
+          "requests": 1,
+          "bytes": 17906,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 4.71
+        },
+        {
+          "route": "/api/x/csp/report",
+          "requests": 1,
+          "bytes": 108,
+          "statuses": {
+            "204": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "other": 1
+          },
+          "pending": 0,
+          "perMinute": 4.71
+        }
+      ],
+      "note": "one load of /decks, recorded until the network rested plus 6 s"
+    },
+    "load deck": {
+      "windowMs": 26437,
+      "minutes": 0.44,
+      "requests": 38,
+      "rows": [
+        {
+          "route": "/assets/* (static)",
+          "requests": 34,
+          "bytes": 734868,
+          "statuses": {
+            "200": 34
+          },
+          "cache": {
+            "HIT": 34
+          },
+          "methods": {
+            "GET": 34
+          },
+          "types": {
+            "stylesheet": 15,
+            "script": 17,
+            "font": 2
+          },
+          "pending": 0,
+          "perMinute": 77.16
+        },
+        {
+          "route": "/deck/<id> (document)",
+          "requests": 1,
+          "bytes": 25694,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 2.27
+        },
+        {
+          "route": "/api/x/csp/report",
+          "requests": 1,
+          "bytes": 284,
+          "statuses": {
+            "204": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "other": 1
+          },
+          "pending": 0,
+          "perMinute": 2.27
+        },
+        {
+          "route": "/_serverFn/2d9a6ce6…",
+          "requests": 1,
+          "bytes": 540,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 2.27
+        },
+        {
+          "route": "/_serverFn/bf5e8df0…",
+          "requests": 1,
+          "bytes": 241,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 2.27
+        }
+      ],
+      "note": "one load of /deck/untitled-20260920-493o, recorded until the network rested plus 6 s"
+    },
+    "cleanup": {
+      "windowMs": 8324,
+      "minutes": 0.14,
+      "requests": 167,
+      "rows": [
+        {
+          "route": "/assets/* (static)",
+          "requests": 129,
+          "bytes": 2248577,
+          "statuses": {
+            "200": 129
+          },
+          "cache": {
+            "HIT": 129
+          },
+          "methods": {
+            "GET": 129
+          },
+          "types": {
+            "stylesheet": 44,
+            "script": 79,
+            "font": 6
+          },
+          "pending": 0,
+          "perMinute": 929.84
+        },
+        {
+          "route": "/_serverFn/376e57a1…",
+          "requests": 9,
+          "bytes": 119616,
+          "statuses": {
+            "200": 7,
+            "pending": 2
+          },
+          "cache": {
+            "MISS": 7
+          },
+          "methods": {
+            "GET": 9
+          },
+          "types": {
+            "fetch": 9
+          },
+          "pending": 4,
+          "perMinute": 64.87
+        },
+        {
+          "route": "/api/render/<slide>",
+          "requests": 7,
+          "bytes": 15104,
+          "statuses": {
+            "200": 3,
+            "302": 3,
+            "pending": 1
+          },
+          "cache": {
+            "MISS": 2,
+            "HIT": 4
+          },
+          "methods": {
+            "GET": 7
+          },
+          "types": {
+            "image": 7
+          },
+          "pending": 1,
+          "perMinute": 50.46
+        },
+        {
+          "route": "/_serverFn/4b2ac650…",
+          "requests": 4,
+          "bytes": 1393,
+          "statuses": {
+            "200": 4
+          },
+          "cache": {
+            "MISS": 4
+          },
+          "methods": {
+            "POST": 4
+          },
+          "types": {
+            "fetch": 4
+          },
+          "pending": 0,
+          "perMinute": 28.83
+        },
+        {
+          "route": "/api/x/csp/report",
+          "requests": 3,
+          "bytes": 292,
+          "statuses": {
+            "204": 3
+          },
+          "cache": {
+            "MISS": 3
+          },
+          "methods": {
+            "POST": 3
+          },
+          "types": {
+            "other": 3
+          },
+          "pending": 0,
+          "perMinute": 21.62
+        },
+        {
+          "route": "blob public host",
+          "requests": 3,
+          "bytes": 30730,
+          "statuses": {
+            "200": 3
+          },
+          "cache": {
+            "HIT": 3
+          },
+          "methods": {
+            "GET": 3
+          },
+          "types": {
+            "image": 3
+          },
+          "pending": 0,
+          "perMinute": 21.62
+        },
+        {
+          "route": "/edit/<id> (document)",
+          "requests": 1,
+          "bytes": 23886,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "brand/* (static)",
+          "requests": 1,
+          "bytes": 13873,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "HIT": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "image": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/api/decks/<id>/stream",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/8f65781f…",
+          "requests": 1,
+          "bytes": 460,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/3a277a5c…",
+          "requests": 1,
+          "bytes": 319,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/2d9a6ce6…",
+          "requests": 1,
+          "bytes": 2147,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/api/decks/<id>/presence",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/bf5e8df0…",
+          "requests": 1,
+          "bytes": 0,
+          "statuses": {
+            "pending": 1
+          },
+          "cache": {},
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 1,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/decks (document)",
+          "requests": 1,
+          "bytes": 17994,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/decks/trash (document)",
+          "requests": 1,
+          "bytes": 13255,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "document": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/4f13088a…",
+          "requests": 1,
+          "bytes": 312,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "POST": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        },
+        {
+          "route": "/_serverFn/f742a258…",
+          "requests": 1,
+          "bytes": 1103,
+          "statuses": {
+            "200": 1
+          },
+          "cache": {
+            "MISS": 1
+          },
+          "methods": {
+            "GET": 1
+          },
+          "types": {
+            "fetch": 1
+          },
+          "pending": 0,
+          "perMinute": 7.21
+        }
+      ],
+      "note": "File > Move to trash, Delete forever on /decks/trash, the 404 checks"
+    }
+  },
+  "deck": {
+    "id": "untitled-20260920-493o",
+    "titleSlide": "title",
+    "head": "heading/text",
+    "body": "lead/text",
+    "revision": 1,
+    "url": "https://turboslide.vercel.app/edit/untitled-20260920-493o"
+  },
+  "cleanup": {
+    "trashed": "File > Move to trash",
+    "removed": "Delete forever on /decks/trash",
+    "edit": 404,
+    "deck": 404
+  },
+  "requests": [
+    {
+      "t": 1789932198779,
+      "url": "https://turboslide.vercel.app/new",
+      "method": "GET",
+      "type": "document",
+      "route": "/new (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 23551,
+      "pending": false,
+      "tEnd": 1789932199046,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199042,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932199151,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199042,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1674,
+      "pending": false,
+      "tEnd": 1789932199211,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1138,
+      "pending": false,
+      "tEnd": 1789932199149,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 3597,
+      "pending": false,
+      "tEnd": 1789932199150,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932199191,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1722,
+      "pending": false,
+      "tEnd": 1789932199160,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 6669,
+      "pending": false,
+      "tEnd": 1789932199169,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-CIsb7PjM.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1055,
+      "pending": false,
+      "tEnd": 1789932199168,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932199140,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932199188,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/GtMark-BY1xdogY.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 948,
+      "pending": false,
+      "tEnd": 1789932199139,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-CaVJVyNv.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2185,
+      "pending": false,
+      "tEnd": 1789932199149,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-Ds73Umhw.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 595,
+      "pending": false,
+      "tEnd": 1789932199151,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-Bacrmug8.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 24132,
+      "pending": false,
+      "tEnd": 1789932199160,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-Urf5TzcS.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 5098,
+      "pending": false,
+      "tEnd": 1789932199150,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 157270,
+      "pending": false,
+      "tEnd": 1789932199173,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/new-B0lQ2W4c.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 941,
+      "pending": false,
+      "tEnd": 1789932199152,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/Frame-DwjMUeba.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 129626,
+      "pending": false,
+      "tEnd": 1789932199176,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-DfBlslyc.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 136548,
+      "pending": false,
+      "tEnd": 1789932199675,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932199221,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199043,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932199198,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199236,
+      "url": "https://turboslide.vercel.app/brand/figure-dark.png",
+      "method": "GET",
+      "type": "image",
+      "route": "brand/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+      "bytes": 13873,
+      "pending": false,
+      "tEnd": 1789932199270,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199269,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-xsvq9voN.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 33590,
+      "pending": false,
+      "tEnd": 1789932199305,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199269,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932199442,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199269,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 3059,
+      "pending": false,
+      "tEnd": 1789932199306,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199269,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-DqE_ZbQ1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 141690,
+      "pending": false,
+      "tEnd": 1789932199310,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/GtMark-xPBUbuOi.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 25288,
+      "pending": false,
+      "tEnd": 1789932199307,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 13901,
+      "pending": false,
+      "tEnd": 1789932199302,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-Ck-4S6-t.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2016,
+      "pending": false,
+      "tEnd": 1789932199301,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-JpEF9sNy.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 870,
+      "pending": false,
+      "tEnd": 1789932199307,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/dispatch-BhbGp7ZY.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 87,
+      "pending": false,
+      "tEnd": 1789932199306,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/bundle-BQhbgb89.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 488,
+      "pending": false,
+      "tEnd": 1789932199300,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/-link-slot-CNj8sbKv.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 119,
+      "pending": false,
+      "tEnd": 1789932199300,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/labels-DnAomIXT.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 895,
+      "pending": false,
+      "tEnd": 1789932199306,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/deck-6Vm2kGrj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 365,
+      "pending": false,
+      "tEnd": 1789932199302,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/download-ChZcmnQI.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1944,
+      "pending": false,
+      "tEnd": 1789932199307,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199270,
+      "url": "https://turboslide.vercel.app/assets/diagrams-D0LzyNDp.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2652,
+      "pending": false,
+      "tEnd": 1789932199302,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199703,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 300,
+      "pending": false,
+      "tEnd": 1789932199801,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199733,
+      "url": "https://turboslide.vercel.app/assets/dither.worker-DEdJgEjO.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 150,
+      "pending": false,
+      "tEnd": 1789932199769,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199748,
+      "url": "https://turboslide.vercel.app/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/8f65781f…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 268,
+      "pending": false,
+      "tEnd": 1789932199981,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199748,
+      "url": "https://turboslide.vercel.app/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/3a277a5c…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 344,
+      "pending": false,
+      "tEnd": 1789932199851,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199749,
+      "url": "https://turboslide.vercel.app/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/2d9a6ce6…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 1879,
+      "pending": false,
+      "tEnd": 1789932199933,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932199934,
+      "url": "https://turboslide.vercel.app/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/bf5e8df0…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932202201,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 117,
+      "pending": false,
+      "tEnd": 1789932202300,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932202207,
+      "url": "https://turboslide.vercel.app/_serverFn/a98ce57408eb7d0bf930866f8f2af33ca7a111064bb59c9d90359780c7554137",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/a98ce574…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 2068,
+      "pending": false,
+      "tEnd": 1789932203514,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203520,
+      "url": "https://turboslide.vercel.app/api/decks/untitled-20260920-493o/stream?since=1&tab=a13860575366e1a30e179c583b213dea",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/api/decks/<id>/stream",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932203523,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932203523,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932203523,
+      "url": "https://turboslide.vercel.app/_serverFn/5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/5f3e5dc3…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932203528,
+      "url": "https://turboslide.vercel.app/home",
+      "method": "GET",
+      "type": "document",
+      "route": "/home (document)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 23587,
+      "pending": false,
+      "tEnd": 1789932203566,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203558,
+      "url": "https://turboslide.vercel.app/home/01-new-presentation-1440-95c7e90e54.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 40468,
+      "pending": false,
+      "tEnd": 1789932203722,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203558,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932203558,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932203558,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 545
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/home-BrcrBNnM.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 30448,
+      "pending": false,
+      "tEnd": 1789932203771,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203559,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932203559,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932203560,
+      "url": "https://turboslide.vercel.app/assets/labels-DnAomIXT.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 895,
+      "pending": false,
+      "tEnd": 1789932203560,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932203560,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932203560,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932203560,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932203560,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932203572,
+      "url": "https://turboslide.vercel.app/decks",
+      "method": "GET",
+      "type": "other",
+      "route": "/decks (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 17835,
+      "pending": false,
+      "tEnd": 1789932204477,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203572,
+      "url": "https://turboslide.vercel.app/deck/gt-brand",
+      "method": "GET",
+      "type": "other",
+      "route": "/deck/<id> (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 33223,
+      "pending": false,
+      "tEnd": 1789932205252,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203573,
+      "url": "https://turboslide.vercel.app/brand/hero-dark.png",
+      "method": "GET",
+      "type": "image",
+      "route": "brand/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+      "bytes": 13679,
+      "pending": false,
+      "tEnd": 1789932203757,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203573,
+      "url": "https://turboslide.vercel.app/brand/figure-dark.png",
+      "method": "GET",
+      "type": "image",
+      "route": "brand/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+      "bytes": 13873,
+      "pending": false,
+      "tEnd": 1789932203573,
+      "headersBytes": 544
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/06-canvas-rotation-720-95bc95cfb5.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 25006,
+      "pending": false,
+      "tEnd": 1789932203704,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/02-file-menu-720-f6bd3d6446.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 19187,
+      "pending": false,
+      "tEnd": 1789932203705,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/05-filmstrip-menu-720-c94c373d71.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 26511,
+      "pending": false,
+      "tEnd": 1789932203730,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/07-canvas-snap-guides-720-bc9c6b9e05.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 23178,
+      "pending": false,
+      "tEnd": 1789932203849,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/04-layout-grid-720-59885d1f58.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 33327,
+      "pending": false,
+      "tEnd": 1789932203740,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/03-insert-menu-720-6b09157d08.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 27100,
+      "pending": false,
+      "tEnd": 1789932203724,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/08-format-options-720-1310aeb890.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 27057,
+      "pending": false,
+      "tEnd": 1789932203717,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/09-download-dialog-720-f4bd9083d7.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 24692,
+      "pending": false,
+      "tEnd": 1789932203756,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203582,
+      "url": "https://turboslide.vercel.app/home/11-presenter-console-720-7074523836.jpg",
+      "method": "GET",
+      "type": "image",
+      "route": "home/* (static)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 22201,
+      "pending": false,
+      "tEnd": 1789932203720,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932203596,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932203596,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932211799,
+      "url": "https://turboslide.vercel.app/decks",
+      "method": "GET",
+      "type": "document",
+      "route": "/decks (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 17906,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212685,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-493o&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 5935,
+      "pending": false,
+      "tEnd": 1789932214514,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212685,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932212685,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932212685,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932212685,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932212685,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932212685,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932212685,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932212685,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -526,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 526
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/GtMark-BY1xdogY.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/decks.index-Di-gMdJf.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 7352,
+      "pending": false,
+      "tEnd": 1789932212768,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/GtMark-xPBUbuOi.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -537,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 537
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/-restoring-BLjGjmjD.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1019,
+      "pending": false,
+      "tEnd": 1789932212767,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/bundle-BQhbgb89.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 488,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/-link-slot-CNj8sbKv.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 119,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932212686,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932212686,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932212753,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-30wo&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 3234,
+      "pending": false,
+      "tEnd": 1789932212797,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212753,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-8ujd&theme=dark&w=320&r=8",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932213147,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212753,
+      "url": "https://turboslide.vercel.app/api/render/opener-brand?deck=gt-brand&theme=dark&w=320&r=26",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932212806,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212753,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260914-y0mk&theme=dark&w=320&r=59",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932212800,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212757,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932212757,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932212801,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260914-y0mk/.thumbs/59/dark%40320/title.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 8596,
+      "pending": false,
+      "tEnd": 1789932213289,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212806,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.thumbs/26/dark%40320/opener-brand.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 19641,
+      "pending": false,
+      "tEnd": 1789932213306,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/edit._deckId-BgWFTd3u.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 561,
+      "pending": false,
+      "tEnd": 1789932213064,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-DfBlslyc.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -541,
+      "pending": false,
+      "tEnd": 1789932212907,
+      "headersBytes": 541
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/Frame-DwjMUeba.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932212907,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-xsvq9voN.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -547,
+      "pending": false,
+      "tEnd": 1789932212907,
+      "headersBytes": 547
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-CIsb7PjM.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -461,
+      "pending": false,
+      "tEnd": 1789932212910,
+      "headersBytes": 461
+    },
+    {
+      "t": 1789932212907,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932212907,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932212929,
+      "headersBytes": 472
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-DqE_ZbQ1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -540,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 540
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-Ck-4S6-t.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -543,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 543
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-CaVJVyNv.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -457,
+      "pending": false,
+      "tEnd": 1789932212929,
+      "headersBytes": 457
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-JpEF9sNy.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 870,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-Ds73Umhw.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 595,
+      "pending": false,
+      "tEnd": 1789932212929,
+      "headersBytes": 474
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/dispatch-BhbGp7ZY.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 87,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 557
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-Bacrmug8.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -454,
+      "pending": false,
+      "tEnd": 1789932212929,
+      "headersBytes": 454
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/labels-DnAomIXT.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 895,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/deck-6Vm2kGrj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 365,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 554
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/download-ChZcmnQI.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932212909,
+      "url": "https://turboslide.vercel.app/assets/diagrams-D0LzyNDp.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932212909,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932212910,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-Urf5TzcS.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -455,
+      "pending": false,
+      "tEnd": 1789932212930,
+      "headersBytes": 455
+    },
+    {
+      "t": 1789932212910,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13197,
+      "pending": false,
+      "tEnd": 1789932213700,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212935,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13345,
+      "pending": false,
+      "tEnd": 1789932217193,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212935,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13067,
+      "pending": false,
+      "tEnd": 1789932213483,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212940,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13036,
+      "pending": false,
+      "tEnd": 1789932213732,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212940,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13372,
+      "pending": false,
+      "tEnd": 1789932217479,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212940,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13276,
+      "pending": false,
+      "tEnd": 1789932213581,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212940,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13037,
+      "pending": false,
+      "tEnd": 1789932213864,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932212981,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 66550,
+      "pending": false,
+      "tEnd": 1789932218037,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932213144,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 108,
+      "pending": false,
+      "tEnd": 1789932213305,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932213147,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260920-8ujd/.thumbs/8/dark%40320/title.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 2493,
+      "pending": false,
+      "tEnd": 1789932213293,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224570,
+      "url": "https://turboslide.vercel.app/deck/untitled-20260920-493o",
+      "method": "GET",
+      "type": "document",
+      "route": "/deck/<id> (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 25694,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224891,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932224891,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932224891,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/-access-page-Dj_1OzfG.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 655,
+      "pending": false,
+      "tEnd": 1789932224983,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-CIsb7PjM.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -461,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 461
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 472
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -526,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 526
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/GtMark-BY1xdogY.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-CaVJVyNv.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -457,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 457
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-Ds73Umhw.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 595,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 474
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-Bacrmug8.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -454,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 454
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932224893,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/deck._deckId-CTBiR2JX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 867,
+      "pending": false,
+      "tEnd": 1789932224928,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/deck._deckId-Cq989gEu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 893,
+      "pending": false,
+      "tEnd": 1789932224921,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/-access-page-CTO5eS6T.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1539,
+      "pending": false,
+      "tEnd": 1789932224921,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/deck._deckId-DHIp_lBQ.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 902,
+      "pending": false,
+      "tEnd": 1789932224950,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/DeckViewer-B0B9LxRj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2656,
+      "pending": false,
+      "tEnd": 1789932224924,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932224893,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932224894,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932224894,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932225001,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-xsvq9voN.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -547,
+      "pending": false,
+      "tEnd": 1789932225001,
+      "headersBytes": 547
+    },
+    {
+      "t": 1789932225001,
+      "url": "https://turboslide.vercel.app/assets/Frame-DwjMUeba.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-DqE_ZbQ1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -540,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 540
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/GtMark-xPBUbuOi.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -537,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 537
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-Ck-4S6-t.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -543,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 543
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-JpEF9sNy.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 870,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932225002,
+      "url": "https://turboslide.vercel.app/assets/dispatch-BhbGp7ZY.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 87,
+      "pending": false,
+      "tEnd": 1789932225002,
+      "headersBytes": 557
+    },
+    {
+      "t": 1789932225013,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 284,
+      "pending": false,
+      "tEnd": 1789932225106,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932225020,
+      "url": "https://turboslide.vercel.app/assets/dither.worker-DEdJgEjO.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -471,
+      "pending": false,
+      "tEnd": 1789932225027,
+      "headersBytes": 471
+    },
+    {
+      "t": 1789932225023,
+      "url": "https://turboslide.vercel.app/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/2d9a6ce6…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 540,
+      "pending": false,
+      "tEnd": 1789932225145,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932225146,
+      "url": "https://turboslide.vercel.app/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/bf5e8df0…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 241,
+      "pending": false,
+      "tEnd": 1789932250296,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251029,
+      "url": "https://turboslide.vercel.app/edit/untitled-20260920-493o",
+      "method": "GET",
+      "type": "document",
+      "route": "/edit/<id> (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 23886,
+      "pending": false,
+      "tEnd": 1789932251331,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251327,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-CIsb7PjM.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -461,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 461
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 472
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -526,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 526
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/GtMark-BY1xdogY.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932251328,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-CaVJVyNv.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -457,
+      "pending": false,
+      "tEnd": 1789932251328,
+      "headersBytes": 457
+    },
+    {
+      "t": 1789932251329,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-Ds73Umhw.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 595,
+      "pending": false,
+      "tEnd": 1789932251329,
+      "headersBytes": 474
+    },
+    {
+      "t": 1789932251329,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-Bacrmug8.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -454,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 454
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-Urf5TzcS.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -455,
+      "pending": false,
+      "tEnd": 1789932251331,
+      "headersBytes": 455
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/-access-page-Dj_1OzfG.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -530,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 530
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/edit._deckId-BgWFTd3u.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 561,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 562
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-DfBlslyc.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -541,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 541
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/edit._deckId-Bi3GwA0_.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 207,
+      "pending": false,
+      "tEnd": 1789932251355,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/-access-page-CTO5eS6T.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -543,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 543
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/edit._deckId-BymLNvPd.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 195,
+      "pending": false,
+      "tEnd": 1789932251355,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932251330,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932251330,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932251332,
+      "url": "https://turboslide.vercel.app/brand/figure-dark.png",
+      "method": "GET",
+      "type": "image",
+      "route": "brand/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+      "bytes": 13873,
+      "pending": false,
+      "tEnd": 1789932251332,
+      "headersBytes": 544
+    },
+    {
+      "t": 1789932251337,
+      "url": "https://turboslide.vercel.app/assets/Frame-DwjMUeba.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932251337,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932251337,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-xsvq9voN.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -547,
+      "pending": false,
+      "tEnd": 1789932251337,
+      "headersBytes": 547
+    },
+    {
+      "t": 1789932251337,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932251337,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932251337,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932251337,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932251337,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-DqE_ZbQ1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -540,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 540
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/GtMark-xPBUbuOi.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -537,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 537
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-Ck-4S6-t.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -543,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 543
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-JpEF9sNy.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 870,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/dispatch-BhbGp7ZY.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 87,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 557
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/bundle-BQhbgb89.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 488,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/-link-slot-CNj8sbKv.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 119,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/labels-DnAomIXT.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 895,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/deck-6Vm2kGrj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 365,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 554
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/download-ChZcmnQI.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932251338,
+      "url": "https://turboslide.vercel.app/assets/diagrams-D0LzyNDp.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932251338,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932251355,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 95,
+      "pending": false,
+      "tEnd": 1789932251427,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251371,
+      "url": "https://turboslide.vercel.app/assets/dither.worker-DEdJgEjO.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -471,
+      "pending": false,
+      "tEnd": 1789932251386,
+      "headersBytes": 471
+    },
+    {
+      "t": 1789932251380,
+      "url": "https://turboslide.vercel.app/api/decks/untitled-20260920-493o/stream?since=1&tab=a13860575366e1a30e179c583b213dea",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/api/decks/<id>/stream",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-cache, no-transform",
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932251381,
+      "url": "https://turboslide.vercel.app/_serverFn/8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/8f65781f…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 460,
+      "pending": false,
+      "tEnd": 1789932251564,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251381,
+      "url": "https://turboslide.vercel.app/_serverFn/3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/3a277a5c…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 319,
+      "pending": false,
+      "tEnd": 1789932251565,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251381,
+      "url": "https://turboslide.vercel.app/_serverFn/2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/2d9a6ce6…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 2147,
+      "pending": false,
+      "tEnd": 1789932251567,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251440,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 102,
+      "pending": false,
+      "tEnd": 1789932251564,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251440,
+      "url": "https://turboslide.vercel.app/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/4b2ac650…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 510,
+      "pending": false,
+      "tEnd": 1789932251904,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251440,
+      "url": "https://turboslide.vercel.app/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/4b2ac650…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 267,
+      "pending": false,
+      "tEnd": 1789932251766,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251440,
+      "url": "https://turboslide.vercel.app/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/4b2ac650…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 290,
+      "pending": false,
+      "tEnd": 1789932251672,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251564,
+      "url": "https://turboslide.vercel.app/api/decks/untitled-20260920-493o/presence",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/api/decks/<id>/presence",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932251568,
+      "url": "https://turboslide.vercel.app/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/bf5e8df0…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/AgentAccess-DXozpzbo.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1043,
+      "pending": false,
+      "tEnd": 1789932251827,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/AgentAccess-DT-dK3F3.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 708,
+      "pending": false,
+      "tEnd": 1789932251828,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/AvatarBuilder-DvfDMxho.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2402,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/Background-BHN537Da.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 3797,
+      "pending": false,
+      "tEnd": 1789932251846,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/InsertMaterial-cxJpsUXt.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1047,
+      "pending": false,
+      "tEnd": 1789932251828,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251795,
+      "url": "https://turboslide.vercel.app/assets/CustomSpacing-Btxr95no.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1314,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Details-HX6vkMhH.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 752,
+      "pending": false,
+      "tEnd": 1789932251854,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Download-C0Q0ckYL.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2138,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/FindReplace-DpTBoyOJ.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1936,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/FromThisPresentation-DZE4njhu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1065,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Help-V8-QE0J0.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1146,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/ImageByUrl-BriExkbG.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1321,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/ImportSlides-Dllgvdyx.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2029,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/InsertIcon-DhNYnIVD.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 884,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Link-CaEyBuLn.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1259,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/MakeCopy-BgCJRfPe.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1310,
+      "pending": false,
+      "tEnd": 1789932251842,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/ForgetBrowser-DJVZLoaj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 868,
+      "pending": false,
+      "tEnd": 1789932251842,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/NameVersion-C8vUa7_x.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 776,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/NotificationSettings-DZI1CPhE.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1088,
+      "pending": false,
+      "tEnd": 1789932251846,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Open-D5P0iFy1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1682,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Profile-BeVK2ADg.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1999,
+      "pending": false,
+      "tEnd": 1789932251841,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Publish-oJOEXyGa.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2176,
+      "pending": false,
+      "tEnd": 1789932251843,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/share-ZuJl7nbg.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1346,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/RequestAccess-C-W1KTQt.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1076,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/Share-DVvskEC_.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 7835,
+      "pending": false,
+      "tEnd": 1789932251846,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/SignIn-BGoZcjYI.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1612,
+      "pending": false,
+      "tEnd": 1789932251843,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/SlideNumbers-D4QEfCPU.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1076,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/SpecialCharacters-BrngWBdU.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 8311,
+      "pending": false,
+      "tEnd": 1789932251847,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/DiagramPanel-C8NMQEIB.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2770,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/DiagramPanel-Dkm_YTZJ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 817,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/EditHtmlPanel-BztW2031.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1062,
+      "pending": false,
+      "tEnd": 1789932251829,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/EditHtmlPanel-BbZJvipr.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 632,
+      "pending": false,
+      "tEnd": 1789932251841,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/ShortcutsDialog-D5kev-0u.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 1345,
+      "pending": false,
+      "tEnd": 1789932251894,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932251796,
+      "url": "https://turboslide.vercel.app/assets/ShortcutsDialog-HaZkVnqW.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 953,
+      "pending": false,
+      "tEnd": 1789932251830,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932252244,
+      "url": "https://turboslide.vercel.app/_serverFn/4b2ac650b153ab2366846644f273767c3546e07dd88155074914ce9b5da63301",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/4b2ac650…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 326,
+      "pending": false,
+      "tEnd": 1789932252644,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932252650,
+      "url": "https://turboslide.vercel.app/decks",
+      "method": "GET",
+      "type": "document",
+      "route": "/decks (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 17994,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254182,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-493o&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 5935,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 833
+    },
+    {
+      "t": 1789932254182,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932254183,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932254183,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932254183,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932254183,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932254183,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932254183,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932254183,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932254183,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -526,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 526
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/GtMark-BY1xdogY.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/decks.index-Di-gMdJf.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -542,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932254185,
+      "url": "https://turboslide.vercel.app/assets/GtMark-xPBUbuOi.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -537,
+      "pending": false,
+      "tEnd": 1789932254185,
+      "headersBytes": 537
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/-restoring-BLjGjmjD.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -541,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 541
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/bundle-BQhbgb89.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 488,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/-link-slot-CNj8sbKv.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 119,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932254186,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932254186,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932254194,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-xmuj&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932254194,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-30wo&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 3234,
+      "pending": false,
+      "tEnd": 1789932254195,
+      "headersBytes": 834
+    },
+    {
+      "t": 1789932254194,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-8ujd&theme=dark&w=320&r=8",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932254196,
+      "headersBytes": 912
+    },
+    {
+      "t": 1789932254194,
+      "url": "https://turboslide.vercel.app/api/render/opener-brand?deck=gt-brand&theme=dark&w=320&r=26",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932254196,
+      "headersBytes": 903
+    },
+    {
+      "t": 1789932254194,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260914-y0mk&theme=dark&w=320&r=59",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 302,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 0,
+      "pending": false,
+      "tEnd": 1789932254196,
+      "headersBytes": 917
+    },
+    {
+      "t": 1789932254196,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260920-8ujd/.thumbs/8/dark%40320/title.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 2493,
+      "pending": false,
+      "tEnd": 1789932254196,
+      "headersBytes": 618
+    },
+    {
+      "t": 1789932254196,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.thumbs/26/dark%40320/opener-brand.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 19641,
+      "pending": false,
+      "tEnd": 1789932254196,
+      "headersBytes": 629
+    },
+    {
+      "t": 1789932254196,
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260914-y0mk/.thumbs/59/dark%40320/title.png",
+      "method": "GET",
+      "type": "image",
+      "route": "blob public host",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000",
+      "bytes": 8596,
+      "pending": false,
+      "tEnd": 1789932254199,
+      "headersBytes": 620
+    },
+    {
+      "t": 1789932254199,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932254199,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932254205,
+      "url": "https://turboslide.vercel.app/decks/trash",
+      "method": "GET",
+      "type": "document",
+      "route": "/decks/trash (document)",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "bytes": 13255,
+      "pending": false,
+      "tEnd": 1789932255084,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254274,
+      "url": "https://turboslide.vercel.app/assets/edit._deckId-BgWFTd3u.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 561,
+      "pending": false,
+      "tEnd": 1789932254274,
+      "headersBytes": 562
+    },
+    {
+      "t": 1789932254274,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-DfBlslyc.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -541,
+      "pending": false,
+      "tEnd": 1789932254274,
+      "headersBytes": 541
+    },
+    {
+      "t": 1789932254274,
+      "url": "https://turboslide.vercel.app/assets/Frame-DwjMUeba.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932254274,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-xsvq9voN.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -547,
+      "pending": false,
+      "tEnd": 1789932254275,
+      "headersBytes": 547
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/useStudioSession-CIsb7PjM.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -461,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 461
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/Progress-BpxpIxXu.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932254275,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/Progress-Qh-4a0X0.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 781,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 472
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-DqE_ZbQ1.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -540,
+      "pending": false,
+      "tEnd": 1789932254275,
+      "headersBytes": 540
+    },
+    {
+      "t": 1789932254275,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-Ck-4S6-t.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -543,
+      "pending": false,
+      "tEnd": 1789932254275,
+      "headersBytes": 543
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/IdentityChip-CaVJVyNv.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -457,
+      "pending": false,
+      "tEnd": 1789932254277,
+      "headersBytes": 457
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-JpEF9sNy.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 870,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/ToolButton-Ds73Umhw.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 595,
+      "pending": false,
+      "tEnd": 1789932254277,
+      "headersBytes": 474
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/dispatch-BhbGp7ZY.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 87,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 557
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/Slideshow-Bacrmug8.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -454,
+      "pending": false,
+      "tEnd": 1789932254277,
+      "headersBytes": 454
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/labels-DnAomIXT.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 895,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 556
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/deck-6Vm2kGrj.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 365,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 554
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/download-ChZcmnQI.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/diagrams-D0LzyNDp.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932254276,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/assets/EditorRoot-Urf5TzcS.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -455,
+      "pending": false,
+      "tEnd": 1789932254278,
+      "headersBytes": 455
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13141,
+      "pending": false,
+      "tEnd": 1789932254720,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254276,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932254277,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932254277,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932254277,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 66862,
+      "pending": false,
+      "tEnd": 1789932254721,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254277,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13206,
+      "pending": false,
+      "tEnd": 1789932254705,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254277,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": null,
+      "cache": null,
+      "cacheControl": null,
+      "bytes": null,
+      "pending": true
+    },
+    {
+      "t": 1789932254278,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13035,
+      "pending": false,
+      "tEnd": 1789932254564,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254279,
+      "url": "https://turboslide.vercel.app/_serverFn/376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d?payload=%7B%22t%22%3A%7B%22t%22%3A10%2C%22i%22%3A0%2C%22p%22%3A%7B%22k%22%3A%5B…",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/376e57a1…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 13372,
+      "pending": false,
+      "tEnd": 1789932254634,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932254290,
+      "url": "https://turboslide.vercel.app/api/x/csp/report",
+      "method": "POST",
+      "type": "other",
+      "route": "/api/x/csp/report",
+      "status": 204,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 95,
+      "pending": false,
+      "tEnd": 1789932254366,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932255082,
+      "url": "https://turboslide.vercel.app/assets/inter-DJL1FIyQ.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 447,
+      "pending": false,
+      "tEnd": 1789932255082,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932255082,
+      "url": "https://turboslide.vercel.app/assets/tokens-DRUsHvej.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932255082,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932255082,
+      "url": "https://turboslide.vercel.app/assets/brand-CFd7wGFs.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932255082,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/sheet-dL_94mv7.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/stage-DAHOds8-.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 931,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/styles-CUVxzxxu.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -524,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 524
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/index-CGo_5oGi.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -523,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 523
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-CFjz9Jl4.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -526,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 526
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/index-Dkbo1pra.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -536,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 536
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/decks.trash-DrUidMdB.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 2655,
+      "pending": false,
+      "tEnd": 1789932255105,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/Snackbar-GCqURTEX.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -539,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 539
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/-restoring-BLjGjmjD.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": -541,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 541
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/-link-slot-CNj8sbKv.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 119,
+      "pending": false,
+      "tEnd": 1789932255083,
+      "headersBytes": 560
+    },
+    {
+      "t": 1789932255083,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-DiVDrmQJ.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 352240,
+      "pending": false,
+      "tEnd": 1789932255084,
+      "headersBytes": 542
+    },
+    {
+      "t": 1789932255084,
+      "url": "https://turboslide.vercel.app/assets/InterVariable-Italic-d6KXgdvN.woff2",
+      "method": "GET",
+      "type": "font",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 380904,
+      "pending": false,
+      "tEnd": 1789932255084,
+      "headersBytes": 549
+    },
+    {
+      "t": 1789932255085,
+      "url": "https://turboslide.vercel.app/api/render/title?deck=untitled-20260920-493o&theme=dark&w=320&r=1",
+      "method": "GET",
+      "type": "image",
+      "route": "/api/render/<slide>",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 5935,
+      "pending": false,
+      "tEnd": 1789932255085,
+      "headersBytes": 833
+    },
+    {
+      "t": 1789932255091,
+      "url": "https://turboslide.vercel.app/assets/useMountEffect-D_-wRQ1b.js",
+      "method": "GET",
+      "type": "script",
+      "route": "/assets/* (static)",
+      "status": 200,
+      "cache": "HIT",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "bytes": 328,
+      "pending": false,
+      "tEnd": 1789932255091,
+      "headersBytes": 564
+    },
+    {
+      "t": 1789932255834,
+      "url": "https://turboslide.vercel.app/_serverFn/4f13088ac1edd359f3b5c064e03aa8d3a84df1defa596f81cce7bbdb8481a8ce",
+      "method": "POST",
+      "type": "fetch",
+      "route": "/_serverFn/4f13088a…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 312,
+      "pending": false,
+      "tEnd": 1789932256973,
+      "headersBytes": 0
+    },
+    {
+      "t": 1789932256976,
+      "url": "https://turboslide.vercel.app/_serverFn/f742a2587f06d76c0eab1e068c7e04db1390b8f4eaf301619c762c6aa9fb2e67",
+      "method": "GET",
+      "type": "fetch",
+      "route": "/_serverFn/f742a258…",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "no-store",
+      "bytes": 1103,
+      "pending": false,
+      "tEnd": 1789932258755,
+      "headersBytes": 0
+    }
+  ],
+  "endedAt": "2026-09-20T19:24:19.352Z"
+}

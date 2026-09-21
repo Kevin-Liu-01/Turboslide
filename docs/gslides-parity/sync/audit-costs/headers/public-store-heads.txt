@@ -1,0 +1,42 @@
+=== GET -I https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.turboslide/pulse.json (1) ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=2592000
+etag: "3f80f560753fb0af613d56c38d4f911d"
+last-modified: Sun, 20 Sep 2026 19:19:27 GMT
+x-vercel-cache: MISS
+content-length: 106
+=== (2, same url again) ===
+HTTP/2 200 
+age: 0
+x-vercel-cache: HIT
+=== (3, cache busting query) ===
+HTTP/2 200 
+age: 0
+etag: "3f80f560753fb0af613d56c38d4f911d"
+x-vercel-cache: HIT
+=== (4, If-None-Match "3f80f560753fb0af613d56c38d4f911d") ===
+HTTP/2 304 
+etag: "3f80f560753fb0af613d56c38d4f911d"
+x-vercel-cache: HIT
+=== GET -I https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/deck.json (1) ===
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=2592000
+etag: "7f3ad50b57c553c62fa3f413fc9f9880"
+last-modified: Sun, 20 Sep 2026 19:19:27 GMT
+x-vercel-cache: MISS
+content-length: 96268
+=== (2, same url again) ===
+HTTP/2 200 
+age: 0
+x-vercel-cache: HIT
+=== (3, cache busting query) ===
+HTTP/2 200 
+age: 0
+etag: "7f3ad50b57c553c62fa3f413fc9f9880"
+x-vercel-cache: HIT
+=== (4, If-None-Match "7f3ad50b57c553c62fa3f413fc9f9880") ===
+HTTP/2 304 
+etag: "7f3ad50b57c553c62fa3f413fc9f9880"
+x-vercel-cache: HIT

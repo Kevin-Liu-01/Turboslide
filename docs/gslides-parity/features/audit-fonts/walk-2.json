@@ -1,0 +1,49 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-20T19:08:38.682Z",
+  "deckId": "untitled-20260920-7m8r",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the draft opened",
+      "expected": "an untitled id",
+      "observed": "untitled-20260920-7m8r",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "a digits column in the body run",
+      "expected": "proportional digits: the rows 1111 and 0000 end at different x",
+      "observed": "{\"fontSize\":\"26px\",\"fontWeight\":\"400\",\"fontFeatureSettings\":\"normal\",\"fontVariantNumeric\":\"normal\",\"run\":\"lead/text\"}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the disabled Font control at 2x",
+      "expected": "a zoom of the text tail around Font",
+      "observed": "{\"x\":343,\"y\":75.5,\"width\":44.890625,\"height\":32}",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "Format > Text submenu rows",
+      "expected": "the rows of the Text submenu on production, and whether a Font row exists",
+      "observed": "{\"items\":[\"menu.format.text: Text\",\"menu.format.text.bold: Bold⌘B\",\"menu.format.text.italic: Italic⌘I\",\"menu.format.text.underline: Underline⌘U\",\"menu.format.text.strikethrough: Strikethrough⇧⌘X\",\"menu.format.text.superscript: Superscript⌘.\",\"menu.format.text.subscript: Subscript⌘,\",\"menu.format.text.size: Size\",\"menu.format.text.capitalization: Capitalization\",\"menu.format.textFitting: Text fitting\"],\"fontRow\":false}",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "File > Move to trash",
+      "expected": "/decks and the card not listed",
+      "observed": "https://turboslide.vercel.app/decks; card listed false",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "Delete forever, then GET /edit and /deck",
+      "expected": "both 404",
+      "observed": "the trash page; /edit 404, /deck 404",
+      "ok": true
+    }
+  ]
+}

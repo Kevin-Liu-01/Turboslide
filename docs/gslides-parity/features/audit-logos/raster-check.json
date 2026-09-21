@@ -1,0 +1,143 @@
+{
+  "total": 276,
+  "rasterized": 274,
+  "failed": [
+    {
+      "f": "cogvideo--default.svg",
+      "error": "Error: Input buffer has corrupt header: glib: XML parse error: Error domain 1 code 68 on line 1 column 5569 of data: xmlParseEntityRef: no name"
+    },
+    {
+      "f": "nuxt--default.svg",
+      "error": "Error: Input buffer contains unsupported image format"
+    }
+  ],
+  "msMedian": 2,
+  "msP95": 9,
+  "msMax": 16,
+  "pngBytesMedian": 1602,
+  "pngBytesMax": 7419,
+  "defaults": 158,
+  "invisibleOnPaper": [
+    "anthropic--default.svg",
+    "bolt--default.svg",
+    "comfyui--default.svg",
+    "egghead--default.svg",
+    "flask--default.svg",
+    "glide--default.svg",
+    "matrix--default.svg",
+    "million--default.svg",
+    "openai--default.svg",
+    "tldraw--default.svg",
+    "vercel--default.svg"
+  ],
+  "invisibleOnInk": [
+    "backbone--default.svg",
+    "dagster--default.svg",
+    "dark-reader--default.svg",
+    "de-longhi--default.svg",
+    "github--default.svg",
+    "gnu-nano--default.svg",
+    "lexus--default.svg",
+    "mapbox--default.svg",
+    "metacritic--default.svg",
+    "million--default.svg",
+    "pollinations--default.svg",
+    "pond5--default.svg",
+    "wero--default.svg"
+  ],
+  "usesCurrentColor": [
+    "aws--default.svg",
+    "aws--mono.svg",
+    "chime--mono.svg",
+    "cogvideo--default.svg",
+    "comfyui--mono.svg",
+    "microsoft-fabric-data-factory--default.svg",
+    "phalcon--mono.svg",
+    "pollinations--default.svg",
+    "pollinations--mono.svg",
+    "siliconcloud-siliconflow--mono.svg",
+    "visualbasic--mono.svg"
+  ],
+  "picks": [
+    {
+      "slug": "vercel",
+      "onPaper": 0,
+      "onInk": 0.509
+    },
+    {
+      "slug": "openai",
+      "onPaper": 0,
+      "onInk": 0.437
+    },
+    {
+      "slug": "figma",
+      "onPaper": 0.707,
+      "onInk": 0.711
+    },
+    {
+      "slug": "slack",
+      "onPaper": 0.49,
+      "onInk": 0.497
+    },
+    {
+      "slug": "stripe",
+      "onPaper": 0.451,
+      "onInk": 0.436
+    },
+    {
+      "slug": "salesforce",
+      "onPaper": 0.677,
+      "onInk": 0.718
+    },
+    {
+      "slug": "hubspot",
+      "onPaper": 0.297,
+      "onInk": 0.303
+    },
+    {
+      "slug": "notion",
+      "onPaper": 0.545,
+      "onInk": 0.468
+    },
+    {
+      "slug": "google",
+      "onPaper": 0.519,
+      "onInk": 0.525
+    },
+    {
+      "slug": "microsoft",
+      "onPaper": 0.892,
+      "onInk": 0.905
+    },
+    {
+      "slug": "zoom",
+      "onPaper": 0.666,
+      "onInk": 0.838
+    },
+    {
+      "slug": "github",
+      "onPaper": 0.451,
+      "onInk": 0
+    },
+    {
+      "slug": "anthropic",
+      "onPaper": 0,
+      "onInk": 0.35
+    },
+    {
+      "slug": "bolt",
+      "onPaper": 0,
+      "onInk": 0.517
+    },
+    {
+      "slug": "comfyui",
+      "onPaper": 0,
+      "onInk": 0.516
+    },
+    {
+      "slug": "egghead",
+      "onPaper": 0,
+      "onInk": 0.501
+    }
+  ]
+}

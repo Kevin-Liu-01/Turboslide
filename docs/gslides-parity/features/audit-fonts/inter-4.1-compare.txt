@@ -1,0 +1,31 @@
+# Inter 4.1 comparison (2026-09-20)
+
+sha256 of the checkout's files and of Inter-4.1.zip web/ files (the zip from https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip, 33707794 bytes):
+693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3  packages/fonts/assets/InterVariable.woff2
+0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05  packages/fonts/assets/InterVariable-Italic.woff2
+693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3  Inter-4.1.zip/web/InterVariable.woff2
+e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a  Inter-4.1.zip/web/InterVariable-Italic.woff2
+
+387976 Inter-4.1.zip/web/InterVariable-Italic.woff2
+352240 Inter-4.1.zip/web/InterVariable.woff2
+
+rsms/inter releases (GitHub API): v4.1 2024-11-16T00:27:07Z (asset Inter-4.1.zip 33707794), v4.0 2023-11-20T00:11:13Z; no v4.001 tag.
+
+4.1 changelog lines that touch the italic or the features the sheet uses:
+- Remove c2sc and smcp from aalt. #630
+- Remove incomplete OpenType features c2sc and smcp. #630
+- Fixes broken glyphs Cyrillic /uni04F6 /Ghestrokecyrillic and /uni04FA in Italic. #636
+- Fixes issue with 'frac' feature that put all number into exponent. #639
+- More constrained calt .case subsitutions. #648
+- New design of /Germandbls with old design available at /Germandbls.1 via cv14. #693
+- Fixes ss03 in italic. #711
+- Add dlig exception for fffi et al. #732
+- Fix slant angle of /dieresiscomb.ss07 in italic 900 weights
+- Improvements to fractions
+- Removes NxN -> N×N transformation in calt on popular request
+
+URL statuses (curl -o /dev/null -w %{http_code}):
+https://github.com/rsms/inter/releases/tag/v4.001 404
+https://github.com/rsms/inter/blob/v4.001/LICENSE.txt 404
+https://github.com/rsms/inter/releases/tag/v4.1 200
+https://github.com/rsms/inter/blob/v4.1/LICENSE.txt 200

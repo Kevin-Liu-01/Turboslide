@@ -1,0 +1,250 @@
+{
+ "readAt": "2026-09-20",
+ "registry": {
+  "url": "https://thesvg.org/api/registry.json",
+  "bytes": 1497387,
+  "total": 7417,
+  "fields": [
+   "aliases",
+   "categories",
+   "hex",
+   "license",
+   "slug",
+   "title",
+   "url",
+   "variants"
+  ],
+  "lastModified": "Sun, 20 Sep 2026 06:39:58 GMT",
+  "server": "GitHub.com behind Fastly",
+  "cacheControl": "max-age=600",
+  "cors": "access-control-allow-origin: *"
+ },
+ "iconsJson": {
+  "url": "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/src/data/icons.json",
+  "bytes": 3284459,
+  "extraFields": [
+   "dateAdded",
+   "collection",
+   "collectionVersion",
+   "collectionMeta",
+   "guidelines",
+   "supersedes",
+   "supersededBy"
+  ],
+  "variantsAsPaths": true,
+  "cacheControl": "public, max-age=604800, s-maxage=43200"
+ },
+ "collections": {
+  "brands": 4681,
+  "auth-badges": 860,
+  "aws": 739,
+  "azure": 626,
+  "community": 259,
+  "gcp": 214,
+  "k8s": 38
+ },
+ "categories": 141,
+ "variantKeyCounts": {
+  "default": 7417,
+  "mono": 3757,
+  "16": 326,
+  "32": 326,
+  "64": 326,
+  "wordmark": 311,
+  "light": 195,
+  "dark": 195,
+  "color": 157,
+  "wordmarkDark": 126,
+  "wordmarkLight": 121,
+  "line": 38,
+  "icon": 1,
+  "horizontal": 1,
+  "lockup": 1,
+  "lockupDark": 1,
+  "logo": 1,
+  "wordmarkMono": 1
+ },
+ "brandsAndCommunity": {
+  "count": 4940,
+  "withMono": 3757,
+  "withLightAndDark": 178,
+  "withAnyWordmark": 315,
+  "defaultOnlyNoMonoNoLightDark": 1100,
+  "hexWhite": 70,
+  "withGuidelines": 1123,
+  "withAliases": 371,
+  "withoutUrl": 132
+ },
+ "licenceValues": 57,
+ "licenceTop": {
+  "CC0-1.0": 4260,
+  "MIT": 1331,
+  "CC-BY-ND-2.0": 739,
+  "Apache-2.0": 369,
+  "brand-use": 285,
+  "Trademark": 78,
+  "Fair Use": 65,
+  "Microsoft proprietary product icon; no express redistribution license supplied; maintainer review required": 37,
+  "Custom": 29,
+  "CC-BY-SA-4.0": 28,
+  "Unknown": 25,
+  "CC-BY-4.0": 20,
+  "Proprietary": 17,
+  "MPL-2.0": 13,
+  "GPL-3.0": 12
+ },
+ "addedSince2026-08-20": 903,
+ "dateAddedRange": [
+  "2026-03-07",
+  "2026-09-17"
+ ],
+ "variantKeyToFileMismatch": "registry.json lists camelCase keys (wordmarkLight) while the files are kebab case (wordmark-light.svg); icons.json carries the paths",
+ "sellerBrandsMissing": [
+  "outreach",
+  "zoominfo",
+  "pandadoc",
+  "servicenow",
+  "klaviyo",
+  "lokalise",
+  "phrase",
+  "smartling",
+  "weglot",
+  "lilt",
+  "general-translation"
+ ],
+ "sellerBrandsPresent": {
+  "salesforce": [
+   [
+    "salesforce",
+    [
+     "default"
+    ]
+   ]
+  ],
+  "hubspot": [
+   [
+    "hubspot",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "slack": [
+   [
+    "slack",
+    [
+     "default",
+     "wordmark"
+    ]
+   ]
+  ],
+  "zoom": [
+   [
+    "zoom",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "gong": [
+   [
+    "gong",
+    [
+     "default"
+    ]
+   ]
+  ],
+  "docusign": [
+   [
+    "docusign",
+    [
+     "default"
+    ]
+   ]
+  ],
+  "zendesk": [
+   [
+    "zendesk",
+    [
+     "default",
+     "mono",
+     "wordmark"
+    ]
+   ]
+  ],
+  "intercom": [
+   [
+    "intercom",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "datadog": [
+   [
+    "datadog",
+    [
+     "default",
+     "mono",
+     "wordmark"
+    ]
+   ]
+  ],
+  "snowflake": [
+   [
+    "snowflake",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "deepl": [
+   [
+    "deepl",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "crowdin": [
+   [
+    "crowdin",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "transifex": [
+   [
+    "transifex",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ],
+  "microsoft-teams": [
+   [
+    "microsoft-teams",
+    [
+     "default"
+    ]
+   ]
+  ],
+  "google-slides": [
+   [
+    "google-slides",
+    [
+     "default",
+     "mono"
+    ]
+   ]
+  ]
+ }
+}

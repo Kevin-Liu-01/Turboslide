@@ -1,0 +1,36 @@
+# Production checks (https://turboslide.vercel.app, 2026-09-20)
+
+GET /fonts/faces/current/roboto.css -> 404 (the catalog route is not on production)
+
+Link tags of the /new document (curl -L /):
+<link rel="stylesheet" href="/assets/inter-DJL1FIyQ.css" data-precedence="default"/>
+<link rel="modulepreload" href="/assets/index-Dkbo1pra.js"/>
+<link rel="modulepreload" href="/assets/new-B0lQ2W4c.js"/>
+<link rel="modulepreload" href="/assets/Frame-DwjMUeba.js"/>
+<link rel="modulepreload" href="/assets/EditorRoot-DfBlslyc.js"/>
+<link rel="preload" href="/assets/InterVariable-DiVDrmQJ.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+<link rel="preload" href="/assets/InterVariable-Italic-d6KXgdvN.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+
+woff2 asset headers:
+/assets/InterVariable-DiVDrmQJ.woff2
+HTTP/2 200 
+access-control-allow-origin: *
+cache-control: public, max-age=31536000, immutable
+content-type: font/woff2
+content-length: 352240
+/assets/InterVariable-Italic-d6KXgdvN.woff2
+HTTP/2 200 
+access-control-allow-origin: *
+cache-control: public, max-age=31536000, immutable
+content-type: font/woff2
+content-length: 380904
+
+sha256 of the served files:
+693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3  served InterVariable.woff2
+0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05  served InterVariable-Italic.woff2
+
+Served inter css:
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/InterVariable-DiVDrmQJ.woff2)format("woff2")}
+@font-face{font-family:Inter;font-style:italic;font-weight:100 900;font-display:swap;src:url(/assets/InterVariable-Italic-d6KXgdvN.woff2)format("woff2")}
+@font-face{font-family:Inter Fallback;src:local(Arial);size-adjust:107.472%;ascent-override:90.1394%;descent-override:22.444%;line-gap-override:0%}
+

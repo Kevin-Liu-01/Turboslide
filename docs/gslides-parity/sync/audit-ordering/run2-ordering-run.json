@@ -1,0 +1,2587 @@
+{
+  "run": "run2",
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T19:08:15.648Z",
+  "phases": {
+    "create": {
+      "url": "/edit/untitled-20260920-bn78",
+      "tier": "blob",
+      "revision": 1,
+      "serverRevision": 1,
+      "seq": 1,
+      "pending": 0,
+      "retained": 0,
+      "connected": true,
+      "offline": false,
+      "streamDown": false,
+      "clientId": "2b72f365279529b9b8ea6e74e9ea8b7c",
+      "mode": {
+        "editorStage": true,
+        "role": null,
+        "mode": "slide",
+        "saveWords": "All changes saved",
+        "viewOnly": false
+      }
+    },
+    "join": {
+      "b": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "clientId": "0c511e0f49efd9c90120ea638fe82024",
+        "others": 2,
+        "heading": "Sync audit",
+        "mode": {
+          "editorStage": true,
+          "role": "owner",
+          "mode": "slide",
+          "saveWords": "All changes saved",
+          "viewOnly": false
+        }
+      },
+      "c": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "clientId": "a65d61aa4b7f5320923c67975271a80d",
+        "others": 0,
+        "heading": "Sync audit",
+        "mode": {
+          "editorStage": false,
+          "role": "viewer",
+          "mode": "slide",
+          "saveWords": null,
+          "viewOnly": true
+        }
+      }
+    },
+    "serial": {
+      "tokens": [
+        {
+          "token": " a01",
+          "typedAt": 5855,
+          "ackMs": 697,
+          "revision": 2,
+          "seenAt": 8478,
+          "latencyMs": 2623,
+          "seenRevision": 2,
+          "seenSeq": 2,
+          "seenInCMs": null
+        },
+        {
+          "token": " a02",
+          "typedAt": 8878,
+          "ackMs": 879,
+          "revision": 3,
+          "seenAt": 10700,
+          "latencyMs": 1822,
+          "seenRevision": 3,
+          "seenSeq": 3,
+          "seenInCMs": null
+        },
+        {
+          "token": " a03",
+          "typedAt": 11886,
+          "ackMs": 506,
+          "revision": 4,
+          "seenAt": 13024,
+          "latencyMs": 1138,
+          "seenRevision": 4,
+          "seenSeq": 4,
+          "seenInCMs": null
+        },
+        {
+          "token": " a04",
+          "typedAt": 14842,
+          "ackMs": 634,
+          "revision": 5,
+          "seenAt": 17462,
+          "latencyMs": 2620,
+          "seenRevision": 5,
+          "seenSeq": 5,
+          "seenInCMs": null
+        },
+        {
+          "token": " a05",
+          "typedAt": 17853,
+          "ackMs": 1011,
+          "revision": 6,
+          "seenAt": 19780,
+          "latencyMs": 1927,
+          "seenRevision": 6,
+          "seenSeq": 6,
+          "seenInCMs": null
+        },
+        {
+          "token": " a06",
+          "typedAt": 20859,
+          "ackMs": 441,
+          "revision": 7,
+          "seenAt": 22200,
+          "latencyMs": 1341,
+          "seenRevision": 7,
+          "seenSeq": 7,
+          "seenInCMs": null
+        },
+        {
+          "token": " a07",
+          "typedAt": 23851,
+          "ackMs": 563,
+          "revision": 8,
+          "seenAt": 26638,
+          "latencyMs": 2787,
+          "seenRevision": 8,
+          "seenSeq": 8,
+          "seenInCMs": null
+        },
+        {
+          "token": " a08",
+          "typedAt": 26822,
+          "ackMs": 695,
+          "revision": 9,
+          "seenAt": 29164,
+          "latencyMs": 2342,
+          "seenRevision": 9,
+          "seenSeq": 9,
+          "seenInCMs": null
+        },
+        {
+          "token": " a09",
+          "typedAt": 29842,
+          "ackMs": 817,
+          "revision": 10,
+          "seenAt": 31481,
+          "latencyMs": 1639,
+          "seenRevision": 10,
+          "seenSeq": 10,
+          "seenInCMs": null
+        },
+        {
+          "token": " a10",
+          "typedAt": 32902,
+          "ackMs": 812,
+          "revision": 11,
+          "seenAt": 33805,
+          "latencyMs": 903,
+          "seenRevision": 11,
+          "seenSeq": 11,
+          "seenInCMs": null
+        },
+        {
+          "token": " a11",
+          "typedAt": 35880,
+          "ackMs": 444,
+          "revision": 12,
+          "seenAt": 38043,
+          "latencyMs": 2163,
+          "seenRevision": 12,
+          "seenSeq": 12,
+          "seenInCMs": null
+        },
+        {
+          "token": " a12",
+          "typedAt": 38803,
+          "ackMs": 692,
+          "revision": 13,
+          "seenAt": 40362,
+          "latencyMs": 1559,
+          "seenRevision": 13,
+          "seenSeq": 13,
+          "seenInCMs": null
+        },
+        {
+          "token": " a13",
+          "typedAt": 41802,
+          "ackMs": 936,
+          "revision": 14,
+          "seenAt": 44802,
+          "latencyMs": 3000,
+          "seenRevision": 14,
+          "seenSeq": 14,
+          "seenInCMs": null
+        },
+        {
+          "token": " a14",
+          "typedAt": 44829,
+          "ackMs": 437,
+          "revision": 15,
+          "seenAt": 47225,
+          "latencyMs": 2396,
+          "seenRevision": 15,
+          "seenSeq": 15,
+          "seenInCMs": null
+        },
+        {
+          "token": " a15",
+          "typedAt": 47842,
+          "ackMs": 564,
+          "revision": 16,
+          "seenAt": 49942,
+          "latencyMs": 2100,
+          "seenRevision": 16,
+          "seenSeq": 16,
+          "seenInCMs": null
+        },
+        {
+          "token": " a16",
+          "typedAt": 50821,
+          "ackMs": 439,
+          "revision": 17,
+          "seenAt": 52872,
+          "latencyMs": 2051,
+          "seenRevision": 17,
+          "seenSeq": 17,
+          "seenInCMs": null
+        },
+        {
+          "token": " a17",
+          "typedAt": 53889,
+          "ackMs": 683,
+          "revision": 18,
+          "seenAt": 55191,
+          "latencyMs": 1302,
+          "seenRevision": 18,
+          "seenSeq": 18,
+          "seenInCMs": null
+        },
+        {
+          "token": " a18",
+          "typedAt": 56862,
+          "ackMs": 437,
+          "revision": 19,
+          "seenAt": 59532,
+          "latencyMs": 2670,
+          "seenRevision": 19,
+          "seenSeq": 19,
+          "seenInCMs": null
+        },
+        {
+          "token": " a19",
+          "typedAt": 59796,
+          "ackMs": 691,
+          "revision": 20,
+          "seenAt": 61849,
+          "latencyMs": 2053,
+          "seenRevision": 20,
+          "seenSeq": 20,
+          "seenInCMs": null
+        },
+        {
+          "token": " a20",
+          "typedAt": 62809,
+          "ackMs": 440,
+          "revision": 21,
+          "seenAt": 64170,
+          "latencyMs": 1361,
+          "seenRevision": 21,
+          "seenSeq": 21,
+          "seenInCMs": null
+        },
+        {
+          "token": " a21",
+          "typedAt": 65822,
+          "ackMs": 625,
+          "revision": 22,
+          "seenAt": 68710,
+          "latencyMs": 2888,
+          "seenRevision": 22,
+          "seenSeq": 22,
+          "seenInCMs": null
+        },
+        {
+          "token": " a22",
+          "typedAt": 68859,
+          "ackMs": 875,
+          "revision": 23,
+          "seenAt": 71132,
+          "latencyMs": 2273,
+          "seenRevision": 23,
+          "seenSeq": 23,
+          "seenInCMs": null
+        },
+        {
+          "token": " a23",
+          "typedAt": 71824,
+          "ackMs": 1378,
+          "revision": 24,
+          "seenAt": 73753,
+          "latencyMs": 1929,
+          "seenRevision": 24,
+          "seenSeq": 24,
+          "seenInCMs": null
+        },
+        {
+          "token": " a24",
+          "typedAt": 74881,
+          "ackMs": 694,
+          "revision": 25,
+          "seenAt": 76077,
+          "latencyMs": 1196,
+          "seenRevision": 25,
+          "seenSeq": 25,
+          "seenInCMs": null
+        },
+        {
+          "token": " a25",
+          "typedAt": 77881,
+          "ackMs": 937,
+          "revision": 26,
+          "seenAt": 80728,
+          "latencyMs": 2847,
+          "seenRevision": 26,
+          "seenSeq": 26,
+          "seenInCMs": null
+        },
+        {
+          "token": " a26",
+          "typedAt": 80792,
+          "ackMs": 563,
+          "revision": 27,
+          "seenAt": 83050,
+          "latencyMs": 2258,
+          "seenRevision": 27,
+          "seenSeq": 27,
+          "seenInCMs": null
+        },
+        {
+          "token": " a27",
+          "typedAt": 83850,
+          "ackMs": 435,
+          "revision": 28,
+          "seenAt": 85168,
+          "latencyMs": 1318,
+          "seenRevision": 28,
+          "seenSeq": 28,
+          "seenInCMs": null
+        },
+        {
+          "token": " a28",
+          "typedAt": 86825,
+          "ackMs": 498,
+          "revision": 29,
+          "seenAt": 87487,
+          "latencyMs": 662,
+          "seenRevision": 29,
+          "seenSeq": 29,
+          "seenInCMs": null
+        },
+        {
+          "token": " a29",
+          "typedAt": 89866,
+          "ackMs": 874,
+          "revision": 30,
+          "seenAt": 91825,
+          "latencyMs": 1959,
+          "seenRevision": 29,
+          "seenSeq": 30,
+          "seenInCMs": null
+        },
+        {
+          "token": " a30",
+          "typedAt": 92822,
+          "ackMs": 506,
+          "revision": 31,
+          "seenAt": 94149,
+          "latencyMs": 1327,
+          "seenRevision": 31,
+          "seenSeq": 31,
+          "seenInCMs": null
+        }
+      ],
+      "latency": {
+        "n": 30,
+        "mean": 1948,
+        "p50": 2051,
+        "p95": 2888,
+        "max": 3000,
+        "min": 662
+      },
+      "ack": {
+        "n": 30,
+        "mean": 673,
+        "p50": 683,
+        "p95": 1011,
+        "max": 1378,
+        "min": 435
+      },
+      "arrivalOrder": [
+        " a01",
+        " a02",
+        " a03",
+        " a04",
+        " a05",
+        " a06",
+        " a07",
+        " a08",
+        " a09",
+        " a10",
+        " a11",
+        " a12",
+        " a13",
+        " a14",
+        " a15",
+        " a16",
+        " a17",
+        " a18",
+        " a19",
+        " a20",
+        " a21",
+        " a22",
+        " a23",
+        " a24",
+        " a25",
+        " a26",
+        " a27",
+        " a28",
+        " a29",
+        " a30"
+      ],
+      "inOrder": true,
+      "lost": [],
+      "duplicates": [],
+      "over3s": [],
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "bText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "cText": "Sync audit",
+      "equalAB": true,
+      "a": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "c": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "mode": {
+          "editorStage": false,
+          "role": "viewer",
+          "mode": "slide",
+          "saveWords": null,
+          "viewOnly": true
+        },
+        "seenTokens": 0
+      },
+      "bSamples": [
+        {
+          "at": 5347,
+          "revision": 1,
+          "serverRevision": 1,
+          "seq": 1,
+          "pending": 0,
+          "text": "Sync audit"
+        },
+        {
+          "at": 8478,
+          "revision": 2,
+          "serverRevision": 2,
+          "seq": 2,
+          "pending": 0,
+          "text": "Sync audit a01"
+        },
+        {
+          "at": 10700,
+          "revision": 3,
+          "serverRevision": 3,
+          "seq": 3,
+          "pending": 0,
+          "text": "Sync audit a01 a02"
+        },
+        {
+          "at": 13024,
+          "revision": 4,
+          "serverRevision": 4,
+          "seq": 4,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03"
+        },
+        {
+          "at": 17462,
+          "revision": 5,
+          "serverRevision": 5,
+          "seq": 5,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04"
+        },
+        {
+          "at": 19780,
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 6,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05"
+        },
+        {
+          "at": 22200,
+          "revision": 7,
+          "serverRevision": 7,
+          "seq": 7,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06"
+        },
+        {
+          "at": 26638,
+          "revision": 8,
+          "serverRevision": 8,
+          "seq": 8,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07"
+        },
+        {
+          "at": 29164,
+          "revision": 9,
+          "serverRevision": 9,
+          "seq": 9,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08"
+        },
+        {
+          "at": 31481,
+          "revision": 10,
+          "serverRevision": 10,
+          "seq": 10,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09"
+        },
+        {
+          "at": 33805,
+          "revision": 11,
+          "serverRevision": 11,
+          "seq": 11,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10"
+        },
+        {
+          "at": 38043,
+          "revision": 12,
+          "serverRevision": 12,
+          "seq": 12,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11"
+        },
+        {
+          "at": 40362,
+          "revision": 13,
+          "serverRevision": 13,
+          "seq": 13,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12"
+        },
+        {
+          "at": 44802,
+          "revision": 14,
+          "serverRevision": 14,
+          "seq": 14,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13"
+        },
+        {
+          "at": 47225,
+          "revision": 15,
+          "serverRevision": 15,
+          "seq": 15,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14"
+        },
+        {
+          "at": 49942,
+          "revision": 16,
+          "serverRevision": 16,
+          "seq": 16,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15"
+        },
+        {
+          "at": 52872,
+          "revision": 17,
+          "serverRevision": 17,
+          "seq": 17,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16"
+        },
+        {
+          "at": 55191,
+          "revision": 18,
+          "serverRevision": 18,
+          "seq": 18,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17"
+        },
+        {
+          "at": 59532,
+          "revision": 19,
+          "serverRevision": 19,
+          "seq": 19,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18"
+        },
+        {
+          "at": 61849,
+          "revision": 20,
+          "serverRevision": 20,
+          "seq": 20,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19"
+        },
+        {
+          "at": 64170,
+          "revision": 21,
+          "serverRevision": 21,
+          "seq": 21,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20"
+        },
+        {
+          "at": 68710,
+          "revision": 22,
+          "serverRevision": 22,
+          "seq": 22,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21"
+        },
+        {
+          "at": 71132,
+          "revision": 23,
+          "serverRevision": 23,
+          "seq": 23,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22"
+        },
+        {
+          "at": 73753,
+          "revision": 24,
+          "serverRevision": 24,
+          "seq": 24,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23"
+        },
+        {
+          "at": 76077,
+          "revision": 25,
+          "serverRevision": 25,
+          "seq": 25,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24"
+        },
+        {
+          "at": 80728,
+          "revision": 26,
+          "serverRevision": 26,
+          "seq": 26,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25"
+        },
+        {
+          "at": 83050,
+          "revision": 27,
+          "serverRevision": 27,
+          "seq": 27,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26"
+        },
+        {
+          "at": 85168,
+          "revision": 28,
+          "serverRevision": 28,
+          "seq": 28,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27"
+        },
+        {
+          "at": 87487,
+          "revision": 29,
+          "serverRevision": 29,
+          "seq": 29,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28"
+        },
+        {
+          "at": 91825,
+          "revision": 29,
+          "serverRevision": 29,
+          "seq": 30,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29"
+        },
+        {
+          "at": 91925,
+          "revision": 30,
+          "serverRevision": 30,
+          "seq": 30,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29"
+        },
+        {
+          "at": 94149,
+          "revision": 31,
+          "serverRevision": 31,
+          "seq": 31,
+          "pending": 0,
+          "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30"
+        }
+      ],
+      "saveWords": {
+        "a": "All changes saved",
+        "b": "All changes saved",
+        "c": null
+      },
+      "stale": {
+        "a": null,
+        "b": null
+      }
+    },
+    "concurrent": {
+      "rounds": [
+        {
+          "round": 1,
+          "windowMs": 359,
+          "convergedMs": 14060,
+          "a": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1",
+            "revision": 32,
+            "serverRevision": 32,
+            "seq": 32,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "b": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1",
+            "revision": 33,
+            "serverRevision": 33,
+            "seq": 33,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "equal": false,
+          "aHasBoth": false,
+          "bHasBoth": false,
+          "orderInA": null,
+          "orderInB": null
+        },
+        {
+          "round": 2,
+          "windowMs": 332,
+          "convergedMs": 13316,
+          "a": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2",
+            "revision": 40,
+            "serverRevision": 40,
+            "seq": 40,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "b": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2",
+            "revision": 41,
+            "serverRevision": 41,
+            "seq": 41,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "equal": false,
+          "aHasBoth": false,
+          "bHasBoth": false,
+          "orderInA": null,
+          "orderInB": null
+        },
+        {
+          "round": 3,
+          "windowMs": 358,
+          "convergedMs": 14670,
+          "a": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2 xa3",
+            "revision": 48,
+            "serverRevision": 48,
+            "seq": 48,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "b": {
+            "text": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3",
+            "revision": 49,
+            "serverRevision": 49,
+            "seq": 49,
+            "pending": 0,
+            "retained": 1,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "stale": null
+          },
+          "equal": false,
+          "aHasBoth": false,
+          "bHasBoth": false,
+          "orderInA": null,
+          "orderInB": null
+        }
+      ],
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3",
+      "bText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3",
+      "equal": true,
+      "a": {
+        "revision": 55,
+        "serverRevision": 55,
+        "seq": 55,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b": {
+        "revision": 55,
+        "serverRevision": 55,
+        "seq": 55,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      }
+    },
+    "offline": {
+      "offlineMs": 20048,
+      "bTokens": [
+        {
+          "text": " b1",
+          "at": 155387
+        },
+        {
+          "text": " b2",
+          "at": 158111
+        },
+        {
+          "text": " b3",
+          "at": 160823
+        },
+        {
+          "text": " b4",
+          "at": 163546
+        },
+        {
+          "text": " b5",
+          "at": 166204
+        }
+      ],
+      "aOffline": [
+        {
+          "text": " o1",
+          "at": 159358,
+          "state": {
+            "revision": 55,
+            "serverRevision": 55,
+            "seq": 55,
+            "pending": 0,
+            "retained": 0,
+            "connected": false,
+            "offline": false,
+            "streamDown": true
+          },
+          "words": "Reconnecting…"
+        },
+        {
+          "text": " o2",
+          "at": 164589,
+          "state": {
+            "revision": 55,
+            "serverRevision": 55,
+            "seq": 55,
+            "pending": 1,
+            "retained": 0,
+            "connected": false,
+            "offline": true,
+            "streamDown": true
+          },
+          "words": "Offline. Changes will save when you reconnect"
+        }
+      ],
+      "aBeforeOnline": {
+        "revision": 55,
+        "serverRevision": 55,
+        "seq": 55,
+        "pending": 2,
+        "retained": 0,
+        "connected": false,
+        "offline": true,
+        "streamDown": true,
+        "words": "Offline. Changes will save when you reconnect"
+      },
+      "aSettledMs": 4634,
+      "aSettled": {
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 2,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "convergedMs": 4854,
+      "converged": true,
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+      "bText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+      "lostInA": [
+        " b1",
+        " b2",
+        " b3",
+        " b4",
+        " b5"
+      ],
+      "lostInB": [
+        " b1",
+        " b2",
+        " b3",
+        " b4",
+        " b5"
+      ],
+      "duplicatesInA": [],
+      "duplicatesInB": [],
+      "orderA": [
+        " b1",
+        " b2",
+        " b3",
+        " b4",
+        " b5",
+        " o1",
+        " o2"
+      ],
+      "a": {
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 2,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "b": {
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false
+      },
+      "saveWords": {
+        "a": "Saving…",
+        "b": "All changes saved"
+      },
+      "stale": {
+        "a": null,
+        "b": null
+      }
+    },
+    "reload": {
+      "reloadMs": {
+        "a": 1778,
+        "b": 2065,
+        "c": 2032
+      },
+      "a": {
+        "id": "untitled-20260920-bn78",
+        "title": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 0,
+        "order": [
+          "title"
+        ],
+        "heading": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2"
+      },
+      "b": {
+        "id": "untitled-20260920-bn78",
+        "title": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 0,
+        "order": [
+          "title"
+        ],
+        "heading": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2"
+      },
+      "c": {
+        "id": "untitled-20260920-bn78",
+        "title": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+        "revision": 61,
+        "serverRevision": 61,
+        "seq": 61,
+        "pending": 0,
+        "retained": 0,
+        "order": [
+          "title"
+        ],
+        "heading": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3 o1 o2",
+        "mode": {
+          "editorStage": false,
+          "role": "viewer",
+          "mode": "slide",
+          "saveWords": null,
+          "viewOnly": true
+        }
+      },
+      "sameAB": true,
+      "sameAC": true,
+      "sameRevision": true,
+      "staleAgainstLive": {
+        "a": false,
+        "b": false,
+        "liveBefore": {
+          "a": 61,
+          "b": 61
+        }
+      },
+      "headingMatchesLive": {
+        "a": true,
+        "b": true,
+        "c": true
+      }
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 3893,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::5g52w-1789931299409-12ee57aa4cda",
+      "retryAfter": null
+    },
+    {
+      "who": "C",
+      "at": 4844,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::4f7fk-1789931300412-726d2d3640e0",
+      "retryAfter": null
+    },
+    {
+      "who": "B",
+      "at": 5246,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::8pg5x-1789931300846-5816d68c19aa",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 5876,
+      "entries": 1,
+      "base": 1,
+      "status": 200,
+      "ms": 647,
+      "revision": "2",
+      "vercelId": "sfo1::iad1::jqbgq-1789931301586-22fd64ad79d8",
+      "retryAfter": null,
+      "admitted": [
+        2
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 8902,
+      "entries": 1,
+      "base": 2,
+      "status": 200,
+      "ms": 817,
+      "revision": "3",
+      "vercelId": "sfo1::iad1::8bp2c-1789931304609-cc40c48866cc",
+      "retryAfter": null,
+      "admitted": [
+        3
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 11920,
+      "entries": 1,
+      "base": 3,
+      "status": 200,
+      "ms": 447,
+      "revision": "4",
+      "vercelId": "sfo1::iad1::t7kxr-1789931307614-75ccb0178817",
+      "retryAfter": null,
+      "admitted": [
+        4
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 14860,
+      "entries": 1,
+      "base": 4,
+      "status": 200,
+      "ms": 559,
+      "revision": "5",
+      "vercelId": "sfo1::iad1::zlrmh-1789931310643-08c1b097d5e4",
+      "retryAfter": null,
+      "admitted": [
+        5
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 17895,
+      "entries": 1,
+      "base": 5,
+      "status": 200,
+      "ms": 910,
+      "revision": "6",
+      "vercelId": "sfo1::iad1::t7kxr-1789931313654-1138a6557d78",
+      "retryAfter": null,
+      "admitted": [
+        6
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 20881,
+      "entries": 1,
+      "base": 6,
+      "status": 200,
+      "ms": 398,
+      "revision": "7",
+      "vercelId": "sfo1::iad1::6zglk-1789931316577-e4fa1585c0c1",
+      "retryAfter": null,
+      "admitted": [
+        7
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 23872,
+      "entries": 1,
+      "base": 7,
+      "status": 200,
+      "ms": 533,
+      "revision": "8",
+      "vercelId": "sfo1::iad1::chzrl-1789931319568-70a2bd294f88",
+      "retryAfter": null,
+      "admitted": [
+        8
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 26858,
+      "entries": 1,
+      "base": 8,
+      "status": 200,
+      "ms": 594,
+      "revision": "9",
+      "vercelId": "sfo1::iad1::zwt7s-1789931322555-8bfad72527ce",
+      "retryAfter": null,
+      "admitted": [
+        9
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 29899,
+      "entries": 1,
+      "base": 9,
+      "status": 200,
+      "ms": 702,
+      "revision": "10",
+      "vercelId": "sfo1::iad1::c8m5d-1789931325648-d282dd687bf0",
+      "retryAfter": null,
+      "admitted": [
+        10
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 32920,
+      "entries": 1,
+      "base": 10,
+      "status": 200,
+      "ms": 787,
+      "revision": "11",
+      "vercelId": "sfo1::iad1::48b2n-1789931328621-5099bc7d2a8a",
+      "retryAfter": null,
+      "admitted": [
+        11
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 35895,
+      "entries": 1,
+      "base": 11,
+      "status": 200,
+      "ms": 425,
+      "revision": "12",
+      "vercelId": "sfo1::iad1::5k8vk-1789931331590-9fa248b2ed17",
+      "retryAfter": null,
+      "admitted": [
+        12
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 38848,
+      "entries": 1,
+      "base": 12,
+      "status": 200,
+      "ms": 619,
+      "revision": "13",
+      "vercelId": "sfo1::iad1::r7jwp-1789931334618-ed98046ca31b",
+      "retryAfter": null,
+      "admitted": [
+        13
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 41852,
+      "entries": 1,
+      "base": 13,
+      "status": 200,
+      "ms": 863,
+      "revision": "14",
+      "vercelId": "sfo1::iad1::57hn6-1789931337551-d6d67dbbe48c",
+      "retryAfter": null,
+      "admitted": [
+        14
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 44849,
+      "entries": 1,
+      "base": 14,
+      "status": 200,
+      "ms": 407,
+      "revision": "15",
+      "vercelId": "sfo1::iad1::z49cs-1789931340545-da9aa984e5c9",
+      "retryAfter": null,
+      "admitted": [
+        15
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 47888,
+      "entries": 1,
+      "base": 15,
+      "status": 200,
+      "ms": 483,
+      "revision": "16",
+      "vercelId": "sfo1::iad1::q8l5j-1789931343602-1436f24969a6",
+      "retryAfter": null,
+      "admitted": [
+        16
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 50860,
+      "entries": 1,
+      "base": 16,
+      "status": 200,
+      "ms": 396,
+      "revision": "17",
+      "vercelId": "sfo1::iad1::79wmc-1789931346557-ba0129413e18",
+      "retryAfter": null,
+      "admitted": [
+        17
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 53924,
+      "entries": 1,
+      "base": 17,
+      "status": 200,
+      "ms": 628,
+      "revision": "18",
+      "vercelId": "sfo1::iad1::tld7m-1789931349618-6eb04cdbf4ad",
+      "retryAfter": null,
+      "admitted": [
+        18
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 56885,
+      "entries": 1,
+      "base": 18,
+      "status": 200,
+      "ms": 396,
+      "revision": "19",
+      "vercelId": "sfo1::iad1::rv2gj-1789931352581-c09ec0d47f2e",
+      "retryAfter": null,
+      "admitted": [
+        19
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 59853,
+      "entries": 1,
+      "base": 19,
+      "status": 200,
+      "ms": 595,
+      "revision": "20",
+      "vercelId": "sfo1::iad1::xqd4n-1789931355584-1729cc2d5ccf",
+      "retryAfter": null,
+      "admitted": [
+        20
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 62826,
+      "entries": 1,
+      "base": 20,
+      "status": 200,
+      "ms": 396,
+      "revision": "21",
+      "vercelId": "sfo1::iad1::zfjgv-1789931358521-f157a42d6008",
+      "retryAfter": null,
+      "admitted": [
+        21
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 65852,
+      "entries": 1,
+      "base": 21,
+      "status": 200,
+      "ms": 535,
+      "revision": "22",
+      "vercelId": "sfo1::iad1::5qmqh-1789931361550-3c2872364585",
+      "retryAfter": null,
+      "admitted": [
+        22
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 68881,
+      "entries": 1,
+      "base": 22,
+      "status": 200,
+      "ms": 843,
+      "revision": "23",
+      "vercelId": "sfo1::iad1::dz6gt-1789931364673-fc595dc0d194",
+      "retryAfter": null,
+      "admitted": [
+        23
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 71871,
+      "entries": 1,
+      "base": 23,
+      "status": 200,
+      "ms": 1272,
+      "revision": "24",
+      "vercelId": "sfo1::iad1::48b2n-1789931367613-7135cb131aad",
+      "retryAfter": null,
+      "admitted": [
+        24
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 74915,
+      "entries": 1,
+      "base": 24,
+      "status": 200,
+      "ms": 612,
+      "revision": "25",
+      "vercelId": "sfo1::iad1::xdnq5-1789931370613-63dd1b1c9799",
+      "retryAfter": null,
+      "admitted": [
+        25
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 77902,
+      "entries": 1,
+      "base": 25,
+      "status": 200,
+      "ms": 867,
+      "revision": "26",
+      "vercelId": "sfo1::iad1::z49cs-1789931373602-cd6b90916dc7",
+      "retryAfter": null,
+      "admitted": [
+        26
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 80848,
+      "entries": 1,
+      "base": 26,
+      "status": 200,
+      "ms": 442,
+      "revision": "27",
+      "vercelId": "sfo1::iad1::r7jwp-1789931376561-57191fdc1473",
+      "retryAfter": null,
+      "admitted": [
+        27
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 83891,
+      "entries": 1,
+      "base": 27,
+      "status": 200,
+      "ms": 384,
+      "revision": "28",
+      "vercelId": "sfo1::iad1::zzbwk-1789931379586-078aee23053c",
+      "retryAfter": null,
+      "admitted": [
+        28
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 86850,
+      "entries": 1,
+      "base": 28,
+      "status": 200,
+      "ms": 436,
+      "revision": "29",
+      "vercelId": "sfo1::iad1::zzbwk-1789931382549-c1b532b1e342",
+      "retryAfter": null,
+      "admitted": [
+        29
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 89905,
+      "entries": 1,
+      "base": 29,
+      "status": 200,
+      "ms": 783,
+      "revision": "30",
+      "vercelId": "sfo1::iad1::j4ljt-1789931385597-7b5a3eecaf2e",
+      "retryAfter": null,
+      "admitted": [
+        30
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 92853,
+      "entries": 1,
+      "base": 30,
+      "status": 200,
+      "ms": 471,
+      "revision": "31",
+      "vercelId": "sfo1::iad1::6b7n2-1789931388617-21844a06e443",
+      "retryAfter": null,
+      "admitted": [
+        31
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 99391,
+      "entries": 1,
+      "base": 31,
+      "status": 200,
+      "ms": 466,
+      "revision": "32",
+      "vercelId": "sfo1::iad1::7mwmv-1789931395134-1dbd7e483de0",
+      "retryAfter": null,
+      "admitted": [
+        32
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 99499,
+      "entries": 1,
+      "base": 31,
+      "status": 200,
+      "ms": 1893,
+      "revision": "33",
+      "vercelId": "sfo1::iad1::zzbwk-1789931395199-d55092d88522",
+      "retryAfter": null,
+      "admitted": [
+        33
+      ],
+      "rejected": 0,
+      "between": 1
+    },
+    {
+      "who": "A",
+      "at": 102900,
+      "entries": 1,
+      "base": 33,
+      "status": 200,
+      "ms": 944,
+      "revision": "34",
+      "vercelId": "sfo1::iad1::4lrbh-1789931398598-238adbaf913f",
+      "retryAfter": null,
+      "admitted": [
+        34
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 105174,
+      "entries": 1,
+      "base": 34,
+      "status": 200,
+      "ms": 753,
+      "revision": "35",
+      "vercelId": "sfo1::iad1::2q5bv-1789931400867-1a7f6f7351ec",
+      "retryAfter": null,
+      "admitted": [
+        35
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 107414,
+      "entries": 1,
+      "base": 35,
+      "status": 200,
+      "ms": 510,
+      "revision": "36",
+      "vercelId": "sfo1::iad1::6b7n2-1789931403113-9d7272e578a3",
+      "retryAfter": null,
+      "admitted": [
+        36
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 109860,
+      "entries": 1,
+      "base": 36,
+      "status": 200,
+      "ms": 572,
+      "revision": "37",
+      "vercelId": "sfo1::iad1::6lfsz-1789931405556-af5451de3b44",
+      "retryAfter": null,
+      "admitted": [
+        37
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 112120,
+      "entries": 1,
+      "base": 37,
+      "status": 200,
+      "ms": 734,
+      "revision": "38",
+      "vercelId": "sfo1::iad1::n2d2h-1789931407853-191f5af1b998",
+      "retryAfter": null,
+      "admitted": [
+        38
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 114417,
+      "entries": 1,
+      "base": 38,
+      "status": 200,
+      "ms": 1194,
+      "revision": "39",
+      "vercelId": "sfo1::iad1::rq2fp-1789931410116-2afe757b21f8",
+      "retryAfter": null,
+      "admitted": [
+        39
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 116726,
+      "entries": 1,
+      "base": 39,
+      "status": 200,
+      "ms": 843,
+      "revision": "40",
+      "vercelId": "sfo1::iad1::gfk2j-1789931412422-c32f936fab93",
+      "retryAfter": null,
+      "admitted": [
+        40
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 116874,
+      "entries": 1,
+      "base": 39,
+      "status": 200,
+      "ms": 1218,
+      "revision": "41",
+      "vercelId": "sfo1::iad1::d6g5x-1789931412583-dddb70b58941",
+      "retryAfter": null,
+      "admitted": [
+        41
+      ],
+      "rejected": 0,
+      "between": 1
+    },
+    {
+      "who": "A",
+      "at": 119021,
+      "entries": 1,
+      "base": 41,
+      "status": 200,
+      "ms": 1167,
+      "revision": "42",
+      "vercelId": "sfo1::iad1::s98ns-1789931414717-33bb05b03c45",
+      "retryAfter": null,
+      "admitted": [
+        42
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 121396,
+      "entries": 1,
+      "base": 42,
+      "status": 200,
+      "ms": 889,
+      "revision": "43",
+      "vercelId": "sfo1::iad1::l85x5-1789931417094-6f4edf568275",
+      "retryAfter": null,
+      "admitted": [
+        43
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 123700,
+      "entries": 1,
+      "base": 43,
+      "status": 200,
+      "ms": 683,
+      "revision": "44",
+      "vercelId": "sfo1::iad1::gnsn6-1789931419434-f8c50224c3a3",
+      "retryAfter": null,
+      "admitted": [
+        44
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 126009,
+      "entries": 1,
+      "base": 44,
+      "status": 200,
+      "ms": 3962,
+      "revision": "45",
+      "vercelId": "sfo1::iad1::7jxwh-1789931421702-6a559fa7c3a5",
+      "retryAfter": null,
+      "admitted": [
+        45
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 130471,
+      "entries": 1,
+      "base": 45,
+      "status": 200,
+      "ms": 803,
+      "revision": "46",
+      "vercelId": "sfo1::iad1::5v57g-1789931426170-8c528cf3a586",
+      "retryAfter": null,
+      "admitted": [
+        46
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 132772,
+      "entries": 1,
+      "base": 46,
+      "status": 200,
+      "ms": 522,
+      "revision": "47",
+      "vercelId": "sfo1::iad1::mj6nc-1789931428465-3981fe901e65",
+      "retryAfter": null,
+      "admitted": [
+        47
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 133438,
+      "entries": 1,
+      "base": 46,
+      "status": 200,
+      "ms": 1189,
+      "revision": "48",
+      "vercelId": "sfo1::iad1::wfkjs-1789931429134-89e2f2923756",
+      "retryAfter": null,
+      "admitted": [
+        48
+      ],
+      "rejected": 0,
+      "between": 1
+    },
+    {
+      "who": "B",
+      "at": 133529,
+      "entries": 1,
+      "base": 47,
+      "status": 200,
+      "ms": 2525,
+      "revision": "49",
+      "vercelId": "sfo1::iad1::5mh98-1789931429225-30c0bce07c5f",
+      "retryAfter": null,
+      "admitted": [
+        49
+      ],
+      "rejected": 0,
+      "between": 1
+    },
+    {
+      "who": "A",
+      "at": 137456,
+      "entries": 1,
+      "base": 49,
+      "status": 200,
+      "ms": 655,
+      "revision": "50",
+      "vercelId": "sfo1::iad1::jt8h6-1789931433184-b4562af4ccab",
+      "retryAfter": null,
+      "admitted": [
+        50
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 139812,
+      "entries": 1,
+      "base": 50,
+      "status": 200,
+      "ms": 1120,
+      "revision": "51",
+      "vercelId": "sfo1::iad1::mj6nc-1789931435509-5dfb8995980d",
+      "retryAfter": null,
+      "admitted": [
+        51
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 142085,
+      "entries": 1,
+      "base": 51,
+      "status": 200,
+      "ms": 823,
+      "revision": "52",
+      "vercelId": "sfo1::iad1::vhmp8-1789931437779-e3a928ba873e",
+      "retryAfter": null,
+      "admitted": [
+        52
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 144556,
+      "entries": 1,
+      "base": 52,
+      "status": 200,
+      "ms": 805,
+      "revision": "53",
+      "vercelId": "sfo1::iad1::k5vxn-1789931440265-b07e241bc09b",
+      "retryAfter": null,
+      "admitted": [
+        53
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 146839,
+      "entries": 1,
+      "base": 53,
+      "status": 200,
+      "ms": 723,
+      "revision": "54",
+      "vercelId": "sfo1::iad1::npc2h-1789931442539-4cfcb873a574",
+      "retryAfter": null,
+      "admitted": [
+        54
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 149183,
+      "entries": 1,
+      "base": 54,
+      "status": 200,
+      "ms": 1026,
+      "revision": "55",
+      "vercelId": "sfo1::iad1::7jxwh-1789931444879-c027fc8e04a8",
+      "retryAfter": null,
+      "admitted": [
+        55
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 155186,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=1&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_ABORTED"
+    },
+    {
+      "who": "A",
+      "at": 155255,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 155451,
+      "entries": 1,
+      "base": 55,
+      "status": 200,
+      "ms": 467,
+      "revision": "56",
+      "vercelId": "sfo1::iad1::452l9-1789931451144-c7730069b68e",
+      "retryAfter": null,
+      "admitted": [
+        56
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 155686,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=55&retire=2b72f365279529b9b8ea6e74e9ea8b7c&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 156688,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=55&retire=2b72f365279529b9b8ea6e74e9ea8b7c&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 158123,
+      "entries": 1,
+      "base": 56,
+      "status": 200,
+      "ms": 1079,
+      "revision": "57",
+      "vercelId": "sfo1::iad1::hfwxr-1789931453905-1f1aa102a05c",
+      "retryAfter": null,
+      "admitted": [
+        57
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 158689,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=55&retire=2b72f365279529b9b8ea6e74e9ea8b7c&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 158765,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159267,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159381,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159404,
+      "entries": 1,
+      "base": 55,
+      "status": "no response",
+      "ms": 1,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 159405,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159905,
+      "entries": 1,
+      "base": 55,
+      "status": "no response",
+      "ms": 1,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 159906,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 160839,
+      "entries": 1,
+      "base": 57,
+      "status": 200,
+      "ms": 814,
+      "revision": "58",
+      "vercelId": "sfo1::iad1::llfxn-1789931456547-5154cf276750",
+      "retryAfter": null,
+      "admitted": [
+        58
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 160908,
+      "entries": 1,
+      "base": 55,
+      "status": "no response",
+      "ms": 0,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 160908,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 162692,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=55&retire=2b72f365279529b9b8ea6e74e9ea8b7c&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 162910,
+      "entries": 1,
+      "base": 55,
+      "status": "no response",
+      "ms": 0,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 162910,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 163563,
+      "entries": 1,
+      "base": 58,
+      "status": 200,
+      "ms": 424,
+      "revision": "59",
+      "vercelId": "sfo1::iad1::wswm8-1789931459260-be5417c04f78",
+      "retryAfter": null,
+      "admitted": [
+        59
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 163767,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164446,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164579,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164602,
+      "entries": 2,
+      "base": 55,
+      "status": "no response",
+      "ms": 0,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 164602,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 166262,
+      "entries": 1,
+      "base": 59,
+      "status": 200,
+      "ms": 977,
+      "revision": "60",
+      "vercelId": "sfo1::iad1::d6g5x-1789931462015-e7e962594d26",
+      "retryAfter": null,
+      "admitted": [
+        60
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 166913,
+      "entries": 2,
+      "base": 55,
+      "status": "no response",
+      "ms": 0,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 166913,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 168769,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 170695,
+      "failed": "/api/decks/untitled-20260920-bn78/stream?since=55&retire=2b72f365279529b9b8ea6e74e9ea8b7c&tab=fd38fc31f136281f957a885042456e08",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 172602,
+      "entries": 2,
+      "base": 55,
+      "status": "no response",
+      "ms": 1,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 172603,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 173770,
+      "failed": "/api/decks/untitled-20260920-bn78/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 174914,
+      "entries": 2,
+      "base": 55,
+      "status": "no response",
+      "ms": 1,
+      "revision": null,
+      "vercelId": null
+    },
+    {
+      "who": "A",
+      "at": 174915,
+      "failed": "/api/decks/untitled-20260920-bn78/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 178828,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::jnjmh-1789931474392-2f00f60a91cf",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 179048,
+      "entries": 2,
+      "base": 60,
+      "status": 200,
+      "ms": 724,
+      "revision": "61",
+      "vercelId": "sfo1::iad1::6mwq8-1789931474747-616200c2e495",
+      "retryAfter": null,
+      "admitted": [
+        61,
+        61
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 181110,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::452l9-1789931476580-537d0f634b8c",
+      "retryAfter": null
+    },
+    {
+      "who": "C",
+      "at": 181733,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::6zglk-1789931476737-7dadc8c0bf23",
+      "retryAfter": null
+    },
+    {
+      "who": "B",
+      "at": 181833,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::77l6b-1789931476703-ee0bcfb73a70",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 182815,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::s98ns-1789931478401-a889f1961c6c",
+      "retryAfter": null
+    }
+  ],
+  "anomalies": [
+    {
+      "kind": "viewer-stale",
+      "cText": "Sync audit",
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "cState": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "mode": {
+          "editorStage": false,
+          "role": "viewer",
+          "mode": "slide",
+          "saveWords": null,
+          "viewOnly": true
+        },
+        "seenTokens": 0
+      }
+    },
+    {
+      "kind": "divergence-concurrent",
+      "round": 1,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1"
+    },
+    {
+      "kind": "lost-write-concurrent",
+      "round": 1,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1"
+    },
+    {
+      "kind": "divergence-concurrent",
+      "round": 2,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2"
+    },
+    {
+      "kind": "lost-write-concurrent",
+      "round": 2,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2"
+    },
+    {
+      "kind": "divergence-concurrent",
+      "round": 3,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2 xa3",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3"
+    },
+    {
+      "kind": "lost-write-concurrent",
+      "round": 3,
+      "a": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xa1 xa2 xa3",
+      "b": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 xb1 xb2 xb3"
+    },
+    {
+      "kind": "lost-write-offline",
+      "lostInA": [
+        " b1",
+        " b2",
+        " b3",
+        " b4",
+        " b5"
+      ],
+      "lostInB": [
+        " b1",
+        " b2",
+        " b3",
+        " b4",
+        " b5"
+      ]
+    }
+  ],
+  "console": [
+    {
+      "who": "A",
+      "at": 155255,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 155686,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 156688,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 158690,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 158702,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 158765,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159267,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159381,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159405,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159906,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 160705,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 160908,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 162692,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 162708,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 162910,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 163767,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164446,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164579,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164602,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 164710,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 166712,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 166913,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 168715,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 168769,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 170696,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 170717,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 172603,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 172719,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 173770,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 174720,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 174915,
+      "error": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    }
+  ],
+  "finishedAt": "2026-09-20T19:11:17.952Z",
+  "seconds": 182,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260920-bn78"
+}

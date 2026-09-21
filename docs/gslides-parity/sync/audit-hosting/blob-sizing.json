@@ -1,0 +1,226 @@
+{
+  "listedAt": "2026-09-20T19:07:15.043Z",
+  "elapsedMs": 9117,
+  "pages": 18,
+  "objects": 17201,
+  "bytes": 1359673370,
+  "gib": 1.266,
+  "oldestUploadedAt": "2026-09-12T00:36:01.000Z",
+  "newestUploadedAt": "2026-09-20T19:07:10.000Z",
+  "byPrefix": [
+    {
+      "key": "exports/",
+      "objects": 2114,
+      "bytes": 681056450,
+      "mib": 649.51
+    },
+    {
+      "key": "decks/",
+      "objects": 13617,
+      "bytes": 595774801,
+      "mib": 568.18
+    },
+    {
+      "key": "bundles/",
+      "objects": 4,
+      "bytes": 76849885,
+      "mib": 73.29
+    },
+    {
+      "key": "builds/",
+      "objects": 10,
+      "bytes": 5703986,
+      "mib": 5.44
+    },
+    {
+      "key": "users/",
+      "objects": 943,
+      "bytes": 236693,
+      "mib": 0.23
+    },
+    {
+      "key": "links/",
+      "objects": 477,
+      "bytes": 36722,
+      "mib": 0.04
+    },
+    {
+      "key": "vitals/",
+      "objects": 35,
+      "bytes": 14752,
+      "mib": 0.01
+    },
+    {
+      "key": "index/",
+      "objects": 1,
+      "bytes": 81,
+      "mib": 0
+    }
+  ],
+  "decksByKind": [
+    {
+      "key": "assets/",
+      "objects": 2901,
+      "bytes": 507219900,
+      "mib": 483.72
+    },
+    {
+      "key": "snapshots/",
+      "objects": 977,
+      "bytes": 45835706,
+      "mib": 43.71
+    },
+    {
+      "key": ".turboslide/",
+      "objects": 4286,
+      "bytes": 31319199,
+      "mib": 29.87
+    },
+    {
+      "key": "versions/",
+      "objects": 3907,
+      "bytes": 4648326,
+      "mib": 4.43
+    },
+    {
+      "key": "slides/",
+      "objects": 1172,
+      "bytes": 2625725,
+      "mib": 2.5
+    },
+    {
+      "key": ".thumbs/",
+      "objects": 216,
+      "bytes": 2544832,
+      "mib": 2.43
+    },
+    {
+      "key": "deck.json",
+      "objects": 72,
+      "bytes": 1457903,
+      "mib": 1.39
+    },
+    {
+      "key": "other sidecar",
+      "objects": 6,
+      "bytes": 76097,
+      "mib": 0.07
+    },
+    {
+      "key": "access.json",
+      "objects": 57,
+      "bytes": 39619,
+      "mib": 0.04
+    },
+    {
+      "key": "comments/",
+      "objects": 11,
+      "bytes": 4959,
+      "mib": 0
+    },
+    {
+      "key": "leases.json",
+      "objects": 12,
+      "bytes": 2535,
+      "mib": 0
+    }
+  ],
+  "exportsByKind": [
+    {
+      "key": "produced files",
+      "objects": 2114,
+      "bytes": 681056450,
+      "mib": 649.51
+    }
+  ],
+  "sizeBuckets": [
+    {
+      "key": ">8 MB",
+      "objects": 26,
+      "bytes": 519339499,
+      "mib": 495.28
+    },
+    {
+      "key": "256 KB to 1 MB",
+      "objects": 844,
+      "bytes": 409348995,
+      "mib": 390.39
+    },
+    {
+      "key": "16 to 256 KB",
+      "objects": 4380,
+      "bytes": 350768350,
+      "mib": 334.52
+    },
+    {
+      "key": "1 to 8 MB",
+      "objects": 38,
+      "bytes": 51870978,
+      "mib": 49.47
+    },
+    {
+      "key": "1 to 16 KB",
+      "objects": 4717,
+      "bytes": 24383779,
+      "mib": 23.25
+    },
+    {
+      "key": "<1 KB",
+      "objects": 7196,
+      "bytes": 3961769,
+      "mib": 3.78
+    }
+  ],
+  "decks": {
+    "count": 130,
+    "withThumbs": 87,
+    "withSnapshots": 60,
+    "bytesMedian": 2293079,
+    "bytesP90": 5516063,
+    "bytesMax": 64381445,
+    "objectsMedian": 14,
+    "objectsP90": 302,
+    "objectsMax": 2658,
+    "snapshotsTotal": 977,
+    "thumbsTotal": 216,
+    "slidesTotal": 1172,
+    "versionsTotal": 3907,
+    "largestFive": [
+      {
+        "objects": 506,
+        "bytes": 64381445,
+        "snapshots": 98,
+        "thumbs": 1,
+        "slides": 86
+      },
+      {
+        "objects": 2658,
+        "bytes": 63536571,
+        "snapshots": 1,
+        "thumbs": 74,
+        "slides": 85
+      },
+      {
+        "objects": 312,
+        "bytes": 32070999,
+        "snapshots": 1,
+        "thumbs": 1,
+        "slides": 85
+      },
+      {
+        "objects": 314,
+        "bytes": 31738320,
+        "snapshots": 0,
+        "thumbs": 1,
+        "slides": 85
+      },
+      {
+        "objects": 303,
+        "bytes": 31732572,
+        "snapshots": 0,
+        "thumbs": 1,
+        "slides": 85
+      }
+    ]
+  }
+}

@@ -1,0 +1,1020 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-20T19:00:34.748Z",
+  "phases": {
+    "create": {
+      "url": "/edit/untitled-20260920-zym8",
+      "tier": "blob",
+      "revision": 1,
+      "serverRevision": 1,
+      "clientId": "2a8cbd5318153795c793573bdda47a2b"
+    },
+    "join": {
+      "revision": 1,
+      "serverRevision": 1,
+      "seq": 1,
+      "clientId": "9bcef8fa165aaf8149f8eac2c55ad4f9",
+      "others": 1,
+      "heading": "Sync audit"
+    },
+    "serial": {
+      "tokens": [
+        {
+          "token": " a01",
+          "typedAt": 9045,
+          "ackMs": 2,
+          "revision": 1,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a02",
+          "typedAt": 12073,
+          "ackMs": 3,
+          "revision": 2,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a03",
+          "typedAt": 15083,
+          "ackMs": 2,
+          "revision": 3,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a04",
+          "typedAt": 18051,
+          "ackMs": 2,
+          "revision": 4,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a05",
+          "typedAt": 21034,
+          "ackMs": 2,
+          "revision": 5,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a06",
+          "typedAt": 24034,
+          "ackMs": 1,
+          "revision": 6,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a07",
+          "typedAt": 27121,
+          "ackMs": 2,
+          "revision": 7,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a08",
+          "typedAt": 30056,
+          "ackMs": 3,
+          "revision": 8,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a09",
+          "typedAt": 33112,
+          "ackMs": 1,
+          "revision": 9,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a10",
+          "typedAt": 36130,
+          "ackMs": 1,
+          "revision": 10,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a11",
+          "typedAt": 39100,
+          "ackMs": 2,
+          "revision": 11,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a12",
+          "typedAt": 42079,
+          "ackMs": 10,
+          "revision": 12,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a13",
+          "typedAt": 45120,
+          "ackMs": 3,
+          "revision": 13,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a14",
+          "typedAt": 48127,
+          "ackMs": 3,
+          "revision": 14,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a15",
+          "typedAt": 51123,
+          "ackMs": 3,
+          "revision": 15,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a16",
+          "typedAt": 54075,
+          "ackMs": 3,
+          "revision": 16,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a17",
+          "typedAt": 57101,
+          "ackMs": 2,
+          "revision": 17,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a18",
+          "typedAt": 60101,
+          "ackMs": 2,
+          "revision": 18,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a19",
+          "typedAt": 63121,
+          "ackMs": 3,
+          "revision": 19,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a20",
+          "typedAt": 66095,
+          "ackMs": 2,
+          "revision": 20,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a21",
+          "typedAt": 69118,
+          "ackMs": 1,
+          "revision": 21,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a22",
+          "typedAt": 72104,
+          "ackMs": 2,
+          "revision": 22,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a23",
+          "typedAt": 75066,
+          "ackMs": 2,
+          "revision": 23,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a24",
+          "typedAt": 78146,
+          "ackMs": 1,
+          "revision": 24,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a25",
+          "typedAt": 81091,
+          "ackMs": 1,
+          "revision": 25,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a26",
+          "typedAt": 84123,
+          "ackMs": 1,
+          "revision": 26,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a27",
+          "typedAt": 87120,
+          "ackMs": 1,
+          "revision": 27,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a28",
+          "typedAt": 90099,
+          "ackMs": 2,
+          "revision": 28,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a29",
+          "typedAt": 93098,
+          "ackMs": 1,
+          "revision": 29,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        },
+        {
+          "token": " a30",
+          "typedAt": 96078,
+          "ackMs": 2,
+          "revision": 30,
+          "seenAt": null,
+          "latencyMs": null,
+          "seenRevision": null
+        }
+      ],
+      "latency": {
+        "n": 0
+      },
+      "ack": {
+        "n": 30,
+        "mean": 2,
+        "p50": 2,
+        "p95": 3,
+        "max": 10,
+        "min": 1
+      },
+      "arrivalOrder": [],
+      "inOrder": true,
+      "lost": [
+        " a01",
+        " a02",
+        " a03",
+        " a04",
+        " a05",
+        " a06",
+        " a07",
+        " a08",
+        " a09",
+        " a10",
+        " a11",
+        " a12",
+        " a13",
+        " a14",
+        " a15",
+        " a16",
+        " a17",
+        " a18",
+        " a19",
+        " a20",
+        " a21",
+        " a22",
+        " a23",
+        " a24",
+        " a25",
+        " a26",
+        " a27",
+        " a28",
+        " a29",
+        " a30"
+      ],
+      "duplicatesInA": [],
+      "over3s": [],
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "bText": "Sync audit",
+      "equal": false,
+      "a": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0
+      },
+      "b": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0
+      },
+      "bSamples": [
+        {
+          "at": 8571,
+          "revision": 1,
+          "serverRevision": 1,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 9793,
+          "revision": 2,
+          "serverRevision": 2,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 13338,
+          "revision": 3,
+          "serverRevision": 3,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 17793,
+          "revision": 4,
+          "serverRevision": 4,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 20213,
+          "revision": 5,
+          "serverRevision": 5,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 22532,
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 24847,
+          "revision": 7,
+          "serverRevision": 7,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 29201,
+          "revision": 8,
+          "serverRevision": 8,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 31726,
+          "revision": 9,
+          "serverRevision": 9,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 35977,
+          "revision": 10,
+          "serverRevision": 10,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 38504,
+          "revision": 11,
+          "serverRevision": 11,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 40731,
+          "revision": 12,
+          "serverRevision": 12,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 44994,
+          "revision": 13,
+          "serverRevision": 13,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 47432,
+          "revision": 14,
+          "serverRevision": 14,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 49762,
+          "revision": 15,
+          "serverRevision": 15,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 54212,
+          "revision": 16,
+          "serverRevision": 16,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 56445,
+          "revision": 17,
+          "serverRevision": 17,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 58664,
+          "revision": 18,
+          "serverRevision": 18,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 61088,
+          "revision": 19,
+          "serverRevision": 19,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 65532,
+          "revision": 20,
+          "serverRevision": 20,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 67749,
+          "revision": 21,
+          "serverRevision": 21,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 70169,
+          "revision": 22,
+          "serverRevision": 22,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 74704,
+          "revision": 23,
+          "serverRevision": 23,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 77019,
+          "revision": 24,
+          "serverRevision": 24,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 79438,
+          "revision": 25,
+          "serverRevision": 25,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 83878,
+          "revision": 26,
+          "serverRevision": 26,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 86192,
+          "revision": 27,
+          "serverRevision": 27,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 88512,
+          "revision": 28,
+          "serverRevision": 28,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 93053,
+          "revision": 29,
+          "serverRevision": 29,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 95271,
+          "revision": 30,
+          "serverRevision": 30,
+          "seq": 1,
+          "text": null
+        },
+        {
+          "at": 97488,
+          "revision": 31,
+          "serverRevision": 31,
+          "seq": 1,
+          "text": null
+        }
+      ],
+      "saveWords": {
+        "a": "All changes saved",
+        "b": null
+      },
+      "stale": {
+        "a": null,
+        "b": null
+      }
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 4497,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::s98ns-1789930838602-2bc2f344a586"
+    },
+    {
+      "who": "B",
+      "at": 8345,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::jfkc8-1789930840569-741eb06f4fd8"
+    },
+    {
+      "who": "A",
+      "at": 9075,
+      "entries": 1,
+      "base": 1,
+      "status": 200,
+      "ms": 692,
+      "revision": "2",
+      "vercelId": "sfo1::iad1::hcccv-1789930843877-e520d2c822a9",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 12106,
+      "entries": 1,
+      "base": 2,
+      "status": 200,
+      "ms": 769,
+      "revision": "3",
+      "vercelId": "sfo1::iad1::6xxn6-1789930846900-15c0b96d5047",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 15134,
+      "entries": 1,
+      "base": 3,
+      "status": 200,
+      "ms": 615,
+      "revision": "4",
+      "vercelId": "sfo1::iad1::vvdwm-1789930849930-74c8ac34a6c6",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 18107,
+      "entries": 1,
+      "base": 4,
+      "status": 200,
+      "ms": 991,
+      "revision": "5",
+      "vercelId": "sfo1::iad1::4bqwj-1789930852991-8733d11df7b6",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 21071,
+      "entries": 1,
+      "base": 5,
+      "status": 200,
+      "ms": 810,
+      "revision": "6",
+      "vercelId": "sfo1::iad1::dz6gt-1789930855939-4c18e7ca365a",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 24094,
+      "entries": 1,
+      "base": 6,
+      "status": 200,
+      "ms": 449,
+      "revision": "7",
+      "vercelId": "sfo1::iad1::b7gfh-1789930858899-0bd1c1da26e4",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 27134,
+      "entries": 1,
+      "base": 7,
+      "status": 200,
+      "ms": 951,
+      "revision": "8",
+      "vercelId": "sfo1::iad1::r56pm-1789930861929-b97c38425ba9",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 30113,
+      "entries": 1,
+      "base": 8,
+      "status": 200,
+      "ms": 471,
+      "revision": "9",
+      "vercelId": "sfo1::iad1::qhdb5-1789930864912-fbdf349bc718",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 33132,
+      "entries": 1,
+      "base": 9,
+      "status": 200,
+      "ms": 836,
+      "revision": "10",
+      "vercelId": "sfo1::iad1::j4tkm-1789930868001-433ad8247b53",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 36154,
+      "entries": 1,
+      "base": 10,
+      "status": 200,
+      "ms": 619,
+      "revision": "11",
+      "vercelId": "sfo1::iad1::gq88f-1789930870954-2f84d2d9d004",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 39145,
+      "entries": 1,
+      "base": 11,
+      "status": 200,
+      "ms": 575,
+      "revision": "12",
+      "vercelId": "sfo1::iad1::hfwxr-1789930873941-f275dff9947a",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 42133,
+      "entries": 1,
+      "base": 12,
+      "status": 200,
+      "ms": 807,
+      "revision": "13",
+      "vercelId": "sfo1::iad1::rm95r-1789930876924-367fe1e8fbd2",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 45155,
+      "entries": 1,
+      "base": 13,
+      "status": 200,
+      "ms": 1158,
+      "revision": "14",
+      "vercelId": "sfo1::iad1::xz4b5-1789930880002-d7ffa5527056",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 48138,
+      "entries": 1,
+      "base": 14,
+      "status": 200,
+      "ms": 796,
+      "revision": "15",
+      "vercelId": "sfo1::iad1::b9lgc-1789930882960-554b5304d9a2",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 51152,
+      "entries": 1,
+      "base": 15,
+      "status": 200,
+      "ms": 804,
+      "revision": "16",
+      "vercelId": "sfo1::iad1::hjctc-1789930885942-8df654c34d68",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 54127,
+      "entries": 1,
+      "base": 16,
+      "status": 200,
+      "ms": 957,
+      "revision": "17",
+      "vercelId": "sfo1::iad1::s4dnx-1789930888976-8cbf059bd6dd",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 57125,
+      "entries": 1,
+      "base": 17,
+      "status": 200,
+      "ms": 483,
+      "revision": "18",
+      "vercelId": "sfo1::iad1::tfbrh-1789930891926-b653e9229fb1",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 60113,
+      "entries": 1,
+      "base": 18,
+      "status": 200,
+      "ms": 655,
+      "revision": "19",
+      "vercelId": "sfo1::iad1::h79xj-1789930895010-f8e6067f0e71",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 63147,
+      "entries": 1,
+      "base": 19,
+      "status": 200,
+      "ms": 660,
+      "revision": "20",
+      "vercelId": "sfo1::iad1::gq88f-1789930897946-f36b3523dbe0",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 66153,
+      "entries": 1,
+      "base": 20,
+      "status": 200,
+      "ms": 840,
+      "revision": "21",
+      "vercelId": "sfo1::iad1::zvhxf-1789930901312-b6c74388f6a9",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 69168,
+      "entries": 1,
+      "base": 21,
+      "status": 200,
+      "ms": 493,
+      "revision": "22",
+      "vercelId": "sfo1::iad1::ljwss-1789930904041-64691bae2e17",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 72118,
+      "entries": 1,
+      "base": 22,
+      "status": 200,
+      "ms": 503,
+      "revision": "23",
+      "vercelId": "sfo1::iad1::csvkl-1789930906918-11edebf98e94",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 75112,
+      "entries": 1,
+      "base": 23,
+      "status": 200,
+      "ms": 580,
+      "revision": "24",
+      "vercelId": "sfo1::iad1::j87sm-1789930909938-26f0f3dc2dde",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 78187,
+      "entries": 1,
+      "base": 24,
+      "status": 200,
+      "ms": 811,
+      "revision": "25",
+      "vercelId": "sfo1::iad1::bvbz5-1789930912991-1a5b1b372998",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 81151,
+      "entries": 1,
+      "base": 25,
+      "status": 200,
+      "ms": 735,
+      "revision": "26",
+      "vercelId": "sfo1::iad1::gq88f-1789930915948-8fa79296de1c",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 84151,
+      "entries": 1,
+      "base": 26,
+      "status": 200,
+      "ms": 480,
+      "revision": "27",
+      "vercelId": "sfo1::iad1::rbfq4-1789930918949-79006634d51f",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 87154,
+      "entries": 1,
+      "base": 27,
+      "status": 200,
+      "ms": 458,
+      "revision": "28",
+      "vercelId": "sfo1::iad1::hdfz2-1789930922003-bf11aeb0dfd0",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 90152,
+      "entries": 1,
+      "base": 28,
+      "status": 200,
+      "ms": 720,
+      "revision": "29",
+      "vercelId": "sfo1::iad1::wdwjz-1789930924953-59e81dc44110",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 93139,
+      "entries": 1,
+      "base": 29,
+      "status": 200,
+      "ms": 507,
+      "revision": "30",
+      "vercelId": "sfo1::iad1::tg4wd-1789930927992-e92a2368b1e1",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 96122,
+      "entries": 1,
+      "base": 30,
+      "status": 200,
+      "ms": 415,
+      "revision": "31",
+      "vercelId": "sfo1::iad1::tm5tb-1789930930921-2c6fdd23502d",
+      "retryAfter": null
+    },
+    {
+      "who": "A",
+      "at": 151910,
+      "stream": true,
+      "status": 200,
+      "vercelId": "sfo1::iad1::vhpnq-1789930986604-d5946d1a18f7"
+    }
+  ],
+  "anomalies": [
+    {
+      "kind": "lost-write",
+      "lost": [
+        " a01",
+        " a02",
+        " a03",
+        " a04",
+        " a05",
+        " a06",
+        " a07",
+        " a08",
+        " a09",
+        " a10",
+        " a11",
+        " a12",
+        " a13",
+        " a14",
+        " a15",
+        " a16",
+        " a17",
+        " a18",
+        " a19",
+        " a20",
+        " a21",
+        " a22",
+        " a23",
+        " a24",
+        " a25",
+        " a26",
+        " a27",
+        " a28",
+        " a29",
+        " a30"
+      ],
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "bText": "Sync audit"
+    },
+    {
+      "kind": "divergence-after-serial",
+      "aText": "Sync audit a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "bText": "Sync audit"
+    }
+  ],
+  "console": [
+    {
+      "who": "A",
+      "at": 871,
+      "error": "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    },
+    {
+      "who": "B",
+      "at": 5485,
+      "error": "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    },
+    {
+      "who": "A",
+      "at": 151613,
+      "error": "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    },
+    {
+      "who": "A",
+      "at": 154211,
+      "error": "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    },
+    {
+      "who": "A",
+      "at": 158187,
+      "error": "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    }
+  ],
+  "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.ts-stagewrap.ts-editor .pt-slide [data-run=\"heading/text\"]') to be visible\n\n    at openRun (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/sync/ordering/ordering-probe.mjs:113:12)\n    at /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/sync/ordering/ordering-probe.mjs:365:9",
+  "finishedAt": "2026-09-20T19:03:05.979Z",
+  "seconds": 151,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260920-zym8"
+}

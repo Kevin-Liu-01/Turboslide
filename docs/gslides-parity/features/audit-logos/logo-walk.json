@@ -1,0 +1,121 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260920-1ykj",
+  "ranAt": "2026-09-20T19:03:59.442Z",
+  "rows": [
+    {
+      "step": "the draft opened",
+      "expected": "an untitled draft",
+      "observed": "untitled-20260920-1ykj; slide title",
+      "ok": true
+    },
+    {
+      "step": "Insert menu rows",
+      "expected": "a Logo row or a brand route",
+      "observed": "Insert: Image | Text box | Shape | Table | Chart | Diagram | Word art | Line | Link⌘K | Comment⌥⌘M | New slide⌃M | Slide numbers; Image: Upload from computer",
+      "ok": false
+    },
+    {
+      "step": "Insert > Image > Upload from computer with figma/default.svg saved from thesvg.org",
+      "expected": "the mark lands on the slide as a picture",
+      "observed": "chooser accept \"image/*\"; after 2298 ms: no object; snackbar \"svg is not accepted here; send png, jpeg, webp or gif\"",
+      "ok": false
+    },
+    {
+      "step": "asset.add { url: https://thesvg.org/icons/figma/default.svg } on the window transport",
+      "expected": "an asset with twins",
+      "observed": "refused: page.evaluate: Error: host thesvg.org is not in the capture allowlist; pass --allow thesvg.org (SPEC 11 captureHosts)\n    at Object.deserialize (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:26069)\n    at Fo ",
+      "ok": false
+    },
+    {
+      "step": "asset.add { file: data:image/svg+xml } on the window transport",
+      "expected": "an asset with twins",
+      "observed": "refused: page.evaluate: Error: svg is not accepted here; send png, jpeg, webp or gif\n    at Object.deserialize (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:26069)\n    at Fo (https://turboslide.vercel.app/assets/inde",
+      "ok": false
+    },
+    {
+      "step": "asset.add { url: a 512 px PNG on upload.wikimedia.org } on the window transport",
+      "expected": "an asset with twins (the allowlisted host)",
+      "observed": "refused: page.evaluate: Error: https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/512px-React-icon.svg.png: HTTP 403\n    at Object.deserialize (https://turboslide.vercel.app/assets/index-Dkbo1pra.js:12:26069",
+      "ok": false
+    },
+    {
+      "step": "Insert > Image > Upload from computer with figma-logo.png (324 by 480)",
+      "expected": "the picture draws within 500 ms, centred in the body slot, selected",
+      "observed": "after 1532 ms (first drawn at 1529 ms): object mark mark {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0}; snackbar \"asset.add: figma-logo\"",
+      "ok": true
+    },
+    {
+      "step": "Insert > Image > Upload from computer with slack-wordmark.png (960 by 244)",
+      "expected": "the wordmark lands as a second picture beside the first",
+      "observed": "after 918 ms: object shot shot-2 {\"x\":136,\"y\":128,\"w\":480,\"h\":122,\"z\":4}; snackbar \"asset.add: slack-wordmark\"; overlap with the first false",
+      "ok": true
+    },
+    {
+      "step": "the picture's right click menu",
+      "expected": "a row that makes it the logo on every slide",
+      "observed": "chip \"none\"; rows: Cut⌘X | Copy⌘C | Paste⌘V | Delete⌫ | Duplicate⌘D | Order | Rotate | Group⌥⌘G (disabled) | Center on page | Align | Replace image | Crop image | Reset image (disabled) | Image options | Format options | Comment⌥⌘M",
+      "ok": false
+    },
+    {
+      "step": "the picture on the slide",
+      "expected": "a selectable object with handles",
+      "observed": "pos {\"x\":137,\"y\":307.28125,\"w\":132,\"h\":84,\"z\":0} sheet px; overlay 1128x635",
+      "ok": true
+    },
+    {
+      "step": "the Theme panel",
+      "expected": "a Logo section",
+      "observed": "controls: panel.themes, panel.themes.close, themes.gt.light, themes.gt.dark, themes.inThis.light, themes.inThis.dark",
+      "ok": false
+    },
+    {
+      "step": "Insert > Icon with Advanced tools on",
+      "expected": "a searchable grid of symbols",
+      "observed": "advanced true; 70 symbols; search field true; lead \"One of the theme’s symbols; the tone is set in Format options\"",
+      "ok": true
+    },
+    {
+      "step": "Search the menus: \"logo\"",
+      "expected": "a Logo or Brand kit row",
+      "observed": "0 rows: ",
+      "ok": false
+    },
+    {
+      "step": "the dark appearance with the picture",
+      "expected": "the slide ground turns to ink",
+      "observed": "ground rgba(0, 0, 0, 0)",
+      "ok": false
+    },
+    {
+      "step": "File > Move to trash",
+      "expected": "the page returns to /decks",
+      "observed": "/decks",
+      "ok": true
+    },
+    {
+      "step": "Delete forever",
+      "expected": "the card leaves the trash",
+      "observed": "untitled-20260920-1ykj",
+      "ok": true
+    },
+    {
+      "step": "the scratch deck answers 404",
+      "expected": "GET /edit/untitled-20260920-1ykj is 404",
+      "observed": "status 404",
+      "ok": true
+    },
+    {
+      "step": "the scratch deck answers 404 on /deck",
+      "expected": "GET /deck/untitled-20260920-1ykj is 404",
+      "observed": "status 404",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+    "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+  ]
+}

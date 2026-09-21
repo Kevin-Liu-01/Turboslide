@@ -1,0 +1,5 @@
+registry total 7417 icons 7417
+names checked 146 present 122 missing 24
+missing: servicenow, lokalise, phrase, smartling, weglot, lilt, outreach, zoominfo, apollo, pandadoc, klaviyo, ramp, deel, remote, deloitte, mckinsey, zscaler, servicetitan, toast, shopify plus, hygraph, gtm, general translation, locadex
+localisation names present: ['crowdin', 'transifex', 'deepl']
+localisation names missing: ['lokalise', 'phrase', 'smartling', 'weglot', 'lilt']

@@ -1,0 +1,12 @@
+deck folders under decks/: 129
+folders with a manifest: 70 of 129; files under decks/: 13546; bytes: 591116484
+files by kind: {"versions":3905,"snapshots":973,"slides":1167,"state":4249,"comments":11,"assets":2885,"thumbs":214,"manifest":70,"leases":12,"access":55,"other":5}
+live decks: versions n 70 min 0 p50 5 p90 28 max 376 sum 1400
+live decks: snapshots n 70 min 0 p50 3 p90 29 max 143 sum 800
+live decks: slides n 70 min 1 p50 2 p90 85 max 86 sum 1126
+live decks: state files n 70 min 0 p50 0 p90 23 max 2284 sum 3706
+live decks: bytes n 70 min 2732 p50 2353535 p90 31731532 max 64400965 sum 574867043
+folders without a manifest (leftovers): 59; their files by kind: versions 2505 snapshots 173 slides 41 state 543 thumbs 41 assets 29 other 0; bytes 16249441
+export job records: 0
+top level folders: 8 (builds, bundles, decks, exports, index, links, users, vitals)
+list calls made by this script: 137

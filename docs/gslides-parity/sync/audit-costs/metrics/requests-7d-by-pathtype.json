@@ -1,0 +1,204 @@
+{
+  "query": {
+    "metric": "vercel.request.count",
+    "aggregation": "sum",
+    "groupBy": [
+      "path_type"
+    ],
+    "filter": "environment eq 'production'",
+    "startTime": "2026-09-13T19:16:45.388Z",
+    "endTime": "2026-09-20T19:16:45.388Z",
+    "granularity": {
+      "days": 1
+    },
+    "orderBy": "count",
+    "orderDirection": "desc"
+  },
+  "summary": [
+    {
+      "vercel_request_count_sum": 3405892,
+      "path_type": "streaming_func"
+    },
+    {
+      "vercel_request_count_sum": 44347,
+      "path_type": "static"
+    },
+    {
+      "vercel_request_count_sum": 184,
+      "path_type": ""
+    },
+    {
+      "vercel_request_count_sum": 133,
+      "path_type": "redirect"
+    }
+  ],
+  "data": [
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_count_sum": 770613,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_count_sum": 2526027,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_count_sum": 23266,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_count_sum": 29586,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_count_sum": 6731,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_count_sum": 17109,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_count_sum": 16670,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_count_sum": 15890,
+      "path_type": "streaming_func"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_count_sum": 4829,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_count_sum": 5503,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_count_sum": 13937,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_count_sum": 7671,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_count_sum": 91,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_count_sum": 3769,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_count_sum": 3302,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_count_sum": 5245,
+      "path_type": "static"
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_count_sum": 12,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_count_sum": 40,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_count_sum": 13,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_count_sum": 3,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_count_sum": 10,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_count_sum": 102,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_count_sum": 2,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_count_sum": 2,
+      "path_type": ""
+    },
+    {
+      "timestamp": "2026-09-13T00:00:00.000Z",
+      "vercel_request_count_sum": 0,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-14T00:00:00.000Z",
+      "vercel_request_count_sum": 11,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-15T00:00:00.000Z",
+      "vercel_request_count_sum": 65,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "vercel_request_count_sum": 12,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00.000Z",
+      "vercel_request_count_sum": 4,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-18T00:00:00.000Z",
+      "vercel_request_count_sum": 17,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-19T00:00:00.000Z",
+      "vercel_request_count_sum": 9,
+      "path_type": "redirect"
+    },
+    {
+      "timestamp": "2026-09-20T00:00:00.000Z",
+      "vercel_request_count_sum": 15,
+      "path_type": "redirect"
+    }
+  ],
+  "statistics": {
+    "bytesRead": 145706149,
+    "rowsRead": 2800958,
+    "dbTimeSeconds": 3.7601966857910156
+  },
+  "orderBy": "count",
+  "orderDirection": "desc"
+}

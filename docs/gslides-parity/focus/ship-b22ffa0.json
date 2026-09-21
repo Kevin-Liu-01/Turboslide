@@ -1,0 +1,19 @@
+{
+  "commit": "b22ffa0",
+  "renderedFrom": [
+    "docs/gslides-parity/focus/verification/product-p2-gate-preview.json",
+    "docs/gslides-parity/focus/verification/gate-preview-product-ship-3wcrees3x.json",
+    "docs/gslides-parity/focus/verification/gate-preview-product-ship.json",
+    "docs/gslides-parity/focus/verification/gate-preview-product-ship-rerun.json"
+  ],
+  "rule": "docs/PRODUCT.md 8.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the verifier's pass 2 run and the ship step's runs on the enforce previews (the second and the third, the deployment of record, and the rerun once of its red spec files); a feature or a row red in both runs on the deployment of record stays parked; the rows that differ between the runs are flaky and are not listed (docs/gslides-parity/product/build/ship.md section 5)",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    { "id": "versions.show-changes-marks", "parks": ["file.versionHistory.showChanges"] },
+    { "id": "collab.roster.go-to-slide", "parks": ["title.presence.goTo"] }
+  ]
+}

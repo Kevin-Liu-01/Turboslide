@@ -1,0 +1,78 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deck": "untitled-20260921-pho5",
+  "startedAt": "2026-09-21T21:31:19.382Z",
+  "shots": [
+    "production-product-edit-1440-light.jpg",
+    "production-product-title-row-1440-light.jpg",
+    "production-product-advanced-1440-light.jpg",
+    "production-product-home-1440-light.jpg",
+    "production-product-edit-1440-dark.jpg",
+    "production-product-title-row-1440-dark.jpg",
+    "production-product-advanced-1440-dark.jpg",
+    "production-product-home-1440-dark.jpg"
+  ],
+  "steps": [
+    {
+      "name": "draft on /new",
+      "observed": "id untitled-20260921-pho5; connected false",
+      "at": "2026-09-21T21:31:21.837Z"
+    },
+    {
+      "name": "first write",
+      "observed": "address /edit/untitled-20260921-pho5; revision 1; deck untitled-20260921-pho5",
+      "at": "2026-09-21T21:31:25.069Z"
+    },
+    {
+      "name": "appearance light",
+      "observed": "data-theme light",
+      "at": "2026-09-21T21:31:26.336Z"
+    },
+    {
+      "name": "title row 1440-light",
+      "observed": "clip {\"x\":0,\"y\":0,\"width\":1440,\"height\":46}",
+      "at": "2026-09-21T21:31:26.763Z"
+    },
+    {
+      "name": "advanced light",
+      "observed": "the switch read true",
+      "at": "2026-09-21T21:31:27.730Z"
+    },
+    {
+      "name": "home light",
+      "observed": "data-theme light; title Turboslide",
+      "at": "2026-09-21T21:31:33.364Z"
+    },
+    {
+      "name": "appearance dark",
+      "observed": "data-theme dark",
+      "at": "2026-09-21T21:31:37.043Z"
+    },
+    {
+      "name": "title row 1440-dark",
+      "observed": "clip {\"x\":0,\"y\":0,\"width\":1440,\"height\":46}",
+      "at": "2026-09-21T21:31:37.466Z"
+    },
+    {
+      "name": "advanced dark",
+      "observed": "the switch read true",
+      "at": "2026-09-21T21:31:38.427Z"
+    },
+    {
+      "name": "home dark",
+      "observed": "data-theme dark; title Turboslide",
+      "at": "2026-09-21T21:31:42.718Z"
+    },
+    {
+      "name": "appearance match",
+      "observed": "data-theme light",
+      "at": "2026-09-21T21:31:46.277Z"
+    },
+    {
+      "name": "end",
+      "observed": "revision 1; pending 0; the switch false; the appearance back on match",
+      "at": "2026-09-21T21:31:46.279Z"
+    }
+  ],
+  "endedAt": "2026-09-21T21:31:46.279Z"
+}
